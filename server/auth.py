@@ -33,10 +33,13 @@ SESSION_SECONDS = 12 * 60 * 60
 PBKDF2_ITERATIONS = 600_000
 MIN_PASSWORD = 12
 
-# Login throttle, counted in the database so every cloud worker shares it.
-# ponytail: keyed by login only; an attacker can lock a known login for the
-# window. Add a per-address key if that becomes a real nuisance.
+# Login throttle, counted in the database so every cloud worker shares it
+# (O-7). Keyed by login AND client: five failures for one login from one
+# client pause that pair only, so a stranger elsewhere cannot lock a known
+# account out. A client that sprays many logins is paused as a whole. The
+# client address is stored hashed; the table is operational, never backed up.
 MAX_FAILURES = 5
+MAX_CLIENT_FAILURES = 20
 FAILURE_WINDOW_SECONDS = 15 * 60
 
 _LOGIN = re.compile(r"^[a-z0-9][a-z0-9._@-]{2,63}$")
@@ -164,19 +167,24 @@ def _check_password(password: str) -> None:
 
 # -- login and sessions ----------------------------------------------------------
 
-def login(conn: DatabaseConnection, username: Any, password: Any) -> tuple[str | None, dict[str, Any] | None, bool]:
+def login(conn: DatabaseConnection, username: Any, password: Any,
+          client: str = "") -> tuple[str | None, dict[str, Any] | None, bool]:
     """Check credentials. Returns (token, user, throttled).
 
     A failure never says whether the account exists. The token is only ever
     returned to the browser; the database keeps its SHA-256.
     """
     clave = normalize_login(username)[:200]
+    cliente = _client_key(client)
     ahora = time.time()
     conn.execute("DELETE FROM team_login_failure WHERE failed_at < ?",
                  (ahora - FAILURE_WINDOW_SECONDS,))
-    fallos = conn.execute("SELECT COUNT(*) AS n FROM team_login_failure WHERE login = ?",
-                          (clave,)).fetchone()["n"]
-    if fallos >= MAX_FAILURES:
+    por_par = conn.execute(
+        "SELECT COUNT(*) AS n FROM team_login_failure WHERE login = ? AND client = ?",
+        (clave, cliente)).fetchone()["n"]
+    por_cliente = conn.execute(
+        "SELECT COUNT(*) AS n FROM team_login_failure WHERE client = ?", (cliente,)).fetchone()["n"]
+    if por_par >= MAX_FAILURES or por_cliente >= MAX_CLIENT_FAILURES:
         return None, None, True
 
     row = conn.execute(
@@ -185,11 +193,11 @@ def login(conn: DatabaseConnection, username: Any, password: Any) -> tuple[str |
     secreto = password if isinstance(password, str) else ""
     valid = verify_password(secreto, row["password_hash"] if row else _DUMMY_HASH)
     if not (row and valid and row["active"] and secreto):
-        conn.execute("INSERT INTO team_login_failure (login, failed_at) VALUES (?, ?)",
-                     (clave, ahora))
+        conn.execute("INSERT INTO team_login_failure (login, client, failed_at) VALUES (?, ?, ?)",
+                     (clave, cliente, ahora))
         return None, None, False
 
-    conn.execute("DELETE FROM team_login_failure WHERE login = ?", (clave,))
+    conn.execute("DELETE FROM team_login_failure WHERE login = ? AND client = ?", (clave, cliente))
     token = secrets.token_urlsafe(32)
     conn.execute(
         "INSERT INTO team_session (token_hash, user_id, credential_revision, created_at,"
@@ -235,6 +243,11 @@ def cookie(value: str, max_age: int, secure: bool) -> str:
     server (http://localhost), which rejects any non-loopback Host header."""
     flags = "; Secure" if secure else ""
     return f"{COOKIE}={value}; Path=/; Max-Age={max_age}; HttpOnly{flags}; SameSite=Strict"
+
+
+def _client_key(client: str) -> str:
+    """A stable, non-reversible key for a client address ('' when unknown)."""
+    return hashlib.sha256(f"ara-login:{client}".encode()).hexdigest()[:32] if client else ""
 
 
 def _token_hash(token: str) -> str:

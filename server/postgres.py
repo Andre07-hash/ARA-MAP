@@ -140,7 +140,12 @@ DO $$ BEGIN
   END IF;
 END $$;""" for nombre, columna in (("fk_inventory_draft", "draft_revision_id"),
                                    ("fk_inventory_published", "published_revision_id")))
-    return _to_postgres(sin_ciclo) + restricciones + "\n"
+    from .db import LOGIN_CLIENT_INDEX
+
+    # A v8 workspace made before the per-client throttle key gains the column.
+    cliente = ("ALTER TABLE team_login_failure ADD COLUMN IF NOT EXISTS client TEXT NOT NULL"
+               " DEFAULT '';\n" + LOGIN_CLIENT_INDEX)
+    return _to_postgres(sin_ciclo) + restricciones + "\n" + cliente
 
 
 # Import-assistant drafts: the parsed file and the choices made so far, kept

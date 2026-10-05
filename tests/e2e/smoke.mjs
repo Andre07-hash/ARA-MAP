@@ -93,7 +93,7 @@ const check = async (name, fn) => {
 };
 
 const fixtures = await provision();
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await chromium.launch(process.env.ARA_CHROMIUM ? { executablePath: process.env.ARA_CHROMIUM } : { channel: 'chrome' });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));

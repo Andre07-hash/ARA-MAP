@@ -79,7 +79,8 @@ class AnonymousWithoutDatabase(CloudServer, unittest.TestCase):
         # set to "1" in setUp and grants nothing.
         self.assertEqual(self.request("DELETE", "/api/bases/1")[0], 401)
         config = json.loads(self.request("GET", "/api/config")[1])
-        self.assertEqual(config, {"readOnly": True, "cloud": True, "authRequired": True,
+        # readOnly reflects only ARA_MAP_READ_ONLY (Stage 2), not the session.
+        self.assertEqual(config, {"readOnly": False, "cloud": True, "authRequired": True,
                                   "maxUploadBytes": 4 * 1024 * 1024})
 
     def test_anonymous_cannot_preview_a_csv(self):

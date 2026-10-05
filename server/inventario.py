@@ -2,8 +2,9 @@
 the publication gate, attention reasons and list filtering.
 
 Pure functions over plain dicts. The repository stores; this module decides.
-Stage 2 (preview, publish, public catalog) reuses publication_blockers and the
-list functions here rather than restating them.
+Preview, Publish and the public catalog share one publication gate
+(publication_blockers), one eligibility predicate (publicly_visible) and one
+explicit serializer (public_terrain), so they cannot drift apart.
 """
 
 from __future__ import annotations
@@ -178,6 +179,68 @@ def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> lis
     return reasons
 
 
+# -- the public projection ------------------------------------------------------
+
+# PublicTerrain, field by field (INTEGRATION_DECISIONS §5). Explicit selection:
+# a revision is never copied whole and then trimmed, so a private field added
+# later cannot leak by default. contacto, notas_internas, extra_json,
+# confirmations and every actor are absent on purpose.
+PUBLIC_REVISION_FIELDS = (
+    "terreno", "estado", "municipio", "direccion", "superficie_m2", "superficie_ha",
+    "afectaciones_pct", "afectaciones_m2", "lat", "lon", "asking_price", "asking_m2",
+    "moneda", "price_on_request", "availability", "public_description")
+PUBLIC_FIELDS = ("id", "revision_id", *PUBLIC_REVISION_FIELDS, "published_at")
+
+
+def publicly_visible(availability: Any) -> bool:
+    """Whether a published revision belongs in the active public catalog.
+    Sold and withdrawn stay published internally but leave the catalog."""
+    return availability in PUBLIC_AVAILABILITY
+
+
+def public_terrain(inventory_id: str, revision_id: str, revision: Mapping[str, Any],
+                   published_at: str | None) -> dict[str, Any]:
+    """The one PublicTerrain serializer, for preview, public list and detail.
+    Preview passes published_at=None: the commit time is not known yet."""
+    terrain: dict[str, Any] = {"id": inventory_id, "revision_id": revision_id}
+    for name in PUBLIC_REVISION_FIELDS:
+        terrain[name] = revision[name]
+    terrain["price_on_request"] = bool(terrain["price_on_request"])
+    terrain["published_at"] = published_at
+    return terrain
+
+
+def public_changes(draft: Mapping[str, Any],
+                   published: Mapping[str, Any] | None) -> dict[str, dict[str, Any]]:
+    """Public fields where the saved draft differs from the published revision:
+    what Publish would change in the catalog. Private notes are not a public
+    change, so editing only them leaves nothing pending."""
+    if published is None:
+        return {}
+    return {n: {"published": published[n], "draft": draft[n]}
+            for n in PUBLIC_REVISION_FIELDS if _public_value(draft[n]) != _public_value(published[n])}
+
+
+def _public_value(value: Any) -> Any:
+    return bool(value) if isinstance(value, bool) else value
+
+
+def preview_warnings(draft: Mapping[str, Any], confirmations: Mapping[str, Any],
+                     published: Mapping[str, Any] | None) -> list[dict[str, str]]:
+    """What the team should see before publishing: unconfirmed facts, the
+    existing validation findings (inconsistent prices...) and whether this
+    publication takes the terrain out of the public catalog."""
+    reasons = [r for r in attention(draft, confirmations) if r["kind"] != "blocker"]
+    if draft.get("availability") in ("sold", "withdrawn"):
+        visible_now = published is not None and publicly_visible(published.get("availability"))
+        reasons.append({
+            "kind": "warning", "code": "leaves_catalog", "field": "availability",
+            "message": ("Al publicar, este terreno saldrá del catálogo público."
+                        if visible_now else
+                        "Publicado así, este terreno no aparecerá en el catálogo público.")})
+    return reasons
+
+
 # -- list queries -------------------------------------------------------------
 
 class QueryError(ValueError):
@@ -189,7 +252,8 @@ class QueryError(ValueError):
 PUBLIC_QUERY = ("q", "estado", "municipio", "area_min_m2", "area_max_m2", "moneda",
                 "price_min", "price_max", "price_basis", "cursor", "limit")
 INTERNAL_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
-                  "include_archived")
+                  "public_visible", "has_pending_changes", "include_archived")
+_BOOLEAN = ("attention", "public_visible", "has_pending_changes", "include_archived")
 _MULTI = ("estado", "municipio", "publication_state", "availability")
 
 
@@ -224,7 +288,7 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     for name, choices in (("publication_state", PUBLICATION_STATES), ("availability", AVAILABILITY)):
         if any(v not in choices for v in q[name]):
             errors[name] = f"Valores admitidos: {', '.join(choices)}."
-    for name in ("attention", "include_archived"):
+    for name in _BOOLEAN:
         value = single.get(name)
         if value not in (None, "true", "false", "1", "0"):
             errors[name] = "Usa true o false."

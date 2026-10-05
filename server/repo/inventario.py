@@ -2,7 +2,8 @@
 
 Writes are compare-and-set on inventory_terrain.version, in the same
 transaction as the new immutable revision, the pointer change and the history
-event: either all of them land or none do. In SQLite the first statement of
+event: either all of them land or none do. Publication moves the published
+pointer the same way; the public catalog reads only the revision it names. In SQLite the first statement of
 each write transaction is itself a write, so it waits for the write lock
 instead of failing on a stale read snapshot.
 """
@@ -30,7 +31,7 @@ SELECT t.id, t.version, t.draft_revision_id, t.published_revision_id, t.publishe
        d.price_confirmed_at, d.price_confirmed_by, pu.display_name AS price_confirmed_by_name,
        d.availability_confirmed_at, d.availability_confirmed_by,
        au.display_name AS availability_confirmed_by_name,
-       p.availability AS published_availability
+       {", ".join(f"p.{f} AS p_{f}" for f in inventario.PUBLIC_REVISION_FIELDS)}
 FROM inventory_terrain t
 JOIN inventory_revision d ON d.id = t.draft_revision_id
 LEFT JOIN inventory_revision p ON p.id = t.published_revision_id
@@ -49,6 +50,26 @@ class IdempotencyConflictError(Exception):
     """An Idempotency-Key was reused for a different request."""
 
 
+class RevisionChangedError(Exception):
+    """Publish named a revision that is no longer the saved draft."""
+
+
+class InvalidStateError(Exception):
+    """A lifecycle action that does not apply to the record as it is now."""
+
+    def __init__(self, mensaje: str) -> None:
+        super().__init__(mensaje)
+        self.mensaje = mensaje
+
+
+class PublicationBlockedError(Exception):
+    """The draft does not pass the publication gate."""
+
+    def __init__(self, blockers: list[dict[str, str]]) -> None:
+        super().__init__("publication blocked")
+        self.blockers = blockers
+
+
 # -- reads ---------------------------------------------------------------------
 
 def get(conn: DatabaseConnection, inventory_id: str) -> dict[str, Any] | None:
@@ -63,6 +84,51 @@ def all_records(conn: DatabaseConnection) -> list[dict[str, Any]]:
     few thousand rows; move the business filters into SQL past that.
     """
     return [_dto(r) for r in conn.execute(_SELECT).fetchall()]
+
+
+# The public catalog: only the revision named by the published pointer, only
+# the projected columns, only eligible records. One statement, so a list, its
+# total and its facets all come from the same read.
+_PUBLIC_SELECT = f"""
+SELECT t.id, t.published_at, p.id AS revision_id,
+       {", ".join(f"p.{f}" for f in inventario.PUBLIC_REVISION_FIELDS)}
+FROM inventory_terrain t
+JOIN inventory_revision p ON p.id = t.published_revision_id AND p.inventory_id = t.id
+WHERE t.archived_at IS NULL AND p.availability IN ({", ".join("?" for _ in inventario.PUBLIC_AVAILABILITY)})
+"""
+
+
+def public_records(conn: DatabaseConnection) -> list[dict[str, Any]]:
+    """Every terrain in the active public catalog, as PublicTerrain."""
+    rows = conn.execute(_PUBLIC_SELECT, inventario.PUBLIC_AVAILABILITY).fetchall()
+    return [_public_dto(r) for r in rows]
+
+
+def public_get(conn: DatabaseConnection, inventory_id: str) -> dict[str, Any] | None:
+    row = conn.execute(_PUBLIC_SELECT + " AND t.id = ?",
+                       (*inventario.PUBLIC_AVAILABILITY, inventory_id)).fetchone()
+    return _public_dto(row) if row else None
+
+
+def _public_dto(row: Mapping[str, Any]) -> dict[str, Any]:
+    terrain = inventario.public_terrain(row["id"], row["revision_id"], row, row["published_at"])
+    if not inventario.publicly_visible(terrain["availability"]):  # belt and braces
+        raise AssertionError("ineligible record in the public catalog")
+    return terrain
+
+
+def revision(conn: DatabaseConnection, inventory_id: str,
+             revision_id: str) -> dict[str, Any] | None:
+    """One saved revision of this terrain (never another terrain's)."""
+    row = conn.execute(
+        f"SELECT id, {', '.join(REVISION_FIELDS)}, price_confirmed_at, availability_confirmed_at"
+        " FROM inventory_revision WHERE id = ? AND inventory_id = ?",
+        (revision_id, inventory_id)).fetchone()
+    if row is None:
+        return None
+    result = dict(row)
+    result["price_on_request"] = bool(result["price_on_request"])
+    return result
 
 
 def history(conn: DatabaseConnection, inventory_id: str, before_version: int | None,
@@ -189,6 +255,103 @@ def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
     return result
 
 
+# -- publication lifecycle ------------------------------------------------------
+# Each action is one compare-and-set on the version together with its pointer,
+# timestamps and history event. Archive and unpublish withdraw at commit;
+# restore never republishes.
+
+def publish(conn: DatabaseConnection, inventory_id: str, expected_version: int,
+            revision_id: str, actor: Mapping[str, Any]) -> dict[str, Any]:
+    """Promote exactly the reviewed saved draft. No implicit save."""
+    current = _current(conn, inventory_id, expected_version)
+    if current["archived_at"]:
+        raise InvalidStateError("Un terreno archivado no se publica. Restáuralo primero.")
+    if revision_id != current["draft_revision_id"]:
+        raise RevisionChangedError()
+    if current["published_revision_id"] == revision_id:
+        raise InvalidStateError("Esta revisión ya está publicada.")
+    blockers = inventario.publication_blockers(current["draft"])
+    if blockers:
+        raise PublicationBlockedError(blockers)
+    ahora = db.now()
+    with db.transaction(conn):
+        _claim(conn, inventory_id, expected_version, actor, ahora)
+        conn.execute(
+            "UPDATE inventory_terrain SET published_revision_id = ?, published_at = ?,"
+            " first_published_at = COALESCE(first_published_at, ?) WHERE id = ?",
+            (revision_id, ahora, ahora, inventory_id))
+        _event(conn, inventory_id, expected_version + 1, "publish", actor, ahora,
+               current["published_revision_id"], revision_id,
+               {"availability": current["draft"]["availability"],
+                "changes": current["pending_changes"]})
+    return _reread(conn, inventory_id)
+
+
+def unpublish(conn: DatabaseConnection, inventory_id: str, expected_version: int,
+              actor: Mapping[str, Any]) -> dict[str, Any]:
+    """Take a terrain out of the public catalog now. The draft is untouched."""
+    current = _current(conn, inventory_id, expected_version)
+    if current["archived_at"] or not current["published_revision_id"]:
+        raise InvalidStateError("Este terreno no está publicado.")
+    return _withdraw(conn, current, expected_version, "unpublish", actor, archive=False)
+
+
+def archive(conn: DatabaseConnection, inventory_id: str, expected_version: int,
+            actor: Mapping[str, Any]) -> dict[str, Any]:
+    """Archive: hidden internally by default and withdrawn from the catalog."""
+    current = _current(conn, inventory_id, expected_version)
+    if current["archived_at"]:
+        raise InvalidStateError("Este terreno ya está archivado.")
+    return _withdraw(conn, current, expected_version, "archive", actor, archive=True)
+
+
+def restore(conn: DatabaseConnection, inventory_id: str, expected_version: int,
+            actor: Mapping[str, Any]) -> dict[str, Any]:
+    """Back to the active inventory, unpublished: restore never republishes."""
+    current = _current(conn, inventory_id, expected_version)
+    if not current["archived_at"]:
+        raise InvalidStateError("Este terreno no está archivado.")
+    ahora = db.now()
+    with db.transaction(conn):
+        _claim(conn, inventory_id, expected_version, actor, ahora)
+        conn.execute("UPDATE inventory_terrain SET archived_at = NULL WHERE id = ?",
+                     (inventory_id,))
+        _event(conn, inventory_id, expected_version + 1, "restore", actor, ahora,
+               None, None, {})
+    return _reread(conn, inventory_id)
+
+
+def _withdraw(conn: DatabaseConnection, current: Mapping[str, Any], expected_version: int,
+              action: str, actor: Mapping[str, Any], *, archive: bool) -> dict[str, Any]:
+    inventory_id = current["id"]
+    ahora = db.now()
+    with db.transaction(conn):
+        _claim(conn, inventory_id, expected_version, actor, ahora)
+        conn.execute(
+            "UPDATE inventory_terrain SET published_revision_id = NULL, published_at = NULL"
+            + (", archived_at = ?" if archive else "") + " WHERE id = ?",
+            (ahora, inventory_id) if archive else (inventory_id,))
+        _event(conn, inventory_id, expected_version + 1, action, actor, ahora,
+               current["published_revision_id"], None,
+               {"was_published": bool(current["published_revision_id"])})
+    return _reread(conn, inventory_id)
+
+
+def _current(conn: DatabaseConnection, inventory_id: str, expected_version: int) -> dict[str, Any]:
+    current = get(conn, inventory_id)
+    if current is None:
+        raise LookupError(inventory_id)
+    if current["version"] != expected_version:
+        raise ConflictError()
+    return current
+
+
+def _reread(conn: DatabaseConnection, inventory_id: str) -> dict[str, Any]:
+    result = get(conn, inventory_id)
+    assert result is not None
+    return result
+
+
 def _claim(conn: DatabaseConnection, inventory_id: str, expected_version: int,
            actor: Mapping[str, Any], ahora: str) -> None:
     """The compare-and-set. Zero rows means someone else got there first."""
@@ -256,16 +419,23 @@ def _dto(row: Mapping[str, Any]) -> dict[str, Any]:
 
     confirmations = {"price": stamp("price"), "availability": stamp("availability")}
     state = publication_state(row)
+    published = ({f: row[f"p_{f}"] for f in inventario.PUBLIC_REVISION_FIELDS}
+                 if row["published_revision_id"] else None)
+    if published is not None:
+        published["price_on_request"] = bool(published["price_on_request"])
+    pending = inventario.public_changes(draft, published)
     return {
         "id": row["id"],
         "version": row["version"],
         "draft_revision_id": row["draft_revision_id"],
         "published_revision_id": row["published_revision_id"],
         "publication_state": state,
-        "public_visible": state == "published"
-        and row["published_availability"] in inventario.PUBLIC_AVAILABILITY,
-        "has_pending_changes": bool(row["published_revision_id"])
-        and row["published_revision_id"] != row["draft_revision_id"],
+        "public_visible": state == "published" and published is not None
+        and inventario.publicly_visible(published["availability"]),
+        # A saved draft whose public facts differ from the published revision.
+        # Private-only edits (contact, notes) leave nothing to publish.
+        "has_pending_changes": bool(pending),
+        "pending_changes": pending,
         "published_at": row["published_at"],
         "archived_at": row["archived_at"],
         "draft": draft,

@@ -159,7 +159,7 @@ function crearApi() {
 
 /* ---------------------------------------------------------------- helpers */
 
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await chromium.launch(process.env.ARA_CHROMIUM ? { executablePath: process.env.ARA_CHROMIUM } : { channel: 'chrome' });
 const resultados = [];
 let fallos = 0;
 

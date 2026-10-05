@@ -41,6 +41,7 @@ class Request:
         headers: Any,
         user: dict[str, Any] | None = None,
         cloud: bool = False,
+        client: str = "",
     ) -> None:
         self.method = method
         self.path = path
@@ -53,6 +54,9 @@ class Request:
         self.user = user
         # Whether this is the HTTPS cloud deployment rather than loopback.
         self.cloud = cloud
+        # The caller's network address as the adapter determined it (login
+        # throttle only); "" when unknown.
+        self.client = client
         # Headers a handler adds to its response (only Set-Cookie today).
         self.response_headers: dict[str, str] = {}
 

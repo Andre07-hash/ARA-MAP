@@ -51,6 +51,11 @@ router.add("POST", "/api/inventario/terrenos", api_inventario.create)
 router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail)
 router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update)
 router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history)
+router.add("GET", "/api/inventario/terrenos/:id/vista-publica", api_inventario.preview)
+router.add("POST", "/api/inventario/terrenos/:id/publicar", api_inventario.publish)
+router.add("POST", "/api/inventario/terrenos/:id/despublicar", api_inventario.unpublish)
+router.add("POST", "/api/inventario/terrenos/:id/archivar", api_inventario.archive)
+router.add("POST", "/api/inventario/terrenos/:id/restaurar", api_inventario.restore)
 router.add("GET", "/api/bases", api_bases.listing)
 router.add("GET", "/api/bases/:id", api_bases.detail)
 router.add("GET", "/api/bases/:id/terrenos", api_bases.terrenos)
@@ -161,19 +166,23 @@ class Handler(BaseHTTPRequestHandler):
             request = Request(
                 method=method, path=context["path"], query=context["query"],
                 params=context["params"], body=self._read_body(), headers=self.headers,
-                user=user, cloud=self.CLOUD,
+                user=user, cloud=self.CLOUD, client=self._client_id(),
             )
             result = handler(request)
         except ApiError as exc:
             if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
-        except Exception as exc:  # noqa: BLE001 - surfaced to the user, logged below
+        except Exception:  # noqa: BLE001 - logged here, never sent to the caller
+            # The exception text can name tables, values or paths: it goes to
+            # the server log only. Callers get a generic answer (O-5).
             import traceback
             traceback.print_exc()
+            self.close_connection = True
             return self._send_json(
-                {"error": f"Error inesperado: {exc}"}, HTTPStatus.INTERNAL_SERVER_ERROR
-            )
+                {"error": "Ocurrió un error inesperado. Inténtalo de nuevo; si se repite,"
+                          " avisa al equipo.", "detalle": {"code": "internal"}},
+                HTTPStatus.INTERNAL_SERVER_ERROR)
 
         if isinstance(result, tuple):  # a file download
             payload, filename = result
@@ -191,6 +200,12 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(
             {"error": "Inicia sesión para continuar.", "detalle": {"code": "unauthenticated"}},
             HTTPStatus.UNAUTHORIZED)
+
+    def _client_id(self) -> str:
+        """Who is calling, for the login throttle. The local server only ever
+        talks to this machine, so the socket address is the whole story and no
+        forwarded header is believed."""
+        return str(self.client_address[0]) if self.client_address else ""
 
     def _database_ready(self) -> bool:
         """Locally the SQLite file is always there; the cloud needs Postgres."""

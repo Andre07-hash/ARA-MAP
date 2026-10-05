@@ -238,6 +238,7 @@ CREATE INDEX IF NOT EXISTS idx_team_session_user ON team_session(user_id);
 
 CREATE TABLE IF NOT EXISTS team_login_failure (
   login     TEXT NOT NULL,
+  client    TEXT NOT NULL DEFAULT '',
   failed_at REAL NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_team_login_failure ON team_login_failure(login, failed_at);
@@ -331,6 +332,12 @@ CREATE TABLE IF NOT EXISTS inventory_operation_result (
 # Kept out of SCHEMA on purpose: SCHEMA runs before the column migrations, and
 # on a database from before folders these columns do not exist yet, so an index
 # on them there would fail. Shared with the Postgres upgrade.
+# The login throttle's per-client key (Stage 2, O-7). A v8 file made before it
+# lacks the column: db.migrate / postgres.migrate_sql add it, then this index.
+LOGIN_CLIENT_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_team_login_failure_client ON team_login_failure(client, login, failed_at);
+"""
+
 FOLDER_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_base_carpeta ON base(carpeta_id);
 CREATE INDEX IF NOT EXISTS idx_mapa_carpeta ON mapa(carpeta_id);
@@ -458,6 +465,9 @@ def migrate(conn: sqlite3.Connection) -> None:
 
     conn.executescript(SCHEMA)
     conn.executescript(INVENTORY_SCHEMA)  # v7 -> v8, additive and idempotent
+    if "client" not in _columns(conn, "team_login_failure"):
+        conn.execute("ALTER TABLE team_login_failure ADD COLUMN client TEXT NOT NULL DEFAULT ''")
+    conn.executescript(LOGIN_CLIENT_INDEX)
     # Before any snapshot below copies terrains: the copy names this column.
     _migrate_moneda(conn)
 

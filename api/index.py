@@ -6,6 +6,7 @@ adapter only states what differs in the cloud: any Host, same-host Origin for
 writes, HTTPS (Secure cookies), a 4 MB body limit and Postgres being required.
 """
 
+import ipaddress
 import os
 from urllib.parse import urlsplit
 
@@ -34,6 +35,21 @@ class handler(Handler):
             self.close_connection = True
             return self._send_json({"error": "Petición rechazada: origen externo."}, 403)
         return super()._dispatch(method)
+
+    def _client_id(self):
+        """The visitor's address for the login throttle.
+
+        Vercel's edge overwrites X-Forwarded-For with the real client address
+        (a value sent by the client is not passed through), so on Vercel its
+        first entry identifies the caller. Behind any other proxy this header
+        could be forged: revisit this method before deploying elsewhere. A
+        value that is not an IP address is ignored rather than trusted.
+        """
+        forwarded = (self.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+        try:
+            return str(ipaddress.ip_address(forwarded[:64]))
+        except ValueError:
+            return super()._client_id()
 
     def _database_ready(self):
         # Never fall back to a local SQLite file in the cloud.

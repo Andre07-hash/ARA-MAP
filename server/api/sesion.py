@@ -18,10 +18,10 @@ MAX_LOGIN_BODY = 4096
 
 
 def config(request: Request) -> Respuesta:
-    """Nonsecret UI configuration. /api/session is the authority on sign-in;
-    readOnly is kept for the legacy interface until it moves to /api/session."""
+    """Nonsecret UI configuration. readOnly reflects only ARA_MAP_READ_ONLY;
+    /api/session is the authority on sign-in."""
     return {
-        "readOnly": os.environ.get("ARA_MAP_READ_ONLY") == "1" or request.user is None,
+        "readOnly": os.environ.get("ARA_MAP_READ_ONLY") == "1",
         "cloud": request.cloud,
         "authRequired": True,
         "maxUploadBytes": (4 if request.cloud else 25) * 1024 * 1024,
@@ -41,7 +41,8 @@ def login(request: Request) -> Respuesta:
     # The session block must end normally so the recorded failure commits on
     # Postgres too; the error is raised only afterwards.
     with db.session() as conn:
-        token, user, throttled = auth.login(conn, data.get("username"), data.get("password"))
+        token, user, throttled = auth.login(conn, data.get("username"), data.get("password"),
+                                            client=request.client)
     if throttled:
         raise ApiError("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", 429,
                        {"code": "rate_limited"})

@@ -54,7 +54,8 @@ def listing(request: Request) -> Respuesta:
         if inventario.matches(r["draft"], q)
         and (not q["publication_state"] or r["publication_state"] in q["publication_state"])
         and (not q["availability"] or r["draft"]["availability"] in q["availability"])
-        and (q["attention"] is None or bool(r["attention"]) == q["attention"])
+        and all(q[f] is None or bool(r[f]) == q[f]
+                for f in ("attention", "public_visible", "has_pending_changes"))
     ]
     terrenos, cursor = inventario.page(matching, q)
     return {"terrenos": terrenos, "total": len(matching), "next_cursor": cursor,
@@ -157,14 +158,147 @@ def history(request: Request) -> Respuesta:
             "next_cursor": str(siguiente) if siguiente is not None else None}
 
 
-# -- public catalog: Stage 2 placeholders ------------------------------------------
-# Publishing does not exist yet, so nothing is eligible: the catalog is empty
-# and every detail is the same 404 a missing or unpublished id will get.
+# -- publication lifecycle ------------------------------------------------------
+
+def _expected_version(data: Mapping[str, Any], allowed: tuple[str, ...]) -> tuple[int, dict[str, str]]:
+    errors = {str(k): "Campo no admitido." for k in data if k not in allowed}
+    expected: Any = data.get("expected_version")
+    if type(expected) is not int or expected < 1:
+        errors["expected_version"] = "Envía la versión que revisaste (entero)."
+        expected = 0
+    return expected, errors
+
+
+def _conflict(conn: Any, inventory_id: str) -> ApiError:
+    latest = repo.get(conn, inventory_id)
+    return ApiError(
+        "Otra persona cambió este terreno. Revisa la versión actual antes de continuar.", 409,
+        {"code": "conflict", "current_version": latest["version"] if latest else None,
+         "terreno": latest})
+
+
+def _lifecycle(request: Request, action: str) -> Respuesta:
+    actor = _actor(request)
+    inventory_id = request.uuid_param("id")
+    data = parse_json(request.body)
+    allowed = ("expected_version", "revision_id") if action == "publish" else ("expected_version",)
+    expected, errors = _expected_version(data, allowed)
+    revision_id = data.get("revision_id")
+    if action == "publish" and (not isinstance(revision_id, str) or not revision_id):
+        errors["revision_id"] = "Envía la revisión que revisaste en la vista previa."
+    if errors:
+        raise _invalid(errors)
+    with db.session() as conn:
+        try:
+            if action == "publish":
+                terreno = repo.publish(conn, inventory_id, expected, str(revision_id), actor)
+            else:
+                terreno = getattr(repo, action)(conn, inventory_id, expected, actor)
+        except LookupError:
+            raise _not_found() from None
+        except repo.ConflictError:
+            raise _conflict(conn, inventory_id) from None
+        except repo.RevisionChangedError:
+            latest = repo.get(conn, inventory_id)
+            raise ApiError(
+                "El borrador cambió después de tu vista previa. Revísalo de nuevo antes de"
+                " publicar.", 409,
+                {"code": "revision_changed", "current_version": latest["version"] if latest else None,
+                 "terreno": latest}) from None
+        except repo.InvalidStateError as exc:
+            raise ApiError(exc.mensaje, 409, {"code": "invalid_state"}) from None
+        except repo.PublicationBlockedError as exc:
+            raise ApiError("Este borrador todavía no se puede publicar.", 422,
+                           {"code": "publication_blocked", "blockers": exc.blockers}) from None
+    return {"terreno": terreno}
+
+
+def publish(request: Request) -> Respuesta:
+    """{expected_version, revision_id}: publish exactly the reviewed saved draft."""
+    return _lifecycle(request, "publish")
+
+
+def unpublish(request: Request) -> Respuesta:
+    return _lifecycle(request, "unpublish")
+
+
+def archive(request: Request) -> Respuesta:
+    return _lifecycle(request, "archive")
+
+
+def restore(request: Request) -> Respuesta:
+    return _lifecycle(request, "restore")
+
+
+def preview(request: Request) -> Respuesta:
+    """The saved draft exactly as the public would see it once published.
+
+    Uses the same serializer as the catalog; published_at is null because the
+    commit time is unknown. Only the current saved draft can be previewed for
+    publication: a stale revision_id is a 409, so the team reviews again.
+    """
+    _actor(request)
+    inventory_id = request.uuid_param("id")
+    errors = {k: "Parámetro no admitido." for k in request.query if k != "revision_id"}
+    if errors:
+        raise _invalid(errors, "Parámetros inválidos.")
+    requested = request.q("revision_id")
+    with db.session() as conn:
+        current = repo.get(conn, inventory_id)
+        if current is None:
+            raise _not_found()
+        if requested is not None and requested != current["draft_revision_id"]:
+            if repo.revision(conn, inventory_id, requested) is None:
+                raise _not_found()
+            raise ApiError(
+                "Esa revisión ya no es el borrador guardado. Revisa la versión actual.", 409,
+                {"code": "revision_changed", "current_version": current["version"],
+                 "terreno": current})
+        published = (repo.revision(conn, inventory_id, current["published_revision_id"])
+                     if current["published_revision_id"] else None)
+    draft = current["draft"]
+    return {
+        "id": current["id"],
+        "version": current["version"],
+        "revision_id": current["draft_revision_id"],
+        "preview": True,
+        "terreno": inventario.public_terrain(current["id"], current["draft_revision_id"], draft, None),
+        "blockers": inventario.publication_blockers(draft),
+        "warnings": inventario.preview_warnings(draft, current["confirmations"], published),
+    }
+
+
+# -- the public catalog (anonymous) ------------------------------------------------
+# Only the revision selected by the published pointer, only eligible records and
+# only PublicTerrain fields. A missing, draft, unpublished, archived, sold or
+# withdrawn id all get the same 404.
+
+def _public_not_found() -> ApiError:
+    return ApiError("Terreno no encontrado.", 404, {"code": "not_found"})
+
 
 def public_listing(request: Request) -> Respuesta:
-    return {"terrenos": [], "total": 0, "next_cursor": None,
-            "facets": {"estados": [], "municipios": [], "monedas": []}}
+    try:
+        q = inventario.parse_query(request.query, inventario.PUBLIC_QUERY)
+    except inventario.QueryError as exc:
+        raise _invalid(exc.errors, "Filtros inválidos.") from None
+    with db.session() as conn:
+        candidates = repo.public_records(conn)
+    matching = [t for t in candidates if inventario.matches(t, q)]
+    terrenos, cursor = inventario.page(matching, q)
+    return {"terrenos": terrenos, "total": len(matching), "next_cursor": cursor,
+            "facets": inventario.facets(candidates, lambda t: t, q)}
 
 
 def public_detail(request: Request) -> Respuesta:
-    raise ApiError("Terreno no encontrado.", 404, {"code": "not_found"})
+    if request.query:
+        raise _invalid({k: "Parámetro no admitido." for k in request.query}, "Parámetros inválidos.")
+    try:
+        inventory_id = request.uuid_param("id")
+    except ApiError:
+        raise _public_not_found() from None
+    with db.session() as conn:
+        terreno = repo.public_get(conn, inventory_id)
+    if terreno is None:
+        raise _public_not_found()
+    return {"terreno": terreno}

@@ -23,7 +23,7 @@ if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 for (const [u, c] of Object.entries(CLAVES)) assert.ok(c, `falta ARA_PW_${u.toUpperCase()}`);
 if (/vercel|ara-map\.|https:/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
 
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await chromium.launch(process.env.ARA_CHROMIUM ? { executablePath: process.env.ARA_CHROMIUM } : { channel: 'chrome' });
 const resultados = [];
 let fallos = 0;
 async function caso(nombre, fn) {

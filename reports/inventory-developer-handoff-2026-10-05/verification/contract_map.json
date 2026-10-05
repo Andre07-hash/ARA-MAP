@@ -1,0 +1,21 @@
+{
+ "_comment": "Filled 2026-10-05 from BACKEND_RESPONSE.md (Stage 1). extra and confirmation dates are not editable draft fields in v1 (source_extra is read-only; confirmations use PATCH confirm), so they are not sent.",
+ "private_field_names": {
+  "contacts": "contacto",
+  "internal_notes": "notas_internas",
+  "extra": null,
+  "price_confirmed_at": null,
+  "availability_confirmed_at": null
+ },
+ "create_body_wrapper": null,
+ "provision_cmd": {
+  "local": ["{python}", "scripts/cuentas.py", "--sqlite", "{db}", "--password-stdin", "crear", "{username}", "{display_name}"],
+  "cloud": ["{python}", "scripts/cuentas.py", "--url-env", "ARA_VERIFY_PG_URL", "--password-stdin", "crear", "{username}", "{display_name}"]
+ },
+ "schema_cmd_cloud": ["{python}", "scripts/esquema.py", "--url-env", "ARA_VERIFY_PG_URL"],
+ "provision_password_repeats": 1,
+ "legacy_edit_password_env": "ARA_MAP_EDIT_PASSWORD",
+ "session_cookie": "ara_sesion",
+ "server_extra_env": {},
+ "signup_probe_paths": ["/api/registro", "/api/register", "/api/signup", "/api/usuarios", "/api/users", "/api/cuentas", "/api/team", "/api/session"]
+}

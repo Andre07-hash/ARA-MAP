@@ -1,0 +1,12 @@
+ok   anonymous startup asks only for config, session and the public catalog
+ok   251 published terrains: count, table and map agree after every page arrives
+ok   phone: the Filtros drawer holds every control, keeps state and returns focus
+ok   a public price-on-request terrain says so, and negotiation is labelled
+ok   a private deep link offers sign-in, then returns there
+ok   edit: 409 keeps my input, shows their change, and saves only after review
+ok   new draft: client and server field errors, and a lost response retried with the same key
+ok   phone editor: actions reachable, no horizontal overflow
+ok   leaving a dirty editor asks first; cancelling keeps the input
+ok   history panel lists actor, time, changes and confirmations, with paging
+ok   logout cancels pending private loads, clears private DOM, and Back shows nothing private
+11 ok, 0 failed (fixture-only; not integrated)

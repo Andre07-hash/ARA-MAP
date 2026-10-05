@@ -1,0 +1,12 @@
+test_control_normal_xlsx_preserves_four_rows (__main__.ImportSafety.test_control_normal_xlsx_preserves_four_rows) ... ok
+test_control_real_total_row_is_excluded (__main__.ImportSafety.test_control_real_total_row_is_excluded) ... ok
+test_excel_currency_format_cannot_be_relabelled_mxn (__main__.ImportSafety.test_excel_currency_format_cannot_be_relabelled_mxn) ... ok
+test_real_header_after_row50_is_selectable (__main__.ImportSafety.test_real_header_after_row50_is_selectable) ... ok
+test_real_terrain_starting_total_is_not_discarded (__main__.ImportSafety.test_real_terrain_starting_total_is_not_discarded) ... ok
+test_suspicious_footer_is_not_accepted_without_review (__main__.ImportSafety.test_suspicious_footer_is_not_accepted_without_review) ... ok
+test_tab_csv_is_parsed_or_rejected_before_name_mapping (__main__.ImportSafety.test_tab_csv_is_parsed_or_rejected_before_name_mapping) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.056s
+
+OK

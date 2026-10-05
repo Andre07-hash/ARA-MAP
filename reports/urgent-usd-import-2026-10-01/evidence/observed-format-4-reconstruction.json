@@ -1,0 +1,74 @@
+{
+  "id": 4,
+  "nombre": "Formato de «Base Terrenos 09.26 copy»",
+  "version": 1,
+  "decimal": "dot",
+  "hoja": "CSV",
+  "asignaciones": [
+    [
+      "id",
+      1,
+      "id_origen"
+    ],
+    [
+      "terreno",
+      1,
+      "terreno"
+    ],
+    [
+      "estado",
+      1,
+      "estado"
+    ],
+    [
+      "municipio",
+      1,
+      "municipio"
+    ],
+    [
+      "direccion",
+      1,
+      "direccion"
+    ],
+    [
+      "superficie m2",
+      1,
+      "superficie_m2"
+    ],
+    [
+      "superficie ha",
+      1,
+      "superficie_ha"
+    ],
+    [
+      "afectaciones %",
+      1,
+      "afectaciones_pct"
+    ],
+    [
+      "afectaciones m2",
+      1,
+      "afectaciones_m2"
+    ],
+    [
+      "asking price",
+      1,
+      "extra"
+    ],
+    [
+      "asking $/m2",
+      1,
+      "extra"
+    ],
+    [
+      "x",
+      1,
+      "lat"
+    ],
+    [
+      "y",
+      1,
+      "lon"
+    ]
+  ]
+}

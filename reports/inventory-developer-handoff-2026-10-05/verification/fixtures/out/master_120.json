@@ -1,0 +1,5662 @@
+[
+ {
+  "draft": {
+   "afectaciones_m2": 599.46,
+   "afectaciones_pct": 0.0332,
+   "asking_m2": 3154.95,
+   "asking_price": 56965682.55,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M001-c89888 tel. 55 0000 8243",
+   "direccion": "Km 67 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M001-e7e221.xlsx",
+    "Columna SNTL-EXTRAK-M001-cb367b": "SNTL-EXTRAV-M001-14ea17",
+    "Comisión interna": "3% SNTL-COMMISSION-M001-ae86e2",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M001-266161\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M001-0a67e0",
+   "lat": 20.543509,
+   "lon": -100.332121,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M001",
+   "superficie_ha": 1.8055970000000001,
+   "superficie_m2": 18055.97,
+   "terreno": "Rancho San José de Gracia M001"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M001",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M001-ae86e2",
+   "SNTL-CONTACT-M001-c89888",
+   "SNTL-EXTRAK-M001-cb367b",
+   "SNTL-EXTRAV-M001-14ea17",
+   "SNTL-FORMULA-M001-266161",
+   "SNTL-NOTE-M001-0a67e0",
+   "SNTL-SRCFILE-M001-e7e221"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 44003.58,
+   "afectaciones_pct": 0.0796,
+   "asking_m2": 3814.45,
+   "asking_price": 2108661450.87,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M002-f207a5 tel. 55 0000 5487",
+   "direccion": "Km 2 Carretera Federal, Corregidora",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M002-c2ace7.xlsx",
+    "Columna SNTL-EXTRAK-M002-284c50": "SNTL-EXTRAV-M002-16629f",
+    "Comisión interna": "4% SNTL-COMMISSION-M002-ab026a",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M002-bcb93d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M002-aa1b62",
+   "lat": 20.602491,
+   "lon": -100.461301,
+   "moneda": "MXN",
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M002",
+   "superficie_ha": 55.280878,
+   "superficie_m2": 552808.78,
+   "terreno": "Lote Ávila Camacho M002"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M002",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M002-ab026a",
+   "SNTL-CONTACT-M002-f207a5",
+   "SNTL-EXTRAK-M002-284c50",
+   "SNTL-EXTRAV-M002-16629f",
+   "SNTL-FORMULA-M002-bcb93d",
+   "SNTL-NOTE-M002-aa1b62",
+   "SNTL-SRCFILE-M002-c2ace7"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 6440.07,
+   "afectaciones_pct": 0.3358,
+   "asking_m2": 5857.88,
+   "asking_price": 112344062.85,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M003-7b8b2f tel. 55 0000 9176",
+   "direccion": "Km 21 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M003-0aa1e4.xlsx",
+    "Columna SNTL-EXTRAK-M003-52ea72": "SNTL-EXTRAV-M003-074d7c",
+    "Comisión interna": "5% SNTL-COMMISSION-M003-7b9626",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M003-36307e\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M003-bcaac9",
+   "lat": 25.761679,
+   "lon": -100.346375,
+   "moneda": "MXN",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M003",
+   "superficie_ha": 1.9178279999999999,
+   "superficie_m2": 19178.28,
+   "terreno": "Terreno Peña Blanca M003"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M003",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M003-7b9626",
+   "SNTL-CONTACT-M003-7b8b2f",
+   "SNTL-EXTRAK-M003-52ea72",
+   "SNTL-EXTRAV-M003-074d7c",
+   "SNTL-FORMULA-M003-36307e",
+   "SNTL-NOTE-M003-bcaac9",
+   "SNTL-SRCFILE-M003-0aa1e4"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 362.63,
+   "asking_price": 5580984.49,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M004-6ddadb tel. 55 0000 6920",
+   "direccion": "Km 67 Carretera Federal, Apodaca",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M004-37c969.xlsx",
+    "Columna SNTL-EXTRAK-M004-717c2c": "SNTL-EXTRAV-M004-63dc0e",
+    "Comisión interna": "3% SNTL-COMMISSION-M004-820193",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M004-bbf330\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M004-3a9973",
+   "lat": 25.775669,
+   "lon": -100.248349,
+   "moneda": "USD",
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M004",
+   "superficie_ha": 1.53903,
+   "superficie_m2": 15390.3,
+   "terreno": "Bodega Ex-Hacienda Álamos M004"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M004",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M004-820193",
+   "SNTL-CONTACT-M004-6ddadb",
+   "SNTL-EXTRAK-M004-717c2c",
+   "SNTL-EXTRAV-M004-63dc0e",
+   "SNTL-FORMULA-M004-bbf330",
+   "SNTL-NOTE-M004-3a9973",
+   "SNTL-SRCFILE-M004-37c969"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3625.11,
+   "afectaciones_pct": 0.2228,
+   "asking_m2": 215.36,
+   "asking_price": 3504053.64,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M005-823521 tel. 55 0000 4007",
+   "direccion": "Km 56 Carretera Federal, Santa Catarina",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M005-f6ec6f.xlsx",
+    "Columna SNTL-EXTRAK-M005-6f1d12": "SNTL-EXTRAV-M005-f6a60e",
+    "Comisión interna": "1% SNTL-COMMISSION-M005-274148",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M005-430fd3\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M005-35e5a8",
+   "lat": 20.5988,
+   "lon": -100.3799,
+   "moneda": "USD",
+   "municipio": "Querétaro",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M005",
+   "superficie_ha": 1.627068,
+   "superficie_m2": 16270.68,
+   "terreno": "Predio La Esperanza"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M005",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M005-274148",
+   "SNTL-CONTACT-M005-823521",
+   "SNTL-EXTRAK-M005-6f1d12",
+   "SNTL-EXTRAV-M005-f6a60e",
+   "SNTL-FORMULA-M005-430fd3",
+   "SNTL-NOTE-M005-35e5a8",
+   "SNTL-SRCFILE-M005-f6ec6f"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2254.99,
+   "afectaciones_pct": 0.0624,
+   "asking_m2": 426.69,
+   "asking_price": 15419586.68,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M006-1bc668 tel. 55 0000 6207",
+   "direccion": null,
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M006-1411f2.xlsx",
+    "Columna SNTL-EXTRAK-M006-065ab8": "SNTL-EXTRAV-M006-9b4a5c",
+    "Comisión interna": "3% SNTL-COMMISSION-M006-f19504",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M006-015125\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M006-353b74",
+   "lat": 20.6697,
+   "lon": -103.3396,
+   "moneda": "USD",
+   "municipio": "Guadalajara",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M006",
+   "superficie_ha": 3.613768,
+   "superficie_m2": 36137.68,
+   "terreno": "Predio La Esperanza"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M006",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M006-f19504",
+   "SNTL-CONTACT-M006-1bc668",
+   "SNTL-EXTRAK-M006-065ab8",
+   "SNTL-EXTRAV-M006-9b4a5c",
+   "SNTL-FORMULA-M006-015125",
+   "SNTL-NOTE-M006-353b74",
+   "SNTL-SRCFILE-M006-1411f2"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 222459.7,
+   "afectaciones_pct": 0.2603,
+   "asking_m2": 260.11,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M007-161d18 tel. 55 0000 5488",
+   "direccion": "Km 22 Carretera Federal, Zapopan",
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M007-92bdb3.xlsx",
+    "Columna SNTL-EXTRAK-M007-7542f0": "SNTL-EXTRAV-M007-5fddd4",
+    "Comisión interna": "1% SNTL-COMMISSION-M007-7c4fd6",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M007-a1a709\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M007-31211a",
+   "lat": 20.9774,
+   "lon": -89.5826,
+   "moneda": "USD",
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M007",
+   "superficie_ha": 85.462811,
+   "superficie_m2": 854628.11,
+   "terreno": "Predio La Esperanza"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M007",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M007-7c4fd6",
+   "SNTL-CONTACT-M007-161d18",
+   "SNTL-EXTRAK-M007-7542f0",
+   "SNTL-EXTRAV-M007-5fddd4",
+   "SNTL-FORMULA-M007-a1a709",
+   "SNTL-NOTE-M007-31211a",
+   "SNTL-SRCFILE-M007-92bdb3"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M008-ab2a59 tel. 55 0000 6692",
+   "direccion": "Km 58 Carretera Federal, Tlajomulco de Zúñiga",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M008-054463.xlsx",
+    "Columna SNTL-EXTRAK-M008-2ce615": "SNTL-EXTRAV-M008-b67103",
+    "Comisión interna": "3% SNTL-COMMISSION-M008-53adfc",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M008-db7f7a\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M008-a4dbde",
+   "lat": 20.428684,
+   "lon": -103.378786,
+   "moneda": null,
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M008",
+   "superficie_ha": 1.22576,
+   "superficie_m2": 12257.6,
+   "terreno": "Polígono Santa Mónica M008"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M008",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M008-53adfc",
+   "SNTL-CONTACT-M008-ab2a59",
+   "SNTL-EXTRAK-M008-2ce615",
+   "SNTL-EXTRAV-M008-b67103",
+   "SNTL-FORMULA-M008-db7f7a",
+   "SNTL-NOTE-M008-a4dbde",
+   "SNTL-SRCFILE-M008-054463"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 151920.05,
+   "afectaciones_pct": 0.2473,
+   "asking_m2": null,
+   "asking_price": 56047240.69,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M009-5f9eb9 tel. 55 0000 3359",
+   "direccion": "Km 74 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M009-3e4d15.xlsx",
+    "Columna SNTL-EXTRAK-M009-6a4ce6": "SNTL-EXTRAV-M009-87a4be",
+    "Comisión interna": "4% SNTL-COMMISSION-M009-47ce15",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M009-0c0af9\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M009-3a0d57",
+   "lat": 21.136506,
+   "lon": -101.667292,
+   "moneda": "MXN",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M009",
+   "superficie_ha": 61.431479,
+   "superficie_m2": 614314.79,
+   "terreno": "Ejido La Purísima M009"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M009",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M009-47ce15",
+   "SNTL-CONTACT-M009-5f9eb9",
+   "SNTL-EXTRAK-M009-6a4ce6",
+   "SNTL-EXTRAV-M009-87a4be",
+   "SNTL-FORMULA-M009-0c0af9",
+   "SNTL-NOTE-M009-3a0d57",
+   "SNTL-SRCFILE-M009-3e4d15"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 630.0,
+   "afectaciones_pct": 0.0525,
+   "asking_m2": 4752.32,
+   "asking_price": 57027840.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M010-8c8bbe tel. 55 0000 1048",
+   "direccion": "Km 74 Carretera Federal, Silao de la Victoria",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M010-53a6e0.xlsx",
+    "Columna SNTL-EXTRAK-M010-632641": "SNTL-EXTRAV-M010-df9dc4",
+    "Comisión interna": "5% SNTL-COMMISSION-M010-ab48bc",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M010-df8b4e\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M010-755bb3",
+   "lat": 20.6301,
+   "lon": -100.2801,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M010",
+   "superficie_ha": 1.2,
+   "superficie_m2": 12000.0,
+   "terreno": "Fracción A Los Olivos"
+  },
+  "dup_group": "olivos-A",
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M010",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M010-ab48bc",
+   "SNTL-CONTACT-M010-8c8bbe",
+   "SNTL-EXTRAK-M010-632641",
+   "SNTL-EXTRAV-M010-df9dc4",
+   "SNTL-FORMULA-M010-df8b4e",
+   "SNTL-NOTE-M010-755bb3",
+   "SNTL-SRCFILE-M010-53a6e0"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3787.5,
+   "afectaciones_pct": 0.303,
+   "asking_m2": 4406.48,
+   "asking_price": 55081000.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M011-d1535c tel. 55 0000 8947",
+   "direccion": "Km 11 Carretera Federal, Celaya",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M011-00979e.xlsx",
+    "Columna SNTL-EXTRAK-M011-807a59": "SNTL-EXTRAV-M011-afc714",
+    "Comisión interna": "3% SNTL-COMMISSION-M011-ab225e",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M011-962077\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M011-68dbea",
+   "lat": 20.6305,
+   "lon": -100.2801,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M011",
+   "superficie_ha": 1.25,
+   "superficie_m2": 12500.0,
+   "terreno": "Fracción B Los Olivos"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M011",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M011-ab225e",
+   "SNTL-CONTACT-M011-d1535c",
+   "SNTL-EXTRAK-M011-807a59",
+   "SNTL-EXTRAV-M011-afc714",
+   "SNTL-FORMULA-M011-962077",
+   "SNTL-NOTE-M011-68dbea",
+   "SNTL-SRCFILE-M011-00979e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 3276.55,
+   "asking_price": 39318600.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M012-83039e tel. 55 0000 6595",
+   "direccion": null,
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M012-94291e.xlsx",
+    "Columna SNTL-EXTRAK-M012-d8db8f": "SNTL-EXTRAV-M012-cf72e9",
+    "Comisión interna": "2% SNTL-COMMISSION-M012-aadac3",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M012-698d18\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M012-f2b427",
+   "lat": 20.6302,
+   "lon": -100.2802,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M012",
+   "superficie_ha": 1.2,
+   "superficie_m2": 12000.0,
+   "terreno": "Fracción A Los Olivos"
+  },
+  "dup_group": "olivos-A",
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M012",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M012-aadac3",
+   "SNTL-CONTACT-M012-83039e",
+   "SNTL-EXTRAK-M012-d8db8f",
+   "SNTL-EXTRAV-M012-cf72e9",
+   "SNTL-FORMULA-M012-698d18",
+   "SNTL-NOTE-M012-f2b427",
+   "SNTL-SRCFILE-M012-94291e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 6836.45,
+   "afectaciones_pct": 0.1394,
+   "asking_m2": 4570.68,
+   "asking_price": 224155151.44,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M013-350c45 tel. 55 0000 1424",
+   "direccion": "Km 56 Carretera Federal, Soledad de Graciano Sánchez",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M013-51fc2a.xlsx",
+    "Columna SNTL-EXTRAK-M013-7c7c90": "SNTL-EXTRAV-M013-dc4464",
+    "Comisión interna": "5% SNTL-COMMISSION-M013-5f4e36",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M013-2400a2\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M013-382689",
+   "lat": 22.216614,
+   "lon": -100.964026,
+   "moneda": "MXN",
+   "municipio": "Soledad de Graciano Sánchez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M013",
+   "superficie_ha": 4.904197,
+   "superficie_m2": 49041.97,
+   "terreno": "Rancho San José de Gracia M013"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M013",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M013-5f4e36",
+   "SNTL-CONTACT-M013-350c45",
+   "SNTL-EXTRAK-M013-7c7c90",
+   "SNTL-EXTRAV-M013-dc4464",
+   "SNTL-FORMULA-M013-2400a2",
+   "SNTL-NOTE-M013-382689",
+   "SNTL-SRCFILE-M013-51fc2a"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 841.28,
+   "afectaciones_pct": 0.1954,
+   "asking_m2": 44.09,
+   "asking_price": 189826.41,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M014-9c0ba4 tel. 55 0000 2416",
+   "direccion": "Km 43 Carretera Federal, Mérida",
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M014-877846.xlsx",
+    "Columna SNTL-EXTRAK-M014-6cd606": "SNTL-EXTRAV-M014-66d85e",
+    "Comisión interna": "1% SNTL-COMMISSION-M014-be4c2c",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M014-a6d45b\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M014-4fff35",
+   "lat": 20.966093,
+   "lon": -89.551352,
+   "moneda": "USD",
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M014",
+   "superficie_ha": 0.430543,
+   "superficie_m2": 4305.43,
+   "terreno": "Lote Ávila Camacho M014"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M014",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M014-be4c2c",
+   "SNTL-CONTACT-M014-9c0ba4",
+   "SNTL-EXTRAK-M014-6cd606",
+   "SNTL-EXTRAV-M014-66d85e",
+   "SNTL-FORMULA-M014-a6d45b",
+   "SNTL-NOTE-M014-4fff35",
+   "SNTL-SRCFILE-M014-877846"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 55285.64,
+   "afectaciones_pct": 0.1201,
+   "asking_m2": 312.89,
+   "asking_price": 144032681.86,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M015-d7e025 tel. 55 0000 8678",
+   "direccion": "Km 11 Carretera Federal, Cuautitlán Izcalli",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M015-0272c6.xlsx",
+    "Columna SNTL-EXTRAK-M015-02e762": "SNTL-EXTRAV-M015-ddb81a",
+    "Comisión interna": "4% SNTL-COMMISSION-M015-93f3a7",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M015-fac91f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M015-e47f12",
+   "lat": 19.642432,
+   "lon": -99.187307,
+   "moneda": "USD",
+   "municipio": "Cuautitlán Izcalli",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M015",
+   "superficie_ha": 46.033009,
+   "superficie_m2": 460330.09,
+   "terreno": "Terreno Peña Blanca M015"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M015",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M015-93f3a7",
+   "SNTL-CONTACT-M015-d7e025",
+   "SNTL-EXTRAK-M015-02e762",
+   "SNTL-EXTRAV-M015-ddb81a",
+   "SNTL-FORMULA-M015-fac91f",
+   "SNTL-NOTE-M015-e47f12",
+   "SNTL-SRCFILE-M015-0272c6"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 336.89,
+   "asking_price": 9580144.3,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M016-b4522a tel. 55 0000 1445",
+   "direccion": "Km 78 Carretera Federal, Tepotzotlán",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M016-1c3b00.xlsx",
+    "Columna SNTL-EXTRAK-M016-e82e43": "SNTL-EXTRAV-M016-dec378",
+    "Comisión interna": "3% SNTL-COMMISSION-M016-bb61a8",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M016-b87cb1\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M016-5a56ba",
+   "lat": 19.748928,
+   "lon": -99.226182,
+   "moneda": "USD",
+   "municipio": "Tepotzotlán",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M016",
+   "superficie_ha": 2.843701,
+   "superficie_m2": 28437.01,
+   "terreno": "Bodega Ex-Hacienda Álamos M016"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M016",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M016-bb61a8",
+   "SNTL-CONTACT-M016-b4522a",
+   "SNTL-EXTRAK-M016-e82e43",
+   "SNTL-EXTRAV-M016-dec378",
+   "SNTL-FORMULA-M016-b87cb1",
+   "SNTL-NOTE-M016-5a56ba",
+   "SNTL-SRCFILE-M016-1c3b00"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 16615.91,
+   "afectaciones_pct": 0.2594,
+   "asking_m2": 421.78,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M017-e89bb7 tel. 55 0000 1249",
+   "direccion": "Km 31 Carretera Federal, Ramos Arizpe",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M017-8ff106.xlsx",
+    "Columna SNTL-EXTRAK-M017-ed173a": "SNTL-EXTRAV-M017-7b5255",
+    "Comisión interna": "4% SNTL-COMMISSION-M017-203745",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M017-f367dc\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M017-b00742",
+   "lat": 25.555775,
+   "lon": -100.986935,
+   "moneda": "USD",
+   "municipio": "Ramos Arizpe",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M017",
+   "superficie_ha": 6.405516,
+   "superficie_m2": 64055.16,
+   "terreno": "Fracción Güémez M017"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M017",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M017-203745",
+   "SNTL-CONTACT-M017-e89bb7",
+   "SNTL-EXTRAK-M017-ed173a",
+   "SNTL-EXTRAV-M017-7b5255",
+   "SNTL-FORMULA-M017-f367dc",
+   "SNTL-NOTE-M017-b00742",
+   "SNTL-SRCFILE-M017-8ff106"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1119.45,
+   "afectaciones_pct": 0.0628,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M018-47a27f tel. 55 0000 8893",
+   "direccion": null,
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M018-73fc42.xlsx",
+    "Columna SNTL-EXTRAK-M018-4482d8": "SNTL-EXTRAV-M018-e772b1",
+    "Comisión interna": "1% SNTL-COMMISSION-M018-17b6dd",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M018-db9a7b\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M018-16183b",
+   "lat": 25.467804,
+   "lon": -100.927447,
+   "moneda": null,
+   "municipio": "Saltillo",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M018",
+   "superficie_ha": 1.782557,
+   "superficie_m2": 17825.57,
+   "terreno": "Predio Los Cañones M018"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M018",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M018-17b6dd",
+   "SNTL-CONTACT-M018-47a27f",
+   "SNTL-EXTRAK-M018-4482d8",
+   "SNTL-EXTRAV-M018-e772b1",
+   "SNTL-FORMULA-M018-db9a7b",
+   "SNTL-NOTE-M018-16183b",
+   "SNTL-SRCFILE-M018-73fc42"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 65038.83,
+   "afectaciones_pct": 0.0862,
+   "asking_m2": null,
+   "asking_price": 65763945.67,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M019-c05ccc tel. 55 0000 1178",
+   "direccion": "Km 35 Carretera Federal, San José Chiapa",
+   "estado": "Puebla",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M019-4e3c3c.xlsx",
+    "Columna SNTL-EXTRAK-M019-62e23e": "SNTL-EXTRAV-M019-d49713",
+    "Comisión interna": "4% SNTL-COMMISSION-M019-4084c5",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M019-d2edf8\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M019-5663ec",
+   "lat": 19.188387,
+   "lon": -97.760494,
+   "moneda": "MXN",
+   "municipio": "San José Chiapa",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M019",
+   "superficie_ha": 75.451074,
+   "superficie_m2": 754510.74,
+   "terreno": "Nave Logística Ébano M019"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M019",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M019-4084c5",
+   "SNTL-CONTACT-M019-c05ccc",
+   "SNTL-EXTRAK-M019-62e23e",
+   "SNTL-EXTRAV-M019-d49713",
+   "SNTL-FORMULA-M019-d2edf8",
+   "SNTL-NOTE-M019-5663ec",
+   "SNTL-SRCFILE-M019-4e3c3c"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 2678.78,
+   "asking_price": 83374723.75,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M020-dca144 tel. 55 0000 9181",
+   "direccion": "Km 70 Carretera Federal, Tijuana",
+   "estado": "Baja California",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M020-398bb8.xlsx",
+    "Columna SNTL-EXTRAK-M020-ebee55": "SNTL-EXTRAV-M020-0c91d1",
+    "Comisión interna": "1% SNTL-COMMISSION-M020-9338ae",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M020-117d13\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M020-222d63",
+   "lat": 32.496179,
+   "lon": -116.989784,
+   "moneda": "MXN",
+   "municipio": "Tijuana",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M020",
+   "superficie_ha": 3.112414,
+   "superficie_m2": 31124.14,
+   "terreno": "<b>Terreno Negritas</b> & \"comillas\""
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M020",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M020-9338ae",
+   "SNTL-CONTACT-M020-dca144",
+   "SNTL-EXTRAK-M020-ebee55",
+   "SNTL-EXTRAV-M020-0c91d1",
+   "SNTL-FORMULA-M020-117d13",
+   "SNTL-NOTE-M020-222d63",
+   "SNTL-SRCFILE-M020-398bb8"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 16671.07,
+   "afectaciones_pct": 0.304,
+   "asking_m2": 4272.46,
+   "asking_price": 234297562.11,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M021-e4f14e tel. 55 0000 4302",
+   "direccion": "<script>alert(\"xss-M021\")</script> Calle 5",
+   "estado": "Quintana Roo",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M021-48daba.xlsx",
+    "Columna SNTL-EXTRAK-M021-bec95d": "SNTL-EXTRAV-M021-23156b",
+    "Comisión interna": "4% SNTL-COMMISSION-M021-8ea7ac",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M021-085b59\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M021-6b8fbe",
+   "lat": 21.159708,
+   "lon": -86.7797,
+   "moneda": "MXN",
+   "municipio": "Benito Juárez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M021",
+   "superficie_ha": 5.483903,
+   "superficie_m2": 54839.03,
+   "terreno": "Ejido La Purísima M021"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M021",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M021-8ea7ac",
+   "SNTL-CONTACT-M021-e4f14e",
+   "SNTL-EXTRAK-M021-bec95d",
+   "SNTL-EXTRAV-M021-23156b",
+   "SNTL-FORMULA-M021-085b59",
+   "SNTL-NOTE-M021-6b8fbe",
+   "SNTL-SRCFILE-M021-48daba"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1813.44,
+   "afectaciones_pct": 0.0463,
+   "asking_m2": 3474.23,
+   "asking_price": 136076000.23,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M022-cd3101 tel. 55 0000 9110",
+   "direccion": "Km 41 Carretera Federal, Querétaro",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M022-42ab32.xlsx",
+    "Columna SNTL-EXTRAK-M022-77f381": "SNTL-EXTRAV-M022-f7b4da",
+    "Comisión interna": "5% SNTL-COMMISSION-M022-ef42c6",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M022-00485f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M022-eefc14",
+   "lat": 20.537815,
+   "lon": -100.461442,
+   "moneda": "MXN",
+   "municipio": "Querétaro",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "<img src=x onerror=alert(1)> PUBMARK-M022",
+   "superficie_ha": 3.916724,
+   "superficie_m2": 39167.24,
+   "terreno": "Macrolote Río Bravo M022"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M022",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M022-ef42c6",
+   "SNTL-CONTACT-M022-cd3101",
+   "SNTL-EXTRAK-M022-77f381",
+   "SNTL-EXTRAV-M022-f7b4da",
+   "SNTL-FORMULA-M022-00485f",
+   "SNTL-NOTE-M022-eefc14",
+   "SNTL-SRCFILE-M022-42ab32"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 10002.2,
+   "afectaciones_pct": 0.3332,
+   "asking_m2": 4345.65,
+   "asking_price": 130450329.09,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M023-7722d9 tel. 55 0000 2333",
+   "direccion": "Km 29 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M023-769540.xlsx",
+    "Columna SNTL-EXTRAK-M023-e050d4": "SNTL-EXTRAV-M023-c11ab4",
+    "Comisión interna": "3% SNTL-COMMISSION-M023-5d4da2",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M023-6f4284\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M023-19eaa1",
+   "lat": 20.635975,
+   "lon": -100.298579,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M023",
+   "superficie_ha": 3.0018599999999998,
+   "superficie_m2": 30018.6,
+   "terreno": "=HYPERLINK(\"http://example.invalid\",\"Lote\")"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M023",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M023-5d4da2",
+   "SNTL-CONTACT-M023-7722d9",
+   "SNTL-EXTRAK-M023-e050d4",
+   "SNTL-EXTRAV-M023-c11ab4",
+   "SNTL-FORMULA-M023-6f4284",
+   "SNTL-NOTE-M023-19eaa1",
+   "SNTL-SRCFILE-M023-769540"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 153.11,
+   "asking_price": 22799787.71,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M024-76615a tel. 55 0000 5733",
+   "direccion": "+52 (442) 000 0000 Carretera 57",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M024-f8e614.xlsx",
+    "Columna SNTL-EXTRAK-M024-2c59cc": "SNTL-EXTRAV-M024-375298",
+    "Comisión interna": "2% SNTL-COMMISSION-M024-31b6e2",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M024-5756f1\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M024-3dad3d",
+   "lat": 20.602232,
+   "lon": -100.396403,
+   "moneda": "USD",
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M024",
+   "superficie_ha": 14.891116,
+   "superficie_m2": 148911.16,
+   "terreno": "Parque Industrial El Ñandú M024"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M024",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M024-31b6e2",
+   "SNTL-CONTACT-M024-76615a",
+   "SNTL-EXTRAK-M024-2c59cc",
+   "SNTL-EXTRAV-M024-375298",
+   "SNTL-FORMULA-M024-5756f1",
+   "SNTL-NOTE-M024-3dad3d",
+   "SNTL-SRCFILE-M024-f8e614"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 7668.71,
+   "afectaciones_pct": 0.3284,
+   "asking_m2": 310.83,
+   "asking_price": 7258424.45,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M025-6ac02c tel. 55 0000 9736",
+   "direccion": "Km 30 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M025-9158c7.xlsx",
+    "Columna SNTL-EXTRAK-M025-641c99": "SNTL-EXTRAV-M025-c906fd",
+    "Comisión interna": "4% SNTL-COMMISSION-M025-256541",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M025-322a03\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M025-221d90",
+   "lat": 25.613327,
+   "lon": -100.36584,
+   "moneda": "USD",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "@SUM(A1:A2) PUBMARK-M025",
+   "superficie_ha": 2.335175,
+   "superficie_m2": 23351.75,
+   "terreno": "Rancho San José de Gracia M025"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M025",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M025-256541",
+   "SNTL-CONTACT-M025-6ac02c",
+   "SNTL-EXTRAK-M025-641c99",
+   "SNTL-EXTRAV-M025-c906fd",
+   "SNTL-FORMULA-M025-322a03",
+   "SNTL-NOTE-M025-221d90",
+   "SNTL-SRCFILE-M025-9158c7"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 100249.18,
+   "afectaciones_pct": 0.2232,
+   "asking_m2": 359.22,
+   "asking_price": 161341892.05,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M026-2187d7 tel. 55 0000 8518",
+   "direccion": "Km 74 Carretera Federal, Apodaca",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M026-ecde33.xlsx",
+    "Columna SNTL-EXTRAK-M026-5469de": "SNTL-EXTRAV-M026-47d2ac",
+    "Comisión interna": "2% SNTL-COMMISSION-M026-d3c98a",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M026-ed30ed\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M026-4381c6",
+   "lat": 25.844337,
+   "lon": -100.242476,
+   "moneda": "USD",
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M026",
+   "superficie_ha": 44.914507,
+   "superficie_m2": 449145.07,
+   "terreno": "-Lote Menos Uno"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M026",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M026-d3c98a",
+   "SNTL-CONTACT-M026-2187d7",
+   "SNTL-EXTRAK-M026-5469de",
+   "SNTL-EXTRAV-M026-47d2ac",
+   "SNTL-FORMULA-M026-ed30ed",
+   "SNTL-NOTE-M026-4381c6",
+   "SNTL-SRCFILE-M026-ecde33"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 217991.83,
+   "afectaciones_pct": 0.2751,
+   "asking_m2": 53.79,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M027-6d79ac tel. 55 0000 7532",
+   "direccion": "Km 74 Carretera Federal, Santa Catarina",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M027-5f6785.xlsx",
+    "Columna SNTL-EXTRAK-M027-8b9b36": "SNTL-EXTRAV-M027-5fec0b",
+    "Comisión interna": "2% SNTL-COMMISSION-M027-fcf2d9",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M027-c2c3cd\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M027-ef425b",
+   "lat": 25.675335,
+   "lon": -100.472633,
+   "moneda": "USD",
+   "municipio": "Santa Catarina",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M027",
+   "superficie_ha": 79.240941,
+   "superficie_m2": 792409.41,
+   "terreno": "Terreno Peña Blanca M027"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M027",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M027-fcf2d9",
+   "SNTL-CONTACT-M027-6d79ac",
+   "SNTL-EXTRAK-M027-8b9b36",
+   "SNTL-EXTRAV-M027-5fec0b",
+   "SNTL-FORMULA-M027-c2c3cd",
+   "SNTL-NOTE-M027-ef425b",
+   "SNTL-SRCFILE-M027-5f6785"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M028-631d55 tel. 55 0000 3395",
+   "direccion": "Km 18 Carretera Federal, Guadalajara",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M028-297f48.xlsx",
+    "Columna SNTL-EXTRAK-M028-adefe7": "SNTL-EXTRAV-M028-75658d",
+    "Comisión interna": "1% SNTL-COMMISSION-M028-134611",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M028-382a06\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M028-4d7d9c",
+   "lat": 20.698937,
+   "lon": -103.405621,
+   "moneda": null,
+   "municipio": "Guadalajara",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M028",
+   "superficie_ha": 4.419491000000001,
+   "superficie_m2": 44194.91,
+   "terreno": "Bodega Ex-Hacienda Álamos M028"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M028",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M028-134611",
+   "SNTL-CONTACT-M028-631d55",
+   "SNTL-EXTRAK-M028-adefe7",
+   "SNTL-EXTRAV-M028-75658d",
+   "SNTL-FORMULA-M028-382a06",
+   "SNTL-NOTE-M028-4d7d9c",
+   "SNTL-SRCFILE-M028-297f48"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 328.39,
+   "afectaciones_pct": 0.0511,
+   "asking_m2": null,
+   "asking_price": 48253083.42,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M029-2eca28 tel. 55 0000 8808",
+   "direccion": "Km 40 Carretera Federal, Zapopan",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M029-7dd416.xlsx",
+    "Columna SNTL-EXTRAK-M029-e1db03": "SNTL-EXTRAV-M029-460a5f",
+    "Comisión interna": "1% SNTL-COMMISSION-M029-027f09",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M029-c512ae\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M029-167dcb",
+   "lat": 20.74731,
+   "lon": -103.339557,
+   "moneda": "MXN",
+   "municipio": "Zapopan",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M029",
+   "superficie_ha": 0.642641,
+   "superficie_m2": 6426.41,
+   "terreno": "Fracción Güémez M029"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M029",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M029-027f09",
+   "SNTL-CONTACT-M029-2eca28",
+   "SNTL-EXTRAK-M029-e1db03",
+   "SNTL-EXTRAV-M029-460a5f",
+   "SNTL-FORMULA-M029-c512ae",
+   "SNTL-NOTE-M029-167dcb",
+   "SNTL-SRCFILE-M029-7dd416"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 356.0,
+   "afectaciones_pct": 0.0356,
+   "asking_m2": 122.5,
+   "asking_price": 1225000.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M030-54adab tel. 55 0000 1097",
+   "direccion": null,
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M030-c24b33.xlsx",
+    "Columna SNTL-EXTRAK-M030-4e3c07": "SNTL-EXTRAV-M030-fa019e",
+    "Comisión interna": "3% SNTL-COMMISSION-M030-295ac0",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M030-f6ff2d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M030-8d4c1f",
+   "lat": 20.423735,
+   "lon": -103.385987,
+   "moneda": "USD",
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M030",
+   "superficie_ha": 1.0,
+   "superficie_m2": 10000.0,
+   "terreno": "Predio Los Cañones M030"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M030",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M030-295ac0",
+   "SNTL-CONTACT-M030-54adab",
+   "SNTL-EXTRAK-M030-4e3c07",
+   "SNTL-EXTRAV-M030-fa019e",
+   "SNTL-FORMULA-M030-f6ff2d",
+   "SNTL-NOTE-M030-8d4c1f",
+   "SNTL-SRCFILE-M030-c24b33"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 804.75,
+   "afectaciones_pct": 0.3219,
+   "asking_m2": 3456.78,
+   "asking_price": 8641950.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M031-888f5c tel. 55 0000 2006",
+   "direccion": "Km 80 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M031-a2c9b0.xlsx",
+    "Columna SNTL-EXTRAK-M031-364e9a": "SNTL-EXTRAV-M031-feb722",
+    "Comisión interna": "5% SNTL-COMMISSION-M031-55f291",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M031-424596\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M031-3e90b2",
+   "lat": 21.064273,
+   "lon": -101.727206,
+   "moneda": "MXN",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M031",
+   "superficie_ha": 0.25,
+   "superficie_m2": 2500.0,
+   "terreno": "Nave Logística Ébano M031"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M031",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M031-55f291",
+   "SNTL-CONTACT-M031-888f5c",
+   "SNTL-EXTRAK-M031-364e9a",
+   "SNTL-EXTRAV-M031-feb722",
+   "SNTL-FORMULA-M031-424596",
+   "SNTL-NOTE-M031-3e90b2",
+   "SNTL-SRCFILE-M031-a2c9b0"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 85.25,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M032-4c5207 tel. 55 0000 8644",
+   "direccion": "Km 7 Carretera Federal, Silao de la Victoria",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M032-cb68af.xlsx",
+    "Columna SNTL-EXTRAK-M032-224646": "SNTL-EXTRAV-M032-4bed01",
+    "Comisión interna": "1% SNTL-COMMISSION-M032-155b73",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M032-b38cb8\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M032-bfecd9",
+   "lat": 20.916896,
+   "lon": -101.435832,
+   "moneda": "USD",
+   "municipio": "Silao de la Victoria",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M032",
+   "superficie_ha": 4.0,
+   "superficie_m2": 40000.0,
+   "terreno": "Polígono Santa Mónica M032"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M032",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M032-155b73",
+   "SNTL-CONTACT-M032-4c5207",
+   "SNTL-EXTRAK-M032-224646",
+   "SNTL-EXTRAV-M032-4bed01",
+   "SNTL-FORMULA-M032-b38cb8",
+   "SNTL-NOTE-M032-bfecd9",
+   "SNTL-SRCFILE-M032-cb68af"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2223.53,
+   "afectaciones_pct": 0.0714,
+   "asking_m2": null,
+   "asking_price": 987654321.99,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M033-7a06a5 tel. 55 0000 8456",
+   "direccion": "Km 43 Carretera Federal, Celaya",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M033-0872a9.xlsx",
+    "Columna SNTL-EXTRAK-M033-d6580b": "SNTL-EXTRAV-M033-4d0d8b",
+    "Comisión interna": "3% SNTL-COMMISSION-M033-c7a5af",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M033-37932c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M033-351b46",
+   "lat": 20.508558,
+   "lon": -100.782183,
+   "moneda": "MXN",
+   "municipio": "Celaya",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M033",
+   "superficie_ha": 3.114191,
+   "superficie_m2": 31141.91,
+   "terreno": "Ejido La Purísima M033"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M033",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M033-c7a5af",
+   "SNTL-CONTACT-M033-7a06a5",
+   "SNTL-EXTRAK-M033-d6580b",
+   "SNTL-EXTRAV-M033-4d0d8b",
+   "SNTL-FORMULA-M033-37932c",
+   "SNTL-NOTE-M033-351b46",
+   "SNTL-SRCFILE-M033-0872a9"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3531.19,
+   "afectaciones_pct": 0.2927,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M034-1d1b0a tel. 55 0000 6945",
+   "direccion": "Km 5 Carretera Federal, San Luis Potosí",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M034-575160.xlsx",
+    "Columna SNTL-EXTRAK-M034-648452": "SNTL-EXTRAV-M034-3a0deb",
+    "Comisión interna": "5% SNTL-COMMISSION-M034-28a66b",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M034-032c9b\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M034-d3680c",
+   "lat": 22.196875,
+   "lon": -100.942152,
+   "moneda": null,
+   "municipio": "San Luis Potosí",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M034",
+   "superficie_ha": 1.20642,
+   "superficie_m2": 12064.2,
+   "terreno": "Macrolote Río Bravo M034"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M034",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M034-28a66b",
+   "SNTL-CONTACT-M034-1d1b0a",
+   "SNTL-EXTRAK-M034-648452",
+   "SNTL-EXTRAV-M034-3a0deb",
+   "SNTL-FORMULA-M034-032c9b",
+   "SNTL-NOTE-M034-d3680c",
+   "SNTL-SRCFILE-M034-575160"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 8.02,
+   "afectaciones_pct": 0.0006,
+   "asking_m2": 212.61,
+   "asking_price": 2842427.74,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M035-cf58ca tel. 55 0000 6509",
+   "direccion": "Km 67 Carretera Federal, Soledad de Graciano Sánchez",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M035-462307.xlsx",
+    "Columna SNTL-EXTRAK-M035-ee2129": "SNTL-EXTRAV-M035-c71c0c",
+    "Comisión interna": "3% SNTL-COMMISSION-M035-470e91",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M035-24c220\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M035-99ecb2",
+   "lat": 22.148212,
+   "lon": -100.989161,
+   "moneda": "USD",
+   "municipio": "Soledad de Graciano Sánchez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M035",
+   "superficie_ha": 1.3369209999999998,
+   "superficie_m2": 13369.21,
+   "terreno": "Reserva Cerro Azul M035"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M035",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M035-470e91",
+   "SNTL-CONTACT-M035-cf58ca",
+   "SNTL-EXTRAK-M035-ee2129",
+   "SNTL-EXTRAV-M035-c71c0c",
+   "SNTL-FORMULA-M035-24c220",
+   "SNTL-NOTE-M035-99ecb2",
+   "SNTL-SRCFILE-M035-462307"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 117.49,
+   "asking_price": 77754225.23,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M036-f57882 tel. 55 0000 8380",
+   "direccion": null,
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M036-c87a6e.xlsx",
+    "Columna SNTL-EXTRAK-M036-5a922c": "SNTL-EXTRAV-M036-22f1c9",
+    "Comisión interna": "2% SNTL-COMMISSION-M036-5a318a",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M036-03cb6d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M036-03b293",
+   "lat": 21.003681,
+   "lon": -89.639768,
+   "moneda": "USD",
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M036",
+   "superficie_ha": 66.179441,
+   "superficie_m2": 661794.41,
+   "terreno": "Parque Industrial El Ñandú M036"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M036",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M036-5a318a",
+   "SNTL-CONTACT-M036-f57882",
+   "SNTL-EXTRAK-M036-5a922c",
+   "SNTL-EXTRAV-M036-22f1c9",
+   "SNTL-FORMULA-M036-03cb6d",
+   "SNTL-NOTE-M036-03b293",
+   "SNTL-SRCFILE-M036-c87a6e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 971.46,
+   "afectaciones_pct": 0.0287,
+   "asking_m2": 167.41,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M037-2bf58c tel. 55 0000 6910",
+   "direccion": "Km 62 Carretera Federal, Cuautitlán Izcalli",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M037-696a67.xlsx",
+    "Columna SNTL-EXTRAK-M037-c02203": "SNTL-EXTRAV-M037-f311b5",
+    "Comisión interna": "1% SNTL-COMMISSION-M037-cad713",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M037-4f6df4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M037-73e087",
+   "lat": 19.598352,
+   "lon": -99.18914,
+   "moneda": "USD",
+   "municipio": "Cuautitlán Izcalli",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M037",
+   "superficie_ha": 3.384889,
+   "superficie_m2": 33848.89,
+   "terreno": "Rancho San José de Gracia M037"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M037",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M037-cad713",
+   "SNTL-CONTACT-M037-2bf58c",
+   "SNTL-EXTRAK-M037-c02203",
+   "SNTL-EXTRAV-M037-f311b5",
+   "SNTL-FORMULA-M037-4f6df4",
+   "SNTL-NOTE-M037-73e087",
+   "SNTL-SRCFILE-M037-696a67"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 9893.8,
+   "afectaciones_pct": 0.2988,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M038-1c3c14 tel. 55 0000 9941",
+   "direccion": "Km 17 Carretera Federal, Tepotzotlán",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M038-6c83ed.xlsx",
+    "Columna SNTL-EXTRAK-M038-724b49": "SNTL-EXTRAV-M038-972077",
+    "Comisión interna": "3% SNTL-COMMISSION-M038-6239fb",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M038-57997a\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M038-95998d",
+   "lat": 19.77647,
+   "lon": -99.182904,
+   "moneda": null,
+   "municipio": "Tepotzotlán",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M038",
+   "superficie_ha": 3.311179,
+   "superficie_m2": 33111.79,
+   "terreno": "Lote Ávila Camacho M038"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M038",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M038-6239fb",
+   "SNTL-CONTACT-M038-1c3c14",
+   "SNTL-EXTRAK-M038-724b49",
+   "SNTL-EXTRAV-M038-972077",
+   "SNTL-FORMULA-M038-57997a",
+   "SNTL-NOTE-M038-95998d",
+   "SNTL-SRCFILE-M038-6c83ed"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 11323.08,
+   "afectaciones_pct": 0.2171,
+   "asking_m2": null,
+   "asking_price": 27937878.42,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M039-2af4e0 tel. 55 0000 7741",
+   "direccion": "Km 26 Carretera Federal, Ramos Arizpe",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M039-5e12c1.xlsx",
+    "Columna SNTL-EXTRAK-M039-754454": "SNTL-EXTRAV-M039-46a704",
+    "Comisión interna": "1% SNTL-COMMISSION-M039-8c4ada",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M039-a551d1\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M039-0763bc",
+   "lat": 25.557962,
+   "lon": -100.978503,
+   "moneda": "MXN",
+   "municipio": "Ramos Arizpe",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M039",
+   "superficie_ha": 5.215604,
+   "superficie_m2": 52156.04,
+   "terreno": "Terreno Peña Blanca M039"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M039",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M039-8c4ada",
+   "SNTL-CONTACT-M039-2af4e0",
+   "SNTL-EXTRAK-M039-754454",
+   "SNTL-EXTRAV-M039-46a704",
+   "SNTL-FORMULA-M039-a551d1",
+   "SNTL-NOTE-M039-0763bc",
+   "SNTL-SRCFILE-M039-5e12c1"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 1500.0,
+   "asking_price": 10000000.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M040-8e2ea5 tel. 55 0000 7355",
+   "direccion": "Km 66 Carretera Federal, Saltillo",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M040-25095e.xlsx",
+    "Columna SNTL-EXTRAK-M040-126bde": "SNTL-EXTRAV-M040-453259",
+    "Comisión interna": "5% SNTL-COMMISSION-M040-ca3ac4",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M040-d55f72\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M040-0d9127",
+   "lat": 25.363075,
+   "lon": -100.974081,
+   "moneda": "MXN",
+   "municipio": "Saltillo",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M040",
+   "superficie_ha": 0.5,
+   "superficie_m2": 5000.0,
+   "terreno": "Bodega Ex-Hacienda Álamos M040"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "price_inconsistency",
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M040",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M040-ca3ac4",
+   "SNTL-CONTACT-M040-8e2ea5",
+   "SNTL-EXTRAK-M040-126bde",
+   "SNTL-EXTRAV-M040-453259",
+   "SNTL-FORMULA-M040-d55f72",
+   "SNTL-NOTE-M040-0d9127",
+   "SNTL-SRCFILE-M040-25095e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 0.09,
+   "afectaciones_pct": 0.088,
+   "asking_m2": 8626.32,
+   "asking_price": 8626.32,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M041-6a6033 tel. 55 0000 7045",
+   "direccion": "Km 53 Carretera Federal, San José Chiapa",
+   "estado": "Puebla",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M041-35d518.xlsx",
+    "Columna SNTL-EXTRAK-M041-99acfd": "SNTL-EXTRAV-M041-b37e9a",
+    "Comisión interna": "1% SNTL-COMMISSION-M041-ada3e5",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M041-481037\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M041-aeeee1",
+   "lat": 19.207739,
+   "lon": -97.718689,
+   "moneda": "MXN",
+   "municipio": "San José Chiapa",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M041",
+   "superficie_ha": 0.0001,
+   "superficie_m2": 1.0,
+   "terreno": "Fracción Güémez M041"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M041",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M041-ada3e5",
+   "SNTL-CONTACT-M041-6a6033",
+   "SNTL-EXTRAK-M041-99acfd",
+   "SNTL-EXTRAV-M041-b37e9a",
+   "SNTL-FORMULA-M041-481037",
+   "SNTL-NOTE-M041-aeeee1",
+   "SNTL-SRCFILE-M041-35d518"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 7315000.0,
+   "afectaciones_pct": 0.2926,
+   "asking_m2": 1199.82,
+   "asking_price": 29995500000.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M042-f0cfce tel. 55 0000 4647",
+   "direccion": null,
+   "estado": "Baja California",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M042-e448a8.xlsx",
+    "Columna SNTL-EXTRAK-M042-399242": "SNTL-EXTRAV-M042-3341d4",
+    "Comisión interna": "3% SNTL-COMMISSION-M042-a36de2",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M042-de7dc2\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M042-afa103",
+   "lat": 32.535347,
+   "lon": -117.073564,
+   "moneda": "MXN",
+   "municipio": "Tijuana",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M042",
+   "superficie_ha": 2500.0,
+   "superficie_m2": 25000000.0,
+   "terreno": "Predio Los Cañones M042"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M042",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M042-a36de2",
+   "SNTL-CONTACT-M042-f0cfce",
+   "SNTL-EXTRAK-M042-399242",
+   "SNTL-EXTRAV-M042-3341d4",
+   "SNTL-FORMULA-M042-de7dc2",
+   "SNTL-NOTE-M042-afa103",
+   "SNTL-SRCFILE-M042-e448a8"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 88335.9,
+   "afectaciones_pct": 0.1044,
+   "asking_m2": 4623.45,
+   "asking_price": 3912036743.26,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M043-6e8785 tel. 55 0000 5928",
+   "direccion": "Km 48 Carretera Federal, Benito Juárez",
+   "estado": "Quintana Roo",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M043-0bc9c8.xlsx",
+    "Columna SNTL-EXTRAK-M043-065d8a": "SNTL-EXTRAV-M043-6073a4",
+    "Comisión interna": "5% SNTL-COMMISSION-M043-0cc1a0",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M043-4ad39c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M043-5446f9",
+   "lat": 21.098296,
+   "lon": -86.813238,
+   "moneda": "MXN",
+   "municipio": "Benito Juárez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M043",
+   "superficie_ha": 84.612935,
+   "superficie_m2": 846129.35,
+   "terreno": "Nave Logística Ébano M043"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M043",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M043-0cc1a0",
+   "SNTL-CONTACT-M043-6e8785",
+   "SNTL-EXTRAK-M043-065d8a",
+   "SNTL-EXTRAV-M043-6073a4",
+   "SNTL-FORMULA-M043-4ad39c",
+   "SNTL-NOTE-M043-5446f9",
+   "SNTL-SRCFILE-M043-0bc9c8"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 244.04,
+   "asking_price": 48120187.9,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M044-4aa971 tel. 55 0000 5028",
+   "direccion": "Km 26 Carretera Federal, Querétaro",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M044-1656e8.xlsx",
+    "Columna SNTL-EXTRAK-M044-3f620a": "SNTL-EXTRAV-M044-b4bf0e",
+    "Comisión interna": "5% SNTL-COMMISSION-M044-2eb082",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M044-40c428\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M044-240996",
+   "lat": 20.628298,
+   "lon": -100.396477,
+   "moneda": "USD",
+   "municipio": "Querétaro",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M044",
+   "superficie_ha": 19.718156,
+   "superficie_m2": 197181.56,
+   "terreno": "Polígono Santa Mónica M044"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M044",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M044-2eb082",
+   "SNTL-CONTACT-M044-4aa971",
+   "SNTL-EXTRAK-M044-3f620a",
+   "SNTL-EXTRAV-M044-b4bf0e",
+   "SNTL-FORMULA-M044-40c428",
+   "SNTL-NOTE-M044-240996",
+   "SNTL-SRCFILE-M044-1656e8"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2797.01,
+   "afectaciones_pct": 0.0748,
+   "asking_m2": 118.12,
+   "asking_price": 4416887.15,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M045-aca123 tel. 55 0000 7232",
+   "direccion": "Km 53 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M045-b13986.xlsx",
+    "Columna SNTL-EXTRAK-M045-01a161": "SNTL-EXTRAV-M045-02aa67",
+    "Comisión interna": "4% SNTL-COMMISSION-M045-489ad1",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M045-f9768f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M045-ce7097",
+   "lat": 20.613019,
+   "lon": -100.199201,
+   "moneda": "USD",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M045",
+   "superficie_ha": 3.739322,
+   "superficie_m2": 37393.22,
+   "terreno": "Ejido La Purísima M045"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M045",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M045-489ad1",
+   "SNTL-CONTACT-M045-aca123",
+   "SNTL-EXTRAK-M045-01a161",
+   "SNTL-EXTRAV-M045-02aa67",
+   "SNTL-FORMULA-M045-f9768f",
+   "SNTL-NOTE-M045-ce7097",
+   "SNTL-SRCFILE-M045-b13986"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 86364.2,
+   "afectaciones_pct": 0.3235,
+   "asking_m2": 164.33,
+   "asking_price": 43870876.09,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M046-47a90e tel. 55 0000 6116",
+   "direccion": "Km 65 Carretera Federal, Corregidora",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M046-09c12c.xlsx",
+    "Columna SNTL-EXTRAK-M046-ab347c": "SNTL-EXTRAV-M046-5d4e88",
+    "Comisión interna": "4% SNTL-COMMISSION-M046-db60f1",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M046-b4dcb4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M046-761e0a",
+   "lat": 20.488484,
+   "lon": -100.454455,
+   "moneda": "USD",
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M046",
+   "superficie_ha": 26.696815,
+   "superficie_m2": 266968.15,
+   "terreno": "Macrolote Río Bravo M046"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M046",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M046-db60f1",
+   "SNTL-CONTACT-M046-47a90e",
+   "SNTL-EXTRAK-M046-ab347c",
+   "SNTL-EXTRAV-M046-5d4e88",
+   "SNTL-FORMULA-M046-b4dcb4",
+   "SNTL-NOTE-M046-761e0a",
+   "SNTL-SRCFILE-M046-09c12c"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 78409.83,
+   "afectaciones_pct": 0.2748,
+   "asking_m2": 221.85,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M047-1b915c tel. 55 0000 4241",
+   "direccion": "Km 21 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M047-631a66.xlsx",
+    "Columna SNTL-EXTRAK-M047-dc4ea4": "SNTL-EXTRAV-M047-e9e929",
+    "Comisión interna": "2% SNTL-COMMISSION-M047-3e0547",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M047-74f531\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M047-6808b8",
+   "lat": 25.621176,
+   "lon": -100.360317,
+   "moneda": "USD",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M047",
+   "superficie_ha": 28.533418,
+   "superficie_m2": 285334.18,
+   "terreno": "Reserva Cerro Azul M047"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M047",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M047-3e0547",
+   "SNTL-CONTACT-M047-1b915c",
+   "SNTL-EXTRAK-M047-dc4ea4",
+   "SNTL-EXTRAV-M047-e9e929",
+   "SNTL-FORMULA-M047-74f531",
+   "SNTL-NOTE-M047-6808b8",
+   "SNTL-SRCFILE-M047-631a66"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M048-5f3d94 tel. 55 0000 5888",
+   "direccion": null,
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M048-166921.xlsx",
+    "Columna SNTL-EXTRAK-M048-be3805": "SNTL-EXTRAV-M048-afed72",
+    "Comisión interna": "2% SNTL-COMMISSION-M048-c27cef",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M048-1dc43d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M048-a85812",
+   "lat": 25.768944,
+   "lon": -100.180369,
+   "moneda": null,
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M048",
+   "superficie_ha": 1.492004,
+   "superficie_m2": 14920.04,
+   "terreno": "Parque Industrial El Ñandú M048"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M048",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M048-c27cef",
+   "SNTL-CONTACT-M048-5f3d94",
+   "SNTL-EXTRAK-M048-be3805",
+   "SNTL-EXTRAV-M048-afed72",
+   "SNTL-FORMULA-M048-1dc43d",
+   "SNTL-NOTE-M048-a85812",
+   "SNTL-SRCFILE-M048-166921"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2770.53,
+   "afectaciones_pct": 0.1546,
+   "asking_m2": null,
+   "asking_price": 7348336.71,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M049-d28af6 tel. 55 0000 7614",
+   "direccion": "Km 21 Carretera Federal, Santa Catarina",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M049-b283cc.xlsx",
+    "Columna SNTL-EXTRAK-M049-c5706e": "SNTL-EXTRAV-M049-c33083",
+    "Comisión interna": "5% SNTL-COMMISSION-M049-a92bfb",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M049-68f907\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M049-76b874",
+   "lat": 25.706421,
+   "lon": -100.394349,
+   "moneda": "MXN",
+   "municipio": "Santa Catarina",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M049",
+   "superficie_ha": 1.7920630000000002,
+   "superficie_m2": 17920.63,
+   "terreno": "Rancho San José de Gracia M049"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M049",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M049-a92bfb",
+   "SNTL-CONTACT-M049-d28af6",
+   "SNTL-EXTRAK-M049-c5706e",
+   "SNTL-EXTRAV-M049-c33083",
+   "SNTL-FORMULA-M049-68f907",
+   "SNTL-NOTE-M049-76b874",
+   "SNTL-SRCFILE-M049-b283cc"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 5468.7,
+   "afectaciones_pct": 0.1577,
+   "asking_m2": 8012.65,
+   "asking_price": 277861715.18,
+   "availability": "available",
+   "availability_confirmed_at": "2026-10-01",
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M050-7a070d tel. 55 0000 9886",
+   "direccion": "Km 58 Carretera Federal, Guadalajara",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M050-23b81d.xlsx",
+    "Columna SNTL-EXTRAK-M050-8f2b35": "SNTL-EXTRAV-M050-5421b0",
+    "Comisión interna": "4% SNTL-COMMISSION-M050-188df8",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M050-97b546\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M050-2be59c",
+   "lat": 20.584575,
+   "lon": -103.379998,
+   "moneda": "MXN",
+   "municipio": "Guadalajara",
+   "price_confirmed_at": "2026-10-01",
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M050",
+   "superficie_ha": 3.4677879999999996,
+   "superficie_m2": 34677.88,
+   "terreno": "Lote Ávila Camacho M050"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [],
+  "intended_lifecycle": "published",
+  "key": "M050",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M050-188df8",
+   "SNTL-CONTACT-M050-7a070d",
+   "SNTL-EXTRAK-M050-8f2b35",
+   "SNTL-EXTRAV-M050-5421b0",
+   "SNTL-FORMULA-M050-97b546",
+   "SNTL-NOTE-M050-2be59c",
+   "SNTL-SRCFILE-M050-23b81d"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 11225.01,
+   "afectaciones_pct": 0.299,
+   "asking_m2": 3878.1,
+   "asking_price": 145591048.48,
+   "availability": "available",
+   "availability_confirmed_at": "2024-01-15",
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M051-4711fd tel. 55 0000 5431",
+   "direccion": "Km 4 Carretera Federal, Zapopan",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M051-c769be.xlsx",
+    "Columna SNTL-EXTRAK-M051-7058cb": "SNTL-EXTRAV-M051-e50c07",
+    "Comisión interna": "5% SNTL-COMMISSION-M051-69af8f",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M051-09b8af\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M051-54a4b0",
+   "lat": 20.666894,
+   "lon": -103.380721,
+   "moneda": "MXN",
+   "municipio": "Zapopan",
+   "price_confirmed_at": "2024-01-15",
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M051",
+   "superficie_ha": 3.7541849999999997,
+   "superficie_m2": 37541.85,
+   "terreno": "Terreno Peña Blanca M051"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [],
+  "intended_lifecycle": "published",
+  "key": "M051",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M051-69af8f",
+   "SNTL-CONTACT-M051-4711fd",
+   "SNTL-EXTRAK-M051-7058cb",
+   "SNTL-EXTRAV-M051-e50c07",
+   "SNTL-FORMULA-M051-09b8af",
+   "SNTL-NOTE-M051-54a4b0",
+   "SNTL-SRCFILE-M051-c769be"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 1417.21,
+   "asking_price": 55151407.41,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M052-37f8eb tel. 55 0000 2364",
+   "direccion": "Km 48 Carretera Federal, Tlajomulco de Zúñiga",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M052-71d108.xlsx",
+    "Columna SNTL-EXTRAK-M052-20fb7c": "SNTL-EXTRAV-M052-2cb960",
+    "Comisión interna": "4% SNTL-COMMISSION-M052-404677",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M052-e35ce8\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M052-a3c218",
+   "lat": 20.529656,
+   "lon": -103.383264,
+   "moneda": "MXN",
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M052",
+   "superficie_ha": 3.8915480000000002,
+   "superficie_m2": 38915.48,
+   "terreno": "Bodega Ex-Hacienda Álamos M052"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M052",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M052-404677",
+   "SNTL-CONTACT-M052-37f8eb",
+   "SNTL-EXTRAK-M052-20fb7c",
+   "SNTL-EXTRAV-M052-2cb960",
+   "SNTL-FORMULA-M052-e35ce8",
+   "SNTL-NOTE-M052-a3c218",
+   "SNTL-SRCFILE-M052-71d108"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3183.24,
+   "afectaciones_pct": 0.2766,
+   "asking_m2": 5861.28,
+   "asking_price": 67454247.82,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M053-b860e3 tel. 55 0000 2207",
+   "direccion": "Km 51 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M053-306686.xlsx",
+    "Columna SNTL-EXTRAK-M053-397863": "SNTL-EXTRAV-M053-ef4d15",
+    "Comisión interna": "1% SNTL-COMMISSION-M053-199c8c",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M053-af60fd\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M053-70ad55",
+   "lat": 21.077597,
+   "lon": -101.69039,
+   "moneda": "MXN",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M053",
+   "superficie_ha": 1.1508450000000001,
+   "superficie_m2": 11508.45,
+   "terreno": "Fracción Güémez M053"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M053",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M053-199c8c",
+   "SNTL-CONTACT-M053-b860e3",
+   "SNTL-EXTRAK-M053-397863",
+   "SNTL-EXTRAV-M053-ef4d15",
+   "SNTL-FORMULA-M053-af60fd",
+   "SNTL-NOTE-M053-70ad55",
+   "SNTL-SRCFILE-M053-306686"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 66475.56,
+   "afectaciones_pct": 0.1423,
+   "asking_m2": 304.81,
+   "asking_price": 142392235.35,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M054-ada35a tel. 55 0000 1875",
+   "direccion": null,
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M054-366e66.xlsx",
+    "Columna SNTL-EXTRAK-M054-7eb457": "SNTL-EXTRAV-M054-8b87ce",
+    "Comisión interna": "2% SNTL-COMMISSION-M054-25e3fb",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M054-ce6dc1\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M054-134f0d",
+   "lat": 20.995925,
+   "lon": -101.486209,
+   "moneda": "USD",
+   "municipio": "Silao de la Victoria",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M054",
+   "superficie_ha": 46.71508,
+   "superficie_m2": 467150.8,
+   "terreno": "Predio Los Cañones M054"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M054",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M054-25e3fb",
+   "SNTL-CONTACT-M054-ada35a",
+   "SNTL-EXTRAK-M054-7eb457",
+   "SNTL-EXTRAV-M054-8b87ce",
+   "SNTL-FORMULA-M054-ce6dc1",
+   "SNTL-NOTE-M054-134f0d",
+   "SNTL-SRCFILE-M054-366e66"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1045.29,
+   "afectaciones_pct": 0.0651,
+   "asking_m2": 421.78,
+   "asking_price": 6772373.84,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M055-fe4ff5 tel. 55 0000 8643",
+   "direccion": "Km 68 Carretera Federal, Celaya",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M055-a756bf.xlsx",
+    "Columna SNTL-EXTRAK-M055-2da475": "SNTL-EXTRAV-M055-169e81",
+    "Comisión interna": "2% SNTL-COMMISSION-M055-4f0d28",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M055-5be2a4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M055-5bab06",
+   "lat": 20.448809,
+   "lon": -100.87932,
+   "moneda": "USD",
+   "municipio": "Celaya",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M055",
+   "superficie_ha": 1.605665,
+   "superficie_m2": 16056.65,
+   "terreno": "Nave Logística Ébano M055"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M055",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M055-4f0d28",
+   "SNTL-CONTACT-M055-fe4ff5",
+   "SNTL-EXTRAK-M055-2da475",
+   "SNTL-EXTRAV-M055-169e81",
+   "SNTL-FORMULA-M055-5be2a4",
+   "SNTL-NOTE-M055-5bab06",
+   "SNTL-SRCFILE-M055-a756bf"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 43.52,
+   "asking_price": 650663.17,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M056-1a43d3 tel. 55 0000 9521",
+   "direccion": "Km 2 Carretera Federal, San Luis Potosí",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M056-454da7.xlsx",
+    "Columna SNTL-EXTRAK-M056-680120": "SNTL-EXTRAV-M056-6d7021",
+    "Comisión interna": "2% SNTL-COMMISSION-M056-fd4997",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M056-a08bbf\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M056-104527",
+   "lat": 22.233386,
+   "lon": -101.06539,
+   "moneda": "USD",
+   "municipio": "San Luis Potosí",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M056",
+   "superficie_ha": 1.49509,
+   "superficie_m2": 14950.9,
+   "terreno": "Polígono Santa Mónica M056"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M056",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M056-fd4997",
+   "SNTL-CONTACT-M056-1a43d3",
+   "SNTL-EXTRAK-M056-680120",
+   "SNTL-EXTRAV-M056-6d7021",
+   "SNTL-FORMULA-M056-a08bbf",
+   "SNTL-NOTE-M056-104527",
+   "SNTL-SRCFILE-M056-454da7"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 58328.42,
+   "afectaciones_pct": 0.2724,
+   "asking_m2": 292.06,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M057-500e23 tel. 55 0000 3751",
+   "direccion": "Km 72 Carretera Federal, Soledad de Graciano Sánchez",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M057-645720.xlsx",
+    "Columna SNTL-EXTRAK-M057-540b82": "SNTL-EXTRAV-M057-a9cf2b",
+    "Comisión interna": "5% SNTL-COMMISSION-M057-db1c1e",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M057-91692c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M057-102b3e",
+   "lat": 22.240646,
+   "lon": -100.927945,
+   "moneda": "USD",
+   "municipio": "Soledad de Graciano Sánchez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M057",
+   "superficie_ha": 21.412784,
+   "superficie_m2": 214127.84,
+   "terreno": "Ejido La Purísima M057"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M057",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M057-db1c1e",
+   "SNTL-CONTACT-M057-500e23",
+   "SNTL-EXTRAK-M057-540b82",
+   "SNTL-EXTRAV-M057-a9cf2b",
+   "SNTL-FORMULA-M057-91692c",
+   "SNTL-NOTE-M057-102b3e",
+   "SNTL-SRCFILE-M057-645720"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3723.68,
+   "afectaciones_pct": 0.0926,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M058-80558b tel. 55 0000 4796",
+   "direccion": "Km 8 Carretera Federal, Mérida",
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M058-4897b6.xlsx",
+    "Columna SNTL-EXTRAK-M058-b2c93b": "SNTL-EXTRAV-M058-04d1d6",
+    "Comisión interna": "3% SNTL-COMMISSION-M058-417434",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M058-e2e643\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M058-8a9004",
+   "lat": 21.006387,
+   "lon": -89.671767,
+   "moneda": null,
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M058",
+   "superficie_ha": 4.021253,
+   "superficie_m2": 40212.53,
+   "terreno": "Macrolote Río Bravo M058"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M058",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M058-417434",
+   "SNTL-CONTACT-M058-80558b",
+   "SNTL-EXTRAK-M058-b2c93b",
+   "SNTL-EXTRAV-M058-04d1d6",
+   "SNTL-FORMULA-M058-e2e643",
+   "SNTL-NOTE-M058-8a9004",
+   "SNTL-SRCFILE-M058-4897b6"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 6259.05,
+   "afectaciones_pct": 0.1595,
+   "asking_m2": null,
+   "asking_price": 32383656.73,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M059-ebcd7c tel. 55 0000 7835",
+   "direccion": "Km 2 Carretera Federal, Cuautitlán Izcalli",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M059-8a8b74.xlsx",
+    "Columna SNTL-EXTRAK-M059-25d851": "SNTL-EXTRAV-M059-458773",
+    "Comisión interna": "5% SNTL-COMMISSION-M059-b76073",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M059-f1bf74\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M059-3d6528",
+   "lat": 19.659079,
+   "lon": -99.312254,
+   "moneda": "MXN",
+   "municipio": "Cuautitlán Izcalli",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M059",
+   "superficie_ha": 3.9241699999999997,
+   "superficie_m2": 39241.7,
+   "terreno": "Reserva Cerro Azul M059"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M059",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M059-b76073",
+   "SNTL-CONTACT-M059-ebcd7c",
+   "SNTL-EXTRAK-M059-25d851",
+   "SNTL-EXTRAV-M059-458773",
+   "SNTL-FORMULA-M059-f1bf74",
+   "SNTL-NOTE-M059-3d6528",
+   "SNTL-SRCFILE-M059-8a8b74"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 6798.54,
+   "asking_price": 2888313692.88,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M060-63a4f4 tel. 55 0000 3684",
+   "direccion": null,
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M060-7b9f14.xlsx",
+    "Columna SNTL-EXTRAK-M060-31f99e": "SNTL-EXTRAV-M060-de77ba",
+    "Comisión interna": "1% SNTL-COMMISSION-M060-a77643",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M060-13f815\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M060-6cefa3",
+   "lat": 19.757909,
+   "lon": -99.231239,
+   "moneda": "MXN",
+   "municipio": "Tepotzotlán",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M060",
+   "superficie_ha": 42.484322999999996,
+   "superficie_m2": 424843.23,
+   "terreno": "Parque Industrial El Ñandú M060"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M060",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M060-a77643",
+   "SNTL-CONTACT-M060-63a4f4",
+   "SNTL-EXTRAK-M060-31f99e",
+   "SNTL-EXTRAV-M060-de77ba",
+   "SNTL-FORMULA-M060-13f815",
+   "SNTL-NOTE-M060-6cefa3",
+   "SNTL-SRCFILE-M060-7b9f14"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 6377.9,
+   "afectaciones_pct": 0.2534,
+   "asking_m2": 3707.55,
+   "asking_price": 93316401.14,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M061-e933c0 tel. 55 0000 9903",
+   "direccion": "Km 10 Carretera Federal, Ramos Arizpe",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M061-39f945.xlsx",
+    "Columna SNTL-EXTRAK-M061-e386a0": "SNTL-EXTRAV-M061-1b1c26",
+    "Comisión interna": "2% SNTL-COMMISSION-M061-18c2e5",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M061-39e62e\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M061-e255ad",
+   "lat": 25.490084,
+   "lon": -100.95896,
+   "moneda": "MXN",
+   "municipio": "Ramos Arizpe",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M061",
+   "superficie_ha": 2.516929,
+   "superficie_m2": 25169.29,
+   "terreno": "Rancho San José de Gracia M061"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M061",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M061-18c2e5",
+   "SNTL-CONTACT-M061-e933c0",
+   "SNTL-EXTRAK-M061-e386a0",
+   "SNTL-EXTRAV-M061-1b1c26",
+   "SNTL-FORMULA-M061-39e62e",
+   "SNTL-NOTE-M061-e255ad",
+   "SNTL-SRCFILE-M061-39f945"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1808.41,
+   "afectaciones_pct": 0.1183,
+   "asking_m2": 2685.26,
+   "asking_price": 41048629.78,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M062-02074b tel. 55 0000 7060",
+   "direccion": "Km 28 Carretera Federal, Saltillo",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M062-d11e02.xlsx",
+    "Columna SNTL-EXTRAK-M062-3658e9": "SNTL-EXTRAV-M062-7b0a30",
+    "Comisión interna": "1% SNTL-COMMISSION-M062-ac0d09",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M062-917fde\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M062-fdb427",
+   "lat": 25.382386,
+   "lon": -100.933781,
+   "moneda": "MXN",
+   "municipio": "Saltillo",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M062",
+   "superficie_ha": 1.528665,
+   "superficie_m2": 15286.65,
+   "terreno": "Lote Ávila Camacho M062"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M062",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M062-ac0d09",
+   "SNTL-CONTACT-M062-02074b",
+   "SNTL-EXTRAK-M062-3658e9",
+   "SNTL-EXTRAV-M062-7b0a30",
+   "SNTL-FORMULA-M062-917fde",
+   "SNTL-NOTE-M062-fdb427",
+   "SNTL-SRCFILE-M062-d11e02"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 42355.94,
+   "afectaciones_pct": 0.2986,
+   "asking_m2": 5889.04,
+   "asking_price": 835351137.1,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M063-2fcd75 tel. 55 0000 8724",
+   "direccion": "Km 68 Carretera Federal, San José Chiapa",
+   "estado": "Puebla",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M063-00726b.xlsx",
+    "Columna SNTL-EXTRAK-M063-53f99b": "SNTL-EXTRAV-M063-ccc95f",
+    "Comisión interna": "4% SNTL-COMMISSION-M063-6cdc1b",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M063-02c034\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M063-0011a7",
+   "lat": 19.222632,
+   "lon": -97.807828,
+   "moneda": "MXN",
+   "municipio": "San José Chiapa",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M063",
+   "superficie_ha": 14.184844,
+   "superficie_m2": 141848.44,
+   "terreno": "Terreno Peña Blanca M063"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M063",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M063-6cdc1b",
+   "SNTL-CONTACT-M063-2fcd75",
+   "SNTL-EXTRAK-M063-53f99b",
+   "SNTL-EXTRAV-M063-ccc95f",
+   "SNTL-FORMULA-M063-02c034",
+   "SNTL-NOTE-M063-0011a7",
+   "SNTL-SRCFILE-M063-00726b"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 128.74,
+   "asking_price": 3793876.39,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M064-8c47c2 tel. 55 0000 4718",
+   "direccion": "Km 44 Carretera Federal, Tijuana",
+   "estado": "Baja California",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M064-62fd9f.xlsx",
+    "Columna SNTL-EXTRAK-M064-5f58d2": "SNTL-EXTRAV-M064-da1398",
+    "Comisión interna": "4% SNTL-COMMISSION-M064-a6b2cd",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M064-325bbc\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M064-32a6e3",
+   "lat": 32.496813,
+   "lon": -117.111204,
+   "moneda": "USD",
+   "municipio": "Tijuana",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M064",
+   "superficie_ha": 2.946929,
+   "superficie_m2": 29469.29,
+   "terreno": "Bodega Ex-Hacienda Álamos M064"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M064",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M064-a6b2cd",
+   "SNTL-CONTACT-M064-8c47c2",
+   "SNTL-EXTRAK-M064-5f58d2",
+   "SNTL-EXTRAV-M064-da1398",
+   "SNTL-FORMULA-M064-325bbc",
+   "SNTL-NOTE-M064-32a6e3",
+   "SNTL-SRCFILE-M064-62fd9f"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1348.39,
+   "afectaciones_pct": 0.1208,
+   "asking_m2": 188.0,
+   "asking_price": 2098487.96,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M065-da24ac tel. 55 0000 8394",
+   "direccion": "Km 62 Carretera Federal, Benito Juárez",
+   "estado": "Quintana Roo",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M065-80efed.xlsx",
+    "Columna SNTL-EXTRAK-M065-dc9701": "SNTL-EXTRAV-M065-7d6851",
+    "Comisión interna": "5% SNTL-COMMISSION-M065-534c4e",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M065-ce6c9d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M065-49f287",
+   "lat": 21.168555,
+   "lon": -86.878132,
+   "moneda": "USD",
+   "municipio": "Benito Juárez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M065",
+   "superficie_ha": 1.116217,
+   "superficie_m2": 11162.17,
+   "terreno": "Fracción Güémez M065"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M065",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M065-534c4e",
+   "SNTL-CONTACT-M065-da24ac",
+   "SNTL-EXTRAK-M065-dc9701",
+   "SNTL-EXTRAV-M065-7d6851",
+   "SNTL-FORMULA-M065-ce6c9d",
+   "SNTL-NOTE-M065-49f287",
+   "SNTL-SRCFILE-M065-80efed"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 70043.76,
+   "afectaciones_pct": 0.2145,
+   "asking_m2": 50.48,
+   "asking_price": 16483957.27,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M066-c65af3 tel. 55 0000 1942",
+   "direccion": null,
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M066-edcd27.xlsx",
+    "Columna SNTL-EXTRAK-M066-3f2e8d": "SNTL-EXTRAV-M066-0b4b14",
+    "Comisión interna": "3% SNTL-COMMISSION-M066-162239",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M066-f8121a\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M066-c161ee",
+   "lat": 20.583914,
+   "lon": -100.374469,
+   "moneda": "USD",
+   "municipio": "Querétaro",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M066",
+   "superficie_ha": 32.654432,
+   "superficie_m2": 326544.32,
+   "terreno": "Predio Los Cañones M066"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M066",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M066-162239",
+   "SNTL-CONTACT-M066-c65af3",
+   "SNTL-EXTRAK-M066-3f2e8d",
+   "SNTL-EXTRAV-M066-0b4b14",
+   "SNTL-FORMULA-M066-f8121a",
+   "SNTL-NOTE-M066-c161ee",
+   "SNTL-SRCFILE-M066-edcd27"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 16447.08,
+   "afectaciones_pct": 0.2895,
+   "asking_m2": 363.94,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M067-a0b0c6 tel. 55 0000 8318",
+   "direccion": "Km 25 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M067-23bc85.xlsx",
+    "Columna SNTL-EXTRAK-M067-ef56ae": "SNTL-EXTRAV-M067-7f9673",
+    "Comisión interna": "2% SNTL-COMMISSION-M067-8929e7",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M067-3bbbb5\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M067-f5f7e0",
+   "lat": 20.699433,
+   "lon": -100.221716,
+   "moneda": "USD",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M067",
+   "superficie_ha": 5.681203,
+   "superficie_m2": 56812.03,
+   "terreno": "Nave Logística Ébano M067"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M067",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M067-8929e7",
+   "SNTL-CONTACT-M067-a0b0c6",
+   "SNTL-EXTRAK-M067-ef56ae",
+   "SNTL-EXTRAV-M067-7f9673",
+   "SNTL-FORMULA-M067-3bbbb5",
+   "SNTL-NOTE-M067-f5f7e0",
+   "SNTL-SRCFILE-M067-23bc85"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M068-e50a0d tel. 55 0000 7066",
+   "direccion": "Km 75 Carretera Federal, Corregidora",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M068-555dc0.xlsx",
+    "Columna SNTL-EXTRAK-M068-e8665b": "SNTL-EXTRAV-M068-5eb295",
+    "Comisión interna": "5% SNTL-COMMISSION-M068-fc656e",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M068-db0b1b\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M068-8f3078",
+   "lat": 20.525757,
+   "lon": -100.478244,
+   "moneda": null,
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M068",
+   "superficie_ha": 5.522202,
+   "superficie_m2": 55222.02,
+   "terreno": "Polígono Santa Mónica M068"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M068",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M068-fc656e",
+   "SNTL-CONTACT-M068-e50a0d",
+   "SNTL-EXTRAK-M068-e8665b",
+   "SNTL-EXTRAV-M068-5eb295",
+   "SNTL-FORMULA-M068-db0b1b",
+   "SNTL-NOTE-M068-8f3078",
+   "SNTL-SRCFILE-M068-555dc0"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3763.66,
+   "afectaciones_pct": 0.2098,
+   "asking_m2": null,
+   "asking_price": 58630703.09,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M069-145a34 tel. 55 0000 5773",
+   "direccion": "Km 69 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M069-7cb4b4.xlsx",
+    "Columna SNTL-EXTRAK-M069-0a890f": "SNTL-EXTRAV-M069-0d9323",
+    "Comisión interna": "3% SNTL-COMMISSION-M069-f64455",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M069-507acf\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M069-d3aa35",
+   "lat": 25.744919,
+   "lon": -100.385068,
+   "moneda": "MXN",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M069",
+   "superficie_ha": 1.793927,
+   "superficie_m2": 17939.27,
+   "terreno": "Ejido La Purísima M069"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M069",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M069-f64455",
+   "SNTL-CONTACT-M069-145a34",
+   "SNTL-EXTRAK-M069-0a890f",
+   "SNTL-EXTRAV-M069-0d9323",
+   "SNTL-FORMULA-M069-507acf",
+   "SNTL-NOTE-M069-d3aa35",
+   "SNTL-SRCFILE-M069-7cb4b4"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2074.73,
+   "afectaciones_pct": 0.2039,
+   "asking_m2": 2392.98,
+   "asking_price": 24349121.89,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M070-fc2443 tel. 55 0000 1464",
+   "direccion": "Km 66 Carretera Federal, Apodaca",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M070-8624c5.xlsx",
+    "Columna SNTL-EXTRAK-M070-cc71ed": "SNTL-EXTRAV-M070-db00f5",
+    "Comisión interna": "2% SNTL-COMMISSION-M070-980534",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M070-8c1ad8\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M070-f3394d",
+   "lat": 25.701988,
+   "lon": -100.232699,
+   "moneda": "MXN",
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M070",
+   "superficie_ha": 1.017523,
+   "superficie_m2": 10175.23,
+   "terreno": "Macrolote Río Bravo M070"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M070",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M070-980534",
+   "SNTL-CONTACT-M070-fc2443",
+   "SNTL-EXTRAK-M070-cc71ed",
+   "SNTL-EXTRAV-M070-db00f5",
+   "SNTL-FORMULA-M070-8c1ad8",
+   "SNTL-NOTE-M070-f3394d",
+   "SNTL-SRCFILE-M070-8624c5"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3897.27,
+   "afectaciones_pct": 0.2433,
+   "asking_m2": 2842.93,
+   "asking_price": 45539076.19,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M071-e0aeb8 tel. 55 0000 7528",
+   "direccion": "Km 49 Carretera Federal, Santa Catarina",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M071-241dd1.xlsx",
+    "Columna SNTL-EXTRAK-M071-9885a9": "SNTL-EXTRAV-M071-8c83e8",
+    "Comisión interna": "2% SNTL-COMMISSION-M071-a7a2ef",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M071-cd1d60\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M071-0b95a8",
+   "lat": 25.727954,
+   "lon": -100.497179,
+   "moneda": "MXN",
+   "municipio": "Santa Catarina",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M071",
+   "superficie_ha": 1.601836,
+   "superficie_m2": 16018.36,
+   "terreno": "Reserva Cerro Azul M071"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M071",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M071-a7a2ef",
+   "SNTL-CONTACT-M071-e0aeb8",
+   "SNTL-EXTRAK-M071-9885a9",
+   "SNTL-EXTRAV-M071-8c83e8",
+   "SNTL-FORMULA-M071-cd1d60",
+   "SNTL-NOTE-M071-0b95a8",
+   "SNTL-SRCFILE-M071-241dd1"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 1073.95,
+   "asking_price": 724793991.53,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M072-5f896b tel. 55 0000 7267",
+   "direccion": null,
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M072-4b7131.xlsx",
+    "Columna SNTL-EXTRAK-M072-52edb5": "SNTL-EXTRAV-M072-2a3c78",
+    "Comisión interna": "2% SNTL-COMMISSION-M072-d27dba",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M072-b5e3dd\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M072-22d289",
+   "lat": 20.725528,
+   "lon": -103.306414,
+   "moneda": "MXN",
+   "municipio": "Guadalajara",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M072",
+   "superficie_ha": 67.48861600000001,
+   "superficie_m2": 674886.16,
+   "terreno": "Parque Industrial El Ñandú M072"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M072",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M072-d27dba",
+   "SNTL-CONTACT-M072-5f896b",
+   "SNTL-EXTRAK-M072-52edb5",
+   "SNTL-EXTRAV-M072-2a3c78",
+   "SNTL-FORMULA-M072-b5e3dd",
+   "SNTL-NOTE-M072-22d289",
+   "SNTL-SRCFILE-M072-4b7131"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 17373.45,
+   "afectaciones_pct": 0.2991,
+   "asking_m2": 7571.96,
+   "asking_price": 439823127.01,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M073-40f4dd tel. 55 0000 1354",
+   "direccion": "Km 69 Carretera Federal, Zapopan",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M073-e6e6c4.xlsx",
+    "Columna SNTL-EXTRAK-M073-6139b7": "SNTL-EXTRAV-M073-44e003",
+    "Comisión interna": "4% SNTL-COMMISSION-M073-b989ed",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M073-1f1a69\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M073-66de97",
+   "lat": 20.68163,
+   "lon": -103.372623,
+   "moneda": "MXN",
+   "municipio": "Zapopan",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M073",
+   "superficie_ha": 5.808577,
+   "superficie_m2": 58085.77,
+   "terreno": "Rancho San José de Gracia M073"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M073",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M073-b989ed",
+   "SNTL-CONTACT-M073-40f4dd",
+   "SNTL-EXTRAK-M073-6139b7",
+   "SNTL-EXTRAV-M073-44e003",
+   "SNTL-FORMULA-M073-1f1a69",
+   "SNTL-NOTE-M073-66de97",
+   "SNTL-SRCFILE-M073-e6e6c4"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 17945.31,
+   "afectaciones_pct": 0.1818,
+   "asking_m2": 263.27,
+   "asking_price": 25987139.49,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M074-86e816 tel. 55 0000 3127",
+   "direccion": "Km 6 Carretera Federal, Tlajomulco de Zúñiga",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M074-75d8bd.xlsx",
+    "Columna SNTL-EXTRAK-M074-523e22": "SNTL-EXTRAV-M074-9140ae",
+    "Comisión interna": "5% SNTL-COMMISSION-M074-36d5b0",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M074-858d22\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M074-a5e461",
+   "lat": 20.410953,
+   "lon": -103.427625,
+   "moneda": "USD",
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M074",
+   "superficie_ha": 9.870908,
+   "superficie_m2": 98709.08,
+   "terreno": "Lote Ávila Camacho M074"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M074",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M074-36d5b0",
+   "SNTL-CONTACT-M074-86e816",
+   "SNTL-EXTRAK-M074-523e22",
+   "SNTL-EXTRAV-M074-9140ae",
+   "SNTL-FORMULA-M074-858d22",
+   "SNTL-NOTE-M074-a5e461",
+   "SNTL-SRCFILE-M074-75d8bd"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 5231.77,
+   "afectaciones_pct": 0.0903,
+   "asking_m2": 208.56,
+   "asking_price": 12083486.71,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M075-99c5ed tel. 55 0000 9031",
+   "direccion": "Km 27 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M075-219695.xlsx",
+    "Columna SNTL-EXTRAK-M075-59d5aa": "SNTL-EXTRAV-M075-3f92d3",
+    "Comisión interna": "5% SNTL-COMMISSION-M075-e47151",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M075-cfb15c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M075-f977f3",
+   "lat": 21.168197,
+   "lon": -101.691358,
+   "moneda": "USD",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M075",
+   "superficie_ha": 5.793769999999999,
+   "superficie_m2": 57937.7,
+   "terreno": "Terreno Peña Blanca M075"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M075",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M075-e47151",
+   "SNTL-CONTACT-M075-99c5ed",
+   "SNTL-EXTRAK-M075-59d5aa",
+   "SNTL-EXTRAV-M075-3f92d3",
+   "SNTL-FORMULA-M075-cfb15c",
+   "SNTL-NOTE-M075-f977f3",
+   "SNTL-SRCFILE-M075-219695"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 123.12,
+   "asking_price": 16942454.55,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M076-f84b3e tel. 55 0000 2283",
+   "direccion": "Km 35 Carretera Federal, Silao de la Victoria",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M076-c7fbe9.xlsx",
+    "Columna SNTL-EXTRAK-M076-af5607": "SNTL-EXTRAV-M076-05eabe",
+    "Comisión interna": "1% SNTL-COMMISSION-M076-1ce78f",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M076-b66ea9\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M076-3d384e",
+   "lat": 21.012759,
+   "lon": -101.423392,
+   "moneda": "USD",
+   "municipio": "Silao de la Victoria",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M076",
+   "superficie_ha": 13.760928,
+   "superficie_m2": 137609.28,
+   "terreno": "Bodega Ex-Hacienda Álamos M076"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M076",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M076-1ce78f",
+   "SNTL-CONTACT-M076-f84b3e",
+   "SNTL-EXTRAK-M076-af5607",
+   "SNTL-EXTRAV-M076-05eabe",
+   "SNTL-FORMULA-M076-b66ea9",
+   "SNTL-NOTE-M076-3d384e",
+   "SNTL-SRCFILE-M076-c7fbe9"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 90894.56,
+   "afectaciones_pct": 0.3358,
+   "asking_m2": 123.31,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M077-e150fd tel. 55 0000 6478",
+   "direccion": "Km 31 Carretera Federal, Celaya",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M077-370c41.xlsx",
+    "Columna SNTL-EXTRAK-M077-28ea01": "SNTL-EXTRAV-M077-11002c",
+    "Comisión interna": "4% SNTL-COMMISSION-M077-d8aa18",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M077-9b776d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M077-b08fcd",
+   "lat": 20.548393,
+   "lon": -100.862502,
+   "moneda": "USD",
+   "municipio": "Celaya",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M077",
+   "superficie_ha": 27.068063000000002,
+   "superficie_m2": 270680.63,
+   "terreno": "Fracción Güémez M077"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M077",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M077-d8aa18",
+   "SNTL-CONTACT-M077-e150fd",
+   "SNTL-EXTRAK-M077-28ea01",
+   "SNTL-EXTRAV-M077-11002c",
+   "SNTL-FORMULA-M077-9b776d",
+   "SNTL-NOTE-M077-b08fcd",
+   "SNTL-SRCFILE-M077-370c41"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1563.18,
+   "afectaciones_pct": 0.03,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M078-9a2e25 tel. 55 0000 7308",
+   "direccion": null,
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M078-9cd850.xlsx",
+    "Columna SNTL-EXTRAK-M078-63a833": "SNTL-EXTRAV-M078-407674",
+    "Comisión interna": "4% SNTL-COMMISSION-M078-b45832",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M078-d02230\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M078-0c2a11",
+   "lat": 22.137095,
+   "lon": -100.939195,
+   "moneda": null,
+   "municipio": "San Luis Potosí",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M078",
+   "superficie_ha": 5.210611,
+   "superficie_m2": 52106.11,
+   "terreno": "Predio Los Cañones M078"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M078",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M078-b45832",
+   "SNTL-CONTACT-M078-9a2e25",
+   "SNTL-EXTRAK-M078-63a833",
+   "SNTL-EXTRAV-M078-407674",
+   "SNTL-FORMULA-M078-d02230",
+   "SNTL-NOTE-M078-0c2a11",
+   "SNTL-SRCFILE-M078-9cd850"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3679.38,
+   "afectaciones_pct": 0.0624,
+   "asking_m2": null,
+   "asking_price": 3655054.13,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M079-df66b4 tel. 55 0000 9513",
+   "direccion": "Km 53 Carretera Federal, Soledad de Graciano Sánchez",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M079-7fd2e4.xlsx",
+    "Columna SNTL-EXTRAK-M079-f182d1": "SNTL-EXTRAV-M079-15c4df",
+    "Comisión interna": "3% SNTL-COMMISSION-M079-21b298",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M079-ca894d\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M079-ee5ba6",
+   "lat": 22.188031,
+   "lon": -100.865367,
+   "moneda": "MXN",
+   "municipio": "Soledad de Graciano Sánchez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M079",
+   "superficie_ha": 5.8964360000000005,
+   "superficie_m2": 58964.36,
+   "terreno": "Nave Logística Ébano M079"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M079",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M079-21b298",
+   "SNTL-CONTACT-M079-df66b4",
+   "SNTL-EXTRAK-M079-f182d1",
+   "SNTL-EXTRAV-M079-15c4df",
+   "SNTL-FORMULA-M079-ca894d",
+   "SNTL-NOTE-M079-ee5ba6",
+   "SNTL-SRCFILE-M079-7fd2e4"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 1697.98,
+   "asking_price": 54185292.53,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M080-bc4948 tel. 55 0000 8838",
+   "direccion": "Km 19 Carretera Federal, Mérida",
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M080-2daded.xlsx",
+    "Columna SNTL-EXTRAK-M080-218a3c": "SNTL-EXTRAV-M080-74e58d",
+    "Comisión interna": "3% SNTL-COMMISSION-M080-279d12",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M080-3f7c6b\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M080-466c4d",
+   "lat": 20.929168,
+   "lon": -89.620385,
+   "moneda": "MXN",
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M080",
+   "superficie_ha": 3.191162,
+   "superficie_m2": 31911.62,
+   "terreno": "Polígono Santa Mónica M080"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M080",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M080-279d12",
+   "SNTL-CONTACT-M080-bc4948",
+   "SNTL-EXTRAK-M080-218a3c",
+   "SNTL-EXTRAV-M080-74e58d",
+   "SNTL-FORMULA-M080-3f7c6b",
+   "SNTL-NOTE-M080-466c4d",
+   "SNTL-SRCFILE-M080-2daded"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 4298.01,
+   "afectaciones_pct": 0.087,
+   "asking_m2": 8676.13,
+   "asking_price": 428622252.04,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M081-40b7da tel. 55 0000 8246",
+   "direccion": "Km 38 Carretera Federal, Cuautitlán Izcalli",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M081-4420b3.xlsx",
+    "Columna SNTL-EXTRAK-M081-85cdb5": "SNTL-EXTRAV-M081-859a1c",
+    "Comisión interna": "3% SNTL-COMMISSION-M081-8c885b",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M081-360800\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M081-a0cf36",
+   "lat": 19.593819,
+   "lon": -99.181653,
+   "moneda": "MXN",
+   "municipio": "Cuautitlán Izcalli",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M081",
+   "superficie_ha": 4.940247,
+   "superficie_m2": 49402.47,
+   "terreno": "Ejido La Purísima M081"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M081",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M081-8c885b",
+   "SNTL-CONTACT-M081-40b7da",
+   "SNTL-EXTRAK-M081-85cdb5",
+   "SNTL-EXTRAV-M081-859a1c",
+   "SNTL-FORMULA-M081-360800",
+   "SNTL-NOTE-M081-a0cf36",
+   "SNTL-SRCFILE-M081-4420b3"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 137.82,
+   "afectaciones_pct": 0.062,
+   "asking_m2": 7906.48,
+   "asking_price": 17575393.46,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M082-a9e4b0 tel. 55 0000 6137",
+   "direccion": "Km 24 Carretera Federal, Tepotzotlán",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M082-eda0f2.xlsx",
+    "Columna SNTL-EXTRAK-M082-0e5caf": "SNTL-EXTRAV-M082-5ff71b",
+    "Comisión interna": "5% SNTL-COMMISSION-M082-5cd247",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M082-9a5327\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M082-4f4c00",
+   "lat": 19.656047,
+   "lon": -99.186692,
+   "moneda": "MXN",
+   "municipio": "Tepotzotlán",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M082",
+   "superficie_ha": 0.222291,
+   "superficie_m2": 2222.91,
+   "terreno": "Macrolote Río Bravo M082"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M082",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M082-5cd247",
+   "SNTL-CONTACT-M082-a9e4b0",
+   "SNTL-EXTRAK-M082-0e5caf",
+   "SNTL-EXTRAV-M082-5ff71b",
+   "SNTL-FORMULA-M082-9a5327",
+   "SNTL-NOTE-M082-4f4c00",
+   "SNTL-SRCFILE-M082-eda0f2"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1909.4,
+   "afectaciones_pct": 0.1914,
+   "asking_m2": 7582.28,
+   "asking_price": 75640749.46,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M083-795e9c tel. 55 0000 3823",
+   "direccion": "Km 5 Carretera Federal, Ramos Arizpe",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M083-142816.xlsx",
+    "Columna SNTL-EXTRAK-M083-c2420c": "SNTL-EXTRAV-M083-41fb7f",
+    "Comisión interna": "1% SNTL-COMMISSION-M083-d5f0aa",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M083-708b7f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M083-210a0b",
+   "lat": 25.605392,
+   "lon": -100.938608,
+   "moneda": "MXN",
+   "municipio": "Ramos Arizpe",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M083",
+   "superficie_ha": 0.997599,
+   "superficie_m2": 9975.99,
+   "terreno": "Reserva Cerro Azul M083"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M083",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M083-d5f0aa",
+   "SNTL-CONTACT-M083-795e9c",
+   "SNTL-EXTRAK-M083-c2420c",
+   "SNTL-EXTRAV-M083-41fb7f",
+   "SNTL-FORMULA-M083-708b7f",
+   "SNTL-NOTE-M083-210a0b",
+   "SNTL-SRCFILE-M083-142816"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 60.71,
+   "asking_price": 28001513.1,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M084-455914 tel. 55 0000 2864",
+   "direccion": null,
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M084-54cb54.xlsx",
+    "Columna SNTL-EXTRAK-M084-8ec5fe": "SNTL-EXTRAV-M084-c49497",
+    "Comisión interna": "3% SNTL-COMMISSION-M084-c1b1df",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M084-0f838c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M084-725b96",
+   "lat": 25.471407,
+   "lon": -100.938945,
+   "moneda": "USD",
+   "municipio": "Saltillo",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M084",
+   "superficie_ha": 46.123395,
+   "superficie_m2": 461233.95,
+   "terreno": "Parque Industrial El Ñandú M084"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M084",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M084-c1b1df",
+   "SNTL-CONTACT-M084-455914",
+   "SNTL-EXTRAK-M084-8ec5fe",
+   "SNTL-EXTRAV-M084-c49497",
+   "SNTL-FORMULA-M084-0f838c",
+   "SNTL-NOTE-M084-725b96",
+   "SNTL-SRCFILE-M084-54cb54"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 34210.7,
+   "afectaciones_pct": 0.2917,
+   "asking_m2": 317.29,
+   "asking_price": 37211907.63,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M085-a3fa76 tel. 55 0000 4170",
+   "direccion": "Km 29 Carretera Federal, San José Chiapa",
+   "estado": "Puebla",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M085-900d3e.xlsx",
+    "Columna SNTL-EXTRAK-M085-64c585": "SNTL-EXTRAV-M085-9c879e",
+    "Comisión interna": "2% SNTL-COMMISSION-M085-708c2d",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M085-0e1304\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M085-0108a3",
+   "lat": 19.158394,
+   "lon": -97.733965,
+   "moneda": "USD",
+   "municipio": "San José Chiapa",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M085",
+   "superficie_ha": 11.728043,
+   "superficie_m2": 117280.43,
+   "terreno": "Rancho San José de Gracia M085"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M085",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M085-708c2d",
+   "SNTL-CONTACT-M085-a3fa76",
+   "SNTL-EXTRAK-M085-64c585",
+   "SNTL-EXTRAV-M085-9c879e",
+   "SNTL-FORMULA-M085-0e1304",
+   "SNTL-NOTE-M085-0108a3",
+   "SNTL-SRCFILE-M085-900d3e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2221.48,
+   "afectaciones_pct": 0.0554,
+   "asking_m2": 117.44,
+   "asking_price": 4709225.39,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M086-f2da13 tel. 55 0000 9491",
+   "direccion": "Km 60 Carretera Federal, Tijuana",
+   "estado": "Baja California",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M086-985dd1.xlsx",
+    "Columna SNTL-EXTRAK-M086-40d485": "SNTL-EXTRAV-M086-b1a993",
+    "Comisión interna": "4% SNTL-COMMISSION-M086-7eaa73",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M086-c8bc78\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M086-a9f381",
+   "lat": 32.449503,
+   "lon": -117.034112,
+   "moneda": "USD",
+   "municipio": "Tijuana",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M086",
+   "superficie_ha": 4.009899,
+   "superficie_m2": 40098.99,
+   "terreno": "Lote Ávila Camacho M086"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M086",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M086-7eaa73",
+   "SNTL-CONTACT-M086-f2da13",
+   "SNTL-EXTRAK-M086-40d485",
+   "SNTL-EXTRAV-M086-b1a993",
+   "SNTL-FORMULA-M086-c8bc78",
+   "SNTL-NOTE-M086-a9f381",
+   "SNTL-SRCFILE-M086-985dd1"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 153175.55,
+   "afectaciones_pct": 0.2723,
+   "asking_m2": 276.53,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M087-f8deb8 tel. 55 0000 8447",
+   "direccion": "Km 53 Carretera Federal, Benito Juárez",
+   "estado": "Quintana Roo",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M087-80240e.xlsx",
+    "Columna SNTL-EXTRAK-M087-aac5d1": "SNTL-EXTRAV-M087-337e29",
+    "Comisión interna": "2% SNTL-COMMISSION-M087-2c3472",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M087-964ce4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M087-9b95b2",
+   "lat": 21.162915,
+   "lon": -86.837887,
+   "moneda": "USD",
+   "municipio": "Benito Juárez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M087",
+   "superficie_ha": 56.252497999999996,
+   "superficie_m2": 562524.98,
+   "terreno": "Terreno Peña Blanca M087"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M087",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M087-2c3472",
+   "SNTL-CONTACT-M087-f8deb8",
+   "SNTL-EXTRAK-M087-aac5d1",
+   "SNTL-EXTRAV-M087-337e29",
+   "SNTL-FORMULA-M087-964ce4",
+   "SNTL-NOTE-M087-9b95b2",
+   "SNTL-SRCFILE-M087-80240e"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M088-980a2f tel. 55 0000 2949",
+   "direccion": "Km 21 Carretera Federal, Querétaro",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M088-94cd97.xlsx",
+    "Columna SNTL-EXTRAK-M088-4a2b55": "SNTL-EXTRAV-M088-24aa27",
+    "Comisión interna": "4% SNTL-COMMISSION-M088-fd7291",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M088-d14050\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M088-dafda4",
+   "lat": 20.540345,
+   "lon": -100.37933,
+   "moneda": null,
+   "municipio": "Querétaro",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M088",
+   "superficie_ha": 5.562119,
+   "superficie_m2": 55621.19,
+   "terreno": "Bodega Ex-Hacienda Álamos M088"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M088",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M088-fd7291",
+   "SNTL-CONTACT-M088-980a2f",
+   "SNTL-EXTRAK-M088-4a2b55",
+   "SNTL-EXTRAV-M088-24aa27",
+   "SNTL-FORMULA-M088-d14050",
+   "SNTL-NOTE-M088-dafda4",
+   "SNTL-SRCFILE-M088-94cd97"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 20814.64,
+   "afectaciones_pct": 0.254,
+   "asking_m2": null,
+   "asking_price": 49972149.99,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M089-5ec107 tel. 55 0000 7984",
+   "direccion": "Km 36 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M089-840b18.xlsx",
+    "Columna SNTL-EXTRAK-M089-585b5e": "SNTL-EXTRAV-M089-c54a87",
+    "Comisión interna": "2% SNTL-COMMISSION-M089-97a0cf",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M089-41a203\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M089-88cc32",
+   "lat": 20.666034,
+   "lon": -100.306149,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M089",
+   "superficie_ha": 8.194741,
+   "superficie_m2": 81947.41,
+   "terreno": "Fracción Güémez M089"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M089",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M089-97a0cf",
+   "SNTL-CONTACT-M089-5ec107",
+   "SNTL-EXTRAK-M089-585b5e",
+   "SNTL-EXTRAV-M089-c54a87",
+   "SNTL-FORMULA-M089-41a203",
+   "SNTL-NOTE-M089-88cc32",
+   "SNTL-SRCFILE-M089-840b18"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 409.39,
+   "afectaciones_pct": 0.0225,
+   "asking_m2": 1747.15,
+   "asking_price": 31789516.55,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M090-4d277e tel. 55 0000 9156",
+   "direccion": null,
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M090-5d9607.xlsx",
+    "Columna SNTL-EXTRAK-M090-87e6bc": "SNTL-EXTRAV-M090-4a7cfb",
+    "Comisión interna": "1% SNTL-COMMISSION-M090-5e49e0",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M090-29cac6\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M090-10e905",
+   "lat": 20.570914,
+   "lon": -100.473805,
+   "moneda": "MXN",
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M090",
+   "superficie_ha": 1.819507,
+   "superficie_m2": 18195.07,
+   "terreno": "Predio Los Cañones M090"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M090",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M090-5e49e0",
+   "SNTL-CONTACT-M090-4d277e",
+   "SNTL-EXTRAK-M090-87e6bc",
+   "SNTL-EXTRAV-M090-4a7cfb",
+   "SNTL-FORMULA-M090-29cac6",
+   "SNTL-NOTE-M090-10e905",
+   "SNTL-SRCFILE-M090-5d9607"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 126400.09,
+   "afectaciones_pct": 0.1578,
+   "asking_m2": 7392.26,
+   "asking_price": 5921307743.46,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M091-cee4db tel. 55 0000 2872",
+   "direccion": "Km 6 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M091-820235.xlsx",
+    "Columna SNTL-EXTRAK-M091-1e3c72": "SNTL-EXTRAV-M091-416c37",
+    "Comisión interna": "2% SNTL-COMMISSION-M091-7d5a54",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M091-dc138a\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M091-9ab4df",
+   "lat": 25.608131,
+   "lon": -100.277542,
+   "moneda": "MXN",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M091",
+   "superficie_ha": 80.101454,
+   "superficie_m2": 801014.54,
+   "terreno": "Nave Logística Ébano M091"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M091",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M091-7d5a54",
+   "SNTL-CONTACT-M091-cee4db",
+   "SNTL-EXTRAK-M091-1e3c72",
+   "SNTL-EXTRAV-M091-416c37",
+   "SNTL-FORMULA-M091-dc138a",
+   "SNTL-NOTE-M091-9ab4df",
+   "SNTL-SRCFILE-M091-820235"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 5463.81,
+   "asking_price": 3845608745.61,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M092-f24fb7 tel. 55 0000 8572",
+   "direccion": "Km 13 Carretera Federal, Apodaca",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M092-d068b3.xlsx",
+    "Columna SNTL-EXTRAK-M092-c33e8b": "SNTL-EXTRAV-M092-003ba7",
+    "Comisión interna": "5% SNTL-COMMISSION-M092-f2915a",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M092-fa0c2f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M092-317416",
+   "lat": 25.852207,
+   "lon": -100.186809,
+   "moneda": "MXN",
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M092",
+   "superficie_ha": 70.38328100000001,
+   "superficie_m2": 703832.81,
+   "terreno": "Polígono Santa Mónica M092"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M092",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M092-f2915a",
+   "SNTL-CONTACT-M092-f24fb7",
+   "SNTL-EXTRAK-M092-c33e8b",
+   "SNTL-EXTRAV-M092-003ba7",
+   "SNTL-FORMULA-M092-fa0c2f",
+   "SNTL-NOTE-M092-317416",
+   "SNTL-SRCFILE-M092-d068b3"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 8055.85,
+   "afectaciones_pct": 0.2843,
+   "asking_m2": 5895.09,
+   "asking_price": 167041678.57,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M093-305642 tel. 55 0000 1248",
+   "direccion": "Km 39 Carretera Federal, Santa Catarina",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M093-b7df93.xlsx",
+    "Columna SNTL-EXTRAK-M093-d1e940": "SNTL-EXTRAV-M093-fefb81",
+    "Comisión interna": "2% SNTL-COMMISSION-M093-f657cf",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M093-9cb0b5\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M093-1a0432",
+   "lat": 25.630287,
+   "lon": -100.43318,
+   "moneda": "MXN",
+   "municipio": "Santa Catarina",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M093",
+   "superficie_ha": 2.833573,
+   "superficie_m2": 28335.73,
+   "terreno": "Ejido La Purísima M093"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M093",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M093-f657cf",
+   "SNTL-CONTACT-M093-305642",
+   "SNTL-EXTRAK-M093-d1e940",
+   "SNTL-EXTRAV-M093-fefb81",
+   "SNTL-FORMULA-M093-9cb0b5",
+   "SNTL-NOTE-M093-1a0432",
+   "SNTL-SRCFILE-M093-b7df93"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1017.36,
+   "afectaciones_pct": 0.0921,
+   "asking_m2": 188.67,
+   "asking_price": 2084103.53,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M094-06103f tel. 55 0000 9671",
+   "direccion": "Km 65 Carretera Federal, Guadalajara",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M094-3801f2.xlsx",
+    "Columna SNTL-EXTRAK-M094-42122e": "SNTL-EXTRAV-M094-184f0e",
+    "Comisión interna": "4% SNTL-COMMISSION-M094-42a253",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M094-d39205\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M094-ae4793",
+   "lat": 20.728689,
+   "lon": -103.407717,
+   "moneda": "USD",
+   "municipio": "Guadalajara",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M094",
+   "superficie_ha": 1.104629,
+   "superficie_m2": 11046.29,
+   "terreno": "Macrolote Río Bravo M094"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M094",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M094-42a253",
+   "SNTL-CONTACT-M094-06103f",
+   "SNTL-EXTRAK-M094-42122e",
+   "SNTL-EXTRAV-M094-184f0e",
+   "SNTL-FORMULA-M094-d39205",
+   "SNTL-NOTE-M094-ae4793",
+   "SNTL-SRCFILE-M094-3801f2"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 4726.91,
+   "afectaciones_pct": 0.0877,
+   "asking_m2": 330.36,
+   "asking_price": 17805944.8,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M095-e05e31 tel. 55 0000 2056",
+   "direccion": "Km 21 Carretera Federal, Zapopan",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M095-91730c.xlsx",
+    "Columna SNTL-EXTRAK-M095-d0e400": "SNTL-EXTRAV-M095-ebb9eb",
+    "Comisión interna": "1% SNTL-COMMISSION-M095-54b428",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M095-796a52\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M095-ee2a4a",
+   "lat": 20.680454,
+   "lon": -103.368042,
+   "moneda": "USD",
+   "municipio": "Zapopan",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M095",
+   "superficie_ha": 5.389861,
+   "superficie_m2": 53898.61,
+   "terreno": "Reserva Cerro Azul M095"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M095",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M095-54b428",
+   "SNTL-CONTACT-M095-e05e31",
+   "SNTL-EXTRAK-M095-d0e400",
+   "SNTL-EXTRAV-M095-ebb9eb",
+   "SNTL-FORMULA-M095-796a52",
+   "SNTL-NOTE-M095-ee2a4a",
+   "SNTL-SRCFILE-M095-91730c"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 395.4,
+   "asking_price": 12356475.38,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M096-a83851 tel. 55 0000 7989",
+   "direccion": null,
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M096-1f42cc.xlsx",
+    "Columna SNTL-EXTRAK-M096-9c7fc0": "SNTL-EXTRAV-M096-02132c",
+    "Comisión interna": "5% SNTL-COMMISSION-M096-9eefb8",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M096-71ec39\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M096-49bd22",
+   "lat": 20.504958,
+   "lon": -103.471092,
+   "moneda": "USD",
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M096",
+   "superficie_ha": 3.125057,
+   "superficie_m2": 31250.57,
+   "terreno": "Parque Industrial El Ñandú M096"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M096",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M096-9eefb8",
+   "SNTL-CONTACT-M096-a83851",
+   "SNTL-EXTRAK-M096-9c7fc0",
+   "SNTL-EXTRAV-M096-02132c",
+   "SNTL-FORMULA-M096-71ec39",
+   "SNTL-NOTE-M096-49bd22",
+   "SNTL-SRCFILE-M096-1f42cc"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 5170.53,
+   "afectaciones_pct": 0.1324,
+   "asking_m2": 303.9,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M097-139d80 tel. 55 0000 2078",
+   "direccion": "Km 55 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M097-1a3892.xlsx",
+    "Columna SNTL-EXTRAK-M097-776bc3": "SNTL-EXTRAV-M097-c40fca",
+    "Comisión interna": "2% SNTL-COMMISSION-M097-31866c",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M097-ff41b3\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M097-64ddee",
+   "lat": 21.191382,
+   "lon": -101.702691,
+   "moneda": "USD",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M097",
+   "superficie_ha": 3.905236,
+   "superficie_m2": 39052.36,
+   "terreno": "Rancho San José de Gracia M097"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M097",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M097-31866c",
+   "SNTL-CONTACT-M097-139d80",
+   "SNTL-EXTRAK-M097-776bc3",
+   "SNTL-EXTRAV-M097-c40fca",
+   "SNTL-FORMULA-M097-ff41b3",
+   "SNTL-NOTE-M097-64ddee",
+   "SNTL-SRCFILE-M097-1a3892"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 14499.93,
+   "afectaciones_pct": 0.349,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M098-c5dd12 tel. 55 0000 2288",
+   "direccion": "Km 22 Carretera Federal, Silao de la Victoria",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M098-5654cd.xlsx",
+    "Columna SNTL-EXTRAK-M098-ba2c9a": "SNTL-EXTRAV-M098-e72838",
+    "Comisión interna": "3% SNTL-COMMISSION-M098-bfeae8",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M098-03c3b3\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M098-b920a3",
+   "lat": 20.982269,
+   "lon": -101.393114,
+   "moneda": null,
+   "municipio": "Silao de la Victoria",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M098",
+   "superficie_ha": 4.1547089999999995,
+   "superficie_m2": 41547.09,
+   "terreno": "Lote Ávila Camacho M098"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M098",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M098-bfeae8",
+   "SNTL-CONTACT-M098-c5dd12",
+   "SNTL-EXTRAK-M098-ba2c9a",
+   "SNTL-EXTRAV-M098-e72838",
+   "SNTL-FORMULA-M098-03c3b3",
+   "SNTL-NOTE-M098-b920a3",
+   "SNTL-SRCFILE-M098-5654cd"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 37960.45,
+   "afectaciones_pct": 0.0645,
+   "asking_m2": null,
+   "asking_price": 50379540.93,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M099-1b1320 tel. 55 0000 9469",
+   "direccion": "Km 63 Carretera Federal, Celaya",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M099-881d55.xlsx",
+    "Columna SNTL-EXTRAK-M099-0bf1db": "SNTL-EXTRAV-M099-a8aeab",
+    "Comisión interna": "2% SNTL-COMMISSION-M099-5f10e7",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M099-ce0ea0\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M099-d494bd",
+   "lat": 20.456545,
+   "lon": -100.862031,
+   "moneda": "MXN",
+   "municipio": "Celaya",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M099",
+   "superficie_ha": 58.853412,
+   "superficie_m2": 588534.12,
+   "terreno": "Terreno Peña Blanca M099"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M099",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M099-5f10e7",
+   "SNTL-CONTACT-M099-1b1320",
+   "SNTL-EXTRAK-M099-0bf1db",
+   "SNTL-EXTRAV-M099-a8aeab",
+   "SNTL-FORMULA-M099-ce0ea0",
+   "SNTL-NOTE-M099-d494bd",
+   "SNTL-SRCFILE-M099-881d55"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 5860.65,
+   "asking_price": 3860896706.16,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M100-f21828 tel. 55 0000 8879",
+   "direccion": "Km 54 Carretera Federal, San Luis Potosí",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M100-22914c.xlsx",
+    "Columna SNTL-EXTRAK-M100-44070f": "SNTL-EXTRAV-M100-6bb4d8",
+    "Comisión interna": "5% SNTL-COMMISSION-M100-65e5fc",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M100-95865c\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M100-534558",
+   "lat": 22.199768,
+   "lon": -101.017448,
+   "moneda": "MXN",
+   "municipio": "San Luis Potosí",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M100",
+   "superficie_ha": 65.878302,
+   "superficie_m2": 658783.02,
+   "terreno": "Bodega Ex-Hacienda Álamos M100"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "published",
+  "key": "M100",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M100-65e5fc",
+   "SNTL-CONTACT-M100-f21828",
+   "SNTL-EXTRAK-M100-44070f",
+   "SNTL-EXTRAV-M100-6bb4d8",
+   "SNTL-FORMULA-M100-95865c",
+   "SNTL-NOTE-M100-534558",
+   "SNTL-SRCFILE-M100-22914c"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 880.97,
+   "afectaciones_pct": 0.2647,
+   "asking_m2": 1496.54,
+   "asking_price": 4980769.46,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M101-2c8b11 tel. 55 0000 8645",
+   "direccion": "Km 57 Carretera Federal, Soledad de Graciano Sánchez",
+   "estado": "San Luis Potosí",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M101-5d6802.xlsx",
+    "Columna SNTL-EXTRAK-M101-cdf9f0": "SNTL-EXTRAV-M101-d7eb74",
+    "Comisión interna": "2% SNTL-COMMISSION-M101-d6005f",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M101-b2cbf4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M101-d48099",
+   "lat": null,
+   "lon": null,
+   "moneda": "MXN",
+   "municipio": "Soledad de Graciano Sánchez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M101",
+   "superficie_ha": 0.33281900000000003,
+   "superficie_m2": 3328.19,
+   "terreno": "Fracción Güémez M101"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "coordinates"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M101",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M101-d6005f",
+   "SNTL-CONTACT-M101-2c8b11",
+   "SNTL-EXTRAK-M101-cdf9f0",
+   "SNTL-EXTRAV-M101-d7eb74",
+   "SNTL-FORMULA-M101-b2cbf4",
+   "SNTL-NOTE-M101-d48099",
+   "SNTL-SRCFILE-M101-5d6802"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 8512.18,
+   "afectaciones_pct": 0.2346,
+   "asking_m2": 5571.23,
+   "asking_price": 202145339.36,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M102-136f37 tel. 55 0000 5747",
+   "direccion": null,
+   "estado": "Yucatán",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M102-1fa5e3.xlsx",
+    "Columna SNTL-EXTRAK-M102-de3ef3": "SNTL-EXTRAV-M102-a074ab",
+    "Comisión interna": "1% SNTL-COMMISSION-M102-5eae13",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M102-327b83\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M102-00fec9",
+   "lat": -100.39,
+   "lon": 20.58,
+   "moneda": "MXN",
+   "municipio": "Mérida",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M102",
+   "superficie_ha": 3.6283790000000002,
+   "superficie_m2": 36283.79,
+   "terreno": "Predio Los Cañones M102"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "coordinates"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M102",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M102-5eae13",
+   "SNTL-CONTACT-M102-136f37",
+   "SNTL-EXTRAK-M102-de3ef3",
+   "SNTL-EXTRAV-M102-a074ab",
+   "SNTL-FORMULA-M102-327b83",
+   "SNTL-NOTE-M102-00fec9",
+   "SNTL-SRCFILE-M102-1fa5e3"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 21200.83,
+   "afectaciones_pct": 0.1876,
+   "asking_m2": 809.6,
+   "asking_price": 91493559.87,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M103-cc2206 tel. 55 0000 1766",
+   "direccion": "Km 37 Carretera Federal, Cuautitlán Izcalli",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M103-eb9c40.xlsx",
+    "Columna SNTL-EXTRAK-M103-20c525": "SNTL-EXTRAV-M103-1a83e3",
+    "Comisión interna": "2% SNTL-COMMISSION-M103-0fa98a",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M103-ff22b3\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M103-41fb76",
+   "lat": 40.7128,
+   "lon": -74.006,
+   "moneda": "MXN",
+   "municipio": "Cuautitlán Izcalli",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M103",
+   "superficie_ha": 11.301082000000001,
+   "superficie_m2": 113010.82,
+   "terreno": "Nave Logística Ébano M103"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "coordinates"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M103",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M103-0fa98a",
+   "SNTL-CONTACT-M103-cc2206",
+   "SNTL-EXTRAK-M103-20c525",
+   "SNTL-EXTRAV-M103-1a83e3",
+   "SNTL-FORMULA-M103-ff22b3",
+   "SNTL-NOTE-M103-41fb76",
+   "SNTL-SRCFILE-M103-eb9c40"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M104-f59f6d tel. 55 0000 5635",
+   "direccion": "Km 74 Carretera Federal, Tepotzotlán",
+   "estado": "Estado de México",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M104-124305.xlsx",
+    "Columna SNTL-EXTRAK-M104-c8230e": "SNTL-EXTRAV-M104-1edd7c",
+    "Comisión interna": "5% SNTL-COMMISSION-M104-378f1e",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M104-863455\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M104-f43a9a",
+   "lat": 19.716667,
+   "lon": -99.287263,
+   "moneda": null,
+   "municipio": "Tepotzotlán",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M104",
+   "superficie_ha": 82.020981,
+   "superficie_m2": 820209.81,
+   "terreno": "Polígono Santa Mónica M104"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "price"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M104",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M104-378f1e",
+   "SNTL-CONTACT-M104-f59f6d",
+   "SNTL-EXTRAK-M104-c8230e",
+   "SNTL-EXTRAV-M104-1edd7c",
+   "SNTL-FORMULA-M104-863455",
+   "SNTL-NOTE-M104-f43a9a",
+   "SNTL-SRCFILE-M104-124305"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 1552.5,
+   "afectaciones_pct": 0.0394,
+   "asking_m2": 295.43,
+   "asking_price": 11641020.32,
+   "availability": "unknown",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M105-20a994 tel. 55 0000 6297",
+   "direccion": "Km 64 Carretera Federal, Ramos Arizpe",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M105-86fe02.xlsx",
+    "Columna SNTL-EXTRAK-M105-3c83f3": "SNTL-EXTRAV-M105-61f4a6",
+    "Comisión interna": "4% SNTL-COMMISSION-M105-2d159c",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M105-03cf48\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M105-2c8120",
+   "lat": 25.479033,
+   "lon": -101.012756,
+   "moneda": "USD",
+   "municipio": "Ramos Arizpe",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M105",
+   "superficie_ha": 3.9403650000000003,
+   "superficie_m2": 39403.65,
+   "terreno": "Ejido La Purísima M105"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "availability"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M105",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M105-2d159c",
+   "SNTL-CONTACT-M105-20a994",
+   "SNTL-EXTRAK-M105-3c83f3",
+   "SNTL-EXTRAV-M105-61f4a6",
+   "SNTL-FORMULA-M105-03cf48",
+   "SNTL-NOTE-M105-2c8120",
+   "SNTL-SRCFILE-M105-86fe02"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 106539.79,
+   "afectaciones_pct": 0.1285,
+   "asking_m2": 131.02,
+   "asking_price": 108629134.02,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M106-4d8f25 tel. 55 0000 4230",
+   "direccion": "Km 28 Carretera Federal, Saltillo",
+   "estado": "Coahuila",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M106-761eb0.xlsx",
+    "Columna SNTL-EXTRAK-M106-6b0001": "SNTL-EXTRAV-M106-94ba9a",
+    "Comisión interna": "4% SNTL-COMMISSION-M106-0233a8",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M106-df7509\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M106-6754d4",
+   "lat": 25.388152,
+   "lon": -101.009342,
+   "moneda": "MXN",
+   "municipio": "Saltillo",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M106",
+   "superficie_ha": 82.91034499999999,
+   "superficie_m2": 829103.45,
+   "terreno": "Macrolote Río Bravo M106"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "price_conflict"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M106",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M106-0233a8",
+   "SNTL-CONTACT-M106-4d8f25",
+   "SNTL-EXTRAK-M106-6b0001",
+   "SNTL-EXTRAV-M106-94ba9a",
+   "SNTL-FORMULA-M106-df7509",
+   "SNTL-NOTE-M106-6754d4",
+   "SNTL-SRCFILE-M106-761eb0"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 6180.93,
+   "afectaciones_pct": 0.3314,
+   "asking_m2": null,
+   "asking_price": 3000000.0,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M107-a695d9 tel. 55 0000 3282",
+   "direccion": "Km 12 Carretera Federal, San José Chiapa",
+   "estado": "Puebla",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M107-e5e9a2.xlsx",
+    "Columna SNTL-EXTRAK-M107-f67551": "SNTL-EXTRAV-M107-d3e849",
+    "Comisión interna": "3% SNTL-COMMISSION-M107-778ad4",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M107-9b8fb5\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M107-0d84e3",
+   "lat": 19.193828,
+   "lon": -97.683428,
+   "moneda": null,
+   "municipio": "San José Chiapa",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M107",
+   "superficie_ha": 1.8650970000000002,
+   "superficie_m2": 18650.97,
+   "terreno": "Reserva Cerro Azul M107"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "currency"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M107",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M107-778ad4",
+   "SNTL-CONTACT-M107-a695d9",
+   "SNTL-EXTRAK-M107-f67551",
+   "SNTL-EXTRAV-M107-d3e849",
+   "SNTL-FORMULA-M107-9b8fb5",
+   "SNTL-NOTE-M107-0d84e3",
+   "SNTL-SRCFILE-M107-e5e9a2"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M108-a39ea3 tel. 55 0000 6541",
+   "direccion": null,
+   "estado": "Baja California",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M108-fb29fd.xlsx",
+    "Columna SNTL-EXTRAK-M108-98af7a": "SNTL-EXTRAV-M108-1d7193",
+    "Comisión interna": "4% SNTL-COMMISSION-M108-0e19a6",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M108-fb74c6\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M108-27b943",
+   "lat": 32.536408,
+   "lon": -117.077895,
+   "moneda": null,
+   "municipio": "Tijuana",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M108",
+   "superficie_ha": null,
+   "superficie_m2": null,
+   "terreno": "Parque Industrial El Ñandú M108"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "area"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M108",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M108-0e19a6",
+   "SNTL-CONTACT-M108-a39ea3",
+   "SNTL-EXTRAK-M108-98af7a",
+   "SNTL-EXTRAV-M108-1d7193",
+   "SNTL-FORMULA-M108-fb74c6",
+   "SNTL-NOTE-M108-27b943",
+   "SNTL-SRCFILE-M108-fb29fd"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": 0.1188,
+   "asking_m2": null,
+   "asking_price": 70430508.61,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M109-53f85d tel. 55 0000 9802",
+   "direccion": "Km 79 Carretera Federal, Benito Juárez",
+   "estado": "Quintana Roo",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M109-cfbca5.xlsx",
+    "Columna SNTL-EXTRAK-M109-44b29c": "SNTL-EXTRAV-M109-b38a98",
+    "Comisión interna": "2% SNTL-COMMISSION-M109-7206ee",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M109-cf87d4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M109-d36041",
+   "lat": 21.214666,
+   "lon": -86.793038,
+   "moneda": "MXN",
+   "municipio": "Benito Juárez",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M109",
+   "superficie_ha": 0.0,
+   "superficie_m2": 0.0,
+   "terreno": "Rancho San José de Gracia M109"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "area"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M109",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M109-7206ee",
+   "SNTL-CONTACT-M109-53f85d",
+   "SNTL-EXTRAK-M109-44b29c",
+   "SNTL-EXTRAV-M109-b38a98",
+   "SNTL-FORMULA-M109-cf87d4",
+   "SNTL-NOTE-M109-d36041",
+   "SNTL-SRCFILE-M109-cfbca5"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "unknown",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M110-837866 tel. 55 0000 1415",
+   "direccion": null,
+   "estado": null,
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M110-cdce28.xlsx",
+    "Columna SNTL-EXTRAK-M110-4f1047": "SNTL-EXTRAV-M110-f68f71",
+    "Comisión interna": "3% SNTL-COMMISSION-M110-aaf6ef",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M110-192a88\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M110-efcdc9",
+   "lat": null,
+   "lon": null,
+   "moneda": null,
+   "municipio": null,
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": null,
+   "superficie_ha": null,
+   "superficie_m2": null,
+   "terreno": "=CMD(\"calc\") Borrador mínimo M110"
+  },
+  "dup_group": null,
+  "expected_blockers": [
+   "coordinates",
+   "area",
+   "availability",
+   "price"
+  ],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "draft",
+  "key": "M110",
+  "publishable": false,
+  "sentinels": [
+   "SNTL-COMMISSION-M110-aaf6ef",
+   "SNTL-CONTACT-M110-837866",
+   "SNTL-EXTRAK-M110-4f1047",
+   "SNTL-EXTRAV-M110-f68f71",
+   "SNTL-FORMULA-M110-192a88",
+   "SNTL-NOTE-M110-efcdc9",
+   "SNTL-SRCFILE-M110-cdce28"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 202963.69,
+   "afectaciones_pct": 0.3248,
+   "asking_m2": 8502.87,
+   "asking_price": 5313343299.19,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M111-cc3e8c tel. 55 0000 4714",
+   "direccion": "Km 4 Carretera Federal, El Marqués",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M111-c13a63.xlsx",
+    "Columna SNTL-EXTRAK-M111-e3adb4": "SNTL-EXTRAV-M111-6f538c",
+    "Comisión interna": "4% SNTL-COMMISSION-M111-e17f5d",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M111-a0341f\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M111-dcdee9",
+   "lat": 20.641596,
+   "lon": -100.325696,
+   "moneda": "MXN",
+   "municipio": "El Marqués",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M111",
+   "superficie_ha": 62.488822,
+   "superficie_m2": 624888.22,
+   "terreno": "Terreno Peña Blanca M111"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M111",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M111-e17f5d",
+   "SNTL-CONTACT-M111-cc3e8c",
+   "SNTL-EXTRAK-M111-e3adb4",
+   "SNTL-EXTRAV-M111-6f538c",
+   "SNTL-FORMULA-M111-a0341f",
+   "SNTL-NOTE-M111-dcdee9",
+   "SNTL-SRCFILE-M111-c13a63"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 2869.97,
+   "asking_price": 1152777664.23,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M112-d73dad tel. 55 0000 8333",
+   "direccion": "Km 80 Carretera Federal, Corregidora",
+   "estado": "Querétaro",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M112-862be7.xlsx",
+    "Columna SNTL-EXTRAK-M112-5a2d95": "SNTL-EXTRAV-M112-041e52",
+    "Comisión interna": "1% SNTL-COMMISSION-M112-6a6577",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M112-08ca37\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M112-4b80da",
+   "lat": 20.556022,
+   "lon": -100.474207,
+   "moneda": "MXN",
+   "municipio": "Corregidora",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M112",
+   "superficie_ha": 40.166889000000005,
+   "superficie_m2": 401668.89,
+   "terreno": "Bodega Ex-Hacienda Álamos M112"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M112",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M112-6a6577",
+   "SNTL-CONTACT-M112-d73dad",
+   "SNTL-EXTRAK-M112-5a2d95",
+   "SNTL-EXTRAV-M112-041e52",
+   "SNTL-FORMULA-M112-08ca37",
+   "SNTL-NOTE-M112-4b80da",
+   "SNTL-SRCFILE-M112-862be7"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 2941.05,
+   "afectaciones_pct": 0.064,
+   "asking_m2": 3241.95,
+   "asking_price": 148980084.01,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M113-7f0a61 tel. 55 0000 4723",
+   "direccion": "Km 78 Carretera Federal, Monterrey",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M113-275dfb.xlsx",
+    "Columna SNTL-EXTRAK-M113-9ea90f": "SNTL-EXTRAV-M113-79de87",
+    "Comisión interna": "4% SNTL-COMMISSION-M113-b5ef77",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M113-a44dde\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M113-791984",
+   "lat": 25.667664,
+   "lon": -100.304728,
+   "moneda": "MXN",
+   "municipio": "Monterrey",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M113",
+   "superficie_ha": 4.595385,
+   "superficie_m2": 45953.85,
+   "terreno": "Fracción Güémez M113"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M113",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M113-b5ef77",
+   "SNTL-CONTACT-M113-7f0a61",
+   "SNTL-EXTRAK-M113-9ea90f",
+   "SNTL-EXTRAV-M113-79de87",
+   "SNTL-FORMULA-M113-a44dde",
+   "SNTL-NOTE-M113-791984",
+   "SNTL-SRCFILE-M113-275dfb"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 3637.56,
+   "afectaciones_pct": 0.0608,
+   "asking_m2": 208.06,
+   "asking_price": 12447882.34,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M114-41d05e tel. 55 0000 7079",
+   "direccion": null,
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M114-ef09fa.xlsx",
+    "Columna SNTL-EXTRAK-M114-ebdfea": "SNTL-EXTRAV-M114-038e1c",
+    "Comisión interna": "1% SNTL-COMMISSION-M114-bd4316",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M114-be3fd5\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M114-b3962b",
+   "lat": 25.731482,
+   "lon": -100.155445,
+   "moneda": "USD",
+   "municipio": "Apodaca",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M114",
+   "superficie_ha": 5.982833,
+   "superficie_m2": 59828.33,
+   "terreno": "Predio Los Cañones M114"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M114",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M114-bd4316",
+   "SNTL-CONTACT-M114-41d05e",
+   "SNTL-EXTRAK-M114-ebdfea",
+   "SNTL-EXTRAV-M114-038e1c",
+   "SNTL-FORMULA-M114-be3fd5",
+   "SNTL-NOTE-M114-b3962b",
+   "SNTL-SRCFILE-M114-ef09fa"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 20953.36,
+   "afectaciones_pct": 0.1202,
+   "asking_m2": 447.27,
+   "asking_price": 77968482.11,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M115-d80b5d tel. 55 0000 4347",
+   "direccion": "Km 19 Carretera Federal, Santa Catarina",
+   "estado": "Nuevo León",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M115-a4f10c.xlsx",
+    "Columna SNTL-EXTRAK-M115-6cb57f": "SNTL-EXTRAV-M115-88e93a",
+    "Comisión interna": "2% SNTL-COMMISSION-M115-5249ee",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M115-512c1a\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M115-8e173d",
+   "lat": 25.668657,
+   "lon": -100.459702,
+   "moneda": "USD",
+   "municipio": "Santa Catarina",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M115",
+   "superficie_ha": 17.432084,
+   "superficie_m2": 174320.84,
+   "terreno": "Nave Logística Ébano M115"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M115",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M115-5249ee",
+   "SNTL-CONTACT-M115-d80b5d",
+   "SNTL-EXTRAK-M115-6cb57f",
+   "SNTL-EXTRAV-M115-88e93a",
+   "SNTL-FORMULA-M115-512c1a",
+   "SNTL-NOTE-M115-8e173d",
+   "SNTL-SRCFILE-M115-a4f10c"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 177.89,
+   "asking_price": 6764799.14,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M116-7c4719 tel. 55 0000 1599",
+   "direccion": "Km 12 Carretera Federal, Guadalajara",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M116-ce7291.xlsx",
+    "Columna SNTL-EXTRAK-M116-fcc87e": "SNTL-EXTRAV-M116-47d46f",
+    "Comisión interna": "2% SNTL-COMMISSION-M116-4929fa",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M116-0b94ca\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M116-8351d5",
+   "lat": 20.6958,
+   "lon": -103.374599,
+   "moneda": "USD",
+   "municipio": "Guadalajara",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M116",
+   "superficie_ha": 3.802799,
+   "superficie_m2": 38027.99,
+   "terreno": "Polígono Santa Mónica M116"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M116",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M116-4929fa",
+   "SNTL-CONTACT-M116-7c4719",
+   "SNTL-EXTRAK-M116-fcc87e",
+   "SNTL-EXTRAV-M116-47d46f",
+   "SNTL-FORMULA-M116-0b94ca",
+   "SNTL-NOTE-M116-8351d5",
+   "SNTL-SRCFILE-M116-ce7291"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 5280.94,
+   "afectaciones_pct": 0.1216,
+   "asking_m2": 219.69,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M117-2daed7 tel. 55 0000 6211",
+   "direccion": "Km 41 Carretera Federal, Zapopan",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M117-8bf578.xlsx",
+    "Columna SNTL-EXTRAK-M117-70a7db": "SNTL-EXTRAV-M117-5066c4",
+    "Comisión interna": "5% SNTL-COMMISSION-M117-32c9c2",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M117-cb10e5\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M117-faaf8f",
+   "lat": 20.796798,
+   "lon": -103.401833,
+   "moneda": "USD",
+   "municipio": "Zapopan",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M117",
+   "superficie_ha": 4.342878,
+   "superficie_m2": 43428.78,
+   "terreno": "Ejido La Purísima M117"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M117",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M117-32c9c2",
+   "SNTL-CONTACT-M117-2daed7",
+   "SNTL-EXTRAK-M117-70a7db",
+   "SNTL-EXTRAV-M117-5066c4",
+   "SNTL-FORMULA-M117-cb10e5",
+   "SNTL-NOTE-M117-faaf8f",
+   "SNTL-SRCFILE-M117-8bf578"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 147184.42,
+   "afectaciones_pct": 0.243,
+   "asking_m2": null,
+   "asking_price": null,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M118-f317a2 tel. 55 0000 9096",
+   "direccion": "Km 29 Carretera Federal, Tlajomulco de Zúñiga",
+   "estado": "Jalisco",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M118-bf69e3.xlsx",
+    "Columna SNTL-EXTRAK-M118-3f2193": "SNTL-EXTRAV-M118-227a83",
+    "Comisión interna": "1% SNTL-COMMISSION-M118-35275b",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M118-9e0fd4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M118-b2ffc5",
+   "lat": 20.397237,
+   "lon": -103.503176,
+   "moneda": null,
+   "municipio": "Tlajomulco de Zúñiga",
+   "price_confirmed_at": null,
+   "price_on_request": true,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M118",
+   "superficie_ha": 60.56971899999999,
+   "superficie_m2": 605697.19,
+   "terreno": "Macrolote Río Bravo M118"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M118",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M118-35275b",
+   "SNTL-CONTACT-M118-f317a2",
+   "SNTL-EXTRAK-M118-3f2193",
+   "SNTL-EXTRAV-M118-227a83",
+   "SNTL-FORMULA-M118-9e0fd4",
+   "SNTL-NOTE-M118-b2ffc5",
+   "SNTL-SRCFILE-M118-bf69e3"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": 98.66,
+   "afectaciones_pct": 0.0102,
+   "asking_m2": null,
+   "asking_price": 58381727.1,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M119-8632a0 tel. 55 0000 6855",
+   "direccion": "Km 55 Carretera Federal, León",
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M119-59af05.xlsx",
+    "Columna SNTL-EXTRAK-M119-548106": "SNTL-EXTRAV-M119-c72667",
+    "Comisión interna": "1% SNTL-COMMISSION-M119-6330d5",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M119-2b3c18\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M119-9b4a68",
+   "lat": 21.148101,
+   "lon": -101.742418,
+   "moneda": "MXN",
+   "municipio": "León",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M119",
+   "superficie_ha": 0.9672229999999999,
+   "superficie_m2": 9672.23,
+   "terreno": "Reserva Cerro Azul M119"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M119",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M119-6330d5",
+   "SNTL-CONTACT-M119-8632a0",
+   "SNTL-EXTRAK-M119-548106",
+   "SNTL-EXTRAV-M119-c72667",
+   "SNTL-FORMULA-M119-2b3c18",
+   "SNTL-NOTE-M119-9b4a68",
+   "SNTL-SRCFILE-M119-59af05"
+  ]
+ },
+ {
+  "draft": {
+   "afectaciones_m2": null,
+   "afectaciones_pct": null,
+   "asking_m2": 7761.42,
+   "asking_price": 6937036350.69,
+   "availability": "available",
+   "availability_confirmed_at": null,
+   "contacts": "Lic. Ñúñez Pérez SNTL-CONTACT-M120-b1763f tel. 55 0000 7181",
+   "direccion": null,
+   "estado": "Guanajuato",
+   "extra": {
+    "Archivo origen": "inventario_SNTL-SRCFILE-M120-6d077f.xlsx",
+    "Columna SNTL-EXTRAK-M120-30fd94": "SNTL-EXTRAV-M120-3f0924",
+    "Comisión interna": "1% SNTL-COMMISSION-M120-291966",
+    "Fórmula privada": "=CONCAT(\"SNTL-FORMULA-M120-6b13c4\")"
+   },
+   "internal_notes": "<i>Nota interna</i> SNTL-NOTE-M120-8339de",
+   "lat": 20.990196,
+   "lon": -101.428153,
+   "moneda": "MXN",
+   "municipio": "Silao de la Victoria",
+   "price_confirmed_at": null,
+   "price_on_request": false,
+   "public_description": "Terreno de prueba ficticio PUBMARK-M120",
+   "superficie_ha": 89.378443,
+   "superficie_m2": 893784.43,
+   "terreno": "Parque Industrial El Ñandú M120"
+  },
+  "dup_group": null,
+  "expected_blockers": [],
+  "expected_warnings": [
+   "never_confirmed"
+  ],
+  "intended_lifecycle": "unpublished",
+  "key": "M120",
+  "publishable": true,
+  "sentinels": [
+   "SNTL-COMMISSION-M120-291966",
+   "SNTL-CONTACT-M120-b1763f",
+   "SNTL-EXTRAK-M120-30fd94",
+   "SNTL-EXTRAV-M120-3f0924",
+   "SNTL-FORMULA-M120-6b13c4",
+   "SNTL-NOTE-M120-8339de",
+   "SNTL-SRCFILE-M120-6d077f"
+  ]
+ }
+]

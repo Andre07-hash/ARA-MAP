@@ -1,0 +1,18 @@
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/esquema.py --url-env ARA_VERIFY_PG_URL
+Versión del esquema: sin registrar; este código espera 8.
+Esquema en la versión 8. Los datos existentes se conservaron.
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/esquema.py --url-env ARA_VERIFY_PG_URL
+Versión del esquema: 8; este código espera 8.
+Esquema en la versión 8. Los datos existentes se conservaron.
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/esquema.py --url-env ARA_VERIFY_PG_URL --check
+Versión del esquema: 8; este código espera 8.
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --url-env ARA_VERIFY_PG_URL --password-stdin crear sntl-user-a-54ccb0 Ana Verificadora SNTL-ACTOR-A-ced4ba
+Cuenta creada: sntl-user-a-54ccb0 (Ana Verificadora SNTL-ACTOR-A-ced4ba).
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --url-env ARA_VERIFY_PG_URL --password-stdin crear sntl-user-b-461a5e Beto Verificador SNTL-ACTOR-B-5776b3
+Cuenta creada: sntl-user-b-461a5e (Beto Verificador SNTL-ACTOR-B-5776b3).
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --url-env ARA_VERIFY_PG_URL --password-stdin crear sntl-user-c-9b8794 Cata Verificadora SNTL-ACTOR-C-f00e94
+Cuenta creada: sntl-user-c-9b8794 (Cata Verificadora SNTL-ACTOR-C-f00e94).
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --url-env ARA_VERIFY_PG_URL --password-stdin restablecer sntl-user-b-461a5e
+Contraseña cambiada; sus sesiones abiertas se cerraron.
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --url-env ARA_VERIFY_PG_URL desactivar sntl-user-c-9b8794
+Cuenta desactivada.

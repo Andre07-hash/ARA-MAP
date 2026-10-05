@@ -1,0 +1,3113 @@
+[
+  {
+    "id": 1,
+    "title": "Excel standard control",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "file": "MapTest1.xlsx"
+  },
+  {
+    "id": 2,
+    "title": "Reordered columns",
+    "rows": [
+      [
+        "Longitud",
+        "Terreno",
+        "Latitud",
+        "Superficie m2",
+        "Precio"
+      ],
+      [
+        -99.1332,
+        "FICTICIO Encino",
+        19.4326,
+        2400,
+        1200000
+      ],
+      [
+        -103.344,
+        "FICTICIO Roble",
+        20.6736,
+        5000,
+        2500000
+      ],
+      [
+        -100.3161,
+        "FICTICIO Cedro",
+        25.6866,
+        7500,
+        3750000
+      ],
+      [
+        -100.3899,
+        "FICTICIO Fresno",
+        20.5888,
+        9600,
+        4800000
+      ]
+    ],
+    "fields": [
+      "lon",
+      "terreno",
+      "lat",
+      "superficie_m2",
+      "asking_price"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest2.csv"
+  },
+  {
+    "id": 3,
+    "title": "Semicolon and decimal comma",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        "1200000",
+        "2400",
+        "19,4326",
+        "-99,1332"
+      ],
+      [
+        "FICTICIO Roble",
+        "2500000",
+        "5000",
+        "20,6736",
+        "-103,344"
+      ],
+      [
+        "FICTICIO Cedro",
+        "3750000",
+        "7500",
+        "25,6866",
+        "-100,3161"
+      ],
+      [
+        "FICTICIO Fresno",
+        "4800000",
+        "9600",
+        "20,5888",
+        "-100,3899"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "separator": ";",
+    "decimal": "comma",
+    "file": "MapTest3.csv"
+  },
+  {
+    "id": 4,
+    "title": "Title, merged banner and blank rows",
+    "rows": [
+      [
+        "DATOS FICTICIOS PARA PRUEBAS"
+      ],
+      [],
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "header": 1,
+    "visualHeader": 3,
+    "merge": "A1:E1",
+    "file": "MapTest4.xlsx"
+  },
+  {
+    "id": 5,
+    "title": "Instructions sheet before terrain sheet",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "notesFirst": true,
+    "sheet": 1,
+    "file": "MapTest5.xlsx"
+  },
+  {
+    "id": 6,
+    "title": "Repeated header inside table",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest6.csv"
+  },
+  {
+    "id": 7,
+    "title": "Summary total row",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ],
+      [
+        "TOTAL",
+        12250000,
+        24500,
+        "",
+        ""
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest7.csv"
+  },
+  {
+    "id": 8,
+    "title": "Repeated price headers: total and unit",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Precio",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        500,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        500,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        500,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "asking_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "asking_m2": 500,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "asking_m2": 500,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "asking_m2": 500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "asking_m2": 500,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "file": "MapTest8.xlsx"
+  },
+  {
+    "id": 9,
+    "title": "English headers",
+    "rows": [
+      [
+        "Property name",
+        "Sale price MXN",
+        "Area sqm",
+        "Latitude",
+        "Longitude"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest9.csv"
+  },
+  {
+    "id": 10,
+    "title": "Unknown headers require mapping",
+    "rows": [
+      [
+        "Proyecto",
+        "Pedido",
+        "Dimension",
+        "Posicion A",
+        "Posicion B"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest10.csv"
+  },
+  {
+    "id": 11,
+    "title": "Two header rows with units",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie",
+        "Coordenadas",
+        null
+      ],
+      [
+        null,
+        "MXN",
+        "m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "layout_gap",
+    "merge": "D1:E1",
+    "file": "MapTest11.xlsx"
+  },
+  {
+    "id": 12,
+    "title": "Transposed property cards",
+    "rows": [
+      [
+        "Campo",
+        "FICTICIO Encino",
+        "FICTICIO Roble",
+        "FICTICIO Cedro",
+        "FICTICIO Fresno"
+      ],
+      [
+        "Precio",
+        1200000,
+        2500000,
+        3750000,
+        4800000
+      ],
+      [
+        "Superficie m2",
+        2400,
+        5000,
+        7500,
+        9600
+      ],
+      [
+        "Latitud",
+        19.4326,
+        20.6736,
+        25.6866,
+        20.5888
+      ],
+      [
+        "Longitud",
+        -99.1332,
+        -103.344,
+        -100.3161,
+        -100.3899
+      ]
+    ],
+    "fields": [],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "layout_gap",
+    "file": "MapTest12.xlsx"
+  },
+  {
+    "id": 13,
+    "title": "Two side-by-side terrain tables",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Latitud",
+        "Longitud",
+        null,
+        "Terreno",
+        "Precio",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        19.4326,
+        -99.1332,
+        null,
+        "FICTICIO Cedro",
+        3750000,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        20.6736,
+        -103.344,
+        null,
+        "FICTICIO Fresno",
+        4800000,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "lat",
+      "lon",
+      "extra",
+      "extra",
+      "extra",
+      "extra",
+      "extra"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "layout_gap",
+    "file": "MapTest13.xlsx"
+  },
+  {
+    "id": 14,
+    "title": "Two valid worksheets: choose one",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "secondRows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "file": "MapTest14.xlsx"
+  },
+  {
+    "id": 15,
+    "title": "Coordinates together in one cell",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Coordenadas"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        "19.4326, -99.1332"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        "20.6736, -103.344"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        "25.6866, -100.3161"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        "20.5888, -100.3899"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "extra"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "coordinate_gap",
+    "file": "MapTest15.csv"
+  },
+  {
+    "id": 16,
+    "title": "Degrees minutes seconds coordinates",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        "19°25'57.36\"N",
+        "99°7'59.52\"W"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        "20°40'24.96\"N",
+        "103°20'38.40\"W"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        "25°41'11.76\"N",
+        "100°18'57.96\"W"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        "20°35'19.68\"N",
+        "100°23'23.64\"W"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "coordinate_gap",
+    "file": "MapTest16.csv"
+  },
+  {
+    "id": 17,
+    "title": "Projected UTM coordinates",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Este",
+        "Norte",
+        "Zona UTM"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        486000,
+        2148000,
+        "14N"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        487000,
+        2149000,
+        "14N"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        488000,
+        2150000,
+        "14N"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        489000,
+        2151000,
+        "14N"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "extra",
+      "extra",
+      "extra"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": null,
+        "lon": null
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": null,
+        "lon": null
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": null,
+        "lon": null
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": null,
+        "lon": null
+      }
+    ],
+    "extension": "csv",
+    "category": "safe_limitation",
+    "file": "MapTest17.csv"
+  },
+  {
+    "id": 18,
+    "title": "Mixed decimal conventions by column",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        "1.200.000,00",
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        "2.500.000,00",
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        "3.750.000,00",
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        "4.800.000,00",
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "number_gap",
+    "file": "MapTest18.csv"
+  },
+  {
+    "id": 19,
+    "title": "USD stated in header",
+    "rows": [
+      [
+        "Terreno",
+        "Precio USD",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "extra",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": null,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": null,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": null,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": null,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "safe_limitation",
+    "file": "MapTest19.csv"
+  },
+  {
+    "id": 20,
+    "title": "USD stated only in Excel number format",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": null,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": null,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": null,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": null,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "currency_safety",
+    "formats": [
+      [
+        "B2:B5",
+        "\"USD \"#,##0.00"
+      ]
+    ],
+    "file": "MapTest20.xlsx"
+  },
+  {
+    "id": 21,
+    "title": "Native Excel percentage values",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud",
+        "Afectaciones %"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332,
+        0.15
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344,
+        0.2
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161,
+        0
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899,
+        0.05
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon",
+      "afectaciones_pct"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332,
+        "afectaciones_pct": 0.15
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344,
+        "afectaciones_pct": 0.2
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161,
+        "afectaciones_pct": 0
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899,
+        "afectaciones_pct": 0.05
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "formats": [
+      [
+        "F2:F5",
+        "0%"
+      ]
+    ],
+    "file": "MapTest21.xlsx"
+  },
+  {
+    "id": 22,
+    "title": "Legitimate terrain name begins with Total",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "Total FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "Total FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "row_safety",
+    "file": "MapTest22.csv"
+  },
+  {
+    "id": 23,
+    "title": "Footnote below data",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ],
+      [
+        "NOTA: valores sujetos a revisión",
+        "",
+        "",
+        "",
+        ""
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "row_safety",
+    "file": "MapTest23.csv",
+    "manualExclude": [
+      5
+    ]
+  },
+  {
+    "id": 24,
+    "title": "Leading blank rows and columns",
+    "rows": [
+      [],
+      [
+        null,
+        null,
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        null,
+        null,
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        null,
+        null,
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        null,
+        null,
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        null,
+        null,
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "extra",
+      "extra",
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "visualHeader": 2,
+    "file": "MapTest24.xlsx"
+  },
+  {
+    "id": 25,
+    "title": "Decimal comma coordinates with quoted comma CSV",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        "19,4326",
+        "-99,1332"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        "20,6736",
+        "-103,344"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        "25,6866",
+        "-100,3161"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        "20,5888",
+        "-100,3899"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "decimal": "comma",
+    "file": "MapTest25.csv"
+  },
+  {
+    "id": 26,
+    "title": "Quotes, comma and multiline extra text",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud",
+        "Notas"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332,
+        "Dijo \"revisar\", el acceso\nSegunda línea"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344,
+        "Sin observaciones"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161,
+        "Sin observaciones"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899,
+        "Sin observaciones"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon",
+      "extra"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest26.csv"
+  },
+  {
+    "id": 27,
+    "title": "UTF-16 Excel CSV export",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "encoding_limit",
+    "encoding": "utf16le",
+    "file": "MapTest27.csv"
+  },
+  {
+    "id": 28,
+    "title": "Windows-1252 CSV export",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud",
+        "Observación"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332,
+        "Información de prueba"
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344,
+        "Información de prueba"
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161,
+        "Información de prueba"
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899,
+        "Información de prueba"
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon",
+      "extra"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "encoding_limit",
+    "encoding": "latin1",
+    "file": "MapTest28.csv"
+  },
+  {
+    "id": 29,
+    "title": "Tab-delimited file with .csv extension",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "delimiter_gap",
+    "separator": "\t",
+    "file": "MapTest29.csv"
+  },
+  {
+    "id": 30,
+    "title": "Malformed CSV quoting",
+    "rows": [],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "reject",
+    "raw": "Terreno,Precio,Latitud,Longitud\n\"FICTICIO sin cierre,1200000,19.4326,-99.1332\n",
+    "file": "MapTest30.csv"
+  },
+  {
+    "id": 31,
+    "title": "Empty CSV",
+    "rows": [],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "reject",
+    "raw": "",
+    "file": "MapTest31.csv"
+  },
+  {
+    "id": 32,
+    "title": "Blank price versus real zero",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        "",
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        0,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": null,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 0,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "file": "MapTest32.csv"
+  },
+  {
+    "id": 33,
+    "title": "Price formulas with cached results",
+    "rows": [
+      [
+        "Terreno",
+        "Superficie m2",
+        "Precio m2",
+        "Precio",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        2400,
+        500,
+        null,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        5000,
+        500,
+        null,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        7500,
+        500,
+        null,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        9600,
+        500,
+        null,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "superficie_m2",
+      "asking_m2",
+      "asking_price",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332,
+        "asking_m2": 500
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344,
+        "asking_m2": 500
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161,
+        "asking_m2": 500
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899,
+        "asking_m2": 500
+      }
+    ],
+    "extension": "xlsx",
+    "category": "supported",
+    "formulas": [
+      [
+        "D2:D5",
+        [
+          "=B2*C2",
+          "=B3*C3",
+          "=B4*C4",
+          "=B5*C5"
+        ]
+      ]
+    ],
+    "file": "MapTest33.xlsx"
+  },
+  {
+    "id": 34,
+    "title": "Table without a header row",
+    "rows": [
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "layout_gap",
+    "file": "MapTest34.csv"
+  },
+  {
+    "id": 35,
+    "title": "Header after 55 nonblank introduction lines",
+    "rows": [
+      [
+        "Nota ficticia 1"
+      ],
+      [
+        "Nota ficticia 2"
+      ],
+      [
+        "Nota ficticia 3"
+      ],
+      [
+        "Nota ficticia 4"
+      ],
+      [
+        "Nota ficticia 5"
+      ],
+      [
+        "Nota ficticia 6"
+      ],
+      [
+        "Nota ficticia 7"
+      ],
+      [
+        "Nota ficticia 8"
+      ],
+      [
+        "Nota ficticia 9"
+      ],
+      [
+        "Nota ficticia 10"
+      ],
+      [
+        "Nota ficticia 11"
+      ],
+      [
+        "Nota ficticia 12"
+      ],
+      [
+        "Nota ficticia 13"
+      ],
+      [
+        "Nota ficticia 14"
+      ],
+      [
+        "Nota ficticia 15"
+      ],
+      [
+        "Nota ficticia 16"
+      ],
+      [
+        "Nota ficticia 17"
+      ],
+      [
+        "Nota ficticia 18"
+      ],
+      [
+        "Nota ficticia 19"
+      ],
+      [
+        "Nota ficticia 20"
+      ],
+      [
+        "Nota ficticia 21"
+      ],
+      [
+        "Nota ficticia 22"
+      ],
+      [
+        "Nota ficticia 23"
+      ],
+      [
+        "Nota ficticia 24"
+      ],
+      [
+        "Nota ficticia 25"
+      ],
+      [
+        "Nota ficticia 26"
+      ],
+      [
+        "Nota ficticia 27"
+      ],
+      [
+        "Nota ficticia 28"
+      ],
+      [
+        "Nota ficticia 29"
+      ],
+      [
+        "Nota ficticia 30"
+      ],
+      [
+        "Nota ficticia 31"
+      ],
+      [
+        "Nota ficticia 32"
+      ],
+      [
+        "Nota ficticia 33"
+      ],
+      [
+        "Nota ficticia 34"
+      ],
+      [
+        "Nota ficticia 35"
+      ],
+      [
+        "Nota ficticia 36"
+      ],
+      [
+        "Nota ficticia 37"
+      ],
+      [
+        "Nota ficticia 38"
+      ],
+      [
+        "Nota ficticia 39"
+      ],
+      [
+        "Nota ficticia 40"
+      ],
+      [
+        "Nota ficticia 41"
+      ],
+      [
+        "Nota ficticia 42"
+      ],
+      [
+        "Nota ficticia 43"
+      ],
+      [
+        "Nota ficticia 44"
+      ],
+      [
+        "Nota ficticia 45"
+      ],
+      [
+        "Nota ficticia 46"
+      ],
+      [
+        "Nota ficticia 47"
+      ],
+      [
+        "Nota ficticia 48"
+      ],
+      [
+        "Nota ficticia 49"
+      ],
+      [
+        "Nota ficticia 50"
+      ],
+      [
+        "Nota ficticia 51"
+      ],
+      [
+        "Nota ficticia 52"
+      ],
+      [
+        "Nota ficticia 53"
+      ],
+      [
+        "Nota ficticia 54"
+      ],
+      [
+        "Nota ficticia 55"
+      ],
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "xlsx",
+    "category": "layout_gap",
+    "header": 55,
+    "visualHeader": 56,
+    "file": "MapTest35.xlsx"
+  },
+  {
+    "id": 36,
+    "title": "UTF-8 BOM and explicit separator directive",
+    "rows": [
+      [
+        "Terreno",
+        "Precio",
+        "Superficie m2",
+        "Latitud",
+        "Longitud"
+      ],
+      [
+        "FICTICIO Encino",
+        1200000,
+        2400,
+        19.4326,
+        -99.1332
+      ],
+      [
+        "FICTICIO Roble",
+        2500000,
+        5000,
+        20.6736,
+        -103.344
+      ],
+      [
+        "FICTICIO Cedro",
+        3750000,
+        7500,
+        25.6866,
+        -100.3161
+      ],
+      [
+        "FICTICIO Fresno",
+        4800000,
+        9600,
+        20.5888,
+        -100.3899
+      ]
+    ],
+    "fields": [
+      "terreno",
+      "asking_price",
+      "superficie_m2",
+      "lat",
+      "lon"
+    ],
+    "expected": [
+      {
+        "terreno": "FICTICIO Encino",
+        "asking_price": 1200000,
+        "superficie_m2": 2400,
+        "lat": 19.4326,
+        "lon": -99.1332
+      },
+      {
+        "terreno": "FICTICIO Roble",
+        "asking_price": 2500000,
+        "superficie_m2": 5000,
+        "lat": 20.6736,
+        "lon": -103.344
+      },
+      {
+        "terreno": "FICTICIO Cedro",
+        "asking_price": 3750000,
+        "superficie_m2": 7500,
+        "lat": 25.6866,
+        "lon": -100.3161
+      },
+      {
+        "terreno": "FICTICIO Fresno",
+        "asking_price": 4800000,
+        "superficie_m2": 9600,
+        "lat": 20.5888,
+        "lon": -100.3899
+      }
+    ],
+    "extension": "csv",
+    "category": "supported",
+    "separator": ";",
+    "prefix": "﻿sep=;\r\n",
+    "file": "MapTest36.csv"
+  }
+]

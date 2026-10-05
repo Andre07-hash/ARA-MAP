@@ -1,0 +1,65 @@
+test_control_normal_xlsx_preserves_four_rows (__main__.ImportSafety.test_control_normal_xlsx_preserves_four_rows) ... ok
+test_control_real_total_row_is_excluded (__main__.ImportSafety.test_control_real_total_row_is_excluded) ... ok
+test_excel_currency_format_cannot_be_relabelled_mxn (__main__.ImportSafety.test_excel_currency_format_cannot_be_relabelled_mxn) ... FAIL
+test_real_header_after_row50_is_selectable (__main__.ImportSafety.test_real_header_after_row50_is_selectable) ... FAIL
+test_real_terrain_starting_total_is_not_discarded (__main__.ImportSafety.test_real_terrain_starting_total_is_not_discarded) ... FAIL
+test_suspicious_footer_is_not_accepted_without_review (__main__.ImportSafety.test_suspicious_footer_is_not_accepted_without_review) ... FAIL
+test_tab_csv_is_parsed_or_rejected_before_name_mapping (__main__.ImportSafety.test_tab_csv_is_parsed_or_rejected_before_name_mapping) ... FAIL
+
+======================================================================
+FAIL: test_excel_currency_format_cannot_be_relabelled_mxn (__main__.ImportSafety.test_excel_currency_format_cannot_be_relabelled_mxn)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-tests-2026-09-28/support/regressions.py", line 28, in test_excel_currency_format_cannot_be_relabelled_mxn
+    self.assertTrue(all(x['asking_price'] is None for x in r['vista_previa']['filas']),
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    'Explicit USD number-format metadata was discarded; prices became MXN.')
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : Explicit USD number-format metadata was discarded; prices became MXN.
+
+======================================================================
+FAIL: test_real_header_after_row50_is_selectable (__main__.ImportSafety.test_real_header_after_row50_is_selectable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-tests-2026-09-28/support/regressions.py", line 52, in test_real_header_after_row50_is_selectable
+    self.assertIn(55,[x['indice'] for x in r['interpretacion']['encabezados']],
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                  'The correction dropdown cannot reach the real header at physical row 56.')
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 55 not found in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49] : The correction dropdown cannot reach the real header at physical row 56.
+
+======================================================================
+FAIL: test_real_terrain_starting_total_is_not_discarded (__main__.ImportSafety.test_real_terrain_starting_total_is_not_discarded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-tests-2026-09-28/support/regressions.py", line 34, in test_real_terrain_starting_total_is_not_discarded
+    self.assertIn('Total FICTICIO Encino',[x['terreno'] for x in r['vista_previa']['filas']])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Total FICTICIO Encino' not found in ['FICTICIO Roble', 'FICTICIO Cedro', 'FICTICIO Fresno']
+
+======================================================================
+FAIL: test_suspicious_footer_is_not_accepted_without_review (__main__.ImportSafety.test_suspicious_footer_is_not_accepted_without_review)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-tests-2026-09-28/support/regressions.py", line 39, in test_suspicious_footer_is_not_accepted_without_review
+    self.assertEqual(r['vista_previa']['conteo'],4,
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     'A notes footer is offered as a fifth terrain without a row-classification question.')
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 4 : A notes footer is offered as a fifth terrain without a row-classification question.
+
+======================================================================
+FAIL: test_tab_csv_is_parsed_or_rejected_before_name_mapping (__main__.ImportSafety.test_tab_csv_is_parsed_or_rejected_before_name_mapping)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-tests-2026-09-28/support/regressions.py", line 47, in test_tab_csv_is_parsed_or_rejected_before_name_mapping
+    self.assertGreaterEqual(len(r['interpretacion']['columnas']),5,
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            'Tab-delimited rows were collapsed into one apparent name column.')
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 not greater than or equal to 5 : Tab-delimited rows were collapsed into one apparent name column.
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.067s
+
+FAILED (failures=5)

@@ -1,0 +1,126 @@
+{
+  "bases/34": {
+    "name": "Copy of REPORTE RESERVA ARA",
+    "total": 34,
+    "located": 0,
+    "with_price": 0,
+    "incidences": 34,
+    "canonical_rows_sha256": "46d27481b6fb6cfaa8f069db772190f96feb21cbc888d3694ecf62de126a9b8e",
+    "export": [
+      {
+        "sheet": "Registro Análisis",
+        "data_rows": 34,
+        "columns": 13
+      }
+    ]
+  },
+  "bases/27": {
+    "name": "Fake 2",
+    "total": 13,
+    "located": 12,
+    "with_price": 13,
+    "incidences": 1,
+    "canonical_rows_sha256": "edb3551e262d78afe0a722d825583faaee51b8f6dd027837de1756ca21d50efb",
+    "export": [
+      {
+        "sheet": "Registro Análisis",
+        "data_rows": 13,
+        "columns": 13
+      }
+    ]
+  },
+  "bases/26": {
+    "name": "Fake 1",
+    "total": 12,
+    "located": 11,
+    "with_price": 12,
+    "incidences": 1,
+    "canonical_rows_sha256": "92c12f56b9d38744c49db3340bc8aa9b2070a134b4afc82ed038601cfa74073c",
+    "export": [
+      {
+        "sheet": "Registro Análisis",
+        "data_rows": 12,
+        "columns": 13
+      }
+    ]
+  },
+  "bases/25": {
+    "name": "Base Terrenos 09.26 Gerardo",
+    "total": 79,
+    "located": 39,
+    "with_price": 59,
+    "incidences": 47,
+    "canonical_rows_sha256": "9d151e55c9c7cf48c69370de65f873920fdebbda61226a485ace5161d4a8259d",
+    "export": [
+      {
+        "sheet": "Registro Análisis",
+        "data_rows": 79,
+        "columns": 13
+      }
+    ]
+  },
+  "mapas/4": {
+    "name": "prueba comparación",
+    "total": 92,
+    "located": 51,
+    "with_price": 72,
+    "incidences": 48,
+    "canonical_rows_sha256": "6ce90587b8819d85f41e1c5ab6dc97c2badb5f88a4de71ac7aa7a7353cb6ba2f",
+    "export": [
+      {
+        "sheet": "Base Terrenos 09.26 Gerardo",
+        "data_rows": 79,
+        "columns": 13
+      },
+      {
+        "sheet": "Fake 2",
+        "data_rows": 13,
+        "columns": 13
+      }
+    ]
+  },
+  "mapas/1": {
+    "name": "Base Terrenos 09.26 Ficticia vs Base Terrenos 08.26 Ficticia vs Base Terrenos 09.26 copy",
+    "total": 104,
+    "located": 62,
+    "with_price": 84,
+    "incidences": 49,
+    "canonical_rows_sha256": "c91a12b7dbf64db4d80cfe21ad1744e5fd51024d52d4084614ce4d878053e0b9",
+    "export": [
+      {
+        "sheet": "Fake 2",
+        "data_rows": 13,
+        "columns": 13
+      },
+      {
+        "sheet": "Fake 1",
+        "data_rows": 12,
+        "columns": 13
+      },
+      {
+        "sheet": "Base Terrenos 09.26 Gerardo",
+        "data_rows": 79,
+        "columns": 13
+      }
+    ]
+  },
+  "folders_bases": {
+    "carpetas": [
+      {
+        "id": 3,
+        "tipo": "bases",
+        "nombre": "GErman",
+        "creado_en": "2026-09-24T02:22:08+00:00",
+        "actualizado_en": "2026-09-24T02:22:08+00:00",
+        "conteo": 1
+      }
+    ],
+    "sin_carpeta": 3,
+    "total": 4
+  },
+  "folders_mapas": {
+    "carpetas": [],
+    "sin_carpeta": 2,
+    "total": 2
+  }
+}

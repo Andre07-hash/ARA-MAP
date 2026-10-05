@@ -1,0 +1,12 @@
+{
+  "name": "ara-map-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Optional end-to-end checks. The app itself needs no Node packages.",
+  "scripts": {
+    "test": "node smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0"
+  }
+}

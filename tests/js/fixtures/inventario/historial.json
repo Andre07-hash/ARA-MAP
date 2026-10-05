@@ -1,0 +1,49 @@
+{
+  "eventos": [
+    {
+      "id": "e3",
+      "version": 3,
+      "action": "update",
+      "at": "2026-10-05T16:00:00Z",
+      "actor": {
+        "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+        "display_name": "Ana Prueba"
+      },
+      "before_revision_id": "r2",
+      "after_revision_id": "r3",
+      "changes": {
+        "asking_m2": {
+          "before": 120.0,
+          "after": 122.5
+        }
+      },
+      "confirmed": [
+        "price"
+      ]
+    },
+    {
+      "id": "e2",
+      "version": 2,
+      "action": "update",
+      "at": "2026-10-05T15:30:00Z",
+      "actor": {
+        "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0002",
+        "display_name": "Beto Prueba"
+      },
+      "before_revision_id": "r1",
+      "after_revision_id": "r2",
+      "changes": {
+        "lat": {
+          "before": null,
+          "after": 20.7236
+        },
+        "lon": {
+          "before": null,
+          "after": -103.3848
+        }
+      }
+    }
+  ],
+  "total": 3,
+  "next_cursor": "2"
+}

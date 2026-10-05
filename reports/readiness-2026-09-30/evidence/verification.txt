@@ -1,0 +1,31 @@
+
+── Pruebas unitarias e integración (Python del sistema) ──
+Ran 605 tests in 18.872s
+
+OK (skipped=21)
+   OK   suite de Python
+
+── Compatibilidad con el Python que trae macOS ──
+   OK   suite completa en Python 3.9.6
+
+── Lógica de mapa y comparación (JavaScript) ──
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 79.083416
+   OK   pruebas de JavaScript
+
+── Linter y tipos ──
+All checks passed!
+   OK   ruff
+Success: no issues found in 39 source files
+   OK   mypy
+--------------------------------------------------------------
+TOTAL                             3931    248    94%
+   OK   cobertura (mínimo 80%)
+
+── Pruebas de navegador ──
+   Requieren la aplicación corriendo y Chrome instalado:
+     ARA_MAP_DB=/tmp/ara-e2e.db python3 -m server.app
+     cd tests/e2e && npm install && npm test
+
+Todo en orden.

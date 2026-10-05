@@ -1,0 +1,592 @@
+{
+ "target": "http://127.0.0.1:8433",
+ "browser": "chromium 153.0.8010.12",
+ "playwright": "1.63.0",
+ "node": "v23.7.0",
+ "seed_total": 369,
+ "perf": {
+  "ui_create_ms": 39,
+  "full_list_assembled_ms": 130,
+  "filter_251_ms": 836
+ },
+ "counts": {
+  "PASS": 90,
+  "N/A": 1,
+  "INFO": 2,
+  "WARN": 1
+ },
+ "results": [
+  {
+   "case": "VIEW-01",
+   "check": "anonymous startup calls exactly config, session, publico/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "no anonymous 401s (no private calls attempted)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "anonymous DOM/storage/URL carry no sentinel",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous nav offers only Catálogo + Iniciar sesión",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 1440x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 1024x768: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 768x1024: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 390x844: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 375x812: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 959x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "anonymous catalog 961x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "PUB/VIEW",
+   "check": "public catalog with records (Stage 2)",
+   "status": "N/A",
+   "detail": "no publish route in Stage 1; empty-state only"
+  },
+  {
+   "case": "B1",
+   "check": "no page/console errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "private deep link shows sign-in, no private data in page",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "no private API call before sign-in",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "wrong password shows generic message",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "after sign-in returns to the deep-linked record (team sees private contact)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "session cookie HttpOnly + SameSite=Strict in browser",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "session token not readable by page script",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B2",
+   "check": "no page/console errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-01",
+   "check": "UI: price without currency gets field error, input kept",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-01",
+   "check": "UI create persisted exact values (USD 122.5, 10000 m², literal name)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-01",
+   "check": "HTML-like name rendered literally (no <i> element from data)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-01",
+   "check": "UI: B edits and saves A's record",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "UI: stale save shows conflict review",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "UI: C's typed values retained after 409",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "UI: nothing of C written by the rejected save",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "UI: review rebases on B's untouched field",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "UI: deliberate resave = v3 with B's address + C's price/note, actor C",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-02",
+   "check": "UI history: three actors, create + before→after values",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-02",
+   "check": "history dialog closes with Escape",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B3",
+   "check": "no unexpected page/console errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B3",
+   "check": "no alert() executed (XSS trap)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-03",
+   "check": "list requests during load (incl. superseded)",
+   "status": "INFO",
+   "detail": [
+    "?limit=250",
+    "?limit=250&cursor=a53d3b04-e1bd-4da7-8d58-ce822af6cd50"
+   ]
+  },
+  {
+   "case": "VIEW-03",
+   "check": "full inventory (370) assembled before count; 2 page requests",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-03",
+   "check": "full table rows == API total",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-03",
+   "check": "251 matching: assembled from 2 pages (250 + 1)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-03",
+   "check": "table holds exactly P001..P251 once each",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-03",
+   "check": "map/legend/count agree for the 251 query",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "clearing search restores full count",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B4",
+   "check": "no page/console errors / alerts",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "after logout with 1 late response(s), 1 carrying private data: no sentinel in DOM/inputs/storage/URL",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "after logout no team display name in DOM",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "browser cookie no longer authorizes private API (server revoked)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "Back #1 (#/catalogo): no private content resurrected",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "Back #2 (#/catalogo): no private content resurrected",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "Back #3 left the app (about:blank)",
+   "status": "INFO",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "revisiting the private URL after logout: sign-in only, no private content",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B5",
+   "check": "no page errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: Filtros button visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: drawer filters on server (9 results) and returns focus to trigger",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: filter state kept when drawer reopens",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: Escape closes drawer; cleared search restores full list",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: phone user can select a result and see its detail",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: Guardar borrador reachable inside viewport",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: editor no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "390: save works from phone editor",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: Filtros button visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: drawer filters on server (9 results) and returns focus to trigger",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: filter state kept when drawer reopens",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: Escape closes drawer; cleared search restores full list",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: phone user can select a result and see its detail",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: Guardar borrador reachable inside viewport",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: editor no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "375: save works from phone editor",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 1440x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 1440x900: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 1024x768: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 1024x768: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 768x1024: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 768x1024: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 390x844: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 390x844: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 375x812: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 375x812: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 959x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 959x900: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "inventory 961x900: no horizontal overflow",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "editor 961x900: no horizontal overflow; save visible",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "959px: Filtros drawer button, rail hidden",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-01",
+   "check": "961px: rail visible, no drawer button",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B6",
+   "check": "no page errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: sign in (Tab/Enter only)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: edit + save persisted",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: Escape closes Historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: focus returns to the Historial trigger after Escape",
+   "status": "WARN",
+   "detail": {
+    "tag": "BODY",
+    "id": "",
+    "cls": "",
+    "text": "Saltar al contenido\n  ARA MapInventarioB"
+   }
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: open/close Filtros drawer, focus returns",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "VIEW-02",
+   "check": "keyboard: sign out",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B7",
+   "check": "no page errors",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "anonymous #/bases: sign-in only, no legacy names",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "REG-01",
+   "check": "signed in: legacy base gallery lists the v7 bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "REG-01",
+   "check": "signed in: legacy base opens on the map",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "REG-01",
+   "check": "signed in: saved map (frozen v7 snapshot) reopens",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "B8",
+   "check": "no page errors",
+   "status": "PASS",
+   "detail": null
+  }
+ ]
+}

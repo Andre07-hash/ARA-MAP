@@ -1,0 +1,10 @@
+{
+  "server/asistente/campos.py": "1082a28f1eb4b8f06328c1ead32a0ab804c136435c5316ef952da9569d1f85cf",
+  "server/asistente/detectar.py": "22ada2162559a01980671d27c676117a8138d2ee1fc9046ed94d4124da37c6c2",
+  "server/asistente/plan.py": "c5b96e85aaf3b25ee21d2cd42e9b24090f14081e6cc586a3ab8221ab737c5724",
+  "server/asistente/rejilla.py": "db04821bd24e59153e2549d55cfbc029ce7c4b0213a1b2750a8fbe28ba2d8d46",
+  "server/asistente/servicio.py": "0713a0b1db8bcc554079827ca90bd63b34f389bf4ecb25edaeb333b9b13abacd",
+  "server/importer.py": "069a79253d095c29ff1c3ff41c8d54b8a0a853113a6da43088f4a14852dca8d8",
+  "web/lib/format.js": "fa8c6429d6475e3d23db4a8725592d20401dfa82bd59b0faf8b584256a8d16e5",
+  "web/components/bases/ImportDialog.js": "fdfe54bae7d7f984f0d7230360c57690f94419b58ce080615b7145b220b31a5b"
+}

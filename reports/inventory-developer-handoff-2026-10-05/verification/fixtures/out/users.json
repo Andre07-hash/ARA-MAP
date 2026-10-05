@@ -1,0 +1,30 @@
+[
+ {
+  "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba",
+  "password": "SNTL-PASS-A-362276-Fict!1df28b",
+  "provision": true,
+  "tag": "A",
+  "username": "sntl-user-a-54ccb0"
+ },
+ {
+  "display_name": "Beto Verificador SNTL-ACTOR-B-5776b3",
+  "password": "SNTL-PASS-B-e893c8-Fict!9d9ccd",
+  "provision": true,
+  "tag": "B",
+  "username": "sntl-user-b-461a5e"
+ },
+ {
+  "display_name": "Cata Verificadora SNTL-ACTOR-C-f00e94",
+  "password": "SNTL-PASS-C-341ae4-Fict!f56b32",
+  "provision": true,
+  "tag": "C",
+  "username": "sntl-user-c-9b8794"
+ },
+ {
+  "display_name": "Nunca Provisionado SNTL-ACTOR-X-e3971b",
+  "password": "SNTL-PASS-X-77ad59-Fict!787179",
+  "provision": false,
+  "tag": "X",
+  "username": "sntl-user-x-07dd9b"
+ }
+]

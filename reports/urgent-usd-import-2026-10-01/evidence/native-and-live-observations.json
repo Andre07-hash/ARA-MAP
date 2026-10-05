@@ -1,0 +1,28 @@
+{
+  "read_at": "2026-10-01T14:14:40.147940-06:00",
+  "native_numbers_read_method": "AppleScript, get only; no save or export",
+  "numbers_path": "/Users/andrejasso/Desktop/Base Terrenos 09.26.numbers",
+  "sheet": "Registro An\u00e1lisis",
+  "cells": {
+    "J2": {
+      "value": 388689722,
+      "display": "US$ 388,689,722"
+    },
+    "K2": {
+      "value": 600,
+      "display": "US$ 600"
+    },
+    "K4": {
+      "value": 122.5,
+      "display": "US$ 123"
+    }
+  },
+  "user_confirmation": "Source prices are US dollars, confirmed in this conversation on October 1, 2026",
+  "production_bases_count": 0,
+  "production_saved_map_ids": [
+    1,
+    4
+  ],
+  "production_format_id": 4,
+  "deployment_id": "dpl_GtcUn7XczFo1FdciNZ9XUdjH3fkU"
+}

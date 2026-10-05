@@ -1,0 +1,63 @@
+{
+  "terreno": {
+    "id": "3f1c2b9e-7a4d-4f6e-8b21-0c9d5e6f0002",
+    "version": 1,
+    "draft_revision_id": "9a0e7b1c-0000-4000-8000-000000000010",
+    "published_revision_id": null,
+    "publication_state": "draft",
+    "public_visible": false,
+    "has_pending_changes": false,
+    "published_at": null,
+    "archived_at": null,
+    "draft": {
+      "terreno": "Predio sin coordenadas",
+      "estado": "Nuevo León",
+      "municipio": "Apodaca",
+      "direccion": null,
+      "public_description": null,
+      "contacto": null,
+      "notas_internas": null,
+      "superficie_m2": 800.0,
+      "superficie_ha": null,
+      "afectaciones_pct": null,
+      "afectaciones_m2": null,
+      "asking_price": null,
+      "asking_m2": null,
+      "lat": null,
+      "lon": null,
+      "moneda": null,
+      "price_on_request": false,
+      "availability": "unknown"
+    },
+    "confirmations": {
+      "price": null,
+      "availability": null
+    },
+    "source_extra": {},
+    "attention": [
+      {
+        "kind": "unconfirmed",
+        "code": "price_unconfirmed",
+        "field": "asking_price",
+        "message": "El precio nunca se ha confirmado."
+      },
+      {
+        "kind": "unconfirmed",
+        "code": "availability_unconfirmed",
+        "field": "availability",
+        "message": "La disponibilidad nunca se ha confirmado."
+      }
+    ],
+    "revision_number": 1,
+    "created_at": "2026-10-05T15:00:00Z",
+    "created_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+      "display_name": "Ana Prueba"
+    },
+    "updated_at": "2026-10-05T16:00:00Z",
+    "updated_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+      "display_name": "Ana Prueba"
+    }
+  }
+}

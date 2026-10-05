@@ -1,0 +1,2124 @@
+[
+ {
+  "case": "LEAK",
+  "check": "probe ids",
+  "status": "INFO",
+  "detail": {
+   "legacy": [
+    1,
+    2,
+    3,
+    4,
+    999999
+   ],
+   "inventory": 1
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "final registry enumerated",
+  "status": "INFO",
+  "detail": 31
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-BASE-L3-5a3854",
+    "SNTL-BASENOTE-L1-798188",
+    "SNTL-BASENOTE-L2-4d1203"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASENOTE-L1-798188",
+    "SNTL-SHEET-L1-b8441c",
+    "SNTL-SRCFILE-L1-0ed65c"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L2-126287",
+    "SNTL-BASENOTE-L2-4d1203",
+    "SNTL-SHEET-L2-fcd4ee",
+    "SNTL-SRCFILE-L2-19ef24"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L3-5a3854",
+    "SNTL-BASENOTE-L3-ad07d3",
+    "SNTL-SHEET-L3-495b72",
+    "SNTL-SRCFILE-L3-af6ef9"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/1/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-LCONTACT-L1R01-7cc499",
+    "SNTL-LCONTACT-L1R02-5c5030",
+    "SNTL-LCONTACT-L1R03-9eebe7",
+    "SNTL-LCONTACT-L1R04-faf541",
+    "SNTL-LCONTACT-L1R05-0e5d4e"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/2/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-LCONTACT-L2R01-fed355",
+    "SNTL-LCONTACT-L2R02-f55604",
+    "SNTL-LCONTACT-L2R03-4e23c4",
+    "SNTL-LCONTACT-L2R04-230522",
+    "SNTL-LCONTACT-L2R05-1bae99"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/3/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-LCONTACT-L3R01-2e9f14",
+    "SNTL-LCONTACT-L3R02-c569ff",
+    "SNTL-LCONTACT-L3R03-e7a8b5",
+    "SNTL-LCONTACT-L3R04-0d917b",
+    "SNTL-LCONTACT-L3R05-641424"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/4/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/999999/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/carpetas",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/formatos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-FORMAT-FMT1-e6a8e7"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/historial",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/vista-publica",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-BASE-L4-799fec",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-MAP-C1-d33c42"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-MAP-S1-72df7c",
+    "SNTL-MAPCONFIG-S1-3591f3"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-MAP-C1-d33c42",
+    "SNTL-MAPCONFIG-C1-2d2130"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L4-799fec",
+    "SNTL-MAP-D1-108ca5"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/1/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-LCONTACT-L1R01-7cc499",
+    "SNTL-LCONTACT-L1R02-5c5030",
+    "SNTL-LCONTACT-L1R03-9eebe7",
+    "SNTL-LCONTACT-L1R04-faf541"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/2/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-LCONTACT-L1R01-7cc499",
+    "SNTL-LCONTACT-L1R02-5c5030"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/3/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L4-799fec",
+    "SNTL-LCONTACT-L4R01-0a2371",
+    "SNTL-LCONTACT-L4R02-aced54",
+    "SNTL-LCONTACT-L4R03-43b684",
+    "SNTL-LCONTACT-L4R04-6fec78"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/4/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/mapas/999999/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/exportar",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/nope",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/nope denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/1/secreto",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/bases/1/secreto denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/inventario denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/inventario/terrenos/x/y/z",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/inventario/terrenos/x/y/z denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/BASES",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/BASES denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api//bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api//bases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases/",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-BASE-L3-5a3854",
+    "SNTL-BASENOTE-L1-798188",
+    "SNTL-BASENOTE-L2-4d1203"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/bases/ denied as 200 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/./bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/./bases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases%2F1",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/bases%2F1 denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/terrenos/../../bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/publico/terrenos/../../bases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/terrenos/..%2f..%2fbases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/publico/terrenos/..%2f..%2fbases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/../bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/publico/../bases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/config/../bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/config/../bases denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/session/../mapas/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/session/../mapas/1/terrenos denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/bases?x=/api/config",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-BASE-L3-5a3854",
+    "SNTL-BASENOTE-L1-798188",
+    "SNTL-BASENOTE-L2-4d1203"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/bases?x=/api/config denied as 200 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/terrenosX",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/publico/terrenosX denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/publico denied as 404 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/exportar/",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "unknown /api/exportar/ denied as 405 (not 401)",
+  "status": "WARN",
+  "detail": "contract: unknown API routes must not bypass sign-in; confirm 404 policy"
+ },
+ {
+  "case": "LEAK",
+  "check": "HEAD /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "OPTIONS /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/1",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/2",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/3",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/4",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/999999",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/1/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/2/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/3/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/4/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/999999/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/carpetas",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/formatos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/inventario/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/historial",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/vista-publica",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/1",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/2",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/3",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/4",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/999999",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/2/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/3/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/4/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/999999/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/1/adjuntar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/2/adjuntar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/3/adjuntar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/4/adjuntar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/999999/adjuntar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/1/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/2/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/3/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/4/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/bases/999999/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/carpetas",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/importar/analizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/importar/confirmar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/importar/preparar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/importar/vista-previa",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/1/actualizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-MAP-S1-72df7c",
+    "SNTL-MAPCONFIG-S1-3591f3"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/2/actualizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-MAP-C1-d33c42",
+    "SNTL-MAPCONFIG-C1-2d2130"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/3/actualizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L4-799fec",
+    "SNTL-MAP-D1-108ca5"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/4/actualizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/999999/actualizar",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/combinar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/mapas/combinar/vista-previa",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/exportar",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/2/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/3/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/4/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/999999/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/inventario/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/historial",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/vista-publica",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-MAP-S1-72df7c",
+    "SNTL-MAPCONFIG-S1-3591f3"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-MAP-C1-d33c42",
+    "SNTL-MAPCONFIG-C1-2d2130"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L4-799fec",
+    "SNTL-MAP-D1-108ca5"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/2/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/3/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/4/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/999999/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/1/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/2/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/3/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/4/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/bases/999999/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/carpetas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/formatos/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-MAP-S1-72df7c",
+    "SNTL-MAPCONFIG-S1-3591f3"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a",
+    "SNTL-BASE-L2-126287",
+    "SNTL-LAYERTAG-C1-34ca5a",
+    "SNTL-MAP-C1-d33c42",
+    "SNTL-MAPCONFIG-C1-2d2130"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L4-799fec",
+    "SNTL-MAP-D1-108ca5"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/1/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/2/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/3/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/4/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PATCH /api/mapas/999999/carpeta",
+  "status": "FAIL",
+  "detail": {
+   "status": 400,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "PUT /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L1-64776a"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L2-126287"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-BASE-L3-5a3854"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-FOLDER-F1-5a4bed"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-FOLDER-F2-36722e"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-FORMAT-FMT1-e6a8e7"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-MAP-S1-72df7c"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-MAP-C1-d33c42"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 200,
+   "hits": [
+    "SNTL-MAP-D1-108ca5"
+   ]
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/2/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/3/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/4/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/bases/999999/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/carpetas",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/formatos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/inventario/terrenos",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/historial",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/inventario/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1/vista-publica",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/1",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/2",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/3",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/4",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/999999",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/1/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/2/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/3/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/4/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "DELETE /api/mapas/999999/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/config",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "config has no secret-looking keys",
+  "status": "PASS",
+  "detail": {
+   "readOnly": false
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/session",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "anonymous session is exactly {authenticated:false}",
+  "status": "FAIL",
+  "detail": {
+   "error": "Ruta no encontrada."
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/login",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "POST /api/logout",
+  "status": "FAIL",
+  "detail": {
+   "status": 404,
+   "hits": []
+  }
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/terrenos",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "public catalog list",
+  "status": "SKIP",
+  "detail": "route absent: Stage 2"
+ },
+ {
+  "case": "LEAK",
+  "check": "GET /api/publico/terrenos/c1fb779a-fa21-4972-ac9a-9c39a2793ce1",
+  "status": "PASS",
+  "detail": null
+ },
+ {
+  "case": "LEAK",
+  "check": "non-public detail 404 bodies indistinguishable (draft vs nonexistent)",
+  "status": "PASS",
+  "detail": 1
+ },
+ {
+  "case": "LEAK",
+  "check": "static assets scanned",
+  "status": "INFO",
+  "detail": "zero hits unless FAIL rows above"
+ },
+ {
+  "case": "LEAK",
+  "check": "sentinel hits across all anonymous responses == 0",
+  "status": "FAIL",
+  "detail": 435
+ }
+]

@@ -1,0 +1,234 @@
+[pg_disposable] postgres (PostgreSQL) 17.11 (Homebrew) at 127.0.0.1:55433 db=ara_verify dir=/var/folders/cn/yr2t32vx2774_1pg924z9dqm0000gn/T//ara-pg-verify.5sQv2R
+............................................................................................asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: presupuesto
+asistencia automática sin resultado: invalido
+....asistencia automática sin resultado: error
+asistencia automática sin resultado: error
+.asistencia automática sin resultado: tiempo
+........................asistencia automática sin resultado: limite
+asistencia automática sin resultado: error
+asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: rechazo
+asistencia automática sin resultado: invalido
+.....el uso informado superó la reserva máxima; se registra completo
+........./opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 429: 'rate'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 500: 'err'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.............  "POST /api/importar/analizar HTTP/1.1" 401 -
+  "POST /api/importar/preparar HTTP/1.1" 401 -
+  "GET /api/formatos HTTP/1.1" 401 -
+  "PATCH /api/formatos/1 HTTP/1.1" 401 -
+  "DELETE /api/formatos/1 HTTP/1.1" 401 -
+.....................................................................  "POST /api/carpetas HTTP/1.1" 401 -
+  "PATCH /api/carpetas/1 HTTP/1.1" 401 -
+  "DELETE /api/carpetas/1 HTTP/1.1" 401 -
+  "PATCH /api/bases/1/carpeta HTTP/1.1" 401 -
+  "PATCH /api/mapas/1/carpeta HTTP/1.1" 401 -
+.....  "GET /api/carpetas?tipo=bases HTTP/1.1" 401 -
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 401: 'Unauthorized'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+  "POST /api/login HTTP/1.1" 403 -
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 403: 'Forbidden'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+  "POST /api/carpetas HTTP/1.1" 403 -
+  "PATCH /api/carpetas/1 HTTP/1.1" 403 -
+  "DELETE /api/carpetas/1 HTTP/1.1" 403 -
+  "PATCH /api/bases/1/carpeta HTTP/1.1" 403 -
+  "PATCH /api/mapas/1/carpeta HTTP/1.1" 403 -
+.....  "POST /api/importar/vista-previa?csv_decimal=dot HTTP/1.1" 401 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases/1/terrenos HTTP/1.1" 401 -
+  "GET /api/mapas/1/terrenos HTTP/1.1" 401 -
+  "GET /api/carpetas HTTP/1.1" 401 -
+  "POST /api/exportar HTTP/1.1" 401 -
+  "DELETE /api/bases/1 HTTP/1.1" 401 -
+  "PATCH /api/bases/1 HTTP/1.1" 401 -
+  "POST /api/mapas HTTP/1.1" 401 -
+  "POST /api/importar/confirmar HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/cualquier-cosa HTTP/1.1" 401 -
+.  "DELETE /api/bases/1 HTTP/1.1" 401 -
+.  "GET /api/session HTTP/1.1" 503 -
+  "POST /api/login HTTP/1.1" 503 -
+  "GET /api/bases HTTP/1.1" 503 -
+.  "POST /api/importar/vista-previa HTTP/1.1" 413 -
+.  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 429 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 403 -
+  "POST /api/mapas HTTP/1.1" 403 -
+.  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+.  "POST /api/login HTTP/1.1" 413 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+.....................................................................................................................................Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/server/app.py", line 166, in _dispatch
+    result = handler(request)
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/inventario.py", line 89, in create
+    return repo.create(conn, fields, actor, key, request_hash)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/inventario.py", line 109, in create
+    return _create(conn, fields, actor, key, request_hash)
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/inventario.py", line 139, in _create
+    _event(conn, inventory_id, 1, "create", actor, ahora, None, revision_id, {"changes": cambios})
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+RuntimeError: falla simulada
+  "POST /api/inventario/terrenos HTTP/1.1" 500 -
+..  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+.  "POST /api/inventario/terrenos HTTP/1.1" 409 -
+.  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/8c260ade-bff1-4897-ac00-0a29f7eb21d1 HTTP/1.1" 422 -
+.  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/cc5a9272-4185-4c5f-9cb0-73542ee03d87 HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/cc5a9272-4185-4c5f-9cb0-73542ee03d87/historial HTTP/1.1" 401 -
+  "PATCH /api/inventario/terrenos/cc5a9272-4185-4c5f-9cb0-73542ee03d87 HTTP/1.1" 401 -
+  "POST /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/publico/terrenos/cc5a9272-4185-4c5f-9cb0-73542ee03d87 HTTP/1.1" 404 -
+...  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/37bb087d-8187-42c1-b087-363849baaf66 HTTP/1.1" 422 -
+.  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+...  "GET /api/inventario/terrenos/496a35df-78e1-42a7-8352-67f5d8a05500/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/no-es-uuid HTTP/1.1" 404 -
+.  "GET /api/inventario/terrenos?price_min=5 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?limit=251 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?limit=0 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?moneda=EUR HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?contacto=x HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?publication_state=vendido HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?attention=quizas HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?area_min_m2=abc HTTP/1.1" 422 -
+.....Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/server/app.py", line 166, in _dispatch
+    result = handler(request)
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/inventario.py", line 124, in update
+    return {"terreno": repo.update(conn, inventory_id, expected, fields,
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   tuple(dict.fromkeys(confirm)), actor)}
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/inventario.py", line 185, in update
+    _event(conn, inventory_id, expected_version + 1, "update", actor, ahora,
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           current["draft_revision_id"], revision_id, details)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+RuntimeError: falla simulada
+  "PATCH /api/inventario/terrenos/037f953e-5611-496f-b835-4a2d00080f21 HTTP/1.1" 500 -
+....  "PATCH /api/inventario/terrenos/f5d5e342-c875-4b79-89be-d00aa9b9e693 HTTP/1.1" 409 -
+  "PATCH /api/inventario/terrenos/f5d5e342-c875-4b79-89be-d00aa9b9e693 HTTP/1.1" 409 -
+.  "PATCH /api/inventario/terrenos/184e323e-3b6d-45ef-be4b-6ade17c6d792 HTTP/1.1" 409 -
+./Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/_connection_base.py:153: ResourceWarning: <psycopg.Connection object at 0x10939a250> was deleted while still open. Please use 'with' or '.close()' to close the connection properly
+  __warn(
+.......  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "PATCH /api/inventario/terrenos/d77dd8f5-75f1-4cba-8ef9-452980af1808 HTTP/1.1" 409 -
+  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+...............................................................................................................asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: error
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: limite
+asistencia automática sin resultado: rechazo
+.......asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+..asistencia automática sin resultado: invalido
+..../opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 500: 'e'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 429: 'r'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+..............  "GET /api/bases HTTP/1.1" 401 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases/1 HTTP/1.1" 401 -
+  "GET /api/bases/1/terrenos HTTP/1.1" 401 -
+  "GET /api/mapas HTTP/1.1" 401 -
+  "GET /api/mapas/1 HTTP/1.1" 401 -
+  "GET /api/mapas/1/terrenos HTTP/1.1" 401 -
+  "GET /api/carpetas HTTP/1.1" 401 -
+  "GET /api/formatos HTTP/1.1" 401 -
+  "POST /api/exportar HTTP/1.1" 401 -
+  "POST /api/importar/vista-previa HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/no-existe HTTP/1.1" 401 -
+  "GET /api/bases/ HTTP/1.1" 401 -
+  "GET /api HTTP/1.1" 401 -
+..  "GET /api/publico/terrenos/abc HTTP/1.1" 404 -
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 404: 'Not Found'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.  "GET /api/bases/999 HTTP/1.1" 404 -
+..  "POST /api/mapas HTTP/1.1" 400 -
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 400: 'Bad Request'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.  "GET /api/bases/abc HTTP/1.1" 404 -
+.  "GET /api/no-existe HTTP/1.1" 404 -
+..  "DELETE /api/bases HTTP/1.1" 405 -
+/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 405: 'Method Not Allowed'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+.  "GET / HTTP/1.1" 403 -
+.  "POST /api/mapas HTTP/1.1" 403 -
+...  "POST /api/mapas HTTP/1.1" 400 -
+...  "GET /../server/db.py HTTP/1.1" 403 -
+  "GET /../../etc/passwd HTTP/1.1" 403 -
+  "GET /%2e%2e/%2e%2e/server/app.py HTTP/1.1" 403 -
+................................/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/xml/etree/ElementTree.py:1301: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x109403e20>
+  self._parser.feed(data)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..................................................................................
+----------------------------------------------------------------------
+Ran 670 tests in 39.622s
+
+OK
+[pg_disposable] torn down /var/folders/cn/yr2t32vx2774_1pg924z9dqm0000gn/T//ara-pg-verify.5sQv2R

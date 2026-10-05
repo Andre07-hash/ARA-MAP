@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "case": "last-row",
+      "state": "revisar",
+      "error": "La tabla no contiene ningún terreno con nombre.",
+      "restoreButtons": 0
+    },
+    {
+      "case": "thirteen-exclusions",
+      "restoreButtons": 12,
+      "lastNoteShown": false
+    },
+    {
+      "case": "worksheet-switch",
+      "count": 2,
+      "exclusions": [
+        1
+      ],
+      "names": [
+        "Fictional 1-1",
+        "Fictional 1-2"
+      ]
+    }
+  ],
+  "errors": []
+}
+Temporary server stopped; temporary database and workbook removed.

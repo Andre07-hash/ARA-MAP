@@ -1,0 +1,6 @@
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --sqlite /private/var/folders/cn/yr2t32vx2774_1pg924z9dqm0000gn/T/ara-verify-browser-0ygd20be/ara.db --password-stdin crear sntl-user-a-54ccb0 Ana Verificadora SNTL-ACTOR-A-ced4ba
+Cuenta creada: sntl-user-a-54ccb0 (Ana Verificadora SNTL-ACTOR-A-ced4ba).
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --sqlite /private/var/folders/cn/yr2t32vx2774_1pg924z9dqm0000gn/T/ara-verify-browser-0ygd20be/ara.db --password-stdin crear sntl-user-b-461a5e Beto Verificador SNTL-ACTOR-B-5776b3
+Cuenta creada: sntl-user-b-461a5e (Beto Verificador SNTL-ACTOR-B-5776b3).
+$ /Users/andrejasso/Desktop/ARA Map/.venv-dev/bin/python3 scripts/cuentas.py --sqlite /private/var/folders/cn/yr2t32vx2774_1pg924z9dqm0000gn/T/ara-verify-browser-0ygd20be/ara.db --password-stdin crear sntl-user-c-9b8794 Cata Verificadora SNTL-ACTOR-C-f00e94
+Cuenta creada: sntl-user-c-9b8794 (Cata Verificadora SNTL-ACTOR-C-f00e94).

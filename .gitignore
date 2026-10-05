@@ -1,0 +1,14 @@
+*.pyc
+.DS_Store
+.codex-work/
+.coverage
+.mypy_cache/
+.ruff_cache/
+.venv-dev/
+__pycache__/
+datos/
+node_modules/
+.vercel
+.env*
+api/data/
+.cloud-access.txt

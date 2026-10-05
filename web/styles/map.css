@@ -1,0 +1,254 @@
+/* Everything that floats over the map, plus Leaflet's own chrome. */
+
+/* ----------------------------------------------------------------- legend */
+
+.legend {
+  min-width: 13rem;
+  max-width: 17rem;
+  padding: var(--space-3);
+  background: oklch(100% 0 0 / 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+}
+
+.legend-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--rule);
+}
+.legend-count { font-size: var(--text-micro); color: var(--ink-secondary); }
+
+.legend-list { list-style: none; margin: 0; padding: 0; }
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+  font-size: var(--text-small);
+  cursor: pointer;
+  min-width: 0;
+}
+.legend-item input { accent-color: var(--ink); margin: 0; flex-shrink: 0; }
+.legend-item.is-off .legend-label,
+.legend-item.is-off .legend-swatch { opacity: 0.35; }
+.legend-label { flex: 1; min-width: 0; }
+
+.legend-swatch {
+  width: 11px; height: 11px;
+  border-radius: 3px;
+  border: 1px solid oklch(19% 0.006 60 / 0.15);
+  flex-shrink: 0;
+}
+
+.legend-note {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-micro);
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.legend-ramp { display: flex; flex-direction: column; gap: 2px; }
+.ramp-step { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-micro); }
+.ramp-swatch { width: 18px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+.ramp-label { color: var(--ink-secondary); }
+.ramp-step-unknown { margin-top: 3px; }
+
+/* ------------------------------------------------------- basemap switcher */
+
+.basemap-switcher {
+  display: inline-flex;
+  padding: 3px;
+  background: oklch(100% 0 0 / 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+}
+.basemap-option {
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.basemap-option:hover { background: var(--paper-sunken); color: var(--ink); }
+.basemap-option.is-active { background: var(--ink); color: var(--ink-inverse); }
+
+/* --------------------------------------------------------------- unplaced */
+
+.unplaced {
+  position: absolute;
+  right: var(--space-4);
+  /* clears Leaflet's attribution strip along the bottom edge */
+  bottom: calc(var(--space-4) + 14px);
+  z-index: var(--z-overlay);
+  /* Collapsed it is just a button, so it only claims the width it needs and
+   * stops crowding the legend on a narrow stage. */
+  width: auto;
+  max-width: calc(100% - var(--space-6));
+  max-height: calc(100% - var(--space-7));
+  display: flex;
+  flex-direction: column;
+  background: oklch(100% 0 0 / 0.96);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+}
+.unplaced.is-open { width: 20rem; }
+.unplaced.is-empty { display: none; }
+
+.unplaced-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+.unplaced-toggle:hover { background: var(--paper-sunken); }
+.unplaced-caret { color: var(--ink-muted); font-size: 0.7rem; }
+.unplaced-toggle .eyebrow { flex: 1; }
+.unplaced-count {
+  padding: 1px var(--space-2);
+  background: var(--paper-sunken);
+  border-radius: 99px;
+  font-size: var(--text-micro);
+  color: var(--ink-secondary);
+}
+
+.unplaced-body { overflow-y: auto; border-top: 1px solid var(--rule); }
+.unplaced-note { padding: var(--space-3); font-size: var(--text-micro); line-height: 1.45; }
+.unplaced-list { list-style: none; margin: 0; padding: 0 0 var(--space-2); }
+
+.unplaced-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid transparent;
+}
+.unplaced-item:hover { background: var(--paper-sunken); }
+.unplaced-item.is-selected { border-left-color: var(--ink); background: var(--paper-sunken); }
+
+.unplaced-name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: var(--text-small);
+  cursor: pointer;
+}
+.unplaced-name .muted { font-size: var(--text-micro); }
+.unplaced-area { font-size: var(--text-micro); white-space: nowrap; }
+
+.unplaced-link {
+  display: grid;
+  place-items: center;
+  width: 22px; height: 22px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  text-decoration: none;
+}
+.unplaced-link:hover { background: var(--ink); color: var(--ink-inverse); }
+
+/* ---------------------------------------------------------------- leaflet */
+
+.leaflet-container { font: inherit; background: var(--paper-sunken); }
+
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  background: oklch(100% 0 0 / 0.78) !important;
+  color: var(--ink-muted);
+}
+.leaflet-control-attribution a { color: var(--ink-secondary); }
+
+.leaflet-bar a {
+  color: var(--ink) !important;
+  border-bottom-color: var(--rule) !important;
+}
+.leaflet-bar a:hover { background: var(--paper-sunken) !important; }
+
+.mark-tooltip {
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: var(--ink-inverse);
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-micro);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.mark-tooltip strong { display: block; font-size: var(--text-small); }
+.mark-tooltip span { display: block; opacity: 0.75; }
+.mark-tooltip::before { border-top-color: var(--ink) !important; }
+
+/* ------------------------------------------- capas más allá del rango seguro */
+
+/* Layers past the validated colour range carry a dashed ring on the map; the
+ * legend swatch repeats that pattern so the two read as the same thing. */
+.legend-swatch.is-dashed {
+  border: 1.5px dashed var(--ink);
+  background-clip: padding-box;
+}
+
+.legend-orphan {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--status-aviso);
+  color: var(--ink-inverse);
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.legend-note.legend-aviso {
+  color: var(--status-aviso);
+}
+
+/* Impossible coordinates are a different problem from missing ones. */
+.unplaced-count-error {
+  background: var(--status-error);
+  color: var(--ink-inverse);
+}
+.unplaced-note-error {
+  padding: var(--space-3);
+  font-size: var(--text-micro);
+  line-height: 1.45;
+  color: var(--status-error);
+}
+.unplaced-item.is-invalid { border-left-color: var(--status-error); }
+.unplaced-badge {
+  padding: 1px var(--space-2);
+  border-radius: 99px;
+  background: var(--status-error);
+  color: var(--ink-inverse);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  white-space: nowrap;
+}

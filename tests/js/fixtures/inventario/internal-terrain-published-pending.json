@@ -1,0 +1,62 @@
+{
+  "terreno": {
+    "id": "3f1c2b9e-7a4d-4f6e-8b21-0c9d5e6f0003",
+    "version": 6,
+    "draft_revision_id": "9a0e7b1c-0000-4000-8000-000000000016",
+    "published_revision_id": "9a0e7b1c-0000-4000-8000-000000000015",
+    "publication_state": "published",
+    "public_visible": true,
+    "has_pending_changes": true,
+    "published_at": "2026-10-04T12:00:00Z",
+    "archived_at": null,
+    "draft": {
+      "terreno": "Rancho El Mezquite",
+      "estado": "Guanajuato",
+      "municipio": "León",
+      "direccion": null,
+      "public_description": null,
+      "contacto": null,
+      "notas_internas": null,
+      "superficie_m2": 50000.0,
+      "superficie_ha": null,
+      "afectaciones_pct": null,
+      "afectaciones_m2": null,
+      "asking_price": 25000000.0,
+      "asking_m2": 500.0,
+      "lat": 21.1219,
+      "lon": -101.6823,
+      "moneda": "MXN",
+      "price_on_request": false,
+      "availability": "sold"
+    },
+    "confirmations": {
+      "price": {
+        "at": "2026-10-04T11:00:00Z",
+        "by": {
+          "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0002",
+          "display_name": "Beto Prueba"
+        }
+      },
+      "availability": {
+        "at": "2026-10-04T11:00:00Z",
+        "by": {
+          "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0002",
+          "display_name": "Beto Prueba"
+        }
+      }
+    },
+    "source_extra": {},
+    "attention": [],
+    "revision_number": 6,
+    "created_at": "2026-10-05T15:00:00Z",
+    "created_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+      "display_name": "Ana Prueba"
+    },
+    "updated_at": "2026-10-05T16:00:00Z",
+    "updated_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0002",
+      "display_name": "Beto Prueba"
+    }
+  }
+}

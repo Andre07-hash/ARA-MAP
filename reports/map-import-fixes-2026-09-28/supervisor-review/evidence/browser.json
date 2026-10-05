@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "case": "last-row",
+      "state": "revisar",
+      "error": "La tabla no contiene ningún terreno con nombre.",
+      "restoreButtons": 0,
+      "text": "Importar base\n\none.csv\n\nLa tabla no contiene ningún terreno con nombre.\nCorregir interpretación\n\nOpcional. Cada cambio vuelve a generar la vista previa; nada se guarda hasta que importes.\n\nFILA DE ENCABEZADOS\nLínea 1: Terreno | Precio | Latitud | Longitud\nLínea 2: Fictional single | 1200000 | 19 | -99\nOTRA LÍNEA DEL ARCHIVO\nUsar\n\nLíneas con datos: 1 a 2. Es el número que ves en el archivo, no una posición interna.\n\nNÚMEROS ESCRITOS COMO TEXTO\nPunto decimal (1,234.56)\nComa decimal (1.234,56)\nCOLUMNA DEL ARCHIVO\tEJEMPLOS\tSE IMPORTA COMO\nTerreno · columna 1\tFictional single\t\nDestino de Terreno\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\nPrecio · columna 2\t1200000\t\nDestino de Precio\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\nLatitud · columna 3\t19\t\nDestino de Latitud\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\nLongitud · columna 4\t-99\t\nDestino de Longitud\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\nDetalles de la detección\nCancelar"
+    },
+    {
+      "case": "thirteen-exclusions",
+      "restoreButtons": 12,
+      "lastNoteShown": false,
+      "text": "Importar base\n\nthirteen-notes.csv\n\nNOMBRE DE LA BASE\nCARPETA\nSin carpeta\nRecordar este formato para la próxima vez\nTERRENOS\n\n1\n\nse importarán\nEN EL MAPA\n\n1\n\ncon coordenadas válidas\nCON PRECIO\n\n1\n\nen MXN; los demás quedan sin precio\nFUERA DEL MAPA\n\n0\n\nsin coordenadas\n+\n−\nEsri, HERE, Garmin, © OpenStreetMap contributors\n1 punto según las coordenadas del archivo. Son ubicaciones aproximadas, no los linderos del terreno.\nTERRENOS\nLÍNEA\tTERRENO\tESTADO · MUNICIPIO\tSUPERFICIE\tPRECIO TOTAL\tUBICACIÓN\tORIGINAL\tIMPORTAR\n2\tFictional real\t—\t—\t$1,200,000\tEn el mapa\t\nVer\n\tNo importar\n\n13 filas no son terrenos y no se importan:\n\nLínea 3 Nota al pie («NOTA: fictional 1»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 4 Nota al pie («NOTA: fictional 2»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 5 Nota al pie («NOTA: fictional 3»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 6 Nota al pie («NOTA: fictional 4»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 7 Nota al pie («NOTA: fictional 5»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 8 Nota al pie («NOTA: fictional 6»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 9 Nota al pie («NOTA: fictional 7»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 10 Nota al pie («NOTA: fictional 8»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 11 Nota al pie («NOTA: fictional 9»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 12 Nota al pie («NOTA: fictional 10»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 13 Nota al pie («NOTA: fictional 11»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nLínea 14 Nota al pie («NOTA: fictional 12»): es lo único escrito en la fila, sin ubicación, superficie ni precioSí es un terreno: importarla\nREVISIÓN DE DATOS\n2\nCampo faltante\nVer 1 terreno con observaciones (por línea del archivo CSV)\n\nLos datos se importan tal como están. Nada se corrige automáticamente: corrige el archivo original y vuelve a importar si hace falta.\n\nCorregir interpretación\nDetalles de la detección\nCancelar\nImportar 1 terreno"
+    },
+    {
+      "case": "worksheet-switch",
+      "count": 2,
+      "exclusions": [
+        1
+      ],
+      "names": [
+        "Fictional 1-1",
+        "Fictional 1-2"
+      ]
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,10 @@
+{
+  "terrenos": [],
+  "total": 0,
+  "next_cursor": null,
+  "facets": {
+    "estados": [],
+    "municipios": [],
+    "monedas": []
+  }
+}

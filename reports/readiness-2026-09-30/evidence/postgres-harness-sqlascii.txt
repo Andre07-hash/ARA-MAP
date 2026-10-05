@@ -1,0 +1,486 @@
+waiting for server to start.... done
+server started
+postgres (PostgreSQL) 17.11 (Homebrew)
+test_assistant_drafts_formats_and_usage (tests.test_postgres.PostgresTests.test_assistant_drafts_formats_and_usage) ... FAIL
+test_cross_instance_import_and_single_use_token (tests.test_postgres.PostgresTests.test_cross_instance_import_and_single_use_token) ... ok
+test_csv_preview_confirm_through_postgres_staging (tests.test_postgres.PostgresTests.test_csv_preview_confirm_through_postgres_staging) ... FAIL
+test_currency_and_row_decisions_survive_a_serialized_draft (tests.test_postgres.PostgresTests.test_currency_and_row_decisions_survive_a_serialized_draft)
+A draft crosses workers as text: its evidence and decisions ride along. ... ERROR
+test_empty_base_counts (tests.test_postgres.PostgresTests.test_empty_base_counts) ... ok
+test_failed_commit_cleanup_does_not_wait_for_the_workspace_lock (tests.test_postgres.PostgresTests.test_failed_commit_cleanup_does_not_wait_for_the_workspace_lock)
+Supervisor R2b: cleanup runs after the business session released the lock. ... ok
+test_folders_move_delete_and_backup (tests.test_postgres.PostgresTests.test_folders_move_delete_and_backup) ... ERROR
+test_late_confirmation_after_a_corrected_import_is_refused (tests.test_postgres.PostgresTests.test_late_confirmation_after_a_corrected_import_is_refused)
+Supervisor R2a ordering on real Postgres: every request has its own connection. ... ok
+test_rollback_and_concurrent_ids (tests.test_postgres.PostgresTests.test_rollback_and_concurrent_ids) ... ok
+test_snapshots_rename_refresh_and_delete (tests.test_postgres.PostgresTests.test_snapshots_rename_refresh_and_delete) ... ERROR
+test_upgrading_a_workspace_from_before_folders (tests.test_postgres.PostgresTests.test_upgrading_a_workspace_from_before_folders) ... FAIL
+test_merging_two_different_saved_maps_keeps_both_layers (tests.test_postgres_aceptacion.ComparacionesEnLaNube.test_merging_two_different_saved_maps_keeps_both_layers) ... ERROR
+test_append (tests.test_postgres_aceptacion.ConfirmacionTardia.test_append) ... ERROR
+test_new_base (tests.test_postgres_aceptacion.ConfirmacionTardia.test_new_base) ... ok
+test_threaded_confirm_and_correction_on_separate_connections (tests.test_postgres_aceptacion.ConfirmacionTardia.test_threaded_confirm_and_correction_on_separate_connections) ... Exception in thread Thread-3 (confirmar):
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 140, in confirmar
+    salida["confirmada"] = importar.confirm(peticion(json_body={
+                           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": False}))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 325, in confirm
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+FAIL
+test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) ... 
+  test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='escritura') ... ERROR
+  test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='procedencia') ... ERROR
+  test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='respaldo') ... ERROR
+test_new_base (tests.test_postgres_aceptacion.FallasSinResiduos.test_new_base) ... ok
+test_the_upgraded_workspace_is_usable (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_the_upgraded_workspace_is_usable) ... FAIL
+test_upgrade_preserves_everything_reaches_v6_and_can_run_again (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_upgrade_preserves_everything_reaches_v6_and_can_run_again) ... FAIL
+test_concurrent_callers_cannot_share_the_last_of_the_budget (tests.test_postgres_aceptacion.PresupuestoEntreConexiones.test_concurrent_callers_cannot_share_the_last_of_the_budget) ... FAIL
+test_known_usage_replaces_the_reservation (tests.test_postgres_aceptacion.PresupuestoEntreConexiones.test_known_usage_replaces_the_reservation) ... ok
+
+======================================================================
+ERROR: test_currency_and_row_decisions_survive_a_serialized_draft (tests.test_postgres.PostgresTests.test_currency_and_row_decisions_survive_a_serialized_draft)
+A draft crosses workers as text: its evidence and decisions ride along.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 215, in test_currency_and_row_decisions_survive_a_serialized_draft
+    importar.confirm(self._peticion(json_body={"token": restaurada["vista_previa"]["token"],
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                               "nombre": "Nota", "recordar_formato": False}))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 325, in confirm
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+ERROR: test_folders_move_delete_and_backup (tests.test_postgres.PostgresTests.test_folders_move_delete_and_backup)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 118, in test_folders_move_delete_and_backup
+    carpeta = call(api_carpetas.create, json_body={"tipo": "bases", "nombre": "Nube Norte"})["carpeta"]
+              ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 114, in call
+    return handler(Request(method="POST", path="/x", query=kwargs.pop("query", {}),
+                           params=kwargs.pop("params", {}), body=body, headers={}))
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/carpetas.py", line 106, in create
+    return {"carpeta": repo.get(conn, carpeta_id)}
+                       ~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/carpetas.py", line 74, in get
+    tabla = ITEM_TABLE[row["tipo"]]
+            ~~~~~~~~~~^^^^^^^^^^^^^
+KeyError: b'bases'
+
+======================================================================
+ERROR: test_snapshots_rename_refresh_and_delete (tests.test_postgres.PostgresTests.test_snapshots_rename_refresh_and_delete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 63, in test_snapshots_rename_refresh_and_delete
+    map_id = mapas.create(conn, "Test base", "simple", [{"base_id": base_id, "color": "#abcdef", "visible": True}], sigue_base=True)
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/mapas.py", line 66, in create
+    refresh_snapshot(conn, mapa_id)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/mapas.py", line 139, in refresh_snapshot
+    _copy_base_into_layer(conn, mapa_id, capa["orden"], base_id)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/repo/mapas.py", line 167, in _copy_base_into_layer
+    incidencias_json=json.dumps(incidencias, ensure_ascii=False),
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'severidad'
+when serializing list item 0
+
+======================================================================
+ERROR: test_merging_two_different_saved_maps_keeps_both_layers (tests.test_postgres_aceptacion.ComparacionesEnLaNube.test_merging_two_different_saved_maps_keeps_both_layers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 384, in test_merging_two_different_saved_maps_keeps_both_layers
+    ids.append(importar.confirm(peticion(json_body={"token": p["token"], "nombre": nombre}))["base"]["id"])
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 325, in confirm
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+ERROR: test_append (tests.test_postgres_aceptacion.ConfirmacionTardia.test_append)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 126, in test_append
+    self.ordenar(lambda r: importar.append(peticion(params={"id": base_id}, json_body={
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": False,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "resoluciones": {"0": "actualizar"}})), base_id=base_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 113, in ordenar
+    commit(viejo)
+    ~~~~~~^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 126, in <lambda>
+    self.ordenar(lambda r: importar.append(peticion(params={"id": base_id}, json_body={
+                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": False,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "resoluciones": {"0": "actualizar"}})), base_id=base_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 376, in append
+    with _confirmacion(pending):
+         ~~~~~~~~~~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 246, in _confirmacion
+    _vigente(pending)
+    ~~~~~~~~^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 109, in intercalar
+    commit(nuevo)
+    ~~~~~~^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 126, in <lambda>
+    self.ordenar(lambda r: importar.append(peticion(params={"id": base_id}, json_body={
+                           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": False,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "resoluciones": {"0": "actualizar"}})), base_id=base_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 377, in append
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+ERROR: test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='escritura')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 207, in test_append
+    self.fallar_y_seguir(commit, falla(), base_id=base_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 168, in fallar_y_seguir
+    commit(r, recordar=True)
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 205, in commit
+    return importar.append(peticion(params={"id": base_id}, json_body={
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": recordar}))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 377, in append
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+ERROR: test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='procedencia')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 207, in test_append
+    self.fallar_y_seguir(commit, falla(), base_id=base_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 168, in fallar_y_seguir
+    commit(r, recordar=True)
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 205, in commit
+    return importar.append(peticion(params={"id": base_id}, json_body={
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": recordar}))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 377, in append
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+ERROR: test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) (falla='respaldo')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 207, in test_append
+    self.fallar_y_seguir(commit, falla(), base_id=base_id)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 174, in fallar_y_seguir
+    salida = commit(self.analizar(base_id=base_id), recordar=True)
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 205, in commit
+    return importar.append(peticion(params={"id": base_id}, json_body={
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "token": r["vista_previa"]["token"], "recordar_formato": recordar}))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/api/importar.py", line 377, in append
+    db.backup()
+    ~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/db.py", line 486, in backup
+    postgres.backup()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'nombre'
+when serializing list item 0
+when serializing dict item 'base'
+
+======================================================================
+FAIL: test_assistant_drafts_formats_and_usage (tests.test_postgres.PostgresTests.test_assistant_drafts_formats_and_usage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 186, in test_assistant_drafts_formats_and_usage
+    self.assertEqual((primero[2], igual[2], otro[2]), ("nuevo", "reutilizado", "nueva_version"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: ('nuevo', 'nueva_version', 'nueva_version') != ('nuevo', 'reutilizado', 'nueva_version')
+
+First differing element 1:
+'nueva_version'
+'reutilizado'
+
+- ('nuevo', 'nueva_version', 'nueva_version')
+?            ^ ^^ ^^^^^^ -
+
++ ('nuevo', 'reutilizado', 'nueva_version')
+?            ^^ ^^^^^ ^
+
+
+======================================================================
+FAIL: test_csv_preview_confirm_through_postgres_staging (tests.test_postgres.PostgresTests.test_csv_preview_confirm_through_postgres_staging)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 101, in test_csv_preview_confirm_through_postgres_staging
+    self.assertEqual((base["conteo"], base["ubicados"], base["hoja"]), (2, 1, "CSV"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (2, 1, b'CSV') != (2, 1, 'CSV')
+
+First differing element 2:
+b'CSV'
+'CSV'
+
+- (2, 1, b'CSV')
+?        -
+
++ (2, 1, 'CSV')
+
+======================================================================
+FAIL: test_upgrading_a_workspace_from_before_folders (tests.test_postgres.PostgresTests.test_upgrading_a_workspace_from_before_folders)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres.py", line 164, in test_upgrading_a_workspace_from_before_folders
+    self.assertEqual((base["nombre"], base["carpeta_id"]), ("Vieja", None))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (b'Vieja', None) != ('Vieja', None)
+
+First differing element 0:
+b'Vieja'
+'Vieja'
+
+- (b'Vieja', None)
+?  -
+
++ ('Vieja', None)
+
+======================================================================
+FAIL: test_threaded_confirm_and_correction_on_separate_connections (tests.test_postgres_aceptacion.ConfirmacionTardia.test_threaded_confirm_and_correction_on_separate_connections)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 158, in test_threaded_confirm_and_correction_on_separate_connections
+    self.assertTrue("confirmada" in salida or "corregida" in salida, salida)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : {'corregida_error': 409}
+
+======================================================================
+FAIL: test_the_upgraded_workspace_is_usable (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_the_upgraded_workspace_is_usable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 364, in test_the_upgraded_workspace_is_usable
+    self.assertEqual(self.script().returncode, 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_upgrade_preserves_everything_reaches_v6_and_can_run_again (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_upgrade_preserves_everything_reaches_v6_and_can_run_again)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 347, in test_upgrade_preserves_everything_reaches_v6_and_can_run_again
+    self.assertEqual(salida.returncode, 0, salida.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/scripts/migrate_cloud.py", line 58, in <module>
+    postgres.backup()  # the existing tables, before anything changes
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/andrejasso/Desktop/ARA Map/server/postgres.py", line 187, in backup
+    (json.dumps(payload, ensure_ascii=False),))
+     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/opt/homebrew/Cellar/python@3.14/3.14.5/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bytes is not JSON serializable
+when serializing dict item 'tipo'
+when serializing list item 0
+when serializing dict item 'carpeta'
+
+
+======================================================================
+FAIL: test_concurrent_callers_cannot_share_the_last_of_the_budget (tests.test_postgres_aceptacion.PresupuestoEntreConexiones.test_concurrent_callers_cannot_share_the_last_of_the_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/tests/test_postgres_aceptacion.py", line 271, in test_concurrent_callers_cannot_share_the_last_of_the_budget
+    self.assertEqual(conn.execute("SELECT estado FROM uso_ia").fetchone()["estado"], "ok_uso_desconocido")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'ok_uso_desconocido' != 'ok_uso_desconocido'
+
+----------------------------------------------------------------------
+Ran 21 tests in 1.745s
+
+FAILED (failures=7, errors=8)
+waiting for server to shut down.... done
+server stopped
+Temporary PostgreSQL cluster stopped and removed; no production connection used.

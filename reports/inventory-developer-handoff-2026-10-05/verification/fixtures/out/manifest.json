@@ -1,0 +1,6798 @@
+{
+ "canonical_cases": {
+  "area_max": {
+   "key": "M042"
+  },
+  "area_min": {
+   "key": "M041"
+  },
+  "confirmation_fresh_stale": [
+   "M050",
+   "M051"
+  ],
+  "formula_literals": [
+   "M023",
+   "M024",
+   "M025",
+   "M026"
+  ],
+  "html_literals": [
+   "M020",
+   "M021",
+   "M022"
+  ],
+  "likely_duplicate_pair": [
+   "M010",
+   "M012"
+  ],
+  "mxn_cents_per_m2": {
+   "asking_m2": 3456.78,
+   "key": "M031",
+   "moneda": "MXN"
+  },
+  "nearby_distinct_parcels": [
+   "M010",
+   "M011"
+  ],
+  "pagination_query": {
+   "estado": "Aguascalientes",
+   "municipio": "Villa Verificación Paginación",
+   "q": "Lote Paginación"
+  },
+  "price_inconsistency_warning": {
+   "key": "M040"
+  },
+  "price_on_request": {
+   "key": "M034"
+  },
+  "repeated_name_distinct_location": [
+   "M005",
+   "M006",
+   "M007"
+  ],
+  "usd_cents_per_m2": {
+   "asking_m2": 122.5,
+   "key": "M030",
+   "moneda": "USD"
+  },
+  "usd_per_m2_only": {
+   "asking_m2": 85.25,
+   "asking_price": null,
+   "key": "M032"
+  }
+ },
+ "counts": {
+  "master_by_currency": {
+   "MXN": 58,
+   "None": 16,
+   "USD": 46
+  },
+  "master_drafts": 10,
+  "master_intended_published": 100,
+  "master_intended_unpublished": 10,
+  "master_price_on_request": 14,
+  "master_publishable": 110,
+  "master_total": 120,
+  "matching_by_currency": {
+   "MXN": 126,
+   "None": 25,
+   "USD": 100
+  },
+  "matching_negotiation": 25,
+  "matching_total": 251
+ },
+ "fictional": true,
+ "fixture_hash_sha256": "8fa4b0926bcedcded3952c4a1aa68d4fc07882d2c4aad8a896985f9ff388a2b8",
+ "fixture_version": 1,
+ "generator": "verification/fixtures/gen_fixtures.py",
+ "logical_private_fields": [
+  "contacts",
+  "internal_notes",
+  "extra",
+  "price_confirmed_at",
+  "availability_confirmed_at"
+ ],
+ "records": {
+  "M001": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M001-ae86e2",
+    "SNTL-CONTACT-M001-c89888",
+    "SNTL-EXTRAK-M001-cb367b",
+    "SNTL-EXTRAV-M001-14ea17",
+    "SNTL-FORMULA-M001-266161",
+    "SNTL-NOTE-M001-0a67e0",
+    "SNTL-SRCFILE-M001-e7e221"
+   ]
+  },
+  "M002": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M002-ab026a",
+    "SNTL-CONTACT-M002-f207a5",
+    "SNTL-EXTRAK-M002-284c50",
+    "SNTL-EXTRAV-M002-16629f",
+    "SNTL-FORMULA-M002-bcb93d",
+    "SNTL-NOTE-M002-aa1b62",
+    "SNTL-SRCFILE-M002-c2ace7"
+   ]
+  },
+  "M003": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M003-7b9626",
+    "SNTL-CONTACT-M003-7b8b2f",
+    "SNTL-EXTRAK-M003-52ea72",
+    "SNTL-EXTRAV-M003-074d7c",
+    "SNTL-FORMULA-M003-36307e",
+    "SNTL-NOTE-M003-bcaac9",
+    "SNTL-SRCFILE-M003-0aa1e4"
+   ]
+  },
+  "M004": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M004-820193",
+    "SNTL-CONTACT-M004-6ddadb",
+    "SNTL-EXTRAK-M004-717c2c",
+    "SNTL-EXTRAV-M004-63dc0e",
+    "SNTL-FORMULA-M004-bbf330",
+    "SNTL-NOTE-M004-3a9973",
+    "SNTL-SRCFILE-M004-37c969"
+   ]
+  },
+  "M005": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M005-274148",
+    "SNTL-CONTACT-M005-823521",
+    "SNTL-EXTRAK-M005-6f1d12",
+    "SNTL-EXTRAV-M005-f6a60e",
+    "SNTL-FORMULA-M005-430fd3",
+    "SNTL-NOTE-M005-35e5a8",
+    "SNTL-SRCFILE-M005-f6ec6f"
+   ]
+  },
+  "M006": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M006-f19504",
+    "SNTL-CONTACT-M006-1bc668",
+    "SNTL-EXTRAK-M006-065ab8",
+    "SNTL-EXTRAV-M006-9b4a5c",
+    "SNTL-FORMULA-M006-015125",
+    "SNTL-NOTE-M006-353b74",
+    "SNTL-SRCFILE-M006-1411f2"
+   ]
+  },
+  "M007": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M007-7c4fd6",
+    "SNTL-CONTACT-M007-161d18",
+    "SNTL-EXTRAK-M007-7542f0",
+    "SNTL-EXTRAV-M007-5fddd4",
+    "SNTL-FORMULA-M007-a1a709",
+    "SNTL-NOTE-M007-31211a",
+    "SNTL-SRCFILE-M007-92bdb3"
+   ]
+  },
+  "M008": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M008-53adfc",
+    "SNTL-CONTACT-M008-ab2a59",
+    "SNTL-EXTRAK-M008-2ce615",
+    "SNTL-EXTRAV-M008-b67103",
+    "SNTL-FORMULA-M008-db7f7a",
+    "SNTL-NOTE-M008-a4dbde",
+    "SNTL-SRCFILE-M008-054463"
+   ]
+  },
+  "M009": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M009-47ce15",
+    "SNTL-CONTACT-M009-5f9eb9",
+    "SNTL-EXTRAK-M009-6a4ce6",
+    "SNTL-EXTRAV-M009-87a4be",
+    "SNTL-FORMULA-M009-0c0af9",
+    "SNTL-NOTE-M009-3a0d57",
+    "SNTL-SRCFILE-M009-3e4d15"
+   ]
+  },
+  "M010": {
+   "dup_group": "olivos-A",
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M010-ab48bc",
+    "SNTL-CONTACT-M010-8c8bbe",
+    "SNTL-EXTRAK-M010-632641",
+    "SNTL-EXTRAV-M010-df9dc4",
+    "SNTL-FORMULA-M010-df8b4e",
+    "SNTL-NOTE-M010-755bb3",
+    "SNTL-SRCFILE-M010-53a6e0"
+   ]
+  },
+  "M011": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M011-ab225e",
+    "SNTL-CONTACT-M011-d1535c",
+    "SNTL-EXTRAK-M011-807a59",
+    "SNTL-EXTRAV-M011-afc714",
+    "SNTL-FORMULA-M011-962077",
+    "SNTL-NOTE-M011-68dbea",
+    "SNTL-SRCFILE-M011-00979e"
+   ]
+  },
+  "M012": {
+   "dup_group": "olivos-A",
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M012-aadac3",
+    "SNTL-CONTACT-M012-83039e",
+    "SNTL-EXTRAK-M012-d8db8f",
+    "SNTL-EXTRAV-M012-cf72e9",
+    "SNTL-FORMULA-M012-698d18",
+    "SNTL-NOTE-M012-f2b427",
+    "SNTL-SRCFILE-M012-94291e"
+   ]
+  },
+  "M013": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M013-5f4e36",
+    "SNTL-CONTACT-M013-350c45",
+    "SNTL-EXTRAK-M013-7c7c90",
+    "SNTL-EXTRAV-M013-dc4464",
+    "SNTL-FORMULA-M013-2400a2",
+    "SNTL-NOTE-M013-382689",
+    "SNTL-SRCFILE-M013-51fc2a"
+   ]
+  },
+  "M014": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M014-be4c2c",
+    "SNTL-CONTACT-M014-9c0ba4",
+    "SNTL-EXTRAK-M014-6cd606",
+    "SNTL-EXTRAV-M014-66d85e",
+    "SNTL-FORMULA-M014-a6d45b",
+    "SNTL-NOTE-M014-4fff35",
+    "SNTL-SRCFILE-M014-877846"
+   ]
+  },
+  "M015": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M015-93f3a7",
+    "SNTL-CONTACT-M015-d7e025",
+    "SNTL-EXTRAK-M015-02e762",
+    "SNTL-EXTRAV-M015-ddb81a",
+    "SNTL-FORMULA-M015-fac91f",
+    "SNTL-NOTE-M015-e47f12",
+    "SNTL-SRCFILE-M015-0272c6"
+   ]
+  },
+  "M016": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M016-bb61a8",
+    "SNTL-CONTACT-M016-b4522a",
+    "SNTL-EXTRAK-M016-e82e43",
+    "SNTL-EXTRAV-M016-dec378",
+    "SNTL-FORMULA-M016-b87cb1",
+    "SNTL-NOTE-M016-5a56ba",
+    "SNTL-SRCFILE-M016-1c3b00"
+   ]
+  },
+  "M017": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M017-203745",
+    "SNTL-CONTACT-M017-e89bb7",
+    "SNTL-EXTRAK-M017-ed173a",
+    "SNTL-EXTRAV-M017-7b5255",
+    "SNTL-FORMULA-M017-f367dc",
+    "SNTL-NOTE-M017-b00742",
+    "SNTL-SRCFILE-M017-8ff106"
+   ]
+  },
+  "M018": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M018-17b6dd",
+    "SNTL-CONTACT-M018-47a27f",
+    "SNTL-EXTRAK-M018-4482d8",
+    "SNTL-EXTRAV-M018-e772b1",
+    "SNTL-FORMULA-M018-db9a7b",
+    "SNTL-NOTE-M018-16183b",
+    "SNTL-SRCFILE-M018-73fc42"
+   ]
+  },
+  "M019": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M019-4084c5",
+    "SNTL-CONTACT-M019-c05ccc",
+    "SNTL-EXTRAK-M019-62e23e",
+    "SNTL-EXTRAV-M019-d49713",
+    "SNTL-FORMULA-M019-d2edf8",
+    "SNTL-NOTE-M019-5663ec",
+    "SNTL-SRCFILE-M019-4e3c3c"
+   ]
+  },
+  "M020": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M020-9338ae",
+    "SNTL-CONTACT-M020-dca144",
+    "SNTL-EXTRAK-M020-ebee55",
+    "SNTL-EXTRAV-M020-0c91d1",
+    "SNTL-FORMULA-M020-117d13",
+    "SNTL-NOTE-M020-222d63",
+    "SNTL-SRCFILE-M020-398bb8"
+   ]
+  },
+  "M021": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M021-8ea7ac",
+    "SNTL-CONTACT-M021-e4f14e",
+    "SNTL-EXTRAK-M021-bec95d",
+    "SNTL-EXTRAV-M021-23156b",
+    "SNTL-FORMULA-M021-085b59",
+    "SNTL-NOTE-M021-6b8fbe",
+    "SNTL-SRCFILE-M021-48daba"
+   ]
+  },
+  "M022": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M022-ef42c6",
+    "SNTL-CONTACT-M022-cd3101",
+    "SNTL-EXTRAK-M022-77f381",
+    "SNTL-EXTRAV-M022-f7b4da",
+    "SNTL-FORMULA-M022-00485f",
+    "SNTL-NOTE-M022-eefc14",
+    "SNTL-SRCFILE-M022-42ab32"
+   ]
+  },
+  "M023": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M023-5d4da2",
+    "SNTL-CONTACT-M023-7722d9",
+    "SNTL-EXTRAK-M023-e050d4",
+    "SNTL-EXTRAV-M023-c11ab4",
+    "SNTL-FORMULA-M023-6f4284",
+    "SNTL-NOTE-M023-19eaa1",
+    "SNTL-SRCFILE-M023-769540"
+   ]
+  },
+  "M024": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M024-31b6e2",
+    "SNTL-CONTACT-M024-76615a",
+    "SNTL-EXTRAK-M024-2c59cc",
+    "SNTL-EXTRAV-M024-375298",
+    "SNTL-FORMULA-M024-5756f1",
+    "SNTL-NOTE-M024-3dad3d",
+    "SNTL-SRCFILE-M024-f8e614"
+   ]
+  },
+  "M025": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M025-256541",
+    "SNTL-CONTACT-M025-6ac02c",
+    "SNTL-EXTRAK-M025-641c99",
+    "SNTL-EXTRAV-M025-c906fd",
+    "SNTL-FORMULA-M025-322a03",
+    "SNTL-NOTE-M025-221d90",
+    "SNTL-SRCFILE-M025-9158c7"
+   ]
+  },
+  "M026": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M026-d3c98a",
+    "SNTL-CONTACT-M026-2187d7",
+    "SNTL-EXTRAK-M026-5469de",
+    "SNTL-EXTRAV-M026-47d2ac",
+    "SNTL-FORMULA-M026-ed30ed",
+    "SNTL-NOTE-M026-4381c6",
+    "SNTL-SRCFILE-M026-ecde33"
+   ]
+  },
+  "M027": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M027-fcf2d9",
+    "SNTL-CONTACT-M027-6d79ac",
+    "SNTL-EXTRAK-M027-8b9b36",
+    "SNTL-EXTRAV-M027-5fec0b",
+    "SNTL-FORMULA-M027-c2c3cd",
+    "SNTL-NOTE-M027-ef425b",
+    "SNTL-SRCFILE-M027-5f6785"
+   ]
+  },
+  "M028": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M028-134611",
+    "SNTL-CONTACT-M028-631d55",
+    "SNTL-EXTRAK-M028-adefe7",
+    "SNTL-EXTRAV-M028-75658d",
+    "SNTL-FORMULA-M028-382a06",
+    "SNTL-NOTE-M028-4d7d9c",
+    "SNTL-SRCFILE-M028-297f48"
+   ]
+  },
+  "M029": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M029-027f09",
+    "SNTL-CONTACT-M029-2eca28",
+    "SNTL-EXTRAK-M029-e1db03",
+    "SNTL-EXTRAV-M029-460a5f",
+    "SNTL-FORMULA-M029-c512ae",
+    "SNTL-NOTE-M029-167dcb",
+    "SNTL-SRCFILE-M029-7dd416"
+   ]
+  },
+  "M030": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M030-295ac0",
+    "SNTL-CONTACT-M030-54adab",
+    "SNTL-EXTRAK-M030-4e3c07",
+    "SNTL-EXTRAV-M030-fa019e",
+    "SNTL-FORMULA-M030-f6ff2d",
+    "SNTL-NOTE-M030-8d4c1f",
+    "SNTL-SRCFILE-M030-c24b33"
+   ]
+  },
+  "M031": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M031-55f291",
+    "SNTL-CONTACT-M031-888f5c",
+    "SNTL-EXTRAK-M031-364e9a",
+    "SNTL-EXTRAV-M031-feb722",
+    "SNTL-FORMULA-M031-424596",
+    "SNTL-NOTE-M031-3e90b2",
+    "SNTL-SRCFILE-M031-a2c9b0"
+   ]
+  },
+  "M032": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M032-155b73",
+    "SNTL-CONTACT-M032-4c5207",
+    "SNTL-EXTRAK-M032-224646",
+    "SNTL-EXTRAV-M032-4bed01",
+    "SNTL-FORMULA-M032-b38cb8",
+    "SNTL-NOTE-M032-bfecd9",
+    "SNTL-SRCFILE-M032-cb68af"
+   ]
+  },
+  "M033": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M033-c7a5af",
+    "SNTL-CONTACT-M033-7a06a5",
+    "SNTL-EXTRAK-M033-d6580b",
+    "SNTL-EXTRAV-M033-4d0d8b",
+    "SNTL-FORMULA-M033-37932c",
+    "SNTL-NOTE-M033-351b46",
+    "SNTL-SRCFILE-M033-0872a9"
+   ]
+  },
+  "M034": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M034-28a66b",
+    "SNTL-CONTACT-M034-1d1b0a",
+    "SNTL-EXTRAK-M034-648452",
+    "SNTL-EXTRAV-M034-3a0deb",
+    "SNTL-FORMULA-M034-032c9b",
+    "SNTL-NOTE-M034-d3680c",
+    "SNTL-SRCFILE-M034-575160"
+   ]
+  },
+  "M035": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M035-470e91",
+    "SNTL-CONTACT-M035-cf58ca",
+    "SNTL-EXTRAK-M035-ee2129",
+    "SNTL-EXTRAV-M035-c71c0c",
+    "SNTL-FORMULA-M035-24c220",
+    "SNTL-NOTE-M035-99ecb2",
+    "SNTL-SRCFILE-M035-462307"
+   ]
+  },
+  "M036": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M036-5a318a",
+    "SNTL-CONTACT-M036-f57882",
+    "SNTL-EXTRAK-M036-5a922c",
+    "SNTL-EXTRAV-M036-22f1c9",
+    "SNTL-FORMULA-M036-03cb6d",
+    "SNTL-NOTE-M036-03b293",
+    "SNTL-SRCFILE-M036-c87a6e"
+   ]
+  },
+  "M037": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M037-cad713",
+    "SNTL-CONTACT-M037-2bf58c",
+    "SNTL-EXTRAK-M037-c02203",
+    "SNTL-EXTRAV-M037-f311b5",
+    "SNTL-FORMULA-M037-4f6df4",
+    "SNTL-NOTE-M037-73e087",
+    "SNTL-SRCFILE-M037-696a67"
+   ]
+  },
+  "M038": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M038-6239fb",
+    "SNTL-CONTACT-M038-1c3c14",
+    "SNTL-EXTRAK-M038-724b49",
+    "SNTL-EXTRAV-M038-972077",
+    "SNTL-FORMULA-M038-57997a",
+    "SNTL-NOTE-M038-95998d",
+    "SNTL-SRCFILE-M038-6c83ed"
+   ]
+  },
+  "M039": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M039-8c4ada",
+    "SNTL-CONTACT-M039-2af4e0",
+    "SNTL-EXTRAK-M039-754454",
+    "SNTL-EXTRAV-M039-46a704",
+    "SNTL-FORMULA-M039-a551d1",
+    "SNTL-NOTE-M039-0763bc",
+    "SNTL-SRCFILE-M039-5e12c1"
+   ]
+  },
+  "M040": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "price_inconsistency",
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M040-ca3ac4",
+    "SNTL-CONTACT-M040-8e2ea5",
+    "SNTL-EXTRAK-M040-126bde",
+    "SNTL-EXTRAV-M040-453259",
+    "SNTL-FORMULA-M040-d55f72",
+    "SNTL-NOTE-M040-0d9127",
+    "SNTL-SRCFILE-M040-25095e"
+   ]
+  },
+  "M041": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M041-ada3e5",
+    "SNTL-CONTACT-M041-6a6033",
+    "SNTL-EXTRAK-M041-99acfd",
+    "SNTL-EXTRAV-M041-b37e9a",
+    "SNTL-FORMULA-M041-481037",
+    "SNTL-NOTE-M041-aeeee1",
+    "SNTL-SRCFILE-M041-35d518"
+   ]
+  },
+  "M042": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M042-a36de2",
+    "SNTL-CONTACT-M042-f0cfce",
+    "SNTL-EXTRAK-M042-399242",
+    "SNTL-EXTRAV-M042-3341d4",
+    "SNTL-FORMULA-M042-de7dc2",
+    "SNTL-NOTE-M042-afa103",
+    "SNTL-SRCFILE-M042-e448a8"
+   ]
+  },
+  "M043": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M043-0cc1a0",
+    "SNTL-CONTACT-M043-6e8785",
+    "SNTL-EXTRAK-M043-065d8a",
+    "SNTL-EXTRAV-M043-6073a4",
+    "SNTL-FORMULA-M043-4ad39c",
+    "SNTL-NOTE-M043-5446f9",
+    "SNTL-SRCFILE-M043-0bc9c8"
+   ]
+  },
+  "M044": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M044-2eb082",
+    "SNTL-CONTACT-M044-4aa971",
+    "SNTL-EXTRAK-M044-3f620a",
+    "SNTL-EXTRAV-M044-b4bf0e",
+    "SNTL-FORMULA-M044-40c428",
+    "SNTL-NOTE-M044-240996",
+    "SNTL-SRCFILE-M044-1656e8"
+   ]
+  },
+  "M045": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M045-489ad1",
+    "SNTL-CONTACT-M045-aca123",
+    "SNTL-EXTRAK-M045-01a161",
+    "SNTL-EXTRAV-M045-02aa67",
+    "SNTL-FORMULA-M045-f9768f",
+    "SNTL-NOTE-M045-ce7097",
+    "SNTL-SRCFILE-M045-b13986"
+   ]
+  },
+  "M046": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M046-db60f1",
+    "SNTL-CONTACT-M046-47a90e",
+    "SNTL-EXTRAK-M046-ab347c",
+    "SNTL-EXTRAV-M046-5d4e88",
+    "SNTL-FORMULA-M046-b4dcb4",
+    "SNTL-NOTE-M046-761e0a",
+    "SNTL-SRCFILE-M046-09c12c"
+   ]
+  },
+  "M047": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M047-3e0547",
+    "SNTL-CONTACT-M047-1b915c",
+    "SNTL-EXTRAK-M047-dc4ea4",
+    "SNTL-EXTRAV-M047-e9e929",
+    "SNTL-FORMULA-M047-74f531",
+    "SNTL-NOTE-M047-6808b8",
+    "SNTL-SRCFILE-M047-631a66"
+   ]
+  },
+  "M048": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M048-c27cef",
+    "SNTL-CONTACT-M048-5f3d94",
+    "SNTL-EXTRAK-M048-be3805",
+    "SNTL-EXTRAV-M048-afed72",
+    "SNTL-FORMULA-M048-1dc43d",
+    "SNTL-NOTE-M048-a85812",
+    "SNTL-SRCFILE-M048-166921"
+   ]
+  },
+  "M049": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M049-a92bfb",
+    "SNTL-CONTACT-M049-d28af6",
+    "SNTL-EXTRAK-M049-c5706e",
+    "SNTL-EXTRAV-M049-c33083",
+    "SNTL-FORMULA-M049-68f907",
+    "SNTL-NOTE-M049-76b874",
+    "SNTL-SRCFILE-M049-b283cc"
+   ]
+  },
+  "M050": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M050-188df8",
+    "SNTL-CONTACT-M050-7a070d",
+    "SNTL-EXTRAK-M050-8f2b35",
+    "SNTL-EXTRAV-M050-5421b0",
+    "SNTL-FORMULA-M050-97b546",
+    "SNTL-NOTE-M050-2be59c",
+    "SNTL-SRCFILE-M050-23b81d"
+   ]
+  },
+  "M051": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M051-69af8f",
+    "SNTL-CONTACT-M051-4711fd",
+    "SNTL-EXTRAK-M051-7058cb",
+    "SNTL-EXTRAV-M051-e50c07",
+    "SNTL-FORMULA-M051-09b8af",
+    "SNTL-NOTE-M051-54a4b0",
+    "SNTL-SRCFILE-M051-c769be"
+   ]
+  },
+  "M052": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M052-404677",
+    "SNTL-CONTACT-M052-37f8eb",
+    "SNTL-EXTRAK-M052-20fb7c",
+    "SNTL-EXTRAV-M052-2cb960",
+    "SNTL-FORMULA-M052-e35ce8",
+    "SNTL-NOTE-M052-a3c218",
+    "SNTL-SRCFILE-M052-71d108"
+   ]
+  },
+  "M053": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M053-199c8c",
+    "SNTL-CONTACT-M053-b860e3",
+    "SNTL-EXTRAK-M053-397863",
+    "SNTL-EXTRAV-M053-ef4d15",
+    "SNTL-FORMULA-M053-af60fd",
+    "SNTL-NOTE-M053-70ad55",
+    "SNTL-SRCFILE-M053-306686"
+   ]
+  },
+  "M054": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M054-25e3fb",
+    "SNTL-CONTACT-M054-ada35a",
+    "SNTL-EXTRAK-M054-7eb457",
+    "SNTL-EXTRAV-M054-8b87ce",
+    "SNTL-FORMULA-M054-ce6dc1",
+    "SNTL-NOTE-M054-134f0d",
+    "SNTL-SRCFILE-M054-366e66"
+   ]
+  },
+  "M055": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M055-4f0d28",
+    "SNTL-CONTACT-M055-fe4ff5",
+    "SNTL-EXTRAK-M055-2da475",
+    "SNTL-EXTRAV-M055-169e81",
+    "SNTL-FORMULA-M055-5be2a4",
+    "SNTL-NOTE-M055-5bab06",
+    "SNTL-SRCFILE-M055-a756bf"
+   ]
+  },
+  "M056": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M056-fd4997",
+    "SNTL-CONTACT-M056-1a43d3",
+    "SNTL-EXTRAK-M056-680120",
+    "SNTL-EXTRAV-M056-6d7021",
+    "SNTL-FORMULA-M056-a08bbf",
+    "SNTL-NOTE-M056-104527",
+    "SNTL-SRCFILE-M056-454da7"
+   ]
+  },
+  "M057": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M057-db1c1e",
+    "SNTL-CONTACT-M057-500e23",
+    "SNTL-EXTRAK-M057-540b82",
+    "SNTL-EXTRAV-M057-a9cf2b",
+    "SNTL-FORMULA-M057-91692c",
+    "SNTL-NOTE-M057-102b3e",
+    "SNTL-SRCFILE-M057-645720"
+   ]
+  },
+  "M058": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M058-417434",
+    "SNTL-CONTACT-M058-80558b",
+    "SNTL-EXTRAK-M058-b2c93b",
+    "SNTL-EXTRAV-M058-04d1d6",
+    "SNTL-FORMULA-M058-e2e643",
+    "SNTL-NOTE-M058-8a9004",
+    "SNTL-SRCFILE-M058-4897b6"
+   ]
+  },
+  "M059": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M059-b76073",
+    "SNTL-CONTACT-M059-ebcd7c",
+    "SNTL-EXTRAK-M059-25d851",
+    "SNTL-EXTRAV-M059-458773",
+    "SNTL-FORMULA-M059-f1bf74",
+    "SNTL-NOTE-M059-3d6528",
+    "SNTL-SRCFILE-M059-8a8b74"
+   ]
+  },
+  "M060": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M060-a77643",
+    "SNTL-CONTACT-M060-63a4f4",
+    "SNTL-EXTRAK-M060-31f99e",
+    "SNTL-EXTRAV-M060-de77ba",
+    "SNTL-FORMULA-M060-13f815",
+    "SNTL-NOTE-M060-6cefa3",
+    "SNTL-SRCFILE-M060-7b9f14"
+   ]
+  },
+  "M061": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M061-18c2e5",
+    "SNTL-CONTACT-M061-e933c0",
+    "SNTL-EXTRAK-M061-e386a0",
+    "SNTL-EXTRAV-M061-1b1c26",
+    "SNTL-FORMULA-M061-39e62e",
+    "SNTL-NOTE-M061-e255ad",
+    "SNTL-SRCFILE-M061-39f945"
+   ]
+  },
+  "M062": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M062-ac0d09",
+    "SNTL-CONTACT-M062-02074b",
+    "SNTL-EXTRAK-M062-3658e9",
+    "SNTL-EXTRAV-M062-7b0a30",
+    "SNTL-FORMULA-M062-917fde",
+    "SNTL-NOTE-M062-fdb427",
+    "SNTL-SRCFILE-M062-d11e02"
+   ]
+  },
+  "M063": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M063-6cdc1b",
+    "SNTL-CONTACT-M063-2fcd75",
+    "SNTL-EXTRAK-M063-53f99b",
+    "SNTL-EXTRAV-M063-ccc95f",
+    "SNTL-FORMULA-M063-02c034",
+    "SNTL-NOTE-M063-0011a7",
+    "SNTL-SRCFILE-M063-00726b"
+   ]
+  },
+  "M064": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M064-a6b2cd",
+    "SNTL-CONTACT-M064-8c47c2",
+    "SNTL-EXTRAK-M064-5f58d2",
+    "SNTL-EXTRAV-M064-da1398",
+    "SNTL-FORMULA-M064-325bbc",
+    "SNTL-NOTE-M064-32a6e3",
+    "SNTL-SRCFILE-M064-62fd9f"
+   ]
+  },
+  "M065": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M065-534c4e",
+    "SNTL-CONTACT-M065-da24ac",
+    "SNTL-EXTRAK-M065-dc9701",
+    "SNTL-EXTRAV-M065-7d6851",
+    "SNTL-FORMULA-M065-ce6c9d",
+    "SNTL-NOTE-M065-49f287",
+    "SNTL-SRCFILE-M065-80efed"
+   ]
+  },
+  "M066": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M066-162239",
+    "SNTL-CONTACT-M066-c65af3",
+    "SNTL-EXTRAK-M066-3f2e8d",
+    "SNTL-EXTRAV-M066-0b4b14",
+    "SNTL-FORMULA-M066-f8121a",
+    "SNTL-NOTE-M066-c161ee",
+    "SNTL-SRCFILE-M066-edcd27"
+   ]
+  },
+  "M067": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M067-8929e7",
+    "SNTL-CONTACT-M067-a0b0c6",
+    "SNTL-EXTRAK-M067-ef56ae",
+    "SNTL-EXTRAV-M067-7f9673",
+    "SNTL-FORMULA-M067-3bbbb5",
+    "SNTL-NOTE-M067-f5f7e0",
+    "SNTL-SRCFILE-M067-23bc85"
+   ]
+  },
+  "M068": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M068-fc656e",
+    "SNTL-CONTACT-M068-e50a0d",
+    "SNTL-EXTRAK-M068-e8665b",
+    "SNTL-EXTRAV-M068-5eb295",
+    "SNTL-FORMULA-M068-db0b1b",
+    "SNTL-NOTE-M068-8f3078",
+    "SNTL-SRCFILE-M068-555dc0"
+   ]
+  },
+  "M069": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M069-f64455",
+    "SNTL-CONTACT-M069-145a34",
+    "SNTL-EXTRAK-M069-0a890f",
+    "SNTL-EXTRAV-M069-0d9323",
+    "SNTL-FORMULA-M069-507acf",
+    "SNTL-NOTE-M069-d3aa35",
+    "SNTL-SRCFILE-M069-7cb4b4"
+   ]
+  },
+  "M070": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M070-980534",
+    "SNTL-CONTACT-M070-fc2443",
+    "SNTL-EXTRAK-M070-cc71ed",
+    "SNTL-EXTRAV-M070-db00f5",
+    "SNTL-FORMULA-M070-8c1ad8",
+    "SNTL-NOTE-M070-f3394d",
+    "SNTL-SRCFILE-M070-8624c5"
+   ]
+  },
+  "M071": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M071-a7a2ef",
+    "SNTL-CONTACT-M071-e0aeb8",
+    "SNTL-EXTRAK-M071-9885a9",
+    "SNTL-EXTRAV-M071-8c83e8",
+    "SNTL-FORMULA-M071-cd1d60",
+    "SNTL-NOTE-M071-0b95a8",
+    "SNTL-SRCFILE-M071-241dd1"
+   ]
+  },
+  "M072": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M072-d27dba",
+    "SNTL-CONTACT-M072-5f896b",
+    "SNTL-EXTRAK-M072-52edb5",
+    "SNTL-EXTRAV-M072-2a3c78",
+    "SNTL-FORMULA-M072-b5e3dd",
+    "SNTL-NOTE-M072-22d289",
+    "SNTL-SRCFILE-M072-4b7131"
+   ]
+  },
+  "M073": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M073-b989ed",
+    "SNTL-CONTACT-M073-40f4dd",
+    "SNTL-EXTRAK-M073-6139b7",
+    "SNTL-EXTRAV-M073-44e003",
+    "SNTL-FORMULA-M073-1f1a69",
+    "SNTL-NOTE-M073-66de97",
+    "SNTL-SRCFILE-M073-e6e6c4"
+   ]
+  },
+  "M074": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M074-36d5b0",
+    "SNTL-CONTACT-M074-86e816",
+    "SNTL-EXTRAK-M074-523e22",
+    "SNTL-EXTRAV-M074-9140ae",
+    "SNTL-FORMULA-M074-858d22",
+    "SNTL-NOTE-M074-a5e461",
+    "SNTL-SRCFILE-M074-75d8bd"
+   ]
+  },
+  "M075": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M075-e47151",
+    "SNTL-CONTACT-M075-99c5ed",
+    "SNTL-EXTRAK-M075-59d5aa",
+    "SNTL-EXTRAV-M075-3f92d3",
+    "SNTL-FORMULA-M075-cfb15c",
+    "SNTL-NOTE-M075-f977f3",
+    "SNTL-SRCFILE-M075-219695"
+   ]
+  },
+  "M076": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M076-1ce78f",
+    "SNTL-CONTACT-M076-f84b3e",
+    "SNTL-EXTRAK-M076-af5607",
+    "SNTL-EXTRAV-M076-05eabe",
+    "SNTL-FORMULA-M076-b66ea9",
+    "SNTL-NOTE-M076-3d384e",
+    "SNTL-SRCFILE-M076-c7fbe9"
+   ]
+  },
+  "M077": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M077-d8aa18",
+    "SNTL-CONTACT-M077-e150fd",
+    "SNTL-EXTRAK-M077-28ea01",
+    "SNTL-EXTRAV-M077-11002c",
+    "SNTL-FORMULA-M077-9b776d",
+    "SNTL-NOTE-M077-b08fcd",
+    "SNTL-SRCFILE-M077-370c41"
+   ]
+  },
+  "M078": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M078-b45832",
+    "SNTL-CONTACT-M078-9a2e25",
+    "SNTL-EXTRAK-M078-63a833",
+    "SNTL-EXTRAV-M078-407674",
+    "SNTL-FORMULA-M078-d02230",
+    "SNTL-NOTE-M078-0c2a11",
+    "SNTL-SRCFILE-M078-9cd850"
+   ]
+  },
+  "M079": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M079-21b298",
+    "SNTL-CONTACT-M079-df66b4",
+    "SNTL-EXTRAK-M079-f182d1",
+    "SNTL-EXTRAV-M079-15c4df",
+    "SNTL-FORMULA-M079-ca894d",
+    "SNTL-NOTE-M079-ee5ba6",
+    "SNTL-SRCFILE-M079-7fd2e4"
+   ]
+  },
+  "M080": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M080-279d12",
+    "SNTL-CONTACT-M080-bc4948",
+    "SNTL-EXTRAK-M080-218a3c",
+    "SNTL-EXTRAV-M080-74e58d",
+    "SNTL-FORMULA-M080-3f7c6b",
+    "SNTL-NOTE-M080-466c4d",
+    "SNTL-SRCFILE-M080-2daded"
+   ]
+  },
+  "M081": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M081-8c885b",
+    "SNTL-CONTACT-M081-40b7da",
+    "SNTL-EXTRAK-M081-85cdb5",
+    "SNTL-EXTRAV-M081-859a1c",
+    "SNTL-FORMULA-M081-360800",
+    "SNTL-NOTE-M081-a0cf36",
+    "SNTL-SRCFILE-M081-4420b3"
+   ]
+  },
+  "M082": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M082-5cd247",
+    "SNTL-CONTACT-M082-a9e4b0",
+    "SNTL-EXTRAK-M082-0e5caf",
+    "SNTL-EXTRAV-M082-5ff71b",
+    "SNTL-FORMULA-M082-9a5327",
+    "SNTL-NOTE-M082-4f4c00",
+    "SNTL-SRCFILE-M082-eda0f2"
+   ]
+  },
+  "M083": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M083-d5f0aa",
+    "SNTL-CONTACT-M083-795e9c",
+    "SNTL-EXTRAK-M083-c2420c",
+    "SNTL-EXTRAV-M083-41fb7f",
+    "SNTL-FORMULA-M083-708b7f",
+    "SNTL-NOTE-M083-210a0b",
+    "SNTL-SRCFILE-M083-142816"
+   ]
+  },
+  "M084": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M084-c1b1df",
+    "SNTL-CONTACT-M084-455914",
+    "SNTL-EXTRAK-M084-8ec5fe",
+    "SNTL-EXTRAV-M084-c49497",
+    "SNTL-FORMULA-M084-0f838c",
+    "SNTL-NOTE-M084-725b96",
+    "SNTL-SRCFILE-M084-54cb54"
+   ]
+  },
+  "M085": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M085-708c2d",
+    "SNTL-CONTACT-M085-a3fa76",
+    "SNTL-EXTRAK-M085-64c585",
+    "SNTL-EXTRAV-M085-9c879e",
+    "SNTL-FORMULA-M085-0e1304",
+    "SNTL-NOTE-M085-0108a3",
+    "SNTL-SRCFILE-M085-900d3e"
+   ]
+  },
+  "M086": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M086-7eaa73",
+    "SNTL-CONTACT-M086-f2da13",
+    "SNTL-EXTRAK-M086-40d485",
+    "SNTL-EXTRAV-M086-b1a993",
+    "SNTL-FORMULA-M086-c8bc78",
+    "SNTL-NOTE-M086-a9f381",
+    "SNTL-SRCFILE-M086-985dd1"
+   ]
+  },
+  "M087": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M087-2c3472",
+    "SNTL-CONTACT-M087-f8deb8",
+    "SNTL-EXTRAK-M087-aac5d1",
+    "SNTL-EXTRAV-M087-337e29",
+    "SNTL-FORMULA-M087-964ce4",
+    "SNTL-NOTE-M087-9b95b2",
+    "SNTL-SRCFILE-M087-80240e"
+   ]
+  },
+  "M088": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M088-fd7291",
+    "SNTL-CONTACT-M088-980a2f",
+    "SNTL-EXTRAK-M088-4a2b55",
+    "SNTL-EXTRAV-M088-24aa27",
+    "SNTL-FORMULA-M088-d14050",
+    "SNTL-NOTE-M088-dafda4",
+    "SNTL-SRCFILE-M088-94cd97"
+   ]
+  },
+  "M089": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M089-97a0cf",
+    "SNTL-CONTACT-M089-5ec107",
+    "SNTL-EXTRAK-M089-585b5e",
+    "SNTL-EXTRAV-M089-c54a87",
+    "SNTL-FORMULA-M089-41a203",
+    "SNTL-NOTE-M089-88cc32",
+    "SNTL-SRCFILE-M089-840b18"
+   ]
+  },
+  "M090": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M090-5e49e0",
+    "SNTL-CONTACT-M090-4d277e",
+    "SNTL-EXTRAK-M090-87e6bc",
+    "SNTL-EXTRAV-M090-4a7cfb",
+    "SNTL-FORMULA-M090-29cac6",
+    "SNTL-NOTE-M090-10e905",
+    "SNTL-SRCFILE-M090-5d9607"
+   ]
+  },
+  "M091": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M091-7d5a54",
+    "SNTL-CONTACT-M091-cee4db",
+    "SNTL-EXTRAK-M091-1e3c72",
+    "SNTL-EXTRAV-M091-416c37",
+    "SNTL-FORMULA-M091-dc138a",
+    "SNTL-NOTE-M091-9ab4df",
+    "SNTL-SRCFILE-M091-820235"
+   ]
+  },
+  "M092": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M092-f2915a",
+    "SNTL-CONTACT-M092-f24fb7",
+    "SNTL-EXTRAK-M092-c33e8b",
+    "SNTL-EXTRAV-M092-003ba7",
+    "SNTL-FORMULA-M092-fa0c2f",
+    "SNTL-NOTE-M092-317416",
+    "SNTL-SRCFILE-M092-d068b3"
+   ]
+  },
+  "M093": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M093-f657cf",
+    "SNTL-CONTACT-M093-305642",
+    "SNTL-EXTRAK-M093-d1e940",
+    "SNTL-EXTRAV-M093-fefb81",
+    "SNTL-FORMULA-M093-9cb0b5",
+    "SNTL-NOTE-M093-1a0432",
+    "SNTL-SRCFILE-M093-b7df93"
+   ]
+  },
+  "M094": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M094-42a253",
+    "SNTL-CONTACT-M094-06103f",
+    "SNTL-EXTRAK-M094-42122e",
+    "SNTL-EXTRAV-M094-184f0e",
+    "SNTL-FORMULA-M094-d39205",
+    "SNTL-NOTE-M094-ae4793",
+    "SNTL-SRCFILE-M094-3801f2"
+   ]
+  },
+  "M095": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M095-54b428",
+    "SNTL-CONTACT-M095-e05e31",
+    "SNTL-EXTRAK-M095-d0e400",
+    "SNTL-EXTRAV-M095-ebb9eb",
+    "SNTL-FORMULA-M095-796a52",
+    "SNTL-NOTE-M095-ee2a4a",
+    "SNTL-SRCFILE-M095-91730c"
+   ]
+  },
+  "M096": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M096-9eefb8",
+    "SNTL-CONTACT-M096-a83851",
+    "SNTL-EXTRAK-M096-9c7fc0",
+    "SNTL-EXTRAV-M096-02132c",
+    "SNTL-FORMULA-M096-71ec39",
+    "SNTL-NOTE-M096-49bd22",
+    "SNTL-SRCFILE-M096-1f42cc"
+   ]
+  },
+  "M097": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M097-31866c",
+    "SNTL-CONTACT-M097-139d80",
+    "SNTL-EXTRAK-M097-776bc3",
+    "SNTL-EXTRAV-M097-c40fca",
+    "SNTL-FORMULA-M097-ff41b3",
+    "SNTL-NOTE-M097-64ddee",
+    "SNTL-SRCFILE-M097-1a3892"
+   ]
+  },
+  "M098": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M098-bfeae8",
+    "SNTL-CONTACT-M098-c5dd12",
+    "SNTL-EXTRAK-M098-ba2c9a",
+    "SNTL-EXTRAV-M098-e72838",
+    "SNTL-FORMULA-M098-03c3b3",
+    "SNTL-NOTE-M098-b920a3",
+    "SNTL-SRCFILE-M098-5654cd"
+   ]
+  },
+  "M099": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M099-5f10e7",
+    "SNTL-CONTACT-M099-1b1320",
+    "SNTL-EXTRAK-M099-0bf1db",
+    "SNTL-EXTRAV-M099-a8aeab",
+    "SNTL-FORMULA-M099-ce0ea0",
+    "SNTL-NOTE-M099-d494bd",
+    "SNTL-SRCFILE-M099-881d55"
+   ]
+  },
+  "M100": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M100-65e5fc",
+    "SNTL-CONTACT-M100-f21828",
+    "SNTL-EXTRAK-M100-44070f",
+    "SNTL-EXTRAV-M100-6bb4d8",
+    "SNTL-FORMULA-M100-95865c",
+    "SNTL-NOTE-M100-534558",
+    "SNTL-SRCFILE-M100-22914c"
+   ]
+  },
+  "M101": {
+   "dup_group": null,
+   "expected_blockers": [
+    "coordinates"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M101-d6005f",
+    "SNTL-CONTACT-M101-2c8b11",
+    "SNTL-EXTRAK-M101-cdf9f0",
+    "SNTL-EXTRAV-M101-d7eb74",
+    "SNTL-FORMULA-M101-b2cbf4",
+    "SNTL-NOTE-M101-d48099",
+    "SNTL-SRCFILE-M101-5d6802"
+   ]
+  },
+  "M102": {
+   "dup_group": null,
+   "expected_blockers": [
+    "coordinates"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M102-5eae13",
+    "SNTL-CONTACT-M102-136f37",
+    "SNTL-EXTRAK-M102-de3ef3",
+    "SNTL-EXTRAV-M102-a074ab",
+    "SNTL-FORMULA-M102-327b83",
+    "SNTL-NOTE-M102-00fec9",
+    "SNTL-SRCFILE-M102-1fa5e3"
+   ]
+  },
+  "M103": {
+   "dup_group": null,
+   "expected_blockers": [
+    "coordinates"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M103-0fa98a",
+    "SNTL-CONTACT-M103-cc2206",
+    "SNTL-EXTRAK-M103-20c525",
+    "SNTL-EXTRAV-M103-1a83e3",
+    "SNTL-FORMULA-M103-ff22b3",
+    "SNTL-NOTE-M103-41fb76",
+    "SNTL-SRCFILE-M103-eb9c40"
+   ]
+  },
+  "M104": {
+   "dup_group": null,
+   "expected_blockers": [
+    "price"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M104-378f1e",
+    "SNTL-CONTACT-M104-f59f6d",
+    "SNTL-EXTRAK-M104-c8230e",
+    "SNTL-EXTRAV-M104-1edd7c",
+    "SNTL-FORMULA-M104-863455",
+    "SNTL-NOTE-M104-f43a9a",
+    "SNTL-SRCFILE-M104-124305"
+   ]
+  },
+  "M105": {
+   "dup_group": null,
+   "expected_blockers": [
+    "availability"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M105-2d159c",
+    "SNTL-CONTACT-M105-20a994",
+    "SNTL-EXTRAK-M105-3c83f3",
+    "SNTL-EXTRAV-M105-61f4a6",
+    "SNTL-FORMULA-M105-03cf48",
+    "SNTL-NOTE-M105-2c8120",
+    "SNTL-SRCFILE-M105-86fe02"
+   ]
+  },
+  "M106": {
+   "dup_group": null,
+   "expected_blockers": [
+    "price_conflict"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M106-0233a8",
+    "SNTL-CONTACT-M106-4d8f25",
+    "SNTL-EXTRAK-M106-6b0001",
+    "SNTL-EXTRAV-M106-94ba9a",
+    "SNTL-FORMULA-M106-df7509",
+    "SNTL-NOTE-M106-6754d4",
+    "SNTL-SRCFILE-M106-761eb0"
+   ]
+  },
+  "M107": {
+   "dup_group": null,
+   "expected_blockers": [
+    "currency"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M107-778ad4",
+    "SNTL-CONTACT-M107-a695d9",
+    "SNTL-EXTRAK-M107-f67551",
+    "SNTL-EXTRAV-M107-d3e849",
+    "SNTL-FORMULA-M107-9b8fb5",
+    "SNTL-NOTE-M107-0d84e3",
+    "SNTL-SRCFILE-M107-e5e9a2"
+   ]
+  },
+  "M108": {
+   "dup_group": null,
+   "expected_blockers": [
+    "area"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M108-0e19a6",
+    "SNTL-CONTACT-M108-a39ea3",
+    "SNTL-EXTRAK-M108-98af7a",
+    "SNTL-EXTRAV-M108-1d7193",
+    "SNTL-FORMULA-M108-fb74c6",
+    "SNTL-NOTE-M108-27b943",
+    "SNTL-SRCFILE-M108-fb29fd"
+   ]
+  },
+  "M109": {
+   "dup_group": null,
+   "expected_blockers": [
+    "area"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M109-7206ee",
+    "SNTL-CONTACT-M109-53f85d",
+    "SNTL-EXTRAK-M109-44b29c",
+    "SNTL-EXTRAV-M109-b38a98",
+    "SNTL-FORMULA-M109-cf87d4",
+    "SNTL-NOTE-M109-d36041",
+    "SNTL-SRCFILE-M109-cfbca5"
+   ]
+  },
+  "M110": {
+   "dup_group": null,
+   "expected_blockers": [
+    "coordinates",
+    "area",
+    "availability",
+    "price"
+   ],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "draft",
+   "publishable": false,
+   "sentinels": [
+    "SNTL-COMMISSION-M110-aaf6ef",
+    "SNTL-CONTACT-M110-837866",
+    "SNTL-EXTRAK-M110-4f1047",
+    "SNTL-EXTRAV-M110-f68f71",
+    "SNTL-FORMULA-M110-192a88",
+    "SNTL-NOTE-M110-efcdc9",
+    "SNTL-SRCFILE-M110-cdce28"
+   ]
+  },
+  "M111": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M111-e17f5d",
+    "SNTL-CONTACT-M111-cc3e8c",
+    "SNTL-EXTRAK-M111-e3adb4",
+    "SNTL-EXTRAV-M111-6f538c",
+    "SNTL-FORMULA-M111-a0341f",
+    "SNTL-NOTE-M111-dcdee9",
+    "SNTL-SRCFILE-M111-c13a63"
+   ]
+  },
+  "M112": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M112-6a6577",
+    "SNTL-CONTACT-M112-d73dad",
+    "SNTL-EXTRAK-M112-5a2d95",
+    "SNTL-EXTRAV-M112-041e52",
+    "SNTL-FORMULA-M112-08ca37",
+    "SNTL-NOTE-M112-4b80da",
+    "SNTL-SRCFILE-M112-862be7"
+   ]
+  },
+  "M113": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M113-b5ef77",
+    "SNTL-CONTACT-M113-7f0a61",
+    "SNTL-EXTRAK-M113-9ea90f",
+    "SNTL-EXTRAV-M113-79de87",
+    "SNTL-FORMULA-M113-a44dde",
+    "SNTL-NOTE-M113-791984",
+    "SNTL-SRCFILE-M113-275dfb"
+   ]
+  },
+  "M114": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M114-bd4316",
+    "SNTL-CONTACT-M114-41d05e",
+    "SNTL-EXTRAK-M114-ebdfea",
+    "SNTL-EXTRAV-M114-038e1c",
+    "SNTL-FORMULA-M114-be3fd5",
+    "SNTL-NOTE-M114-b3962b",
+    "SNTL-SRCFILE-M114-ef09fa"
+   ]
+  },
+  "M115": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M115-5249ee",
+    "SNTL-CONTACT-M115-d80b5d",
+    "SNTL-EXTRAK-M115-6cb57f",
+    "SNTL-EXTRAV-M115-88e93a",
+    "SNTL-FORMULA-M115-512c1a",
+    "SNTL-NOTE-M115-8e173d",
+    "SNTL-SRCFILE-M115-a4f10c"
+   ]
+  },
+  "M116": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M116-4929fa",
+    "SNTL-CONTACT-M116-7c4719",
+    "SNTL-EXTRAK-M116-fcc87e",
+    "SNTL-EXTRAV-M116-47d46f",
+    "SNTL-FORMULA-M116-0b94ca",
+    "SNTL-NOTE-M116-8351d5",
+    "SNTL-SRCFILE-M116-ce7291"
+   ]
+  },
+  "M117": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M117-32c9c2",
+    "SNTL-CONTACT-M117-2daed7",
+    "SNTL-EXTRAK-M117-70a7db",
+    "SNTL-EXTRAV-M117-5066c4",
+    "SNTL-FORMULA-M117-cb10e5",
+    "SNTL-NOTE-M117-faaf8f",
+    "SNTL-SRCFILE-M117-8bf578"
+   ]
+  },
+  "M118": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M118-35275b",
+    "SNTL-CONTACT-M118-f317a2",
+    "SNTL-EXTRAK-M118-3f2193",
+    "SNTL-EXTRAV-M118-227a83",
+    "SNTL-FORMULA-M118-9e0fd4",
+    "SNTL-NOTE-M118-b2ffc5",
+    "SNTL-SRCFILE-M118-bf69e3"
+   ]
+  },
+  "M119": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M119-6330d5",
+    "SNTL-CONTACT-M119-8632a0",
+    "SNTL-EXTRAK-M119-548106",
+    "SNTL-EXTRAV-M119-c72667",
+    "SNTL-FORMULA-M119-2b3c18",
+    "SNTL-NOTE-M119-9b4a68",
+    "SNTL-SRCFILE-M119-59af05"
+   ]
+  },
+  "M120": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "unpublished",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-M120-291966",
+    "SNTL-CONTACT-M120-b1763f",
+    "SNTL-EXTRAK-M120-30fd94",
+    "SNTL-EXTRAV-M120-3f0924",
+    "SNTL-FORMULA-M120-6b13c4",
+    "SNTL-NOTE-M120-8339de",
+    "SNTL-SRCFILE-M120-6d077f"
+   ]
+  },
+  "P001": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P001-0cf428",
+    "SNTL-CONTACT-P001-1f8900",
+    "SNTL-EXTRAK-P001-0aabba",
+    "SNTL-EXTRAV-P001-45e7e9",
+    "SNTL-FORMULA-P001-c6381f",
+    "SNTL-NOTE-P001-bca602",
+    "SNTL-SRCFILE-P001-f3cd47"
+   ]
+  },
+  "P002": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P002-1306bf",
+    "SNTL-CONTACT-P002-198121",
+    "SNTL-EXTRAK-P002-111a19",
+    "SNTL-EXTRAV-P002-6dcfd4",
+    "SNTL-FORMULA-P002-0e7a01",
+    "SNTL-NOTE-P002-f4dd4b",
+    "SNTL-SRCFILE-P002-252e06"
+   ]
+  },
+  "P003": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P003-32f59b",
+    "SNTL-CONTACT-P003-1e635b",
+    "SNTL-EXTRAK-P003-51f306",
+    "SNTL-EXTRAV-P003-e5f0e3",
+    "SNTL-FORMULA-P003-0b694e",
+    "SNTL-NOTE-P003-1ee731",
+    "SNTL-SRCFILE-P003-0d192b"
+   ]
+  },
+  "P004": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P004-9d5760",
+    "SNTL-CONTACT-P004-d3f783",
+    "SNTL-EXTRAK-P004-fa3dbc",
+    "SNTL-EXTRAV-P004-ec9f8d",
+    "SNTL-FORMULA-P004-36a02d",
+    "SNTL-NOTE-P004-af807c",
+    "SNTL-SRCFILE-P004-b4f35d"
+   ]
+  },
+  "P005": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P005-1dc385",
+    "SNTL-CONTACT-P005-503114",
+    "SNTL-EXTRAK-P005-7fd544",
+    "SNTL-EXTRAV-P005-4812b2",
+    "SNTL-FORMULA-P005-3a66a6",
+    "SNTL-NOTE-P005-a36a80",
+    "SNTL-SRCFILE-P005-a0ac37"
+   ]
+  },
+  "P006": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P006-47fb26",
+    "SNTL-CONTACT-P006-e6b912",
+    "SNTL-EXTRAK-P006-ab0ae1",
+    "SNTL-EXTRAV-P006-33a9bf",
+    "SNTL-FORMULA-P006-8117e9",
+    "SNTL-NOTE-P006-af8f5e",
+    "SNTL-SRCFILE-P006-8c876b"
+   ]
+  },
+  "P007": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P007-a8f306",
+    "SNTL-CONTACT-P007-c44e5e",
+    "SNTL-EXTRAK-P007-40735b",
+    "SNTL-EXTRAV-P007-6f7860",
+    "SNTL-FORMULA-P007-b10f96",
+    "SNTL-NOTE-P007-6f0c02",
+    "SNTL-SRCFILE-P007-07df01"
+   ]
+  },
+  "P008": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P008-5a998b",
+    "SNTL-CONTACT-P008-fe4feb",
+    "SNTL-EXTRAK-P008-ee7ad1",
+    "SNTL-EXTRAV-P008-66952f",
+    "SNTL-FORMULA-P008-108050",
+    "SNTL-NOTE-P008-add39f",
+    "SNTL-SRCFILE-P008-afea9f"
+   ]
+  },
+  "P009": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P009-53e1c9",
+    "SNTL-CONTACT-P009-ef61a5",
+    "SNTL-EXTRAK-P009-220b7a",
+    "SNTL-EXTRAV-P009-b9bdd4",
+    "SNTL-FORMULA-P009-1be366",
+    "SNTL-NOTE-P009-109237",
+    "SNTL-SRCFILE-P009-561198"
+   ]
+  },
+  "P010": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P010-e5e4a7",
+    "SNTL-CONTACT-P010-cea536",
+    "SNTL-EXTRAK-P010-1314f7",
+    "SNTL-EXTRAV-P010-ee2c4a",
+    "SNTL-FORMULA-P010-d4b737",
+    "SNTL-NOTE-P010-2d1590",
+    "SNTL-SRCFILE-P010-bf04c3"
+   ]
+  },
+  "P011": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P011-d2250d",
+    "SNTL-CONTACT-P011-aa3488",
+    "SNTL-EXTRAK-P011-02da0e",
+    "SNTL-EXTRAV-P011-6ca126",
+    "SNTL-FORMULA-P011-428997",
+    "SNTL-NOTE-P011-9ed3f2",
+    "SNTL-SRCFILE-P011-f4523f"
+   ]
+  },
+  "P012": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P012-b54db7",
+    "SNTL-CONTACT-P012-96ae56",
+    "SNTL-EXTRAK-P012-f20090",
+    "SNTL-EXTRAV-P012-b028f2",
+    "SNTL-FORMULA-P012-d1c5c2",
+    "SNTL-NOTE-P012-8ff594",
+    "SNTL-SRCFILE-P012-675a43"
+   ]
+  },
+  "P013": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P013-1ce0f5",
+    "SNTL-CONTACT-P013-b34c21",
+    "SNTL-EXTRAK-P013-81712c",
+    "SNTL-EXTRAV-P013-7bac67",
+    "SNTL-FORMULA-P013-512d61",
+    "SNTL-NOTE-P013-bc1c06",
+    "SNTL-SRCFILE-P013-cdc59d"
+   ]
+  },
+  "P014": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P014-0134a0",
+    "SNTL-CONTACT-P014-7b41be",
+    "SNTL-EXTRAK-P014-b52ac9",
+    "SNTL-EXTRAV-P014-5913de",
+    "SNTL-FORMULA-P014-05ce4c",
+    "SNTL-NOTE-P014-cc6d12",
+    "SNTL-SRCFILE-P014-32d7de"
+   ]
+  },
+  "P015": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P015-329c54",
+    "SNTL-CONTACT-P015-e376ae",
+    "SNTL-EXTRAK-P015-8331ef",
+    "SNTL-EXTRAV-P015-571f76",
+    "SNTL-FORMULA-P015-7024ca",
+    "SNTL-NOTE-P015-a68598",
+    "SNTL-SRCFILE-P015-0803ef"
+   ]
+  },
+  "P016": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P016-eb27ae",
+    "SNTL-CONTACT-P016-735601",
+    "SNTL-EXTRAK-P016-4517fc",
+    "SNTL-EXTRAV-P016-a1e286",
+    "SNTL-FORMULA-P016-2ba82d",
+    "SNTL-NOTE-P016-42e70d",
+    "SNTL-SRCFILE-P016-0e3384"
+   ]
+  },
+  "P017": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P017-07f6f9",
+    "SNTL-CONTACT-P017-49678e",
+    "SNTL-EXTRAK-P017-f6db73",
+    "SNTL-EXTRAV-P017-03a7e4",
+    "SNTL-FORMULA-P017-c1dc13",
+    "SNTL-NOTE-P017-6531f0",
+    "SNTL-SRCFILE-P017-8c1213"
+   ]
+  },
+  "P018": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P018-94c458",
+    "SNTL-CONTACT-P018-a1c03c",
+    "SNTL-EXTRAK-P018-30a698",
+    "SNTL-EXTRAV-P018-308f8f",
+    "SNTL-FORMULA-P018-4f74d7",
+    "SNTL-NOTE-P018-aa6342",
+    "SNTL-SRCFILE-P018-870e25"
+   ]
+  },
+  "P019": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P019-321197",
+    "SNTL-CONTACT-P019-a0f4f8",
+    "SNTL-EXTRAK-P019-519709",
+    "SNTL-EXTRAV-P019-2a3bc1",
+    "SNTL-FORMULA-P019-2cef8f",
+    "SNTL-NOTE-P019-0cc146",
+    "SNTL-SRCFILE-P019-a9b43c"
+   ]
+  },
+  "P020": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P020-385073",
+    "SNTL-CONTACT-P020-9234ff",
+    "SNTL-EXTRAK-P020-6d93b1",
+    "SNTL-EXTRAV-P020-9111ab",
+    "SNTL-FORMULA-P020-c32710",
+    "SNTL-NOTE-P020-2c9cb1",
+    "SNTL-SRCFILE-P020-bea297"
+   ]
+  },
+  "P021": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P021-645652",
+    "SNTL-CONTACT-P021-fa7e3c",
+    "SNTL-EXTRAK-P021-28853a",
+    "SNTL-EXTRAV-P021-56ca45",
+    "SNTL-FORMULA-P021-0413f5",
+    "SNTL-NOTE-P021-c02afd",
+    "SNTL-SRCFILE-P021-8dc476"
+   ]
+  },
+  "P022": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P022-7cf44c",
+    "SNTL-CONTACT-P022-2986ff",
+    "SNTL-EXTRAK-P022-698c66",
+    "SNTL-EXTRAV-P022-01ed5b",
+    "SNTL-FORMULA-P022-0a6413",
+    "SNTL-NOTE-P022-18ce88",
+    "SNTL-SRCFILE-P022-b67c61"
+   ]
+  },
+  "P023": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P023-980325",
+    "SNTL-CONTACT-P023-012760",
+    "SNTL-EXTRAK-P023-ff785c",
+    "SNTL-EXTRAV-P023-d61e67",
+    "SNTL-FORMULA-P023-1ff04b",
+    "SNTL-NOTE-P023-e4bcff",
+    "SNTL-SRCFILE-P023-c10e23"
+   ]
+  },
+  "P024": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P024-145c2a",
+    "SNTL-CONTACT-P024-f944fb",
+    "SNTL-EXTRAK-P024-e27c9b",
+    "SNTL-EXTRAV-P024-3637b6",
+    "SNTL-FORMULA-P024-c490de",
+    "SNTL-NOTE-P024-7ea59f",
+    "SNTL-SRCFILE-P024-0a4ef2"
+   ]
+  },
+  "P025": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P025-114b32",
+    "SNTL-CONTACT-P025-a10764",
+    "SNTL-EXTRAK-P025-e6b99e",
+    "SNTL-EXTRAV-P025-25d543",
+    "SNTL-FORMULA-P025-be0ee2",
+    "SNTL-NOTE-P025-5bafc8",
+    "SNTL-SRCFILE-P025-330a5b"
+   ]
+  },
+  "P026": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P026-42cc6f",
+    "SNTL-CONTACT-P026-b79080",
+    "SNTL-EXTRAK-P026-dc02ea",
+    "SNTL-EXTRAV-P026-8319d3",
+    "SNTL-FORMULA-P026-53277f",
+    "SNTL-NOTE-P026-4312bf",
+    "SNTL-SRCFILE-P026-2dd7f7"
+   ]
+  },
+  "P027": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P027-6be9a5",
+    "SNTL-CONTACT-P027-1409b4",
+    "SNTL-EXTRAK-P027-b294be",
+    "SNTL-EXTRAV-P027-dbfebe",
+    "SNTL-FORMULA-P027-74ff88",
+    "SNTL-NOTE-P027-e90e51",
+    "SNTL-SRCFILE-P027-bc016d"
+   ]
+  },
+  "P028": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P028-e0de79",
+    "SNTL-CONTACT-P028-285b54",
+    "SNTL-EXTRAK-P028-983402",
+    "SNTL-EXTRAV-P028-afb064",
+    "SNTL-FORMULA-P028-81c5c8",
+    "SNTL-NOTE-P028-445c14",
+    "SNTL-SRCFILE-P028-5e36f0"
+   ]
+  },
+  "P029": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P029-9897b6",
+    "SNTL-CONTACT-P029-cd4e15",
+    "SNTL-EXTRAK-P029-b2d75a",
+    "SNTL-EXTRAV-P029-221855",
+    "SNTL-FORMULA-P029-f23d81",
+    "SNTL-NOTE-P029-ea16f1",
+    "SNTL-SRCFILE-P029-ecce7c"
+   ]
+  },
+  "P030": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P030-6642c4",
+    "SNTL-CONTACT-P030-4127a6",
+    "SNTL-EXTRAK-P030-22824b",
+    "SNTL-EXTRAV-P030-09f1ab",
+    "SNTL-FORMULA-P030-a8c1b9",
+    "SNTL-NOTE-P030-9ab011",
+    "SNTL-SRCFILE-P030-9c87fa"
+   ]
+  },
+  "P031": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P031-5c6ee3",
+    "SNTL-CONTACT-P031-79b36f",
+    "SNTL-EXTRAK-P031-c60633",
+    "SNTL-EXTRAV-P031-cbc242",
+    "SNTL-FORMULA-P031-2d817d",
+    "SNTL-NOTE-P031-691cc3",
+    "SNTL-SRCFILE-P031-70d825"
+   ]
+  },
+  "P032": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P032-b55fa9",
+    "SNTL-CONTACT-P032-2a91b9",
+    "SNTL-EXTRAK-P032-3161f9",
+    "SNTL-EXTRAV-P032-f1cb09",
+    "SNTL-FORMULA-P032-abd865",
+    "SNTL-NOTE-P032-ca2eb4",
+    "SNTL-SRCFILE-P032-5b48ab"
+   ]
+  },
+  "P033": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P033-e3dd8b",
+    "SNTL-CONTACT-P033-b557fe",
+    "SNTL-EXTRAK-P033-7c1ab4",
+    "SNTL-EXTRAV-P033-36b1b4",
+    "SNTL-FORMULA-P033-d437bf",
+    "SNTL-NOTE-P033-6ed26d",
+    "SNTL-SRCFILE-P033-4eac0f"
+   ]
+  },
+  "P034": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P034-7d7e4c",
+    "SNTL-CONTACT-P034-f74f33",
+    "SNTL-EXTRAK-P034-0f2f92",
+    "SNTL-EXTRAV-P034-0bb692",
+    "SNTL-FORMULA-P034-f57cc4",
+    "SNTL-NOTE-P034-93bd95",
+    "SNTL-SRCFILE-P034-ef42ac"
+   ]
+  },
+  "P035": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P035-f1bf8c",
+    "SNTL-CONTACT-P035-447543",
+    "SNTL-EXTRAK-P035-d35df4",
+    "SNTL-EXTRAV-P035-873d38",
+    "SNTL-FORMULA-P035-b7f490",
+    "SNTL-NOTE-P035-7b9d62",
+    "SNTL-SRCFILE-P035-d7ae03"
+   ]
+  },
+  "P036": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P036-9ebfb4",
+    "SNTL-CONTACT-P036-35f87c",
+    "SNTL-EXTRAK-P036-549f74",
+    "SNTL-EXTRAV-P036-ae22f3",
+    "SNTL-FORMULA-P036-c2c1f0",
+    "SNTL-NOTE-P036-cd6b7d",
+    "SNTL-SRCFILE-P036-67a374"
+   ]
+  },
+  "P037": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P037-3ac160",
+    "SNTL-CONTACT-P037-9184b0",
+    "SNTL-EXTRAK-P037-8c7779",
+    "SNTL-EXTRAV-P037-c54b5c",
+    "SNTL-FORMULA-P037-d4138e",
+    "SNTL-NOTE-P037-5dfcda",
+    "SNTL-SRCFILE-P037-ce3430"
+   ]
+  },
+  "P038": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P038-8480b4",
+    "SNTL-CONTACT-P038-d27274",
+    "SNTL-EXTRAK-P038-b33a43",
+    "SNTL-EXTRAV-P038-30a7d1",
+    "SNTL-FORMULA-P038-19ab0c",
+    "SNTL-NOTE-P038-0ed3c5",
+    "SNTL-SRCFILE-P038-00a0ef"
+   ]
+  },
+  "P039": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P039-ef1db4",
+    "SNTL-CONTACT-P039-871223",
+    "SNTL-EXTRAK-P039-c29519",
+    "SNTL-EXTRAV-P039-6a0ca7",
+    "SNTL-FORMULA-P039-b056f8",
+    "SNTL-NOTE-P039-dca1cf",
+    "SNTL-SRCFILE-P039-04125d"
+   ]
+  },
+  "P040": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P040-ff342a",
+    "SNTL-CONTACT-P040-fef5d7",
+    "SNTL-EXTRAK-P040-0cb8db",
+    "SNTL-EXTRAV-P040-43c919",
+    "SNTL-FORMULA-P040-c8a552",
+    "SNTL-NOTE-P040-6bd5d6",
+    "SNTL-SRCFILE-P040-d6d29f"
+   ]
+  },
+  "P041": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P041-9e3e18",
+    "SNTL-CONTACT-P041-72221e",
+    "SNTL-EXTRAK-P041-2310c8",
+    "SNTL-EXTRAV-P041-acfd58",
+    "SNTL-FORMULA-P041-81e552",
+    "SNTL-NOTE-P041-ec0033",
+    "SNTL-SRCFILE-P041-a33c6c"
+   ]
+  },
+  "P042": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P042-755aae",
+    "SNTL-CONTACT-P042-30be09",
+    "SNTL-EXTRAK-P042-03f9e7",
+    "SNTL-EXTRAV-P042-81baa5",
+    "SNTL-FORMULA-P042-d9248e",
+    "SNTL-NOTE-P042-259318",
+    "SNTL-SRCFILE-P042-c1dcbd"
+   ]
+  },
+  "P043": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P043-6dc230",
+    "SNTL-CONTACT-P043-85f062",
+    "SNTL-EXTRAK-P043-469eb8",
+    "SNTL-EXTRAV-P043-d98ee7",
+    "SNTL-FORMULA-P043-96f6c9",
+    "SNTL-NOTE-P043-4667c2",
+    "SNTL-SRCFILE-P043-8797dc"
+   ]
+  },
+  "P044": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P044-3d232f",
+    "SNTL-CONTACT-P044-16cb83",
+    "SNTL-EXTRAK-P044-b915db",
+    "SNTL-EXTRAV-P044-df77d8",
+    "SNTL-FORMULA-P044-9d4c6c",
+    "SNTL-NOTE-P044-a0e097",
+    "SNTL-SRCFILE-P044-967e32"
+   ]
+  },
+  "P045": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P045-e20546",
+    "SNTL-CONTACT-P045-b21f7b",
+    "SNTL-EXTRAK-P045-781a62",
+    "SNTL-EXTRAV-P045-4fbbd6",
+    "SNTL-FORMULA-P045-efba09",
+    "SNTL-NOTE-P045-1d8fd6",
+    "SNTL-SRCFILE-P045-20c91b"
+   ]
+  },
+  "P046": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P046-5c6ec6",
+    "SNTL-CONTACT-P046-752bfe",
+    "SNTL-EXTRAK-P046-12e3f7",
+    "SNTL-EXTRAV-P046-ba9318",
+    "SNTL-FORMULA-P046-0383df",
+    "SNTL-NOTE-P046-bee2d0",
+    "SNTL-SRCFILE-P046-718868"
+   ]
+  },
+  "P047": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P047-506f31",
+    "SNTL-CONTACT-P047-02fbf2",
+    "SNTL-EXTRAK-P047-f9ac46",
+    "SNTL-EXTRAV-P047-1d28a1",
+    "SNTL-FORMULA-P047-c0c9e7",
+    "SNTL-NOTE-P047-af995e",
+    "SNTL-SRCFILE-P047-fa7103"
+   ]
+  },
+  "P048": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P048-7ca56e",
+    "SNTL-CONTACT-P048-d4f5a3",
+    "SNTL-EXTRAK-P048-d958e1",
+    "SNTL-EXTRAV-P048-004bfc",
+    "SNTL-FORMULA-P048-c3d4f8",
+    "SNTL-NOTE-P048-a79e00",
+    "SNTL-SRCFILE-P048-a4560e"
+   ]
+  },
+  "P049": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P049-ebe4e2",
+    "SNTL-CONTACT-P049-746c90",
+    "SNTL-EXTRAK-P049-fd6b42",
+    "SNTL-EXTRAV-P049-937282",
+    "SNTL-FORMULA-P049-747ab8",
+    "SNTL-NOTE-P049-69a7dd",
+    "SNTL-SRCFILE-P049-727330"
+   ]
+  },
+  "P050": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P050-a2fd8a",
+    "SNTL-CONTACT-P050-d743fb",
+    "SNTL-EXTRAK-P050-01bcca",
+    "SNTL-EXTRAV-P050-3d7337",
+    "SNTL-FORMULA-P050-a1e942",
+    "SNTL-NOTE-P050-f137e5",
+    "SNTL-SRCFILE-P050-146c3e"
+   ]
+  },
+  "P051": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P051-ab0f89",
+    "SNTL-CONTACT-P051-f1fdd1",
+    "SNTL-EXTRAK-P051-195c1b",
+    "SNTL-EXTRAV-P051-b1d43e",
+    "SNTL-FORMULA-P051-2020a9",
+    "SNTL-NOTE-P051-85d026",
+    "SNTL-SRCFILE-P051-08c744"
+   ]
+  },
+  "P052": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P052-711ed2",
+    "SNTL-CONTACT-P052-9ffc25",
+    "SNTL-EXTRAK-P052-f2ed73",
+    "SNTL-EXTRAV-P052-3c3052",
+    "SNTL-FORMULA-P052-98640e",
+    "SNTL-NOTE-P052-67126e",
+    "SNTL-SRCFILE-P052-5f067c"
+   ]
+  },
+  "P053": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P053-9aee99",
+    "SNTL-CONTACT-P053-62ec79",
+    "SNTL-EXTRAK-P053-619f0a",
+    "SNTL-EXTRAV-P053-53d589",
+    "SNTL-FORMULA-P053-92ed12",
+    "SNTL-NOTE-P053-7a4ebc",
+    "SNTL-SRCFILE-P053-3227d1"
+   ]
+  },
+  "P054": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P054-78749c",
+    "SNTL-CONTACT-P054-457232",
+    "SNTL-EXTRAK-P054-98b08c",
+    "SNTL-EXTRAV-P054-94e110",
+    "SNTL-FORMULA-P054-cc7cdb",
+    "SNTL-NOTE-P054-2a4506",
+    "SNTL-SRCFILE-P054-f76dd6"
+   ]
+  },
+  "P055": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P055-2ac876",
+    "SNTL-CONTACT-P055-52da6b",
+    "SNTL-EXTRAK-P055-84b291",
+    "SNTL-EXTRAV-P055-d61ab4",
+    "SNTL-FORMULA-P055-3a562c",
+    "SNTL-NOTE-P055-706533",
+    "SNTL-SRCFILE-P055-025832"
+   ]
+  },
+  "P056": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P056-30afc5",
+    "SNTL-CONTACT-P056-a02400",
+    "SNTL-EXTRAK-P056-742470",
+    "SNTL-EXTRAV-P056-1bfb10",
+    "SNTL-FORMULA-P056-e7f39d",
+    "SNTL-NOTE-P056-3e5447",
+    "SNTL-SRCFILE-P056-754b10"
+   ]
+  },
+  "P057": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P057-5c19e6",
+    "SNTL-CONTACT-P057-843500",
+    "SNTL-EXTRAK-P057-027f62",
+    "SNTL-EXTRAV-P057-7e736a",
+    "SNTL-FORMULA-P057-c0995f",
+    "SNTL-NOTE-P057-429a61",
+    "SNTL-SRCFILE-P057-353aa0"
+   ]
+  },
+  "P058": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P058-f08148",
+    "SNTL-CONTACT-P058-aa49f8",
+    "SNTL-EXTRAK-P058-a85675",
+    "SNTL-EXTRAV-P058-80db93",
+    "SNTL-FORMULA-P058-66292d",
+    "SNTL-NOTE-P058-581c72",
+    "SNTL-SRCFILE-P058-c3ef85"
+   ]
+  },
+  "P059": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P059-f16eed",
+    "SNTL-CONTACT-P059-7ca328",
+    "SNTL-EXTRAK-P059-4a2b04",
+    "SNTL-EXTRAV-P059-262963",
+    "SNTL-FORMULA-P059-e0d5b1",
+    "SNTL-NOTE-P059-a52baa",
+    "SNTL-SRCFILE-P059-908ffe"
+   ]
+  },
+  "P060": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P060-f3c4d8",
+    "SNTL-CONTACT-P060-efffe4",
+    "SNTL-EXTRAK-P060-7aea66",
+    "SNTL-EXTRAV-P060-902733",
+    "SNTL-FORMULA-P060-ee6393",
+    "SNTL-NOTE-P060-63f994",
+    "SNTL-SRCFILE-P060-a94588"
+   ]
+  },
+  "P061": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P061-5dfa94",
+    "SNTL-CONTACT-P061-65ff4a",
+    "SNTL-EXTRAK-P061-12e54d",
+    "SNTL-EXTRAV-P061-0d24bb",
+    "SNTL-FORMULA-P061-64de2e",
+    "SNTL-NOTE-P061-ce0ebd",
+    "SNTL-SRCFILE-P061-1058f7"
+   ]
+  },
+  "P062": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P062-51cad2",
+    "SNTL-CONTACT-P062-15c715",
+    "SNTL-EXTRAK-P062-5281f8",
+    "SNTL-EXTRAV-P062-61d230",
+    "SNTL-FORMULA-P062-158cbf",
+    "SNTL-NOTE-P062-cba1f8",
+    "SNTL-SRCFILE-P062-13e01b"
+   ]
+  },
+  "P063": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P063-dc4bdf",
+    "SNTL-CONTACT-P063-dada82",
+    "SNTL-EXTRAK-P063-ce9818",
+    "SNTL-EXTRAV-P063-f310ad",
+    "SNTL-FORMULA-P063-8467e3",
+    "SNTL-NOTE-P063-ab4980",
+    "SNTL-SRCFILE-P063-67aa9b"
+   ]
+  },
+  "P064": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P064-f1aca9",
+    "SNTL-CONTACT-P064-d6e816",
+    "SNTL-EXTRAK-P064-0cced1",
+    "SNTL-EXTRAV-P064-09b6f2",
+    "SNTL-FORMULA-P064-a709f3",
+    "SNTL-NOTE-P064-6b91c7",
+    "SNTL-SRCFILE-P064-369dae"
+   ]
+  },
+  "P065": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P065-c63301",
+    "SNTL-CONTACT-P065-4e3e51",
+    "SNTL-EXTRAK-P065-45bfde",
+    "SNTL-EXTRAV-P065-377f5f",
+    "SNTL-FORMULA-P065-280b1d",
+    "SNTL-NOTE-P065-610934",
+    "SNTL-SRCFILE-P065-e64097"
+   ]
+  },
+  "P066": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P066-343342",
+    "SNTL-CONTACT-P066-b4e5a8",
+    "SNTL-EXTRAK-P066-807dc1",
+    "SNTL-EXTRAV-P066-d19828",
+    "SNTL-FORMULA-P066-3d1027",
+    "SNTL-NOTE-P066-3764d8",
+    "SNTL-SRCFILE-P066-f11d6a"
+   ]
+  },
+  "P067": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P067-9d8cf4",
+    "SNTL-CONTACT-P067-e332a5",
+    "SNTL-EXTRAK-P067-8cda60",
+    "SNTL-EXTRAV-P067-bdc037",
+    "SNTL-FORMULA-P067-f7548f",
+    "SNTL-NOTE-P067-77e468",
+    "SNTL-SRCFILE-P067-53b8fb"
+   ]
+  },
+  "P068": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P068-e03447",
+    "SNTL-CONTACT-P068-bbc1cf",
+    "SNTL-EXTRAK-P068-dac729",
+    "SNTL-EXTRAV-P068-c770da",
+    "SNTL-FORMULA-P068-ce75e4",
+    "SNTL-NOTE-P068-3ff2e3",
+    "SNTL-SRCFILE-P068-674460"
+   ]
+  },
+  "P069": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P069-97f116",
+    "SNTL-CONTACT-P069-8cfc64",
+    "SNTL-EXTRAK-P069-676d55",
+    "SNTL-EXTRAV-P069-701676",
+    "SNTL-FORMULA-P069-737e72",
+    "SNTL-NOTE-P069-30b9dd",
+    "SNTL-SRCFILE-P069-7774c9"
+   ]
+  },
+  "P070": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P070-a7b08c",
+    "SNTL-CONTACT-P070-cd9a23",
+    "SNTL-EXTRAK-P070-f9bb29",
+    "SNTL-EXTRAV-P070-073f19",
+    "SNTL-FORMULA-P070-a61731",
+    "SNTL-NOTE-P070-7f9dcc",
+    "SNTL-SRCFILE-P070-9d1349"
+   ]
+  },
+  "P071": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P071-73594c",
+    "SNTL-CONTACT-P071-62d2a1",
+    "SNTL-EXTRAK-P071-9df498",
+    "SNTL-EXTRAV-P071-0c04a0",
+    "SNTL-FORMULA-P071-b4b3a2",
+    "SNTL-NOTE-P071-91cce2",
+    "SNTL-SRCFILE-P071-a886ab"
+   ]
+  },
+  "P072": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P072-9e3d6f",
+    "SNTL-CONTACT-P072-92f4eb",
+    "SNTL-EXTRAK-P072-a259da",
+    "SNTL-EXTRAV-P072-09451d",
+    "SNTL-FORMULA-P072-2207da",
+    "SNTL-NOTE-P072-88da66",
+    "SNTL-SRCFILE-P072-e4faf4"
+   ]
+  },
+  "P073": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P073-c1a122",
+    "SNTL-CONTACT-P073-509b64",
+    "SNTL-EXTRAK-P073-8aa62d",
+    "SNTL-EXTRAV-P073-d3f470",
+    "SNTL-FORMULA-P073-35c942",
+    "SNTL-NOTE-P073-ff0736",
+    "SNTL-SRCFILE-P073-31e5ad"
+   ]
+  },
+  "P074": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P074-d3e77a",
+    "SNTL-CONTACT-P074-aac184",
+    "SNTL-EXTRAK-P074-f627bf",
+    "SNTL-EXTRAV-P074-b184db",
+    "SNTL-FORMULA-P074-40fd6a",
+    "SNTL-NOTE-P074-b2dd03",
+    "SNTL-SRCFILE-P074-14e3b1"
+   ]
+  },
+  "P075": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P075-235bfe",
+    "SNTL-CONTACT-P075-b68bba",
+    "SNTL-EXTRAK-P075-4da5d3",
+    "SNTL-EXTRAV-P075-771239",
+    "SNTL-FORMULA-P075-4cdc01",
+    "SNTL-NOTE-P075-31c985",
+    "SNTL-SRCFILE-P075-b27ae7"
+   ]
+  },
+  "P076": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P076-4c7689",
+    "SNTL-CONTACT-P076-9ddb4d",
+    "SNTL-EXTRAK-P076-dc33e1",
+    "SNTL-EXTRAV-P076-d599a0",
+    "SNTL-FORMULA-P076-a032b2",
+    "SNTL-NOTE-P076-6cc2e6",
+    "SNTL-SRCFILE-P076-3a2e0e"
+   ]
+  },
+  "P077": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P077-682715",
+    "SNTL-CONTACT-P077-51fc1e",
+    "SNTL-EXTRAK-P077-9d59a9",
+    "SNTL-EXTRAV-P077-c54162",
+    "SNTL-FORMULA-P077-bd16ca",
+    "SNTL-NOTE-P077-9fed6b",
+    "SNTL-SRCFILE-P077-9cb37c"
+   ]
+  },
+  "P078": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P078-3b6db2",
+    "SNTL-CONTACT-P078-e0794b",
+    "SNTL-EXTRAK-P078-d305d3",
+    "SNTL-EXTRAV-P078-73cc4e",
+    "SNTL-FORMULA-P078-a60649",
+    "SNTL-NOTE-P078-0ecb29",
+    "SNTL-SRCFILE-P078-af8904"
+   ]
+  },
+  "P079": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P079-7b2cce",
+    "SNTL-CONTACT-P079-0200fb",
+    "SNTL-EXTRAK-P079-ce3143",
+    "SNTL-EXTRAV-P079-2e992e",
+    "SNTL-FORMULA-P079-fb23b2",
+    "SNTL-NOTE-P079-4e7859",
+    "SNTL-SRCFILE-P079-b0695e"
+   ]
+  },
+  "P080": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P080-fc752c",
+    "SNTL-CONTACT-P080-1ed1e1",
+    "SNTL-EXTRAK-P080-b93f2c",
+    "SNTL-EXTRAV-P080-8ecea3",
+    "SNTL-FORMULA-P080-5f5d27",
+    "SNTL-NOTE-P080-88046b",
+    "SNTL-SRCFILE-P080-c76456"
+   ]
+  },
+  "P081": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P081-de38ae",
+    "SNTL-CONTACT-P081-0b1a9b",
+    "SNTL-EXTRAK-P081-0a95f9",
+    "SNTL-EXTRAV-P081-52415e",
+    "SNTL-FORMULA-P081-eb6f1c",
+    "SNTL-NOTE-P081-b62d08",
+    "SNTL-SRCFILE-P081-da87a7"
+   ]
+  },
+  "P082": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P082-5231cb",
+    "SNTL-CONTACT-P082-d78519",
+    "SNTL-EXTRAK-P082-44e52f",
+    "SNTL-EXTRAV-P082-bc8690",
+    "SNTL-FORMULA-P082-7538a1",
+    "SNTL-NOTE-P082-4c12c9",
+    "SNTL-SRCFILE-P082-5de907"
+   ]
+  },
+  "P083": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P083-868ffb",
+    "SNTL-CONTACT-P083-a3deec",
+    "SNTL-EXTRAK-P083-4066e0",
+    "SNTL-EXTRAV-P083-28e9d4",
+    "SNTL-FORMULA-P083-326f4a",
+    "SNTL-NOTE-P083-f6639a",
+    "SNTL-SRCFILE-P083-7a3f8f"
+   ]
+  },
+  "P084": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P084-f40d47",
+    "SNTL-CONTACT-P084-0beffa",
+    "SNTL-EXTRAK-P084-da9934",
+    "SNTL-EXTRAV-P084-59d281",
+    "SNTL-FORMULA-P084-e090bf",
+    "SNTL-NOTE-P084-79cbe5",
+    "SNTL-SRCFILE-P084-99c5fe"
+   ]
+  },
+  "P085": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P085-4458a7",
+    "SNTL-CONTACT-P085-2e3c41",
+    "SNTL-EXTRAK-P085-4ae7fb",
+    "SNTL-EXTRAV-P085-0b0e8b",
+    "SNTL-FORMULA-P085-d19233",
+    "SNTL-NOTE-P085-5c5ce6",
+    "SNTL-SRCFILE-P085-ac491d"
+   ]
+  },
+  "P086": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P086-85b0e6",
+    "SNTL-CONTACT-P086-2ce3cc",
+    "SNTL-EXTRAK-P086-f28e25",
+    "SNTL-EXTRAV-P086-76d2e0",
+    "SNTL-FORMULA-P086-31cd03",
+    "SNTL-NOTE-P086-b19f64",
+    "SNTL-SRCFILE-P086-8caf2e"
+   ]
+  },
+  "P087": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P087-00a817",
+    "SNTL-CONTACT-P087-d865a4",
+    "SNTL-EXTRAK-P087-129c44",
+    "SNTL-EXTRAV-P087-0576b8",
+    "SNTL-FORMULA-P087-db2a99",
+    "SNTL-NOTE-P087-5567ef",
+    "SNTL-SRCFILE-P087-999433"
+   ]
+  },
+  "P088": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P088-d6d76d",
+    "SNTL-CONTACT-P088-29f4ca",
+    "SNTL-EXTRAK-P088-64332f",
+    "SNTL-EXTRAV-P088-c7451f",
+    "SNTL-FORMULA-P088-dac2a0",
+    "SNTL-NOTE-P088-03dee3",
+    "SNTL-SRCFILE-P088-d78847"
+   ]
+  },
+  "P089": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P089-5ddd1a",
+    "SNTL-CONTACT-P089-cf05d2",
+    "SNTL-EXTRAK-P089-bf521a",
+    "SNTL-EXTRAV-P089-2892f3",
+    "SNTL-FORMULA-P089-505930",
+    "SNTL-NOTE-P089-06172f",
+    "SNTL-SRCFILE-P089-9fa6d8"
+   ]
+  },
+  "P090": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P090-b377e3",
+    "SNTL-CONTACT-P090-aa86f1",
+    "SNTL-EXTRAK-P090-d9fa74",
+    "SNTL-EXTRAV-P090-be3d98",
+    "SNTL-FORMULA-P090-5a2d8e",
+    "SNTL-NOTE-P090-bc3398",
+    "SNTL-SRCFILE-P090-47e9d3"
+   ]
+  },
+  "P091": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P091-8b6e63",
+    "SNTL-CONTACT-P091-a01777",
+    "SNTL-EXTRAK-P091-7cb147",
+    "SNTL-EXTRAV-P091-93029f",
+    "SNTL-FORMULA-P091-c9c1ca",
+    "SNTL-NOTE-P091-6f1d3c",
+    "SNTL-SRCFILE-P091-c8c16a"
+   ]
+  },
+  "P092": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P092-e72d46",
+    "SNTL-CONTACT-P092-e9e0cf",
+    "SNTL-EXTRAK-P092-d90066",
+    "SNTL-EXTRAV-P092-6b059c",
+    "SNTL-FORMULA-P092-833a4e",
+    "SNTL-NOTE-P092-ee20dc",
+    "SNTL-SRCFILE-P092-183cf9"
+   ]
+  },
+  "P093": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P093-6f6818",
+    "SNTL-CONTACT-P093-3614c4",
+    "SNTL-EXTRAK-P093-4658e0",
+    "SNTL-EXTRAV-P093-3749b4",
+    "SNTL-FORMULA-P093-1f7a8a",
+    "SNTL-NOTE-P093-148838",
+    "SNTL-SRCFILE-P093-99ae00"
+   ]
+  },
+  "P094": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P094-ca0520",
+    "SNTL-CONTACT-P094-41466f",
+    "SNTL-EXTRAK-P094-1aca79",
+    "SNTL-EXTRAV-P094-d54e43",
+    "SNTL-FORMULA-P094-94a465",
+    "SNTL-NOTE-P094-0e8b3f",
+    "SNTL-SRCFILE-P094-9e9a3e"
+   ]
+  },
+  "P095": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P095-ae1727",
+    "SNTL-CONTACT-P095-99811d",
+    "SNTL-EXTRAK-P095-17b2f8",
+    "SNTL-EXTRAV-P095-6994c0",
+    "SNTL-FORMULA-P095-54d948",
+    "SNTL-NOTE-P095-e667b7",
+    "SNTL-SRCFILE-P095-1631bc"
+   ]
+  },
+  "P096": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P096-0cf1a6",
+    "SNTL-CONTACT-P096-9db897",
+    "SNTL-EXTRAK-P096-0ac814",
+    "SNTL-EXTRAV-P096-c19330",
+    "SNTL-FORMULA-P096-8c15d7",
+    "SNTL-NOTE-P096-4b49ed",
+    "SNTL-SRCFILE-P096-4de849"
+   ]
+  },
+  "P097": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P097-8eae3a",
+    "SNTL-CONTACT-P097-3e4ffa",
+    "SNTL-EXTRAK-P097-2bd28f",
+    "SNTL-EXTRAV-P097-288616",
+    "SNTL-FORMULA-P097-baed98",
+    "SNTL-NOTE-P097-880163",
+    "SNTL-SRCFILE-P097-15bdbd"
+   ]
+  },
+  "P098": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P098-9600a5",
+    "SNTL-CONTACT-P098-cbd3f8",
+    "SNTL-EXTRAK-P098-b2a508",
+    "SNTL-EXTRAV-P098-6d0927",
+    "SNTL-FORMULA-P098-f90d9a",
+    "SNTL-NOTE-P098-4f3c6e",
+    "SNTL-SRCFILE-P098-adda13"
+   ]
+  },
+  "P099": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P099-21d4ab",
+    "SNTL-CONTACT-P099-f2c666",
+    "SNTL-EXTRAK-P099-df5206",
+    "SNTL-EXTRAV-P099-51e7a1",
+    "SNTL-FORMULA-P099-dd7097",
+    "SNTL-NOTE-P099-77a9e5",
+    "SNTL-SRCFILE-P099-fa81ea"
+   ]
+  },
+  "P100": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P100-b344cb",
+    "SNTL-CONTACT-P100-d644aa",
+    "SNTL-EXTRAK-P100-26cbcd",
+    "SNTL-EXTRAV-P100-2f8855",
+    "SNTL-FORMULA-P100-95cd29",
+    "SNTL-NOTE-P100-a7fb35",
+    "SNTL-SRCFILE-P100-b768e7"
+   ]
+  },
+  "P101": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P101-d2cb6c",
+    "SNTL-CONTACT-P101-b0c5b5",
+    "SNTL-EXTRAK-P101-24a9a1",
+    "SNTL-EXTRAV-P101-a7abcc",
+    "SNTL-FORMULA-P101-38272c",
+    "SNTL-NOTE-P101-b206ec",
+    "SNTL-SRCFILE-P101-756be9"
+   ]
+  },
+  "P102": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P102-77b482",
+    "SNTL-CONTACT-P102-4a2291",
+    "SNTL-EXTRAK-P102-76dead",
+    "SNTL-EXTRAV-P102-be05a1",
+    "SNTL-FORMULA-P102-c362c0",
+    "SNTL-NOTE-P102-87964b",
+    "SNTL-SRCFILE-P102-e20858"
+   ]
+  },
+  "P103": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P103-0681e9",
+    "SNTL-CONTACT-P103-1beb18",
+    "SNTL-EXTRAK-P103-627a51",
+    "SNTL-EXTRAV-P103-6392e4",
+    "SNTL-FORMULA-P103-222d2b",
+    "SNTL-NOTE-P103-cc71a4",
+    "SNTL-SRCFILE-P103-f53f2c"
+   ]
+  },
+  "P104": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P104-addef5",
+    "SNTL-CONTACT-P104-01087a",
+    "SNTL-EXTRAK-P104-487293",
+    "SNTL-EXTRAV-P104-bd7886",
+    "SNTL-FORMULA-P104-8aea64",
+    "SNTL-NOTE-P104-aa70b6",
+    "SNTL-SRCFILE-P104-bdbe43"
+   ]
+  },
+  "P105": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P105-accf32",
+    "SNTL-CONTACT-P105-3bc993",
+    "SNTL-EXTRAK-P105-2e949d",
+    "SNTL-EXTRAV-P105-7363c8",
+    "SNTL-FORMULA-P105-83dc62",
+    "SNTL-NOTE-P105-66cd44",
+    "SNTL-SRCFILE-P105-4d6696"
+   ]
+  },
+  "P106": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P106-d2bd36",
+    "SNTL-CONTACT-P106-2ef013",
+    "SNTL-EXTRAK-P106-91fd02",
+    "SNTL-EXTRAV-P106-a7cf8f",
+    "SNTL-FORMULA-P106-337dfe",
+    "SNTL-NOTE-P106-b1f04a",
+    "SNTL-SRCFILE-P106-3e0f7e"
+   ]
+  },
+  "P107": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P107-54dc6f",
+    "SNTL-CONTACT-P107-41c3aa",
+    "SNTL-EXTRAK-P107-770e0f",
+    "SNTL-EXTRAV-P107-2e31bc",
+    "SNTL-FORMULA-P107-0cf19a",
+    "SNTL-NOTE-P107-cf67dc",
+    "SNTL-SRCFILE-P107-67d693"
+   ]
+  },
+  "P108": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P108-01f63f",
+    "SNTL-CONTACT-P108-f0b6d2",
+    "SNTL-EXTRAK-P108-44299b",
+    "SNTL-EXTRAV-P108-bd7892",
+    "SNTL-FORMULA-P108-c1abe0",
+    "SNTL-NOTE-P108-ef75ab",
+    "SNTL-SRCFILE-P108-3ca395"
+   ]
+  },
+  "P109": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P109-9df4d0",
+    "SNTL-CONTACT-P109-f618f7",
+    "SNTL-EXTRAK-P109-770c59",
+    "SNTL-EXTRAV-P109-1f284b",
+    "SNTL-FORMULA-P109-43b048",
+    "SNTL-NOTE-P109-fe64bc",
+    "SNTL-SRCFILE-P109-6a6f9b"
+   ]
+  },
+  "P110": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P110-769d25",
+    "SNTL-CONTACT-P110-b8c4cd",
+    "SNTL-EXTRAK-P110-3b456d",
+    "SNTL-EXTRAV-P110-5f9fda",
+    "SNTL-FORMULA-P110-412c00",
+    "SNTL-NOTE-P110-a7a840",
+    "SNTL-SRCFILE-P110-1b2dff"
+   ]
+  },
+  "P111": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P111-144385",
+    "SNTL-CONTACT-P111-ca3ce8",
+    "SNTL-EXTRAK-P111-4665f2",
+    "SNTL-EXTRAV-P111-ee59c1",
+    "SNTL-FORMULA-P111-8e19fe",
+    "SNTL-NOTE-P111-3914cc",
+    "SNTL-SRCFILE-P111-0ddae9"
+   ]
+  },
+  "P112": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P112-e05415",
+    "SNTL-CONTACT-P112-b5e8a1",
+    "SNTL-EXTRAK-P112-a684a4",
+    "SNTL-EXTRAV-P112-cc2c18",
+    "SNTL-FORMULA-P112-d8c74b",
+    "SNTL-NOTE-P112-40357c",
+    "SNTL-SRCFILE-P112-e01dbf"
+   ]
+  },
+  "P113": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P113-c68436",
+    "SNTL-CONTACT-P113-0c90d5",
+    "SNTL-EXTRAK-P113-28736f",
+    "SNTL-EXTRAV-P113-faa290",
+    "SNTL-FORMULA-P113-47b0c4",
+    "SNTL-NOTE-P113-b4a7ea",
+    "SNTL-SRCFILE-P113-466ba9"
+   ]
+  },
+  "P114": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P114-44b53e",
+    "SNTL-CONTACT-P114-46e246",
+    "SNTL-EXTRAK-P114-4a1cb9",
+    "SNTL-EXTRAV-P114-5663ff",
+    "SNTL-FORMULA-P114-df2986",
+    "SNTL-NOTE-P114-5d081c",
+    "SNTL-SRCFILE-P114-107d14"
+   ]
+  },
+  "P115": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P115-7b0ac2",
+    "SNTL-CONTACT-P115-45671b",
+    "SNTL-EXTRAK-P115-8812e6",
+    "SNTL-EXTRAV-P115-e41dac",
+    "SNTL-FORMULA-P115-c57b1c",
+    "SNTL-NOTE-P115-6c0804",
+    "SNTL-SRCFILE-P115-49c911"
+   ]
+  },
+  "P116": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P116-a2c7de",
+    "SNTL-CONTACT-P116-5a80ef",
+    "SNTL-EXTRAK-P116-5fd8c9",
+    "SNTL-EXTRAV-P116-d3b674",
+    "SNTL-FORMULA-P116-b77d80",
+    "SNTL-NOTE-P116-ba40b8",
+    "SNTL-SRCFILE-P116-3f2179"
+   ]
+  },
+  "P117": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P117-6e204d",
+    "SNTL-CONTACT-P117-8e9312",
+    "SNTL-EXTRAK-P117-a6fa29",
+    "SNTL-EXTRAV-P117-3d5acb",
+    "SNTL-FORMULA-P117-88c8d8",
+    "SNTL-NOTE-P117-e6959c",
+    "SNTL-SRCFILE-P117-a0dc82"
+   ]
+  },
+  "P118": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P118-d8e797",
+    "SNTL-CONTACT-P118-85f772",
+    "SNTL-EXTRAK-P118-ed57ae",
+    "SNTL-EXTRAV-P118-2a6883",
+    "SNTL-FORMULA-P118-fc6d53",
+    "SNTL-NOTE-P118-dfb4d4",
+    "SNTL-SRCFILE-P118-a6e950"
+   ]
+  },
+  "P119": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P119-427a0a",
+    "SNTL-CONTACT-P119-566d66",
+    "SNTL-EXTRAK-P119-df94f5",
+    "SNTL-EXTRAV-P119-4a0c45",
+    "SNTL-FORMULA-P119-5cd69b",
+    "SNTL-NOTE-P119-09b231",
+    "SNTL-SRCFILE-P119-e416c1"
+   ]
+  },
+  "P120": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P120-88094a",
+    "SNTL-CONTACT-P120-aa3b2a",
+    "SNTL-EXTRAK-P120-ceae30",
+    "SNTL-EXTRAV-P120-18491b",
+    "SNTL-FORMULA-P120-a210b1",
+    "SNTL-NOTE-P120-def053",
+    "SNTL-SRCFILE-P120-6c5ca2"
+   ]
+  },
+  "P121": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P121-6e91b0",
+    "SNTL-CONTACT-P121-1a51f9",
+    "SNTL-EXTRAK-P121-b35b1f",
+    "SNTL-EXTRAV-P121-862a7a",
+    "SNTL-FORMULA-P121-5247f4",
+    "SNTL-NOTE-P121-e27c05",
+    "SNTL-SRCFILE-P121-e539f3"
+   ]
+  },
+  "P122": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P122-335a0b",
+    "SNTL-CONTACT-P122-8011a2",
+    "SNTL-EXTRAK-P122-9b04c1",
+    "SNTL-EXTRAV-P122-b06b18",
+    "SNTL-FORMULA-P122-b5a506",
+    "SNTL-NOTE-P122-50101b",
+    "SNTL-SRCFILE-P122-30c3b3"
+   ]
+  },
+  "P123": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P123-c8d848",
+    "SNTL-CONTACT-P123-762fd1",
+    "SNTL-EXTRAK-P123-e2c8dc",
+    "SNTL-EXTRAV-P123-e9ec56",
+    "SNTL-FORMULA-P123-947fa4",
+    "SNTL-NOTE-P123-655d67",
+    "SNTL-SRCFILE-P123-44e352"
+   ]
+  },
+  "P124": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P124-6b450d",
+    "SNTL-CONTACT-P124-e5b068",
+    "SNTL-EXTRAK-P124-f21105",
+    "SNTL-EXTRAV-P124-5a8564",
+    "SNTL-FORMULA-P124-b8eadc",
+    "SNTL-NOTE-P124-1704b7",
+    "SNTL-SRCFILE-P124-17c3f7"
+   ]
+  },
+  "P125": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P125-add252",
+    "SNTL-CONTACT-P125-68ab29",
+    "SNTL-EXTRAK-P125-a2dcbd",
+    "SNTL-EXTRAV-P125-fdcaad",
+    "SNTL-FORMULA-P125-a6bf31",
+    "SNTL-NOTE-P125-86ccf8",
+    "SNTL-SRCFILE-P125-cb3d31"
+   ]
+  },
+  "P126": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P126-2c334a",
+    "SNTL-CONTACT-P126-38864a",
+    "SNTL-EXTRAK-P126-b98b69",
+    "SNTL-EXTRAV-P126-21dc81",
+    "SNTL-FORMULA-P126-0d3e53",
+    "SNTL-NOTE-P126-4091c8",
+    "SNTL-SRCFILE-P126-95f65c"
+   ]
+  },
+  "P127": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P127-d16a84",
+    "SNTL-CONTACT-P127-0f8be6",
+    "SNTL-EXTRAK-P127-a68500",
+    "SNTL-EXTRAV-P127-3a7e98",
+    "SNTL-FORMULA-P127-4baf84",
+    "SNTL-NOTE-P127-98d98f",
+    "SNTL-SRCFILE-P127-a94e5c"
+   ]
+  },
+  "P128": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P128-ff3978",
+    "SNTL-CONTACT-P128-e8534f",
+    "SNTL-EXTRAK-P128-975d32",
+    "SNTL-EXTRAV-P128-6e56fd",
+    "SNTL-FORMULA-P128-051623",
+    "SNTL-NOTE-P128-aa4c4c",
+    "SNTL-SRCFILE-P128-066e09"
+   ]
+  },
+  "P129": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P129-46c7f8",
+    "SNTL-CONTACT-P129-0401a3",
+    "SNTL-EXTRAK-P129-762d8d",
+    "SNTL-EXTRAV-P129-22fe2a",
+    "SNTL-FORMULA-P129-a8f684",
+    "SNTL-NOTE-P129-3c8e3d",
+    "SNTL-SRCFILE-P129-5b7742"
+   ]
+  },
+  "P130": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P130-a26900",
+    "SNTL-CONTACT-P130-312428",
+    "SNTL-EXTRAK-P130-248af7",
+    "SNTL-EXTRAV-P130-2a5a3a",
+    "SNTL-FORMULA-P130-791d27",
+    "SNTL-NOTE-P130-585ba2",
+    "SNTL-SRCFILE-P130-8f7565"
+   ]
+  },
+  "P131": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P131-d1ccd0",
+    "SNTL-CONTACT-P131-74248a",
+    "SNTL-EXTRAK-P131-399257",
+    "SNTL-EXTRAV-P131-48f252",
+    "SNTL-FORMULA-P131-5401ac",
+    "SNTL-NOTE-P131-a32a07",
+    "SNTL-SRCFILE-P131-df4cf6"
+   ]
+  },
+  "P132": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P132-1098e3",
+    "SNTL-CONTACT-P132-9140fb",
+    "SNTL-EXTRAK-P132-33e825",
+    "SNTL-EXTRAV-P132-a2d323",
+    "SNTL-FORMULA-P132-9a9d59",
+    "SNTL-NOTE-P132-54fd49",
+    "SNTL-SRCFILE-P132-98b734"
+   ]
+  },
+  "P133": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P133-f0c92e",
+    "SNTL-CONTACT-P133-c8f060",
+    "SNTL-EXTRAK-P133-52e839",
+    "SNTL-EXTRAV-P133-35ab3b",
+    "SNTL-FORMULA-P133-6935a1",
+    "SNTL-NOTE-P133-d502a8",
+    "SNTL-SRCFILE-P133-043a78"
+   ]
+  },
+  "P134": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P134-d7b364",
+    "SNTL-CONTACT-P134-1db66f",
+    "SNTL-EXTRAK-P134-9b061f",
+    "SNTL-EXTRAV-P134-6016c5",
+    "SNTL-FORMULA-P134-79e92c",
+    "SNTL-NOTE-P134-54aa8b",
+    "SNTL-SRCFILE-P134-99749e"
+   ]
+  },
+  "P135": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P135-a4b62c",
+    "SNTL-CONTACT-P135-015217",
+    "SNTL-EXTRAK-P135-5ab204",
+    "SNTL-EXTRAV-P135-7c4ae5",
+    "SNTL-FORMULA-P135-cff3f1",
+    "SNTL-NOTE-P135-7b353c",
+    "SNTL-SRCFILE-P135-6667e3"
+   ]
+  },
+  "P136": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P136-fb6736",
+    "SNTL-CONTACT-P136-e5f3a1",
+    "SNTL-EXTRAK-P136-0c91d5",
+    "SNTL-EXTRAV-P136-650c2c",
+    "SNTL-FORMULA-P136-865e4f",
+    "SNTL-NOTE-P136-2de424",
+    "SNTL-SRCFILE-P136-ec2306"
+   ]
+  },
+  "P137": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P137-41ed9c",
+    "SNTL-CONTACT-P137-8a3577",
+    "SNTL-EXTRAK-P137-16d722",
+    "SNTL-EXTRAV-P137-d3787e",
+    "SNTL-FORMULA-P137-00204f",
+    "SNTL-NOTE-P137-7d3e27",
+    "SNTL-SRCFILE-P137-af3405"
+   ]
+  },
+  "P138": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P138-c888b9",
+    "SNTL-CONTACT-P138-940b65",
+    "SNTL-EXTRAK-P138-13c999",
+    "SNTL-EXTRAV-P138-c1139e",
+    "SNTL-FORMULA-P138-4dd533",
+    "SNTL-NOTE-P138-96ffd1",
+    "SNTL-SRCFILE-P138-0c303c"
+   ]
+  },
+  "P139": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P139-090ea6",
+    "SNTL-CONTACT-P139-6ce5bf",
+    "SNTL-EXTRAK-P139-93bde6",
+    "SNTL-EXTRAV-P139-da8ce3",
+    "SNTL-FORMULA-P139-8dedf5",
+    "SNTL-NOTE-P139-18c462",
+    "SNTL-SRCFILE-P139-3e4630"
+   ]
+  },
+  "P140": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P140-d4588a",
+    "SNTL-CONTACT-P140-321cc9",
+    "SNTL-EXTRAK-P140-33ca36",
+    "SNTL-EXTRAV-P140-0bf5b9",
+    "SNTL-FORMULA-P140-7e33c8",
+    "SNTL-NOTE-P140-fd8e47",
+    "SNTL-SRCFILE-P140-8a2af0"
+   ]
+  },
+  "P141": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P141-6ccee3",
+    "SNTL-CONTACT-P141-bb2b4b",
+    "SNTL-EXTRAK-P141-f9cb57",
+    "SNTL-EXTRAV-P141-81f7d9",
+    "SNTL-FORMULA-P141-8805ad",
+    "SNTL-NOTE-P141-79c441",
+    "SNTL-SRCFILE-P141-8b9c79"
+   ]
+  },
+  "P142": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P142-707af1",
+    "SNTL-CONTACT-P142-06f432",
+    "SNTL-EXTRAK-P142-db2b0c",
+    "SNTL-EXTRAV-P142-99ec83",
+    "SNTL-FORMULA-P142-44bc29",
+    "SNTL-NOTE-P142-804f76",
+    "SNTL-SRCFILE-P142-0e7e18"
+   ]
+  },
+  "P143": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P143-bcbf81",
+    "SNTL-CONTACT-P143-44646f",
+    "SNTL-EXTRAK-P143-be9ddb",
+    "SNTL-EXTRAV-P143-d778fa",
+    "SNTL-FORMULA-P143-2bb60c",
+    "SNTL-NOTE-P143-ebdb70",
+    "SNTL-SRCFILE-P143-382950"
+   ]
+  },
+  "P144": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P144-79d74e",
+    "SNTL-CONTACT-P144-905000",
+    "SNTL-EXTRAK-P144-70b300",
+    "SNTL-EXTRAV-P144-960ebe",
+    "SNTL-FORMULA-P144-6b635a",
+    "SNTL-NOTE-P144-35e6b2",
+    "SNTL-SRCFILE-P144-b8b663"
+   ]
+  },
+  "P145": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P145-847e28",
+    "SNTL-CONTACT-P145-6a1083",
+    "SNTL-EXTRAK-P145-c0978b",
+    "SNTL-EXTRAV-P145-234487",
+    "SNTL-FORMULA-P145-ee21d1",
+    "SNTL-NOTE-P145-68f7a8",
+    "SNTL-SRCFILE-P145-c4149e"
+   ]
+  },
+  "P146": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P146-191039",
+    "SNTL-CONTACT-P146-4ac635",
+    "SNTL-EXTRAK-P146-8cbfd7",
+    "SNTL-EXTRAV-P146-49fad4",
+    "SNTL-FORMULA-P146-945f18",
+    "SNTL-NOTE-P146-4c2ef1",
+    "SNTL-SRCFILE-P146-8cfa31"
+   ]
+  },
+  "P147": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P147-23c784",
+    "SNTL-CONTACT-P147-041445",
+    "SNTL-EXTRAK-P147-354ac8",
+    "SNTL-EXTRAV-P147-7f9fba",
+    "SNTL-FORMULA-P147-b4af75",
+    "SNTL-NOTE-P147-16a90b",
+    "SNTL-SRCFILE-P147-701866"
+   ]
+  },
+  "P148": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P148-872e5b",
+    "SNTL-CONTACT-P148-53b88f",
+    "SNTL-EXTRAK-P148-24c135",
+    "SNTL-EXTRAV-P148-a11323",
+    "SNTL-FORMULA-P148-eb9f5f",
+    "SNTL-NOTE-P148-a1ba26",
+    "SNTL-SRCFILE-P148-a9befc"
+   ]
+  },
+  "P149": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P149-8c9e17",
+    "SNTL-CONTACT-P149-4bb134",
+    "SNTL-EXTRAK-P149-c5576a",
+    "SNTL-EXTRAV-P149-ec04f5",
+    "SNTL-FORMULA-P149-81278b",
+    "SNTL-NOTE-P149-685771",
+    "SNTL-SRCFILE-P149-2506bd"
+   ]
+  },
+  "P150": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P150-af1a17",
+    "SNTL-CONTACT-P150-67d647",
+    "SNTL-EXTRAK-P150-66d9fc",
+    "SNTL-EXTRAV-P150-07d49a",
+    "SNTL-FORMULA-P150-5744aa",
+    "SNTL-NOTE-P150-817909",
+    "SNTL-SRCFILE-P150-ca820e"
+   ]
+  },
+  "P151": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P151-6277f6",
+    "SNTL-CONTACT-P151-f05f65",
+    "SNTL-EXTRAK-P151-879859",
+    "SNTL-EXTRAV-P151-7f1a1c",
+    "SNTL-FORMULA-P151-948275",
+    "SNTL-NOTE-P151-c98d09",
+    "SNTL-SRCFILE-P151-c4b448"
+   ]
+  },
+  "P152": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P152-de0619",
+    "SNTL-CONTACT-P152-c78f8a",
+    "SNTL-EXTRAK-P152-c239ba",
+    "SNTL-EXTRAV-P152-72392b",
+    "SNTL-FORMULA-P152-60985a",
+    "SNTL-NOTE-P152-c3c6d7",
+    "SNTL-SRCFILE-P152-61fe55"
+   ]
+  },
+  "P153": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P153-6cadf0",
+    "SNTL-CONTACT-P153-44ddf2",
+    "SNTL-EXTRAK-P153-a3d4bf",
+    "SNTL-EXTRAV-P153-6e452a",
+    "SNTL-FORMULA-P153-936731",
+    "SNTL-NOTE-P153-6b779a",
+    "SNTL-SRCFILE-P153-b76271"
+   ]
+  },
+  "P154": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P154-f18efa",
+    "SNTL-CONTACT-P154-f21083",
+    "SNTL-EXTRAK-P154-71b5a6",
+    "SNTL-EXTRAV-P154-dcd27c",
+    "SNTL-FORMULA-P154-11e80f",
+    "SNTL-NOTE-P154-69f9d1",
+    "SNTL-SRCFILE-P154-620a42"
+   ]
+  },
+  "P155": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P155-de6262",
+    "SNTL-CONTACT-P155-fed976",
+    "SNTL-EXTRAK-P155-3676f3",
+    "SNTL-EXTRAV-P155-f41165",
+    "SNTL-FORMULA-P155-65b24a",
+    "SNTL-NOTE-P155-256754",
+    "SNTL-SRCFILE-P155-42f2b9"
+   ]
+  },
+  "P156": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P156-4327eb",
+    "SNTL-CONTACT-P156-3be97e",
+    "SNTL-EXTRAK-P156-789f86",
+    "SNTL-EXTRAV-P156-78fe91",
+    "SNTL-FORMULA-P156-2e46e2",
+    "SNTL-NOTE-P156-6cf1d1",
+    "SNTL-SRCFILE-P156-d21cf0"
+   ]
+  },
+  "P157": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P157-9e2c64",
+    "SNTL-CONTACT-P157-4a2f2e",
+    "SNTL-EXTRAK-P157-0174ad",
+    "SNTL-EXTRAV-P157-52b8f2",
+    "SNTL-FORMULA-P157-a6afad",
+    "SNTL-NOTE-P157-172108",
+    "SNTL-SRCFILE-P157-9c518a"
+   ]
+  },
+  "P158": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P158-0fd1e1",
+    "SNTL-CONTACT-P158-40d389",
+    "SNTL-EXTRAK-P158-d3df31",
+    "SNTL-EXTRAV-P158-733d40",
+    "SNTL-FORMULA-P158-d0ad66",
+    "SNTL-NOTE-P158-610a16",
+    "SNTL-SRCFILE-P158-0614ef"
+   ]
+  },
+  "P159": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P159-1bfb41",
+    "SNTL-CONTACT-P159-d767ed",
+    "SNTL-EXTRAK-P159-6f81ad",
+    "SNTL-EXTRAV-P159-998c0d",
+    "SNTL-FORMULA-P159-74a528",
+    "SNTL-NOTE-P159-89b9e1",
+    "SNTL-SRCFILE-P159-d89ba7"
+   ]
+  },
+  "P160": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P160-78dd4b",
+    "SNTL-CONTACT-P160-6969e4",
+    "SNTL-EXTRAK-P160-391c1d",
+    "SNTL-EXTRAV-P160-5c0511",
+    "SNTL-FORMULA-P160-60847f",
+    "SNTL-NOTE-P160-19aec9",
+    "SNTL-SRCFILE-P160-c7f565"
+   ]
+  },
+  "P161": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P161-40058f",
+    "SNTL-CONTACT-P161-f6f123",
+    "SNTL-EXTRAK-P161-4569b1",
+    "SNTL-EXTRAV-P161-c9e631",
+    "SNTL-FORMULA-P161-6e1b65",
+    "SNTL-NOTE-P161-5b15a9",
+    "SNTL-SRCFILE-P161-90ebf8"
+   ]
+  },
+  "P162": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P162-4065aa",
+    "SNTL-CONTACT-P162-fbb4ea",
+    "SNTL-EXTRAK-P162-730da8",
+    "SNTL-EXTRAV-P162-4ae3af",
+    "SNTL-FORMULA-P162-d82f71",
+    "SNTL-NOTE-P162-db302c",
+    "SNTL-SRCFILE-P162-d7d18d"
+   ]
+  },
+  "P163": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P163-657920",
+    "SNTL-CONTACT-P163-f9de99",
+    "SNTL-EXTRAK-P163-6beae9",
+    "SNTL-EXTRAV-P163-c0f843",
+    "SNTL-FORMULA-P163-d7a04f",
+    "SNTL-NOTE-P163-9550d6",
+    "SNTL-SRCFILE-P163-2565a0"
+   ]
+  },
+  "P164": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P164-6f0d75",
+    "SNTL-CONTACT-P164-1c43ce",
+    "SNTL-EXTRAK-P164-b206ab",
+    "SNTL-EXTRAV-P164-9050ad",
+    "SNTL-FORMULA-P164-dd8087",
+    "SNTL-NOTE-P164-cef10d",
+    "SNTL-SRCFILE-P164-4a141c"
+   ]
+  },
+  "P165": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P165-6865d0",
+    "SNTL-CONTACT-P165-d1a1c6",
+    "SNTL-EXTRAK-P165-04f507",
+    "SNTL-EXTRAV-P165-885ba8",
+    "SNTL-FORMULA-P165-062b99",
+    "SNTL-NOTE-P165-73c05c",
+    "SNTL-SRCFILE-P165-579c49"
+   ]
+  },
+  "P166": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P166-788fd2",
+    "SNTL-CONTACT-P166-b278d8",
+    "SNTL-EXTRAK-P166-31aae4",
+    "SNTL-EXTRAV-P166-83d9ea",
+    "SNTL-FORMULA-P166-4b9559",
+    "SNTL-NOTE-P166-2bb2bb",
+    "SNTL-SRCFILE-P166-35a89c"
+   ]
+  },
+  "P167": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P167-64bdc7",
+    "SNTL-CONTACT-P167-5b9d63",
+    "SNTL-EXTRAK-P167-846114",
+    "SNTL-EXTRAV-P167-099597",
+    "SNTL-FORMULA-P167-d118f0",
+    "SNTL-NOTE-P167-056789",
+    "SNTL-SRCFILE-P167-04dc03"
+   ]
+  },
+  "P168": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P168-6b89ff",
+    "SNTL-CONTACT-P168-04fae7",
+    "SNTL-EXTRAK-P168-8261db",
+    "SNTL-EXTRAV-P168-8cc7d1",
+    "SNTL-FORMULA-P168-98c0bc",
+    "SNTL-NOTE-P168-6e4e74",
+    "SNTL-SRCFILE-P168-827b34"
+   ]
+  },
+  "P169": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P169-13730e",
+    "SNTL-CONTACT-P169-389085",
+    "SNTL-EXTRAK-P169-273512",
+    "SNTL-EXTRAV-P169-f96124",
+    "SNTL-FORMULA-P169-fb0cec",
+    "SNTL-NOTE-P169-5ab549",
+    "SNTL-SRCFILE-P169-5c1555"
+   ]
+  },
+  "P170": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P170-6c8307",
+    "SNTL-CONTACT-P170-08477d",
+    "SNTL-EXTRAK-P170-198017",
+    "SNTL-EXTRAV-P170-80deb1",
+    "SNTL-FORMULA-P170-2d6333",
+    "SNTL-NOTE-P170-25d0bf",
+    "SNTL-SRCFILE-P170-601cf0"
+   ]
+  },
+  "P171": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P171-d56fbb",
+    "SNTL-CONTACT-P171-029a5d",
+    "SNTL-EXTRAK-P171-b8ab85",
+    "SNTL-EXTRAV-P171-811a30",
+    "SNTL-FORMULA-P171-47d392",
+    "SNTL-NOTE-P171-4640cd",
+    "SNTL-SRCFILE-P171-564cc3"
+   ]
+  },
+  "P172": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P172-540db1",
+    "SNTL-CONTACT-P172-65098c",
+    "SNTL-EXTRAK-P172-da7a70",
+    "SNTL-EXTRAV-P172-454fd7",
+    "SNTL-FORMULA-P172-6ad164",
+    "SNTL-NOTE-P172-03f367",
+    "SNTL-SRCFILE-P172-da0377"
+   ]
+  },
+  "P173": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P173-3751e3",
+    "SNTL-CONTACT-P173-7fa602",
+    "SNTL-EXTRAK-P173-23c7d8",
+    "SNTL-EXTRAV-P173-276254",
+    "SNTL-FORMULA-P173-65d342",
+    "SNTL-NOTE-P173-6a94df",
+    "SNTL-SRCFILE-P173-ee0434"
+   ]
+  },
+  "P174": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P174-eebe81",
+    "SNTL-CONTACT-P174-c7c410",
+    "SNTL-EXTRAK-P174-4a9d86",
+    "SNTL-EXTRAV-P174-5a0228",
+    "SNTL-FORMULA-P174-608817",
+    "SNTL-NOTE-P174-b04e37",
+    "SNTL-SRCFILE-P174-a4f0e0"
+   ]
+  },
+  "P175": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P175-7949de",
+    "SNTL-CONTACT-P175-9f2639",
+    "SNTL-EXTRAK-P175-1360a9",
+    "SNTL-EXTRAV-P175-f265ab",
+    "SNTL-FORMULA-P175-fc7649",
+    "SNTL-NOTE-P175-c6b1db",
+    "SNTL-SRCFILE-P175-c5d4f4"
+   ]
+  },
+  "P176": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P176-1eb695",
+    "SNTL-CONTACT-P176-13e6f5",
+    "SNTL-EXTRAK-P176-8f530c",
+    "SNTL-EXTRAV-P176-494b8a",
+    "SNTL-FORMULA-P176-776ea9",
+    "SNTL-NOTE-P176-92e494",
+    "SNTL-SRCFILE-P176-4c7caa"
+   ]
+  },
+  "P177": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P177-016aa2",
+    "SNTL-CONTACT-P177-8a671a",
+    "SNTL-EXTRAK-P177-d325cd",
+    "SNTL-EXTRAV-P177-be9269",
+    "SNTL-FORMULA-P177-e53e38",
+    "SNTL-NOTE-P177-a072a0",
+    "SNTL-SRCFILE-P177-349edc"
+   ]
+  },
+  "P178": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P178-246b9f",
+    "SNTL-CONTACT-P178-c2f13f",
+    "SNTL-EXTRAK-P178-cde53a",
+    "SNTL-EXTRAV-P178-7b6d82",
+    "SNTL-FORMULA-P178-36569d",
+    "SNTL-NOTE-P178-0b1ed7",
+    "SNTL-SRCFILE-P178-1516ce"
+   ]
+  },
+  "P179": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P179-b2bbc5",
+    "SNTL-CONTACT-P179-3d5588",
+    "SNTL-EXTRAK-P179-fd8eba",
+    "SNTL-EXTRAV-P179-5ff4ab",
+    "SNTL-FORMULA-P179-b7b3f8",
+    "SNTL-NOTE-P179-976a70",
+    "SNTL-SRCFILE-P179-8bfdd2"
+   ]
+  },
+  "P180": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P180-9ca73e",
+    "SNTL-CONTACT-P180-f05573",
+    "SNTL-EXTRAK-P180-8e15af",
+    "SNTL-EXTRAV-P180-b2de09",
+    "SNTL-FORMULA-P180-6ccf9f",
+    "SNTL-NOTE-P180-484782",
+    "SNTL-SRCFILE-P180-632f8b"
+   ]
+  },
+  "P181": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P181-e2b2af",
+    "SNTL-CONTACT-P181-fbc778",
+    "SNTL-EXTRAK-P181-618035",
+    "SNTL-EXTRAV-P181-ad2719",
+    "SNTL-FORMULA-P181-54bf23",
+    "SNTL-NOTE-P181-4a40eb",
+    "SNTL-SRCFILE-P181-1f3f87"
+   ]
+  },
+  "P182": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P182-8a4c83",
+    "SNTL-CONTACT-P182-67bf76",
+    "SNTL-EXTRAK-P182-3cbe8f",
+    "SNTL-EXTRAV-P182-133f2a",
+    "SNTL-FORMULA-P182-a26d96",
+    "SNTL-NOTE-P182-0e8b43",
+    "SNTL-SRCFILE-P182-4bbfd6"
+   ]
+  },
+  "P183": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P183-c00826",
+    "SNTL-CONTACT-P183-1b164c",
+    "SNTL-EXTRAK-P183-a6fdea",
+    "SNTL-EXTRAV-P183-4e877f",
+    "SNTL-FORMULA-P183-da7d44",
+    "SNTL-NOTE-P183-b5f433",
+    "SNTL-SRCFILE-P183-c45a7b"
+   ]
+  },
+  "P184": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P184-36c7a4",
+    "SNTL-CONTACT-P184-48306d",
+    "SNTL-EXTRAK-P184-2d00ed",
+    "SNTL-EXTRAV-P184-a4d647",
+    "SNTL-FORMULA-P184-dee6c6",
+    "SNTL-NOTE-P184-9cbbcb",
+    "SNTL-SRCFILE-P184-d01645"
+   ]
+  },
+  "P185": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P185-21f6de",
+    "SNTL-CONTACT-P185-1319ee",
+    "SNTL-EXTRAK-P185-8a3ae2",
+    "SNTL-EXTRAV-P185-92f74c",
+    "SNTL-FORMULA-P185-2208cf",
+    "SNTL-NOTE-P185-5eaadf",
+    "SNTL-SRCFILE-P185-8ced02"
+   ]
+  },
+  "P186": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P186-85dd44",
+    "SNTL-CONTACT-P186-7891bf",
+    "SNTL-EXTRAK-P186-011ce0",
+    "SNTL-EXTRAV-P186-f89d97",
+    "SNTL-FORMULA-P186-3d4192",
+    "SNTL-NOTE-P186-fe37d8",
+    "SNTL-SRCFILE-P186-59f44e"
+   ]
+  },
+  "P187": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P187-e99834",
+    "SNTL-CONTACT-P187-9baa90",
+    "SNTL-EXTRAK-P187-99dd9b",
+    "SNTL-EXTRAV-P187-28a994",
+    "SNTL-FORMULA-P187-c88b8f",
+    "SNTL-NOTE-P187-8eeeec",
+    "SNTL-SRCFILE-P187-8fb845"
+   ]
+  },
+  "P188": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P188-9b31e1",
+    "SNTL-CONTACT-P188-016694",
+    "SNTL-EXTRAK-P188-264202",
+    "SNTL-EXTRAV-P188-fb20fc",
+    "SNTL-FORMULA-P188-d91e0c",
+    "SNTL-NOTE-P188-845563",
+    "SNTL-SRCFILE-P188-961872"
+   ]
+  },
+  "P189": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P189-a35db9",
+    "SNTL-CONTACT-P189-668e5f",
+    "SNTL-EXTRAK-P189-e7d15b",
+    "SNTL-EXTRAV-P189-eb4172",
+    "SNTL-FORMULA-P189-86319d",
+    "SNTL-NOTE-P189-115896",
+    "SNTL-SRCFILE-P189-4a6827"
+   ]
+  },
+  "P190": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P190-9e790f",
+    "SNTL-CONTACT-P190-e5d955",
+    "SNTL-EXTRAK-P190-10402b",
+    "SNTL-EXTRAV-P190-3b89b3",
+    "SNTL-FORMULA-P190-d874ac",
+    "SNTL-NOTE-P190-125a70",
+    "SNTL-SRCFILE-P190-00fc8f"
+   ]
+  },
+  "P191": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P191-efd36b",
+    "SNTL-CONTACT-P191-0b8eab",
+    "SNTL-EXTRAK-P191-b5c512",
+    "SNTL-EXTRAV-P191-8b9924",
+    "SNTL-FORMULA-P191-f56a65",
+    "SNTL-NOTE-P191-fa9dcf",
+    "SNTL-SRCFILE-P191-b5a601"
+   ]
+  },
+  "P192": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P192-a54ca8",
+    "SNTL-CONTACT-P192-4d4b52",
+    "SNTL-EXTRAK-P192-1f57b4",
+    "SNTL-EXTRAV-P192-b6d07b",
+    "SNTL-FORMULA-P192-b5c87d",
+    "SNTL-NOTE-P192-63dcc6",
+    "SNTL-SRCFILE-P192-014d50"
+   ]
+  },
+  "P193": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P193-3fcde3",
+    "SNTL-CONTACT-P193-4a9e5c",
+    "SNTL-EXTRAK-P193-e34454",
+    "SNTL-EXTRAV-P193-fcedcf",
+    "SNTL-FORMULA-P193-81f006",
+    "SNTL-NOTE-P193-82c70f",
+    "SNTL-SRCFILE-P193-a72d50"
+   ]
+  },
+  "P194": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P194-fd3d77",
+    "SNTL-CONTACT-P194-b0b579",
+    "SNTL-EXTRAK-P194-4541c3",
+    "SNTL-EXTRAV-P194-8baf7c",
+    "SNTL-FORMULA-P194-27293b",
+    "SNTL-NOTE-P194-ffedff",
+    "SNTL-SRCFILE-P194-91eff1"
+   ]
+  },
+  "P195": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P195-227ac0",
+    "SNTL-CONTACT-P195-98bfa9",
+    "SNTL-EXTRAK-P195-fa1862",
+    "SNTL-EXTRAV-P195-b47e1d",
+    "SNTL-FORMULA-P195-b66f91",
+    "SNTL-NOTE-P195-afde24",
+    "SNTL-SRCFILE-P195-7a0d53"
+   ]
+  },
+  "P196": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P196-a95772",
+    "SNTL-CONTACT-P196-b23d29",
+    "SNTL-EXTRAK-P196-5ad1e5",
+    "SNTL-EXTRAV-P196-c37d2e",
+    "SNTL-FORMULA-P196-cd4500",
+    "SNTL-NOTE-P196-e0a265",
+    "SNTL-SRCFILE-P196-72ecf3"
+   ]
+  },
+  "P197": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P197-5fa0d6",
+    "SNTL-CONTACT-P197-0b67c7",
+    "SNTL-EXTRAK-P197-864776",
+    "SNTL-EXTRAV-P197-01a574",
+    "SNTL-FORMULA-P197-84d02c",
+    "SNTL-NOTE-P197-1a63e3",
+    "SNTL-SRCFILE-P197-f05be4"
+   ]
+  },
+  "P198": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P198-8994e6",
+    "SNTL-CONTACT-P198-297214",
+    "SNTL-EXTRAK-P198-da7977",
+    "SNTL-EXTRAV-P198-e8aaf4",
+    "SNTL-FORMULA-P198-39229f",
+    "SNTL-NOTE-P198-3ad5af",
+    "SNTL-SRCFILE-P198-38687d"
+   ]
+  },
+  "P199": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P199-8790cd",
+    "SNTL-CONTACT-P199-45984f",
+    "SNTL-EXTRAK-P199-ee0d27",
+    "SNTL-EXTRAV-P199-7dca6e",
+    "SNTL-FORMULA-P199-71c187",
+    "SNTL-NOTE-P199-9cff5f",
+    "SNTL-SRCFILE-P199-78921a"
+   ]
+  },
+  "P200": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P200-fc5e95",
+    "SNTL-CONTACT-P200-7ff00d",
+    "SNTL-EXTRAK-P200-3fee46",
+    "SNTL-EXTRAV-P200-166588",
+    "SNTL-FORMULA-P200-cabc76",
+    "SNTL-NOTE-P200-e369cd",
+    "SNTL-SRCFILE-P200-ab4877"
+   ]
+  },
+  "P201": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P201-5d4b28",
+    "SNTL-CONTACT-P201-f5c1a5",
+    "SNTL-EXTRAK-P201-c650ff",
+    "SNTL-EXTRAV-P201-82077e",
+    "SNTL-FORMULA-P201-20cacc",
+    "SNTL-NOTE-P201-1e12ea",
+    "SNTL-SRCFILE-P201-6bcbfa"
+   ]
+  },
+  "P202": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P202-0230d3",
+    "SNTL-CONTACT-P202-2541db",
+    "SNTL-EXTRAK-P202-b8e0b9",
+    "SNTL-EXTRAV-P202-6464bb",
+    "SNTL-FORMULA-P202-c96936",
+    "SNTL-NOTE-P202-fc6d7c",
+    "SNTL-SRCFILE-P202-eecf4a"
+   ]
+  },
+  "P203": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P203-fbe280",
+    "SNTL-CONTACT-P203-620674",
+    "SNTL-EXTRAK-P203-9ad77b",
+    "SNTL-EXTRAV-P203-eec2f9",
+    "SNTL-FORMULA-P203-7d189b",
+    "SNTL-NOTE-P203-643c03",
+    "SNTL-SRCFILE-P203-5c2ec4"
+   ]
+  },
+  "P204": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P204-7f950c",
+    "SNTL-CONTACT-P204-c57531",
+    "SNTL-EXTRAK-P204-fb3475",
+    "SNTL-EXTRAV-P204-9e597f",
+    "SNTL-FORMULA-P204-dc94b5",
+    "SNTL-NOTE-P204-3ab0d3",
+    "SNTL-SRCFILE-P204-11be14"
+   ]
+  },
+  "P205": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P205-586324",
+    "SNTL-CONTACT-P205-a2ae04",
+    "SNTL-EXTRAK-P205-b34187",
+    "SNTL-EXTRAV-P205-4b16c4",
+    "SNTL-FORMULA-P205-9dc74d",
+    "SNTL-NOTE-P205-e0020e",
+    "SNTL-SRCFILE-P205-f8f979"
+   ]
+  },
+  "P206": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P206-01a439",
+    "SNTL-CONTACT-P206-b838b7",
+    "SNTL-EXTRAK-P206-9b0db7",
+    "SNTL-EXTRAV-P206-145625",
+    "SNTL-FORMULA-P206-9fa23e",
+    "SNTL-NOTE-P206-09040e",
+    "SNTL-SRCFILE-P206-0c457a"
+   ]
+  },
+  "P207": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P207-153604",
+    "SNTL-CONTACT-P207-97a304",
+    "SNTL-EXTRAK-P207-b89999",
+    "SNTL-EXTRAV-P207-948757",
+    "SNTL-FORMULA-P207-318904",
+    "SNTL-NOTE-P207-4736fa",
+    "SNTL-SRCFILE-P207-206048"
+   ]
+  },
+  "P208": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P208-158859",
+    "SNTL-CONTACT-P208-522b34",
+    "SNTL-EXTRAK-P208-c29241",
+    "SNTL-EXTRAV-P208-61f136",
+    "SNTL-FORMULA-P208-72ee67",
+    "SNTL-NOTE-P208-458a50",
+    "SNTL-SRCFILE-P208-b1abe6"
+   ]
+  },
+  "P209": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P209-0bbd7c",
+    "SNTL-CONTACT-P209-dd1f92",
+    "SNTL-EXTRAK-P209-8a5e37",
+    "SNTL-EXTRAV-P209-472936",
+    "SNTL-FORMULA-P209-94fe7a",
+    "SNTL-NOTE-P209-e76a34",
+    "SNTL-SRCFILE-P209-130161"
+   ]
+  },
+  "P210": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P210-0e6978",
+    "SNTL-CONTACT-P210-1dfd46",
+    "SNTL-EXTRAK-P210-92427f",
+    "SNTL-EXTRAV-P210-801afe",
+    "SNTL-FORMULA-P210-3fef8a",
+    "SNTL-NOTE-P210-d72099",
+    "SNTL-SRCFILE-P210-d30241"
+   ]
+  },
+  "P211": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P211-4b0faa",
+    "SNTL-CONTACT-P211-91e432",
+    "SNTL-EXTRAK-P211-c3a83b",
+    "SNTL-EXTRAV-P211-609504",
+    "SNTL-FORMULA-P211-b850e8",
+    "SNTL-NOTE-P211-763a34",
+    "SNTL-SRCFILE-P211-63d8d9"
+   ]
+  },
+  "P212": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P212-974749",
+    "SNTL-CONTACT-P212-cc1502",
+    "SNTL-EXTRAK-P212-e6d136",
+    "SNTL-EXTRAV-P212-9929b0",
+    "SNTL-FORMULA-P212-32be5b",
+    "SNTL-NOTE-P212-629c1b",
+    "SNTL-SRCFILE-P212-b08cca"
+   ]
+  },
+  "P213": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P213-a9ebb2",
+    "SNTL-CONTACT-P213-4662e0",
+    "SNTL-EXTRAK-P213-22c837",
+    "SNTL-EXTRAV-P213-d1c2ba",
+    "SNTL-FORMULA-P213-463d3b",
+    "SNTL-NOTE-P213-9453d0",
+    "SNTL-SRCFILE-P213-60df38"
+   ]
+  },
+  "P214": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P214-80dd52",
+    "SNTL-CONTACT-P214-16a1fe",
+    "SNTL-EXTRAK-P214-5d16ba",
+    "SNTL-EXTRAV-P214-9ed9a8",
+    "SNTL-FORMULA-P214-b7e581",
+    "SNTL-NOTE-P214-549d33",
+    "SNTL-SRCFILE-P214-068e08"
+   ]
+  },
+  "P215": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P215-7a8fa6",
+    "SNTL-CONTACT-P215-b1887c",
+    "SNTL-EXTRAK-P215-665076",
+    "SNTL-EXTRAV-P215-40e912",
+    "SNTL-FORMULA-P215-77b22e",
+    "SNTL-NOTE-P215-0fb77a",
+    "SNTL-SRCFILE-P215-5b00f8"
+   ]
+  },
+  "P216": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P216-007e86",
+    "SNTL-CONTACT-P216-0a63f9",
+    "SNTL-EXTRAK-P216-569014",
+    "SNTL-EXTRAV-P216-426125",
+    "SNTL-FORMULA-P216-d36bd0",
+    "SNTL-NOTE-P216-0826f2",
+    "SNTL-SRCFILE-P216-51a5f0"
+   ]
+  },
+  "P217": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P217-d80a80",
+    "SNTL-CONTACT-P217-874051",
+    "SNTL-EXTRAK-P217-be7575",
+    "SNTL-EXTRAV-P217-488b3e",
+    "SNTL-FORMULA-P217-4a2313",
+    "SNTL-NOTE-P217-bfb89d",
+    "SNTL-SRCFILE-P217-49317c"
+   ]
+  },
+  "P218": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P218-8e13c1",
+    "SNTL-CONTACT-P218-aadec8",
+    "SNTL-EXTRAK-P218-d5ae11",
+    "SNTL-EXTRAV-P218-8ba889",
+    "SNTL-FORMULA-P218-05e1f5",
+    "SNTL-NOTE-P218-6e2d04",
+    "SNTL-SRCFILE-P218-fd8068"
+   ]
+  },
+  "P219": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P219-2e53b0",
+    "SNTL-CONTACT-P219-4698eb",
+    "SNTL-EXTRAK-P219-f4f461",
+    "SNTL-EXTRAV-P219-2febc8",
+    "SNTL-FORMULA-P219-d9344f",
+    "SNTL-NOTE-P219-3a522e",
+    "SNTL-SRCFILE-P219-febc2b"
+   ]
+  },
+  "P220": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P220-88817d",
+    "SNTL-CONTACT-P220-81bfaf",
+    "SNTL-EXTRAK-P220-52c49c",
+    "SNTL-EXTRAV-P220-5e526d",
+    "SNTL-FORMULA-P220-bfcfc6",
+    "SNTL-NOTE-P220-8169bb",
+    "SNTL-SRCFILE-P220-2df247"
+   ]
+  },
+  "P221": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P221-a8cf3c",
+    "SNTL-CONTACT-P221-692243",
+    "SNTL-EXTRAK-P221-a2d111",
+    "SNTL-EXTRAV-P221-bf6a9c",
+    "SNTL-FORMULA-P221-b76dfb",
+    "SNTL-NOTE-P221-74676c",
+    "SNTL-SRCFILE-P221-b258d2"
+   ]
+  },
+  "P222": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P222-946205",
+    "SNTL-CONTACT-P222-32bd02",
+    "SNTL-EXTRAK-P222-6abea7",
+    "SNTL-EXTRAV-P222-be7a94",
+    "SNTL-FORMULA-P222-29de1c",
+    "SNTL-NOTE-P222-5894b3",
+    "SNTL-SRCFILE-P222-72a5f3"
+   ]
+  },
+  "P223": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P223-cb960b",
+    "SNTL-CONTACT-P223-c649bd",
+    "SNTL-EXTRAK-P223-2b9e2c",
+    "SNTL-EXTRAV-P223-4ae476",
+    "SNTL-FORMULA-P223-1f1768",
+    "SNTL-NOTE-P223-93a56b",
+    "SNTL-SRCFILE-P223-8de91a"
+   ]
+  },
+  "P224": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P224-d3cc0d",
+    "SNTL-CONTACT-P224-8a2832",
+    "SNTL-EXTRAK-P224-8d15f5",
+    "SNTL-EXTRAV-P224-4360de",
+    "SNTL-FORMULA-P224-5069e8",
+    "SNTL-NOTE-P224-29da3f",
+    "SNTL-SRCFILE-P224-714335"
+   ]
+  },
+  "P225": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P225-e0be1b",
+    "SNTL-CONTACT-P225-a42b16",
+    "SNTL-EXTRAK-P225-48d06a",
+    "SNTL-EXTRAV-P225-34b52f",
+    "SNTL-FORMULA-P225-202026",
+    "SNTL-NOTE-P225-dc8e5d",
+    "SNTL-SRCFILE-P225-904c02"
+   ]
+  },
+  "P226": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P226-ac5225",
+    "SNTL-CONTACT-P226-3d751c",
+    "SNTL-EXTRAK-P226-ce1afa",
+    "SNTL-EXTRAV-P226-ee5c91",
+    "SNTL-FORMULA-P226-0d9e00",
+    "SNTL-NOTE-P226-b8e921",
+    "SNTL-SRCFILE-P226-5db253"
+   ]
+  },
+  "P227": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P227-5642e1",
+    "SNTL-CONTACT-P227-7b6bcc",
+    "SNTL-EXTRAK-P227-38e55c",
+    "SNTL-EXTRAV-P227-513a57",
+    "SNTL-FORMULA-P227-16c6c0",
+    "SNTL-NOTE-P227-2a3691",
+    "SNTL-SRCFILE-P227-81a20b"
+   ]
+  },
+  "P228": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P228-d73828",
+    "SNTL-CONTACT-P228-5eb39f",
+    "SNTL-EXTRAK-P228-4bcec7",
+    "SNTL-EXTRAV-P228-fac08a",
+    "SNTL-FORMULA-P228-13e772",
+    "SNTL-NOTE-P228-bec44d",
+    "SNTL-SRCFILE-P228-f16d7c"
+   ]
+  },
+  "P229": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P229-6b55aa",
+    "SNTL-CONTACT-P229-ecb713",
+    "SNTL-EXTRAK-P229-aea72b",
+    "SNTL-EXTRAV-P229-dbd824",
+    "SNTL-FORMULA-P229-174178",
+    "SNTL-NOTE-P229-4919d1",
+    "SNTL-SRCFILE-P229-e8886d"
+   ]
+  },
+  "P230": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P230-18d97e",
+    "SNTL-CONTACT-P230-82bcd3",
+    "SNTL-EXTRAK-P230-42eb53",
+    "SNTL-EXTRAV-P230-90b85c",
+    "SNTL-FORMULA-P230-86bc17",
+    "SNTL-NOTE-P230-f8c2e4",
+    "SNTL-SRCFILE-P230-a2763f"
+   ]
+  },
+  "P231": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P231-f36f10",
+    "SNTL-CONTACT-P231-386039",
+    "SNTL-EXTRAK-P231-35a4e4",
+    "SNTL-EXTRAV-P231-7e0b52",
+    "SNTL-FORMULA-P231-a2a8bb",
+    "SNTL-NOTE-P231-58a73d",
+    "SNTL-SRCFILE-P231-071fbf"
+   ]
+  },
+  "P232": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P232-993dbb",
+    "SNTL-CONTACT-P232-7d6105",
+    "SNTL-EXTRAK-P232-054b11",
+    "SNTL-EXTRAV-P232-9a93df",
+    "SNTL-FORMULA-P232-95d333",
+    "SNTL-NOTE-P232-8bee8f",
+    "SNTL-SRCFILE-P232-b41a4a"
+   ]
+  },
+  "P233": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P233-affcdc",
+    "SNTL-CONTACT-P233-d8db81",
+    "SNTL-EXTRAK-P233-aa817d",
+    "SNTL-EXTRAV-P233-bf4175",
+    "SNTL-FORMULA-P233-f820ae",
+    "SNTL-NOTE-P233-f31c9b",
+    "SNTL-SRCFILE-P233-294d3d"
+   ]
+  },
+  "P234": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P234-1bcc28",
+    "SNTL-CONTACT-P234-e57e6c",
+    "SNTL-EXTRAK-P234-45fec9",
+    "SNTL-EXTRAV-P234-e99ee3",
+    "SNTL-FORMULA-P234-ee067d",
+    "SNTL-NOTE-P234-a1fa39",
+    "SNTL-SRCFILE-P234-14c302"
+   ]
+  },
+  "P235": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P235-67c518",
+    "SNTL-CONTACT-P235-26f20a",
+    "SNTL-EXTRAK-P235-01ce5b",
+    "SNTL-EXTRAV-P235-e7fe25",
+    "SNTL-FORMULA-P235-3c6454",
+    "SNTL-NOTE-P235-7cbe32",
+    "SNTL-SRCFILE-P235-9491e9"
+   ]
+  },
+  "P236": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P236-973f36",
+    "SNTL-CONTACT-P236-a9eb67",
+    "SNTL-EXTRAK-P236-5561d3",
+    "SNTL-EXTRAV-P236-58e23f",
+    "SNTL-FORMULA-P236-1e672c",
+    "SNTL-NOTE-P236-391b91",
+    "SNTL-SRCFILE-P236-1ef2f4"
+   ]
+  },
+  "P237": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P237-cc8c52",
+    "SNTL-CONTACT-P237-e5bbcc",
+    "SNTL-EXTRAK-P237-47c96b",
+    "SNTL-EXTRAV-P237-f646c6",
+    "SNTL-FORMULA-P237-67200b",
+    "SNTL-NOTE-P237-b73f68",
+    "SNTL-SRCFILE-P237-2ecf4e"
+   ]
+  },
+  "P238": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P238-fbd09e",
+    "SNTL-CONTACT-P238-a8e4a6",
+    "SNTL-EXTRAK-P238-5bfd65",
+    "SNTL-EXTRAV-P238-9a341a",
+    "SNTL-FORMULA-P238-649d18",
+    "SNTL-NOTE-P238-b04c79",
+    "SNTL-SRCFILE-P238-d28518"
+   ]
+  },
+  "P239": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P239-e9c56e",
+    "SNTL-CONTACT-P239-e5c51c",
+    "SNTL-EXTRAK-P239-60021b",
+    "SNTL-EXTRAV-P239-a2d8a7",
+    "SNTL-FORMULA-P239-2df5ea",
+    "SNTL-NOTE-P239-d35ff5",
+    "SNTL-SRCFILE-P239-c49bf1"
+   ]
+  },
+  "P240": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P240-22ddc7",
+    "SNTL-CONTACT-P240-ad11c6",
+    "SNTL-EXTRAK-P240-900a8c",
+    "SNTL-EXTRAV-P240-0ed53d",
+    "SNTL-FORMULA-P240-7da260",
+    "SNTL-NOTE-P240-826df7",
+    "SNTL-SRCFILE-P240-213c0e"
+   ]
+  },
+  "P241": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P241-b57f87",
+    "SNTL-CONTACT-P241-4c3628",
+    "SNTL-EXTRAK-P241-290737",
+    "SNTL-EXTRAV-P241-cddeb1",
+    "SNTL-FORMULA-P241-a3f1f4",
+    "SNTL-NOTE-P241-3a9fb7",
+    "SNTL-SRCFILE-P241-f81f9e"
+   ]
+  },
+  "P242": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P242-711874",
+    "SNTL-CONTACT-P242-688cde",
+    "SNTL-EXTRAK-P242-487035",
+    "SNTL-EXTRAV-P242-e98074",
+    "SNTL-FORMULA-P242-e1d1bc",
+    "SNTL-NOTE-P242-cb1a66",
+    "SNTL-SRCFILE-P242-da1332"
+   ]
+  },
+  "P243": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P243-7bd6f3",
+    "SNTL-CONTACT-P243-1a8d6a",
+    "SNTL-EXTRAK-P243-c67ca0",
+    "SNTL-EXTRAV-P243-9445a0",
+    "SNTL-FORMULA-P243-bad07c",
+    "SNTL-NOTE-P243-34554b",
+    "SNTL-SRCFILE-P243-1f1923"
+   ]
+  },
+  "P244": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P244-e23fa9",
+    "SNTL-CONTACT-P244-1ff819",
+    "SNTL-EXTRAK-P244-2e702f",
+    "SNTL-EXTRAV-P244-95be7a",
+    "SNTL-FORMULA-P244-a484f7",
+    "SNTL-NOTE-P244-b65228",
+    "SNTL-SRCFILE-P244-d37a72"
+   ]
+  },
+  "P245": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P245-56c7ab",
+    "SNTL-CONTACT-P245-a9e84f",
+    "SNTL-EXTRAK-P245-d49e93",
+    "SNTL-EXTRAV-P245-ea28f3",
+    "SNTL-FORMULA-P245-29a6fd",
+    "SNTL-NOTE-P245-68b9a3",
+    "SNTL-SRCFILE-P245-3a85da"
+   ]
+  },
+  "P246": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P246-717680",
+    "SNTL-CONTACT-P246-29ba61",
+    "SNTL-EXTRAK-P246-4230f9",
+    "SNTL-EXTRAV-P246-a69ea0",
+    "SNTL-FORMULA-P246-3c40b0",
+    "SNTL-NOTE-P246-3728db",
+    "SNTL-SRCFILE-P246-49be31"
+   ]
+  },
+  "P247": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P247-c2975c",
+    "SNTL-CONTACT-P247-f29ea0",
+    "SNTL-EXTRAK-P247-76c928",
+    "SNTL-EXTRAV-P247-7542a0",
+    "SNTL-FORMULA-P247-7d49ac",
+    "SNTL-NOTE-P247-59cfb9",
+    "SNTL-SRCFILE-P247-af6c33"
+   ]
+  },
+  "P248": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P248-19aeb3",
+    "SNTL-CONTACT-P248-51c6c2",
+    "SNTL-EXTRAK-P248-f19687",
+    "SNTL-EXTRAV-P248-948e4d",
+    "SNTL-FORMULA-P248-d32cb1",
+    "SNTL-NOTE-P248-f0bf42",
+    "SNTL-SRCFILE-P248-ce6f24"
+   ]
+  },
+  "P249": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P249-45794b",
+    "SNTL-CONTACT-P249-656d80",
+    "SNTL-EXTRAK-P249-45750c",
+    "SNTL-EXTRAV-P249-0331cb",
+    "SNTL-FORMULA-P249-7b2b22",
+    "SNTL-NOTE-P249-97712a",
+    "SNTL-SRCFILE-P249-4909c0"
+   ]
+  },
+  "P250": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P250-6308d8",
+    "SNTL-CONTACT-P250-e1f0ae",
+    "SNTL-EXTRAK-P250-cc534e",
+    "SNTL-EXTRAV-P250-7afa6e",
+    "SNTL-FORMULA-P250-c5d94c",
+    "SNTL-NOTE-P250-fb8ebd",
+    "SNTL-SRCFILE-P250-eb16cf"
+   ]
+  },
+  "P251": {
+   "dup_group": null,
+   "expected_blockers": [],
+   "expected_warnings": [
+    "never_confirmed"
+   ],
+   "intended_lifecycle": "published",
+   "publishable": true,
+   "sentinels": [
+    "SNTL-COMMISSION-P251-974cbd",
+    "SNTL-CONTACT-P251-98babe",
+    "SNTL-EXTRAK-P251-a3a1dc",
+    "SNTL-EXTRAV-P251-78ce9b",
+    "SNTL-FORMULA-P251-6d6282",
+    "SNTL-NOTE-P251-6469e4",
+    "SNTL-SRCFILE-P251-179bac"
+   ]
+  }
+ },
+ "seed": 20261005,
+ "sentinel_count": 2609,
+ "sentinel_regex": "(?i)sntl-[a-z]+-[a-z0-9]+-[0-9a-f]{6}"
+}

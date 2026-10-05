@@ -1,0 +1,73 @@
+# Project metadata and tool configuration.
+#
+# ARA Map is not distributed as a package: it is a folder you copy and run with
+# "python3 -m server.app". This file exists so the type checker and linter have
+# one shared configuration, and so the Python version and the single runtime
+# dependency are written down somewhere.
+
+[project]
+name = "ara-map"
+version = "1.0.0"
+description = "Mapa interactivo de terrenos en México para análisis de adquisición."
+requires-python = ">=3.9"
+# openpyxl ships bundled in vendor/python, so a clean machine needs nothing
+# installed. This entry documents the dependency and lets `pip install -e .`
+# work for anyone who prefers a managed environment.
+dependencies = [
+    "openpyxl>=3.1",
+    "psycopg[binary]>=3.2,<4; python_version >= '3.10'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.8",
+    "ruff>=0.3",
+    "coverage>=7.4",
+]
+
+[tool.mypy]
+# mypy no longer accepts 3.9 as a target. The real 3.9 floor is enforced by
+# ruff's py39 target and by running the suite against /usr/bin/python3 (see
+# tests/test_packaging.py), not by this setting.
+python_version = "3.10"
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true   # openpyxl ships no stubs
+files = ["server"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # import sorting
+    "N",    # naming
+    "W",    # warnings
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "SIM",  # simplify
+    "RET",  # return consistency
+]
+ignore = [
+    "E501",  # line length is handled by the formatter, not enforced here
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests name things after the behaviour under test, in Spanish where the
+# domain terms are Spanish.
+"tests/*" = ["N802", "N806"]
+
+[tool.coverage.run]
+source = ["server"]
+omit = ["*/__pycache__/*"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

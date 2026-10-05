@@ -1,0 +1,36 @@
+MapTest1.xlsx PASS questions 0 mismatches 0 
+MapTest2.csv PASS questions 0 mismatches 0 
+MapTest3.csv PASS questions 0 mismatches 0 
+MapTest4.xlsx PASS questions 0 mismatches 0 
+MapTest5.xlsx PASS questions 0 mismatches 0 
+MapTest6.csv PASS questions 0 mismatches 0 
+MapTest7.csv PASS questions 0 mismatches 0 
+MapTest8.xlsx MISMATCH questions 1 mismatches 4 
+MapTest9.csv PASS questions 3 mismatches 0 
+MapTest10.csv PASS questions 5 mismatches 0 
+MapTest11.xlsx PASS questions 2 mismatches 0 
+MapTest12.xlsx UNRESOLVED questions 5 mismatches 0 
+MapTest13.xlsx MISMATCH questions 4 mismatches 3 
+MapTest14.xlsx PASS questions 1 mismatches 0 
+MapTest15.csv MISMATCH questions 0 mismatches 8 
+MapTest16.csv MISMATCH questions 0 mismatches 8 
+MapTest17.csv PASS questions 0 mismatches 0 
+MapTest18.csv MISMATCH questions 1 mismatches 4 
+MapTest19.csv PASS questions 0 mismatches 0 
+MapTest20.xlsx PASS questions 0 mismatches 0 
+MapTest21.xlsx PASS questions 0 mismatches 0 
+MapTest22.csv PASS questions 0 mismatches 0 
+MapTest23.csv PASS questions 0 mismatches 0 
+MapTest24.xlsx PASS questions 0 mismatches 0 
+MapTest25.csv PASS questions 0 mismatches 0 
+MapTest26.csv PASS questions 0 mismatches 0 
+MapTest27.csv REJECTED questions 0 mismatches 0 No se pudo leer la codificación del CSV. Vuelve a exportarlo como CSV UTF-8.
+MapTest28.csv REJECTED questions 0 mismatches 0 No se pudo leer la codificación del CSV. Vuelve a exportarlo como CSV UTF-8.
+MapTest29.csv PASS questions 0 mismatches 0 
+MapTest30.csv REJECTED questions 0 mismatches 0 No se pudo leer el CSV en la línea 2: hay una comilla sin cerrar. Revisa las comillas y los separadores.
+MapTest31.csv REJECTED questions 0 mismatches 0 No se recibió ningún archivo.
+MapTest32.csv PASS questions 0 mismatches 0 
+MapTest33.xlsx PASS questions 0 mismatches 0 
+MapTest34.csv MISMATCH questions 5 mismatches 2 
+MapTest35.xlsx PASS questions 0 mismatches 0 
+MapTest36.csv PASS questions 0 mismatches 0 

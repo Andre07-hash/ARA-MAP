@@ -1,0 +1,310 @@
+{
+  "cases": [
+    {
+      "file": "MapTest1.xlsx",
+      "httpStatus": 200,
+      "stats": [
+        "Terrenos4se importarán",
+        "En el mapa4con coordenadas válidas",
+        "Con precio4en MXN; los demás quedan sin precio",
+        "Fuera del mapa0sin coordenadas"
+      ],
+      "text": "Importar base\n\nMapTest1.xlsx\n\nNOMBRE DE LA BASE\nCARPETA\nSin carpeta\nRecordar este formato para la próxima vez\nTERRENOS\n\n4\n\nse importarán\nEN EL MAPA\n\n4\n\ncon coordenadas válidas\nCON PRECIO\n\n4\n\nen MXN; los demás quedan sin precio\nFUERA DEL MAPA\n\n0\n\nsin coordenadas\n+\n−\nEsri, HERE, Garmin, © OpenStreetMap contributors\n4 puntos según las coordenadas del archivo. Son ubicaciones aproximadas, no los linderos del terreno.\nTERRENOS\nFILA\tTERRENO\tESTADO · MUNICIPIO\tSUPERFICIE\tPRECIO TOTAL\tUBICACIÓN\tORIGINAL\n2\tFICTICIO Encino\t—\t2,400 m²\t$1,200,000\tEn el mapa\t\nVer\n\n3\tFICTICIO Roble\t—\t5,000 m²\t$2,500,000\tEn el mapa\t\nVer\n\n4\tFICTICIO Cedro\t—\t7,500 m²\t$3,750,000\tEn el mapa\t\nVer\n\n5\tFICTICIO Fresno\t—\t9,600 m²\t$4,800,000\tEn el mapa\t\nVer\nREVISIÓN DE DATOS\n8\nCampo faltante\nVer 4 filas con observaciones\n\nLos datos se importan tal como están. Nada se corrige automáticamente: corrige el archivo original y vuelve a importar si hace falta.\n\nCorregir interpretación\nDetalles de la detección\nCancelar\nImportar 4 terrenos"
+    },
+    {
+      "file": "MapTest20.xlsx",
+      "httpStatus": 200,
+      "stats": [
+        "Terrenos4se importarán",
+        "En el mapa4con coordenadas válidas",
+        "Con precio4en MXN; los demás quedan sin precio",
+        "Fuera del mapa0sin coordenadas"
+      ],
+      "text": "Importar base\n\nMapTest20.xlsx\n\nNOMBRE DE LA BASE\nCARPETA\nSin carpeta\nRecordar este formato para la próxima vez\nTERRENOS\n\n4\n\nse importarán\nEN EL MAPA\n\n4\n\ncon coordenadas válidas\nCON PRECIO\n\n4\n\nen MXN; los demás quedan sin precio\nFUERA DEL MAPA\n\n0\n\nsin coordenadas\n+\n−\nEsri, HERE, Garmin, © OpenStreetMap contributors\n4 puntos según las coordenadas del archivo. Son ubicaciones aproximadas, no los linderos del terreno.\nTERRENOS\nFILA\tTERRENO\tESTADO · MUNICIPIO\tSUPERFICIE\tPRECIO TOTAL\tUBICACIÓN\tORIGINAL\n2\tFICTICIO Encino\t—\t2,400 m²\t$1,200,000\tEn el mapa\t\nVer\n\n3\tFICTICIO Roble\t—\t5,000 m²\t$2,500,000\tEn el mapa\t\nVer\n\n4\tFICTICIO Cedro\t—\t7,500 m²\t$3,750,000\tEn el mapa\t\nVer\n\n5\tFICTICIO Fresno\t—\t9,600 m²\t$4,800,000\tEn el mapa\t\nVer\nREVISIÓN DE DATOS\n8\nCampo faltante\nVer 4 filas con observaciones\n\nLos datos se importan tal como están. Nada se corrige automáticamente: corrige el archivo original y vuelve a importar si hace falta.\n\nCorregir interpretación\nDetalles de la detección\nCancelar\nImportar 4 terrenos",
+      "commitStatus": 200,
+      "bases": {
+        "bases": [
+          {
+            "id": 1,
+            "nombre": "MapTest20",
+            "archivo_origen": "MapTest20.xlsx",
+            "hoja": "Terrenos",
+            "importado_en": "2026-09-28T15:51:00-06:00",
+            "notas": null,
+            "carpeta_id": null,
+            "conteo": 4,
+            "ubicados": 4,
+            "sin_coordenadas": 0,
+            "sin_ubicacion": 0,
+            "ubicacion_invalida": 0
+          }
+        ]
+      }
+    },
+    {
+      "file": "MapTest22.csv",
+      "httpStatus": 200,
+      "stats": [
+        "Terrenos3se importarán",
+        "En el mapa3con coordenadas válidas",
+        "Con precio3en MXN; los demás quedan sin precio",
+        "Fuera del mapa0sin coordenadas"
+      ],
+      "text": "Importar base\n\nMapTest22.csv\n\nNOMBRE DE LA BASE\nCARPETA\nSin carpeta\nRecordar este formato para la próxima vez\nTERRENOS\n\n3\n\nse importarán\nEN EL MAPA\n\n3\n\ncon coordenadas válidas\nCON PRECIO\n\n3\n\nen MXN; los demás quedan sin precio\nFUERA DEL MAPA\n\n0\n\nsin coordenadas\n+\n−\nEsri, HERE, Garmin, © OpenStreetMap contributors\n3 puntos según las coordenadas del archivo. Son ubicaciones aproximadas, no los linderos del terreno.\nTERRENOS\nLÍNEA\tTERRENO\tESTADO · MUNICIPIO\tSUPERFICIE\tPRECIO TOTAL\tUBICACIÓN\tORIGINAL\n3\tFICTICIO Roble\t—\t5,000 m²\t$2,500,000\tEn el mapa\t\nVer\n\n4\tFICTICIO Cedro\t—\t7,500 m²\t$3,750,000\tEn el mapa\t\nVer\n\n5\tFICTICIO Fresno\t—\t9,600 m²\t$4,800,000\tEn el mapa\t\nVer\n\n1 fila no son terrenos y no se importan:\n\nLínea 2 Fila de totales («Total FICTICIO Encino»)\nREVISIÓN DE DATOS\n6\nCampo faltante\nVer 3 terrenos con observaciones (por línea del archivo CSV)\n\nLos datos se importan tal como están. Nada se corrige automáticamente: corrige el archivo original y vuelve a importar si hace falta.\n\nCorregir interpretación\nDetalles de la detección\nCancelar\nImportar 3 terrenos",
+      "commitStatus": 200,
+      "bases": {
+        "bases": [
+          {
+            "id": 2,
+            "nombre": "MapTest22",
+            "archivo_origen": "MapTest22.csv",
+            "hoja": "CSV",
+            "importado_en": "2026-09-28T15:51:03-06:00",
+            "notas": null,
+            "carpeta_id": null,
+            "conteo": 3,
+            "ubicados": 3,
+            "sin_coordenadas": 0,
+            "sin_ubicacion": 0,
+            "ubicacion_invalida": 0
+          },
+          {
+            "id": 1,
+            "nombre": "MapTest20",
+            "archivo_origen": "MapTest20.xlsx",
+            "hoja": "Terrenos",
+            "importado_en": "2026-09-28T15:51:00-06:00",
+            "notas": null,
+            "carpeta_id": null,
+            "conteo": 4,
+            "ubicados": 4,
+            "sin_coordenadas": 0,
+            "sin_ubicacion": 0,
+            "ubicacion_invalida": 0
+          }
+        ]
+      }
+    },
+    {
+      "file": "MapTest23.csv",
+      "httpStatus": 200,
+      "stats": [
+        "Terrenos5se importarán",
+        "En el mapa4con coordenadas válidas",
+        "Con precio4en MXN; los demás quedan sin precio",
+        "Fuera del mapa1sin coordenadas"
+      ],
+      "text": "Importar base\n\nMapTest23.csv\n\nNOMBRE DE LA BASE\nCARPETA\nSin carpeta\nRecordar este formato para la próxima vez\nTERRENOS\n\n5\n\nse importarán\nEN EL MAPA\n\n4\n\ncon coordenadas válidas\nCON PRECIO\n\n4\n\nen MXN; los demás quedan sin precio\nFUERA DEL MAPA\n\n1\n\nsin coordenadas\n+\n−\nEsri, HERE, Garmin, © OpenStreetMap contributors\n4 puntos según las coordenadas del archivo. Son ubicaciones aproximadas, no los linderos del terreno.\nTERRENOS\nLÍNEA\tTERRENO\tESTADO · MUNICIPIO\tSUPERFICIE\tPRECIO TOTAL\tUBICACIÓN\tORIGINAL\n2\tFICTICIO Encino\t—\t2,400 m²\t$1,200,000\tEn el mapa\t\nVer\n\n3\tFICTICIO Roble\t—\t5,000 m²\t$2,500,000\tEn el mapa\t\nVer\n\n4\tFICTICIO Cedro\t—\t7,500 m²\t$3,750,000\tEn el mapa\t\nVer\n\n5\tFICTICIO Fresno\t—\t9,600 m²\t$4,800,000\tEn el mapa\t\nVer\n\n6\tNOTA: valores sujetos a revisión\t—\t—\tSin precio\tFuera del mapa\t\nVer\nREVISIÓN DE DATOS\n10\nCampo faltante\n1\nSin coordenadas\nVer 5 terrenos con observaciones (por línea del archivo CSV)\n\nLos datos se importan tal como están. Nada se corrige automáticamente: corrige el archivo original y vuelve a importar si hace falta.\n\nCorregir interpretación\nDetalles de la detección\nCancelar\nImportar 5 terrenos"
+    },
+    {
+      "file": "MapTest35.xlsx",
+      "httpStatus": 200,
+      "stats": [],
+      "headerOptions": [
+        {
+          "value": "0",
+          "text": "Fila 1: Nota ficticia 1"
+        },
+        {
+          "value": "1",
+          "text": "Fila 2: Nota ficticia 2"
+        },
+        {
+          "value": "2",
+          "text": "Fila 3: Nota ficticia 3"
+        },
+        {
+          "value": "3",
+          "text": "Fila 4: Nota ficticia 4"
+        },
+        {
+          "value": "4",
+          "text": "Fila 5: Nota ficticia 5"
+        },
+        {
+          "value": "5",
+          "text": "Fila 6: Nota ficticia 6"
+        },
+        {
+          "value": "6",
+          "text": "Fila 7: Nota ficticia 7"
+        },
+        {
+          "value": "7",
+          "text": "Fila 8: Nota ficticia 8"
+        },
+        {
+          "value": "8",
+          "text": "Fila 9: Nota ficticia 9"
+        },
+        {
+          "value": "9",
+          "text": "Fila 10: Nota ficticia 10"
+        },
+        {
+          "value": "10",
+          "text": "Fila 11: Nota ficticia 11"
+        },
+        {
+          "value": "11",
+          "text": "Fila 12: Nota ficticia 12"
+        },
+        {
+          "value": "12",
+          "text": "Fila 13: Nota ficticia 13"
+        },
+        {
+          "value": "13",
+          "text": "Fila 14: Nota ficticia 14"
+        },
+        {
+          "value": "14",
+          "text": "Fila 15: Nota ficticia 15"
+        },
+        {
+          "value": "15",
+          "text": "Fila 16: Nota ficticia 16"
+        },
+        {
+          "value": "16",
+          "text": "Fila 17: Nota ficticia 17"
+        },
+        {
+          "value": "17",
+          "text": "Fila 18: Nota ficticia 18"
+        },
+        {
+          "value": "18",
+          "text": "Fila 19: Nota ficticia 19"
+        },
+        {
+          "value": "19",
+          "text": "Fila 20: Nota ficticia 20"
+        },
+        {
+          "value": "20",
+          "text": "Fila 21: Nota ficticia 21"
+        },
+        {
+          "value": "21",
+          "text": "Fila 22: Nota ficticia 22"
+        },
+        {
+          "value": "22",
+          "text": "Fila 23: Nota ficticia 23"
+        },
+        {
+          "value": "23",
+          "text": "Fila 24: Nota ficticia 24"
+        },
+        {
+          "value": "24",
+          "text": "Fila 25: Nota ficticia 25"
+        },
+        {
+          "value": "25",
+          "text": "Fila 26: Nota ficticia 26"
+        },
+        {
+          "value": "26",
+          "text": "Fila 27: Nota ficticia 27"
+        },
+        {
+          "value": "27",
+          "text": "Fila 28: Nota ficticia 28"
+        },
+        {
+          "value": "28",
+          "text": "Fila 29: Nota ficticia 29"
+        },
+        {
+          "value": "29",
+          "text": "Fila 30: Nota ficticia 30"
+        },
+        {
+          "value": "30",
+          "text": "Fila 31: Nota ficticia 31"
+        },
+        {
+          "value": "31",
+          "text": "Fila 32: Nota ficticia 32"
+        },
+        {
+          "value": "32",
+          "text": "Fila 33: Nota ficticia 33"
+        },
+        {
+          "value": "33",
+          "text": "Fila 34: Nota ficticia 34"
+        },
+        {
+          "value": "34",
+          "text": "Fila 35: Nota ficticia 35"
+        },
+        {
+          "value": "35",
+          "text": "Fila 36: Nota ficticia 36"
+        },
+        {
+          "value": "36",
+          "text": "Fila 37: Nota ficticia 37"
+        },
+        {
+          "value": "37",
+          "text": "Fila 38: Nota ficticia 38"
+        },
+        {
+          "value": "38",
+          "text": "Fila 39: Nota ficticia 39"
+        },
+        {
+          "value": "39",
+          "text": "Fila 40: Nota ficticia 40"
+        },
+        {
+          "value": "40",
+          "text": "Fila 41: Nota ficticia 41"
+        },
+        {
+          "value": "41",
+          "text": "Fila 42: Nota ficticia 42"
+        },
+        {
+          "value": "42",
+          "text": "Fila 43: Nota ficticia 43"
+        },
+        {
+          "value": "43",
+          "text": "Fila 44: Nota ficticia 44"
+        },
+        {
+          "value": "44",
+          "text": "Fila 45: Nota ficticia 45"
+        },
+        {
+          "value": "45",
+          "text": "Fila 46: Nota ficticia 46"
+        },
+        {
+          "value": "46",
+          "text": "Fila 47: Nota ficticia 47"
+        },
+        {
+          "value": "47",
+          "text": "Fila 48: Nota ficticia 48"
+        },
+        {
+          "value": "48",
+          "text": "Fila 49: Nota ficticia 49"
+        },
+        {
+          "value": "49",
+          "text": "Fila 50: Nota ficticia 50"
+        }
+      ],
+      "canChooseRow56": false,
+      "text": "Importar base\n\nMapTest35.xlsx\n\n4 PREGUNTAS ANTES DE REVISAR\n¿Cuál columna contiene el nombre del terreno?\n\nEs el único dato obligatorio: sin nombre, un terreno no se puede guardar.\n\nNinguna: el archivo no tiene nombres\n¿Qué contiene la columna «(sin encabezado, columna B)»?\n\nValores de ejemplo — columna B: Precio · 1200000 · 2500000 · 3750000. Si no es ninguno de estos datos, se conserva como dato adicional.\n\nPrecio total (MXN)\nSuperficie (m²)\nSuperficie (ha)\nLatitud\nLongitud\nPrecio por m² (MXN)\nConservar como dato adicional\n¿Qué contiene la columna «(sin encabezado, columna C)»?\n\nValores de ejemplo — columna C: Superficie m2 · 2400 · 5000 · 7500. Si no es ninguno de estos datos, se conserva como dato adicional.\n\nPrecio total (MXN)\nSuperficie (m²)\nSuperficie (ha)\nLatitud\nLongitud\nPrecio por m² (MXN)\nConservar como dato adicional\n¿Qué contiene la columna «(sin encabezado, columna D)»?\n\nValores de ejemplo — columna D: Latitud · 19.4326 · 20.6736 · 25.6866. Si no es ninguno de estos datos, se conserva como dato adicional.\n\nLatitud\nPrecio total (MXN)\nSuperficie (m²)\nSuperficie (ha)\nLongitud\nPrecio por m² (MXN)\nConservar como dato adicional\nCorregir interpretación\n\nOpcional. Cada cambio vuelve a generar la vista previa; nada se guarda hasta que importes.\n\nFILA DE ENCABEZADOS\nFila 1: Nota ficticia 1\nFila 2: Nota ficticia 2\nFila 3: Nota ficticia 3\nFila 4: Nota ficticia 4\nFila 5: Nota ficticia 5\nFila 6: Nota ficticia 6\nFila 7: Nota ficticia 7\nFila 8: Nota ficticia 8\nFila 9: Nota ficticia 9\nFila 10: Nota ficticia 10\nFila 11: Nota ficticia 11\nFila 12: Nota ficticia 12\nFila 13: Nota ficticia 13\nFila 14: Nota ficticia 14\nFila 15: Nota ficticia 15\nFila 16: Nota ficticia 16\nFila 17: Nota ficticia 17\nFila 18: Nota ficticia 18\nFila 19: Nota ficticia 19\nFila 20: Nota ficticia 20\nFila 21: Nota ficticia 21\nFila 22: Nota ficticia 22\nFila 23: Nota ficticia 23\nFila 24: Nota ficticia 24\nFila 25: Nota ficticia 25\nFila 26: Nota ficticia 26\nFila 27: Nota ficticia 27\nFila 28: Nota ficticia 28\nFila 29: Nota ficticia 29\nFila 30: Nota ficticia 30\nFila 31: Nota ficticia 31\nFila 32: Nota ficticia 32\nFila 33: Nota ficticia 33\nFila 34: Nota ficticia 34\nFila 35: Nota ficticia 35\nFila 36: Nota ficticia 36\nFila 37: Nota ficticia 37\nFila 38: Nota ficticia 38\nFila 39: Nota ficticia 39\nFila 40: Nota ficticia 40\nFila 41: Nota ficticia 41\nFila 42: Nota ficticia 42\nFila 43: Nota ficticia 43\nFila 44: Nota ficticia 44\nFila 45: Nota ficticia 45\nFila 46: Nota ficticia 46\nFila 47: Nota ficticia 47\nFila 48: Nota ficticia 48\nFila 49: Nota ficticia 49\nFila 50: Nota ficticia 50\nNÚMEROS ESCRITOS COMO TEXTO\nPunto decimal (1,234.56)\nComa decimal (1.234,56)\nCOLUMNA DEL ARCHIVO\tEJEMPLOS\tSE IMPORTA COMO\nNota ficticia 1 · columna A\tNota ficticia 2 · Nota ficticia 3 · Nota ficticia 4\t\nDestino de Nota ficticia 1\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\n(sin encabezado, columna B) · columna B\tPrecio · 1200000 · 2500000\t\nDestino de (sin encabezado, columna B)\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\n(sin encabezado, columna C) · columna C\tSuperficie m2 · 2400 · 5000\t\nDestino de (sin encabezado, columna C)\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\n(sin encabezado, columna D) · columna D\tLatitud · 19.4326 · 20.6736\t\nDestino de (sin encabezado, columna D)\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\n\n(sin encabezado, columna E) · columna E\tLongitud · -99.1332 · -103.344\t\nDestino de (sin encabezado, columna E)\nNombre del terreno\nID de origen\nEstado\nMunicipio\nDirección\nSuperficie (m²)\nSuperficie (ha)\nAfectaciones (%)\nAfectaciones (m²)\nPrecio total (MXN)\nPrecio por m² (MXN)\nLatitud\nLongitud\nConservar como dato adicional\nNo importar\nDetalles de la detección\nCancelar\nContinuar"
+    }
+  ],
+  "pageErrors": []
+}

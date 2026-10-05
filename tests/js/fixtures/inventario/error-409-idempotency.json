@@ -1,0 +1,6 @@
+{
+  "error": "Esa Idempotency-Key ya se usó con otros datos.",
+  "detalle": {
+    "code": "idempotency_conflict"
+  }
+}

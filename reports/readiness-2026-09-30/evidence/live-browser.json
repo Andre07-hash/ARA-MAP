@@ -1,0 +1,158 @@
+{
+  "checks": [
+    {
+      "name": "Fresh entry describes its empty map honestly",
+      "status": "PASS",
+      "detail": {
+        "defaultBase": "Copy of REPORTE RESERVA ARA",
+        "located": 0,
+        "total": 34
+      }
+    },
+    {
+      "name": "Live search preserves focus during real keystrokes",
+      "status": "PASS"
+    },
+    {
+      "name": "Live detail opens and Escape closes it",
+      "status": "FAIL",
+      "detail": "The input did not match the regular expression /Coordenadas/. Input:\n\n'BASE TERRENOS 09.26 GERARDO\\n' +\n  'Marceñas\\n' +\n  '\\n' +\n  'Zumpango, Estado de México\\n' +\n  '\\n' +\n  '×\\n' +\n  'Ver a escala\\n' +\n  '\\n' +\n  '!\\n' +\n  'Error: Asking Price es $388,689,722 pero $600/m² × 64,429 m² da $38,657,322. Parece un error de un dígito (10×).\\n' +\n  '\\n' +\n  'ASKING PRICE\\n' +\n  '\\n' +\n  '$388,689,722\\n' +\n  '\\n' +\n  'ASKING $/M²\\n' +\n  '\\n' +\n  '$600/m²\\n' +\n  '\\n' +\n  'SUPERFICIE\\n' +\n  'Superficie\\n' +\n  '64,429 m²\\n' +\n  'En hectáreas\\n' +\n  '6.4429 ha\\n' +\n  'Afectaciones\\n' +\n  '—\\n' +\n  'Afectaciones m²\\n' +\n  '0 m²\\n' +\n  'UBICACIÓN\\n' +\n  'Estado\\n' +\n  'Estado de México\\n' +\n  'Municipio\\n' +\n  'Zumpango\\n' +\n  'Dirección\\n' +\n  'Carretera Zumpango-Jilotzingo 400, Av. Acueducto, Barrio de Santiago 2a Seccion, 55600 Zumpango de Ocampo, Méx.\\n' +\n  'COORDENADAS\\n' +\n  'Latitud (X)\\n' +\n  '19.8179452790226\\n' +\n  'Longitud (Y)\\n' +\n  '-99.0874491437001\\n' +\n  'Par\\n' +\n  '19.817945, -99.087449\\n' +\n  '\\n' +\n  'El círculo en el mapa cubre la superficie registrada, centrado en este punto. El archivo no trae los linderos, así que la forma es una aproximación: el área y la ubicación sí son las del registro.\\n' +\n  '\\n' +\n  'Fila 1 · ID de origen 1'\n"
+    },
+    {
+      "name": "Live table exports a downloadable workbook",
+      "status": "PASS",
+      "detail": {
+        "filename": "Base Terrenos 09.26 Gerardo.xlsx"
+      }
+    },
+    {
+      "name": "Basemap controls load satellite and street tiles",
+      "status": "PASS",
+      "detail": {
+        "count": 32,
+        "loaded": 32
+      }
+    },
+    {
+      "name": "Both live saved comparisons reopen with their layers",
+      "status": "PASS",
+      "detail": [
+        {
+          "name": "prueba comparación",
+          "layers": 2
+        },
+        {
+          "name": "Base Terrenos 09.26 Ficticia vs",
+          "layers": 3
+        }
+      ]
+    },
+    {
+      "name": "Layer visibility is reversible in the browser",
+      "status": "PASS"
+    },
+    {
+      "name": "Live comparison export downloads",
+      "status": "PASS",
+      "detail": {
+        "filename": "Base Terrenos 09.26 Ficticia vs Base Terrenos 08.26 Ficticia vs Base Terrenos 09.26 copy.xlsx"
+      }
+    },
+    {
+      "name": "Unauthenticated import settings are protected",
+      "status": "PASS",
+      "detail": {
+        "status": 401
+      }
+    },
+    {
+      "name": "Live visitor layout at 320px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 320,
+        "document": 320,
+        "header": 320
+      }
+    },
+    {
+      "name": "Live visitor layout at 375px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 375,
+        "document": 375,
+        "header": 375
+      }
+    },
+    {
+      "name": "Live visitor layout at 768px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 768,
+        "document": 768,
+        "header": 768
+      }
+    },
+    {
+      "name": "Live visitor layout at 1440px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 1440,
+        "document": 1440,
+        "header": 1440
+      }
+    },
+    {
+      "name": "Editor signs in with the existing configured credential",
+      "status": "PASS",
+      "detail": {
+        "editor": true
+      }
+    },
+    {
+      "name": "Editor tools and folder navigation are present",
+      "status": "PASS",
+      "detail": {
+        "bases": 4
+      }
+    },
+    {
+      "name": "Live editor layout at 320px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 320,
+        "document": 320
+      }
+    },
+    {
+      "name": "Live editor layout at 375px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 375,
+        "document": 375
+      }
+    },
+    {
+      "name": "Live editor layout at 768px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 768,
+        "document": 768
+      }
+    },
+    {
+      "name": "Live editor layout at 1440px",
+      "status": "PASS",
+      "detail": {
+        "viewport": 1440,
+        "document": 1440
+      }
+    },
+    {
+      "name": "Editor can sign out",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "blockedWrites": []
+}

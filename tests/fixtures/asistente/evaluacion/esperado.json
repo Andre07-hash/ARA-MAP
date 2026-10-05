@@ -1,0 +1,51 @@
+{
+  "ev1_inmobiliaria.csv": {
+    "Nombre del predio": "terreno",
+    "Entidad federativa": "estado",
+    "Alcaldía": "municipio",
+    "Superficie total m2": "superficie_m2",
+    "Precio de lista": "asking_price",
+    "Latitude": "lat",
+    "Longitude": "lon"
+  },
+  "ev2_broker.csv": {
+    "Propiedad": "terreno",
+    "Estado": "estado",
+    "Municipio": "municipio",
+    "Hectáreas": "superficie_ha",
+    "Precio total": "asking_price",
+    "Precio por m2": "asking_m2",
+    "Lat": "lat",
+    "Lng": "lon"
+  },
+  "ev3_minimo.csv": {
+    "Predio": "terreno"
+  },
+  "ev4_ingles.csv": {
+    "Name": "terreno",
+    "State": "estado",
+    "City": "extra",
+    "Area (m2)": "superficie_m2",
+    "Asking price": "asking_price",
+    "Latitude": "lat",
+    "Longitude": "lon"
+  },
+  "ev5_abreviado.csv": {
+    "Desarrollo": "terreno",
+    "Edo": "estado",
+    "Mpio": "municipio",
+    "Sup m2": "superficie_m2",
+    "Precio": "asking_price",
+    "Lat": "lat",
+    "Lon": "lon"
+  },
+  "ev6_folio.csv": {
+    "Folio": "id_origen",
+    "Nombre": "terreno",
+    "Domicilio": "direccion",
+    "Metros cuadrados": "superficie_m2",
+    "Precio $/m2": "asking_m2",
+    "Latitud": "lat",
+    "Longitud": "lon"
+  }
+}

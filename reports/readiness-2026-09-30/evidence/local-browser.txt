@@ -1,0 +1,75 @@
+Disposable test server port 56085
+  "DELETE /api/carpetas/1 HTTP/1.1" 404 -
+  "DELETE /api/formatos/3 HTTP/1.1" 404 -
+  "DELETE /api/formatos/2 HTTP/1.1" 404 -
+  "DELETE /api/formatos/1 HTTP/1.1" 404 -
+  PASS  the map renders one mark per located terrain
+  PASS  the legend reports the unplaced count
+  PASS  the unplaced panel lists every terrain without coordinates
+  PASS  filtering by state narrows the set
+  PASS  search is accent-insensitive
+  PASS  the detail panel shows a terrain and its findings
+  PASS  Escape closes the detail panel
+  PASS  the table sorts by unit price
+  PASS  the map stays inside its column when the panel is open
+  PASS  the basemap switches to satellite
+  PASS  a saved comparison opens with both layers in different colours
+  PASS  both layers are actually drawn, not hidden behind each other
+  PASS  hiding a layer removes its terrains
+  PASS  the comparison table names the source of every row
+  PASS  the comparison reports new, removed and changed terrains
+  PASS  a changed row names the fields that changed
+  PASS  a saved map ignores later changes to its base
+  PASS  updating a saved map pulls the base change in
+  PASS  marks start as symbols and become real footprints on zoom in
+  PASS  R1 typing letter by letter keeps focus and the whole word
+  PASS  R1 editing mid-caret and clearing keeps the field usable
+  PASS  R1 numeric filters accept continuous typing
+  PASS  R4 double click zooms a terrain to its own scale
+  PASS  R4 background double click still zooms the map normally
+  PASS  R2 the supplied logo is shown and decodes
+  PASS  R5 renaming a source updates the saved maps that show it
+  PASS  R3 a comparison exports one sheet per source
+  PASS  the preview accounts for rows it will not import
+  PASS  impossible coordinates are kept off the map
+  PASS  a deleted source cannot be inherited by a later import
+  PASS  merging two versions of one source keeps both
+  PASS  a CSV is read with its number convention detected, and a correction re-reads it
+  PASS  a CSV appends to a base and reports its lines
+  PASS  assistant 1/3: a familiar file goes upload → review → import
+  PASS  assistant 2/3: an unfamiliar layout is interpreted without questions
+  PASS  assistant 2/3 (automatic): unresolved headers are read automatically or asked
+  PASS  assistant 3/3: an ambiguous file asks one question, answered by keyboard
+  PASS  assistant: the remembered format is reused on the next upload
+  PASS  assistant: same-named columns from a saved format are reconfirmed, not guessed
+  PASS  assistant: dollars declared only by the cell format never become MXN
+  PASS  assistant: a footer is set aside, restored from the preview, and removed again
+  PASS  assistant: a header below a page of notes is found, and named by its printed row
+  PASS  a base folder is created, filled, browsed and imported into
+  PASS  renaming and deleting a base folder keeps every base
+  PASS  a comparison draws on every folder and lands in the open one
+  PASS  moving the open map keeps its view and its snapshot
+  PASS  a saved map survives deletion of its base
+  PASS  layout local @320px: header and toolbar fit, no stray text
+  PASS  layout local @375px: header and toolbar fit, no stray text
+  PASS  layout local @700px: header and toolbar fit, no stray text
+  PASS  layout local @768px: header and toolbar fit, no stray text
+  PASS  layout local @1024px: header and toolbar fit, no stray text
+  PASS  layout local @1440px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @320px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @375px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @700px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @768px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @1024px: header and toolbar fit, no stray text
+  PASS  layout cloud visitor @1440px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @320px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @375px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @700px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @768px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @1024px: header and toolbar fit, no stray text
+  PASS  layout cloud editor @1440px: header and toolbar fit, no stray text
+
+no console errors
+
+65/65 checks passed
+Temporary server stopped; disposable database removed.

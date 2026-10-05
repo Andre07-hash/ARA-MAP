@@ -1,0 +1,279 @@
+/* Base, application shell and the map workspace grid.
+ *
+ * Motion stays on transform/opacity; structure comes from hairline rules and
+ * uneven spacing rather than uniform cards and shadows.
+ *
+ * The rest of the stylesheet lives beside this file:
+ *   controls.css  buttons, inputs and the filter rail
+ *   map.css       legend, basemap switcher, unplaced panel, Leaflet overrides
+ *   panels.css    detail panel, table, screens, dialogs and toasts
+ *   assistant.css the import assistant and format management
+ */
+
+/* Layout and components.
+ * Motion is limited to transform/opacity; structure comes from hairline rules
+ * and uneven spacing rather than uniform cards and shadows.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: var(--z-toast);
+  padding: var(--space-2) var(--space-3);
+  background: var(--ink);
+  color: var(--ink-inverse);
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+  transition: transform var(--duration-fast) var(--ease-out-expo);
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ------------------------------------------------------------------ shell */
+
+.app {
+  display: grid;
+  grid-template-rows: var(--header-height) 1fr;
+  /* Without minmax(0, ...) the column grows to the header's min-content
+   * width, and on a phone the whole app was laid out wider than the screen. */
+  grid-template-columns: minmax(0, 1fr);
+  height: 100vh;
+  height: 100dvh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding-inline: var(--space-5);
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--rule);
+}
+
+.brand { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.brand-name,
+.brand .chip,
+.nav-item { white-space: nowrap; }
+
+/* The supplied logo, at its own 522:478 proportion. object-fit guards the
+ * shape if the box is ever constrained differently. */
+.brand-logo {
+  display: block;
+  height: 32px;
+  width: auto;
+  max-width: 35px;      /* 32 x 522 / 478, rounded */
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  font-size: var(--text-lead);
+}
+
+.nav { display: flex; gap: var(--space-1); }
+
+.nav-item {
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.nav-item:hover { background: var(--paper-sunken); color: var(--ink); }
+.nav-item.is-active { background: var(--ink); color: var(--ink-inverse); }
+
+.app-main { overflow: hidden; min-height: 0; }
+
+/* -------------------------------------------------------------- workspace */
+
+.workspace {
+  display: grid;
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+.workspace:has(.detail-slot) {
+  grid-template-columns: var(--rail-width) minmax(0, 1fr) var(--panel-width);
+}
+
+.rail-slot {
+  overflow-y: auto;
+  border-right: 1px solid var(--rule);
+  background: var(--paper-raised);
+}
+
+.stage-slot {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  /* Without an explicit minmax(0, ...) the column takes the toolbar's
+   * min-content width, which pushed the map past this column and painted it
+   * over the detail panel on narrower screens. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+}
+
+.detail-slot {
+  overflow-y: auto;
+  background: var(--paper-overlay);
+  border-left: 1px solid var(--rule);
+  box-shadow: var(--shadow-panel);
+  animation: panel-in var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.stage { position: relative; min-width: 0; min-height: 0; }
+
+.map-host {
+  position: absolute;
+  inset: 0;
+  background: var(--paper-sunken);
+  /* Leaflet gives its controls z-index values in the 400-1000 band against no
+   * stacking context of its own, so they would float over anything drawn on
+   * top of the map. Isolating keeps them scoped to the map. */
+  isolation: isolate;
+}
+
+/* Bottom-left: the quietest corner of a map of Mexico. Top-left sits over
+ * Baja California and hid the Tijuana marker; top-right holds the zoom
+ * control and bottom-right the unplaced panel. */
+.stage-overlays {
+  position: absolute;
+  left: var(--space-4);
+  bottom: calc(var(--space-4) + 14px);
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-3);
+  align-items: flex-start;
+  pointer-events: none;
+}
+.stage-overlays > * { pointer-events: auto; }
+
+/* ---------------------------------------------------------------- toolbar */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-raised);
+}
+.toolbar-title { min-width: 0; flex: 1 1 12rem; }
+.toolbar-title h1 { font-size: var(--text-lead); }
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--paper-sunken);
+  border-radius: var(--radius);
+}
+.segment {
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-small);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.segment:hover { color: var(--ink); }
+.segment.is-active {
+  background: var(--paper-overlay);
+  color: var(--ink);
+  box-shadow: 0 1px 2px oklch(19% 0.006 60 / 0.12);
+}
+
+/* ------------------------------------------------------------ narrow view */
+
+@media (max-width: 1180px) {
+  :root { --rail-width: 14rem; --panel-width: 21rem; }
+}
+
+@media (max-width: 960px) {
+  .workspace,
+  .workspace:has(.detail-slot) { grid-template-columns: minmax(0, 1fr); }
+  .rail-slot { display: none; }
+  .detail-slot {
+    position: fixed;
+    inset: var(--header-height) 0 0 auto;
+    width: min(26rem, 100vw);
+    z-index: var(--z-panel);
+  }
+  .screen { padding: var(--space-5) var(--space-4); }
+  .screen-header { flex-direction: column; align-items: flex-start; }
+  .unplaced { width: min(20rem, calc(100vw - var(--space-6))); }
+}
+
+/* Phones and narrow tablets: one row does not fit the brand, its status chip,
+ * three sections and the session button, so the sections get a row of their
+ * own under the brand and the session button. */
+@media (max-width: 767px) {
+  :root { --header-height: 6.25rem; }
+  .app-header {
+    flex-wrap: wrap;
+    align-content: center;
+    gap: var(--space-2) var(--space-3);
+    padding-inline: var(--space-4);
+  }
+  .brand { flex: 1 1 auto; }
+  .app-header .session .btn { padding-inline: var(--space-3); }
+  .nav { order: 1; flex: 1 0 100%; }
+  .nav-item { flex: 1 1 auto; }
+
+  .toolbar { padding-inline: var(--space-4); }
+  .toolbar-actions { justify-content: flex-start; }
+}
+
+/* Small phones in the shared version: the status chip and the session button
+ * matter more than the written name, which the logo already carries, so the
+ * name is kept for screen readers only. */
+@media (max-width: 419px) {
+  .app-header { column-gap: var(--space-2); }
+  .app-header .session .btn { padding-inline: var(--space-2); }
+  .app-header:has(.session .btn) .brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}

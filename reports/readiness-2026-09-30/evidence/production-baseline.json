@@ -1,0 +1,220 @@
+{
+  "https://ara-map-ivory.vercel.app": {
+    "/": {
+      "status": 200,
+      "seconds": 0.61,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Vercel-Id": "sfo1::lkqjj-1790799820149-02946662cc1f"
+      },
+      "sha256": "90218f389e6a17b1449643767b4829df5016a1a0a8ef3e17387b56477297604f",
+      "matches_local": true
+    },
+    "/api/config": {
+      "status": 200,
+      "seconds": 1.215,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Content-Type": "application/json; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Vercel-Id": "sfo1::iad1::xpb77-1790799820685-368d937773e9"
+      },
+      "config": {
+        "readOnly": true,
+        "cloud": true,
+        "authRequired": true,
+        "maxUploadBytes": 4194304
+      }
+    },
+    "/api/bases": {
+      "status": 200,
+      "seconds": 1.252,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Content-Type": "application/json; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Vercel-Id": "sfo1::iad1::bdn8s-1790799821889-42e0edc53f90"
+      },
+      "counts": {
+        "bases": 4
+      },
+      "record_ids": {
+        "bases": [
+          34,
+          27,
+          26,
+          25
+        ]
+      }
+    },
+    "/api/mapas": {
+      "status": 200,
+      "seconds": 0.583,
+      "headers": {
+        "Cache-Control": "no-store",
+        "Content-Type": "application/json; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Vercel-Id": "sfo1::iad1::dmf5g-1790799823150-b6ddd5fcbec7"
+      },
+      "counts": {
+        "mapas": 2
+      },
+      "record_ids": {
+        "mapas": [
+          4,
+          1
+        ]
+      }
+    },
+    "/api/carpetas": {
+      "error": "HTTPError",
+      "detail": "HTTP Error 400: Bad Request"
+    },
+    "/components/import/AssistantViews.js": {
+      "status": 200,
+      "seconds": 0.251,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Vercel-Id": "sfo1::c4l9c-1790799824041-fd94695ab284"
+      },
+      "sha256": "235b3f31c96ea005cbab0e75b21fbf66644cc5360f9e73a23add21880c58136c",
+      "matches_local": false
+    },
+    "/components/import/ImportAssistant.js": {
+      "status": 200,
+      "seconds": 0.229,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Vercel-Id": "sfo1::wnpls-1790799824260-a9499a9adfec"
+      },
+      "sha256": "fd3ff94f6ac2e9e2770951985f4a12d757fa67aada264ffa5c3a15bb2c8723fb",
+      "matches_local": false
+    },
+    "/styles/global.css": {
+      "status": 200,
+      "seconds": 0.248,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "text/css; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Vercel-Id": "sfo1::7jbmw-1790799824508-f11ca4289397"
+      },
+      "sha256": "68ac5f337bf59e5b700b5810930f27319cb019718ef33c7a5cd2e0f954a2451a",
+      "matches_local": true
+    },
+    "/components/app.js": {
+      "status": 200,
+      "seconds": 0.251,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Type": "application/javascript; charset=utf-8",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+        "X-Vercel-Id": "sfo1::2ll6q-1790799824764-c9cccd51e419"
+      },
+      "sha256": "ff266e68b715a16be958aa4a89fe806d1531d3f954440a45ccebbaa886aef0ee",
+      "matches_local": true
+    }
+  },
+  "https://ara-map-aicore2.vercel.app": {
+    "/": {
+      "status": 200,
+      "seconds": 1.36,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Security-Policy": "default-src 'self' vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: www.google.com www.gstatic.com *.youtube.com *.youtube-nocookie.com *.ytimg.com *.twimg.com cdn.ampproject.org *.googleapis.com *.fides-cdn.ethyca.com *.ethyca.com cdn.ethyca.com cdn.vercel-insights.com va.vercel-scripts.com cdp.vercel.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;child-src *.youtube.com *.youtube-nocookie.com *.stripe.com www.google.com github.com calendly.com *.vusercontent.net *.vercel.run vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;style-src 'self' 'unsafe-inline' *.googleapis.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;img-src * blob: data:;media-src 'self' videos.ctfassets.net user-images.githubusercontent.com replicate.delivery *.public.blob.vercel-storage.com *.private.blob.vercel-storage.com blob: data: vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;connect-src wss://ws-us3.pusher.com data: * https://*.contentful.com cdp.vercel.com;font-src 'self' *.vercel.com *.gstatic.com vercel.live;frame-ancestors 'none';worker-src 'self' *.vercel.com blob:",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-Vercel-Id": "sfo1::xpb77-1790799825663-eb4c4d2dce2c"
+      },
+      "sha256": "62bb67eb8b30b429117d59ccbd816d4429c7f74c6bb60edfee9c0c6e557c47e9",
+      "matches_local": false
+    },
+    "/api/config": {
+      "error": "JSONDecodeError",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    "/api/bases": {
+      "error": "JSONDecodeError",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    "/api/mapas": {
+      "error": "JSONDecodeError",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    "/api/carpetas": {
+      "error": "JSONDecodeError",
+      "detail": "Expecting value: line 1 column 1 (char 0)"
+    },
+    "/components/import/AssistantViews.js": {
+      "status": 200,
+      "seconds": 1.13,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Security-Policy": "default-src 'self' vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: www.google.com www.gstatic.com *.youtube.com *.youtube-nocookie.com *.ytimg.com *.twimg.com cdn.ampproject.org *.googleapis.com *.fides-cdn.ethyca.com *.ethyca.com cdn.ethyca.com cdn.vercel-insights.com va.vercel-scripts.com cdp.vercel.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;child-src *.youtube.com *.youtube-nocookie.com *.stripe.com www.google.com github.com calendly.com *.vusercontent.net *.vercel.run vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;style-src 'self' 'unsafe-inline' *.googleapis.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;img-src * blob: data:;media-src 'self' videos.ctfassets.net user-images.githubusercontent.com replicate.delivery *.public.blob.vercel-storage.com *.private.blob.vercel-storage.com blob: data: vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;connect-src wss://ws-us3.pusher.com data: * https://*.contentful.com cdp.vercel.com;font-src 'self' *.vercel.com *.gstatic.com vercel.live;frame-ancestors 'none';worker-src 'self' *.vercel.com blob:",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-Vercel-Id": "sfo1::tvv4b-1790799831505-24b6b33feb5b"
+      },
+      "sha256": "4f57116dea629599d2ba4741fa7cb6fbfb45654affc21098a1631faa4b11caf3",
+      "matches_local": false
+    },
+    "/components/import/ImportAssistant.js": {
+      "status": 200,
+      "seconds": 1.737,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Security-Policy": "default-src 'self' vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: www.google.com www.gstatic.com *.youtube.com *.youtube-nocookie.com *.ytimg.com *.twimg.com cdn.ampproject.org *.googleapis.com *.fides-cdn.ethyca.com *.ethyca.com cdn.ethyca.com cdn.vercel-insights.com va.vercel-scripts.com cdp.vercel.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;child-src *.youtube.com *.youtube-nocookie.com *.stripe.com www.google.com github.com calendly.com *.vusercontent.net *.vercel.run vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;style-src 'self' 'unsafe-inline' *.googleapis.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;img-src * blob: data:;media-src 'self' videos.ctfassets.net user-images.githubusercontent.com replicate.delivery *.public.blob.vercel-storage.com *.private.blob.vercel-storage.com blob: data: vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;connect-src wss://ws-us3.pusher.com data: * https://*.contentful.com cdp.vercel.com;font-src 'self' *.vercel.com *.gstatic.com vercel.live;frame-ancestors 'none';worker-src 'self' *.vercel.com blob:",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-Vercel-Id": "sfo1::b9skx-1790799832911-28f86a08283b"
+      },
+      "sha256": "593677242fc2b82ad538c39cb3d329ccb2087da053c9e93920bd4106ab8d673a",
+      "matches_local": false
+    },
+    "/styles/global.css": {
+      "status": 200,
+      "seconds": 1.039,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Security-Policy": "default-src 'self' vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: www.google.com www.gstatic.com *.youtube.com *.youtube-nocookie.com *.ytimg.com *.twimg.com cdn.ampproject.org *.googleapis.com *.fides-cdn.ethyca.com *.ethyca.com cdn.ethyca.com cdn.vercel-insights.com va.vercel-scripts.com cdp.vercel.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;child-src *.youtube.com *.youtube-nocookie.com *.stripe.com www.google.com github.com calendly.com *.vusercontent.net *.vercel.run vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;style-src 'self' 'unsafe-inline' *.googleapis.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;img-src * blob: data:;media-src 'self' videos.ctfassets.net user-images.githubusercontent.com replicate.delivery *.public.blob.vercel-storage.com *.private.blob.vercel-storage.com blob: data: vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;connect-src wss://ws-us3.pusher.com data: * https://*.contentful.com cdp.vercel.com;font-src 'self' *.vercel.com *.gstatic.com vercel.live;frame-ancestors 'none';worker-src 'self' *.vercel.com blob:",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-Vercel-Id": "sfo1::xwxxm-1790799834395-fa99f51637c1"
+      },
+      "sha256": "f2278fd170e2d821853b31d5513f9577add0eda922ecbdf1092ecab55499b2e0",
+      "matches_local": false
+    },
+    "/components/app.js": {
+      "status": 200,
+      "seconds": 1.048,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Content-Security-Policy": "default-src 'self' vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: www.google.com www.gstatic.com *.youtube.com *.youtube-nocookie.com *.ytimg.com *.twimg.com cdn.ampproject.org *.googleapis.com *.fides-cdn.ethyca.com *.ethyca.com cdn.ethyca.com cdn.vercel-insights.com va.vercel-scripts.com cdp.vercel.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;child-src *.youtube.com *.youtube-nocookie.com *.stripe.com www.google.com github.com calendly.com *.vusercontent.net *.vercel.run vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;style-src 'self' 'unsafe-inline' *.googleapis.com vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;img-src * blob: data:;media-src 'self' videos.ctfassets.net user-images.githubusercontent.com replicate.delivery *.public.blob.vercel-storage.com *.private.blob.vercel-storage.com blob: data: vercel.com *.vercel.com *.vercel.sh vercel.live *.stripe.com twitter.com *.twitter.com *.google.com *.github.com *.codesandbox.io https://risk.clearbit.com wss://*.vercel.com localhost:* chrome-extension://*;connect-src wss://ws-us3.pusher.com data: * https://*.contentful.com cdp.vercel.com;font-src 'self' *.vercel.com *.gstatic.com vercel.live;frame-ancestors 'none';worker-src 'self' *.vercel.com blob:",
+        "Content-Type": "text/html; charset=utf-8",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-Vercel-Id": "sfo1::dvmk8-1790799835408-a457f07f1787"
+      },
+      "sha256": "4a95793d7900122a59418f9f578017e1f02ddb6b50bf3604eae9b2c33edb55f3",
+      "matches_local": false
+    }
+  }
+}

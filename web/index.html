@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Mapa interactivo de terrenos en México para análisis de adquisición.">
+  <title>ARA Map — Terrenos</title>
+
+  <link rel="icon" type="image/png" href="assets/ara-logo.png">
+
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/typography.css">
+  <link rel="stylesheet" href="styles/global.css">
+  <link rel="stylesheet" href="styles/controls.css">
+  <link rel="stylesheet" href="styles/map.css">
+  <link rel="stylesheet" href="styles/panels.css">
+  <link rel="stylesheet" href="styles/assistant.css">
+  <link rel="stylesheet" href="styles/inventory.css">
+
+  <script src="vendor/leaflet.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#vista">Saltar al contenido</a>
+  <div id="app" class="app"></div>
+
+  <noscript>
+    <p style="padding:2rem">ARA Map necesita JavaScript para mostrar el mapa.</p>
+  </noscript>
+
+  <script type="module">
+    import { mount } from "./components/app.js";
+
+    // Leaflet is a classic script, so wait for it before mounting.
+    function start() { mount(document.getElementById("app")); }
+    if (window.L) start();
+    else window.addEventListener("load", start, { once: true });
+  </script>
+</body>
+</html>

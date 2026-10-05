@@ -1,0 +1,81 @@
+[
+  {
+    "case": "original_xlsx_clean",
+    "path": "/Users/andrejasso/Desktop/ARA Map/Base Terrenos 09.26 copy.xlsx",
+    "sha256": "a5711517e4f09ac31c2e17d58fe87c70df49e2c96fc5fc271de14a09cd579e32",
+    "rows": 79,
+    "located": 39,
+    "total_price_count": 59,
+    "unit_price_count": 60,
+    "questions": 0,
+    "sheet": "Registro Análisis",
+    "mapping": [
+      {
+        "header": "Asking Price",
+        "destination": "asking_price",
+        "currency_markers": [],
+        "origin": "nombre"
+      },
+      {
+        "header": "Asking $/m2",
+        "destination": "asking_m2",
+        "currency_markers": [],
+        "origin": "nombre"
+      }
+    ]
+  },
+  {
+    "case": "original_xlsx_saved_format_4",
+    "path": "/Users/andrejasso/Desktop/ARA Map/Base Terrenos 09.26 copy.xlsx",
+    "sha256": "a5711517e4f09ac31c2e17d58fe87c70df49e2c96fc5fc271de14a09cd579e32",
+    "rows": 79,
+    "located": 39,
+    "total_price_count": 0,
+    "unit_price_count": 0,
+    "questions": 0,
+    "sheet": "Registro Análisis",
+    "mapping": [
+      {
+        "header": "Asking Price",
+        "destination": "extra",
+        "currency_markers": [],
+        "origin": "formato"
+      },
+      {
+        "header": "Asking $/m2",
+        "destination": "extra",
+        "currency_markers": [],
+        "origin": "formato"
+      }
+    ]
+  },
+  {
+    "case": "today_csv_clean",
+    "path": "/Users/andrejasso/Desktop/Base Terrenos 09.26 copy.csv",
+    "sha256": "aefbf81c8f9192db4bcfebf1572095482bfcf7ba8061a4de657d47cf40ded032",
+    "rows": 79,
+    "located": 39,
+    "total_price_count": 0,
+    "unit_price_count": 0,
+    "questions": 0,
+    "sheet": "CSV",
+    "mapping": [
+      {
+        "header": "Asking Price",
+        "destination": "extra",
+        "currency_markers": [
+          "USD"
+        ],
+        "origin": "valores"
+      },
+      {
+        "header": "Asking $/m2",
+        "destination": "extra",
+        "currency_markers": [
+          "USD"
+        ],
+        "origin": "valores"
+      }
+    ]
+  }
+]

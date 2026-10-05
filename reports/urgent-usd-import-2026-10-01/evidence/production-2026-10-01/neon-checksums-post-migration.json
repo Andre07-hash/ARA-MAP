@@ -1,0 +1,43 @@
+{
+ "carpeta": [
+  1,
+  "2733811eececd85e2e2bd24b7f9ce2b2"
+ ],
+ "base": [
+  0,
+  ""
+ ],
+ "terreno": [
+  0,
+  ""
+ ],
+ "incidencia": [
+  0,
+  ""
+ ],
+ "mapa": [
+  2,
+  "6c814fee9e58e9a17e52256fab3df872"
+ ],
+ "mapa_capa": [
+  5,
+  "1569d47db165c2f216b75024be53b6bc"
+ ],
+ "mapa_terreno": [
+  196,
+  "cf2e050b88a8a94df4d6d05231a8a3a4"
+ ],
+ "formato_importacion": [
+  3,
+  "03b037b51a15dee57bc7186a5e017fb2"
+ ],
+ "importacion": [
+  0,
+  ""
+ ],
+ "schema_version": "7",
+ "moneda_cols": [
+  "mapa_terreno",
+  "terreno"
+ ]
+}

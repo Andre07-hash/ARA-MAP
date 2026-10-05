@@ -1,0 +1,89 @@
+/* Design tokens for ARA Map.
+ *
+ * Direction: a cartographic instrument. Swiss discipline, editorial density,
+ * warm paper surfaces and near-black ink. The chrome is deliberately
+ * ACHROMATIC -- every colour on screen belongs to the data (base identity,
+ * price magnitude, finding severity), never to decoration. Light only: a dark
+ * shell fights a light basemap and makes satellite imagery harder to read.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces -- warm neutrals, subtly layered rather than card-shadowed. */
+  --paper:          oklch(97.2% 0.004 85);
+  --paper-raised:   oklch(99.3% 0.002 85);
+  --paper-sunken:   oklch(94.6% 0.005 85);
+  --paper-overlay:  oklch(100% 0 0);
+
+  /* Ink */
+  --ink:            oklch(19% 0.006 60);
+  --ink-secondary:  oklch(44% 0.006 60);
+  --ink-muted:      oklch(61% 0.006 60);
+  --ink-inverse:    oklch(99% 0 0);
+
+  /* Hairlines. Rules, not borders: structure without weight. */
+  --rule:           oklch(88% 0.005 85);
+  --rule-strong:    oklch(78% 0.006 85);
+
+  /* Status. Fixed, never themed; always paired with an icon and a label. */
+  --status-error:   #d03b3b;
+  --status-aviso:   #b8791a;
+  --status-ok:      #0ca30c;
+
+  /* Type. System sans throughout; figures are tabular wherever they align. */
+  --font-ui:   ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --text-micro: 0.6875rem;
+  --text-small: 0.8125rem;
+  --text-body:  0.9375rem;
+  --text-lead:  1.0625rem;
+  --text-title: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  --text-display: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+
+  --tracking-tight: -0.014em;
+  --tracking-wide:  0.08em;
+
+  /* Spacing. An asymmetric scale: uniform padding everywhere reads as a
+   * template, so the rhythm is deliberately uneven. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 3px;
+  --radius:    5px;
+  --radius-lg: 8px;
+
+  /* Elevation. Used only where something genuinely floats above the map. */
+  --shadow-panel: 0 1px 2px oklch(19% 0.006 60 / 0.06),
+                  0 8px 24px oklch(19% 0.006 60 / 0.10),
+                  0 24px 48px oklch(19% 0.006 60 / 0.06);
+  --shadow-pop:   0 1px 2px oklch(19% 0.006 60 / 0.08),
+                  0 4px 16px oklch(19% 0.006 60 / 0.12);
+
+  --duration-fast:   140ms;
+  --duration-normal: 240ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --rail-width: 16.5rem;
+  --panel-width: 24rem;
+  --header-height: 3.25rem;
+
+  --z-map: 1;
+  --z-overlay: 500;
+  --z-panel: 700;
+  --z-modal: 900;
+  --z-toast: 1000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 1ms;
+    --duration-normal: 1ms;
+  }
+}

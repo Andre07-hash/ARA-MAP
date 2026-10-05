@@ -1,0 +1,24 @@
+{
+  "eventos": [
+    {
+      "id": "e1",
+      "version": 1,
+      "action": "create",
+      "at": "2026-10-05T15:00:00Z",
+      "actor": {
+        "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+        "display_name": "Ana Prueba"
+      },
+      "before_revision_id": null,
+      "after_revision_id": "r1",
+      "changes": {
+        "terreno": {
+          "before": null,
+          "after": "Lote Las Ánimas"
+        }
+      }
+    }
+  ],
+  "total": 3,
+  "next_cursor": null
+}

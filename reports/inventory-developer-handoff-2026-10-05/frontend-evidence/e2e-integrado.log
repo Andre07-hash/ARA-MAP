@@ -1,0 +1,10 @@
+ok   anonymous startup calls only config, session and the public catalog; empty state shows
+ok   a private deep link offers sign-in; wrong password is generic; then the empty inventory
+ok   Ana creates a draft directly: server 422 on currency, then saved with an id
+ok   three users, equal powers: Beto edits Ana's draft; Carla's stale save is a recoverable 409
+ok   confirming the price is a deliberate stamp with actor and date
+ok   251 more drafts: every page assembles before the count, table and map agree
+ok   phone: filters drawer and editor are usable at 390 and 768
+ok   signed in, legacy bases and saved maps stay reachable and editable
+ok   a reload keeps the session; logout revokes it, clears private DOM, and Back shows nothing
+9 ok, 0 failed (INTEGRATED against http://localhost:8432)

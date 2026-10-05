@@ -1,0 +1,10 @@
+{
+  "/components/import/AssistantViews.js": {
+    "matches_prior_release": true,
+    "matches_current_local": false
+  },
+  "/components/import/ImportAssistant.js": {
+    "matches_prior_release": true,
+    "matches_current_local": false
+  }
+}

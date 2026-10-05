@@ -1,0 +1,81 @@
+test_adjacent_escaped_usd_is_blocked (__main__.Followup.test_adjacent_escaped_usd_is_blocked) ... FAIL
+test_control_quoted_usd_is_blocked (__main__.Followup.test_control_quoted_usd_is_blocked) ... ok
+test_exclusion_does_not_move_to_another_worksheet (__main__.Followup.test_exclusion_does_not_move_to_another_worksheet) ... FAIL
+test_last_removed_row_keeps_a_recoverable_preview (__main__.Followup.test_last_removed_row_keeps_a_recoverable_preview) ... FAIL
+test_unquoted_pound_is_blocked (__main__.Followup.test_unquoted_pound_is_blocked) ... FAIL
+
+======================================================================
+FAIL: test_adjacent_escaped_usd_is_blocked (__main__.Followup.test_adjacent_escaped_usd_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 48, in test_adjacent_escaped_usd_is_blocked
+    self.currency_case(r'\U\S\D\ #,##0.00')
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 42, in currency_case
+    self.assertEqual(prices, [None] * 4, 'Foreign currency became stored MXN prices')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [1200000.0, 2500000.0, 3750000.0, 4800000.0] != [None, None, None, None]
+
+First differing element 0:
+1200000.0
+None
+
+- [1200000.0, 2500000.0, 3750000.0, 4800000.0]
++ [None, None, None, None] : Foreign currency became stored MXN prices
+
+======================================================================
+FAIL: test_exclusion_does_not_move_to_another_worksheet (__main__.Followup.test_exclusion_does_not_move_to_another_worksheet)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 61, in test_exclusion_does_not_move_to_another_worksheet
+    self.assertEqual(names, [f'Fictional 1-{i}' for i in range(3)])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['Fictional 1-1', 'Fictional 1-2'] != ['Fictional 1-0', 'Fictional 1-1', 'Fictional 1-2']
+
+First differing element 0:
+'Fictional 1-1'
+'Fictional 1-0'
+
+Second list contains 1 additional elements.
+First extra element 2:
+'Fictional 1-2'
+
+- ['Fictional 1-1', 'Fictional 1-2']
+?               ^
+
++ ['Fictional 1-0', 'Fictional 1-1', 'Fictional 1-2']
+?               ^              +++++++++++++++++
+
+
+======================================================================
+FAIL: test_last_removed_row_keeps_a_recoverable_preview (__main__.Followup.test_last_removed_row_keeps_a_recoverable_preview)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 66, in test_last_removed_row_keeps_a_recoverable_preview
+    self.assertIn('vista_previa', r, 'Removing the final row hides every restore control')
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'vista_previa' not found in {'borrador': 'gO8SZ0Iu8YMH81xxKUNWYOkt', 'interpretacion': {'hoja': {'id': 'csv:,', 'nombre': 'CSV', 'separador': ',', 'filas': 2, 'primera_linea': 1, 'ultima_linea': 2}, 'hojas': [{'id': 'csv:,', 'nombre': 'CSV', 'separador': ',', 'filas': 2}], 'encabezado': {'indice': 0, 'linea': 1}, 'encabezados': [{'indice': 0, 'linea': 1, 'vista': 'Terreno | Precio | Latitud | Longitud'}, {'indice': 1, 'linea': 2, 'vista': 'Fictional single | 1200000 | 19 | -99'}], 'decimal': 'dot', 'columnas': [{'id': 'csv:,/column:0', 'letra': 'columna 1', 'etiqueta': 'Terreno', 'visible': 'Terreno', 'muestras': ['Fictional single'], 'destino': 'terreno', 'origen': 'nombre', 'motivo': '«Terreno» es un nombre conocido de Nombre del terreno.', 'moneda': None, 'monedas': [], 'monedas_formato': []}, {'id': 'csv:,/column:1', 'letra': 'columna 2', 'etiqueta': 'Precio', 'visible': 'Precio', 'muestras': ['1200000'], 'destino': 'asking_price', 'origen': 'nombre', 'motivo': '«Precio» es un nombre conocido de Precio total (MXN).', 'moneda': None, 'monedas': [], 'monedas_formato': []}, {'id': 'csv:,/column:2', 'letra': 'columna 3', 'etiqueta': 'Latitud', 'visible': 'Latitud', 'muestras': ['19'], 'destino': 'lat', 'origen': 'nombre', 'motivo': '«Latitud» es un nombre conocido de Latitud.', 'moneda': None, 'monedas': [], 'monedas_formato': []}, {'id': 'csv:,/column:3', 'letra': 'columna 4', 'etiqueta': 'Longitud', 'visible': 'Longitud', 'muestras': ['-99'], 'destino': 'lon', 'origen': 'nombre', 'motivo': '«Longitud» es un nombre conocido de Longitud.', 'moneda': None, 'monedas': [], 'monedas_formato': []}], 'destinos': [{'valor': 'terreno', 'etiqueta': 'Nombre del terreno'}, {'valor': 'id_origen', 'etiqueta': 'ID de origen'}, {'valor': 'estado', 'etiqueta': 'Estado'}, {'valor': 'municipio', 'etiqueta': 'Municipio'}, {'valor': 'direccion', 'etiqueta': 'Dirección'}, {'valor': 'superficie_m2', 'etiqueta': 'Superficie (m²)'}, {'valor': 'superficie_ha', 'etiqueta': 'Superficie (ha)'}, {'valor': 'afectaciones_pct', 'etiqueta': 'Afectaciones (%)'}, {'valor': 'afectaciones_m2', 'etiqueta': 'Afectaciones (m²)'}, {'valor': 'asking_price', 'etiqueta': 'Precio total (MXN)'}, {'valor': 'asking_m2', 'etiqueta': 'Precio por m² (MXN)'}, {'valor': 'lat', 'etiqueta': 'Latitud'}, {'valor': 'lon', 'etiqueta': 'Longitud'}, {'valor': 'extra', 'etiqueta': 'Conservar como dato adicional'}, {'valor': 'ignorar', 'etiqueta': 'No importar'}], 'avisos': [], 'formato': None, 'automatico': {'estado': 'no_necesario', 'proveedor': None, 'aplicadas': 0, 'descartadas': 0}, 'excluir': [1], 'incluir': [], 'asistencia_configurada': False}, 'error': 'La tabla no contiene ningún terreno con nombre.', 'estado': 'revisar', 'preguntas': [], 'revision': 2} : Removing the final row hides every restore control
+
+======================================================================
+FAIL: test_unquoted_pound_is_blocked (__main__.Followup.test_unquoted_pound_is_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 51, in test_unquoted_pound_is_blocked
+    self.currency_case('£#,##0.00')
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/reports/map-import-fixes-2026-09-28/supervisor-review/review_regressions.py", line 42, in currency_case
+    self.assertEqual(prices, [None] * 4, 'Foreign currency became stored MXN prices')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [1200000.0, 2500000.0, 3750000.0, 4800000.0] != [None, None, None, None]
+
+First differing element 0:
+1200000.0
+None
+
+- [1200000.0, 2500000.0, 3750000.0, 4800000.0]
++ [None, None, None, None] : Foreign currency became stored MXN prices
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.056s
+
+FAILED (failures=4)

@@ -1,0 +1,36 @@
+{
+  "terrenos": [
+    {
+      "id": "3f1c2b9e-7a4d-4f6e-8b21-0c9d5e6f0003",
+      "revision_id": "9a0e7b1c-0000-4000-8000-000000000015",
+      "terreno": "Rancho El Mezquite",
+      "estado": "Guanajuato",
+      "municipio": "León",
+      "direccion": null,
+      "superficie_m2": 50000.0,
+      "superficie_ha": 5.0,
+      "afectaciones_pct": null,
+      "afectaciones_m2": null,
+      "lat": 21.1219,
+      "lon": -101.6823,
+      "asking_price": null,
+      "asking_m2": null,
+      "moneda": null,
+      "price_on_request": true,
+      "availability": "negotiation",
+      "public_description": "Ideal para bodega.",
+      "published_at": "2026-10-04T12:00:00Z"
+    }
+  ],
+  "total": 1,
+  "next_cursor": null,
+  "facets": {
+    "estados": [
+      "Guanajuato"
+    ],
+    "municipios": [
+      "León"
+    ],
+    "monedas": []
+  }
+}

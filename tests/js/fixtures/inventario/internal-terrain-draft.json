@@ -1,0 +1,63 @@
+{
+  "terreno": {
+    "id": "3f1c2b9e-7a4d-4f6e-8b21-0c9d5e6f0001",
+    "version": 3,
+    "draft_revision_id": "9a0e7b1c-0000-4000-8000-000000000003",
+    "published_revision_id": null,
+    "publication_state": "draft",
+    "public_visible": false,
+    "has_pending_changes": false,
+    "published_at": null,
+    "archived_at": null,
+    "draft": {
+      "terreno": "Lote Las Ánimas",
+      "estado": "Jalisco",
+      "municipio": "Zapopan",
+      "direccion": "Camino a Tesistán km 3",
+      "public_description": "Terreno plano con acceso pavimentado.",
+      "contacto": "Sr. Ejemplo 33 0000 0000 SENTINELA-PRIVADO-7731",
+      "notas_internas": "Nota interna SENTINELA-PRIVADO-7731",
+      "superficie_m2": 12500.0,
+      "superficie_ha": 1.25,
+      "afectaciones_pct": 0.07,
+      "afectaciones_m2": null,
+      "asking_price": 1531250.0,
+      "asking_m2": 122.5,
+      "lat": 20.7236,
+      "lon": -103.3848,
+      "moneda": "USD",
+      "price_on_request": false,
+      "availability": "available"
+    },
+    "confirmations": {
+      "price": null,
+      "availability": null
+    },
+    "source_extra": {},
+    "attention": [
+      {
+        "kind": "unconfirmed",
+        "code": "price_unconfirmed",
+        "field": "asking_price",
+        "message": "El precio nunca se ha confirmado."
+      },
+      {
+        "kind": "unconfirmed",
+        "code": "availability_unconfirmed",
+        "field": "availability",
+        "message": "La disponibilidad nunca se ha confirmado."
+      }
+    ],
+    "revision_number": 3,
+    "created_at": "2026-10-05T15:00:00Z",
+    "created_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+      "display_name": "Ana Prueba"
+    },
+    "updated_at": "2026-10-05T16:00:00Z",
+    "updated_by": {
+      "id": "0b6f3a52-1c1e-4d7e-9a51-2f0d8c1a0001",
+      "display_name": "Ana Prueba"
+    }
+  }
+}

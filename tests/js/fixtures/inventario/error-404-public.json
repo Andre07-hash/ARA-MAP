@@ -1,0 +1,6 @@
+{
+  "error": "Terreno no encontrado.",
+  "detalle": {
+    "code": "not_found"
+  }
+}

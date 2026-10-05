@@ -1,0 +1,114 @@
+{
+ "login": "ok (Cerrar sesión visible)",
+ "questions": [
+  "¿Importar «Asking Price» como precio total?",
+  "¿Importar «Asking $/m2» como precio por m²?",
+  "¿En qué moneda están los precios?"
+ ],
+ "preview_terrenos": "Terrenos79se importarán",
+ "preview_mapa": "En el mapa39con coordenadas válidas",
+ "preview_precio": "Con precio59total en USD; 60 con precio por m²",
+ "preview_fuera": "Fuera del mapa40sin coordenadas",
+ "preview_moneda_note": "Moneda de los precios: dólares estadounidenses (USD) — según tu respuesta. Los importes se guardan tal cual; no se convierten.",
+ "preview_row_marcenas": "2MarceñasEstado de México · Zumpango64,429 m²USD 388,689,722USD 600/m²En el mapaVerID1TerrenoMarceñasEstadoEstado de MéxicoMunicipioZumpangoDirecciónCarretera Zumpango-Jilotzingo 400, Av. Acueducto, Barrio de Santiago 2a Seccion, 55600 Zumpango de Ocampo, Méx.Superficie m264428.87Superficie Ha6.442887Afectaciones m20Asking Price388689722Asking $/m2600X19.8179452790226Y-99.0874491437001No importar",
+ "preview_row_eldorado": "4El DoradoQuintana Roo · Playa del Carmen1,086,306 m²USD 133,072,446USD 122.50/m²En el mapaVerID3TerrenoEl DoradoEstadoQuintana RooMunicipioPlaya del CarmenDirecciónCarretera Federal, Cancun - Chetumal Km 48, 77710 Playa del Carmen, Q.R.Superficie m21086305.679Superficie Ha108.6305679Afectaciones %0.8522Afectaciones m2925749.6996438Asking Price133072445.6775Asking $/m2122.5X20.7804442780685Y-86.9875176464538No importar",
+ "remember_format_checked": true,
+ "base": {
+  "id": 37,
+  "nombre": "Demo USD · Base Terrenos 09.26 (1 oct 2026)",
+  "conteo": 79,
+  "ubicados": 39
+ },
+ "stored_counts": {
+  "terrains": 79,
+  "located": 39,
+  "total_prices": 59,
+  "unit_prices": 60,
+  "monedas_priced": [
+   "USD"
+  ]
+ },
+ "stored_marcenas": [
+  388689722,
+  600,
+  "USD",
+  [
+   "PRECIO_INCONSISTENTE: Asking Price es 388,689,722 USD pero 600 USD/m² × 64,429 m² da 38,657,322 USD. Parece un error de un dígito (10×)."
+  ]
+ ],
+ "stored_eldorado": [
+  133072445.6775,
+  122.5,
+  "USD"
+ ],
+ "map_marks": 39,
+ "legend": "Asking $/m²39 terrenos< USD 500≥ USD 500≥ USD 700≥ USD 1.28 k≥ USD 2.15 ksin datoLos círculos son símbolos, no el tamaño real. Acércate para verlos a escala.40 ",
+ "detail_eldorado": "Asking PriceUSD 133,072,446Asking $/m²USD 122.50/m²",
+ "detail_marcenas": "Asking PriceUSD 388,689,722Asking $/m²USD 600/m²",
+ "detail_marcenas_warning": "Asking Price es 388,689,722 USD pero 600 USD/m² × 64,429 m² da 38,657,322 USD.",
+ "table_eldorado": "El DoradoQuintana RooPlaya del Carmen1,086,306 m²108.6306 ha85.22%USD 133,072,446USD 122.50/m²",
+ "saved_map": {
+  "id": 9,
+  "conteo": 79,
+  "ubicados": 39
+ },
+ "reopened_map_eldorado": [
+  122.5,
+  "USD"
+ ],
+ "reopened_map_table_eldorado": "El DoradoQuintana RooPlaya del Carmen1,086,306 m²108.6306 ha85.22%USD 133,072,446USD 122.50/m²",
+ "export": "Demo USD · mapa (1 oct 2026).xlsx",
+ "maps_now": [
+  [
+   9,
+   "Demo USD · mapa (1 oct 2026)",
+   [
+    79
+   ]
+  ],
+  [
+   4,
+   "prueba comparación",
+   [
+    79,
+    13
+   ]
+  ],
+  [
+   1,
+   "Base Terrenos 09.26 Ficticia vs Base Terrenos 08.26 Ficticia vs Base Terrenos 09.26 copy",
+   [
+    13,
+    12,
+    79
+   ]
+  ]
+ ],
+ "formats_now": [
+  [
+   5,
+   "Formato de «Base Terrenos 09.26 copy» (v2)",
+   2,
+   true
+  ],
+  [
+   3,
+   "Formato de «MapTest13»",
+   1,
+   true
+  ],
+  [
+   2,
+   "Formato de «Copy of REPORTE RESERVA ARA »",
+   1,
+   true
+  ],
+  [
+   4,
+   "Formato de «Base Terrenos 09.26 copy»",
+   1,
+   false
+  ]
+ ],
+ "console_errors": []
+}

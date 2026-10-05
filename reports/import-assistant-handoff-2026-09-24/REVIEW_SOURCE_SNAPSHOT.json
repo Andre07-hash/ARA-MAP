@@ -1,0 +1,14 @@
+{
+  "captured_utc": "2026-09-25T03:11:00.719283+00:00",
+  "sha256": {
+    "server/asistente/detectar.py": "2a6c39c41b3f53d2b5628c63d6c61bbceefafb01b9bb7d8925038444e5157e8e",
+    "server/asistente/campos.py": "a21750df53b6511a81e3548c8093c32f7b559b86f77b7a06e21b674c24956175",
+    "server/asistente/plan.py": "7f72dca8e7894e719f3c30bcc1dd8be40a22bbe4682e7de5eb0a2095d3f58243",
+    "server/asistente/ia.py": "9545fb9182e57bf4f24192c50593ede9ffa446ddf2ce58ce8a4c85929bb0a2d3",
+    "server/asistente/servicio.py": "cc582044aa5e732494800e995dbaa4bd9dd8db795ab7ab6a923b53bd91483f63",
+    "server/asistente/borradores.py": "b2343b7470d613723a59007ba6f819fd7f0503d7f2b965a270ed19b3873c3849",
+    "server/api/importar.py": "6cdab4d86262b3aa8a2f8e81d5bb7668277fbe233b8c0ea0c50798aded0f32fe",
+    "server/repo/formatos.py": "14b7d53d3a19f682bd1a436f029bc959aba459aa19a9b75fb1b73fbacab771ac",
+    "web/components/import/ImportAssistant.js": "9db843c55ed443944de4eaeee01189c8e561707bc5e20a07f3ca4ef9b05536d8"
+  }
+}

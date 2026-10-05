@@ -1,0 +1,10 @@
+{
+  "error": "Revisa los campos marcados.",
+  "detalle": {
+    "code": "validation_failed",
+    "fields": {
+      "lat": "Las coordenadas van en pareja: captura latitud y longitud, o ninguna.",
+      "moneda": "Indica la moneda del precio: USD o MXN."
+    }
+  }
+}

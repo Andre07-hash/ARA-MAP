@@ -1,0 +1,139 @@
+/* Buttons, inputs and the filter rail. */
+
+/* --------------------------------------------------------------- controls */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast),
+              transform var(--duration-fast);
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-principal { background: var(--ink); color: var(--ink-inverse); }
+.btn-principal:hover { background: oklch(28% 0.006 60); }
+
+.btn-quiet {
+  background: var(--paper-overlay);
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.btn-quiet:hover { background: var(--paper-sunken); }
+
+.btn-peligro { background: var(--status-error); color: #fff; }
+.btn-peligro:hover { background: oklch(48% 0.16 25); }
+
+/* A button that sits inside a table cell or a list item: it explains a row
+   decision, so it stays quieter than the actions in the dialog's footer. */
+.btn-small {
+  padding: 2px var(--space-2);
+  font-size: var(--text-micro);
+  white-space: nowrap;
+}
+
+.btn:disabled, .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--text-small);
+  color: var(--ink-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--rule-strong);
+  cursor: pointer;
+  transition: color var(--duration-fast);
+}
+.link-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
+.link-peligro:hover { color: var(--status-error); }
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 28px; height: 28px;
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.icon-btn:hover { background: var(--paper-sunken); color: var(--ink); }
+
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper-overlay);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  transition: border-color var(--duration-fast);
+}
+.input:hover { border-color: var(--ink-muted); }
+.input:focus-visible { outline-offset: 0; border-color: var(--ink); }
+.input-num { font-variant-numeric: tabular-nums; }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 3px 0;
+  font-size: var(--text-small);
+  cursor: pointer;
+  min-width: 0;
+}
+.check input { accent-color: var(--ink); flex-shrink: 0; margin: 0; }
+.check span:nth-of-type(1) { flex: 1; min-width: 0; }
+
+/* ------------------------------------------------------------------- rail */
+
+.rail { padding: var(--space-4) var(--space-4) var(--space-7); }
+
+.rail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.rail-field { margin-bottom: var(--space-5); border: none; padding: 0; margin-inline: 0; }
+
+.field-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0;
+}
+
+.rail-result {
+  margin: calc(var(--space-4) * -1) 0 var(--space-5);
+  font-size: var(--text-small);
+  color: var(--ink-secondary);
+}
+
+.check-list { list-style: none; margin: 0; padding: 0; }
+.check-more { font-size: var(--text-small); padding-top: var(--space-1); }
+
+.range-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-2); }
+.range-dash { color: var(--ink-muted); }
+.range-hint { margin-top: var(--space-1); font-size: var(--text-micro); }
+
+.rail-toggles { padding-top: var(--space-4); border-top: 1px solid var(--rule); }

@@ -1,0 +1,28 @@
+{
+  "bases": {
+    "id": 37,
+    "rows": 79,
+    "total_prices": 59,
+    "unit_prices": 60,
+    "all_source_values_match": true,
+    "all_priced_rows_usd": true
+  },
+  "mapas": {
+    "id": 9,
+    "rows": 79,
+    "total_prices": 59,
+    "unit_prices": 60,
+    "all_source_values_match": true,
+    "all_priced_rows_usd": true
+  },
+  "export": {
+    "rows": 79,
+    "currency_column": true,
+    "el_dorado_usd_per_m2": 122.5
+  },
+  "verified_at": "2026-10-01T22:10:28.325538+00:00",
+  "production_url": "https://ara-map-ivory.vercel.app",
+  "deployment_id": "dpl_3vsdvzhV86Y1goinejgcHP83vNML",
+  "deployment_already_existed": true,
+  "production_mutations_by_this_verification": false
+}

@@ -1,0 +1,35 @@
+waiting for server to start.... done
+server started
+postgres (PostgreSQL) 17.11 (Homebrew)
+test_assistant_drafts_formats_and_usage (tests.test_postgres.PostgresTests.test_assistant_drafts_formats_and_usage) ... ok
+test_cross_instance_import_and_single_use_token (tests.test_postgres.PostgresTests.test_cross_instance_import_and_single_use_token) ... ok
+test_csv_preview_confirm_through_postgres_staging (tests.test_postgres.PostgresTests.test_csv_preview_confirm_through_postgres_staging) ... ok
+test_currency_and_row_decisions_survive_a_serialized_draft (tests.test_postgres.PostgresTests.test_currency_and_row_decisions_survive_a_serialized_draft)
+A draft crosses workers as text: its evidence and decisions ride along. ... ok
+test_empty_base_counts (tests.test_postgres.PostgresTests.test_empty_base_counts) ... ok
+test_failed_commit_cleanup_does_not_wait_for_the_workspace_lock (tests.test_postgres.PostgresTests.test_failed_commit_cleanup_does_not_wait_for_the_workspace_lock)
+Supervisor R2b: cleanup runs after the business session released the lock. ... ok
+test_folders_move_delete_and_backup (tests.test_postgres.PostgresTests.test_folders_move_delete_and_backup) ... ok
+test_late_confirmation_after_a_corrected_import_is_refused (tests.test_postgres.PostgresTests.test_late_confirmation_after_a_corrected_import_is_refused)
+Supervisor R2a ordering on real Postgres: every request has its own connection. ... ok
+test_rollback_and_concurrent_ids (tests.test_postgres.PostgresTests.test_rollback_and_concurrent_ids) ... ok
+test_snapshots_rename_refresh_and_delete (tests.test_postgres.PostgresTests.test_snapshots_rename_refresh_and_delete) ... ok
+test_upgrading_a_workspace_from_before_folders (tests.test_postgres.PostgresTests.test_upgrading_a_workspace_from_before_folders) ... ok
+test_merging_two_different_saved_maps_keeps_both_layers (tests.test_postgres_aceptacion.ComparacionesEnLaNube.test_merging_two_different_saved_maps_keeps_both_layers) ... ok
+test_append (tests.test_postgres_aceptacion.ConfirmacionTardia.test_append) ... ok
+test_new_base (tests.test_postgres_aceptacion.ConfirmacionTardia.test_new_base) ... ok
+test_threaded_confirm_and_correction_on_separate_connections (tests.test_postgres_aceptacion.ConfirmacionTardia.test_threaded_confirm_and_correction_on_separate_connections) ... ok
+test_append (tests.test_postgres_aceptacion.FallasSinResiduos.test_append) ... ok
+test_new_base (tests.test_postgres_aceptacion.FallasSinResiduos.test_new_base) ... ok
+test_the_upgraded_workspace_is_usable (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_the_upgraded_workspace_is_usable) ... ok
+test_upgrade_preserves_everything_reaches_v6_and_can_run_again (tests.test_postgres_aceptacion.MigracionDesdeEspacioExistente.test_upgrade_preserves_everything_reaches_v6_and_can_run_again) ... ok
+test_concurrent_callers_cannot_share_the_last_of_the_budget (tests.test_postgres_aceptacion.PresupuestoEntreConexiones.test_concurrent_callers_cannot_share_the_last_of_the_budget) ... ok
+test_known_usage_replaces_the_reservation (tests.test_postgres_aceptacion.PresupuestoEntreConexiones.test_known_usage_replaces_the_reservation) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 2.273s
+
+OK
+waiting for server to shut down.... done
+server stopped
+Temporary PostgreSQL cluster stopped and removed; no production connection used.

@@ -1,0 +1,1 @@
+{"kind":"table","sheet":"Terrenos","address":"A1:I3","rows":3,"cols":9,"values":[["Terreno","Precio","Superficie m2","Latitud","Longitud",null,null,null,null],["FICTICIO Encino",1200000,2400,19.4326,-99.1332,null,null,null,null],["FICTICIO Roble",2500000,5000,20.6736,-103.344,null,null,null,null]]}

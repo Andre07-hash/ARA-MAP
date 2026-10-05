@@ -1,0 +1,104 @@
+{
+  "results": [
+    {
+      "name": "Detail and Escape (case-insensitive text assertion)",
+      "status": "PASS"
+    },
+    {
+      "name": "Live double-click reaches terrain scale",
+      "status": "PASS",
+      "detail": {
+        "required": 11,
+        "actual": 11
+      }
+    },
+    {
+      "name": "Search is reachable at 375px",
+      "status": "FAIL",
+      "detail": "{\"searchVisible\":false,\"railDisplay\":\"none\",\"buttons\":[\"Mapa\",\"Bases\",\"Mapas guardados\",\"Iniciar sesión\",\"Mapa\",\"Tabla\",\"Encuadrar\",\"Exportar\",\"Claro\",\"Satélite\",\"Calles\",\"▸\\nFUERA DEL MAPA\\n40\",\"×\",\"×\"]}"
+    },
+    {
+      "name": "Search is reachable at 768px",
+      "status": "FAIL",
+      "detail": "{\"searchVisible\":false,\"railDisplay\":\"none\",\"buttons\":[\"Mapa\",\"Bases\",\"Mapas guardados\",\"Iniciar sesión\",\"Mapa\",\"Tabla\",\"Encuadrar\",\"Exportar\",\"Claro\",\"Satélite\",\"Calles\",\"▸\\nFUERA DEL MAPA\\n40\",\"×\"]}"
+    },
+    {
+      "name": "Search is reachable at 960px",
+      "status": "FAIL",
+      "detail": "{\"searchVisible\":false,\"railDisplay\":\"none\",\"buttons\":[\"Mapa\",\"Bases\",\"Mapas guardados\",\"Iniciar sesión\",\"Mapa\",\"Tabla\",\"Encuadrar\",\"Exportar\",\"Claro\",\"Satélite\",\"Calles\",\"▸\\nFUERA DEL MAPA\\n40\",\"×\"]}"
+    },
+    {
+      "name": "Search is reachable at 1024px",
+      "status": "PASS",
+      "detail": {
+        "searchVisible": true,
+        "railDisplay": "block",
+        "buttons": [
+          "Mapa",
+          "Bases",
+          "Mapas guardados",
+          "Iniciar sesión",
+          "Mapa",
+          "Tabla",
+          "Encuadrar",
+          "Exportar",
+          "Claro",
+          "Satélite",
+          "Calles",
+          "▸\nFUERA DEL MAPA\n40",
+          "×"
+        ]
+      }
+    },
+    {
+      "name": "Layer visibility uses the intended source and restores it",
+      "status": "PASS",
+      "detail": {
+        "name": "Fake 2\n12",
+        "before": [
+          {
+            "orden": 0,
+            "visible": true
+          },
+          {
+            "orden": 1,
+            "visible": false
+          },
+          {
+            "orden": 2,
+            "visible": true
+          }
+        ],
+        "off": [
+          {
+            "orden": 0,
+            "visible": false
+          },
+          {
+            "orden": 1,
+            "visible": false
+          },
+          {
+            "orden": 2,
+            "visible": true
+          }
+        ],
+        "after": [
+          {
+            "orden": 0,
+            "visible": true
+          },
+          {
+            "orden": 1,
+            "visible": false
+          },
+          {
+            "orden": 2,
+            "visible": true
+          }
+        ]
+      }
+    }
+  ],
+  "errors": []
+}

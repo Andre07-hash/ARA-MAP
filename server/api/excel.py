@@ -23,9 +23,9 @@ from collections.abc import Mapping
 from typing import Any
 
 from .. import db
-from ..excel import lectura, servicio
+from ..excel import lectura, microsoft, servicio
 from ..excel.lectura import Configuracion, LecturaError
-from ..excel.proveedor import Proveedor, ProveedorError
+from ..excel.proveedor import ProveedorError
 from ..repo import carpetas as repo_carpetas
 from ..repo import excel as repo
 from ..router import Request
@@ -35,15 +35,9 @@ Respuesta = dict[str, Any]
 _KEY = re.compile(r"^[\x21-\x7e]{8,200}$")
 
 
-def _sin_proveedor(_: Mapping[str, Any]) -> Proveedor:
-    raise ProveedorError("no_configurado", "La conexión con Microsoft no está configurada en este servidor.")
-
-
-# Replaced at import time by excel.microsoft when the connector is configured,
-# and by tests. Never chosen from request input.
-FABRICA: servicio.FabricaProveedor = _sin_proveedor
-DISPONIBILIDAD: dict[str, Any] = {"disponible": False,
-                                  "motivo": "La conexión con Microsoft no está configurada."}
+# The provider for a stored file identity. Tests replace it with an
+# in-memory fake; it is never chosen from request input.
+FABRICA: servicio.FabricaProveedor = microsoft.fabrica
 
 
 def _actor(request: Request) -> dict[str, Any]:
@@ -101,7 +95,8 @@ def listing(request: Request) -> Respuesta:
     _actor(request)
     with db.session() as conn:
         repo.expirar(conn)
-        return {"fuentes": repo.fuentes(conn), "conector": DISPONIBILIDAD}
+        fuentes = repo.fuentes(conn)
+    return {"fuentes": fuentes, "conector": microsoft.disponibilidad()}
 
 
 def detail(request: Request) -> Respuesta:

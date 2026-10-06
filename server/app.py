@@ -27,9 +27,10 @@ from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
 from .api import mapas as api_mapas
+from .api import microsoft as api_microsoft
 from .api import sesion as api_sesion
 from .router import Request, Router
-from .web_util import ApiError, encode
+from .web_util import ApiError, Redireccion, encode
 
 WEB_ROOT = Path(__file__).resolve().parent.parent / "web"
 DEFAULT_PORT = 8420
@@ -52,6 +53,11 @@ router.add("POST", "/api/inventario/terrenos", api_inventario.create)
 router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail)
 router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update)
 router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history)
+router.add("GET", "/api/microsoft/estado", api_microsoft.estado)
+router.add("POST", "/api/microsoft/conectar", api_microsoft.conectar)
+router.add("GET", "/api/microsoft/callback", api_microsoft.callback)
+router.add("GET", "/api/microsoft/cuentas/:id/archivos", api_microsoft.archivos)
+router.add("POST", "/api/microsoft/cuentas/:id/olvidar", api_microsoft.olvidar)
 router.add("GET", "/api/excel/fuentes", api_excel.listing)
 router.add("POST", "/api/excel/fuentes", api_excel.create)
 router.add("POST", "/api/excel/vista-previa", api_excel.preview)
@@ -189,6 +195,10 @@ class Handler(BaseHTTPRequestHandler):
                 HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
+        if isinstance(result, Redireccion):
+            return self._send(HTTPStatus.SEE_OTHER, b"", "text/plain; charset=utf-8", extra={
+                "Location": result.ruta, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
+                **request.response_headers})
         if isinstance(result, tuple):  # a file download
             payload, filename = result
             return self._send(

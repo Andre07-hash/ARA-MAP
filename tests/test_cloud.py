@@ -186,6 +186,19 @@ class SignedIn(CloudServer, TempDatabase):
     def test_oversized_login_body_is_refused(self):
         self.assertEqual(self.request("POST", "/api/login", "x" * 5000)[0], 413)
 
+    def test_anonymous_login_database_failure_does_not_expose_internals(self):
+        """A missing schema must not reveal SQL or connection details over HTTP."""
+        internal = 'relation "team_login_failure" does not exist; SECRET-DB-DETAIL'
+        with patch("server.api.sesion.db.session", side_effect=RuntimeError(internal)), \
+                patch("traceback.print_exc") as logged:
+            status, body, headers = self.login()
+        self.assertEqual(status, 500)
+        self.assertEqual(json.loads(body)["detalle"], {"code": "internal"})
+        self.assertNotIn(b"team_login_failure", body)
+        self.assertNotIn(b"SECRET-DB-DETAIL", body)
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        logged.assert_called_once_with()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,6 +12,7 @@ import unittest
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
+from unittest.mock import patch
 
 from server import app as app_module
 from tests.support import TempDatabase, create_user, session_cookie
@@ -164,6 +165,16 @@ class AnonymousAccess(ServerCase):
 
 
 class ApiRouting(ServerCase):
+    def test_anonymous_login_failure_has_a_generic_error(self):
+        with patch("server.api.sesion.db.session", side_effect=RuntimeError("PRIVATE-SQL")), \
+                patch("traceback.print_exc") as logged:
+            status, body, _ = self.fetch("/api/login", method="POST", anonymous=True,
+                                         body=b'{"username":"ana","password":"fictional"}')
+        self.assertEqual(status, 500)
+        self.assertEqual(json.loads(body)["detalle"], {"code": "internal"})
+        self.assertNotIn(b"PRIVATE-SQL", body)
+        logged.assert_called_once_with()
+
     def test_a_json_endpoint_answers(self):
         status, body, headers = self.fetch("/api/bases")
         self.assertEqual(status, 200)

@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = APP_ROOT / "datos" / "ara_map.db"
 BACKUPS_KEPT = 10
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 # Savepoint names only need to be unique while nested.
 _savepoints = itertools.count()
@@ -328,6 +328,104 @@ CREATE TABLE IF NOT EXISTS inventory_operation_result (
 );
 """
 
+# v9: workbooks connected from Microsoft OneDrive/SharePoint, refreshed into a
+# legacy base without re-uploading. Additive. A connected base keeps its
+# terrains' ids across refreshes: each row's stable workbook ID (excel_fila)
+# names the terreno it became. Saved maps are frozen copies and are never
+# touched by a refresh. Microsoft refresh tokens are encrypted in Postgres
+# (pgcrypto) with a server-only key; both microsoft_ tables are operational
+# secrets and excluded from backups.
+EXCEL_SCHEMA = """
+CREATE TABLE IF NOT EXISTS microsoft_cuenta (
+  id            TEXT PRIMARY KEY,
+  ms_id         TEXT NOT NULL UNIQUE,
+  nombre        TEXT,
+  correo        TEXT,
+  tipo          TEXT NOT NULL CHECK (tipo IN ('personal', 'organizacion')),
+  token_cifrado TEXT NOT NULL,
+  estado        TEXT NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'reconectar')),
+  conectada_por TEXT NOT NULL REFERENCES team_user(id),
+  conectada_en  TEXT NOT NULL,
+  actualizada_en TEXT NOT NULL
+);
+
+-- One pending sign-in at Microsoft. Single use, short-lived, bound to the
+-- browser (flujo_hash: a cookie set when it started) and to the team session
+-- that started it.
+CREATE TABLE IF NOT EXISTS microsoft_autorizacion (
+  estado_hash         TEXT PRIMARY KEY,
+  flujo_hash          TEXT NOT NULL,
+  verificador_cifrado TEXT NOT NULL,
+  user_id             TEXT NOT NULL,
+  sesion_hash         TEXT NOT NULL,
+  expira              REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS excel_fuente (
+  id                TEXT PRIMARY KEY,
+  base_id           INTEGER NOT NULL UNIQUE REFERENCES base(id) ON DELETE CASCADE,
+  cuenta_id         TEXT NOT NULL,
+  drive_id          TEXT NOT NULL,
+  item_id           TEXT NOT NULL,
+  nombre_archivo    TEXT NOT NULL,
+  web_url           TEXT,
+  hoja              TEXT NOT NULL,
+  columna_id        TEXT NOT NULL,
+  moneda            TEXT CHECK (moneda IN ('USD', 'MXN', 'columna')),
+  version_activa_id TEXT,
+  creada_por        TEXT NOT NULL,
+  creada_en         TEXT NOT NULL,
+  UNIQUE (drive_id, item_id)
+);
+
+-- Each successfully activated content of the workbook.
+CREATE TABLE IF NOT EXISTS excel_version (
+  id             TEXT PRIMARY KEY,
+  fuente_id      TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
+  numero         INTEGER NOT NULL,
+  etag           TEXT,
+  ctag           TEXT,
+  sha256         TEXT NOT NULL,
+  tamano         INTEGER,
+  modificado_en  TEXT,
+  modificado_por TEXT,
+  filas          INTEGER NOT NULL,
+  activada_en    TEXT NOT NULL,
+  UNIQUE (fuente_id, numero)
+);
+
+-- Every refresh attempt, kept for the status a reopened browser shows. At
+-- most one may be running per source.
+CREATE TABLE IF NOT EXISTS excel_ejecucion (
+  id             TEXT PRIMARY KEY,
+  fuente_id      TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
+  estado         TEXT NOT NULL CHECK (estado IN ('en_curso', 'ok', 'sin_cambios', 'error')),
+  iniciada_por   TEXT NOT NULL,
+  iniciada_en    TEXT NOT NULL,
+  iniciada_epoch REAL NOT NULL,
+  terminada_en   TEXT,
+  version_id     TEXT,
+  agregados      INTEGER,
+  actualizados   INTEGER,
+  eliminados     INTEGER,
+  sin_cambio     INTEGER,
+  error_codigo   TEXT,
+  error_mensaje  TEXT,
+  problemas_json TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_excel_ejecucion_en_curso
+  ON excel_ejecucion(fuente_id) WHERE estado = 'en_curso';
+CREATE INDEX IF NOT EXISTS idx_excel_ejecucion_fuente ON excel_ejecucion(fuente_id, iniciada_epoch);
+
+-- Stable workbook ID -> the terreno it is. Survives reordering and edits.
+CREATE TABLE IF NOT EXISTS excel_fila (
+  fuente_id  TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
+  clave      TEXT NOT NULL,
+  terreno_id INTEGER NOT NULL UNIQUE REFERENCES terreno(id) ON DELETE CASCADE,
+  PRIMARY KEY (fuente_id, clave)
+);
+"""
+
 # Kept out of SCHEMA on purpose: SCHEMA runs before the column migrations, and
 # on a database from before folders these columns do not exist yet, so an index
 # on them there would fail. Shared with the Postgres upgrade.
@@ -458,6 +556,7 @@ def migrate(conn: sqlite3.Connection) -> None:
 
     conn.executescript(SCHEMA)
     conn.executescript(INVENTORY_SCHEMA)  # v7 -> v8, additive and idempotent
+    conn.executescript(EXCEL_SCHEMA)      # v8 -> v9, additive and idempotent
     # Before any snapshot below copies terrains: the copy names this column.
     _migrate_moneda(conn)
 
@@ -650,10 +749,12 @@ def backup(path: Path | str | None = None) -> Path | None:
     try:
         with copia:
             origen.backup(copia)
-            # Sessions and login throttling are operational state, not content:
-            # a restored copy must not bring old sign-ins back to life.
+            # Sessions, login throttling and Microsoft credentials are
+            # operational state, not content: a restored copy must not bring
+            # old sign-ins or file access back to life.
             tablas = _table_names(copia)
-            for operativa in ("team_session", "team_login_failure"):
+            for operativa in ("team_session", "team_login_failure", "microsoft_cuenta",
+                              "microsoft_autorizacion"):
                 if operativa in tablas:
                     copia.execute(f"DELETE FROM {operativa}")
     finally:

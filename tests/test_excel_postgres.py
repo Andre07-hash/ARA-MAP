@@ -234,3 +234,78 @@ class ExcelPostgres(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(URL, "No Postgres test connection configured")
+class MigracionAEsquema9(unittest.TestCase):
+    """Schema 8 -> 9 with the real migration script, checked against what
+    schema 9 specifically adds (not only a moving SCHEMA_VERSION)."""
+
+    TABLAS_9 = {"excel_cuenta", "excel_credencial", "excel_autorizacion", "excel_fuente", "excel_configuracion",
+                "excel_version", "excel_identidad", "excel_version_fila", "excel_ejecucion"}
+
+    def setUp(self):
+        import psycopg
+        from psycopg.conninfo import make_conninfo
+        self.esquema = "test_ara_v8_" + uuid.uuid4().hex
+        with psycopg.connect(URL) as conn:
+            conn.execute(f'CREATE SCHEMA "{self.esquema}"')
+        self.url = make_conninfo(URL, options=f"-c search_path={self.esquema}")
+        with patch.dict(os.environ, {"ARA_MAP_DATABASE_URL": self.url}), postgres.session() as conn:
+            conn.raw.execute(postgres.schema_sql(), prepare=False)
+            postgres.migrate(conn)
+            auth.create_user(conn, "ana", "Ana", TEST_PASSWORD, iterations=1000)
+        # Exactly a schema-8 workspace: everything except what 9 adds.
+        with psycopg.connect(self.url) as conn:
+            conn.execute("DROP TABLE " + ", ".join(sorted(self.TABLAS_9)) + " CASCADE")
+            conn.execute("UPDATE workspace_metadata SET value = '8' WHERE key = 'schema_version'")
+            conn.execute("INSERT INTO base (id, nombre, importado_en) VALUES (1, 'Agosto', 't')")
+            conn.execute("INSERT INTO terreno (id, base_id, orden, terreno, clave_dedupe) VALUES (1, 1, 1, 'Norte', 'n')")
+
+    def tearDown(self):
+        import psycopg
+        with psycopg.connect(URL) as conn:
+            conn.execute(f'DROP SCHEMA "{self.esquema}" CASCADE')
+
+    def script(self, *args):
+        import subprocess
+        import sys
+        entorno = {k: v for k, v in os.environ.items() if k not in ("DATABASE_URL", "ARA_MAP_DATABASE_URL")}
+        entorno["ARA_MAP_V8_URL"] = self.url
+        return subprocess.run([sys.executable, "scripts/migrate_cloud.py", "--url-env", "ARA_MAP_V8_URL", *args],
+                              cwd=Path(__file__).parents[1], env=entorno, capture_output=True, text=True,
+                              timeout=120)
+
+    def test_8_to_9_adds_the_connector_keeps_data_and_repeats_safely(self):
+        import psycopg
+        self.assertEqual(self.script("--check").returncode, 1)
+        for _ in range(2):
+            salida = self.script()
+            self.assertEqual(salida.returncode, 0, salida.stderr)
+        with psycopg.connect(self.url) as conn:
+            version = conn.execute("SELECT value FROM workspace_metadata WHERE key = 'schema_version'").fetchone()[0]
+            tablas = {r[0] for r in conn.execute(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = %s", (self.esquema,))}
+            datos = conn.execute("SELECT b.nombre, t.terreno FROM terreno t JOIN base b ON b.id = t.base_id").fetchall()
+            indices = {r[0] for r in conn.execute("SELECT indexname FROM pg_indexes WHERE schemaname = %s",
+                                                  (self.esquema,))}
+            cascadas = conn.execute(
+                "SELECT COUNT(*) FROM information_schema.referential_constraints r"
+                " JOIN information_schema.table_constraints t ON t.constraint_name = r.constraint_name"
+                " AND t.constraint_schema = r.constraint_schema"
+                " WHERE r.constraint_schema = %s AND t.table_name LIKE 'excel_%%' AND r.delete_rule = 'CASCADE'",
+                (self.esquema,)).fetchone()[0]
+            pgcrypto = conn.execute("SELECT to_regprocedure('public.pgp_sym_encrypt(text,text,text)')").fetchone()[0]
+        self.assertEqual(version, "9")
+        self.assertTrue(self.TABLAS_9 <= tablas)
+        self.assertEqual(datos, [("Agosto", "Norte")])
+        self.assertTrue(any("en_curso" in i for i in indices), indices)   # one running refresh per source
+        self.assertEqual(cascadas, 0)                                     # history is never cascaded away
+        self.assertIsNotNone(pgcrypto)
+        self.assertEqual(self.script("--check").returncode, 0)
+        # Content backups never carry credentials or pending sign-ins.
+        self.assertFalse({"excel_credencial", "excel_autorizacion"} & set(postgres.TABLES))
+        self.assertTrue({"excel_fuente", "excel_version_fila", "excel_identidad"} <= set(postgres.TABLES))
+        # The existing base is ordinary: every action stays available.
+        with patch.dict(os.environ, {"ARA_MAP_DATABASE_URL": self.url}), postgres.session() as conn:
+            self.assertFalse(repo.conectada(conn, 1))

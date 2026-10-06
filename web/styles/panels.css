@@ -680,3 +680,59 @@
 .rechazadas-list .figure { margin-right: var(--space-2); }
 
 .detail-escala { width: 100%; justify-content: center; margin-top: var(--space-3); }
+
+/* ------------------------------------------------------ connected Excel
+ * A connected base's card states where its rows come from and how the last
+ * refresh went; the connect dialog walks account -> workbook -> review. */
+.excel-estado {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  font-size: var(--text-small);
+}
+.excel-ok { border-left-color: var(--status-ok); }
+.excel-aviso { border-left-color: var(--status-aviso); }
+.excel-error { border-left-color: var(--status-error); }
+.excel-curso { border-left-color: var(--ink-muted); }
+.excel-estado-titulo { font-weight: 600; }
+.excel-error .excel-estado-titulo { color: var(--status-error); }
+.excel-estado-nota { margin-top: var(--space-1); color: var(--ink-secondary); }
+.excel-estado-datos { list-style: none; margin: var(--space-2) 0 0; padding: 0; font-size: var(--text-micro); }
+.excel-tag {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: 99px;
+  font-size: var(--text-micro);
+  font-weight: 600;
+}
+.excel-tag-error { border-color: var(--status-error); color: var(--status-error); margin-left: var(--space-2); }
+.link-principal { font-weight: 600; color: var(--ink); }
+.excel-help { margin: var(--space-3) 0 var(--space-4); font-size: var(--text-micro); max-width: 60rem; }
+
+.excel-steps { display: flex; gap: var(--space-4); list-style: none; padding: 0; margin: 0 0 var(--space-4); font-size: var(--text-small); }
+.excel-steps li { color: var(--ink-muted); }
+.excel-steps li.is-active { color: var(--ink); font-weight: 600; }
+.excel-steps li.is-done { color: var(--ink-secondary); }
+.excel-list { list-style: none; padding: 0; margin: var(--space-3) 0; border: 1px solid var(--rule); border-radius: var(--radius); }
+.excel-list li + li { border-top: 1px solid var(--rule); }
+.excel-item {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  background: none;
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.excel-item:hover:not(:disabled) { background: var(--paper); }
+.excel-item:disabled { cursor: not-allowed; opacity: 0.7; }
+.excel-toolbar { display: flex; gap: var(--space-2); margin: var(--space-3) 0; }
+.excel-breadcrumb { font-size: var(--text-small); }
+.excel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0 var(--space-4); margin-top: var(--space-4); }
+.excel-table { width: 100%; border-collapse: collapse; font-size: var(--text-micro); margin-top: var(--space-2); }
+.excel-table th, .excel-table td { text-align: left; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--rule); }
+.excel-faltan { font-size: var(--text-small); margin-top: var(--space-3); }
+.excel-problems { margin-top: var(--space-3); font-size: var(--text-small); }
+.excel-problems ul { max-height: 16rem; overflow: auto; margin: var(--space-2) 0 0; }

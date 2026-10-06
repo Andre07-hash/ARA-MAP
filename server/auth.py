@@ -48,6 +48,11 @@ PUBLIC_API = {
     ("POST", "/api/login"),
     ("POST", "/api/logout"),
     ("GET", "/api/publico/terrenos"),
+    # Microsoft's OAuth redirect back. Approved deviation (supervisor brief
+    # 3c486f9, section 2A): the SameSite=Strict session cookie is not sent on
+    # that cross-site navigation; the handler binds the flow by state, PKCE
+    # and its own browser cookie instead, and only ever redirects.
+    ("GET", "/api/microsoft/callback"),
 }
 _PUBLIC_DETAIL = re.compile(r"^/api/publico/terrenos/[^/]+$")
 

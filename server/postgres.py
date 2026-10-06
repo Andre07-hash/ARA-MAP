@@ -23,7 +23,12 @@ LEGACY_TABLES = ("carpeta", "base", "terreno", "incidencia", "mapa", "mapa_capa"
 # operational and deliberately absent. Text UUID keys: never in ID_TABLES.
 INVENTORY_TABLES = ("team_user", "inventory_terrain", "inventory_revision", "inventory_event",
                     "inventory_operation_result")
-TABLES = LEGACY_TABLES + INVENTORY_TABLES
+# v9: connected workbooks, in dependency order. excel_credencial and
+# excel_autorizacion hold secrets and are deliberately absent from content
+# backups: an account restored without its credential needs reconnecting.
+EXCEL_TABLES = ("excel_cuenta", "excel_fuente", "excel_configuracion", "excel_version",
+                "excel_identidad", "excel_version_fila", "excel_ejecucion")
+TABLES = LEGACY_TABLES + INVENTORY_TABLES + EXCEL_TABLES
 # uso_ia is operational metadata, not workspace content: not in backups, but
 # its rows still need generated ids.
 ID_TABLES = (set(LEGACY_TABLES) - {"mapa_capa"}) | {"uso_ia"}
@@ -121,7 +126,26 @@ CREATE TABLE IF NOT EXISTS workspace_backup (
   created TIMESTAMPTZ NOT NULL DEFAULT now(), payload TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS workspace_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-""" + BORRADOR_SQL + inventory_sql()
+""" + BORRADOR_SQL + inventory_sql() + excel_sql()
+
+
+# pgcrypto encrypts connector credentials. Creating it is attempted but not
+# required: a role that may not create extensions still upgrades, and the
+# connector then reports itself unavailable (excel/credenciales.py).
+PGCRYPTO_SQL = """
+DO $$ BEGIN
+  CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+EXCEPTION WHEN insufficient_privilege OR feature_not_supported OR undefined_file THEN
+  RAISE NOTICE 'pgcrypto no disponible: el conector de Excel quedará deshabilitado';
+END $$;
+"""
+
+
+def excel_sql() -> str:
+    """The v9 tables, idempotently, and an attempt at pgcrypto (public)."""
+    from .db import EXCEL_SCHEMA
+
+    return PGCRYPTO_SQL + _to_postgres(EXCEL_SCHEMA)
 
 
 def inventory_sql() -> str:
@@ -175,7 +199,7 @@ def migrate_sql() -> str:
     from .db import FOLDER_INDEXES, SCHEMA, SCHEMA_VERSION
 
     return ("".join(_crear_tabla(SCHEMA, t) for t in NUEVAS_TABLAS) + BORRADOR_SQL
-            + inventory_sql() + """
+            + inventory_sql() + excel_sql() + """
 ALTER TABLE base ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE mapa ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE terreno ADD COLUMN IF NOT EXISTS moneda TEXT CHECK (moneda IN ('USD', 'MXN'));

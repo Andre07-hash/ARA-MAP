@@ -22,13 +22,15 @@ from . import auth, db
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
+from .api import excel as api_excel
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
 from .api import mapas as api_mapas
+from .api import microsoft as api_microsoft
 from .api import sesion as api_sesion
 from .router import Request, Router
-from .web_util import ApiError, encode
+from .web_util import ApiError, Redireccion, encode
 
 WEB_ROOT = Path(__file__).resolve().parent.parent / "web"
 DEFAULT_PORT = 8420
@@ -51,6 +53,21 @@ router.add("POST", "/api/inventario/terrenos", api_inventario.create)
 router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail)
 router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update)
 router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history)
+router.add("GET", "/api/microsoft/estado", api_microsoft.estado)
+router.add("POST", "/api/microsoft/conectar", api_microsoft.conectar)
+router.add("GET", "/api/microsoft/callback", api_microsoft.callback)
+router.add("GET", "/api/microsoft/cuentas/:id/archivos", api_microsoft.archivos)
+router.add("POST", "/api/microsoft/cuentas/:id/olvidar", api_microsoft.olvidar)
+router.add("GET", "/api/excel/fuentes", api_excel.listing)
+router.add("POST", "/api/excel/fuentes", api_excel.create)
+router.add("POST", "/api/excel/vista-previa", api_excel.preview)
+router.add("GET", "/api/excel/fuentes/:id", api_excel.detail)
+router.add("GET", "/api/excel/fuentes/:id/versiones", api_excel.versions)
+router.add("GET", "/api/excel/fuentes/:id/versiones/:vid", api_excel.version_detail)
+router.add("POST", "/api/excel/fuentes/:id/actualizar", api_excel.refresh)
+router.add("POST", "/api/excel/fuentes/:id/configuracion", api_excel.configure)
+router.add("POST", "/api/excel/fuentes/:id/desconectar", api_excel.disconnect)
+router.add("POST", "/api/excel/fuentes/:id/reconectar", api_excel.reconnect)
 router.add("GET", "/api/bases", api_bases.listing)
 router.add("GET", "/api/bases/:id", api_bases.detail)
 router.add("GET", "/api/bases/:id/terrenos", api_bases.terrenos)
@@ -84,6 +101,16 @@ router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove)
 
 # POSTs that only read: allowed in read-only mode.
 READ_ONLY_POSTS = {"/api/exportar"}
+
+
+def _escritura_congelada(exc: BaseException | None) -> bool:
+    """A write refused because the database is read-only (SQLSTATE 25006)."""
+    vistos = 0
+    while exc is not None and vistos < 5:
+        if getattr(exc, "sqlstate", None) == "25006":
+            return True
+        exc, vistos = exc.__cause__ or exc.__context__, vistos + 1
+    return False
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -168,7 +195,14 @@ class Handler(BaseHTTPRequestHandler):
             if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
-        except Exception:  # noqa: BLE001 - logged here, never sent to the caller
+        except Exception as exc:  # noqa: BLE001 - logged here, never sent to the caller
+            if _escritura_congelada(exc):
+                # scripts/congelar_escrituras.py made the database read-only for
+                # a release: reading still works, writing waits.
+                return self._send_json(
+                    {"error": "ARA Map está en mantenimiento: por ahora solo se puede consultar."
+                              " Inténtalo de nuevo más tarde.", "detalle": {"code": "mantenimiento"}},
+                    HTTPStatus.SERVICE_UNAVAILABLE, extra={"Retry-After": "300"})
             import traceback
             traceback.print_exc()
             self.close_connection = True
@@ -178,6 +212,10 @@ class Handler(BaseHTTPRequestHandler):
                 HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
+        if isinstance(result, Redireccion):
+            return self._send(HTTPStatus.SEE_OTHER, b"", "text/plain; charset=utf-8", extra={
+                "Location": result.ruta, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
+                **request.response_headers})
         if isinstance(result, tuple):  # a file download
             payload, filename = result
             return self._send(

@@ -29,6 +29,7 @@ from ..matching import Disposition, classify
 from ..normalize import fold
 from ..repo import bases as repo_bases
 from ..repo import carpetas as repo_carpetas
+from ..repo import excel as repo_excel
 from ..repo import formatos as repo_formatos
 from ..repo import terrenos as repo_terrenos
 from ..router import Request
@@ -369,6 +370,10 @@ def append(request: Request) -> Respuesta:
     except (TypeError, ValueError, AttributeError):
         raise ApiError("Las decisiones sobre conflictos no son válidas.") from None
 
+    # Checked before the single-use token is spent.
+    with db.session() as conn:
+        repo_excel.proteger_base(conn, base_id)
+
     pending = staging.take(token)
     if pending is None:
         raise ApiError("La vista previa expiró. Vuelve a seleccionar el archivo.", 410)
@@ -378,6 +383,7 @@ def append(request: Request) -> Respuesta:
         with db.session() as conn:
             if repo_bases.get(conn, base_id) is None:
                 raise ApiError("La base indicada no existe.", 404)
+            repo_excel.proteger_base(conn, base_id)
 
             decisiones = classify(
                 pending.resultado.records, repo_terrenos.dedupe_rows(conn, base_id)

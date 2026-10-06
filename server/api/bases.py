@@ -8,6 +8,7 @@ from .. import db
 from ..importer import TerrainRecord
 from ..repo import bases as repo
 from ..repo import carpetas as repo_carpetas
+from ..repo import excel as repo_excel
 from ..repo import mapas as repo_mapas
 from ..repo import terrenos as repo_terrenos
 from ..router import Request
@@ -91,6 +92,9 @@ def remove(request: Request) -> Respuesta:
         base = repo.get(conn, base_id)
         if base is None:
             raise ApiError("La base no existe.", 404)
+        # A connected base's history lives in its source; generic delete
+        # must not bypass the source lifecycle.
+        repo_excel.proteger_base(conn, base_id)
         repo.delete(conn, base_id)
         return {"eliminada": base["nombre"], "terrenos": base["conteo"]}
 
@@ -126,6 +130,7 @@ def add_terreno(request: Request) -> Respuesta:
         base_id = request.param("id")
         if repo.get(conn, base_id) is None:
             raise ApiError("La base no existe.", 404)
+        repo_excel.proteger_base(conn, base_id)
 
         orden = repo_terrenos.next_orden(conn, base_id)
         record = TerrainRecord(orden=orden, fila=0, **valores)

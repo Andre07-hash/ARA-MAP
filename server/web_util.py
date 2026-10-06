@@ -10,7 +10,16 @@ from typing import Any
 from .errors import ApiError
 
 # Re-exported so handlers can import their error type from one place.
-__all__ = ["ApiError", "encode", "parse_json", "require"]
+__all__ = ["ApiError", "Redireccion", "encode", "parse_json", "require"]
+
+
+class Redireccion:
+    """A handler result meaning "303 See Other" to a fixed same-origin path."""
+
+    def __init__(self, ruta: str) -> None:
+        if not ruta.startswith("/") or ruta.startswith("//"):
+            raise ValueError("only same-origin paths")
+        self.ruta = ruta
 
 
 def encode(payload: Any) -> bytes:

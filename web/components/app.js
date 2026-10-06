@@ -14,6 +14,7 @@ import { defaultDestination } from "../lib/carpetas.js";
 import { layerColor, layerDash, priceBreaks, priceColor } from "../lib/colors.js";
 import { compareLayers } from "../lib/comparar.js";
 import { append, clear, el } from "../lib/dom.js";
+import { AVISOS, avisoDeHash } from "../lib/excel.js";
 import { activeCount, applyFilters, EMPTY_FILTERS, sinFiltrosDePrecio } from "../lib/filters.js";
 import { fmtCount, monedasDe, plural } from "../lib/format.js";
 import {
@@ -27,6 +28,12 @@ import {
 } from "../lib/store.js";
 import { appendWorkbook, importWorkbook } from "./bases/ImportDialog.js";
 import { BaseGallery } from "./bases/BaseGallery.js";
+import { connectExcel } from "./excel/ConnectExcel.js";
+import {
+  actualizar as actualizarFuente, alActivar, cargarFuentes, comprobar as comprobarFuente,
+  desconectar as desconectarFuente, detenerExcel, ocupadas, reactivar as reactivarFuente,
+  reconectarCuenta,
+} from "./excel/excelActions.js";
 import { BasemapSwitcher } from "./map/BasemapSwitcher.js";
 import {
   createFolder, deleteFolder, loadCarpetas, moveItem, renameFolder, selectFolder,
@@ -154,6 +161,7 @@ function alEntrar(_usuario, { returnTo, startup }) {
  */
 function limpiarPrivado() {
   abortPrivate();
+  detenerExcel();
   cancelarCargas();
   editor?.destroy();
   editor = null;
@@ -190,6 +198,7 @@ async function loadIndex({ forzar = false } = {}) {
       api.bases(), api.mapas(), loadCarpetas("bases"), loadCarpetas("mapas"),
     ]);
     setState({ bases, mapas });
+    cargarFuentes();   // its own failure never hides the bases
   } catch (error) {
     legacyCargado = false;
     if (error.status !== 401) toastError(`No se pudieron cargar las bases y los mapas: ${error.message}`);
@@ -222,6 +231,15 @@ async function revalidar({ forzar = false } = {}) {
 const rutaDelEditor = () => (editor?.id ? { nombre: "editar", id: editor.id } : { nombre: "nuevo" });
 
 async function aplicarRuta() {
+  // The Microsoft callback lands on #/bases?excel=<resultado>: say it once and
+  // drop it from the address bar, without a hashchange.
+  const { hash, aviso } = avisoDeHash(location.hash);
+  if (aviso) {
+    history.replaceState(null, "", hash || "#/");
+    const { tipo, mensaje } = AVISOS[aviso];
+    if (tipo === "error") toastError(mensaje); else toast(mensaje);
+    if (aviso === "conectado" && getState().sesion) setTimeout(abrirConectarExcel, 0);
+  }
   const ruta = parseRoute(location.hash);
   const { sesion } = getState();
   if (!ruta) {
@@ -458,8 +476,36 @@ function renderBases(host, state) {
     onFormats: () => openFormatManager(),
     onRename: (base) => renameBase(base),
     onDelete: (base) => deleteBase(base),
+    fuentes: state.fuentes,
+    ocupada: (id) => ocupadas.tiene(id),
+    onConnectExcel: abrirConectarExcel,
+    excel: {
+      actualizar: (fuente) => actualizarFuente(fuente),
+      comprobar: comprobarFuente,
+      reconectar: reconectarCuenta,
+      desconectar: desconectarFuente,
+      reactivar: reactivarFuente,
+    },
   }));
 }
+
+function abrirConectarExcel() {
+  const state = getState();
+  connectExcel({
+    carpetas: state.carpetas.bases,
+    carpetaInicial: defaultDestination(state.carpetaVista.bases),
+    onDone: async (fuente) => {
+      await Promise.all([afterBaseChange(), cargarFuentes()]);
+      const base = getState().bases.find((b) => b.id === fuente.base_id);
+      if (base) await openBase(base, { silencioso: true });
+    },
+  });
+}
+
+/* New Excel data was activated: the base list and, if that base is open, its
+ * map, table, filters and export all reload from the server. Saved maps are
+ * frozen and never change. */
+alActivar(() => afterBaseChange());
 
 function renderMapas(host, state) {
   renderKeepingFocus(host, () => MapGallery({

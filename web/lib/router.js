@@ -12,7 +12,9 @@
 const CON_ID = new Set(["catalogo", "inventario", "editar"]);
 
 export function parseRoute(hash) {
-  const partes = String(hash ?? "").replace(/^#\/?/, "").split("/").filter(Boolean);
+  // A query (#/bases?excel=conectado, from the Microsoft callback) is a
+  // one-off notice for the page, never part of the route.
+  const partes = String(hash ?? "").split("?")[0].replace(/^#\/?/, "").split("/").filter(Boolean);
   let decod;
   try { decod = partes.map(decodeURIComponent); } catch { return null; }
   const [a, b, c] = decod;

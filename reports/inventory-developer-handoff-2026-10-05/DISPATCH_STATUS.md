@@ -1,5 +1,11 @@
 # Developer coordination status
 
+> **Priority 0: GitHub/Vercel readiness now comes first.** Follow the [repository and deployment prerequisite](../github-vercel-readiness-2026-10-05/START_HERE.md) before continuing Excel + BigQuery implementation. The owner requested this order after moving development to GitHub.
+
+**Current implementation instructions:** [Excel + BigQuery developer packet](../excel-bigquery-developer-handoff-2026-10-05/START_HERE.md). The owner has asked to proceed with this plan. Assignments, shared contract, company setup inputs and acceptance criteria are ready; no developer dispatch or software completion is claimed by this notice.
+
+> **Priority changed after the owners’ meeting (October 5, 2026).** Read [Excel + BigQuery realignment](../product-plan-2026-10-05/EXCEL_BIGQUERY_REALIGNMENT.md) first. Connected Excel refresh and company BigQuery storage now come before all further inventory/public-catalog work. The earlier website-authoritative assumption, spreadsheet-sync deferral and database-provider restriction below are superseded. Preserve completed work; do not resume Stage 2 from this historical plan. This notice changes priorities only; no connector, migration or deployment is complete.
+
 October 5, 2026. Scope of this task: create and communicate implementation instructions as requested by the owner. This status distinguishes completed briefing work from software implementation.
 
 | Workstream | Assignment communicated | Outcome |

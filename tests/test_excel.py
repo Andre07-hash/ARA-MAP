@@ -114,7 +114,7 @@ class Refresh(ExcelServer):
         status, r = self.actualizar(f["id"], "beto")
         self.assertEqual(status, 200, r)
         self.assertEqual(r["ejecucion"]["estado"], "ok")
-        self.assertEqual(r["ejecucion"]["iniciada_por"], self.users["beto"]["id"])
+        self.assertEqual(r["ejecucion"]["iniciada_por"], {"id": self.users["beto"]["id"], "display_name": "Beto"})
         self.assertEqual(r["ejecucion"]["conteos"],
                          {"agregados": 1, "actualizados": 1, "eliminados": 1, "sin_cambio": 1})
         despues = self.terrenos(f["base_id"])

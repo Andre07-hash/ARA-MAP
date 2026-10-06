@@ -118,27 +118,33 @@ def identidades(conn: DatabaseConnection, fuente_id: str) -> list[dict[str, Any]
         "SELECT * FROM excel_identidad WHERE fuente_id = ? ORDER BY clave", (fuente_id,)).fetchall()]
 
 
+# Every run names who started it (the audit trail employees see).
+_EJECUCION_SQL = ("SELECT e.*, u.display_name AS iniciada_por_nombre FROM excel_ejecucion e"
+                  " LEFT JOIN team_user u ON u.id = e.iniciada_por")
+
+
 def ejecucion(conn: DatabaseConnection, ejecucion_id: str) -> dict[str, Any] | None:
-    row = conn.execute("SELECT * FROM excel_ejecucion WHERE id = ?", (ejecucion_id,)).fetchone()
+    row = conn.execute(_EJECUCION_SQL + " WHERE e.id = ?", (ejecucion_id,)).fetchone()
     return ejecucion_dto(row) if row else None
 
 
 def ejecucion_por_clave(conn: DatabaseConnection, fuente_id: str, clave: str) -> dict[str, Any] | None:
-    row = conn.execute("SELECT * FROM excel_ejecucion WHERE fuente_id = ? AND clave_idempotencia = ?",
+    row = conn.execute(_EJECUCION_SQL + " WHERE e.fuente_id = ? AND e.clave_idempotencia = ?",
                        (fuente_id, clave)).fetchone()
     return ejecucion_dto(row) if row else None
 
 
 def ultima_ejecucion(conn: DatabaseConnection, fuente_id: str) -> dict[str, Any] | None:
-    row = conn.execute("SELECT * FROM excel_ejecucion WHERE fuente_id = ?"
-                       " ORDER BY iniciada_epoch DESC, id DESC LIMIT 1", (fuente_id,)).fetchone()
+    row = conn.execute(_EJECUCION_SQL + " WHERE e.fuente_id = ?"
+                       " ORDER BY e.iniciada_epoch DESC, e.id DESC LIMIT 1", (fuente_id,)).fetchone()
     return ejecucion_dto(row) if row else None
 
 
 def ejecucion_dto(row: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "id": row["id"], "tipo": row["tipo"], "estado": row["estado"],
-        "iniciada_por": row["iniciada_por"], "iniciada_en": row["iniciada_en"],
+        "iniciada_por": {"id": row["iniciada_por"], "display_name": row["iniciada_por_nombre"]},
+        "iniciada_en": row["iniciada_en"],
         "terminada_en": row["terminada_en"], "version_id": row["version_id"],
         "conteos": None if row["agregados"] is None else {
             "agregados": row["agregados"], "actualizados": row["actualizados"],
@@ -236,7 +242,7 @@ def reclamar(conn: DatabaseConnection, fuente_row: Mapping[str, Any], tipo: str,
     caller's job (ejecucion_por_clave first)."""
     with db.transaction(conn):
         expirar(conn, fuente_row["id"])
-        actual = conn.execute("SELECT * FROM excel_ejecucion WHERE fuente_id = ? AND estado = 'en_curso'",
+        actual = conn.execute(_EJECUCION_SQL + " WHERE e.fuente_id = ? AND e.estado = 'en_curso'",
                               (fuente_row["id"],)).fetchone()
         if actual is not None:
             raise EnCursoError(ejecucion_dto(actual))

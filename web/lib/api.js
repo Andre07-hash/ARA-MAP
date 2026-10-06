@@ -156,6 +156,30 @@ export const api = {
   renameCarpeta:  (id, nombre) => request(`/carpetas/${id}`, { method: "PATCH", body: { nombre } }),
   deleteCarpeta:  (id) => request(`/carpetas/${id}`, { method: "DELETE" }),
 
+  // Connected Excel (cloud only). Mutations carry an Idempotency-Key.
+  microsoftEstado:   () => request("/microsoft/estado"),
+  microsoftConectar: () => request("/microsoft/conectar", { method: "POST" }),
+  microsoftArchivos: (cuentaId, { carpeta, q } = {}) => {
+                       const p = new URLSearchParams();
+                       if (carpeta) p.set("carpeta", carpeta);
+                       if (q) p.set("q", q);
+                       const query = p.toString();
+                       return request(`/microsoft/cuentas/${enc(cuentaId)}/archivos${query ? `?${query}` : ""}`);
+                     },
+  excelFuentes:      () => request("/excel/fuentes"),
+  excelFuente:       (id) => request(`/excel/fuentes/${enc(id)}`),
+  excelVistaPrevia:  (payload) => request("/excel/vista-previa", { method: "POST", body: payload }),
+  excelConectar:     (payload, clave) => request("/excel/fuentes", {
+                       method: "POST", body: payload, headers: { "Idempotency-Key": clave },
+                     }),
+  excelActualizar:   (id, cuerpo, clave) => request(`/excel/fuentes/${enc(id)}/actualizar`, {
+                       method: "POST", body: cuerpo, headers: { "Idempotency-Key": clave },
+                     }),
+  excelDesconectar:  (id, generacion) => request(`/excel/fuentes/${enc(id)}/desconectar`,
+                                                 { method: "POST", body: { generacion } }),
+  excelReactivar:    (id, generacion) => request(`/excel/fuentes/${enc(id)}/reconectar`,
+                                                 { method: "POST", body: { generacion } }),
+
   mapas:        () => request("/mapas"),
   mapa:         (id) => request(`/mapas/${id}`),
   mapaTerrenos: (id) => request(`/mapas/${id}/terrenos`),

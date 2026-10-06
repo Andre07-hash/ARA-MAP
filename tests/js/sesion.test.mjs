@@ -37,6 +37,11 @@ test("unknown or malformed hashes are not routes", () => {
   }
 });
 
+test("a notice query in the hash does not change the route", () => {
+  assert.deepEqual(parseRoute("#/bases?excel=conectado"), { nombre: "bases", id: null });
+  assert.equal(parseRoute("#/bases/3?excel=conectado"), null);
+});
+
 /* ------------------------------------------------------------ the network */
 
 function stubFetch(responder) {

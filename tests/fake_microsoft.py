@@ -14,6 +14,7 @@ import hashlib
 import json
 import secrets
 import threading
+import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -35,6 +36,8 @@ class FakeMicrosoft:
         self.cola_status: list[tuple[int, dict[str, str]]] = []  # forced next Graph answers
         self.redirigir_a: str | None = None
         self.renovaciones_usadas = 0
+        self.retraso = 0.0   # seconds each download takes (browser tests watch a run in progress)
+        self.usuario_navegador: str | None = None   # who "signs in" at the browser authorize page
         self.lock = threading.Lock()
         fake = self
 
@@ -92,6 +95,8 @@ class FakeMicrosoft:
         h.wfile.write(datos)
 
     def _post(self, h: BaseHTTPRequestHandler) -> None:
+        if h.path == "/_control":
+            return self._control(h)
         if not h.path.endswith("/oauth2/v2.0/token"):
             return self._enviar(h, 404)
         datos = dict(urllib.parse.parse_qsl(h.rfile.read(int(h.headers["Content-Length"])).decode()))
@@ -119,9 +124,40 @@ class FakeMicrosoft:
             self.renovaciones[renovacion] = usuario
         return self._enviar(h, 200, {"access_token": acceso, "refresh_token": renovacion, "expires_in": 3600})
 
+    def _control(self, h: BaseHTTPRequestHandler) -> None:
+        """Browser tests change the fake world here: the workbook's rows, a
+        revoked grant, the next Graph answers."""
+        from tests.excel_support import fila, libro
+        orden = json.loads(h.rfile.read(int(h.headers["Content-Length"])))
+        if "filas" in orden:
+            a = self.archivos[(self.usuarios[orden["usuario"]]["drive_id"], orden["item"])]
+            a.poner(libro([fila(*f) for f in orden["filas"]]))
+        if "revocado" in orden:
+            self.usuarios[orden["usuario"]]["revocado"] = bool(orden["revocado"])
+        if "navegador" in orden:
+            self.usuario_navegador = orden["navegador"]
+        if "retraso" in orden:
+            self.retraso = float(orden["retraso"])
+        if "cola_status" in orden:
+            self.cola_status[:] = [(int(st), {"Retry-After": "0"}) for st in orden["cola_status"]]
+        return self._enviar(h, 200, {"ok": True})
+
     def _get(self, h: BaseHTTPRequestHandler) -> None:
         partes = urllib.parse.urlsplit(h.path)
+        if partes.path.endswith("/oauth2/v2.0/authorize"):
+            # The browser's sign-in page: approves at once as usuario_navegador.
+            url = f"http://{self.host}{h.path}"
+            if self.usuario_navegador is None:
+                q = dict(urllib.parse.parse_qsl(partes.query))
+                destino = q["redirect_uri"] + "?" + urllib.parse.urlencode(
+                    {"error": "access_denied", "state": q.get("state", "")})
+            else:
+                q = dict(urllib.parse.parse_qsl(partes.query))
+                destino = q["redirect_uri"] + "?" + urllib.parse.urlencode(self.autorizar(url, self.usuario_navegador))
+            return self._enviar(h, 302, b"", {"Location": destino})
         if partes.path.startswith("/descarga/"):
+            if self.retraso:
+                time.sleep(self.retraso)
             self.descargas += 1
             if h.headers.get("Authorization"):
                 self.descargas_con_bearer += 1

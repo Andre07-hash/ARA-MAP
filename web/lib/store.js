@@ -30,6 +30,8 @@ const INITIAL = Object.freeze({
   // The legacy workspace (signed in only).
   bases: [],               // always the complete lists, never a folder's subset
   mapas: [],
+  fuentes: [],              // connected Excel sources (one per connected base)
+  conectorExcel: null,      // { disponible, motivo } from the server
   carpetas: { bases: [], mapas: [] },
   carpetasError: { bases: null, mapas: null },
   // Each dashboard remembers its own folder: "all", "unfiled" or a folder id.
@@ -49,7 +51,7 @@ const INITIAL = Object.freeze({
 
 /* Everything a signed-in session may have loaded. Logout resets all of it. */
 const PRIVATE_KEYS = [
-  "sesion", "inventario", "detalle", "bases", "mapas", "carpetas", "carpetasError",
+  "sesion", "inventario", "detalle", "bases", "mapas", "fuentes", "conectorExcel", "carpetas", "carpetasError",
   "carpetaVista", "mapaActivo", "baseActiva", "terrenos", "capas", "seleccionado", "filtros",
 ];
 

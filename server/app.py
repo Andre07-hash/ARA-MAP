@@ -103,6 +103,16 @@ router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove)
 READ_ONLY_POSTS = {"/api/exportar"}
 
 
+def _escritura_congelada(exc: BaseException | None) -> bool:
+    """A write refused because the database is read-only (SQLSTATE 25006)."""
+    vistos = 0
+    while exc is not None and vistos < 5:
+        if getattr(exc, "sqlstate", None) == "25006":
+            return True
+        exc, vistos = exc.__cause__ or exc.__context__, vistos + 1
+    return False
+
+
 class Handler(BaseHTTPRequestHandler):
     """Serves the JSON API and the static app, loopback only."""
 
@@ -185,7 +195,14 @@ class Handler(BaseHTTPRequestHandler):
             if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
-        except Exception:  # noqa: BLE001 - logged here, never sent to the caller
+        except Exception as exc:  # noqa: BLE001 - logged here, never sent to the caller
+            if _escritura_congelada(exc):
+                # scripts/congelar_escrituras.py made the database read-only for
+                # a release: reading still works, writing waits.
+                return self._send_json(
+                    {"error": "ARA Map está en mantenimiento: por ahora solo se puede consultar."
+                              " Inténtalo de nuevo más tarde.", "detalle": {"code": "mantenimiento"}},
+                    HTTPStatus.SERVICE_UNAVAILABLE, extra={"Retry-After": "300"})
             import traceback
             traceback.print_exc()
             self.close_connection = True

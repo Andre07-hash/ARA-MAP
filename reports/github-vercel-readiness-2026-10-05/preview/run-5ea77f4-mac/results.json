@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "step": "served by Vercel",
+      "result": "FAIL",
+      "detail": {
+        "status": 401,
+        "x-vercel-id": "sfo1::slpcz-1791320726047-24360853e982"
+      }
+    },
+    {
+      "step": "static files are byte-identical to 5ea77f4",
+      "result": "FAIL",
+      "detail": {
+        "web/index.html": false,
+        "web/components/app.js": false,
+        "web/lib/api.js": false,
+        "web/styles/global.css": false
+      }
+    }
+  ],
+  "pass": 0,
+  "fail": 2
+}

@@ -1,0 +1,38 @@
+{
+  "carpeta": {
+    "rows": 0,
+    "sha256": "f3d772c52ae3f694def732822a7a42fc004107f3f02ce67ad52cefc68f15004d"
+  },
+  "base": {
+    "rows": 3,
+    "sha256": "15bbf010a0f5d0dde63d7c470043dfa3d60ef57020cb64fbe8a4b2bc3f92240d"
+  },
+  "terreno": {
+    "rows": 104,
+    "sha256": "6c44659de146fb977b68b7490ecd75e3923cc8086cbc730bc67afc74b1b7cc7f"
+  },
+  "incidencia": {
+    "rows": 0,
+    "sha256": "19ca75c6b8a9a9fffac7b8ca8613327cf2008c6d05f2cc1421762598b681b1ee"
+  },
+  "mapa": {
+    "rows": 2,
+    "sha256": "be98b0bab51f16a945aef3db714e7ebcaf4b0528d1e78fdadf890f9cac7eddc8"
+  },
+  "mapa_capa": {
+    "rows": 3,
+    "sha256": "f4773a055c1c8453aed7d8bda79cb8096bff3b2ac605349a9ebc554b829db4e5"
+  },
+  "mapa_terreno": {
+    "rows": 116,
+    "sha256": "c18174c5700d3574542203559193cd126aa2052ef9a736cc9c2c7870930ae462"
+  },
+  "formato_importacion": {
+    "rows": 0,
+    "sha256": "77fd6a74268e1b991f0cc6ee5a0d17fef2d7dcd65b85fc802573bafc683d2a3a"
+  },
+  "importacion": {
+    "rows": 0,
+    "sha256": "512bf50dcd73d7c272ebdcc34a198478f2e84e31041e447a737138c3154152a7"
+  }
+}

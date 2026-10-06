@@ -1,0 +1,106 @@
+{
+  "url_host": "ara-nygwebw37-aicore2.vercel.app",
+  "commit": "5ea77f40f8b7a085cd67dd2180235a3aaf89a387",
+  "results": [
+    {
+      "step": "served by Vercel",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "x-vercel-id": "sfo1::6vxsm-1791320763792-40e93d94b9bd"
+      }
+    },
+    {
+      "step": "static files are byte-identical to 5ea77f4",
+      "result": "PASS",
+      "detail": {
+        "web/index.html": true,
+        "web/components/app.js": true,
+        "web/lib/api.js": true,
+        "web/styles/global.css": true
+      }
+    },
+    {
+      "step": "anonymous /api/config (cloud, no-store)",
+      "result": "PASS",
+      "detail": {
+        "readOnly": true,
+        "cloud": true,
+        "authRequired": true,
+        "maxUploadBytes": 4194304
+      }
+    },
+    {
+      "step": "anonymous /api/session",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "step": "anonymous legacy data is private",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "step": "sign-in with the fictional account; Secure HttpOnly SameSite=Strict",
+      "result": "PASS",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "step": "an .xlsx import works on Vercel",
+      "result": "PASS",
+      "detail": {
+        "preview": 200,
+        "confirm": 200,
+        "terrenos": 3
+      }
+    },
+    {
+      "step": "map data for the imported base",
+      "result": "PASS",
+      "detail": {
+        "terrenos": 3,
+        "ubicados": 3
+      }
+    },
+    {
+      "step": "a saved map is created",
+      "result": "PASS",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "step": "export returns an .xlsx",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "bytes": 5572
+      }
+    },
+    {
+      "step": "an inventory draft saves",
+      "result": "PASS",
+      "detail": {
+        "status": 200
+      }
+    },
+    {
+      "step": "persistence: a second session sees the base, the map and the draft (122.5 USD kept)",
+      "result": "PASS",
+      "detail": {
+        "bases": 1,
+        "mapas": 1,
+        "draft": 200
+      }
+    },
+    {
+      "step": "logout revokes the session",
+      "result": "PASS",
+      "detail": null
+    }
+  ],
+  "pass": 13,
+  "fail": 0
+}

@@ -1,12 +1,12 @@
 # ARA Map release before BigQuery
 
-Current developer assignment: [supervisor completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md). Read the [GitHub coordination protocol](COORDINATION.md) before submitting the next report. These documents govern the next work; the infrastructure observations below remain historical evidence for their named commits.
+Current developer assignment: [supervisor next steps after the connector report](SUPERVISOR_NEXT_STEPS_2026-10-06.md). Read the [GitHub coordination protocol](COORDINATION.md) before submitting the next report. The [original completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) are supporting context. The latest next steps govern; the infrastructure observations below remain historical evidence for their named commits.
 
 Owner decisions confirmed October 6, 2026. This file supersedes the previous packet where its order or storage requirements differ.
 
 ## Required release
 
-The current app must work online, and employees must connect an ordinary shared Excel workbook once, then click **Actualizar desde Excel** to see the latest saved cloud changes without re-uploading. Microsoft OneDrive/SharePoint is the selected provider. The owner is considering personal OneDrive for the initial workbook; support personal Microsoft accounts as well as work accounts. A workbook stays owned by the account that hosts it. Sharing must give employees access to the same cloud workbook, not independent copies.
+The current app must work online, and employees must connect an ordinary shared Excel workbook once, then click **Actualizar desde Excel** to see the latest saved cloud changes without re-uploading. Microsoft OneDrive/SharePoint is the selected provider. The owner has now supplied a company OneDrive for Business workbook; prioritize that account for real acceptance, retaining the existing personal-account support. A workbook stays owned by the account that hosts it. Sharing must give employees access to the same cloud workbook, not independent copies.
 
 **Neon Postgres is the storage destination for this release. BigQuery is deferred until this release works and the owner proceeds with that migration.** Do not continue the old Stage 2 feature list independently.
 

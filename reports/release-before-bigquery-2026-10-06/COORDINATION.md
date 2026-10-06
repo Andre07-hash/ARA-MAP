@@ -4,7 +4,7 @@ GitHub is the shared record. The supervisor's Mac and each Claude Cloud session 
 
 ## Current assignment
 
-Read [the supervisor's completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) in full. This brief resolves the pending design questions in the developer status report and identifies corrections required to schema draft `8d7c8f1`. It supersedes earlier instructions where the requirements differ. Direct instructions from the owner take precedence.
+Read [the latest supervisor next steps](SUPERVISOR_NEXT_STEPS_2026-10-06.md) first. This review of implementation `415eb26` resolves the four completion-report questions and narrows the remaining work to integration, cloud acceptance and release. The [original completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) remain supporting context; the latest next steps take precedence where they differ. Direct instructions from the owner take precedence.
 
 The release target is the working production app with connected Microsoft Excel Refresh and Neon storage. BigQuery follows later. The supervisor owns planning, review and reporting to the owner; developers own implementation and verification. The owner relays links and makes necessary business/account decisions, without having to interpret technical disagreements.
 

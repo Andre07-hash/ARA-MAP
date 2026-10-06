@@ -168,11 +168,14 @@ class Handler(BaseHTTPRequestHandler):
             if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
-        except Exception as exc:  # noqa: BLE001 - surfaced to the user, logged below
+        except Exception:  # noqa: BLE001 - logged here, never sent to the caller
             import traceback
             traceback.print_exc()
+            self.close_connection = True
             return self._send_json(
-                {"error": f"Error inesperado: {exc}"}, HTTPStatus.INTERNAL_SERVER_ERROR
+                {"error": "Ocurrió un error inesperado. Inténtalo de nuevo; si se repite,"
+                          " avisa al equipo.", "detalle": {"code": "internal"}},
+                HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
         if isinstance(result, tuple):  # a file download

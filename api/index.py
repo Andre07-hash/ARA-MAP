@@ -7,7 +7,7 @@ writes, HTTPS (Secure cookies), a 4 MB body limit and Postgres being required.
 """
 
 import os
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 if os.environ.get("DATABASE_URL"):
     os.environ.setdefault("ARA_MAP_DATABASE_URL", os.environ["DATABASE_URL"])
@@ -30,6 +30,18 @@ class handler(Handler):
         return not origin or urlsplit(origin).netloc == self.headers.get("Host")
 
     def _dispatch(self, method):
+        # Vercel forwards the :path* rewrite capture as query metadata. It is
+        # transport information, not an inventory filter. Remove only the
+        # matching capture; unknown or conflicting application filters still
+        # reach normal validation.
+        parsed = urlsplit(self.path)
+        if parsed.path.startswith("/api/"):
+            captured = parsed.path[len("/api/"):].strip("/")
+            pairs = parse_qsl(parsed.query, keep_blank_values=True)
+            filtered = [(key, value) for key, value in pairs
+                        if not (key == "path" and value.strip("/") == captured)]
+            if len(filtered) != len(pairs):
+                self.path = urlunsplit(parsed._replace(query=urlencode(filtered)))
         if method != "GET" and not self._origin_is_local():
             self.close_connection = True
             return self._send_json({"error": "Petición rechazada: origen externo."}, 403)

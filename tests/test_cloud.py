@@ -175,6 +175,26 @@ class SignedIn(CloudServer, TempDatabase):
         self.assertEqual((status, json.loads(body)["detalle"]["code"]), (429, "rate_limited"))
         self.assertEqual(self.login("beto")[0], 200)  # other accounts unaffected
 
+    def test_vercel_rewrite_capture_is_not_an_inventory_filter(self):
+        jar = {"Cookie": self.cookie()}
+        status, body, _ = self.request(
+            "GET", "/api/inventario/terrenos?path=inventario%2Fterrenos&limit=250"
+            "&estado=Jalisco&estado=Quer%C3%A9taro", headers=jar)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["total"], 0)
+        # Other invalid filters are still rejected, including a forged path.
+        for query, field in [("path=other", "path"),
+                             ("path=inventario%2Fterrenos&limit=999", "limit"),
+                             ("path=inventario%2Fterrenos&unknown=1", "unknown")]:
+            with self.subTest(query=query):
+                status, body, _ = self.request(
+                    "GET", "/api/inventario/terrenos?" + query, headers=jar)
+                self.assertEqual(status, 422)
+                self.assertIn(field, json.loads(body)["detalle"]["fields"])
+        # Removing routing metadata never bypasses the sign-in requirement.
+        self.assertEqual(self.request(
+            "GET", "/api/inventario/terrenos?path=inventario%2Fterrenos")[0], 401)
+
     def test_cloud_upload_limit_applies_to_csv(self):
         jar = {"Cookie": self.cookie()}
         status, body, _ = self.request(

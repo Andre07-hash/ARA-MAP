@@ -1,5 +1,11 @@
 # ARA Map: shared inventory and client selection plan
 
+> **Priority 0: GitHub/Vercel readiness now comes first.** Follow the [repository and deployment prerequisite](../github-vercel-readiness-2026-10-05/START_HERE.md) before continuing Excel + BigQuery implementation. The owner requested this order after moving development to GitHub.
+
+**Current implementation instructions:** [Excel + BigQuery developer packet](../excel-bigquery-developer-handoff-2026-10-05/START_HERE.md). The owner has asked to proceed with this plan. Assignments, shared contract, company setup inputs and acceptance criteria are ready; no developer dispatch or software completion is claimed by this notice.
+
+> **Priority changed after the owners’ meeting (October 5, 2026).** Read [Excel + BigQuery realignment](EXCEL_BIGQUERY_REALIGNMENT.md) first. Connected Excel refresh and company BigQuery storage now come before all further inventory/public-catalog work. The earlier website-authoritative assumption, spreadsheet-sync deferral and database-provider restriction below are superseded. Preserve completed work; do not resume Stage 2 from this historical plan. This notice changes priorities only; no connector, migration or deployment is complete.
+
 Prepared October 5, 2026. Updated with the user's scope and publication decisions. Status: agreed direction and publication rules; detailed search parameters pending. This is a supervisory planning document, not an implementation authorization or a release-readiness certification.
 
 Developer handoff prepared at the user's request: `reports/inventory-developer-handoff-2026-10-05/START_HERE.md`. That packet and its `INTEGRATION_DECISIONS.md` translate this roadmap into the current staged build instructions. Backend, interface and independent verification specialists reviewed the repository to prepare their packets. No application implementation or production changes were performed during this handoff task.

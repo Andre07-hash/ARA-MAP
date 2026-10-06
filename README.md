@@ -8,6 +8,24 @@ lo que no vale la pena.
 La aplicación local corre en esta Mac. La versión de Vercel usa una base
 compartida en Neon Postgres, accesible desde otras computadoras.
 
+## Desarrollo desde GitHub — prioridad actual
+
+Repositorio privado: [Andre07-hash/ARA-MAP](https://github.com/Andre07-hash/ARA-MAP).
+El código de `main` incluye trabajo de inventario y autenticación que todavía
+no corresponde a la versión publicada el 1 de octubre. La descripción del
+sitio publicado que sigue es histórica; no demuestra que `main` pueda
+desplegarse directamente sobre la base de producción.
+
+Antes de continuar Excel + BigQuery, completar la
+[preparación de GitHub y Vercel](reports/github-vercel-readiness-2026-10-05/START_HERE.md).
+Trabajar con ramas y pull requests; ejecutar los checks contra datos de prueba.
+Los despliegues automáticos están deshabilitados en `vercel.json` hasta separar
+Preview de Production y verificar esquema, cuentas y arranque de una copia limpia.
+Esta opción no impide un despliegue manual por CLI.
+
+Las instrucciones de [Excel + BigQuery](reports/excel-bigquery-developer-handoff-2026-10-05/START_HERE.md)
+son el siguiente hito después de esa preparación. No reanudar el catálogo público.
+
 ## Publicar en Vercel
 
 Enlace: https://ara-map-ivory.vercel.app
@@ -25,11 +43,10 @@ La base local y la nube son independientes: se migraron los datos locales una
 vez, pero no se sincronizan automáticamente. La versión web admite archivos
 Excel o CSV de hasta 4 MB. La local conserva su límite de 25 MB.
 
-Desde esta carpeta, con la cuenta de Vercel conectada:
-
-```bash
-npx --yes vercel@59.26.0 deploy --prod --yes
-```
+El despliegue manual desde esta carpeta se usó antes de GitHub. Para el próximo
+despliegue, seguir primero la preparación enlazada arriba: usar un commit
+verificado, confirmar la base de destino y ensayar la migración. No publicar
+el checkout de desarrollo directamente sobre producción.
 
 **Antes de desplegar una versión que cambia el esquema** (carpetas: esquema 5;
 asistente de importación: esquema 6), actualiza primero la base compartida; el

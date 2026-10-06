@@ -297,7 +297,7 @@ class MigracionAEsquema9(unittest.TestCase):
                 (self.esquema,)).fetchone()[0]
             pgcrypto = conn.execute("SELECT to_regprocedure('public.pgp_sym_encrypt(text,text,text)')").fetchone()[0]
         self.assertEqual(version, "9")
-        self.assertTrue(self.TABLAS_9 <= tablas)
+        self.assertTrue(tablas >= self.TABLAS_9)
         self.assertEqual(datos, [("Agosto", "Norte")])
         self.assertTrue(any("en_curso" in i for i in indices), indices)   # one running refresh per source
         self.assertEqual(cascadas, 0)                                     # history is never cascaded away

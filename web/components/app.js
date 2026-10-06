@@ -25,6 +25,7 @@ import {
 } from "./inventory/datasets.js";
 import { createTerrainEditor } from "./inventory/TerrainEditor.js";
 import { openTerrainHistory } from "./inventory/TerrainHistory.js";
+import { vistaPrevia } from "./inventory/publicationActions.js";
 import { createSession } from "./session/session.js";
 import { shell } from "./shell/context.js";
 import { renderDatos } from "./shell/datosView.js";
@@ -62,10 +63,12 @@ export async function mount(root) {
     renderView(main);
   });
 
-  // Escape closes the detail panel. Native <dialog> handles its own Escape and
-  // stops the event, so this only ever fires when no dialog is open.
+  // Escape closes the detail panel -- unless a dialog is open: the keydown
+  // reaches the document before the dialog's own Escape closes it, and
+  // closing the panel underneath would take the dialog's opener with it, so
+  // focus could not return there (D-1).
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
+    if (event.key !== "Escape" || document.querySelector("dialog[open]")) return;
     const { ruta, seleccionado } = getState();
     if ((ruta.nombre === "catalogo" || ruta.nombre === "inventario") && ruta.id) {
       navigate({ nombre: ruta.nombre }, { replace: true });
@@ -213,10 +216,17 @@ async function aplicarRuta() {
   efectosDeRuta(ruta);
 }
 
+let seccionAnterior = null;
+
 function efectosDeRuta(ruta) {
   const state = getState();
+  const entrando = seccionAnterior !== ruta.nombre;
+  seccionAnterior = ruta.nombre;
   if (ruta.nombre === "catalogo" || ruta.nombre === "inventario") {
     if (!state[ruta.nombre].cargado && !state[ruta.nombre].cargando) cargar(ruta.nombre);
+    // Coming back from another section: others may have published or saved
+    // meanwhile, so the list is revalidated (opening/closing a detail is not).
+    else if (entrando && !state[ruta.nombre].cargando) pedirCarga(ruta.nombre, { inmediato: true });
     if (ruta.id) cargarDetalle(ruta.nombre, ruta.id);
     else if (state.detalle) setState({ detalle: null });
   } else if (ruta.nombre === "editar" || ruta.nombre === "nuevo") {
@@ -263,6 +273,14 @@ function crearEditor(terreno) {
     terreno,
     onClose: () => navigate(editor?.id ? { nombre: "inventario", id: editor.id } : { nombre: "inventario" }),
     onHistory: (t) => openTerrainHistory({ id: t.id, nombre: t.draft?.terreno }),
+    onPreview: (t) => vistaPrevia(t, {
+      alPublicar: (publicado) => {
+        if (editor?.id !== publicado.id || editor.dirty) return;
+        editor.destroy();
+        editor = null;
+        navigate({ nombre: "inventario", id: publicado.id }, { replace: true });
+      },
+    }),
     onSaved: (guardado, { creado, sucio }) => {
       reemplazarRegistro(guardado);
       pedirCarga("inventario", { inmediato: true });   // revalidate after a write

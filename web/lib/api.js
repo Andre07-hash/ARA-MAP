@@ -129,6 +129,18 @@ export const api = {
                         method: "PATCH",
                         body: { expected_version, changes, ...(confirm.length ? { confirm } : {}) },
                       }),
+  // Publication: always the exact reviewed version (and, to publish, revision).
+  vistaPublica:       (id, revisionId) => request(`/inventario/terrenos/${enc(id)}/vista-publica` +
+                        (revisionId ? `?revision_id=${enc(revisionId)}` : "")),
+  publicar:           (id, expected_version, revision_id) => request(
+                        `/inventario/terrenos/${enc(id)}/publicar`,
+                        { method: "POST", body: { expected_version, revision_id } }),
+  despublicar:        (id, expected_version) => request(`/inventario/terrenos/${enc(id)}/despublicar`,
+                        { method: "POST", body: { expected_version } }),
+  archivar:           (id, expected_version) => request(`/inventario/terrenos/${enc(id)}/archivar`,
+                        { method: "POST", body: { expected_version } }),
+  restaurar:          (id, expected_version) => request(`/inventario/terrenos/${enc(id)}/restaurar`,
+                        { method: "POST", body: { expected_version } }),
   historial:          (id, cursor) => request(`/inventario/terrenos/${enc(id)}/historial` +
                         (cursor != null ? `?cursor=${enc(cursor)}` : "")),
 

@@ -1,10 +1,13 @@
-/* End-to-end checks against a running ARA Map.
+/* End-to-end checks of the legacy workspace (bases, saved maps, folders,
+ * import assistant, comparison, export) against a running ARA Map.
  *
  * Self-provisioning: it creates the bases and the comparison map it needs
  * through the API, then removes them again, so it can run against any
  * instance without depending on what is already stored.
  *
- * Point it at a throwaway database -- see README.md.
+ * The legacy workspace is private: it signs in with an individual fictional
+ * team account (ARA_USER / ARA_PW) on a disposable local server -- see
+ * README.md. It refuses any non-local target.
  */
 
 import { chromium } from 'playwright-core';
@@ -13,11 +16,27 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8420').replace(/\/$/, '');
+if (!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(URL_BASE)) {
+  throw new Error('Solo contra un servidor local desechable (http://localhost:PUERTO).');
+}
+const USUARIO = process.env.ARA_USER;
+const CLAVE = process.env.ARA_PW;
+if (!USUARIO || !CLAVE) throw new Error('Define ARA_USER y ARA_PW de una cuenta de prueba ficticia.');
+
+// One individual sign-in for the whole run; the cookie goes on every request.
+const login = await fetch(`${URL_BASE}/api/login`, {
+  method: 'POST', headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ username: USUARIO, password: CLAVE }),
+});
+if (!login.ok) throw new Error(`No se pudo iniciar sesión como ${USUARIO}: ${login.status}`);
+const SESION = login.headers.get('set-cookie').split(';')[0];
+const [COOKIE_NOMBRE, COOKIE_VALOR] = SESION.split('=');
 const FIXTURE = fileURLToPath(new globalThis.URL('../fixtures/base_terrenos_09_26.xlsx', import.meta.url));
 const FIXTURE_AGOSTO = fileURLToPath(new globalThis.URL('../fixtures/base_terrenos_08_26_sintetica.xlsx', import.meta.url));
 
 const api = async (path, options = {}) => {
-  const response = await fetch(`${URL_BASE}/api${path}`, options);
+  const response = await fetch(`${URL_BASE}/api${path}`,
+    { ...options, headers: { ...(options.headers ?? {}), Cookie: SESION } });
   if (!response.ok) throw new Error(`${path} -> ${response.status} ${await response.text()}`);
   return response.status === 204 ? null : response.json();
 };
@@ -94,7 +113,13 @@ const check = async (name, fn) => {
 
 const fixtures = await provision();
 const browser = await chromium.launch(process.env.ARA_CHROMIUM ? { executablePath: process.env.ARA_CHROMIUM } : { channel: 'chrome' });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+/* A browser page signed in as the test account (same session cookie). */
+async function paginaConSesion(viewport) {
+  const contexto = await browser.newContext({ viewport });
+  await contexto.addCookies([{ name: COOKIE_NOMBRE, value: COOKIE_VALOR, url: URL_BASE }]);
+  return contexto.newPage();
+}
+const page = await paginaConSesion({ width: 1440, height: 900 });
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
@@ -104,7 +129,7 @@ try {
   await page.waitForTimeout(1600);
 
   // Open the base this run created, so the checks do not depend on load order.
-  await page.getByRole('navigation').getByRole('button', { name: 'Bases' }).click();
+  await page.getByRole('navigation').getByRole('link', { name: 'Bases' }).click();
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: new RegExp(fixtures.septiembre.nombre) }).first().click();
   await page.waitForTimeout(2000);
@@ -190,7 +215,7 @@ try {
   });
 
   await check('a saved comparison opens with both layers in different colours', async () => {
-    await page.getByRole('navigation').getByRole('button', { name: 'Mapas guardados' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Mapas guardados' }).click();
     await page.waitForTimeout(600);
     await page.getByRole('button', { name: new RegExp(fixtures.mapa.nombre) }).first().click();
     await page.waitForTimeout(2200);
@@ -269,7 +294,7 @@ try {
   });
 
   await check('marks start as symbols and become real footprints on zoom in', async () => {
-    await page.getByRole('navigation').getByRole('button', { name: 'Bases' }).click();
+    await page.getByRole('navigation').getByRole('link', { name: 'Bases' }).click();
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: new RegExp(fixtures.septiembre.nombre) }).first().click();
     await page.waitForTimeout(2200);
@@ -411,7 +436,7 @@ try {
   await check('R3 a comparison exports one sheet per source', async () => {
     const respuesta = await fetch(`${URL_BASE}/api/exportar`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Cookie: SESION },
       body: JSON.stringify({ mapa_id: fixtures.mapa.id, nombre: 'e2e' }),
     });
     assert.ok(respuesta.ok, `export failed: ${respuesta.status}`);
@@ -816,7 +841,7 @@ try {
   // --- Folders, through the real UI on both dashboards ---
   const secciones = () => page.getByRole('navigation', { name: 'Secciones' });
   const carpetasNav = (tipo) => page.getByRole('navigation', { name: `Carpetas de ${tipo}` });
-  const irA = async (seccion) => { await secciones().getByRole('button', { name: seccion }).click(); };
+  const irA = async (seccion) => { await secciones().getByRole('link', { name: seccion }).click(); };
   const buscarCarpeta = async (tipo, nombre) =>
     (await api(`/carpetas?tipo=${tipo}`)).carpetas.find((c) => c.nombre === nombre);
   const cardDe = (nombre) => page.locator('.card').filter({
@@ -959,24 +984,25 @@ try {
     assert.ok(huerfana.conteo > 0, 'the orphaned layer lost its terrains');
   });
 
-  // Layout: every header mode at phone, tablet and desktop widths, with the
-  // busiest toolbar (a saved comparison). The cloud modes are simulated by
-  // answering /api/config in the browser; everything else is the real server.
+  // Layout: every signed-in header mode at phone, tablet and desktop widths,
+  // with the busiest toolbar (a saved comparison). The cloud and read-only
+  // modes are simulated by answering /api/config in the browser; everything
+  // else is the real server. (Anonymous visitors only get the catalog.)
   const MODOS = {
     local: null,
-    'cloud visitor': { readOnly: true, cloud: true, authRequired: true, maxUploadBytes: 4194304 },
-    'cloud editor': { readOnly: false, cloud: true, authRequired: true, maxUploadBytes: 4194304 },
+    'cloud team': { readOnly: false, cloud: true, authRequired: true, maxUploadBytes: 4194304 },
+    'read-only': { readOnly: true, cloud: false, authRequired: true, maxUploadBytes: 26214400 },
   };
   for (const [modo, config] of Object.entries(MODOS)) {
     for (const width of [320, 375, 700, 768, 1024, 1440]) {
       await check(`layout ${modo} @${width}px: header and toolbar fit, no stray text`, async () => {
-        const vista = await browser.newPage({ viewport: { width, height: 800 } });
+        const vista = await paginaConSesion({ width, height: 800 });
         try {
           if (config) {
             await vista.route('**/api/config', (route) => route.fulfill({ json: config }));
           }
           await vista.goto(`${URL_BASE}/?test=1`, { waitUntil: 'load' });
-          await vista.getByRole('navigation').getByRole('button', { name: 'Mapas guardados' }).click();
+          await vista.getByRole('navigation').getByRole('link', { name: 'Mapas guardados' }).click();
           await vista.getByRole('button', { name: new RegExp(fixtures.mapa.nombre) }).first().click();
           await vista.locator('.toolbar h1', { hasText: fixtures.mapa.nombre }).waitFor();
           if (process.env.E2E_LAYOUT_SHOTS) {
@@ -984,7 +1010,10 @@ try {
           }
           const medida = await vista.evaluate(() => {
             const header = document.querySelector('.app-header');
+            // The section links scroll sideways inside their own row on a
+            // phone, so only what is outside that scroller must fit.
             const fuera = [...document.querySelectorAll('.app-header *, .toolbar *')]
+              .filter((n) => !n.closest('.nav'))
               .filter((n) => n.children.length === 0 || n.matches('button, .chip, .segmented'))
               .filter((n) => n.getClientRects().length)
               .map((n) => [n.textContent.trim() || n.className, n.getBoundingClientRect()])
@@ -1003,7 +1032,8 @@ try {
           assert.deepEqual(medida.fuera, [], 'controls cut off at the viewport edge');
           assert.ok(medida.ancho <= width, `page is ${medida.ancho}px wide`);
           assert.ok(medida.desborde <= 0, `header content spills ${medida.desborde}px below it`);
-          assert.deepEqual(medida.botonesNav, [true, true, true]);
+          // Inventario, Mapa (a map is open), Bases, Mapas guardados, Catálogo público.
+          assert.deepEqual(medida.botonesNav, [true, true, true, true, true]);
           if (width >= 1024) assert.equal(Math.round(medida.alto), 52, 'desktop header should stay one 52px row');
         } finally {
           await vista.close();

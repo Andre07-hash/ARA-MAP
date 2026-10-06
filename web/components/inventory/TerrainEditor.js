@@ -21,7 +21,7 @@ import {
 import { confirmDialog } from "../ui/dialog.js";
 import { confirmacion, EstadoChip } from "./InventoryDetail.js";
 
-export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
+export function createTerrainEditor({ terreno, onSaved, onClose, onHistory, onPreview }) {
   let base = terreno;                       // the server version the form is based on
   let iniciales = textosIniciales(base?.draft);
   let enVuelo = false;
@@ -114,7 +114,21 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
 
   const guardar = el("button", { type: "submit", class: "btn btn-principal" }, "Guardar borrador");
   const historial = el("button", { type: "button", class: "btn btn-quiet" }, "Historial");
+  // Preview shows the SAVED draft: unsaved input has to be saved first.
+  const vistaPrevia = el("button", { type: "button", class: "btn btn-quiet", hidden: true }, "Vista previa");
   const cerrar = el("button", { type: "button", class: "btn btn-quiet" }, "Cerrar");
+
+  const barra = el("footer", { class: "editor-acciones" },
+    estadoTexto,
+    el("div", { class: "screen-actions" }, cerrar, historial, vistaPrevia, guardar),
+  );
+  // Toasts on a phone sit above this bar (styles/inventory.css): publish its
+  // real height, which changes when its buttons wrap.
+  const medirBarra = typeof ResizeObserver === "function"
+    ? new ResizeObserver(() => document.documentElement.style.setProperty(
+      "--editor-barra", `${Math.ceil(barra.getBoundingClientRect().height)}px`))
+    : null;
+  medirBarra?.observe(barra);
 
   const form = el("form", { class: "editor-form", novalidate: true },
     SECCIONES.map((s) => el("fieldset", { class: ["editor-seccion", `editor-${s.id}`] },
@@ -127,10 +141,7 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
       s.id === "ubicacion" && el("div", { class: "editor-ubicacion-nota" }, ubicacionNota, mapsLink),
       s.id === "comercial" && comercialNota,
     )).flatMap((fieldset, i) => (SECCIONES[i].id === "privado" ? [verificacion, fieldset] : [fieldset])),
-    el("footer", { class: "editor-acciones" },
-      estadoTexto,
-      el("div", { class: "screen-actions" }, cerrar, historial, guardar),
-    ),
+    barra,
   );
 
   const element = el("div", { class: "screen editor" },
@@ -164,6 +175,7 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
   }
 
   function pintarEstado(texto) {
+    vistaPrevia.hidden = !base || !onPreview || base.publication_state === "archived";
     if (texto != null) { estadoTexto.textContent = texto; return; }
     estadoTexto.textContent = enVuelo ? "Guardando…"
       : conflictoPendiente ? "Resuelve el conflicto antes de guardar."
@@ -459,6 +471,14 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
   form.addEventListener("submit", onSubmit);
   cerrar.addEventListener("click", () => onClose?.());
   historial.addEventListener("click", () => base && onHistory?.(base));
+  vistaPrevia.addEventListener("click", () => {
+    if (!base) return;
+    if (esSucio() || conflictoPendiente) {
+      aviso("Guarda el borrador antes de la vista previa: solo se publica lo guardado.", "aviso");
+      return;
+    }
+    onPreview?.(base);
+  });
 
   rellenar();
   pintarCabecera();
@@ -470,6 +490,10 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
     get id() { return base?.id ?? null; },
     get dirty() { return esSucio(); },
     focus() { entradas.get("terreno").input.focus(); },
-    destroy() { element.remove(); },
+    destroy() {
+      medirBarra?.disconnect();
+      document.documentElement.style.removeProperty("--editor-barra");
+      element.remove();
+    },
   };
 }

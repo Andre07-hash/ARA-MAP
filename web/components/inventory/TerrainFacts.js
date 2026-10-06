@@ -76,24 +76,31 @@ export function DisponibilidadChip(availability) {
     DISPONIBILIDAD[availability] ?? availability);
 }
 
-/** What a visitor sees for one published terrain. */
-export function PublicTerrainDetail({ terreno, onZoomAEscala, onClose }) {
+/**
+ * What a visitor sees for one published terrain. The publication preview
+ * renders the same component with `vistaPrevia`: same facts, same layout,
+ * marked as not yet published, and nothing but the PublicTerrain fields.
+ */
+export function PublicTerrainDetail({ terreno, onZoomAEscala, onClose, vistaPrevia = false }) {
   const publico = pickPublic(terreno);
   const lugar = [publico.municipio, publico.estado].filter(Boolean).join(", ");
   const ubicado = estadoUbicacion(publico.lat, publico.lon) === "valida";
 
-  return el("aside", {
-    class: "detail", role: "complementary",
-    "aria-label": `Detalle de ${publico.terreno ?? "terreno"}`, tabindex: "-1",
+  return el(vistaPrevia ? "section" : "aside", {
+    class: ["detail", vistaPrevia && "detail-vista-previa"],
+    role: vistaPrevia ? null : "complementary",
+    "aria-label": `${vistaPrevia ? "Vista previa" : "Detalle"} de ${publico.terreno ?? "terreno"}`,
+    tabindex: "-1",
   },
     el("header", { class: "detail-header" },
       el("div", { class: "detail-heading" },
-        el("span", { class: "eyebrow" }, "Catálogo"),
+        el("span", { class: ["eyebrow", vistaPrevia && "eyebrow-vista-previa"] },
+          vistaPrevia ? "Vista previa · Aún no publicada" : "Catálogo"),
         el("h2", {}, publico.terreno ?? "Sin nombre"),
         lugar && el("p", { class: "secondary" }, lugar),
         DisponibilidadChip(publico.availability),
       ),
-      el("button", {
+      onClose && el("button", {
         type: "button", class: "icon-btn", "aria-label": "Cerrar detalle", onclick: onClose,
       }, "×"),
     ),
@@ -104,7 +111,9 @@ export function PublicTerrainDetail({ terreno, onZoomAEscala, onClose }) {
     }, "Ver a escala"),
     TerrainFacts(publico),
     el("footer", { class: "detail-footer muted" },
-      publico.published_at ? `Publicado el ${fmtDate(publico.published_at)}` : ""),
+      vistaPrevia
+        ? `Revisión ${String(publico.revision_id ?? "").slice(0, 8)} · sin fecha de publicación todavía`
+        : publico.published_at ? `Publicado el ${fmtDate(publico.published_at)}` : ""),
   );
 }
 

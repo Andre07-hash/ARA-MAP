@@ -281,7 +281,48 @@ a.nav-item { text-decoration: none; display: inline-flex; align-items: center; }
   .session-user { max-width: 9rem; }
   .editor-grid { grid-template-columns: minmax(0, 1fr); }
   .editor-acciones { padding-block: var(--space-2); row-gap: var(--space-1); }
-  .editor-acciones .screen-actions { flex-wrap: nowrap; width: 100%; }
+  /* Four actions may not fit one phone row: they wrap, Guardar stays last. */
+  .editor-acciones .screen-actions { flex-wrap: wrap; width: 100%; row-gap: var(--space-1); }
   .editor-acciones .btn { padding-inline: var(--space-3); }
   .editor-acciones .btn-principal { margin-left: auto; }
+}
+
+/* ------------------------------------------------- publication (Stage 2) */
+
+.eyebrow-vista-previa {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  border: 1px dashed var(--status-aviso);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--ink);
+}
+.dialog-vista-previa .detail-vista-previa {
+  padding: var(--space-3) 0 0;
+  margin-top: var(--space-3);
+  border-top: 1px dashed var(--rule-strong);
+}
+.vista-previa > .note,
+.vista-previa > .findings,
+.vista-previa > .cambios-pendientes { margin-bottom: var(--space-3); }
+
+.nota-pendiente { margin-block: var(--space-2); }
+.nota-pendiente > p { margin: 0 0 var(--space-2); font-weight: 600; }
+.cambios-pendientes .diff,
+.nota-pendiente .diff { font-size: var(--text-small); }
+.diff-destacado .diff-campo { color: var(--ink); font-weight: 600; }
+.diff-destacado .diff-nuevo { font-weight: 600; }
+
+.detail-ciclo .detail-actions { padding-bottom: 0; }
+
+.cell-publicacion { display: inline-flex; align-items: center; gap: var(--space-1); white-space: nowrap; }
+.col-publicacion { min-width: 12rem; }
+
+/* Phone: a toast must not cover the editor's action bar (Guardar, Vista
+ * previa). While an editor is on screen, toasts sit above the bar. */
+@media (max-width: 960px) {
+  body:has(.editor-acciones) .toast-host {
+    bottom: calc(var(--editor-barra, 7.5rem) + var(--space-3));
+    width: calc(100% - 2 * var(--space-4));
+  }
+  body:has(.editor-acciones) .toast { max-width: 100%; }
 }

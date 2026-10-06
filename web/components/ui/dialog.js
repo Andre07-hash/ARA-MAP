@@ -5,6 +5,10 @@ import { el } from "../../lib/dom.js";
 
 export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "34rem" }) {
   const dialog = el("dialog", { class: "dialog", style: { maxWidth: ancho } });
+  // Where focus goes back to when this closes. If the opener was redrawn
+  // while the dialog was open, its replacement is found again by id (D-1).
+  const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const openerId = opener?.id ?? "";
   const body = el("div", { class: "dialog-body" });
 
   const header = el("header", { class: "dialog-header" },
@@ -14,9 +18,16 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
 
   const footer = el("footer", { class: "dialog-footer" });
   const close = (value) => {
-    dialog.close(value ?? "");
+    if (dialog.open) dialog.close(value ?? "");
     dialog.remove();
   };
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    // Another dialog opened from this one (a confirmation) keeps the focus.
+    if (document.querySelector("dialog[open]")) return;
+    const destino = opener?.isConnected ? opener : openerId ? document.getElementById(openerId) : null;
+    destino?.focus();
+  });
 
   for (const accion of acciones ?? []) {
     footer.append(
@@ -36,7 +47,6 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) close();
   });
-  dialog.addEventListener("cancel", () => dialog.remove());
 
   document.body.append(dialog);
   dialog.showModal();

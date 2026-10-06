@@ -14,6 +14,9 @@ import { InventoryDetail } from "../inventory/InventoryDetail.js";
 import { DatosToolbar, MensajeDatos } from "../inventory/DatosView.js";
 import { DetailMessage, PublicTerrainDetail } from "../inventory/TerrainFacts.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
+import {
+  archivar, restaurar, retirarDelCatalogo, vistaPrevia,
+} from "../inventory/publicationActions.js";
 import { BasemapSwitcher } from "../map/BasemapSwitcher.js";
 import { Legend } from "../map/Legend.js";
 import { TerrainTable } from "../terrain/TerrainTable.js";
@@ -72,6 +75,7 @@ export function renderDatos(host, state, tipo) {
             direccion: shell.tableSort.direccion,
             seleccionado,
             preciosComparables,
+            conPublicacion: tipo === "inventario",
             onSort: ordenarTabla,
             onSelect: (id) => selectTerreno(id, { pan: true }),
           })
@@ -154,5 +158,9 @@ function DetalleDatos(tipo, state, items, id) {
     onHistory: () => openTerrainHistory({ id, nombre: terreno.draft?.terreno }),
     onZoomAEscala: () => zoomTerrenoAEscala(id),
     onClose: cerrar,
+    onPreview: () => vistaPrevia(terreno),
+    onUnpublish: () => retirarDelCatalogo(terreno),
+    onArchive: () => archivar(terreno),
+    onRestore: () => restaurar(terreno),
   });
 }

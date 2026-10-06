@@ -8,11 +8,16 @@
 import { el } from "../../lib/dom.js";
 import { fmtDate, fmtText, googleMapsSearch } from "../../lib/format.js";
 import {
-  avisoDisponibilidadPendiente, estadoPublicacion, estadoUbicacion, pickPublic,
+  accionesDePublicacion, avisoDisponibilidadPendiente, cambiosPendientes, estadoPublicacion,
+  estadoUbicacion, pickPublic,
 } from "../../lib/inventario.js";
+import { CambiosAlPublicar } from "./PublicationPreview.js";
 import { DisponibilidadChip, Section, TerrainFacts } from "./TerrainFacts.js";
 
-export function InventoryDetail({ terreno, onEdit, onHistory, onZoomAEscala, onClose }) {
+export function InventoryDetail({
+  terreno, onEdit, onHistory, onZoomAEscala, onClose,
+  onPreview, onUnpublish, onArchive, onRestore,
+}) {
   const draft = terreno.draft ?? {};
   const estado = estadoPublicacion(terreno);
   const ubicacion = estadoUbicacion(draft.lat, draft.lon);
@@ -21,6 +26,9 @@ export function InventoryDetail({ terreno, onEdit, onHistory, onZoomAEscala, onC
   const atencion = motivosDeAtencion(terreno.attention);
   const extra = Object.entries(terreno.source_extra ?? {});
   const confirmaciones = terreno.confirmations ?? {};
+  const acciones = accionesDePublicacion(terreno);
+  const pendientes = cambiosPendientes(terreno);
+  const pendienteComercial = pendientes.some((c) => c.destacado);
 
   return el("aside", {
     class: "detail", role: "complementary",
@@ -45,7 +53,15 @@ export function InventoryDetail({ terreno, onEdit, onHistory, onZoomAEscala, onC
 
     el("div", { class: "detail-actions" },
       el("button", { type: "button", class: "btn btn-principal", onclick: onEdit }, "Editar"),
-      el("button", { type: "button", class: "btn btn-quiet", onclick: onHistory }, "Historial"),
+      acciones.vistaPrevia && onPreview && el("button", {
+        type: "button", class: "btn btn-quiet", id: "vista-previa-btn", onclick: onPreview,
+        title: "Ve lo que verá el público y publica esta versión guardada",
+      }, terreno.publication_state === "published" && !terreno.has_pending_changes
+        ? "Vista previa" : "Vista previa y publicar"),
+      // A stable id: the history dialog gives focus back to it when it closes,
+      // even if the panel was redrawn meanwhile (D-1).
+      el("button", { type: "button", class: "btn btn-quiet", id: "historial-btn", onclick: onHistory },
+        "Historial"),
       ubicacion === "valida" && onZoomAEscala && el("button", {
         type: "button", class: "btn btn-quiet", onclick: onZoomAEscala,
         title: "Acerca el mapa hasta que el círculo cubra la superficie real",
@@ -53,6 +69,14 @@ export function InventoryDetail({ terreno, onEdit, onHistory, onZoomAEscala, onC
     ),
 
     aviso && el("p", { class: "note note-aviso", role: "status" }, aviso),
+    pendientes.length > 0 && el("div", {
+      class: ["note", "nota-pendiente", pendienteComercial && "note-aviso"], role: "status",
+    },
+      el("p", {}, pendienteComercial
+        ? "Precio o disponibilidad guardados sin publicar: el catálogo sigue mostrando la versión publicada."
+        : "Hay cambios guardados sin publicar: el catálogo sigue mostrando la versión publicada."),
+      CambiosAlPublicar(pendientes),
+    ),
 
     atencion.length > 0 && el("section", { class: "findings", "aria-label": "Necesita atención" },
       el("h3", { class: "eyebrow" }, "Necesita atención"),
@@ -93,6 +117,23 @@ export function InventoryDetail({ terreno, onEdit, onHistory, onZoomAEscala, onC
       ]),
       extra.length > 0 && Section("Otros campos del archivo",
         extra.map(([k, v]) => [k, fmtText(v)])),
+    ),
+
+    (acciones.retirar || acciones.archivar || acciones.restaurar) && el("section", {
+      class: "detail-section detail-ciclo", "aria-label": "Publicación y archivo",
+    },
+      el("h3", { class: "eyebrow" }, "Publicación y archivo"),
+      el("div", { class: "detail-actions" },
+        acciones.retirar && onUnpublish && el("button", {
+          type: "button", class: "btn btn-quiet", onclick: onUnpublish,
+        }, "Retirar del catálogo"),
+        acciones.archivar && onArchive && el("button", {
+          type: "button", class: "btn btn-quiet", onclick: onArchive,
+        }, "Archivar"),
+        acciones.restaurar && onRestore && el("button", {
+          type: "button", class: "btn btn-principal", onclick: onRestore,
+        }, "Restaurar"),
+      ),
     ),
 
     el("footer", { class: "detail-footer" },

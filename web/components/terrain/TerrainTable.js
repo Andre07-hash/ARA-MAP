@@ -11,6 +11,7 @@
 import { el } from "../../lib/dom.js";
 import { ESTADOS } from "../../lib/comparar.js";
 import { SORTS, sortTerrenos } from "../../lib/filters.js";
+import { DISPONIBILIDAD } from "../../lib/inventario.js";
 import { foldText } from "../../lib/format.js";
 import {
   fmtArea, fmtHectares, fmtPercent, fmtPrice, fmtText, fmtUnitPrice,
@@ -42,8 +43,19 @@ export const COMPARISON_SORTS = {
   },
 };
 
+/* The team inventory's status column: publication state in words, then
+ * availability. Never shown in the public catalog. */
+const PUBLICACION_COLUMN = {
+  key: null, titulo: "Publicación", clase: "col-publicacion",
+  render: (t) => el("span", { class: "cell-publicacion" },
+    el("span", { class: ["estado-chip", `estado-${t.estadoPublicacion?.tono ?? "borrador"}`] },
+      t.estadoPublicacion?.etiqueta ?? "—"),
+    t.availability && el("span", { class: "muted" }, ` ${DISPONIBILIDAD[t.availability] ?? t.availability}`)),
+};
+
 export function TerrainTable({
-  terrenos, orden, direccion, seleccionado, comparando = false, preciosComparables = true, onSort, onSelect,
+  terrenos, orden, direccion, seleccionado, comparando = false, preciosComparables = true,
+  conPublicacion = false, onSort, onSelect,
 }) {
   // Prices in different currencies cannot be ranked against each other:
   // 100 USD and 100 MXN are not equal. Their columns stop being sortable.
@@ -54,7 +66,9 @@ export function TerrainTable({
     ? BASE_COLUMNS
     : BASE_COLUMNS.map((c) => (PRECIOS.has(c.key) ? { ...c, key: null } : c));
 
-  const columnas = comparando
+  const columnas = conPublicacion
+    ? [base[0], PUBLICACION_COLUMN, ...base.slice(1)]
+    : comparando
     ? [
         {
           key: "capa", titulo: "Base", clase: "col-base",

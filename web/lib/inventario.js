@@ -73,9 +73,11 @@ export function estadoPublicacion(t) {
   if (estado === "unpublished") return { etiqueta: "No publicado", tono: "borrador" };
   if (estado === "published") {
     if (t.public_visible === false) {
-      const disp = t.draft?.availability;
-      const motivo = !t.has_pending_changes && (disp === "sold" || disp === "withdrawn")
-        ? ` · ${DISPONIBILIDAD[disp]}` : "";
+      // The PUBLISHED availability explains it, not a saved draft's.
+      const disp = t.pending_changes?.availability
+        ? t.pending_changes.availability.published
+        : !t.has_pending_changes ? t.draft?.availability : null;
+      const motivo = disp === "sold" || disp === "withdrawn" ? ` · ${DISPONIBILIDAD[disp]}` : "";
       return { etiqueta: `Fuera del catálogo${motivo}`, tono: "fuera" };
     }
     return t.has_pending_changes
@@ -95,6 +97,49 @@ export function avisoDisponibilidadPendiente(t) {
   if (disp !== "sold" && disp !== "withdrawn") return null;
   return `El borrador marca este terreno como «${DISPONIBILIDAD[disp]}», pero el catálogo ` +
     "sigue mostrando la versión publicada hasta que se publique este cambio.";
+}
+
+/* Public facts whose pending change matters most commercially: shown first
+ * and marked, so a saved price or availability change is never missed. */
+const CAMBIOS_DESTACADOS = new Set([
+  "asking_price", "asking_m2", "moneda", "price_on_request", "availability",
+]);
+
+/**
+ * What publishing would change in the catalog, from the server's
+ * `pending_changes` ({field: {published, draft}}). Most important first.
+ */
+export function cambiosPendientes(t) {
+  const pendientes = t?.pending_changes ?? {};
+  return Object.entries(pendientes)
+    .map(([clave, v]) => ({
+      clave,
+      etiqueta: campo(clave)?.etiqueta ?? clave,
+      publicado: v?.published ?? null,
+      borrador: v?.draft ?? null,
+      destacado: CAMBIOS_DESTACADOS.has(clave),
+    }))
+    .sort((a, b) => Number(b.destacado) - Number(a.destacado));
+}
+
+/** A pending change's value as the team reads it (same labels as the editor). */
+export function valorPendiente(clave, valor) {
+  const c = campo(clave);
+  if (c) return mostrarValor(c, valor);
+  return valor == null || valor === "" ? "—" : String(valor);
+}
+
+/* Which lifecycle actions apply to a record right now. All signed-in users
+ * have all of them; the server re-checks every one against the version. */
+export function accionesDePublicacion(t) {
+  const estado = t?.publication_state;
+  const archivado = estado === "archived" || Boolean(t?.archived_at);
+  return {
+    vistaPrevia: !archivado,
+    retirar: !archivado && estado === "published",
+    archivar: !archivado,
+    restaurar: archivado,
+  };
 }
 
 /* ------------------------------------------------------------ list items */

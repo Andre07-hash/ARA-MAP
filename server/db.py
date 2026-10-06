@@ -328,102 +328,180 @@ CREATE TABLE IF NOT EXISTS inventory_operation_result (
 );
 """
 
-# v9: workbooks connected from Microsoft OneDrive/SharePoint, refreshed into a
-# legacy base without re-uploading. Additive. A connected base keeps its
-# terrains' ids across refreshes: each row's stable workbook ID (excel_fila)
-# names the terreno it became. Saved maps are frozen copies and are never
-# touched by a refresh. Microsoft refresh tokens are encrypted in Postgres
-# (pgcrypto) with a server-only key; both microsoft_ tables are operational
-# secrets and excluded from backups.
+# v9: workbooks connected from a cloud drive (Microsoft OneDrive first) and
+# refreshed into a legacy base without re-uploading. Additive; no legacy table
+# changes. Provider-independent: nothing here is specific to Microsoft except
+# the values stored.
+#
+# * excel_cuenta holds non-secret account identity and is part of content
+#   backups; excel_credencial (encrypted refresh token) and excel_autorizacion
+#   (pending OAuth) are operational secrets and are not. An account with no
+#   credential row needs reconnecting, whatever restored it.
+# * excel_configuracion versions the interpretation (sheet, ID column,
+#   currency, parser version); excel_version records each activated content
+#   with an immutable per-row snapshot (excel_version_fila) of every row it
+#   held, so any retained version can be reconstructed.
+# * excel_identidad is the durable registry of stable workbook IDs: a removed
+#   ID keeps its logical identity (terreno_id becomes NULL) and is reused if
+#   the ID comes back.
+# * The base is the materialized live view. Nothing cascades from a base to
+#   its source history: a connected base cannot be deleted generically.
+# * excel_ejecucion records every refresh with its idempotency key and request
+#   fingerprint, a lease, and the source generation it started from;
+#   activation is a compare-and-set on excel_fuente.generacion.
 EXCEL_SCHEMA = """
-CREATE TABLE IF NOT EXISTS microsoft_cuenta (
-  id            TEXT PRIMARY KEY,
-  ms_id         TEXT NOT NULL UNIQUE,
-  nombre        TEXT,
-  correo        TEXT,
-  tipo          TEXT NOT NULL CHECK (tipo IN ('personal', 'organizacion')),
-  token_cifrado TEXT NOT NULL,
-  estado        TEXT NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'reconectar')),
-  conectada_por TEXT NOT NULL REFERENCES team_user(id),
-  conectada_en  TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS excel_cuenta (
+  id                  TEXT PRIMARY KEY,
+  proveedor           TEXT NOT NULL CHECK (proveedor IN ('microsoft')),
+  proveedor_tenant    TEXT NOT NULL,
+  proveedor_cuenta_id TEXT NOT NULL,
+  tipo                TEXT NOT NULL CHECK (tipo IN ('personal', 'organizacion')),
+  nombre              TEXT,
+  correo              TEXT,
+  conectada_por       TEXT NOT NULL REFERENCES team_user(id),
+  conectada_en        TEXT NOT NULL,
+  actualizada_en      TEXT NOT NULL,
+  UNIQUE (proveedor, proveedor_tenant, proveedor_cuenta_id)
+);
+
+CREATE TABLE IF NOT EXISTS excel_credencial (
+  cuenta_id      TEXT PRIMARY KEY REFERENCES excel_cuenta(id),
+  token_cifrado  TEXT NOT NULL,
+  clave_version  TEXT NOT NULL,
+  generacion     INTEGER NOT NULL DEFAULT 1 CHECK (generacion >= 1),
+  ocupada_hasta  REAL NOT NULL DEFAULT 0,
+  ocupada_por    TEXT,
   actualizada_en TEXT NOT NULL
 );
 
--- One pending sign-in at Microsoft. Single use, short-lived, bound to the
--- browser (flujo_hash: a cookie set when it started) and to the team session
--- that started it.
-CREATE TABLE IF NOT EXISTS microsoft_autorizacion (
+CREATE TABLE IF NOT EXISTS excel_autorizacion (
   estado_hash         TEXT PRIMARY KEY,
   flujo_hash          TEXT NOT NULL,
   verificador_cifrado TEXT NOT NULL,
+  clave_version       TEXT NOT NULL,
   user_id             TEXT NOT NULL,
   sesion_hash         TEXT NOT NULL,
   expira              REAL NOT NULL
 );
 
+-- One connected workbook (one selected sheet) feeding one live base.
 CREATE TABLE IF NOT EXISTS excel_fuente (
-  id                TEXT PRIMARY KEY,
-  base_id           INTEGER NOT NULL UNIQUE REFERENCES base(id) ON DELETE CASCADE,
-  cuenta_id         TEXT NOT NULL,
-  drive_id          TEXT NOT NULL,
-  item_id           TEXT NOT NULL,
-  nombre_archivo    TEXT NOT NULL,
-  web_url           TEXT,
-  hoja              TEXT NOT NULL,
-  columna_id        TEXT NOT NULL,
-  moneda            TEXT CHECK (moneda IN ('USD', 'MXN', 'columna')),
-  version_activa_id TEXT,
-  creada_por        TEXT NOT NULL,
-  creada_en         TEXT NOT NULL,
+  id                     TEXT PRIMARY KEY,
+  base_id                INTEGER NOT NULL UNIQUE REFERENCES base(id),
+  cuenta_id              TEXT NOT NULL REFERENCES excel_cuenta(id),
+  drive_id               TEXT NOT NULL,
+  item_id                TEXT NOT NULL,
+  nombre_archivo         TEXT NOT NULL,
+  web_url                TEXT,
+  estado                 TEXT NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'desconectada')),
+  configuracion_id       TEXT NOT NULL,
+  version_activa_id      TEXT,
+  generacion             INTEGER NOT NULL DEFAULT 1 CHECK (generacion >= 1),
+  ultima_revision_en     TEXT,
+  ultima_exitosa_en      TEXT,
+  ultimo_error_id        TEXT,
+  creada_por             TEXT NOT NULL REFERENCES team_user(id),
+  creada_en              TEXT NOT NULL,
+  desconectada_en        TEXT,
   UNIQUE (drive_id, item_id)
 );
 
--- Each successfully activated content of the workbook.
-CREATE TABLE IF NOT EXISTS excel_version (
+CREATE TABLE IF NOT EXISTS excel_configuracion (
   id             TEXT PRIMARY KEY,
-  fuente_id      TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
-  numero         INTEGER NOT NULL,
-  etag           TEXT,
-  ctag           TEXT,
-  sha256         TEXT NOT NULL,
-  tamano         INTEGER,
-  modificado_en  TEXT,
-  modificado_por TEXT,
-  filas          INTEGER NOT NULL,
-  activada_en    TEXT NOT NULL,
-  UNIQUE (fuente_id, numero)
+  fuente_id      TEXT NOT NULL REFERENCES excel_fuente(id),
+  numero         INTEGER NOT NULL CHECK (numero >= 1),
+  hoja           TEXT NOT NULL,
+  columna_id     TEXT NOT NULL,
+  moneda         TEXT NOT NULL CHECK (moneda IN ('USD', 'MXN', 'desconocida', 'columna')),
+  columna_moneda TEXT,
+  version_lector TEXT NOT NULL,
+  huella         TEXT NOT NULL,
+  creada_por     TEXT NOT NULL REFERENCES team_user(id),
+  creada_en      TEXT NOT NULL,
+  UNIQUE (fuente_id, numero),
+  UNIQUE (fuente_id, id),
+  CHECK ((moneda = 'columna') = (columna_moneda IS NOT NULL))
 );
 
--- Every refresh attempt, kept for the status a reopened browser shows. At
--- most one may be running per source.
+CREATE TABLE IF NOT EXISTS excel_version (
+  id               TEXT PRIMARY KEY,
+  fuente_id        TEXT NOT NULL REFERENCES excel_fuente(id),
+  numero           INTEGER NOT NULL CHECK (numero >= 1),
+  configuracion_id TEXT NOT NULL,
+  ejecucion_id     TEXT NOT NULL,
+  etag             TEXT,
+  ctag             TEXT,
+  sha256           TEXT NOT NULL,
+  contenido_huella TEXT NOT NULL,
+  tamano           INTEGER CHECK (tamano IS NULL OR tamano >= 0),
+  modificado_en    TEXT,
+  modificado_por   TEXT,
+  filas            INTEGER NOT NULL CHECK (filas >= 0),
+  vacia_confirmada INTEGER NOT NULL DEFAULT 0 CHECK (vacia_confirmada IN (0, 1)),
+  activada_en      TEXT NOT NULL,
+  UNIQUE (fuente_id, numero),
+  UNIQUE (fuente_id, id),
+  FOREIGN KEY (fuente_id, configuracion_id) REFERENCES excel_configuracion(fuente_id, id)
+);
+
+-- The durable stable-ID registry. clave is the exact text ID from the sheet.
+CREATE TABLE IF NOT EXISTS excel_identidad (
+  id                  TEXT PRIMARY KEY,
+  fuente_id           TEXT NOT NULL REFERENCES excel_fuente(id),
+  clave               TEXT NOT NULL,
+  terreno_id          INTEGER UNIQUE REFERENCES terreno(id) ON DELETE SET NULL,
+  primera_version     INTEGER NOT NULL,
+  ultima_version      INTEGER NOT NULL,
+  eliminada_en_version INTEGER,
+  UNIQUE (fuente_id, clave),
+  UNIQUE (fuente_id, id)
+);
+
+-- Immutable: every row of every activated version, normalized.
+CREATE TABLE IF NOT EXISTS excel_version_fila (
+  fuente_id   TEXT NOT NULL,
+  version_id  TEXT NOT NULL,
+  identidad_id TEXT NOT NULL,
+  fila        INTEGER NOT NULL CHECK (fila >= 1),
+  datos_json  TEXT NOT NULL,
+  huella      TEXT NOT NULL,
+  PRIMARY KEY (version_id, identidad_id),
+  FOREIGN KEY (fuente_id, version_id) REFERENCES excel_version(fuente_id, id),
+  FOREIGN KEY (fuente_id, identidad_id) REFERENCES excel_identidad(fuente_id, id)
+);
+
 CREATE TABLE IF NOT EXISTS excel_ejecucion (
-  id             TEXT PRIMARY KEY,
-  fuente_id      TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
-  estado         TEXT NOT NULL CHECK (estado IN ('en_curso', 'ok', 'sin_cambios', 'error')),
-  iniciada_por   TEXT NOT NULL,
-  iniciada_en    TEXT NOT NULL,
-  iniciada_epoch REAL NOT NULL,
-  terminada_en   TEXT,
-  version_id     TEXT,
-  agregados      INTEGER,
-  actualizados   INTEGER,
-  eliminados     INTEGER,
-  sin_cambio     INTEGER,
-  error_codigo   TEXT,
-  error_mensaje  TEXT,
-  problemas_json TEXT
+  id                TEXT PRIMARY KEY,
+  fuente_id         TEXT NOT NULL REFERENCES excel_fuente(id),
+  tipo              TEXT NOT NULL CHECK (tipo IN ('conexion', 'actualizacion')),
+  estado            TEXT NOT NULL CHECK (estado IN
+                      ('en_curso', 'ok', 'sin_cambios', 'revision', 'error', 'interrumpida', 'conflicto')),
+  clave_idempotencia TEXT NOT NULL,
+  huella_solicitud  TEXT NOT NULL,
+  iniciada_por      TEXT NOT NULL REFERENCES team_user(id),
+  iniciada_en       TEXT NOT NULL,
+  iniciada_epoch    REAL NOT NULL,
+  lease_hasta       REAL NOT NULL,
+  generacion_base   INTEGER NOT NULL,
+  configuracion_id  TEXT NOT NULL,
+  terminada_en      TEXT,
+  version_id        TEXT,
+  candidato_huella  TEXT,
+  agregados         INTEGER CHECK (agregados IS NULL OR agregados >= 0),
+  actualizados      INTEGER CHECK (actualizados IS NULL OR actualizados >= 0),
+  eliminados        INTEGER CHECK (eliminados IS NULL OR eliminados >= 0),
+  sin_cambio        INTEGER CHECK (sin_cambio IS NULL OR sin_cambio >= 0),
+  error_codigo      TEXT,
+  error_mensaje     TEXT,
+  problemas_json    TEXT,
+  UNIQUE (fuente_id, clave_idempotencia),
+  FOREIGN KEY (fuente_id, version_id) REFERENCES excel_version(fuente_id, id),
+  FOREIGN KEY (fuente_id, configuracion_id) REFERENCES excel_configuracion(fuente_id, id),
+  CHECK ((estado = 'en_curso') = (terminada_en IS NULL))
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_excel_ejecucion_en_curso
   ON excel_ejecucion(fuente_id) WHERE estado = 'en_curso';
 CREATE INDEX IF NOT EXISTS idx_excel_ejecucion_fuente ON excel_ejecucion(fuente_id, iniciada_epoch);
-
--- Stable workbook ID -> the terreno it is. Survives reordering and edits.
-CREATE TABLE IF NOT EXISTS excel_fila (
-  fuente_id  TEXT NOT NULL REFERENCES excel_fuente(id) ON DELETE CASCADE,
-  clave      TEXT NOT NULL,
-  terreno_id INTEGER NOT NULL UNIQUE REFERENCES terreno(id) ON DELETE CASCADE,
-  PRIMARY KEY (fuente_id, clave)
-);
 """
 
 # Kept out of SCHEMA on purpose: SCHEMA runs before the column migrations, and
@@ -753,8 +831,8 @@ def backup(path: Path | str | None = None) -> Path | None:
             # operational state, not content: a restored copy must not bring
             # old sign-ins or file access back to life.
             tablas = _table_names(copia)
-            for operativa in ("team_session", "team_login_failure", "microsoft_cuenta",
-                              "microsoft_autorizacion"):
+            for operativa in ("team_session", "team_login_failure", "excel_credencial",
+                              "excel_autorizacion"):
                 if operativa in tablas:
                     copia.execute(f"DELETE FROM {operativa}")
     finally:

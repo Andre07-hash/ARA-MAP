@@ -22,6 +22,7 @@ from . import auth, db
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
+from .api import excel as api_excel
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
@@ -51,6 +52,16 @@ router.add("POST", "/api/inventario/terrenos", api_inventario.create)
 router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail)
 router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update)
 router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history)
+router.add("GET", "/api/excel/fuentes", api_excel.listing)
+router.add("POST", "/api/excel/fuentes", api_excel.create)
+router.add("POST", "/api/excel/vista-previa", api_excel.preview)
+router.add("GET", "/api/excel/fuentes/:id", api_excel.detail)
+router.add("GET", "/api/excel/fuentes/:id/versiones", api_excel.versions)
+router.add("GET", "/api/excel/fuentes/:id/versiones/:vid", api_excel.version_detail)
+router.add("POST", "/api/excel/fuentes/:id/actualizar", api_excel.refresh)
+router.add("POST", "/api/excel/fuentes/:id/configuracion", api_excel.configure)
+router.add("POST", "/api/excel/fuentes/:id/desconectar", api_excel.disconnect)
+router.add("POST", "/api/excel/fuentes/:id/reconectar", api_excel.reconnect)
 router.add("GET", "/api/bases", api_bases.listing)
 router.add("GET", "/api/bases/:id", api_bases.detail)
 router.add("GET", "/api/bases/:id/terrenos", api_bases.terrenos)

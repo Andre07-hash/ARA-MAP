@@ -1,0 +1,278 @@
+{
+  "results": [
+    {
+      "step": "fresh clone at the reviewed commit",
+      "result": "PASS",
+      "detail": {
+        "head": "d2967f1b3e4c75c9cf81932a42497d2708800cbe"
+      }
+    },
+    {
+      "step": "clean checkout has no local-only files",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "step": "bundle excludes reports/tests/xlsx/root vendor; keeps web/ and api/",
+      "result": "PASS",
+      "detail": {
+        "files": 145,
+        "tracked": 903
+      }
+    },
+    {
+      "step": "vercel.json keeps framework null, web/ output, api/index.py rewrite; Git deployments off",
+      "result": "FAIL",
+      "detail": {
+        "$schema": "https://openapi.vercel.sh/vercel.json",
+        "framework": null,
+        "buildCommand": "",
+        "outputDirectory": "web",
+        "functions": {
+          "api/index.py": {
+            "maxDuration": 120,
+            "excludeFiles": "{tests,reports,outputs,datos,vendor,.venv-dev,.codex-work,api/data}/**"
+          }
+        },
+        "rewrites": [
+          {
+            "source": "/api/:path*",
+            "destination": "/api/index.py"
+          }
+        ]
+      }
+    },
+    {
+      "step": "every asset referenced by web/index.html is in the static output",
+      "result": "PASS",
+      "detail": []
+    },
+    {
+      "step": "clean Python 3.12 runtime installs pyproject dependencies",
+      "result": "PASS",
+      "detail": {
+        "deps": [
+          "openpyxl>=3.1",
+          "psycopg[binary]>=3.2,<4; python_version >= '3.10'"
+        ],
+        "versions": "3.12.15 3.1.5 3.3.6",
+        "pip_stderr": "\n[notice] A new release of pip is available: 25.0.1 -> 26.2.1\n[notice] To update, run: /home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/runtime/bin/python -m pip install --upgrade pip\n"
+      }
+    },
+    {
+      "step": "schema-7 workspace built by the pre-change code: 3 bases / 104 terrains / 2 maps",
+      "result": "PASS",
+      "detail": {
+        "built": {
+          "bases": {
+            "P1": 1,
+            "P2": 2,
+            "P3": 3
+          },
+          "mapas": {
+            "simple": 1,
+            "comparacion": 2
+          },
+          "schema_version": 7
+        },
+        "counts": {
+          "base": 3,
+          "terreno": 104,
+          "mapa": 2
+        }
+      }
+    },
+    {
+      "step": "pre-migration pg_dump",
+      "result": "PASS",
+      "detail": {
+        "bytes": 41974,
+        "stderr": ""
+      }
+    },
+    {
+      "step": "UNMIGRATED schema 7: candidate cannot sign anyone in (expected; migration is required first)",
+      "result": "PASS",
+      "detail": {
+        "config": 200,
+        "login": 500,
+        "login_body": {
+          "error": "Ocurrió un error inesperado. Inténtalo de nuevo; si se repite, avisa al equipo.",
+          "detalle": {
+            "code": "internal"
+          }
+        },
+        "public_list": 500
+      }
+    },
+    {
+      "step": "UNMIGRATED schema 7: no exception text reaches the caller",
+      "result": "PASS",
+      "detail": {
+        "error": "Ocurrió un error inesperado. Inténtalo de nuevo; si se repite, avisa al equipo.",
+        "detalle": {
+          "code": "internal"
+        }
+      }
+    },
+    {
+      "step": "esquema.py: --check reports 7 (exit 1), upgrade twice, --check exit 0; refuses an unset target",
+      "result": "PASS",
+      "detail": {
+        "check_before": "Versión del esquema: 7; este código espera 8.",
+        "run1": "Versión del esquema: 7; este código espera 8.\nEsquema en la versión 8. Los datos existentes se conservaron.",
+        "run2": "Versión del esquema: 8; este código espera 8.\nEsquema en la versión 8. Los datos existentes se conservaron.",
+        "check_after": "Versión del esquema: 8; este código espera 8.",
+        "unset_target": "NO_EXISTE_ESTA_VARIABLE no está definida; no se usa ningún destino por omisión."
+      }
+    },
+    {
+      "step": "every legacy table byte-identical after migration",
+      "result": "PASS",
+      "detail": {
+        "carpeta": 0,
+        "base": 3,
+        "terreno": 104,
+        "incidencia": 0,
+        "mapa": 2,
+        "mapa_capa": 3,
+        "mapa_terreno": 116,
+        "formato_importacion": 0,
+        "importacion": 0
+      }
+    },
+    {
+      "step": "in-database backup taken before the upgrade holds the 104 terrains, 3 bases, 2 maps",
+      "result": "PASS",
+      "detail": {
+        "backups": 2,
+        "tables_in_first": [
+          "base",
+          "carpeta",
+          "formato_importacion",
+          "importacion",
+          "incidencia",
+          "mapa",
+          "mapa_capa",
+          "mapa_terreno",
+          "terreno"
+        ]
+      }
+    },
+    {
+      "step": "schema 8 tables now exist",
+      "result": "PASS",
+      "detail": null
+    },
+    {
+      "step": "fictional accounts provisioned with the operations command (password via stdin)",
+      "result": "PASS",
+      "detail": [
+        "Cuenta creada: ana.ensayo (Ana Ensayo).",
+        "Cuenta creada: beto.ensayo (Beto Ensayo)."
+      ]
+    },
+    {
+      "step": "openpyxl resolves from the installed dependencies, not the repository's vendor copy",
+      "result": "PASS",
+      "detail": "openpyxl /home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/runtime/lib/python3.12/site-packages/openpyxl/__init__.py"
+    },
+    {
+      "step": "anonymous /api/config answers with cloud:true",
+      "result": "PASS",
+      "detail": {
+        "readOnly": false,
+        "cloud": true,
+        "authRequired": true,
+        "maxUploadBytes": 4194304
+      }
+    },
+    {
+      "step": "anonymous /api/session",
+      "result": "PASS",
+      "detail": {
+        "authenticated": false
+      }
+    },
+    {
+      "step": "CONTINUITY: anonymous visitors can no longer browse the 104 legacy terrains (bases/maps 401; new public catalog empty)",
+      "result": "PASS",
+      "detail": {
+        "bases": 401,
+        "mapas": 401,
+        "publico_total": 0
+      }
+    },
+    {
+      "step": "sign-in with a fictional account; Secure HttpOnly SameSite=Strict cookie",
+      "result": "PASS",
+      "detail": {
+        "authenticated": true,
+        "user": {
+          "id": "63d0f6b5-6d10-4151-966a-217ec8b0699d",
+          "display_name": "Ana Ensayo"
+        }
+      }
+    },
+    {
+      "step": "signed in: the 3 migrated bases with all 104 terrains",
+      "result": "PASS",
+      "detail": [
+        28,
+        36,
+        40
+      ]
+    },
+    {
+      "step": "signed in: both saved maps reopen with their frozen terrains",
+      "result": "PASS",
+      "detail": {
+        "Comparación ensayo P1 vs P2": [
+          200,
+          76
+        ],
+        "Mapa ensayo P1": [
+          200,
+          40
+        ]
+      }
+    },
+    {
+      "step": "an .xlsx import works on the deployed runtime (openpyxl from dependencies)",
+      "result": "PASS",
+      "detail": {
+        "preview": 200,
+        "confirm": 200,
+        "terrenos": 79
+      }
+    },
+    {
+      "step": "export of the comparison map returns an .xlsx",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "bytes": 12408
+      }
+    },
+    {
+      "step": "signed in: a new inventory draft saves on the migrated workspace",
+      "result": "PASS",
+      "detail": "draft"
+    },
+    {
+      "step": "recovery: pg_restore of the pre-migration dump gives schema 7, identical legacy tables, no schema-8 tables",
+      "result": "PASS",
+      "detail": {
+        "schema_version": "7",
+        "stderr": ""
+      }
+    },
+    {
+      "step": "recovery: the pre-change (schema 7) code reads the restored workspace (rollback path)",
+      "result": "PASS",
+      "detail": "[3, 2]"
+    }
+  ],
+  "pass": 26,
+  "fail": 1
+}

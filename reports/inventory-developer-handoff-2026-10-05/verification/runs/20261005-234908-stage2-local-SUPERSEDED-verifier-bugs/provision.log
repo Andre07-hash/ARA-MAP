@@ -1,0 +1,10 @@
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-s2-rfpt1ure/ara.db --password-stdin crear sntl-user-a-54ccb0 Ana Verificadora SNTL-ACTOR-A-ced4ba
+Cuenta creada: sntl-user-a-54ccb0 (Ana Verificadora SNTL-ACTOR-A-ced4ba).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-s2-rfpt1ure/ara.db --password-stdin crear sntl-user-b-461a5e Beto Verificador SNTL-ACTOR-B-5776b3
+Cuenta creada: sntl-user-b-461a5e (Beto Verificador SNTL-ACTOR-B-5776b3).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-s2-rfpt1ure/ara.db --password-stdin crear sntl-user-c-9b8794 Cata Verificadora SNTL-ACTOR-C-f00e94
+Cuenta creada: sntl-user-c-9b8794 (Cata Verificadora SNTL-ACTOR-C-f00e94).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-s2-rfpt1ure/ara.db --password-stdin crear sntl-user-t-2e37db Tere Throttle SNTL-ACTOR-T-2e37db
+Cuenta creada: sntl-user-t-2e37db (Tere Throttle SNTL-ACTOR-T-2e37db).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-s2-rfpt1ure/ara.db --password-stdin crear sntl-user-u-2e37db Ugo Throttle SNTL-ACTOR-U-2e37db
+Cuenta creada: sntl-user-u-2e37db (Ugo Throttle SNTL-ACTOR-U-2e37db).

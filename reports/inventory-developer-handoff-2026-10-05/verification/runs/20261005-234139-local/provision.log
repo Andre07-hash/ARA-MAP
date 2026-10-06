@@ -1,0 +1,10 @@
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-e95b3add/ara.db --password-stdin crear sntl-user-a-54ccb0 Ana Verificadora SNTL-ACTOR-A-ced4ba
+Cuenta creada: sntl-user-a-54ccb0 (Ana Verificadora SNTL-ACTOR-A-ced4ba).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-e95b3add/ara.db --password-stdin crear sntl-user-b-461a5e Beto Verificador SNTL-ACTOR-B-5776b3
+Cuenta creada: sntl-user-b-461a5e (Beto Verificador SNTL-ACTOR-B-5776b3).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-e95b3add/ara.db --password-stdin crear sntl-user-c-9b8794 Cata Verificadora SNTL-ACTOR-C-f00e94
+Cuenta creada: sntl-user-c-9b8794 (Cata Verificadora SNTL-ACTOR-C-f00e94).
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-e95b3add/ara.db --password-stdin restablecer sntl-user-b-461a5e
+Contraseña cambiada; sus sesiones abiertas se cerraron.
+$ /home/user/ARA-MAP/.venv-dev/bin/python scripts/cuentas.py --sqlite /tmp/ara-verify-e95b3add/ara.db desactivar sntl-user-c-9b8794
+Cuenta desactivada.

@@ -1,0 +1,5929 @@
+{
+ "mode": "local",
+ "port": 8433,
+ "public_edit_env": true,
+ "db": "/tmp/ara-verify-mjxxsowp/ara.db",
+ "legacy": false,
+ "fixture_hash": "8fa4b0926bcedcded3952c4a1aa68d4fc07882d2c4aad8a896985f9ff388a2b8",
+ "contract_map_sha256": "f3593dbdf5d09af6e65d3f741f6a69f47ac1510ebf35d569ca73c848f1ac6f5a",
+ "python": "3.11.15",
+ "timings_ms": {
+  "create": {
+   "n": 142,
+   "p50": 6.1,
+   "p95": 17.3,
+   "mean": 6.9
+  },
+  "patch": {
+   "n": 32,
+   "p50": 6.7,
+   "p95": 17.4,
+   "mean": 7.4
+  },
+  "get": {
+   "n": 100,
+   "p50": 4.1,
+   "p95": 6.1,
+   "mean": 4.4
+  }
+ },
+ "counts": {
+  "PASS": 861,
+  "FAIL": 0,
+  "WARN": 1,
+  "SKIP": 1,
+  "INFO": 17
+ },
+ "results": [
+  {
+   "case": "INV-01",
+   "check": "M102 (swapped X/Y => |lat|>90) refused at save with a lat field error (§9.1)",
+   "status": "PASS",
+   "detail": [
+    422,
+    {
+     "code": "validation_failed",
+     "fields": {
+      "lat": "La latitud va de -90 a 90."
+     }
+    }
+   ]
+  },
+  {
+   "case": "INV-01",
+   "check": "every other fixture saves as a draft, incl. outside-Mexico/missing coordinates (§9.1)",
+   "status": "PASS",
+   "detail": {}
+  },
+  {
+   "case": "INV-01",
+   "check": "M107 price without currency refused at save",
+   "status": "WARN",
+   "detail": "BACKEND_RESPONSE deviation 5 (pending supervisor confirmation); not counted as defect"
+  },
+  {
+   "case": "INV-01",
+   "check": "round-trip values identical (accents, cents, literals, nulls, private fields)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-01",
+   "check": "every create returned a distinct string id",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-01",
+   "check": "new records are drafts",
+   "status": "PASS",
+   "detail": "{'draft'}"
+  },
+  {
+   "case": "INV-01",
+   "check": "B edits A's draft without import",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "INV-01",
+   "check": "C sees B's saved values with the same stable id",
+   "status": "PASS",
+   "detail": {
+    "terreno": "Lote Ávila Camacho M004 (corregido)",
+    "estado": "Nuevo León",
+    "municipio": "Apodaca",
+    "direccion": "Km 67 Carretera Federal, Apodaca",
+    "public_description": "Terreno de prueba ficticio PUBMARK-M004",
+    "contacto": "Lic. Ñúñez Pérez SNTL-CONTACT-M004-6ddadb tel. 55 0000 6920",
+    "notas_internas": "<i>Nota interna</i> SNTL-NOTE-M004-3a9973",
+    "superficie_m2": 15390.3,
+    "superficie_ha": 1.53903,
+    "afectaciones_pct": null,
+    "afectaciones_m2": null,
+    "asking_price": 5580984.49,
+    "asking_m2": 362.63,
+    "lat": 20.6012,
+    "lon": -100.3911,
+    "moneda": "USD",
+    "price_on_request": false,
+    "availability": "available"
+   }
+  },
+  {
+   "case": "INV-01",
+   "check": "records, versions and drafts identical after server restart",
+   "status": "PASS",
+   "detail": {
+    "M004": [
+     2,
+     2
+    ],
+    "M030": [
+     1,
+     1
+    ],
+    "M110": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "case": "INV-01",
+   "check": "source lineage on rename",
+   "status": "SKIP",
+   "detail": "Stage 3 (adoption/provenance)"
+  },
+  {
+   "case": "ID-01",
+   "check": "three distinct user ids",
+   "status": "PASS",
+   "detail": {
+    "A": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+    "B": "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+    "C": "f978e01a-507d-4e83-9747-64429a534aa3"
+   }
+  },
+  {
+   "case": "ID-01",
+   "check": "A: /api/session has id+display_name and no role keys",
+   "status": "PASS",
+   "detail": "dict_keys(['authenticated', 'user'])"
+  },
+  {
+   "case": "ID-01",
+   "check": "B: /api/session has id+display_name and no role keys",
+   "status": "PASS",
+   "detail": "dict_keys(['authenticated', 'user'])"
+  },
+  {
+   "case": "ID-01",
+   "check": "C: /api/session has id+display_name and no role keys",
+   "status": "PASS",
+   "detail": "dict_keys(['authenticated', 'user'])"
+  },
+  {
+   "case": "ID-01",
+   "check": "A: spoofed actor fields rejected (422)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-01",
+   "check": "A creates M111",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "B: spoofed actor fields rejected (422)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-01",
+   "check": "B creates M112",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "C: spoofed actor fields rejected (422)",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-01",
+   "check": "C creates M113",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "B reads+edits A's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "C reads+edits A's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "A reads+edits B's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "C reads+edits B's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "A reads+edits C's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "B reads+edits C's record",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['actor_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['version'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "changes ['published_revision_id'] rejected without effect",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "history of A's record attributes each event to the session user",
+   "status": "PASS",
+   "detail": {
+    "expected": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "seen": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "events": 3
+   }
+  },
+  {
+   "case": "ID-01",
+   "check": "history of B's record attributes each event to the session user",
+   "status": "PASS",
+   "detail": {
+    "expected": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "seen": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "events": 3
+   }
+  },
+  {
+   "case": "ID-01",
+   "check": "history of C's record attributes each event to the session user",
+   "status": "PASS",
+   "detail": {
+    "expected": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "seen": [
+     "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+     "3ac0d004-b150-4c46-88f1-9a7d4e59355c",
+     "f978e01a-507d-4e83-9747-64429a534aa3"
+    ],
+    "events": 3
+   }
+  },
+  {
+   "case": "ID-01",
+   "check": "all three users see the same inventory total",
+   "status": "PASS",
+   "detail": {
+    "A": 121,
+    "B": 121,
+    "C": 121
+   }
+  },
+  {
+   "case": "ID-01",
+   "check": "cross-user archivar (B on A's record)",
+   "status": "INFO",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "cross-user restaurar (B on A's record)",
+   "status": "INFO",
+   "detail": 200
+  },
+  {
+   "case": "ID-01",
+   "check": "cross-user publicar (B on A's record)",
+   "status": "INFO",
+   "detail": 422
+  },
+  {
+   "case": "ID-01",
+   "check": "cross-user despublicar (B on A's record)",
+   "status": "INFO",
+   "detail": 409
+  },
+  {
+   "case": "INV-02",
+   "check": "valid edit adds one history entry",
+   "status": "PASS",
+   "detail": [
+    1,
+    2
+   ]
+  },
+  {
+   "case": "INV-02",
+   "check": "history holds previous and new value, actor and time",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-02",
+   "check": "version +1 and new draft_revision_id",
+   "status": "PASS",
+   "detail": [
+    1,
+    2
+   ]
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'superficie_m2': 'abc'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['superficie_m2']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "superficie_m2": "Debe ser un número."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'moneda': 'EUR'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['moneda']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "moneda": "Usa USD o MXN (o vacío si se desconoce)."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'lat': 'NaN'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['lat']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "lat": "Debe ser un número finito."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'asking_price': 'Infinity'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['asking_price']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "asking_price": "Debe ser un número finito."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'availability': 'vendido-quizá'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['availability']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "availability": "Disponibilidad inválida."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'campo_inventado': 1} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['campo_inventado']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "campo_inventado": "Campo desconocido o no editable."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'price_on_request': 'sí'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['price_on_request']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "price_on_request": "Debe ser verdadero o falso."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'lat': 95.0} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['lat']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "lat": "La latitud va de -90 a 90."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'lat': -90.5} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['lat']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "lat": "La latitud va de -90 a 90."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'lon': 200.0} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['lon']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "lon": "La longitud va de -180 a 180."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'superficie_m2': -5} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['superficie_m2']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "superficie_m2": "No puede ser negativo."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'extra': {'x': 1}} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['extra']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "extra": "Campo desconocido o no editable."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "invalid {'contacto': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'} -> 422, record untouched",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-02",
+   "check": "  422 carries {error,detalle.code} for ['contacto']",
+   "status": "PASS",
+   "detail": {
+    "code": "validation_failed",
+    "fields": {
+     "contacto": "Admite hasta 2000 caracteres."
+    }
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "rejected edits add no history",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-02",
+   "check": "outside-Mexico pair saved and flagged location_invalid blocker (§9.1)",
+   "status": "PASS",
+   "detail": [
+    "location_invalid",
+    "price_unconfirmed",
+    "availability_unconfirmed"
+   ]
+  },
+  {
+   "case": "INV-02",
+   "check": "rejected edits add no rows in inventory/team tables",
+   "status": "PASS",
+   "detail": [
+    {
+     "team_user": 3,
+     "team_session": 3,
+     "team_login_failure": 0,
+     "inventory_terrain": 121,
+     "inventory_revision": 129,
+     "inventory_event": 131,
+     "inventory_operation_result": 121
+    },
+    {
+     "team_user": 3,
+     "team_session": 3,
+     "team_login_failure": 0,
+     "inventory_terrain": 121,
+     "inventory_revision": 129,
+     "inventory_event": 131,
+     "inventory_operation_result": 121
+    }
+   ]
+  },
+  {
+   "case": "INV-02",
+   "check": "unknown values stay null (not 0/false/'')",
+   "status": "PASS",
+   "detail": {
+    "estado": null,
+    "municipio": null,
+    "direccion": null,
+    "superficie_m2": null,
+    "lat": null,
+    "lon": null,
+    "asking_price": null,
+    "asking_m2": null,
+    "moneda": null
+   }
+  },
+  {
+   "case": "INV-02",
+   "check": "unknown availability stays 'unknown'",
+   "status": "PASS",
+   "detail": "unknown"
+  },
+  {
+   "case": "INV-02",
+   "check": "rolled-back transaction leaves no partial write",
+   "status": "INFO",
+   "detail": "see FAULT case (verifier fault injection)"
+  },
+  {
+   "case": "INV-03",
+   "check": "create with Idempotency-Key=None refused",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-03",
+   "check": "create with Idempotency-Key='' refused",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "INV-03",
+   "check": "no record created without a key",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "INV-03",
+   "check": "same key + same body -> original result",
+   "status": "PASS",
+   "detail": [
+    200,
+    200
+   ]
+  },
+  {
+   "case": "INV-03",
+   "check": "same key + same body after restart -> original id",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "INV-03",
+   "check": "same key + different body -> 409",
+   "status": "PASS",
+   "detail": 409
+  },
+  {
+   "case": "INV-03",
+   "check": "exactly one record added so far",
+   "status": "PASS",
+   "detail": [
+    121,
+    122
+   ]
+  },
+  {
+   "case": "INV-03",
+   "check": "concurrent same-key creates yield one record",
+   "status": "PASS",
+   "detail": {
+    "statuses": [
+     200,
+     200,
+     200,
+     200,
+     200
+    ],
+    "ids": 1
+   }
+  },
+  {
+   "case": "INV-03",
+   "check": "same key reused by another user",
+   "status": "INFO",
+   "detail": [
+    200,
+    true
+   ]
+  },
+  {
+   "case": "INV-03",
+   "check": "new key + identical body (duplicate review is DUP-01, Stage 3)",
+   "status": "INFO",
+   "detail": [
+    200,
+    null
+   ]
+  },
+  {
+   "case": "INV-03",
+   "check": "store counts after INV-03",
+   "status": "INFO",
+   "detail": {
+    "team_user": 3,
+    "team_session": 3,
+    "team_login_failure": 0,
+    "inventory_terrain": 124,
+    "inventory_revision": 132,
+    "inventory_event": 134,
+    "inventory_operation_result": 124
+   }
+  },
+  {
+   "case": "INV-03",
+   "check": "durable result committed with business write",
+   "status": "INFO",
+   "detail": "see FAULT case (verifier fault injection)"
+  },
+  {
+   "case": "FAULT",
+   "check": "patched",
+   "status": "INFO",
+   "detail": "server.repo.inventario._event raises when event details contain 'FAULT-INJECT-5a387159'; nothing else patched; candidate files untouched"
+  },
+  {
+   "case": "FAULT",
+   "check": "create failing mid-transaction returns 5xx",
+   "status": "PASS",
+   "detail": 500
+  },
+  {
+   "case": "FAULT",
+   "check": "failed create leaves no rows (terrain, revision, event, idempotency result)",
+   "status": "PASS",
+   "detail": [
+    {
+     "team_user": 3,
+     "team_session": 3,
+     "team_login_failure": 0,
+     "inventory_terrain": 124,
+     "inventory_revision": 132,
+     "inventory_event": 134,
+     "inventory_operation_result": 124
+    },
+    {
+     "team_user": 3,
+     "team_session": 3,
+     "team_login_failure": 0,
+     "inventory_terrain": 124,
+     "inventory_revision": 132,
+     "inventory_event": 134,
+     "inventory_operation_result": 124
+    }
+   ]
+  },
+  {
+   "case": "FAULT",
+   "check": "same key is free afterwards (no orphan idempotency row): new body succeeds once",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "FAULT",
+   "check": "save failing mid-transaction returns 5xx",
+   "status": "PASS",
+   "detail": 500
+  },
+  {
+   "case": "FAULT",
+   "check": "failed save: version, draft pointer, history and row counts unchanged",
+   "status": "PASS",
+   "detail": [
+    1,
+    1
+   ]
+  },
+  {
+   "case": "FAULT",
+   "check": "a normal save with the same expected_version then succeeds (no stale claim)",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "FAULT",
+   "check": "5xx bodies carry no sentinel",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "same field: A saves N->N+1",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "same field: stale B -> 409 conflict",
+   "status": "PASS",
+   "detail": [
+    409,
+    {
+     "error": "Otra persona guardó cambios en este terreno. Revisa su versión antes de guardar la tuya; tus datos no se han perdido.",
+     "detalle": {
+      "code": "conflict",
+      "current_version": 2,
+      "terreno": {
+       "id": "99c4f90d-0844-401d-aa3b-6c221d3349ac",
+       "version": 2,
+       "draft_revision_id": "aba676b0-e137-4ee3-96fe-3bef41cbf521",
+       "published_revision_id": null,
+       "publication_state": "draft",
+       "public_visible": false,
+       "has_pending_changes": false,
+       "pending_changes": {},
+       "published_at": null,
+       "archived_at": null,
+       "draft": {
+        "terreno": "Nave Logística Ébano M115",
+        "estado": "Nuevo León",
+        "municipio": "Santa Catarina",
+        "direccion": "Versión de A",
+        "public_description": "Terreno de prueba ficticio PUBMARK-M115",
+        "contacto": "Lic. Ñúñez Pérez SNTL-CONTACT-M115-d80b5d tel. 55 0000 4347",
+        "notas_internas": "<i>Nota interna</i> SNTL-NOTE-M115-8e173d",
+        "superficie_m2": 174320.84,
+        "superficie_ha": 17.432084,
+        "afectaciones_pct": 0.1202,
+        "afectaciones_m2": 20953.36,
+        "asking_price": 77968482.11,
+        "asking_m2": 447.27,
+        "lat": 25.668657,
+        "lon": -100.459702,
+        "moneda": "USD",
+        "price_on_request": false,
+        "availability": "available"
+       },
+       "confirmations": {
+        "price": null,
+        "availability": null
+       },
+       "source_extra": {},
+       "attention": [
+        {
+         "kind": "unconfirmed",
+         "code": "price_unconfirmed",
+         "field": "asking_price",
+         "message": "El precio nunca se ha confirmado."
+        },
+        {
+         "kind": "unconfirmed",
+         "code": "availability_unconfirmed",
+         "field": "availability",
+         "message": "La disponibilidad nunca se ha confirmado."
+        }
+       ],
+       "revision_number": 2,
+       "created_at": "2026-10-05T23:41:52+00:00",
+       "created_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       },
+       "updated_at": "2026-10-05T23:41:54+00:00",
+       "updated_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "case": "CON-01",
+   "check": "same field: no partial write from B, A's value kept",
+   "status": "PASS",
+   "detail": 2
+  },
+  {
+   "case": "CON-01",
+   "check": "same field: history +1 only",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "same field: B reloads and deliberately saves",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "different fields: A saves N->N+1",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "different fields: stale B -> 409 conflict",
+   "status": "PASS",
+   "detail": [
+    409,
+    {
+     "error": "Otra persona guardó cambios en este terreno. Revisa su versión antes de guardar la tuya; tus datos no se han perdido.",
+     "detalle": {
+      "code": "conflict",
+      "current_version": 4,
+      "terreno": {
+       "id": "99c4f90d-0844-401d-aa3b-6c221d3349ac",
+       "version": 4,
+       "draft_revision_id": "5d1e9f2b-e6e2-4057-a494-449d4daee07a",
+       "published_revision_id": null,
+       "publication_state": "draft",
+       "public_visible": false,
+       "has_pending_changes": false,
+       "pending_changes": {},
+       "published_at": null,
+       "archived_at": null,
+       "draft": {
+        "terreno": "Nave Logística Ébano M115",
+        "estado": "Nuevo León",
+        "municipio": "Santa Catarina",
+        "direccion": "Versión de B",
+        "public_description": "Terreno de prueba ficticio PUBMARK-M115",
+        "contacto": "Lic. Ñúñez Pérez SNTL-CONTACT-M115-d80b5d tel. 55 0000 4347",
+        "notas_internas": "<i>Nota interna</i> SNTL-NOTE-M115-8e173d",
+        "superficie_m2": 15000.0,
+        "superficie_ha": 17.432084,
+        "afectaciones_pct": 0.1202,
+        "afectaciones_m2": 20953.36,
+        "asking_price": 77968482.11,
+        "asking_m2": 447.27,
+        "lat": 25.668657,
+        "lon": -100.459702,
+        "moneda": "USD",
+        "price_on_request": false,
+        "availability": "available"
+       },
+       "confirmations": {
+        "price": null,
+        "availability": null
+       },
+       "source_extra": {},
+       "attention": [
+        {
+         "kind": "unconfirmed",
+         "code": "price_unconfirmed",
+         "field": "asking_price",
+         "message": "El precio nunca se ha confirmado."
+        },
+        {
+         "kind": "unconfirmed",
+         "code": "availability_unconfirmed",
+         "field": "availability",
+         "message": "La disponibilidad nunca se ha confirmado."
+        },
+        {
+         "kind": "warning",
+         "field": "",
+         "code": "SUPERFICIE_INCONSISTENTE",
+         "severity": "error",
+         "message": "Superficie Ha (17.4321) equivale a 174,321 m², pero la columna m² dice 15,000."
+        },
+        {
+         "kind": "warning",
+         "field": "",
+         "code": "PRECIO_INCONSISTENTE",
+         "severity": "error",
+         "message": "Asking Price es 77,968,482 USD pero 447.27 USD/m² × 15,000 m² da 6,709,050 USD."
+        }
+       ],
+       "revision_number": 4,
+       "created_at": "2026-10-05T23:41:52+00:00",
+       "created_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       },
+       "updated_at": "2026-10-05T23:41:54+00:00",
+       "updated_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "case": "CON-01",
+   "check": "different fields: no partial write from B, A's value kept",
+   "status": "PASS",
+   "detail": 4
+  },
+  {
+   "case": "CON-01",
+   "check": "different fields: history +1 only",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "different fields: B reloads and deliberately saves",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "private note vs public field: A saves N->N+1",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "private note vs public field: stale B -> 409 conflict",
+   "status": "PASS",
+   "detail": [
+    409,
+    {
+     "error": "Otra persona guardó cambios en este terreno. Revisa su versión antes de guardar la tuya; tus datos no se han perdido.",
+     "detalle": {
+      "code": "conflict",
+      "current_version": 6,
+      "terreno": {
+       "id": "99c4f90d-0844-401d-aa3b-6c221d3349ac",
+       "version": 6,
+       "draft_revision_id": "1e1bae02-b42f-45ec-b4b3-8c90324b3ca5",
+       "published_revision_id": null,
+       "publication_state": "draft",
+       "public_visible": false,
+       "has_pending_changes": false,
+       "pending_changes": {},
+       "published_at": null,
+       "archived_at": null,
+       "draft": {
+        "terreno": "Nave Logística Ébano M115",
+        "estado": "Nuevo León",
+        "municipio": "Querétaro",
+        "direccion": "Versión de B",
+        "public_description": "Terreno de prueba ficticio PUBMARK-M115",
+        "contacto": "Lic. Ñúñez Pérez SNTL-CONTACT-M115-d80b5d tel. 55 0000 4347",
+        "notas_internas": "Nota de A SNTL-NOTE-CON01-000000",
+        "superficie_m2": 15000.0,
+        "superficie_ha": 17.432084,
+        "afectaciones_pct": 0.1202,
+        "afectaciones_m2": 20953.36,
+        "asking_price": 77968482.11,
+        "asking_m2": 447.27,
+        "lat": 25.668657,
+        "lon": -100.459702,
+        "moneda": "USD",
+        "price_on_request": false,
+        "availability": "available"
+       },
+       "confirmations": {
+        "price": null,
+        "availability": null
+       },
+       "source_extra": {},
+       "attention": [
+        {
+         "kind": "unconfirmed",
+         "code": "price_unconfirmed",
+         "field": "asking_price",
+         "message": "El precio nunca se ha confirmado."
+        },
+        {
+         "kind": "unconfirmed",
+         "code": "availability_unconfirmed",
+         "field": "availability",
+         "message": "La disponibilidad nunca se ha confirmado."
+        },
+        {
+         "kind": "warning",
+         "field": "",
+         "code": "SUPERFICIE_INCONSISTENTE",
+         "severity": "error",
+         "message": "Superficie Ha (17.4321) equivale a 174,321 m², pero la columna m² dice 15,000."
+        },
+        {
+         "kind": "warning",
+         "field": "",
+         "code": "PRECIO_INCONSISTENTE",
+         "severity": "error",
+         "message": "Asking Price es 77,968,482 USD pero 447.27 USD/m² × 15,000 m² da 6,709,050 USD."
+        }
+       ],
+       "revision_number": 6,
+       "created_at": "2026-10-05T23:41:52+00:00",
+       "created_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       },
+       "updated_at": "2026-10-05T23:41:54+00:00",
+       "updated_by": {
+        "id": "0f485c7f-7d97-4b0f-ba5f-75b86dea4e34",
+        "display_name": "Ana Verificadora SNTL-ACTOR-A-ced4ba"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "case": "CON-01",
+   "check": "private note vs public field: no partial write from B, A's value kept",
+   "status": "PASS",
+   "detail": 6
+  },
+  {
+   "case": "CON-01",
+   "check": "private note vs public field: history +1 only",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "CON-01",
+   "check": "private note vs public field: B reloads and deliberately saves",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "CON-01",
+   "check": "version is an integer counter distinct from revision ids",
+   "status": "PASS",
+   "detail": [
+    7,
+    "5b037f1a-baa1-4e26-b3e3-2b3de0ff1b1e"
+   ]
+  },
+  {
+   "case": "CON-01",
+   "check": "expected_version=12 refused",
+   "status": "PASS",
+   "detail": 409
+  },
+  {
+   "case": "CON-01",
+   "check": "expected_version=None refused",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "CON-01",
+   "check": "expected_version='1' refused",
+   "status": "PASS",
+   "detail": 422
+  },
+  {
+   "case": "CON-01",
+   "check": "3-way race: exactly one 200, others 409, winner's value persisted",
+   "status": "PASS",
+   "detail": {
+    "B": 200,
+    "A": 409,
+    "C": 409
+   }
+  },
+  {
+   "case": "ID-02",
+   "check": "wrong password -> 401",
+   "status": "PASS",
+   "detail": 401
+  },
+  {
+   "case": "ID-02",
+   "check": "unknown user -> 401, same message as wrong password (no enumeration)",
+   "status": "PASS",
+   "detail": [
+    "Usuario o contraseña incorrectos.",
+    "Usuario o contraseña incorrectos."
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "failed logins set no session cookie",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "case": "ID-02",
+   "check": "session cookie HttpOnly + SameSite",
+   "status": "PASS",
+   "detail": "ara_sesion"
+  },
+  {
+   "case": "ID-02",
+   "check": "Secure attribute on loopback cookie",
+   "status": "INFO",
+   "detail": "absent (loopback test policy; production must assert Secure)"
+  },
+  {
+   "case": "ID-02",
+   "check": "session cookie name as documented",
+   "status": "PASS",
+   "detail": "ara_sesion"
+  },
+  {
+   "case": "ID-02",
+   "check": "random session cookie -> anonymous + 401 internal",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "tampered session cookie -> anonymous + 401 internal",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "pre-change shared-password cookie grants nothing",
+   "status": "PASS",
+   "detail": [
+    401,
+    401,
+    401,
+    401
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "Origin https://evil.example: PATCH/POST rejected",
+   "status": "PASS",
+   "detail": [
+    403,
+    403
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "Origin null: PATCH/POST rejected",
+   "status": "PASS",
+   "detail": [
+    403,
+    403
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "Origin http://127.0.0.1.evil.example: PATCH/POST rejected",
+   "status": "PASS",
+   "detail": [
+    403,
+    403
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "cross-origin login rejected, no cookie",
+   "status": "PASS",
+   "detail": 403
+  },
+  {
+   "case": "ID-02",
+   "check": "no write happened via cross-origin",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "no signup endpoint accepts a new account",
+   "status": "PASS",
+   "detail": {
+    "/api/registro": [
+     401,
+     404
+    ],
+    "/api/register": [
+     401,
+     404
+    ],
+    "/api/signup": [
+     401,
+     404
+    ],
+    "/api/usuarios": [
+     401,
+     404
+    ],
+    "/api/users": [
+     401,
+     404
+    ],
+    "/api/cuentas": [
+     401,
+     404
+    ],
+    "/api/team": [
+     401,
+     404
+    ],
+    "/api/session": [
+     401,
+     405
+    ]
+   }
+  },
+  {
+   "case": "ID-02",
+   "check": "unprovisioned identity still cannot sign in",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "logout clears cookie",
+   "status": "PASS",
+   "detail": "cleared"
+  },
+  {
+   "case": "ID-02",
+   "check": "copied cookie after logout -> 401 internal read and write",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "other session of same user after logout",
+   "status": "INFO",
+   "detail": 200
+  },
+  {
+   "case": "ID-02",
+   "check": "anonymous logout is idempotent (2xx)",
+   "status": "PASS",
+   "detail": 200
+  },
+  {
+   "case": "ID-02",
+   "check": "expired session -> 401",
+   "status": "PASS",
+   "detail": "team_session.expires_at := 1 for user_id=user (3 rows)"
+  },
+  {
+   "case": "ID-02",
+   "check": "no password, hash material or session token in any response body",
+   "status": "PASS",
+   "detail": {
+    "markers": [],
+    "tokens_of": []
+   }
+  },
+  {
+   "case": "ID-02",
+   "check": "public config carries no secrets",
+   "status": "PASS",
+   "detail": {
+    "readOnly": false,
+    "cloud": false,
+    "authRequired": true,
+    "maxUploadBytes": 26214400
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "probe ids",
+   "status": "INFO",
+   "detail": {
+    "legacy": [
+     1,
+     2,
+     3,
+     4,
+     999999
+    ],
+    "inventory": 26
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "final registry enumerated",
+   "status": "INFO",
+   "detail": 46
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/carpetas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/formatos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/carpetas?tipo=bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/carpetas?tipo=mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/1/terrenos?ids=1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/mapas/2/terrenos?capa=1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos?limit=250&include_archived=true",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/nope",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/1/secreto",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/x/y/z",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/BASES",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api//bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases/",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/./bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases%2F1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/../../bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/..%2f..%2fbases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/../bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/config/../bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/session/../mapas/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/bases?x=/api/config",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenosX",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/exportar/",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/INVENTARIO/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos;x=1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario//terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos%2f",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos?cursor=../..",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos/%2e%2e/%2e%2e/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api/inventario/terrenos?limit=250&campos=contacto",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET //api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "//api/inventario/terrenos never yields API JSON anonymously",
+   "status": "PASS",
+   "detail": {
+    "status": 401,
+    "type": "application/json; charset=utf-8"
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "GET //api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "//api/bases/1/terrenos never yields API JSON anonymously",
+   "status": "PASS",
+   "detail": {
+    "status": 401,
+    "type": "application/json; charset=utf-8"
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /./api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "/./api/inventario/terrenos never yields API JSON anonymously",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "type": "text/html"
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] GET /api%2finventario%2fterrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "/api%2finventario%2fterrenos never yields API JSON anonymously",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "type": "text/html"
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /./api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "/./api/bases/1/terrenos never yields API JSON anonymously",
+   "status": "PASS",
+   "detail": {
+    "status": 200,
+    "type": "text/html"
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "HEAD /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "OPTIONS /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/carpetas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/formatos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/1/adjuntar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/2/adjuntar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/3/adjuntar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/4/adjuntar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/999999/adjuntar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/bases/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/carpetas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/importar/analizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/importar/confirmar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/importar/preparar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/importar/vista-previa",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/archivar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/despublicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/publicar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] POST /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/restaurar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/1/actualizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/2/actualizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/3/actualizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/4/actualizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/999999/actualizar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/combinar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/mapas/combinar/vista-previa",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/exportar",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/1/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/2/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/3/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/4/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/bases/999999/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/carpetas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/formatos/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] PATCH /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/1/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/2/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/3/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/4/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PATCH /api/mapas/999999/carpeta",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "PUT /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/bases/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/carpetas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/formatos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/historial",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/021d9399-1a43-47e6-b019-accce0620c88/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11601e19-b7a9-4009-b075-4108e819a381/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1423a788-900a-4c8a-92d0-30d06834c807/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "[S1-blocking] DELETE /api/inventario/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2/vista-publica",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/999999",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/1/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/2/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/3/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/4/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "DELETE /api/mapas/999999/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/config",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "config has no secret-looking keys",
+   "status": "PASS",
+   "detail": {
+    "readOnly": false,
+    "cloud": false,
+    "authRequired": true,
+    "maxUploadBytes": 26214400
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/session",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "anonymous session is exactly {authenticated:false}",
+   "status": "PASS",
+   "detail": {
+    "authenticated": false
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/login",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "POST /api/logout",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "public list envelope + exact PublicTerrain keys",
+   "status": "PASS",
+   "detail": {
+    "envelope": [
+     "facets",
+     "next_cursor",
+     "terrenos",
+     "total"
+    ],
+    "bad": []
+   }
+  },
+  {
+   "case": "LEAK",
+   "check": "public list Cache-Control no-store",
+   "status": "PASS",
+   "detail": "no-store"
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos?campos=contacto&include_private=1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/feb10a91-3187-42fe-9cf6-fe6d15270283",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/021d9399-1a43-47e6-b019-accce0620c88",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/0356f1b8-9df3-4dcf-b1ee-63cbc362f254",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/04f64de0-45f1-4977-92b1-334f3ad74a37",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/0568819c-55fb-454e-b6ad-42f45e36e705",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/07f57a45-3411-4573-8a42-056d3f95f5b3",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/0a0498b0-3406-48af-8a08-4187eb9e911e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/0c672bc0-9d49-4cec-97c7-d8e7ead37c03",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/1005b1a8-d819-4c0c-8b20-5bda7070f90d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/10f8fe17-631b-43fd-a606-e340f7f94b91",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/11601e19-b7a9-4009-b075-4108e819a381",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/11a8cca8-ff65-4860-b2ea-ea76d94d464d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/11bd5edb-993e-4296-ad2d-d445f9954a68",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/12dc59fe-cf3f-4056-96ce-061feb5daa39",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/1423a788-900a-4c8a-92d0-30d06834c807",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/16cc9536-64b4-4174-9e75-d329842a15f1",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/1990a3e6-e50e-4c80-bfff-c579bf317b46",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/2043efc3-76d3-4904-a288-fefbf6ace0be",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/2143573f-c6ca-4132-8dfe-e272479461ec",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/218d344c-ec1b-48a4-840c-afcfbd429e6d",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/258b96a1-8474-4151-896f-ab66c3d657a4",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/28e91068-b78d-4661-bee1-caea3ecd4d1e",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/2c1765c9-69ea-47d8-bb04-3077f5b5baba",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/2ea950d7-05c6-4c27-a243-36f8b7fbea1a",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/3085622d-8982-40c6-8f8b-5fb07cd3bbb6",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "GET /api/publico/terrenos/324afa61-359a-4849-8586-472e1dc8a2e2",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "LEAK",
+   "check": "non-public detail 404 bodies indistinguishable (draft vs nonexistent)",
+   "status": "PASS",
+   "detail": 1
+  },
+  {
+   "case": "LEAK",
+   "check": "static assets scanned",
+   "status": "INFO",
+   "detail": "zero hits unless FAIL rows above"
+  },
+  {
+   "case": "LEAK",
+   "check": "signed-in unknown /api route -> 404 (§9.2)",
+   "status": "PASS",
+   "detail": 404
+  },
+  {
+   "case": "LEAK",
+   "check": "after logout the same client gets 401 on legacy reads",
+   "status": "PASS",
+   "detail": 401
+  },
+  {
+   "case": "LEAK",
+   "check": "sentinel hits across all anonymous responses == 0",
+   "status": "PASS",
+   "detail": 0
+  },
+  {
+   "case": "ID-02",
+   "check": "password reset ends the user's existing session",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "old password refused after reset",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "new password accepted after reset",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "deactivation ends the user's existing session",
+   "status": "PASS",
+   "detail": null
+  },
+  {
+   "case": "ID-02",
+   "check": "deactivated user cannot sign in (generic 401)",
+   "status": "PASS",
+   "detail": 401
+  },
+  {
+   "case": "ID-02",
+   "check": "no response grants cross-origin reads (Access-Control-Allow-Origin absent)",
+   "status": "PASS",
+   "detail": []
+  },
+  {
+   "case": "ID-02",
+   "check": "repeated failed logins never succeed; throttled or uniformly 401",
+   "status": "PASS",
+   "detail": [
+    401,
+    401,
+    401,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429,
+    429
+   ]
+  },
+  {
+   "case": "ID-02",
+   "check": "throttle engaged",
+   "status": "INFO",
+   "detail": "429 seen: True"
+  },
+  {
+   "case": "ID-02",
+   "check": "other user can still sign in from same address after X's failures",
+   "status": "INFO",
+   "detail": 200
+  },
+  {
+   "case": "ID-02",
+   "check": "no password or live session token in server/provisioning logs",
+   "status": "PASS",
+   "detail": []
+  }
+ ]
+}

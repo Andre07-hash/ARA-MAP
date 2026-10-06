@@ -1,0 +1,5124 @@
+[
+ {
+  "method": "GET",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 400
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/formatos",
+  "path": "/api/formatos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas",
+  "path": "/api/mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas?tipo=bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas?tipo=mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/bases/1/terrenos",
+  "path": "/api/bases/1/terrenos?ids=1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/mapas/2/terrenos",
+  "path": "/api/mapas/2/terrenos?capa=1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos?limit=250&include_archived=true",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 405
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/nope",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/bases/1/secreto",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/inventario",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/inventario/terrenos/x/y/z",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/BASES",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api//bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/bases/",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/./bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/bases%2F1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/publico/terrenos/../../bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/publico/terrenos/..%2f..%2fbases",
+  "body": null,
+  "anon_status": 404,
+  "expected": [
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/publico/../bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/config/../bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/session/../mapas/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/bases?x=/api/config",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/publico/terrenosX",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/publico",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<unknown>",
+  "path": "/api/exportar/",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos/",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/INVENTARIO/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos;x=1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario//terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos%2f",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos?cursor=../..",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos/%2e%2e/%2e%2e/bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "<inv-trick>",
+  "path": "/api/inventario/terrenos?limit=250&campos=contacto",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 422
+ },
+ {
+  "method": "GET",
+  "pattern": "<shell>",
+  "path": "//api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   200,
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "<shell>",
+  "path": "//api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   200,
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "<shell>",
+  "path": "/./api/inventario/terrenos",
+  "body": null,
+  "anon_status": 200,
+  "expected": [
+   200,
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html",
+  "cache_control": "no-cache",
+  "stage1_blocking": true,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "<shell>",
+  "path": "/api%2finventario%2fterrenos",
+  "body": null,
+  "anon_status": 200,
+  "expected": [
+   200,
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html",
+  "cache_control": "no-cache",
+  "stage1_blocking": true
+ },
+ {
+  "method": "GET",
+  "pattern": "<shell>",
+  "path": "/./api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 200,
+  "expected": [
+   200,
+   401,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html",
+  "cache_control": "no-cache",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "HEAD",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 501,
+  "expected": [
+   401,
+   405,
+   501
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html;charset=utf-8",
+  "cache_control": null,
+  "stage1_blocking": false
+ },
+ {
+  "method": "OPTIONS",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 501,
+  "expected": [
+   401,
+   405,
+   501
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html;charset=utf-8",
+  "cache_control": null,
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/formatos",
+  "path": "/api/formatos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas",
+  "path": "/api/mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/adjuntar",
+  "path": "/api/bases/1/adjuntar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/adjuntar",
+  "path": "/api/bases/2/adjuntar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/adjuntar",
+  "path": "/api/bases/3/adjuntar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/adjuntar",
+  "path": "/api/bases/4/adjuntar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/adjuntar",
+  "path": "/api/bases/999999/adjuntar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/importar/analizar",
+  "path": "/api/importar/analizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/importar/confirmar",
+  "path": "/api/importar/confirmar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/importar/preparar",
+  "path": "/api/importar/preparar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/importar/vista-previa",
+  "path": "/api/importar/vista-previa",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/archivar",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/archivar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/despublicar",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/despublicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/publicar",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/publicar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/inventario/terrenos/:id/restaurar",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/restaurar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas",
+  "path": "/api/mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/actualizar",
+  "path": "/api/mapas/1/actualizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/actualizar",
+  "path": "/api/mapas/2/actualizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/actualizar",
+  "path": "/api/mapas/3/actualizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/actualizar",
+  "path": "/api/mapas/4/actualizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/:id/actualizar",
+  "path": "/api/mapas/999999/actualizar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/combinar",
+  "path": "/api/mapas/combinar",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/mapas/combinar/vista-previa",
+  "path": "/api/mapas/combinar/vista-previa",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {},
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "base_id": 1
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "base_id": 1,
+   "ids": []
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "base_id": 1,
+   "ids": [
+    1,
+    2,
+    3
+   ]
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "mapa_id": 1
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "mapa_id": 2
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "mapa_id": 3,
+   "nombre": "x"
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "base_id": "1"
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/exportar",
+  "path": "/api/exportar",
+  "body": {
+   "base_id": 2,
+   "ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+   ]
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos",
+  "path": "/api/formatos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas",
+  "path": "/api/mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/carpeta",
+  "path": "/api/bases/1/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/carpeta",
+  "path": "/api/bases/2/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/carpeta",
+  "path": "/api/bases/3/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/carpeta",
+  "path": "/api/bases/4/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/bases/:id/carpeta",
+  "path": "/api/bases/999999/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/carpeta",
+  "path": "/api/mapas/1/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/carpeta",
+  "path": "/api/mapas/2/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/carpeta",
+  "path": "/api/mapas/3/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/carpeta",
+  "path": "/api/mapas/4/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PATCH",
+  "pattern": "/api/mapas/:id/carpeta",
+  "path": "/api/mapas/999999/carpeta",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "PUT",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 501,
+  "expected": [
+   401,
+   405,
+   501
+  ],
+  "sentinel_hits": [],
+  "content_type": "text/html;charset=utf-8",
+  "cache_control": null,
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas/:id",
+  "path": "/api/carpetas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos/:id",
+  "path": "/api/formatos/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases",
+  "path": "/api/bases",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id",
+  "path": "/api/bases/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/bases/:id/terrenos",
+  "path": "/api/bases/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/carpetas",
+  "path": "/api/carpetas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/formatos",
+  "path": "/api/formatos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos",
+  "path": "/api/inventario/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/historial",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/historial",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/inventario/terrenos/:id/vista-publica",
+  "path": "/api/inventario/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d/vista-publica",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": true
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas",
+  "path": "/api/mapas",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/1",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/2",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/3",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/4",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id",
+  "path": "/api/mapas/999999",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/1/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/2/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/3/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/4/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "DELETE",
+  "pattern": "/api/mapas/:id/terrenos",
+  "path": "/api/mapas/999999/terrenos",
+  "body": null,
+  "anon_status": 401,
+  "expected": [
+   401,
+   405
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/config",
+  "path": "/api/config",
+  "body": null,
+  "anon_status": 200,
+  "expected": 200,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/session",
+  "path": "/api/session",
+  "body": null,
+  "anon_status": 200,
+  "expected": 200,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/login",
+  "path": "/api/login",
+  "body": {
+   "username": "nadie",
+   "password": "x"
+  },
+  "anon_status": 401,
+  "expected": 401,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "POST",
+  "pattern": "/api/logout",
+  "path": "/api/logout",
+  "body": null,
+  "anon_status": 200,
+  "expected": [
+   200,
+   204
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos",
+  "path": "/api/publico/terrenos",
+  "body": null,
+  "anon_status": 200,
+  "expected": [
+   200,
+   404
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 200
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos",
+  "path": "/api/publico/terrenos?campos=contacto&include_private=1",
+  "body": null,
+  "anon_status": 422,
+  "expected": [
+   200,
+   422
+  ],
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 422
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/e3a75b8d-5911-482c-bf55-fb4578243416",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/b9bdfa85-2e03-4ba8-97bf-1ce9fbc46093",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/595eac0c-4d69-46d0-a507-0f4073f06b80",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/dd67deb4-f523-456b-85ce-fe82f862023d",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/1b1d37b8-80bc-46b7-9e62-4fdf426e4a24",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/f7f9ce94-0f52-4967-8689-a6febaaa2ce5",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/cfa7ad83-051c-4834-b0d8-4666228cd9d6",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ },
+ {
+  "method": "GET",
+  "pattern": "/api/publico/terrenos/:id",
+  "path": "/api/publico/terrenos/0a3f97e9-4fb6-4ab2-abed-d8a98a5dcf1d",
+  "body": null,
+  "anon_status": 404,
+  "expected": 404,
+  "sentinel_hits": [],
+  "content_type": "application/json; charset=utf-8",
+  "cache_control": "no-store",
+  "stage1_blocking": false,
+  "auth_status": 404
+ }
+]

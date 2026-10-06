@@ -1,0 +1,38 @@
+openpyxl /home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/runtime/lib/python3.12/site-packages/openpyxl/__init__.py
+Traceback (most recent call last):
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/app.py", line 171, in _dispatch
+    result = handler(request)
+             ^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/api/sesion.py", line 44, in login
+    token, user, throttled = auth.login(conn, data.get("username"), data.get("password"),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/auth.py", line 180, in login
+    conn.execute("DELETE FROM team_login_failure WHERE failed_at < ?",
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/postgres.py", line 87, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/runtime/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedTable: relation "team_login_failure" does not exist
+LINE 1: DELETE FROM team_login_failure WHERE failed_at < $1
+                    ^
+  "POST /api/login HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/app.py", line 171, in _dispatch
+    result = handler(request)
+             ^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/api/inventario.py", line 286, in public_listing
+    candidates = repo.public_records(conn)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/repo/inventario.py", line 103, in public_records
+    rows = conn.execute(_PUBLIC_SELECT, inventario.PUBLIC_AVAILABILITY).fetchall()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/bundle/server/postgres.py", line 87, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/ARA-MAP/reports/github-vercel-readiness-2026-10-05/rehearsal/run-stage2-d2967f1/work/runtime/lib/python3.12/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedTable: relation "inventory_terrain" does not exist
+LINE 4: FROM inventory_terrain t
+             ^
+  "GET /api/publico/terrenos HTTP/1.1" 500 -

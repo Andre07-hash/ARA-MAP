@@ -1,5 +1,7 @@
 # ARA Map release before BigQuery
 
+Current developer assignment: [supervisor completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md). Read the [GitHub coordination protocol](COORDINATION.md) before submitting the next report. These documents govern the next work; the infrastructure observations below remain historical evidence for their named commits.
+
 Owner decisions confirmed October 6, 2026. This file supersedes the previous packet where its order or storage requirements differ.
 
 ## Required release

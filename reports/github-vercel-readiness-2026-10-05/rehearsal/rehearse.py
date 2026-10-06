@@ -51,7 +51,7 @@ HERE = Path(__file__).resolve().parent
 REPO_URL = "https://github.com/Andre07-hash/ARA-MAP.git"
 LEGACY_TABLES = ("carpeta", "base", "terreno", "incidencia", "mapa", "mapa_capa",
                  "mapa_terreno", "formato_importacion", "importacion")
-PG_BIN = Path("/usr/lib/postgresql/16/bin")
+PG_BIN = Path(os.environ.get("ARA_REHEARSAL_PG_BIN", "/usr/lib/postgresql/16/bin"))
 SAFE_ENV = {k: v for k, v in os.environ.items()
             if k not in ("DATABASE_URL", "ARA_MAP_DATABASE_URL", "ARA_MAP_TEST_DATABASE_URL")}
 
@@ -153,11 +153,14 @@ def main() -> int:
         if not args.private_dir:
             raise SystemExit("--backup needs --private-dir (outside the repository) for data-bearing files")
         private = args.private_dir.resolve()
-        inside = run(["git", "-C", str(private.parent if not private.exists() else private),
+        ancestor = private
+        while not ancestor.exists():
+            ancestor = ancestor.parent
+        inside = run(["git", "-C", str(ancestor),
                       "rev-parse", "--show-toplevel"])
         if inside.returncode == 0:
             raise SystemExit("REFUSING: --private-dir is inside a Git working tree; real data must stay out of Git")
-        private.mkdir(parents=True, exist_ok=False)
+        private.mkdir(parents=True, exist_ok=False, mode=0o700)
         backup_sha = hashlib.sha256(args.backup.read_bytes()).hexdigest()
     if urlsplit(args.pg_admin_url).hostname not in ("127.0.0.1", "localhost"):
         raise SystemExit("REFUSING: loopback disposable Postgres only")
@@ -166,7 +169,7 @@ def main() -> int:
     if args.backup:
         record("backup-input mode: data-bearing files go only to the private directory", True,
                {"backup_sha256": backup_sha})
-    work = out / "work"
+    work = (private or out) / "work"
     work.mkdir()
     stamp = uuid.uuid4().hex[:8]
     db_main, db_restore = f"ensayo_{stamp}", f"ensayo_restaurado_{stamp}"
@@ -179,7 +182,7 @@ def main() -> int:
     record("fresh clone at the reviewed commit", r.returncode == 0 and r2.returncode == 0 and head == args.commit,
            {"head": head})
     if head != args.commit:
-        return finish(out)
+        return finish(out, private)
     record("clean checkout has no local-only files",
            not any((clone / p).exists() for p in (".venv-dev", ".env.local", "datos", "api/data", ".cloud-access.txt")))
 
@@ -229,12 +232,15 @@ def main() -> int:
     url = with_db(args.pg_admin_url, db_main)
     if args.backup:
         custom = run([str(PG_BIN / "pg_restore"), "-l", str(args.backup)]).returncode == 0
-        r = (run([str(PG_BIN / "pg_restore"), "--no-owner", "--no-acl", "-d", url, str(args.backup)]) if custom
-             else run(["psql", "-q", "-v", "ON_ERROR_STOP=0", "-d", url, "-f", str(args.backup)]))
+        r = (run([str(PG_BIN / "pg_restore"), "--exit-on-error", "--no-owner", "--no-acl", "-d", url, str(args.backup)]) if custom
+             else run(["psql", "-q", "-v", "ON_ERROR_STOP=1", "-d", url, "-f", str(args.backup)]))
+        if r.returncode != 0:
+            record("supplied backup restored completely", False, {"exit_code": r.returncode})
+            return finish(out, private)
         version = scalar(url, "SELECT value FROM workspace_metadata WHERE key = 'schema_version'")
         counts = {t: scalar(url, f"SELECT COUNT(*) FROM {t}") for t in ("base", "terreno", "mapa")}
         record("supplied backup restored into a new loopback database (fictional seed skipped)",
-               counts["base"] is not None and str(version) in ("7", "8"),
+               r.returncode == 0 and counts["base"] is not None and str(version) == "7",
                {"format": "custom" if custom else "plain", "schema_version": version, "counts": counts,
                 "restore_errors": r.stderr.count("ERROR")})
     else:
@@ -245,6 +251,8 @@ def main() -> int:
         record("schema-7 workspace built by the pre-change code: 3 bases / 104 terrains / 2 maps",
                built.get("schema_version") == 7 and counts == {"base": 3, "terreno": 104, "mapa": 2},
                {"built": built, "counts": counts})
+    if args.backup and str(version) != "7":
+        return finish(out, private)
     expected = expectations(url)
     before = legacy_digest(url)
     (out / "legacy_digest_before.json").write_text(json.dumps(before, indent=2))
@@ -346,7 +354,9 @@ def main() -> int:
             snap[str(m["id"])] = [s2, len(b2.get("terrenos", [])) if s2 == 200 else None]
         record(f"signed in: all {len(expected['mapas'])} saved maps reopen with their frozen terrains",
                snap == {k: [200, n] for k, n in expected["mapas"].items()}, snap)
-        fixture = (clone / "tests" / "fixtures" / "base_terrenos_09_26.xlsx").read_bytes()
+        sys.path.insert(0, str(HERE.parent / "preview"))
+        from preview_smoke import fictional_workbook
+        fixture = fictional_workbook()
         st, prev, _ = adapter.call("POST", "/api/importar/vista-previa", headers={
             **jar, "Content-Type": "application/octet-stream", "X-Archivo": "fixture.xlsx"}, raw=fixture)
         ok_prev = st == 200 and "token" in prev
@@ -407,11 +417,12 @@ def finish(out: Path, private: Path | None = None) -> int:
     fails = sum(r["result"] == "FAIL" for r in results)
     (out / "results.json").write_text(json.dumps(
         {"results": results, "pass": len(results) - fails, "fail": fails}, indent=2, ensure_ascii=False, default=str))
-    for log in (out / "work").glob("adapter-*.log"):  # may name real records: private in backup mode
+    work = (private or out) / "work"
+    for log in work.glob("adapter-*.log"):  # may name real records: private in backup mode
         shutil.move(str(log), (private or out) / log.name)
-    shutil.rmtree(out / "work" / "runtime", ignore_errors=True)
-    shutil.rmtree(out / "work" / "clone", ignore_errors=True)
-    shutil.rmtree(out / "work" / "bundle", ignore_errors=True)
+    shutil.rmtree(work / "runtime", ignore_errors=True)
+    shutil.rmtree(work / "clone", ignore_errors=True)
+    shutil.rmtree(work / "bundle", ignore_errors=True)
     print(f"\n{len(results) - fails} PASS, {fails} FAIL")
     return 1 if fails else 0
 

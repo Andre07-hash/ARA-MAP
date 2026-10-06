@@ -1,6 +1,8 @@
 # Preview setup runbook — for the supervisor's Mac session
 
-October 6, 2026. The developer container cannot reach Vercel or Neon (its network policy denies `api.vercel.com` and `console.neon.tech`) and holds no credentials for them. These steps are for the authenticated Mac session.
+October 6, 2026. **Mac execution results and current release scope:** [release before BigQuery](../../release-before-bigquery-2026-10-06/START_HERE.md). The real Preview is provisioned; do not repeat branch/account creation.
+
+ The developer container cannot reach Vercel or Neon (its network policy denies `api.vercel.com` and `console.neon.tech`) and holds no credentials for them. These steps are for the authenticated Mac session.
 
 **Ground rules:**
 - Never paste a token, password or connection string into chat, a PR or a commit.
@@ -118,7 +120,9 @@ vercel deploy                      # never --prod; prints the Preview URL
 vercel inspect <preview-url>       # record the deployment id (dpl_…) and target "preview"
 ```
 
-If Deployment Protection is on, create a "Protection Bypass for Automation" secret under Project → Settings → Deployment Protection. Export it only in your shell.
+For Deployment Protection, prefer a fresh development OIDC token from `vercel env pull` into a private file. An existing `.env.local` can override the fresh value in `vercel env run`; check token expiry without printing it. Use `x-vercel-trusted-oidc-idp-token`. The smoke client accepts `VERCEL_OIDC_TOKEN`; a pre-existing bypass secret is optional. Do not disable protection.
+
+Before any smoke-test writes, retrieve the deployment through `vercel api /v13/deployments/<id>` and save its metadata privately. The smoke test requires the expected project, Preview target, READY state, exact hostname and reviewed commit.
 
 ## F. Verify the hosted Preview
 
@@ -127,6 +131,7 @@ export ARA_PREVIEW_PASSWORD=…                 # the fictional account's passwo
 export VERCEL_AUTOMATION_BYPASS_SECRET=…      # only if protection is on
 python3 reports/github-vercel-readiness-2026-10-05/preview/preview_smoke.py \
     --url <preview-url> --commit $SHA --user ensayo.preview \
+    --deployment-json /private/path/preview-deployment.json \
     --out reports/github-vercel-readiness-2026-10-05/preview/run-${SHA:0:7}
 ```
 
@@ -186,3 +191,11 @@ Commit `preview/run-<sha7>/results.json`. It holds statuses, counts and hashes o
    - It writes data-bearing files (dumps, adapter logs) only there.
    - `--out` then gets counts, ids and digests only, safe to commit.
 4. **Rollback plan.** A maintenance or read-only window covering the migration, plus the restore of the pre-migration dump. Restoring discards writes made after the backup. Then re-promote `dpl_3vsdvzhV86Y1goinejgcHP83vNML`. Do not roll the live site back merely as a demonstration.
+
+## Mac verification corrections
+
+The hosted smoke now generates three fictional workbook rows in memory; the repository XLSX fixture contains real terrain records and must not be uploaded as fictional data. HTTP header names are normalized, cross-origin redirects are refused, and deployment identity is checked before any write.
+
+Backup rehearsal now stops on restore errors, supports schema-7 input explicitly, checks the nearest existing ancestor of the private directory, and keeps temporary runtime/log files outside Git from the start. Use `ARA_REHEARSAL_PG_BIN` to select the installed Postgres binaries on macOS; a version capable of reading the production dump is required. These corrections have not yet established the real-production-backup gate.
+
+After `vercel env pull`, compare the list of actual environment keys/targets using the Vercel API. Secret values may be omitted by env pull; missing secrets cannot be treated as proof of isolation. The Mac verification compared all 18 existing production values privately and verified Preview has exactly its two dedicated URLs with no branch overrides.

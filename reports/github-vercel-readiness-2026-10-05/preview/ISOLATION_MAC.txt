@@ -1,0 +1,31 @@
+Variable                         Preview                                  Production
+DATABASE_URL                     ep-wispy-feather-av1oxmt1 ara_preview ara_preview ep-orange-mountain-av5088lz neondb neondb_owner
+DATABASE_URL_UNPOOLED            ep-wispy-feather-av1oxmt1 ara_preview ara_preview ep-orange-mountain-av5088lz neondb neondb_owner
+NEON_AUTH_BASE_URL               unset                                    set
+NEON_PROJECT_ID                  unset                                    set
+PGDATABASE                       unset                                    neondb
+PGHOST                           unset                                    ep-orange-mountain-av5088lz
+PGHOST_UNPOOLED                  unset                                    set
+PGPASSWORD                       unset                                    set (secret)
+PGUSER                           unset                                    neondb_owner
+POSTGRES_DATABASE                unset                                    neondb
+POSTGRES_HOST                    unset                                    ep-orange-mountain-av5088lz
+POSTGRES_PASSWORD                unset                                    set (secret)
+POSTGRES_PRISMA_URL              unset                                    ep-orange-mountain-av5088lz neondb neondb_owner
+POSTGRES_URL                     unset                                    ep-orange-mountain-av5088lz neondb neondb_owner
+POSTGRES_URL_NON_POOLING         unset                                    ep-orange-mountain-av5088lz neondb neondb_owner
+POSTGRES_URL_NO_SSL              unset                                    ep-orange-mountain-av5088lz neondb neondb_owner
+POSTGRES_USER                    unset                                    neondb_owner
+VITE_NEON_AUTH_URL               unset                                    set
+
+Effective Preview database (from DATABASE_URL): endpoint ep-wispy-feather-av1oxmt1, db ara_preview
+Paid-AI settings in Preview: OPENAI_API_KEY=unset, ARA_MAP_IA_CLAVE=unset, ARA_MAP_IA_PROVEEDOR=unset
+Connected read-only: database ara_preview, role ara_preview, PostgreSQL 18.6 (4e955f5) on aarch64-unknown-linux-gnu
+Schema version: 8
+  base               0
+  terreno            0
+  mapa               0
+  team_user          1
+  inventory_terrain  0
+
+PASS  Preview is isolated from Production

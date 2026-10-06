@@ -1,5 +1,7 @@
 # ARA Map — developer assignment: connected Excel and BigQuery
 
+> **October 6 update:** [Release before BigQuery](../release-before-bigquery-2026-10-06/START_HERE.md) supersedes this plan: connected Microsoft Excel Refresh and a working online app now, with Neon storage; BigQuery afterward.
+
 > **Priority 0: GitHub/Vercel readiness now comes first.** Follow the [repository and deployment prerequisite](../github-vercel-readiness-2026-10-05/START_HERE.md) before continuing Excel + BigQuery implementation. The owner requested this order after moving development to GitHub.
 
 Issued October 5, 2026 following the owner's instruction to proceed with the revised plan. Status: implementation packet prepared; developers have not been dispatched by this task. No implementation, cloud provisioning, migration or deployment is claimed here.

@@ -5,13 +5,14 @@ Run on a machine that can reach the deployment (the supervisor's Mac), from a
 checkout of the repository:
 
     export ARA_PREVIEW_PASSWORD=...          # a FICTIONAL Preview account; never on argv
-    export VERCEL_AUTOMATION_BYPASS_SECRET=... # only if Deployment Protection is on
+    # Load a fresh VERCEL_OIDC_TOKEN from a private `vercel env pull` file.
     python3 reports/github-vercel-readiness-2026-10-05/preview/preview_smoke.py \
         --url https://<preview>.vercel.app --commit <sha> --user <fictional login> \
+        --deployment-json <private deployment metadata file> \
         --out reports/github-vercel-readiness-2026-10-05/preview/run-<sha7>
 
 It refuses the production alias and anything that is not *.vercel.app. It
-creates a fictional base (from tests/fixtures), a saved map and an inventory
+creates a fictional base (generated in memory), a saved map and an inventory
 draft, all named "Ensayo Preview <stamp>", and leaves them for inspection
 unless --cleanup is given. results.json contains statuses, counts and hashes
 only: no cookie, password or secret.
@@ -26,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import subprocess
@@ -37,13 +39,32 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[3]
-PRODUCTION_HOSTS = {"ara-map-ivory.vercel.app"}
+PRODUCTION_HOSTS = {"ara-map-ivory.vercel.app", "ara-jysgewccu-aicore2.vercel.app"}
 results: list[dict] = []
 
 
 def record(step: str, ok: bool, detail: object = None) -> None:
     results.append({"step": step, "result": "PASS" if ok else "FAIL", "detail": detail})
     print(f"{'PASS' if ok else 'FAIL'}  {step}" + (f"  {detail}" if detail is not None else ""), flush=True)
+
+
+def fictional_workbook() -> bytes:
+    from openpyxl import Workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Registro Análisis"
+    ws.append(["ID", "Terreno", "Estado", "Municipio", "Superficie m2", "Asking Price", "X", "Y"])
+    for i in range(1, 4):
+        ws.append([i, f"Lote ficticio {i}", "Estado de México", "Municipio de ensayo", 1000 * i,
+                   100000 * i, 19.4 + i / 100, -99.1 - i / 100])
+    out = io.BytesIO()
+    wb.save(out)
+    return out.getvalue()
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None  # Never forward an authentication header to another origin.
 
 
 class Client:
@@ -57,6 +78,8 @@ class Client:
         hdrs = {"Accept": "application/json", "Origin": self.base, **(headers or {})}
         if self.bypass:
             hdrs["x-vercel-protection-bypass"] = self.bypass
+        if os.environ.get("VERCEL_OIDC_TOKEN"):
+            hdrs["x-vercel-trusted-oidc-idp-token"] = os.environ["VERCEL_OIDC_TOKEN"]
         if self.cookie:
             hdrs["Cookie"] = self.cookie
         data = raw if raw is not None else (json.dumps(body).encode() if body is not None else None)
@@ -64,18 +87,18 @@ class Client:
             hdrs["Content-Type"] = "application/json"
         req = urllib.request.Request(self.base + path, data=data, method=method, headers=hdrs)
         try:
-            with urllib.request.urlopen(req, timeout=90) as r:
-                status, payload, h = r.status, r.read(), dict(r.headers)
+            with urllib.request.build_opener(NoRedirect()).open(req, timeout=90) as r:
+                status, payload, h = r.status, r.read(), {k.lower(): v for k, v in r.headers.items()}
         except urllib.error.HTTPError as e:
-            status, payload, h = e.code, e.read(), dict(e.headers)
-        ctype = h.get("Content-Type", "")
+            status, payload, h = e.code, e.read(), {k.lower(): v for k, v in e.headers.items()}
+        ctype = h.get("content-type", "")
         parsed = json.loads(payload) if "json" in ctype and payload else payload
         return status, parsed, h
 
     def login(self, user: str, password: str) -> tuple[int, dict]:
         status, body, h = self.call("POST", "/api/login", {"username": user, "password": password})
         if status == 200:
-            self.cookie = h.get("Set-Cookie", "").split(";")[0]
+            self.cookie = h.get("set-cookie", "").split(";")[0]
         return status, h
 
 
@@ -88,6 +111,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", required=True)
     ap.add_argument("--commit", required=True)
+    ap.add_argument("--deployment-json", type=Path, help="Vercel API deployment metadata, verified before writes")
     ap.add_argument("--user", required=True)
     ap.add_argument("--password-env", default="ARA_PREVIEW_PASSWORD")
     ap.add_argument("--bypass-env", default="VERCEL_AUTOMATION_BYPASS_SECRET")
@@ -103,11 +127,23 @@ def main() -> int:
             raise SystemExit("REFUSING: --selftest-loopback is for 127.0.0.1 only")
     elif host in PRODUCTION_HOSTS or not host.endswith(".vercel.app") or urlsplit(args.url).scheme != "https":
         raise SystemExit("REFUSING: give an https://<preview>.vercel.app URL, never the production alias")
+    if not args.selftest_loopback:
+        if not args.deployment_json:
+            raise SystemExit("REFUSING: --deployment-json is required to prove this is a Preview")
+        deployment = json.loads(args.deployment_json.read_text())
+        if ("target" not in deployment or deployment.get("target") not in (None, "preview")
+                or deployment.get("readyState") != "READY"
+                or deployment.get("projectId") != "prj_M8FX8MdxYKNC5GcQ3aB9B8DzPkjZ"
+                or deployment.get("url") != host
+                or deployment.get("id") == "dpl_3vsdvzhV86Y1goinejgcHP83vNML"):
+            raise SystemExit("REFUSING: deployment metadata does not identify the expected ready Preview")
     password = os.environ.get(args.password_env)
     if not password:
         raise SystemExit(f"Set {args.password_env} (fictional Preview account) in the environment")
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", args.commit],
                             capture_output=True, text=True, check=True).stdout.strip()
+    if not args.selftest_loopback and deployment.get("meta", {}).get("githubCommitSha") != commit:
+        raise SystemExit("REFUSING: deployment commit does not match the reviewed commit")
     args.out.mkdir(parents=True, exist_ok=False)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     a = Client(args.url, os.environ.get(args.bypass_env))
@@ -123,16 +159,19 @@ def main() -> int:
         same[path] = hashlib.sha256(served).hexdigest() == hashlib.sha256(git_file(commit, path)).hexdigest()
     record(f"static files are byte-identical to {commit[:7]}", all(same.values()), same)
 
+    if not all(same.values()):
+        return finish(args.out)
+
     # Anonymous policy.
     status, cfg, h = a.call("GET", "/api/config")
-    record("anonymous /api/config (cloud, no-store)", status == 200 and cfg.get("cloud") is True
+    record("anonymous /api/config (cloud, no-store)", status == 200 and isinstance(cfg, dict) and cfg.get("cloud") is True
            and h.get("Cache-Control", h.get("cache-control")) == "no-store", cfg)
     record("anonymous /api/session", a.call("GET", "/api/session")[1] == {"authenticated": False})
     record("anonymous legacy data is private", a.call("GET", "/api/bases")[0] == 401)
 
     # Sign-in.
     status, h = a.login(args.user, password)
-    cookie_attrs = h.get("Set-Cookie", "")
+    cookie_attrs = h.get("set-cookie", "")
     record("sign-in with the fictional account; Secure HttpOnly SameSite=Strict",
            status == 200 and all(x in cookie_attrs for x in ("Secure", "HttpOnly", "SameSite=Strict")),
            {"status": status})
@@ -140,7 +179,7 @@ def main() -> int:
         return finish(args.out)
 
     # Import (openpyxl on Vercel), map data, saved map, export.
-    fixture = (ROOT / "tests" / "fixtures" / "base_terrenos_09_26.xlsx").read_bytes()
+    fixture = fictional_workbook()
     status, prev, _ = a.call("POST", "/api/importar/vista-previa", raw=fixture, headers={
         "Content-Type": "application/octet-stream", "X-Archivo": "ensayo.xlsx"})
     nombre = f"Ensayo Preview {stamp}"

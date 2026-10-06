@@ -147,8 +147,9 @@ def main() -> int:
             db = conn.execute("SELECT current_database(), current_user, version()").fetchone()
             print(f"Connected read-only: database {db[0]}, role {db[1]}, {db[2].split(',')[0]}")
             meta = conn.execute("SELECT to_regclass('workspace_metadata') IS NOT NULL").fetchone()[0]
-            version = conn.execute("SELECT value FROM workspace_metadata WHERE key = 'schema_version'"
-                                   ).fetchone()[0] if meta else None
+            version_row = conn.execute("SELECT value FROM workspace_metadata WHERE key = 'schema_version'"
+                                   ).fetchone() if meta else None
+            version = version_row[0] if version_row else None
             print(f"Schema version: {version or 'none (empty database)'}")
             for table in ("base", "terreno", "mapa", "team_user", "inventory_terrain"):
                 exists = conn.execute("SELECT to_regclass(%s) IS NOT NULL", (table,)).fetchone()[0]

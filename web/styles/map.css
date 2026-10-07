@@ -205,6 +205,14 @@
 .mark-tooltip span { display: block; opacity: 0.75; }
 .mark-tooltip::before { border-top-color: var(--ink) !important; }
 
+/* A boundary whose outline has not loaded: said in words, not only by the
+ * hollow dashed symbol. */
+.mark-tooltip span.mark-tooltip-aviso {
+  margin-top: 2px;
+  font-style: italic;
+  opacity: 0.9;
+}
+
 /* ------------------------------------------- capas más allá del rango seguro */
 
 /* Layers past the validated colour range carry a dashed ring on the map; the

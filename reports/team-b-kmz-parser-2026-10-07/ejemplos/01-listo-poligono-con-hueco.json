@@ -1,0 +1,107 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "listo",
+  "error": null,
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Predio Ficticio Dos",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 1,
+      "vertices": 10,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.394,
+        20.604
+      ],
+      "area_aproximada_m2": 266789.0,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": [
+    0
+  ],
+  "geometria": {
+    "geojson": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              -100.4,
+              20.6
+            ],
+            [
+              -100.394,
+              20.6
+            ],
+            [
+              -100.394,
+              20.604
+            ],
+            [
+              -100.4,
+              20.604
+            ],
+            [
+              -100.4,
+              20.6
+            ]
+          ],
+          [
+            [
+              -100.398,
+              20.601
+            ],
+            [
+              -100.397,
+              20.601
+            ],
+            [
+              -100.397,
+              20.602
+            ],
+            [
+              -100.398,
+              20.602
+            ],
+            [
+              -100.398,
+              20.601
+            ]
+          ]
+        ]
+      ]
+    },
+    "bbox": [
+      -100.4,
+      20.6,
+      -100.394,
+      20.604
+    ],
+    "punto_interior": {
+      "type": "Point",
+      "coordinates": [
+        -100.397,
+        20.603
+      ]
+    },
+    "area_aproximada_m2": 266789.0,
+    "partes": 1,
+    "huecos": 1,
+    "vertices": 10
+  },
+  "ubicacion": {
+    "dentro_de_mexico": true,
+    "utilizable": true
+  }
+}

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml ><Document><name>Documento ficticio</name><Placemark><name>Predio Ficticio Sin Espacio</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-100.400000,20.600000 -100.396000,20.600000 -100.396000,20.603000 -100.400000,20.603000 -100.400000,20.600000</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark></Document></kml>

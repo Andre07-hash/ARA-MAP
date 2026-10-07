@@ -1,0 +1,20 @@
+{
+  "_nota": "Ficticio. GET /api/session. `capacidades` is computed on the server from the role; the client uses it only to decide what to show. Every route checks again.",
+  "operador": {
+    "authenticated": true,
+    "user": { "id": "5b0c1f0e-0000-4000-8000-000000000001", "display_name": "Ana Ficticia", "rol": "operador" },
+    "capacidades": ["maestra.ver", "maestra.editar", "archivos.ver", "archivos.subir"]
+  },
+  "admin": {
+    "authenticated": true,
+    "user": { "id": "5b0c1f0e-0000-4000-8000-000000000002", "display_name": "Beto Ficticio", "rol": "admin" },
+    "capacidades": ["maestra.ver", "maestra.editar", "maestra.archivar", "columnas.gestionar",
+                    "archivos.ver", "archivos.subir", "archivos.retirar",
+                    "derivados.ver", "derivados.gestionar", "usuarios.gestionar"]
+  },
+  "denegado": {
+    "_caso": "Operator calls GET /api/bases -> HTTP 403",
+    "error": "Tu cuenta no tiene permiso para esta acción.",
+    "detalle": { "code": "forbidden", "capacidad": "derivados.ver" }
+  }
+}

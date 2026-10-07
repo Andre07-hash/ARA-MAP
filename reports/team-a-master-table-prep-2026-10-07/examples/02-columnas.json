@@ -1,0 +1,21 @@
+{
+  "_nota": "Ficticio. GET /api/maestra/columnas. Core ids never change and cannot be retired. `campo` is where A stores the value; B's columns have no `campo` because B owns their content.",
+  "columnas": [
+    { "id": "core:tipo_terreno", "nombre": "Tipo de terreno", "tipo": "texto", "nucleo": true, "campo": "tipo_terreno" },
+    { "id": "core:terreno", "nombre": "Nombre de terreno", "tipo": "texto", "nucleo": true, "campo": "terreno" },
+    { "id": "core:estado", "nombre": "Estado", "tipo": "texto", "nucleo": true, "campo": "estado" },
+    { "id": "core:municipio", "nombre": "Municipio", "tipo": "texto", "nucleo": true, "campo": "municipio" },
+    { "id": "core:superficie", "nombre": "Superficie (m²)", "tipo": "numero", "nucleo": true, "campo": "superficie_m2" },
+    { "id": "core:ha", "nombre": "HA", "tipo": "numero", "nucleo": true, "campo": "superficie_ha" },
+    { "id": "core:afectaciones", "nombre": "Afectaciones %", "tipo": "porcentaje", "nucleo": true, "campo": "afectaciones_pct" },
+    { "id": "core:asking_price", "nombre": "Asking price", "tipo": "monto", "nucleo": true, "campo": "asking_price" },
+    { "id": "core:asking_m2", "nombre": "Asking $/m2", "tipo": "monto", "nucleo": true, "campo": "asking_m2" },
+    { "id": "core:comentarios", "nombre": "Comentarios", "tipo": "largo", "nucleo": true, "campo": "notas_internas" },
+    { "id": "core:archivos", "nombre": "Archivos", "tipo": "archivo", "nucleo": true, "acepta": "pdf", "multiple": true },
+    { "id": "core:kmz", "nombre": "KMZ", "tipo": "archivo", "nucleo": true, "acepta": "kmz", "multiple": false },
+    { "id": "core:x", "nombre": "X (latitud)", "tipo": "numero", "nucleo": true, "campo": "lat" },
+    { "id": "core:y", "nombre": "Y (longitud)", "tipo": "numero", "nucleo": true, "campo": "lon" },
+    { "id": "custom:9f1c2d3e-0000-4000-8000-00000000000a", "nombre": "Uso de suelo", "tipo": "opcion",
+      "opciones": ["Industrial", "Habitacional", "Mixto"], "nucleo": false, "retirada": false }
+  ]
+}

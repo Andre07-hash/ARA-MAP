@@ -1,0 +1,48 @@
+{
+  "_nota": "Ficticio. PATCH /api/inventario/terrenos/:id — the existing route and body, plus `custom`. One cell = one small PATCH.",
+  "peticion": {
+    "expected_version": 3,
+    "changes": {
+      "municipio": "Ficticia"
+    },
+    "custom": {}
+  },
+  "guardado": {
+    "terreno": {
+      "id": "0d5a3b1c-0000-4000-8000-0000000000aa",
+      "version": 4,
+      "…": "…"
+    }
+  },
+  "invalido": {
+    "_http": 422,
+    "error": "Revisa los campos marcados.",
+    "detalle": {
+      "code": "validation_failed",
+      "fields": {
+        "superficie_m2": "Debe ser un número."
+      }
+    }
+  },
+  "conflicto": {
+    "_http": 409,
+    "error": "Otra persona guardó cambios en este terreno. …",
+    "detalle": {
+      "code": "conflict",
+      "current_version": 5,
+      "terreno": {
+        "version": 5,
+        "…": "…"
+      }
+    },
+    "_cliente": "If the other person's changes touch different cells, the grid retries this cell once against version 5 without asking. If they touched the same cell, the cell shows both values and the user chooses."
+  },
+  "crear_en_blanco": {
+    "_peticion": "POST /api/inventario/terrenos with header Idempotency-Key and body {}",
+    "terreno": {
+      "id": "<uuid nuevo>",
+      "version": 1,
+      "…": "…"
+    }
+  }
+}

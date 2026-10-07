@@ -1,5 +1,5 @@
 {
-  "_nota": "Ficticio. Fragmento del DTO de terreno (A) con los resúmenes de B. Sin claves de almacenamiento ni URLs. inventory version no cambia por operaciones de archivos.",
+  "_nota": "Ficticio. Fragmento del DTO de terreno (A) con los resúmenes de B. Sin claves de almacenamiento ni URLs. inventory version no cambia por operaciones de archivos. Sin token agregado (revision_max retirado, §9.3): la tabla compara o reemplaza el resumen.",
   "terreno": {
     "id": "fictional-terrain-1",
     "base_id": "fictional-work-base-1",
@@ -32,7 +32,6 @@
       }
     },
     "archivos": {
-      "revision_max": 5,
       "core:archivos": {
         "total": 1,
         "recientes": [

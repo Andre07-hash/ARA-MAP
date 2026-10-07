@@ -83,6 +83,10 @@ MAX_NOMBRE = 200                    # characters kept from a <name>
 # measured legitimate cases use under half of it (see the B-1 report).
 MAX_TRABAJO = 30_000_000
 
+# An edge-pair comparison is the most expensive unit-sized step (a few float
+# products and comparisons), so it is charged double.
+_COSTO_PAR = 2
+
 # Grid sizing target: registrations per segment plus a base. Only chooses the
 # cell size; the safety limit is MAX_TRABAJO.
 _REGISTROS_POR_SEGMENTO = 32
@@ -673,8 +677,8 @@ class Presupuesto:
     """Work units for one processing call, charged BEFORE the work they pay for.
 
     One unit is one elementary step: a position scanned, a grid registration,
-    an edge pair compared, or an (edge, point) pair examined in a batched
-    point-in-ring pass. Every geometry stage of a call draws on the same
+    or an (edge, point) pair examined in a batched point-in-ring pass; an
+    edge pair compared costs _COSTO_PAR units. Every geometry stage of a call draws on the same
     budget -- all candidates, a combined selection, hole and part containment,
     contact pieces, interior points and normalization -- so no stage can grow
     without bound. Running out raises GEOMETRIA_DEMASIADO_COMPLEJA.
@@ -796,8 +800,10 @@ def _validar_cruces(poligonos: Sequence[Poligono], presupuesto: Presupuesto,
 
     for lista in _rejilla(segmentos, presupuesto).values():
         largo = len(lista)
-        presupuesto.cargar(largo * (largo - 1) // 2)
         for u in range(largo):
+            # Charged row by row: a crowded cell runs out of budget within
+            # one row of the limit instead of after its whole square.
+            presupuesto.cargar(_COSTO_PAR * (largo - u - 1))
             s = segmentos[lista[u]]
             for v in range(u + 1, largo):
                 t = segmentos[lista[v]]

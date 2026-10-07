@@ -84,7 +84,7 @@ def partes_de_clave(clave: object, espacio: str | None = None) -> tuple[str, ...
 
 | Operation | Success | Failure, previous state preserved |
 |---|---|---|
-| `guardar_temporal(clave, bloques, limite)` | Returns bytes written. The new complete object replaces any previous one atomically, and an empty object is valid. | `LimiteExcedidoError` once the running total exceeds `limite`, without consuming further chunks. An exception raised by the caller's iterator propagates unchanged. A chunk that is not `bytes`/`bytearray`/`memoryview` → `TypeError`; a chunk > `MAX_BLOQUE` → `ValueError`; passing a single `bytes`/`str` instead of an iterable → `TypeError`. I/O failure → `FalloAlmacenError`. **In every failure case the previous complete object, or its absence, is unchanged.** |
+| `guardar_temporal(clave, bloques, limite)` | Returns bytes written. The new complete object replaces any previous one atomically, and an empty object is valid. | `LimiteExcedidoError` once the running total exceeds `limite`, without consuming further chunks. An exception raised by the caller's iterator propagates unchanged. A chunk that is not `bytes`/`bytearray`/`memoryview` → `TypeError`; a chunk whose **byte size** (`nbytes` for a memoryview) exceeds `MAX_BLOQUE` → `ValueError`, checked before any copy (§7); passing a single `bytes`/`str` instead of an iterable → `TypeError`. I/O failure → `FalloAlmacenError`. **In every failure case the previous complete object, or its absence, is unchanged.** |
 | `copiar(origen, destino, limite)` | Returns bytes copied. `destino` now holds an independent snapshot of `origen`. | `ObjetoAusenteError` (no source), `LimiteExcedidoError` (source > `limite`, checked before writing), `ColisionError` (`destino` exists; nothing written and the existing object unchanged), `FalloAlmacenError`. Nothing appears at `destino` unless the copy completed. |
 | `leer(clave, limite, bloque)` | A `Lectura` whose chunks are ≤ `bloque` (1…`MAX_BLOQUE`) | `ObjetoAusenteError`. `LimiteExcedidoError` **at the call**, before any byte, if the object is larger than `limite`; there is never a silently truncated read. `FalloAlmacenError` from `next()` on an I/O fault, or if the local file changed in place during the read. |
 | `tamano_de(clave)` | `int`, or **`None` when absent** | `FalloAlmacenError` if something other than a regular file sits at the key |
@@ -214,3 +214,71 @@ The later repository packet can call this interface as PR #12 §2.4 describes:
 Cloud adapters, upload and read grants, and every database or HTTP concern stay in later packets.
 
 **Stopping for supervisory review.** Nothing merged, deployed or provisioned.
+
+## 7. Corrections after supervisory review (S1, S2)
+
+The review is `reports/team-b-storage-review-2026-10-07/REVIEW.md` at instruction commit `8b1484548865ee387572e3480ad3d424b9f69dc1`, reviewing head `2f4ec1d`. The baseline is still `origin/main` `09452fd26d38319567dce28a89db100ea61c739a`, unchanged. §1–§6 above describe the reviewed head. Where this section differs, it wins.
+
+### S1 — a FIFO at a key blocked `leer` and `copiar`
+
+**Reproduced first** at `2f4ec1d` with the review's script: both `leer("temporal/fifo", 1024)` and `copiar("temporal/fifo", …)` stayed blocked until the 2 s child deadline.
+
+**Cause.** `_abrir_objeto` opened the entry with a blocking `O_RDONLY` and only then ran `fstat`. For a FIFO with no writer, `open` never returns.
+
+**Fix** (`server/almacen.py`):
+- Object opens (`_ABRIR_LECTURA`) and directory opens (`_ABRIR_DIRECTORIO`) now also pass **`O_NONBLOCK`**. They are still relative to the directory descriptor and still use `O_NOFOLLOW`, so there is no pre-open path `stat` and no check-then-open race.
+- POSIX `open(2)` with `O_RDONLY|O_NONBLOCK` returns at once for a FIFO, and the existing `fstat` check then rejects any non-regular entry (FIFO, device, socket, directory) with `FalloAlmacenError` and closes the descriptor.
+- For a regular file, `os.set_blocking(fd, True)` clears the flag before the descriptor is returned, so reads behave exactly as before.
+- `O_NONBLOCK` has no effect when opening a regular file or directory on Linux or macOS.
+- Nothing is created or changed: the source stays, no final object appears, and no partial file is left.
+
+**After the fix** the same script returns `FalloAlmacenError` from both calls at once.
+
+### S2 — an oversized chunk was copied before it was rejected
+
+**Reproduced first** at `2f4ec1d` with the review's script: a 32 MiB `bytearray` passed as a memoryview made **both backends allocate 32.0 MiB** before raising `ValueError`.
+
+**Cause.** `_como_bytes` called `bytes(bloque)` before comparing the size with `MAX_BLOQUE`.
+
+**Fix.** The byte size is read from the buffer first: `nbytes` for a memoryview, whose `len()` counts elements of the first dimension, not bytes, and `len()` for `bytes`/`bytearray`. An oversized chunk is rejected without any copy. Accepted chunks behave exactly as before:
+- `bytes` is passed through without a copy;
+- `bytearray` is copied (at most 1 MiB);
+- a memoryview is converted with `tobytes()`, which gives C-order bytes for typed, multidimensional and non-contiguous views.
+
+Both backends use this same function. The 1 MiB ceiling is unchanged, and no buffer type was dropped.
+
+**After the fix** the same script measures **0.0 MiB** for both backends.
+
+### Regression tests (in `tests/test_almacen.py`; 73 → 80)
+
+| Test | Backend | What it proves |
+|---|---|---|
+| `test_fifo_at_a_key_fails_promptly` | Local | Real FIFOs at `temporal/fifo` and `final/v1/fifo`. `leer`, `copiar`, `leer` of the final key and `tamano_de` each return `FalloAlmacenError`. The FIFO is unchanged, `final/v1/n1` does not exist and no partial file is left. The calls run **in a child process with a 20 s deadline**, so a regression fails the test instead of hanging CI. |
+| `test_fifo_where_a_directory_belongs_fails_promptly` | Local | FIFOs at `temporal` and `final/v1`: `leer`, `guardar_temporal`, `tamano_de` and `listar` fail promptly with `FalloAlmacenError`, in a child with a deadline |
+| `test_regular_objects_are_read_in_blocking_mode` | Local | A regular object's descriptor is back in blocking mode and reads in full |
+| `test_oversized_chunks_are_rejected_before_copying` | Both | Rejects, with peak allocation **under 256 KiB**: a 32 MiB bytearray, its memoryview, a typed `array('I')` view of 262,145 elements and 1,048,580 bytes (element count ≤ 1 MiB < byte size), a 2-D view (`len` 2, 2 MiB) and `bytes` one byte over. Buffers are allocated before measurement. The previous staging object is kept. |
+| `test_typed_and_multidimensional_views_round_trip` | Both | A typed `array('H')` view, a 2-D view and a non-contiguous view are stored as their C-order bytes, and a typed view of exactly 1 MiB is accepted |
+| `test_failures_leave_no_partial_files` (extended) | Local | A rejected 2 MiB memoryview leaves no partial file |
+
+**The new tests fail on the reviewed code.** With `server/almacen.py` reverted to `2f4ec1d` and the new tests kept:
+- `test_fifo_at_a_key_fails_promptly` failed with "a storage call blocked … child terminated" after its deadline;
+- `test_oversized_chunks_are_rejected_before_copying` failed for the bytearray, memoryview, typed-view and 2-D cases on **both** backends (9 failures in total);
+- with the fix restored, all 80 pass.
+
+The directory-position FIFO test also passed on the old code on Linux, because `O_DIRECTORY` already fails there before blocking. It stays as a guard for other platforms.
+
+### Evidence at the correction head
+
+Same container as §4 (Linux x86_64, CPython 3.13.16, plus 3.9.25 standing in for macOS's Python):
+
+| Check | Result |
+|---|---|
+| `tests.test_almacen` on 3.13 and 3.9 | **80 OK** each; 5 consecutive 3.13 runs, all OK |
+| Full Python suite on 3.13 and 3.9 | **752 run, 29 Postgres-only skips, 1 failure**: the same environmental `test_packaging…no_openpyxl_of_its_own`, because this container's `/usr/bin/python3` has openpyxl. The supervisor's macOS run did not reproduce it. 752 = 672 + 80. |
+| JavaScript | 98 pass |
+| `ruff check server/ tests/`, `mypy server/` | Clean |
+| `medir.py 256` (3.13) | Unchanged: peak Python allocations ≤ 0.13 MiB for a 256 MiB write, copy and read |
+| `./verificar.sh` | Not runnable here (no `zsh`); its components were run as above |
+| GitHub CI | Reported in PR #13 for the correction head |
+
+The scope is unchanged: only `server/almacen.py`, `tests/test_almacen.py` and this report were edited. There is no database or API integration, and nothing was merged, deployed or provisioned.

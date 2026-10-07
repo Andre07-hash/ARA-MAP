@@ -6,12 +6,17 @@ Every test uses a temporary root or the in-memory fake, with synthetic bytes.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import shutil
+import stat
+import subprocess
+import sys
 import tempfile
 import threading
 import tracemalloc
 import unittest
+from array import array
 from collections.abc import Iterator
 from unittest import mock
 
@@ -29,6 +34,7 @@ from server.almacen import (
 
 KB = 1024
 MB = 1024 * KB
+RAIZ_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 CLAVES_INVALIDAS = [
     "", "temporal", "temporal/", "/temporal/a", "temporal//a", "temporal/../a",
@@ -109,6 +115,47 @@ class Contrato:
             self.a.guardar_temporal("temporal/v1", [b"z" * (MAX_BLOQUE + 1)], 10 * MB)
         self.assertEqual(contenido(self.a, "temporal/v1"), b"original")
         self.assertEqual(self.a.tamano_de("temporal/v1"), 8)
+
+    def test_oversized_chunks_are_rejected_before_copying(self) -> None:
+        # S1 review (S2): the byte size is checked before any copy is made.
+        # Buffers are allocated before measuring, so only the store's own
+        # allocations count.
+        grande = bytearray(32 * MB)
+        tipado = array("I", [7]) * (MAX_BLOQUE // 4 + 1)          # 262,145 elements
+        dos_d = memoryview(bytearray(2 * MAX_BLOQUE)).cast("B", shape=[2, MAX_BLOQUE])
+        casos = {
+            "bytearray": grande,
+            "memoryview": memoryview(grande),
+            "typed view": memoryview(tipado),
+            "2-D view": dos_d,
+            "bytes": bytes(MAX_BLOQUE + 1),
+        }
+        self.assertLessEqual(len(memoryview(tipado)), MAX_BLOQUE)
+        self.assertGreater(memoryview(tipado).nbytes, MAX_BLOQUE)
+        self.assertEqual(len(dos_d), 2)
+        self.a.guardar_temporal("temporal/v1", [b"previo"], 100)
+        for nombre, bloque in casos.items():
+            with self.subTest(nombre):
+                tracemalloc.start()
+                try:
+                    with self.assertRaises(ValueError):
+                        self.a.guardar_temporal("temporal/v1", [b"ok", bloque], 64 * MB)
+                    _, pico = tracemalloc.get_traced_memory()
+                finally:
+                    tracemalloc.stop()
+                self.assertLess(pico, 256 * KB, f"{nombre}: peak {pico} bytes")
+                self.assertEqual(contenido(self.a, "temporal/v1"), b"previo")
+
+    def test_typed_and_multidimensional_views_round_trip(self) -> None:
+        tipado = array("H", range(1000))
+        self.a.guardar_temporal("temporal/v1", [memoryview(tipado)], 2000)
+        self.assertEqual(contenido(self.a, "temporal/v1"), tipado.tobytes())
+        rejilla = memoryview(bytearray(b"abcdef")).cast("B", shape=[2, 3])
+        salteado = memoryview(b"abcdef")[::2]
+        self.a.guardar_temporal("temporal/v2", [rejilla, salteado], 9)
+        self.assertEqual(contenido(self.a, "temporal/v2"), b"abcdeface")
+        justo = memoryview(array("I", [1]) * (MAX_BLOQUE // 4))      # nbytes == MAX_BLOQUE
+        self.assertEqual(self.a.guardar_temporal("temporal/v3", [justo], MAX_BLOQUE), MAX_BLOQUE)
 
     def test_chunks_must_be_an_iterable_of_bytes(self) -> None:
         for malo in (b"abc", bytearray(b"abc"), "abc"):
@@ -483,8 +530,75 @@ class AlmacenLocalSeguridad(unittest.TestCase):
                 f.write(b"ajeno")
         self.assertEqual([m.clave for m in self.a.listar("temporal/")], ["temporal/v1"])
 
+    def en_subproceso(self, acciones: str) -> dict[str, str]:
+        """Run `acciones` against this root in a child with a deadline.
+
+        A regression that blocks (S1) then fails this test instead of
+        hanging the suite. `acciones` is a dict literal of name -> lambda.
+        """
+        codigo = (
+            "import json, sys\n"
+            "from server.almacen import AlmacenLocal, AlmacenError\n"
+            "a = AlmacenLocal(sys.argv[1])\n"
+            f"acciones = {acciones}\n"
+            "salida = {}\n"
+            "for nombre, accion in acciones.items():\n"
+            "    try:\n"
+            "        accion()\n"
+            "        salida[nombre] = 'ok'\n"
+            "    except AlmacenError as exc:\n"
+            "        salida[nombre] = type(exc).__name__\n"
+            "print(json.dumps(salida))\n"
+        )
+        try:
+            hijo = subprocess.run([sys.executable, "-c", codigo, self.raiz], cwd=RAIZ_REPO,
+                                  capture_output=True, text=True, timeout=20)
+        except subprocess.TimeoutExpired:
+            self.fail("a storage call blocked on a non-regular entry; child terminated")
+        self.assertEqual(hijo.returncode, 0, hijo.stderr)
+        resultado: dict[str, str] = json.loads(hijo.stdout)
+        return resultado
+
+    def test_fifo_at_a_key_fails_promptly(self) -> None:
+        # S1 review (S1): opening a FIFO must not wait for a writer.
+        os.makedirs(self.ruta("temporal"))
+        os.makedirs(self.ruta("final", "v1"))
+        os.mkfifo(self.ruta("temporal", "fifo"))
+        os.mkfifo(self.ruta("final", "v1", "fifo"))
+        resultado = self.en_subproceso(
+            "{'leer': lambda: a.leer('temporal/fifo', 1024),"
+            " 'copiar': lambda: a.copiar('temporal/fifo', 'final/v1/n1', 1024),"
+            " 'leer_final': lambda: a.leer('final/v1/fifo', 1024),"
+            " 'tamano_de': lambda: a.tamano_de('temporal/fifo')}")
+        self.assertEqual(resultado, dict.fromkeys(
+            ("leer", "copiar", "leer_final", "tamano_de"), "FalloAlmacenError"))
+        self.assertTrue(stat.S_ISFIFO(os.lstat(self.ruta("temporal", "fifo")).st_mode))
+        self.assertFalse(os.path.lexists(self.ruta("final", "v1", "n1")))
+        self.assertEqual(self.parciales(), [])
+        self.assertEqual(list(self.a.listar("temporal/")), [])
+
+    def test_fifo_where_a_directory_belongs_fails_promptly(self) -> None:
+        os.mkfifo(self.ruta("temporal"))
+        os.makedirs(self.ruta("final"))
+        os.mkfifo(self.ruta("final", "v1"))
+        resultado = self.en_subproceso(
+            "{'leer': lambda: a.leer('temporal/x', 1024),"
+            " 'guardar': lambda: a.guardar_temporal('temporal/x', [b'x'], 10),"
+            " 'tamano_de': lambda: a.tamano_de('final/v1/n1'),"
+            " 'listar': lambda: list(a.listar('final/v1/'))}")
+        self.assertEqual(resultado, dict.fromkeys(
+            ("leer", "guardar", "tamano_de", "listar"), "FalloAlmacenError"))
+
+    def test_regular_objects_are_read_in_blocking_mode(self) -> None:
+        self.a.guardar_temporal("temporal/v1", [b"z" * 1000], 1000)
+        with self.a.leer("temporal/v1", 1000) as lectura:
+            self.assertTrue(os.get_blocking(lectura._fd))
+            self.assertEqual(sum(len(b) for b in lectura), 1000)
+
     def test_failures_leave_no_partial_files(self) -> None:
         self.a.guardar_temporal("temporal/v1", [b"base"], 10)
+        with self.assertRaises(ValueError):
+            self.a.guardar_temporal("temporal/v1", [memoryview(bytearray(2 * MAX_BLOQUE))], 10)
 
         def roto() -> Iterator[bytes]:
             yield b"ab"

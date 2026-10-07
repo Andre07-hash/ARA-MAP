@@ -153,12 +153,22 @@ def _validar_tamano_bloque(bloque: object) -> int:
 
 
 def _como_bytes(bloque: object) -> bytes:
-    if not isinstance(bloque, (bytes, bytearray, memoryview)):
+    """The chunk's bytes, rejecting an oversized chunk BEFORE copying it.
+
+    The size is the buffer's byte count: `nbytes` for a memoryview, whose
+    len() counts elements of its format and first dimension, not bytes.
+    """
+    if isinstance(bloque, memoryview):
+        tamano = bloque.nbytes
+    elif isinstance(bloque, (bytes, bytearray)):
+        tamano = len(bloque)
+    else:
         raise TypeError("each chunk must be bytes, bytearray or memoryview")
-    datos = bytes(bloque)
-    if len(datos) > MAX_BLOQUE:
+    if tamano > MAX_BLOQUE:
         raise ValueError(f"chunks are limited to {MAX_BLOQUE} bytes")
-    return datos
+    if isinstance(bloque, memoryview):
+        return bloque.tobytes()     # C-order bytes, also for typed or multidimensional views
+    return bytes(bloque)            # no copy for bytes; at most MAX_BLOQUE for a bytearray
 
 
 def _bloques_validos(bloques: Iterable[Bloque]) -> Iterable[Bloque]:
@@ -221,8 +231,11 @@ class Almacen(Protocol):
 # -------------------------------------------------------------- local backend
 
 _O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
-_ABRIR_DIRECTORIO = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | _O_CLOEXEC
-_ABRIR_LECTURA = os.O_RDONLY | os.O_NOFOLLOW | _O_CLOEXEC
+# O_NONBLOCK: opening a FIFO (or a device) that someone planted at a key must
+# not wait for a writer. With it, open() returns at once and the fstat check
+# rejects the entry; for a regular file the flag is cleared before reading.
+_ABRIR_DIRECTORIO = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_NONBLOCK | _O_CLOEXEC
+_ABRIR_LECTURA = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | _O_CLOEXEC
 _CREAR_PARCIAL = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | _O_CLOEXEC
 
 
@@ -354,8 +367,12 @@ class AlmacenLocal:
             os.close(directorio)
         try:
             info = os.fstat(fd)
-            if not stat.S_ISREG(info.st_mode):
+            if not stat.S_ISREG(info.st_mode):     # FIFO, device, socket, directory
                 raise FalloAlmacenError()
+            os.set_blocking(fd, True)
+        except OSError as exc:
+            os.close(fd)
+            raise FalloAlmacenError() from exc
         except BaseException:
             os.close(fd)
             raise

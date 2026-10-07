@@ -41,10 +41,11 @@ Checked by reading the code and by `experiment/baseline_probe.py` (output in `ex
 | Individual accounts and revocable sessions | `team_user`, `team_session`; deny-by-default dispatcher | `server/auth.py`, `server/app.py` `_dispatch` |
 | Roles | **None.** `team_user` has no role column; every account has identical powers | Probe 5 |
 | Tipo de terreno, Comentarios | **No such fields**; both are rejected as unknown | Probe 3 |
+| Create a base without importing a file | **Not possible.** A `base` row is only created by an import | `repo.bases.create` is called only from the import handlers; there is no `POST /api/bases` |
 | Custom columns | **None** | — |
 | Editable grid | **None.** `TerrainTable.js` is read-only; editing is a separate full-page form (`TerrainEditor.js`) | — |
 
-**Conclusion: extend the inventory into the master record. Do not create a second terrain store.** The missing pieces are two fields, custom columns, roles and the grid.
+**Conclusion: extend the inventory into the master record. Do not create a second terrain store.** The missing pieces are one field, work bases that can be created empty, per-base custom columns, roles with per-person access, and the grid.
 
 ### Reusable code
 
@@ -65,9 +66,27 @@ Checked by reading the code and by `experiment/baseline_probe.py` (output in `ex
 
 Fictional examples: `examples/02-columnas.json`, `03-registro.json`, `04-editar-celda.json`.
 
-### 2.1 Identity
+### 2.1 Identity and work bases
 
 The master record **is** an `inventory_terrain` row. Its ID is the existing UUID. Existing IDs, revisions and events are kept unchanged. The legacy importer's identity (name + state + municipality + area) is not applied to master records.
+
+**New owner requirement (§3.1): records are grouped into editable work bases**, for example "Base Ejemplo". A work base is created empty, with no file upload, and terrains are then added in the grid. This is new: today a base exists only as the result of importing a spreadsheet.
+
+```
+maestra_base
+  id          TEXT PK (uuid)
+  nombre      TEXT NOT NULL
+  creado_en/por, actualizado_en/por
+  archivado_en/por              reversible; nothing is deleted
+
+inventory_terrain.base_id   TEXT NULL → maestra_base(id)
+```
+
+A terrain belongs to at most one work base. `base_id NULL` means "not assigned": visible to administrators only. Records that exist before the migration stay unassigned; none is moved or invented. An administrator can move a record between bases; that is a versioned, audited change like any other.
+
+Work bases are a different thing from the legacy `base` table (imported spreadsheets, integer IDs, frozen into saved maps). The legacy table is not touched. The interface must name the two differently (decision D8).
+
+**This departs from MASTER_PLAN §4**, which describes one master table with filtered bases derived from it. See §3.1 and decision D0.
 
 ### 2.2 Core columns
 
@@ -104,11 +123,12 @@ One rule conflicts; everything else already allows it.
 
 Sorting and filtering by price keep the existing rule: amounts in different or unknown currencies are never ranked together.
 
-### 2.4 Custom columns
+### 2.4 Custom columns, per work base
 
 ```
 inventory_column
   id            TEXT PK          'custom:<uuid>'
+  base_id       TEXT NOT NULL    → maestra_base(id): the column exists only in that base
   nombre        TEXT NOT NULL
   tipo          TEXT NOT NULL    CHECK IN ('texto','numero','opcion','fecha')
   opciones_json TEXT             for 'opcion'
@@ -119,7 +139,9 @@ inventory_column
 inventory_revision.custom_json   TEXT   {"custom:<uuid>": value, …}
 ```
 
-Values live in the revision, keyed by column ID, so renaming a column changes no stored value and every edit is versioned and audited like a core cell. Retiring a column hides it and keeps its values. Attachment-type custom columns are **not** in the first packet; they wait for Team B's contract.
+The fourteen core columns exist in every work base. **Custom columns belong to one work base**, so the person working in "Base Ejemplo" can add the data that matters there without changing anyone else's table. Whoever may edit a base may add, rename and retire its custom columns.
+
+Values live in the revision, keyed by column ID, so renaming a column changes no stored value and every edit is versioned and audited like a core cell. Retiring a column hides it and keeps its values. Moving a terrain to another base keeps its custom values stored; they show again if it returns. Attachment-type custom columns are **not** in the first packet; they wait for Team B's contract.
 
 Filtering already happens in Python over the whole inventory (`repo.all_records`), so a JSON column needs no SQL that differs between SQLite and Postgres. Ceiling: a few thousand records, the same ceiling the list has today.
 
@@ -138,10 +160,15 @@ No edit is lost silently and no server merge logic is added. Saves for one recor
 
 | Route | Status |
 |---|---|
-| `GET/POST /api/inventario/terrenos`, `GET/PATCH /api/inventario/terrenos/:id`, `GET …/historial` | Existing; reused |
-| `GET /api/maestra/columnas` | New: core + custom column definitions |
-| `POST /api/maestra/columnas`, `PATCH/DELETE /api/maestra/columnas/:id` | New: admin only (add, rename, reorder, retire/restore) |
-| `POST /api/inventario/terrenos/:id/archivar`, `…/restaurar` | New: admin only. `archived_at` exists but has no route today |
+| `GET /api/maestra/bases` | New: the work bases the caller may open |
+| `POST /api/maestra/bases`, `PATCH /api/maestra/bases/:bid`, `POST …/:bid/archivar`, `…/restaurar` | New: create empty, rename, archive, restore |
+| `GET/PUT /api/maestra/bases/:bid/acceso` | New, admin only: which operators may open this base |
+| `GET /api/maestra/bases/:bid/terrenos`, `POST /api/maestra/bases/:bid/terrenos` | New paths over the existing list and create logic, scoped to one base |
+| `GET/PATCH /api/inventario/terrenos/:id`, `GET …/historial` | Existing; reused. Access is decided by the base the terrain belongs to |
+| `POST /api/inventario/terrenos/:id/archivar`, `…/restaurar` | New. `archived_at` exists but has no route today. "Remove" in the interface is this reversible archive |
+| `GET /api/maestra/bases/:bid/columnas` | New: core + that base's custom column definitions |
+| `POST /api/maestra/bases/:bid/columnas`, `PATCH/DELETE …/columnas/:cid` | New: add, rename, reorder, retire/restore |
+| `GET/POST /api/inventario/terrenos` (unscoped) | Existing; becomes admin only, since it spans every base |
 
 The record routes keep the `/api/inventario/` prefix. Renaming them would break Team B's proposed routes and the existing tests for no user benefit.
 
@@ -153,41 +180,64 @@ Fictional example: `examples/01-sesion.json`.
 
 ### 3.1 Requirement relayed with this assignment
 
-The Team A account holder stated when dispatching this work, to be confirmed through the supervisor: *the company decides which person may see and change what in ARA Map, and the person who edits the master table can edit only that and see only that.* This is stricter than the master plan's table, where operator access to derived bases and maps is "decision pending". The proposal below implements the stricter reading and marks it as decision D1.
+The Team A account holder stated, on October 7, to be confirmed through the supervisor:
+
+1. For now there is one operator, who works in one base named after her (called "Base Ejemplo" in this report).
+2. That base can be **created from nothing**, without uploading a spreadsheet or PDF. Either she creates it or an administrator creates it for her.
+3. Inside it she may see, add, edit and remove terrains, upload files and KMZ layouts, and **add columns that exist only in that base**.
+4. She can see and change **nothing outside that base**.
+5. Access for her or for any later operator may be changed over time.
+
+This is stricter and more specific than MASTER_PLAN §6, and it changes §4 of that plan: instead of one shared master table, there are several editable work bases with access granted per person. The proposal below implements it and marks the difference as decision D0, because it also affects Team B (access is decided per terrain, through its base) and the later "filtered base and map" phase.
 
 ### 3.2 Model
 
-`team_user.rol TEXT NOT NULL CHECK (rol IN ('admin','operador'))`. A role is a fixed set of **capabilities** defined in `server/auth.py`. Routes check capabilities, never role names, so a third role or a different split later is a change to one table in code, not to every handler.
+Two things decide access: **what** a role may do, and **where**.
+
+**What — role and capabilities.** `team_user.rol TEXT NOT NULL CHECK (rol IN ('admin','operador'))`. A role is a fixed set of capabilities defined in `server/auth.py`. Routes check capabilities, never role names.
 
 | Capability | Admin | Operator | Covers |
 |---|---|---|---|
-| `maestra.ver` | ✔ | ✔ | List, detail, history, column definitions, the master table's own map |
+| `maestra.ver` | ✔ | ✔ | Open a work base: list, detail, history, columns, its map |
 | `maestra.editar` | ✔ | ✔ | Add terrain, edit core and custom cells |
-| `maestra.archivar` | ✔ | — | Archive / restore a terrain |
-| `columnas.gestionar` | ✔ | — | Add, rename, reorder, retire custom columns |
+| `maestra.archivar` | ✔ | ✔ | Remove (archive) and restore a terrain |
+| `columnas.gestionar` | ✔ | ✔ | Add, rename, reorder, retire that base's custom columns |
 | `archivos.ver` | ✔ | ✔ | List, open, download (Team B) |
 | `archivos.subir` | ✔ | ✔ | Upload, replace, choose layout (Team B) |
-| `archivos.retirar` | ✔ | — | Retire a file (Team B) |
-| `derivados.ver` | ✔ | — | Bases, saved maps, folders, formats: read |
-| `derivados.gestionar` | ✔ | — | Import, export, create/rename/move/delete bases, maps, folders |
+| `archivos.retirar` | ✔ | ✔ | Retire a file (Team B) |
+| `bases.gestionar` | ✔ | — | Create, rename, archive work bases; grant and revoke access; move terrains between bases |
+| `derivados.ver`, `derivados.gestionar` | ✔ | — | Legacy workspace: imported bases, saved maps, folders, formats, import, export |
 | `usuarios.gestionar` | ✔ | — | Accounts and roles |
 
-An operator therefore reaches the master table, its files and its map, and nothing else. The public catalog routes stay anonymous and unchanged.
+**Where — scope.** An administrator's capabilities apply to every work base. An operator's apply **only inside the work bases granted to that person**:
+
+```
+maestra_base_acceso
+  base_id   TEXT NOT NULL → maestra_base(id)
+  user_id   TEXT NOT NULL → team_user(id)
+  otorgado_en, otorgado_por
+  PRIMARY KEY (base_id, user_id)
+```
+
+So the operator, granted "Base Ejemplo", has full working control inside it and reaches nothing else: no other work base, no unassigned record, no imported base, no saved map, no import or export, no accounts. Granting her a second base, or adding a second operator to hers, is one row. Everything an operator can remove is reversible; permanent deletion is not offered to anyone in this packet.
+
+Who creates a work base is decision D1b. The proposal: administrators create it and grant access, which matches "or we create it for her" and needs no extra rule. Letting operators create their own bases is one more capability (`bases.crear`, automatically granted to its creator) if the owner prefers it.
 
 ### 3.3 Enforcement
 
-- **One table, checked in the dispatcher.** `server/auth.py` maps every private route to a capability. `server/app.py` `_dispatch` checks it right after it resolves the session, before the handler runs. A missing capability returns HTTP 403 with `{"code": "forbidden", "capacidad": "…"}`; no session returns the existing 401.
-- **Deny by default.** A test fails if any registered private route has no declared capability. All 41 routes registered today get one; the legacy workspace routes map to `derivados.*`.
-- **Session payload.** `GET /api/session` adds `user.rol` and `capacidades`. The client uses it only to choose what to show (navigation, buttons). Hiding a button is never the control.
-- **Changing a role ends that user's sessions**, reusing the existing `credential_revision` mechanism, so a demotion takes effect immediately.
-- **Helper for Team B's handlers:** `auth.require(request, "archivos.subir")`. There is no per-terrain access list in this release: anyone with `maestra.ver` sees every master record. If per-person record scoping is ever wanted, it goes inside this helper.
-- **Audit.** Role and account changes are recorded with actor and time (`team_user_event`, append-only).
+- **Capability, checked in the dispatcher.** `server/auth.py` maps every private route to a capability. `server/app.py` `_dispatch` checks it right after it resolves the session, before the handler runs. A missing capability returns HTTP 403 with `{"code": "forbidden", "capacidad": "…"}`; no session returns the existing 401.
+- **Scope, checked where the record is known.** `auth.require_base(request, base_id, capacidad)` and `auth.require_terreno(request, terreno_id, capacidad)`; the second resolves the terrain's base first. A terrain or base outside the caller's scope answers **404, not 403**, so an operator cannot learn that other bases or records exist.
+- **Deny by default.** A test fails if any registered private route has no declared capability. All 41 routes registered today get one; the legacy workspace routes map to `derivados.*`. A second test walks every route that takes a terrain or base ID and asserts an operator without a grant gets 404.
+- **Session payload.** `GET /api/session` adds `user.rol`, `capacidades` and `alcance` (the work bases the user may open). The client uses it only to choose what to show. Hiding a button is never the control.
+- **Changing a role ends that user's sessions**, reusing the existing `credential_revision` mechanism. Granting or revoking a base takes effect on the next request, because scope is read from the database on every call.
+- **Helper for Team B's handlers:** `auth.require_terreno(request, terreno_id, "archivos.subir")`. This is the per-terrain signature Team B asked for in R2. Every file and geometry route must call it, including batch geometry reads, where each requested ID is checked.
+- **Audit.** Role, account and access changes are recorded with actor and time (`team_user_event`, append-only).
 
-### 3.4 Account and role management
+### 3.4 Account, role and access management
 
-- First packet: `scripts/cuentas.py crear … --rol`, and `cuentas.py rol USUARIO admin|operador`. This keeps the explicit-target safety the script already has.
-- Later packet: an admin screen in the app to create accounts, reset passwords, deactivate and change roles, behind `usuarios.gestionar`. This is what lets the company manage access without a terminal.
-- **Migration of existing accounts.** The new column defaults to `operador`, the least privilege. The release step lists every account and names the administrators explicitly. No account becomes an administrator by default.
+- First packet: `scripts/cuentas.py crear … --rol`, `cuentas.py rol USUARIO admin|operador`, and the admin routes for work bases and their access (§2.6). This is enough to create the first work base and give the operator access to it.
+- Later packet: an admin screen in the app to create accounts, reset passwords, deactivate, change roles and grant bases, behind `usuarios.gestionar` and `bases.gestionar`. This is what lets the company manage access without a terminal.
+- **Migration of existing accounts.** The new column defaults to `operador` with **no base granted**, which is no access at all. The release step lists every account and names the administrators explicitly. No account becomes an administrator by default.
 
 ---
 
@@ -196,7 +246,7 @@ An operator therefore reaches the master table, its files and its map, and nothi
 A sketch for this checkpoint; no prototype code is proposed for production.
 
 ```
- Tabla maestra                         128 terrenos · Guardado 18:02      [Buscar…] [Filtros] [+ Columna]*
+ Base Ejemplo ▾                        128 terrenos · Guardado 18:02      [Buscar…] [Filtros] [+ Columna]*
  ┌────┬──────────────┬────────────┬───────────┬────────────┬──────────────┬──────────┬───────────┬─────┐
  │    │ Nombre       │ Tipo       │ Estado    │ Superficie │ Asking price │ Archivos │ KMZ       │  …  │
  ├────┼──────────────┼────────────┼───────────┼────────────┼──────────────┼──────────┼───────────┼─────┤
@@ -204,7 +254,7 @@ A sketch for this checkpoint; no prototype code is proposed for production.
  │ ⋮  │ Sin nombre   │            │           │            │              │ ＋       │ ＋        │     │
  │ ⋮  │ Roble Fict.  │            │ Ficticio ◐│  ⚠ "SD"    │              │ ⟳ 40 %   │ ⚠ elegir  │     │
  └────┴──────────────┴────────────┴───────────┴────────────┴──────────────┴──────────┴───────────┴─────┘
- [+ Agregar terreno]                                                        * only with columnas.gestionar
+ [+ Agregar terreno]                                    ▾ lists only the bases granted to the user
 ```
 
 | Interaction | Behaviour |
@@ -213,14 +263,16 @@ A sketch for this checkpoint; no prototype code is proposed for production.
 | **Edit a cell** | Click or Enter opens the cell; Enter or leaving it saves; Esc cancels. Arrow keys and Tab move between cells. Only the changed cell is sent. |
 | **Saving** | The cell shows ◐ while its PATCH is in flight; the header shows "Guardando…" then "Guardado HH:MM". |
 | **Error** | The cell keeps what the user typed, is marked ⚠ and shows the server's message for that field. The rest of the row and every other edit stay saved. |
-| **Conflict** | Other cells changed by someone else: silent retry. Same cell: the cell shows "tu valor / valor de Ana" and the user picks one. |
+| **Conflict** | Other cells changed by someone else: silent retry. Same cell: the cell shows "tu valor / valor de otra persona" and the user picks one. |
 | **Currency** | A price with unknown currency shows a `?` marker; the currency is set from the detail panel or a small control beside the price cells. |
-| **Custom-column control** | "+ Columna" (admins only) asks for name and type. A column header menu offers rename, move and retire. |
+| **Empty base** | A new work base opens as an empty grid with the fourteen core columns and "Agregar terreno". No file is needed. |
+| **Custom-column control** | "+ Columna" asks for name and type and adds the column to this base only. A column header menu offers rename, move and retire. |
+| **Remove** | The row menu (⋮) offers "Quitar". It archives the terrain; "Mostrar quitados" lists them with "Restaurar". |
 | **Attachment-cell slot** | The `Archivos` and `KMZ` cells are rendered by Team B's `ArchivoCelda`. The grid passes it the terrain ID, the column, the summary and the permissions, and gives it focus like any cell. Until B's component exists the cell shows "—". |
 | **Detail panel** | A side panel for long comments, the non-core fields, history and B's `ArchivoDetalle`. |
 | **Narrow screens** | The table keeps the name column pinned; editing happens in the detail panel. |
 
-Implementation shape: a native `<table>` with a single input moved into the active cell, in `web/components/maestra/`, with the cell state machine and save queue as pure functions in `web/lib/maestra.js` (testable with `node --test`). No grid library and no build step. Route `#/maestra`. Rows are not virtualized in the first packet; that is the upgrade if the table passes a few thousand rows (decision D7).
+Implementation shape: a native `<table>` with a single input moved into the active cell, in `web/components/maestra/`, with the cell state machine and save queue as pure functions in `web/lib/maestra.js` (testable with `node --test`). No grid library and no build step. Routes `#/maestra` (base list) and `#/maestra/<base id>`. Rows are not virtualized in the first packet; that is the upgrade if the table passes a few thousand rows (decision D7).
 
 ---
 
@@ -231,12 +283,12 @@ Implementation shape: a native `<table>` with a single input moved into the acti
 | B's request | Team A answer |
 |---|---|
 | R1 tables `archivo`, `archivo_version`, `geometria`, `archivo_evento` | Landed by A as **schema 10**, after B's contract absorbs the supervisor's corrections (active layout separate from uploaded version; attachment-level revision). Not included in schema 9, so A's migration does not wait on those open points. |
-| R2 capability helper | `auth.require(request, capacidad)` with `archivos.ver`, `archivos.subir`, `archivos.retirar` (§3). No per-terrain argument; see §3.3. |
+| R2 capability helper | `auth.require_terreno(request, terreno_id, capacidad)` with `archivos.ver`, `archivos.subir`, `archivos.retirar` (§3.3): the per-terrain signature B asked for. It checks the capability and that the terrain's work base is in the caller's scope; out of scope answers 404. |
 | R3 route registration | A registers B's routes in `server/app.py` and adds each to the capability table. B supplies method, path, handler and capability per route. |
 | R4 `ubicacion` and `archivos` summaries in the terrain DTO | A adds them in `repo._dto` through a batch helper supplied by B: **one query per listing, not one per row**. Field names inside the summaries are B's. |
 | R5 `ubicado` from boundary or X/Y | A applies B's `ubicacionDe` in `web/lib/inventario.js` `itemDeInventario`. |
 | R6 `app.js` hooks | A mounts the geometry loader and `ArchivoDetalle`. |
-| R7 column IDs | `core:archivos`, `core:kmz` accepted; column definition shape in `examples/02-columnas.json` (`tipo: "archivo"`, `acepta`, `multiple`). |
+| R7 column IDs | `core:archivos`, `core:kmz` accepted and present in every work base; column definition shape in `examples/02-columnas.json` (`tipo: "archivo"`, `acepta`, `multiple`). |
 | R8 snapshot references | Wave 3; noted, not designed here. |
 | R9 CI | Confirmed by reading `.github/workflows/checks.yml`: `unittest discover -s tests -t .` picks up any `tests/test_*.py`. No change needed. |
 
@@ -245,15 +297,15 @@ Implementation shape: a native `<table>` with a single input moved into the acti
 1. Final names and shape of the two summaries in the terrain DTO (the supervisor noted `ubicacion.geometria` versus `geometria` is unresolved), and an upper bound on their size per row.
 2. Confirmation that file operations never change `inventory_terrain.version`. The grid relies on that so an upload cannot make a cell edit conflict; it then refreshes the row from `onCambio` alone.
 3. The revised schema requirements for schema 10.
-4. The capability each of B's routes requires, including the batch geometry route.
+4. The capability each of B's routes requires, including the batch geometry route, and confirmation that every route resolves a terrain ID it can pass to `auth.require_terreno` (a version or geometry ID must lead back to its terrain).
 5. Keyboard contract of `ArchivoCelda`: which keys it handles and which it leaves to the grid.
 
 ### 5.3 Shared-change queue (Team A is sole editor)
 
 | # | File | Change | For |
 |---|---|---|---|
-| S1 | `server/db.py`, `server/postgres.py` | Schema 9: `team_user.rol`, `team_user_event`, `inventory_revision.tipo_terreno`, `inventory_revision.custom_json`, `inventory_column` | A |
-| S2 | `server/auth.py`, `server/app.py` | Capability table, dispatcher check, session payload | A, B |
+| S1 | `server/db.py`, `server/postgres.py` | Schema 9: `team_user.rol`, `team_user_event`, `maestra_base`, `maestra_base_acceso`, `inventory_terrain.base_id`, `inventory_revision.tipo_terreno`, `inventory_revision.custom_json`, `inventory_column` | A |
+| S2 | `server/auth.py`, `server/app.py` | Capability table, dispatcher check, scope helpers, session payload | A, B |
 | S3 | `web/components/app.js`, `web/lib/router.js`, `web/lib/store.js`, `web/lib/api.js` | `#/maestra` route, navigation driven by `capacidades`, grid mount | A |
 | S4 | `server/db.py`, `server/postgres.py` | Schema 10: B's tables | B |
 | S5 | `server/app.py`, `server/repo/inventario.py`, `web/lib/inventario.js`, `web/components/app.js` | R3–R6 hooks | B |
@@ -267,15 +319,15 @@ Each is small, starts from `origin/main`, and runs `./verificar.sh` plus the Git
 
 | PR | Branch | Content | Depends on | Acceptance checks |
 |---|---|---|---|---|
-| **A-1** | `claude/team-a/schema-9` | S1 only: additive migration on SQLite and Postgres, no behaviour change | Consolidated contract | Migration 8→9 test on both databases; existing data and saved maps byte-identical; repeatable; backup taken first |
-| **A-2** | `claude/team-a/roles` | S2; `cuentas.py` roles | A-1 | Operator gets 403 on every `derivados.*` and admin-only route and 200 on master routes; anonymous gets 401; every registered route has a capability; role change ends sessions; both databases |
-| **A-3** | `claude/team-a/master-record` | `tipo_terreno`; remove currency-on-save rule; archive/restore routes; column definitions (core only) | A-1, A-2 | Blank create; price without currency saves and is still blocked from publishing; history shows the new field; operator cannot archive |
-| **A-4** | `claude/team-a/master-grid` | S3; grid with add, edit, save/error/conflict states; attachment slot placeholder | A-3 | `node --test` for the cell state machine and save queue; browser test: operator creates an unnamed terrain, edits a cell, a second session sees it after reload; simulated concurrent edit is not lost |
-| **A-5** | `claude/team-a/custom-columns` | Column admin routes and UI; `custom` in PATCH | A-4 | Add, rename, retire and restore keep values; operator cannot manage columns; a retired column's values survive |
-| **A-6** | `claude/team-a/user-admin` | In-app account and role management | A-2 | Admin creates, deactivates and changes roles; operator gets 403; every action is audited |
-| **A-7** | `claude/team-a/attachments-integration` | S4, S5 with Team B | B-3, B-4 | First joint milestone from the delivery plan, locally |
+| **A-1** | `claude/team-a/schema-9` | S1 only: additive migration on SQLite and Postgres, no behaviour change | Consolidated contract | Migration 8→9 test on both databases; existing data and saved maps unchanged; repeatable; backup taken first |
+| **A-2** | `claude/team-a/roles-and-bases` | S2; work-base and access routes; `cuentas.py` roles | A-1 | Admin creates an empty base and grants it. The operator sees only that base; gets 404 for any other base or terrain and 403 for every `derivados.*`, `bases.gestionar` and `usuarios.gestionar` route; anonymous gets 401; every registered route has a capability; revoking the grant takes effect on the next request; both databases |
+| **A-3** | `claude/team-a/master-record` | `tipo_terreno`; remove currency-on-save rule; base-scoped list/create; archive/restore; core column definitions | A-1, A-2 | Blank create inside a base; price without currency saves and is still blocked from publishing; a terrain created in one base never appears in another; archive and restore by the operator inside her base |
+| **A-4** | `claude/team-a/master-grid` | S3; base picker; grid with add, edit, remove, save/error/conflict states; attachment slot placeholder | A-3 | `node --test` for the cell state machine and save queue; browser test: the operator opens an empty base, adds an unnamed terrain, edits a cell, a second session sees it after reload; simulated concurrent edit is not lost |
+| **A-5** | `claude/team-a/custom-columns` | Per-base column routes and UI; `custom` in PATCH | A-4 | Add, rename, retire and restore keep values; a column added in one base does not appear in another; an operator cannot touch another base's columns |
+| **A-6** | `claude/team-a/user-admin` | In-app accounts, roles and base access | A-2 | Admin creates, deactivates, changes roles and grants bases; operator gets 403; every action is audited |
+| **A-7** | `claude/team-a/attachments-integration` | S4, S5 with Team B | B-3, B-4 | First joint milestone from the delivery plan, locally, with the operator restricted to one base |
 
-A-1 to A-3 unblock Team B's B-3 (which needs the capability helper and route registration). A-4 can proceed in parallel with B-2. Search, sort and filter refinements follow A-4 as separate small PRs.
+A-1 to A-3 unblock Team B's B-3 (which needs the scope helper and route registration). A-4 can proceed in parallel with B-2. Search, sort and filter refinements follow A-4 as separate small PRs.
 
 ---
 
@@ -283,15 +335,18 @@ A-1 to A-3 unblock Team B's B-3 (which needs the capability helper and route reg
 
 | # | Decision | Recommendation | Blocks |
 |---|---|---|---|
-| D1 | May an operator see or use bases, saved maps, import and export? | **No.** Operator = master table, its files and its map only (§3.1). | A-2 |
-| D2 | Two roles, or permissions chosen per person? | Two roles now, enforced through capabilities so a third role is a small later change. Per-person switches add an admin screen and test matrix the plan does not yet ask for. | A-2 |
+| **D0** | The owner requirement in §3.1 replaces "one master table" (MASTER_PLAN §4) with several editable work bases and per-person access. Is that the intended direction, and how do filtered bases and saved maps relate to a work base later? | Adopt work bases now; they are a small additive change (two tables, one column) on the same record model. Treat filtered views and maps as derived from one work base when that phase is planned. Whether administrators also need one combined view across bases can wait. | A-1 |
+| D1 | Operator scope | Only the work bases granted to that person, with full working control inside them (add, edit, remove, files, KMZ, columns). Nothing else. | A-2 |
+| D1b | Who creates a work base | Administrators create and grant it. Operator-created bases are a small addition if wanted. | A-2 scope |
+| D2 | Two roles, or permissions chosen per person? | Two roles plus per-person base grants. This already answers "which person can see what" without a permission matrix per person. | A-2 |
 | D3 | May a price be saved without a currency? | Yes, as "unknown"; publishing still requires one. | A-3 |
 | D4 | Is "Comentarios" the existing private "Notas internas"? | Yes, reuse it. A second long-text field would split the same information. | A-1 |
 | D5 | "Tipo de terreno": free text or fixed list? | Free text with suggestions from existing values now; a controlled list once the vocabulary is known. | A-3 only for the list |
-| D6 | Role of each existing account at migration | Everyone starts as operator; the owner names the administrators. | Release, not A-1 |
-| D7 | Expected size and simultaneous editors; is multi-cell paste needed? | Design for up to a few thousand rows and a handful of editors; no paste in the first packet. | A-4 scope |
+| D6 | Role of each existing account at migration | Everyone starts as operator with no base; the owner names the administrators. | Release, not A-1 |
+| D7 | Expected size and simultaneous editors; is multi-cell paste needed? | Design for up to a few thousand rows per base and a handful of editors; no paste in the first packet. | A-4 scope |
+| D8 | Naming: today "Bases" means imported spreadsheets | Call the new ones "Bases" for operators, who see nothing else, and rename the legacy list "Bases importadas" for administrators. | A-4 |
 
-Left for their phase: live versus frozen derived datasets, operator deletion beyond archive, custom attachment columns, public visibility of master data.
+Left for their phase: live versus frozen derived datasets, permanent deletion, custom attachment columns, public visibility of master data.
 
 ---
 
@@ -309,4 +364,4 @@ python3 reports/team-a-master-table-prep-2026-10-07/experiment/baseline_probe.py
 
 ## 9. Next action
 
-Await the supervisor's consolidated contract. On receipt, start A-1 and A-2. If D1 and D2 are still open then, A-1 can still proceed: the role column does not depend on them.
+Await the supervisor's consolidated contract. On receipt, start A-1 and A-2. A-1 depends on D0, because the work-base tables are part of schema 9.

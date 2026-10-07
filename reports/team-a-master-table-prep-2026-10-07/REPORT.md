@@ -64,7 +64,7 @@ Checked by reading the code and by `experiment/baseline_probe.py` (output in `ex
 
 ## 2. Proposed master-record contract
 
-Fictional examples: `examples/02-columnas.json`, `03-registro.json`, `04-editar-celda.json`.
+Fictional examples: `examples/02-columnas.json`, `03-registro.json`, `04-editar-celda.json`, `05-tabla-maestra.json`.
 
 ### 2.1 Identity and work bases
 
@@ -86,7 +86,9 @@ A terrain belongs to at most one work base. `base_id NULL` means "not assigned":
 
 Work bases are a different thing from the legacy `base` table (imported spreadsheets, integer IDs, frozen into saved maps). The legacy table is not touched. The interface must name the two differently (decision D8).
 
-**This departs from MASTER_PLAN §4**, which describes one master table with filtered bases derived from it. See §3.1 and decision D0.
+**The master table is the view across every work base.** Administrators open "Tabla maestra" and see all terrains from all bases in one place, each row showing the base it comes from, and filter it by land type, state, municipality, area, price and base. It is the same records, not a copy: an edit made in a work base is what the master table shows, and the reverse. Work bases are how operators stay organized; the master table is how administrators find things across them.
+
+This keeps MASTER_PLAN §4's single authoritative record set and adds one thing to it: the set is partitioned into work bases with per-person access. See §3.1 and decision D0.
 
 ### 2.2 Core columns
 
@@ -168,7 +170,8 @@ No edit is lost silently and no server merge logic is added. Saves for one recor
 | `POST /api/inventario/terrenos/:id/archivar`, `…/restaurar` | New. `archived_at` exists but has no route today. "Remove" in the interface is this reversible archive |
 | `GET /api/maestra/bases/:bid/columnas` | New: core + that base's custom column definitions |
 | `POST /api/maestra/bases/:bid/columnas`, `PATCH/DELETE …/columnas/:cid` | New: add, rename, reorder, retire/restore |
-| `GET/POST /api/inventario/terrenos` (unscoped) | Existing; becomes admin only, since it spans every base |
+| `GET /api/inventario/terrenos` (unscoped) | Existing; becomes **the master table**: every base, admin only. Gains the filters `base` and `tipo_terreno` (both multi-value) next to the existing state, municipality, area, price and text search, and the facets `bases` and `tipos` |
+| `POST /api/inventario/terrenos` (unscoped) | Existing; admin only; creates an unassigned record |
 
 The record routes keep the `/api/inventario/` prefix. Renaming them would break Team B's proposed routes and the existing tests for no user benefit.
 
@@ -187,8 +190,9 @@ The Team A account holder stated, on October 7, to be confirmed through the supe
 3. Inside it she may see, add, edit and remove terrains, upload files and KMZ layouts, and **add columns that exist only in that base**.
 4. She can see and change **nothing outside that base**.
 5. Access for her or for any later operator may be changed over time.
+6. **Administrators keep a central master table**: every terrain from every base in one place, filterable by land type, state, price and the base it comes from. It is expected to grow large as several operators fill their bases.
 
-This is stricter and more specific than MASTER_PLAN §6, and it changes §4 of that plan: instead of one shared master table, there are several editable work bases with access granted per person. The proposal below implements it and marks the difference as decision D0, because it also affects Team B (access is decided per terrain, through its base) and the later "filtered base and map" phase.
+This is stricter and more specific than MASTER_PLAN §6. It keeps §4's single master table and adds editable work bases underneath it, with access granted per person. The proposal below implements it and marks the addition as decision D0, because it also affects Team B (access is decided per terrain, through its base) and the later "filtered base and map" phase.
 
 ### 3.2 Model
 
@@ -205,6 +209,7 @@ Two things decide access: **what** a role may do, and **where**.
 | `archivos.ver` | ✔ | ✔ | List, open, download (Team B) |
 | `archivos.subir` | ✔ | ✔ | Upload, replace, choose layout (Team B) |
 | `archivos.retirar` | ✔ | ✔ | Retire a file (Team B) |
+| `maestra.global` | ✔ | — | The master table: every terrain of every base in one view, with filters across bases |
 | `bases.gestionar` | ✔ | — | Create, rename, archive work bases; grant and revoke access; move terrains between bases |
 | `derivados.ver`, `derivados.gestionar` | ✔ | — | Legacy workspace: imported bases, saved maps, folders, formats, import, export |
 | `usuarios.gestionar` | ✔ | — | Accounts and roles |
@@ -265,6 +270,7 @@ A sketch for this checkpoint; no prototype code is proposed for production.
 | **Error** | The cell keeps what the user typed, is marked ⚠ and shows the server's message for that field. The rest of the row and every other edit stay saved. |
 | **Conflict** | Other cells changed by someone else: silent retry. Same cell: the cell shows "tu valor / valor de otra persona" and the user picks one. |
 | **Currency** | A price with unknown currency shows a `?` marker; the currency is set from the detail panel or a small control beside the price cells. |
+| **Master table (administrators)** | The same grid over every base, with a pinned **Base** column and a filter bar: Tipo, Estado, Municipio, Superficie, Precio (one currency at a time), Base, and text search. Cells are editable there too. "Agregar terreno" asks which base the new terrain goes in. Operators do not have this view. |
 | **Empty base** | A new work base opens as an empty grid with the fourteen core columns and "Agregar terreno". No file is needed. |
 | **Custom-column control** | "+ Columna" asks for name and type and adds the column to this base only. A column header menu offers rename, move and retire. |
 | **Remove** | The row menu (⋮) offers "Quitar". It archives the terrain; "Mostrar quitados" lists them with "Restaurar". |
@@ -272,7 +278,7 @@ A sketch for this checkpoint; no prototype code is proposed for production.
 | **Detail panel** | A side panel for long comments, the non-core fields, history and B's `ArchivoDetalle`. |
 | **Narrow screens** | The table keeps the name column pinned; editing happens in the detail panel. |
 
-Implementation shape: a native `<table>` with a single input moved into the active cell, in `web/components/maestra/`, with the cell state machine and save queue as pure functions in `web/lib/maestra.js` (testable with `node --test`). No grid library and no build step. Routes `#/maestra` (base list) and `#/maestra/<base id>`. Rows are not virtualized in the first packet; that is the upgrade if the table passes a few thousand rows (decision D7).
+Implementation shape: a native `<table>` with a single input moved into the active cell, in `web/components/maestra/`, with the cell state machine and save queue as pure functions in `web/lib/maestra.js` (testable with `node --test`). No grid library and no build step. Routes `#/maestra` (base list) and `#/maestra/<base id>`. **Scale.** Today the list is filtered in Python over every record and the browser loads every page of a query. That holds for a work base of a few thousand rows. The master table is the first view to outgrow it. Its filters use only core columns and the base, which are ordinary database columns, so the upgrade is contained: filter, sort and page in SQL (same statements on SQLite and Postgres) and render only the visible rows. It is a separate PR, scheduled by the expected size (decision D7), and it does not change the contract in §2.
 
 ---
 
@@ -323,6 +329,7 @@ Each is small, starts from `origin/main`, and runs `./verificar.sh` plus the Git
 | **A-2** | `claude/team-a/roles-and-bases` | S2; work-base and access routes; `cuentas.py` roles | A-1 | Admin creates an empty base and grants it. The operator sees only that base; gets 404 for any other base or terrain and 403 for every `derivados.*`, `bases.gestionar` and `usuarios.gestionar` route; anonymous gets 401; every registered route has a capability; revoking the grant takes effect on the next request; both databases |
 | **A-3** | `claude/team-a/master-record` | `tipo_terreno`; remove currency-on-save rule; base-scoped list/create; archive/restore; core column definitions | A-1, A-2 | Blank create inside a base; price without currency saves and is still blocked from publishing; a terrain created in one base never appears in another; archive and restore by the operator inside her base |
 | **A-4** | `claude/team-a/master-grid` | S3; base picker; grid with add, edit, remove, save/error/conflict states; attachment slot placeholder | A-3 | `node --test` for the cell state machine and save queue; browser test: the operator opens an empty base, adds an unnamed terrain, edits a cell, a second session sees it after reload; simulated concurrent edit is not lost |
+| **A-4b** | `claude/team-a/master-view` | Master table for administrators: `base` and `tipo_terreno` filters and facets, Base column, filter bar | A-4 | Admin sees terrains of two bases together and narrows by base, type, state and price; an operator calling the unscoped list gets 403; a terrain edited in its base shows the change in the master table |
 | **A-5** | `claude/team-a/custom-columns` | Per-base column routes and UI; `custom` in PATCH | A-4 | Add, rename, retire and restore keep values; a column added in one base does not appear in another; an operator cannot touch another base's columns |
 | **A-6** | `claude/team-a/user-admin` | In-app accounts, roles and base access | A-2 | Admin creates, deactivates, changes roles and grants bases; operator gets 403; every action is audited |
 | **A-7** | `claude/team-a/attachments-integration` | S4, S5 with Team B | B-3, B-4 | First joint milestone from the delivery plan, locally, with the operator restricted to one base |
@@ -335,7 +342,7 @@ A-1 to A-3 unblock Team B's B-3 (which needs the scope helper and route registra
 
 | # | Decision | Recommendation | Blocks |
 |---|---|---|---|
-| **D0** | The owner requirement in §3.1 replaces "one master table" (MASTER_PLAN §4) with several editable work bases and per-person access. Is that the intended direction, and how do filtered bases and saved maps relate to a work base later? | Adopt work bases now; they are a small additive change (two tables, one column) on the same record model. Treat filtered views and maps as derived from one work base when that phase is planned. Whether administrators also need one combined view across bases can wait. | A-1 |
+| **D0** | The owner requirement in §3.1 adds editable work bases with per-person access under the master table of MASTER_PLAN §4. Is that the intended structure, and from where are filtered bases and saved maps derived later? | Adopt it: two tables and one column on the same record model, with the master table as the administrators' view across all bases. Derive filtered views and maps from the master table's filters when that phase is planned, as the plan already describes. | A-1 |
 | D1 | Operator scope | Only the work bases granted to that person, with full working control inside them (add, edit, remove, files, KMZ, columns). Nothing else. | A-2 |
 | D1b | Who creates a work base | Administrators create and grant it. Operator-created bases are a small addition if wanted. | A-2 scope |
 | D2 | Two roles, or permissions chosen per person? | Two roles plus per-person base grants. This already answers "which person can see what" without a permission matrix per person. | A-2 |
@@ -343,7 +350,8 @@ A-1 to A-3 unblock Team B's B-3 (which needs the scope helper and route registra
 | D4 | Is "Comentarios" the existing private "Notas internas"? | Yes, reuse it. A second long-text field would split the same information. | A-1 |
 | D5 | "Tipo de terreno": free text or fixed list? | Free text with suggestions from existing values now; a controlled list once the vocabulary is known. | A-3 only for the list |
 | D6 | Role of each existing account at migration | Everyone starts as operator with no base; the owner names the administrators. | Release, not A-1 |
-| D7 | Expected size and simultaneous editors; is multi-cell paste needed? | Design for up to a few thousand rows per base and a handful of editors; no paste in the first packet. | A-4 scope |
+| D7 | Expected size and simultaneous editors; is multi-cell paste needed? | A work base: up to a few thousand rows, a handful of editors, no paste in the first packet. The master table is expected to grow much larger; see the scale note in §4. A rough figure for the first year decides when that upgrade is scheduled. | A-4, A-4b scope |
+| D9 | Which columns does the master table show, given that custom columns differ per base? | The fourteen core columns plus Base. A base's custom columns appear when the master table is filtered to that single base, and always in the detail panel. | A-4b |
 | D8 | Naming: today "Bases" means imported spreadsheets | Call the new ones "Bases" for operators, who see nothing else, and rename the legacy list "Bases importadas" for administrators. | A-4 |
 
 Left for their phase: live versus frozen derived datasets, permanent deletion, custom attachment columns, public visibility of master data.

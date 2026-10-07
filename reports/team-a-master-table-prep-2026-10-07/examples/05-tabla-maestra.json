@@ -1,0 +1,46 @@
+{
+  "_nota": "Ficticio. The master table: GET /api/inventario/terrenos (admin only), every work base in one list. Filters combine; repeated parameters mean 'any of'.",
+  "_peticion": "GET /api/inventario/terrenos?tipo_terreno=Industrial&estado=Ficticio&base=7a1e2b3c-0000-4000-8000-0000000000b1&moneda=MXN&price_max=2000000",
+  "terrenos": [
+    {
+      "id": "0d5a3b1c-0000-4000-8000-0000000000aa",
+      "base_id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+      "base_nombre": "Base Ejemplo",
+      "version": 3,
+      "draft": {
+        "tipo_terreno": "Industrial",
+        "estado": "Ficticio",
+        "asking_price": 1500000.0,
+        "moneda": "MXN",
+        "…": "…"
+      }
+    }
+  ],
+  "total": 1,
+  "next_cursor": null,
+  "facets": {
+    "bases": [
+      {
+        "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+        "nombre": "Base Ejemplo"
+      },
+      {
+        "id": "7a1e2b3c-0000-4000-8000-0000000000b2",
+        "nombre": "Base Ejemplo 2"
+      }
+    ],
+    "tipos": [
+      "Habitacional",
+      "Industrial"
+    ],
+    "estados": [
+      "Ficticio"
+    ],
+    "municipios": [],
+    "monedas": [
+      "MXN",
+      "USD"
+    ]
+  },
+  "_operador": "The same request from an operator -> HTTP 403 {\"code\": \"forbidden\", \"capacidad\": \"maestra.global\"}"
+}

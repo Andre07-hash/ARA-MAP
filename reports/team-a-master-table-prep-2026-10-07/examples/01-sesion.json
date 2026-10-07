@@ -1,0 +1,87 @@
+{
+  "_nota": "Ficticio. GET /api/session. `capacidades` says what the role may do; `alcance` says in which work bases. Both are computed on the server; the client uses them only to decide what to show. Every route checks again.",
+  "operador": {
+    "authenticated": true,
+    "user": {
+      "id": "5b0c1f0e-0000-4000-8000-000000000001",
+      "display_name": "Olga Ficticia",
+      "rol": "operador"
+    },
+    "capacidades": [
+      "maestra.ver",
+      "maestra.editar",
+      "maestra.archivar",
+      "columnas.gestionar",
+      "archivos.ver",
+      "archivos.subir",
+      "archivos.retirar"
+    ],
+    "alcance": {
+      "bases": [
+        {
+          "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+          "nombre": "Base Ejemplo"
+        }
+      ]
+    }
+  },
+  "admin": {
+    "authenticated": true,
+    "user": {
+      "id": "5b0c1f0e-0000-4000-8000-000000000002",
+      "display_name": "Beto Ficticio",
+      "rol": "admin"
+    },
+    "capacidades": [
+      "maestra.ver",
+      "maestra.editar",
+      "maestra.archivar",
+      "columnas.gestionar",
+      "archivos.ver",
+      "archivos.subir",
+      "archivos.retirar",
+      "maestra.global",
+      "bases.gestionar",
+      "derivados.ver",
+      "derivados.gestionar",
+      "usuarios.gestionar"
+    ],
+    "alcance": {
+      "bases": "todas"
+    }
+  },
+  "denegado": {
+    "sin_capacidad": {
+      "_caso": "Operator calls GET /api/bases (legacy workspace) -> HTTP 403",
+      "error": "Tu cuenta no tiene permiso para esta acción.",
+      "detalle": {
+        "code": "forbidden",
+        "capacidad": "derivados.ver"
+      }
+    },
+    "fuera_de_alcance": {
+      "_caso": "Operator opens a terrain or work base not granted to her -> HTTP 404, same answer as a missing one",
+      "error": "El terreno no existe.",
+      "detalle": {
+        "code": "not_found"
+      }
+    }
+  },
+  "otorgar_acceso": {
+    "_peticion": "PUT /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/acceso (admin)",
+    "usuarios": [
+      "5b0c1f0e-0000-4000-8000-000000000001"
+    ]
+  },
+  "crear_base_vacia": {
+    "_peticion": "POST /api/maestra/bases (admin)",
+    "nombre": "Base Ejemplo",
+    "_respuesta": {
+      "base": {
+        "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+        "nombre": "Base Ejemplo",
+        "terrenos": 0
+      }
+    }
+  }
+}

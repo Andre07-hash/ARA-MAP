@@ -1,0 +1,35 @@
+{
+  "_nota": "Ficticio. One master record as returned by listing/detail. Existing InternalTerrain fields are kept; `tipo_terreno` and `custom` are new. `ubicacion` and `archivos` are B's read-only summaries (shape is B's to define; shown here only as the slot).",
+  "terreno": {
+    "id": "0d5a3b1c-0000-4000-8000-0000000000aa",
+    "base_id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+    "version": 3,
+    "archived_at": null,
+    "draft": {
+      "tipo_terreno": null,
+      "terreno": null,
+      "estado": "Ficticio",
+      "municipio": null,
+      "superficie_m2": 12500.0,
+      "superficie_ha": null,
+      "afectaciones_pct": 0.1,
+      "asking_price": 1500000.0,
+      "asking_m2": null,
+      "moneda": null,
+      "notas_internas": null,
+      "lat": null,
+      "lon": null
+    },
+    "custom": {
+      "custom:9f1c2d3e-0000-4000-8000-00000000000a": "Industrial"
+    },
+    "ubicacion": "<B>",
+    "archivos": "<B>",
+    "updated_at": "2026-10-07T18:00:00Z",
+    "updated_by": {
+      "id": "5b0c1f0e-0000-4000-8000-000000000001",
+      "display_name": "Olga Ficticia"
+    }
+  },
+  "_lectura": "No name, no coordinates, a price with unknown currency: all valid and saved. The grid labels the row «Sin nombre»; nothing is written to `terreno`."
+}

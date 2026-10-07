@@ -31,7 +31,7 @@ October 7, 2026 · Team B · draft PR on `claude/team-b/map-boundaries`
    - `fitTo` includes every part.
    - Boundary symbols join the existing coincident-ring grouping.
    - XY-only behaviour is unchanged and **pixel-identical** to the baseline renderer (§4).
-4. **Body missing or loading.** A body that isn't loaded, or that fails validation (malformed, oversized, or from another version), shows a hollow dashed symbol at the interior point with the tooltip "Contorno no disponible". It never becomes an outline and never jumps to X/Y. Without an active usable descriptor, valid X/Y keeps today's marker; with neither, the terrain is unplaced.
+4. **Body missing or loading.** A body that isn't loaded, or that fails validation (malformed, oversized, or declaring bounds other than the active descriptor's; since the B-2 review also coordinates that disagree with its own bounds, §8), shows a hollow dashed symbol at the interior point with the tooltip "Contorno no disponible". It never becomes an outline and never jumps to X/Y. Without an active usable descriptor, valid X/Y keeps today's marker; with neither, the terrain is unplaced.
 5. **Replacements, filtering and reset.**
    - The renderer draws only the active descriptor's body, so a pending or failed replacement body in the map is never drawn.
    - `render()` draws only the supplied rows, so stale map entries are ignored.
@@ -53,7 +53,7 @@ October 7, 2026 · Team B · draft PR on `claude/team-b/map-boundaries`
 | Check | Result |
 |---|---|
 | `node --test tests/js/*.test.mjs` | **116 pass**: 98 existing (including `geo.test.mjs`, unchanged) + 18 new |
-| New helper tests | Cover: boundary only; XY only (existing validator, swapped X/Y stays invalid); neither; disagreeing locations without writing X/Y; 15 malformed or unusable descriptors; legacy rows; the contract example through A's adapter rule; explicit coordinate conversion; holes and parts; missing body; failed replacement (old body used, wrong-version body refused); 9 malformed bodies; body over the vertex limit; the 24 px handover; largest-part box; mixed bounds; coincident rings |
+| New helper tests | Cover: boundary only; XY only (existing validator, swapped X/Y stays invalid); neither; disagreeing locations without writing X/Y; 15 malformed or unusable descriptors; legacy rows; the contract example through A's adapter rule; explicit coordinate conversion; holes and parts; missing body; failed replacement (old body used; a body under the active ID with different bounds refused, a consistency check, not a version guarantee, §8); 9 malformed bodies; body over the vertex limit; the 24 px handover; largest-part box; mixed bounds; coincident rings |
 | Browser, `tests/e2e/contornos.mjs` | **18/18 pass**, stable on 3 consecutive runs. Headless Chromium 141.0.7390.37, Playwright-core 1.63. Fixture `contornos.json` at this branch. Output: `evidencia/contornos-salida.txt`, `resumen.json`, screenshots `01`–`08`. |
 | Python suite (3.13 and uv's 3.9.25) | 672 run, 29 skipped, 1 failure. It is environmental (`test_packaging…has_no_openpyxl_of_its_own`), the same as on the baseline; this branch has no Python changes apart from the fixture generator. |
 | ruff (`server/`, `tests/`), mypy (`server/`) | clean |
@@ -136,3 +136,65 @@ Environment: headless Chromium 141.0.7390.37 on x86_64 Linux, 4 CPUs, no GPU, vi
 - Real company KMZ files and non-Chromium browsers (Safari, Firefox) are untested. Mobile touch input was not exercised with this harness. The existing gesture code handles touch as before.
 - The adversarial ~20,000-ring limit (§4) is recorded, not mitigated.
 - Stopping here for supervisory review before B-3.
+
+## 8. B-2 review corrections (October 7, 2026)
+
+Review: `reports/team-b-b2-review-2026-10-07/{START_HERE,REVIEW}.md` at instruction commit `1a87c5d30a848785ee1aaec72df1653ddf63409e`, of PR #11 head `db0b679`. Sections 1–7 above are the original B-2 submission and its measurements; they stay as historical evidence, except the two version claims narrowed in §2.4 and §3.
+
+| Commit | Change |
+|---|---|
+| `038326a` | **F1** in `web/lib/geometria.js`, plus helper regressions and the measurement generator's bbox |
+| `4c20d86` | Browser regressions for **F1**, and **F2** in `tests/e2e/contornos.mjs` |
+| the commit adding this section | This section and `evidencia-correcciones-b2/` |
+
+### F1 — coordinates must agree with their declared bounds: fixed
+
+- **Change.** `cuerpoLeaflet` now checks, in the same single pass over the already bounded positions (linear, at most 100,000):
+  - every position of every ring, holes included, lies inside the body's declared bbox;
+  - the shells of all parts together span exactly that bbox;
+  - every ring has a positive extent on both axes (no collapsed ring).
+- **Tolerance.** `TOLERANCIA_GRADOS = 1e-9` degrees, about 0.1 mm. The B-1 parser derives bbox as the exact min/max of the shell coordinates and the values travel as JSON, so a real body matches exactly; the tolerance only absorbs last-digit rounding. The existing descriptor/body bbox comparison now uses the same constant.
+- **Failure behaviour.** An inconsistent body is `invalido`, so the existing unavailable-body behaviour applies: a hollow dashed symbol on the descriptor's `punto_interior`, "Contorno no disponible", and `zoomToScale` → `contorno_no_disponible`. Nothing is rewritten, relocated or replaced by X/Y.
+- **Reproducer.** The reviewer's reproducer (the `t-simple` body with +2° longitude) and the four-identical-points body both returned `cargado` before the change and return `invalido` after.
+- **New helper tests.** The four new tests fail without the change (three) or cover parser fixtures (one):
+  - shifted bodies: the reproducer, ±1e-6° on each axis, a diagonal shift; a shift within tolerance still loads;
+  - collapsed and shrunken bodies: four identical points, a flat sliver, a square inside the bbox that does not span it;
+  - holes and parts out of bounds: a hole moved outside, a collapsed hole, one multipart part moved away;
+  - every parser-produced fixture body still loads.
+- **New browser checks.** Two cases, shifted 2° east and collapsed to a point, in the real renderer. Each shows:
+  - the symbol on the descriptor's interior point, painted, with the tooltip "Contorno no disponible";
+  - `zoomToScale` → `contorno_no_disponible`;
+  - canvas alpha 0 at every on-screen vertex of the inconsistent coordinates.
+
+  Screenshots: `evidencia-correcciones-b2/contornos/09-inconsistente-*.png`. The two are byte-identical by design: both inconsistent bodies render the same unavailable symbol at the same descriptor point.
+- **Preserved.** Holes, multipart bodies and all fixture bodies still load. Parser-limit bodies still load too: one 100k-position ring, 20,000 parts, and one large part plus 19,999 small ones, all regenerated with B-1's `efc3628` parser (`kmz.py` SHA-256 `92e3a9fa…94c3`, equal to PR #9's file). Validation takes 16–62 ms in Node. The measurement harness's in-page circles previously declared a bbox of centre ± r that their vertices do not quite reach; they now take their bbox from their positions, as the parser does, so they still draw outlines.
+- **Claim boundary.** A matching bbox is a consistency check, not proof that a body is the same immutable version. That guarantee comes only from the ID-keyed delivery of the integration contract. The docstring and §2.4/§3 wording are narrowed accordingly.
+
+### F2 — the XY pixel regression waits for paint: fixed
+
+- **Capture after paint.** Each renderer run is now `async`. After the final `setView` / `render` / `select`, it waits two animation frames, then captures every canvas: its size, its count of non-transparent pixels, and a SHA-256 digest of every RGBA byte. Only after that is the map's element detached.
+- **Guard.** A capture with no canvas or zero painted pixels fails before any comparison. Then the canvas sizes, painted counts and digests of baseline and B-2 must all be equal. The existing count, viewport, `zoomToScale` and scale comparisons are unchanged.
+- **Negative control.** In each run, the same canvases are cleared deliberately after capture, and the guard must reject that blank result.
+- **Mutation check (not committed).** A temporary copy that gave one marker a different colour in the B-2 run failed on the digest comparison, so the check detects a visual change.
+- **Browser and evidence.** Headless Chromium 141.0.7390.37 (Playwright-core 1.63). Baseline and B-2 both painted **26,594 non-transparent pixels**, with identical digests.
+- **Timing differs by browser.** The diagnostic synchronous capture, kept for the record, was *not* blank in this Chromium (also 26,594): here `zoomToScale`/`setView` triggers a synchronous Leaflet redraw. The reviewer saw 0 on Chrome 154. A synchronous capture therefore shows a browser-dependent intermediate frame, which is why the check now waits for paint instead of relying on either behaviour.
+- **Teardown.** Calling `map.remove()` after capture raised a late Leaflet `_leaflet_pos` error from a pending callback. The run detaches the element as before, now after capture.
+
+### Evidence at `4c20d86` (local, this container)
+
+| Check | Result |
+|---|---|
+| `node --test tests/js/*.test.mjs` | **120 pass** (116 before + 4 new). `geometria.test.mjs`: 22 tests. |
+| `tests/e2e/contornos.mjs` | **20/20 pass**, on 3 consecutive runs. Headless Chromium 141.0.7390.37, real `page.mouse` input. `evidencia-correcciones-b2/contornos-salida.txt`, `contornos/resumen.json` (includes `xyPixelesPintados`). |
+| `tests/e2e/contornos-medicion.mjs` with the three regenerated parser-limit bodies | Every case still reaches `a_escala` with its outline (the 20,000-part case again shows a symbol at first focus, by the largest-part handover, then `a_escala` at z16). `evidencia-correcciones-b2/medicion-salida.txt`, `medicion/medicion.json`. These limit bodies have the same position and part counts as §4's but are not byte-identical (§4's generator was not kept), so the numbers are comparable, not a rerun. The adversarial case remains slow (focus 2.8 s, `zoomToScale` 2.6 s, click 1.1 s), the limit recorded in §4; unchanged by this correction. |
+| Python, no database (`python3` 3.11.15; `/usr/bin/python3` is also 3.11 here, not macOS 3.9) | 672 run, 29 skipped, **0 failures**. The environmental openpyxl packaging failure reported in §3 did not occur in this container. |
+| Python on disposable Postgres 16.14 (`.venv-dev`, psycopg) | 672 run, **0 skipped, 0 failures** |
+| ruff (`server/`, `tests/`), mypy (`server/`) | clean |
+| Coverage | not run: `coverage` is not installed in this container's `.venv-dev` (no Python changed) |
+| `./verificar.sh` | not run as a script: no `zsh` in this container; its components are the rows above |
+
+GitHub CI for the pushed head is reported in the PR, not here.
+
+### Scope
+
+Only B-owned files changed: `web/lib/geometria.js`, `tests/js/geometria.test.mjs`, `tests/e2e/contornos.mjs`, `tests/e2e/contornos-medicion.mjs` and this report folder. No A-owned file, app shell, schema, auth, storage, CI or deployment configuration was touched. PR #9 is untouched. Nothing was merged or deployed. **Stopping for supervisory review before B-3.**

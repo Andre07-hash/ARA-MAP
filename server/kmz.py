@@ -27,10 +27,29 @@ Coordinate orders, stated once because ARA's X/Y are latitude/longitude:
 Geometry is returned exactly as written in the file (ring order, winding and
 repeated points included) apart from dropping altitude, which is reported.
 Invalid shapes are rejected, never repaired.
+
+Bounded work, by stage:
+
+- Package: MAX_KMZ_BYTES; the central directory is walked header by header
+  and refused past MAX_ENTRADAS (directories included) before zipfile reads
+  it; only the one KML member is decompressed, up to MAX_KML_BYTES.
+- Parsing: linear in the document, capped by MAX_KML_BYTES, MAX_ELEMENTOS,
+  MAX_PROFUNDIDAD, MAX_CANDIDATOS, MAX_VERTICES (counted while streaming)
+  and MAX_TOKEN.
+- Geometry: every validation and normalization step of one call -- all
+  candidates, a combined selection, crossings, holes, parts, contact pieces,
+  interior points -- draws on one Presupuesto of MAX_TRABAJO units. Running
+  out gives GEOMETRIA_DEMASIADO_COMPLEJA.
+
+Malformed input, invalid selections and an exhausted budget are returned as
+structured results; programming errors and failures of the process itself
+(MemoryError, for example) are not caught.
 """
 
 from __future__ import annotations
 
+import bisect
+import heapq
 import io
 import math
 import re
@@ -59,13 +78,18 @@ MAX_VERTICES = 100_000              # polygon positions, across the document
 MAX_TOKEN = 128                     # characters in one "lon,lat[,alt]" tuple
 MAX_NOMBRE = 200                    # characters kept from a <name>
 
-# Validation work allowed, per segment plus a fixed base: grid registrations
-# and edge comparisons. A shape needing more is reported as too complex to
-# validate rather than accepted unchecked or left running.
+# Geometry work allowed in ONE processing call, in the units Presupuesto
+# documents, across every stage and candidate. Calibrated so the largest
+# measured legitimate cases use under half of it (see the B-1 report).
+MAX_TRABAJO = 30_000_000
+
+# Grid sizing target: registrations per segment plus a base. Only chooses the
+# cell size; the safety limit is MAX_TRABAJO.
 _REGISTROS_POR_SEGMENTO = 32
 _REGISTROS_BASE = 200_000
-_PARES_POR_SEGMENTO = 64
-_PARES_BASE = 500_000
+
+# Scanlines tried for an interior point before reporting GEOMETRIA_INESTABLE.
+_LINEAS_INTERIOR = 8
 
 # Below this planar ring area (degrees²; about 0.01 m² in Mexico) a ring is
 # treated as having no area.
@@ -106,11 +130,19 @@ class KmzError(Exception):
 # ---------------------------------------------------------------- entry point
 
 def procesar_kmz(datos: bytes, seleccion: object = None) -> dict[str, Any]:
-    """Process one KMZ package. Never raises for bad input or a bad selection."""
+    """Process one KMZ package.
+
+    Malformed or hostile packages, invalid shapes, bad selections and
+    exhausting the work budget all come back as structured results. Only
+    programming errors and resource failures of the process itself (such as
+    MemoryError) would propagate.
+    """
     avisos: list[dict[str, str]] = []
+    presupuesto = Presupuesto()
     try:
         kml, adicionales = leer_paquete(datos)
-        lectura = _leer_kml(kml)
+        lectura = _leer_kml(kml, presupuesto)
+        candidatos = [_describir(c, presupuesto) for c in lectura.candidatos]
     except KmzError as exc:
         return _resultado(RECHAZADO, error=exc)
 
@@ -120,7 +152,6 @@ def procesar_kmz(datos: bytes, seleccion: object = None) -> dict[str, Any]:
                              "no se usan para el contorno."))
     avisos.extend(lectura.avisos())
     ignorados = dict(sorted(lectura.ignorados.items()))
-    candidatos = [_describir(c) for c in lectura.candidatos]
 
     if not candidatos:
         contenido = ", ".join(ignorados) if ignorados else "ningún elemento de mapa"
@@ -141,7 +172,7 @@ def procesar_kmz(datos: bytes, seleccion: object = None) -> dict[str, Any]:
         return _resultado(RECHAZADO, error=error, **base)
 
     if len(candidatos) == 1 and seleccion is None:
-        return _con_geometria([0], lectura, **base)
+        return _con_geometria([0], lectura, presupuesto, **base)
 
     if seleccion is None:
         return _resultado(REQUIERE_SELECCION, **base)
@@ -156,19 +187,24 @@ def procesar_kmz(datos: bytes, seleccion: object = None) -> dict[str, Any]:
                                f"{error['mensaje']}")
     except KmzError as exc:
         return _resultado(REQUIERE_SELECCION, error=exc, **base)
-    return _con_geometria(indices, lectura, **base)
+    return _con_geometria(indices, lectura, presupuesto, **base)
 
 
-def _con_geometria(indices: list[int], lectura: _Lectura,
+def _con_geometria(indices: list[int], lectura: _Lectura, presupuesto: Presupuesto,
                    **base: Any) -> dict[str, Any]:
+    # With several candidates a person can still choose differently, so a
+    # failure here keeps the choice open; a single candidate is final.
+    fallo = REQUIERE_SELECCION if len(lectura.candidatos) > 1 else RECHAZADO
     poligonos = [p for i in indices for p in lectura.candidatos[i].poligonos]
-    if len(indices) > 1:
-        # Each candidate is valid alone; the combination must not overlap.
-        error = validar_poligonos(poligonos)
-        if error:
-            return _resultado(REQUIERE_SELECCION, error=error, **base)
-
-    geometria = normalizar(poligonos)
+    try:
+        if len(indices) > 1:
+            # Each candidate is valid alone; the combination must not overlap.
+            error = validar_poligonos(poligonos, presupuesto)
+            if error:
+                return _resultado(fallo, error=error, **base)
+        geometria = normalizar(poligonos, presupuesto)
+    except KmzError as exc:
+        return _resultado(fallo, error=exc, **base)
     dentro = _dentro_de_mexico(geometria["bbox"])
     avisos = list(base.pop("avisos"))
     if not dentro:
@@ -227,6 +263,8 @@ _EOCD = b"PK\x05\x06"
 _EOCD64_LOCALIZADOR = b"PK\x06\x07"
 _EOCD_FORMATO = "<4s4H2LH"
 _EOCD_TAMANO = struct.calcsize(_EOCD_FORMATO)
+_CENTRAL = b"PK\x01\x02"
+_CENTRAL_TAMANO = 46          # fixed part of a central directory header
 
 
 def leer_paquete(datos: bytes) -> tuple[bytes, bool]:
@@ -241,6 +279,8 @@ def leer_paquete(datos: bytes) -> tuple[bytes, bool]:
     _revisar_directorio(datos)
     try:
         with zipfile.ZipFile(io.BytesIO(datos)) as zf:
+            if len(zf.infolist()) > MAX_ENTRADAS:      # defence in depth
+                raise _demasiadas_entradas()
             miembros = [m for m in zf.infolist() if not m.is_dir()]
             kmls = [m for m in miembros if m.filename.lower().endswith(".kml")]
             if not kmls:
@@ -256,19 +296,25 @@ def leer_paquete(datos: bytes) -> tuple[bytes, bool]:
         raise
     except (zipfile.BadZipFile, zipfile.LargeZipFile, zlib.error, EOFError, OSError,
             ValueError, struct.error, NotImplementedError, RuntimeError) as exc:
-        raise KmzError("KMZ_DANADO", "El KMZ está dañado o incompleto.") from exc
+        raise _danado() from exc
 
 
 def _revisar_directorio(datos: bytes) -> None:
-    """Check the ZIP end record before zipfile reads the whole directory."""
+    """Validate the end record and walk the real central directory, with work
+    bounded by MAX_ENTRADAS, before zipfile materializes any entry.
+
+    The end record's entry counts are not trusted: every central header is
+    counted (directories included) and must tile exactly the span zipfile
+    will read, ending at the end record, with the declared count agreeing.
+    """
     inicio = max(0, len(datos) - (_EOCD_TAMANO + 0xFFFF))
     pos = datos.rfind(_EOCD, inicio)
     if pos < 0 or len(datos) - pos < _EOCD_TAMANO:
         if datos[:4] == b"PK\x03\x04":
-            raise KmzError("KMZ_DANADO", "El KMZ está dañado o incompleto.")
+            raise _danado()
         raise KmzError("KMZ_NO_ES_ZIP",
                        "El archivo no es un KMZ válido (no es un paquete comprimido).")
-    _, disco, disco_dir, en_disco, total, tam_dir, ini_dir, _ = struct.unpack(
+    _, disco, disco_dir, en_disco, total, tam_dir, ini_dir, comentario = struct.unpack(
         _EOCD_FORMATO, datos[pos:pos + _EOCD_TAMANO])
     if (pos >= 20 and datos[pos - 20:pos - 16] == _EOCD64_LOCALIZADOR) \
             or total == 0xFFFF or ini_dir == 0xFFFFFFFF or disco or disco_dir \
@@ -276,10 +322,33 @@ def _revisar_directorio(datos: bytes) -> None:
         raise KmzError("KMZ_NO_SOPORTADO",
                        "El KMZ usa un formato de compresión extendido o dividido que no se admite.")
     if total > MAX_ENTRADAS:
-        raise KmzError("KMZ_DEMASIADAS_ENTRADAS",
-                       "El KMZ contiene demasiados archivos internos.")
-    if tam_dir > pos:
-        raise KmzError("KMZ_DANADO", "El KMZ está dañado o incompleto.")
+        raise _demasiadas_entradas()
+    # zipfile reads the directory from (end record - directory size); data
+    # before the archive is tolerated, a directory starting before 0 is not.
+    desde = pos - tam_dir
+    if desde < 0 or ini_dir > desde or pos + _EOCD_TAMANO + comentario != len(datos):
+        raise _danado()
+
+    entradas = 0
+    k = desde
+    while k < pos:
+        entradas += 1
+        if entradas > MAX_ENTRADAS:
+            raise _demasiadas_entradas()
+        if k + _CENTRAL_TAMANO > pos or datos[k:k + 4] != _CENTRAL:
+            raise _danado()
+        nombre, extra, nota = struct.unpack_from("<3H", datos, k + 28)
+        k += _CENTRAL_TAMANO + nombre + extra + nota
+    if k != pos or entradas != total:
+        raise _danado()
+
+
+def _danado() -> KmzError:
+    return KmzError("KMZ_DANADO", "El KMZ está dañado o incompleto.")
+
+
+def _demasiadas_entradas() -> KmzError:
+    return KmzError("KMZ_DEMASIADAS_ENTRADAS", "El KMZ contiene demasiados archivos internos.")
 
 
 def _leer_miembro(zf: zipfile.ZipFile, info: zipfile.ZipInfo) -> bytes:
@@ -335,9 +404,14 @@ class _Lectura:
         return avisos
 
 
-def _leer_kml(datos: bytes) -> _Lectura:
-    """Parse with expat, refusing any DTD, and enforce limits while parsing."""
-    lector = _LectorKml()
+def _leer_kml(datos: bytes, presupuesto: Presupuesto) -> _Lectura:
+    """Parse with expat, refusing any DTD, and enforce limits while parsing.
+
+    Parsing itself is linear in the document and bounded by the byte,
+    element, depth, vertex and token limits; validating each candidate draws
+    on the call's geometry budget.
+    """
+    lector = _LectorKml(presupuesto)
     parser = xml.parsers.expat.ParserCreate(namespace_separator="}")
     parser.SetParamEntityParsing(xml.parsers.expat.XML_PARAM_ENTITY_PARSING_NEVER)
     parser.buffer_text = False
@@ -385,7 +459,8 @@ class _LectorKml:
     coordinate list exists.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, presupuesto: Presupuesto) -> None:
+        self.presupuesto = presupuesto
         self.lectura = _Lectura()
         self.pila: list[str] = []
         self.elementos = 0
@@ -581,7 +656,7 @@ class _LectorKml:
             raise KmzError("KML_DEMASIADOS_CONTORNOS",
                            f"El archivo tiene más de {MAX_CANDIDATOS} contornos.")
         poligonos: list[Poligono] = placemark["poligonos"]
-        error = placemark["error"] or validar_poligonos(poligonos)
+        error = placemark["error"] or validar_poligonos(poligonos, self.presupuesto)
         carpeta = [n for (n,) in self.carpetas if n]
         self.lectura.candidatos.append(_Candidato(
             len(self.lectura.candidatos), placemark["nombre"], carpeta, poligonos, error))
@@ -594,7 +669,31 @@ def _coordenada_invalida() -> KmzError:
 
 # ------------------------------------------------------------------- geometry
 
-def validar_poligonos(poligonos: Sequence[Poligono]) -> KmzError | None:
+class Presupuesto:
+    """Work units for one processing call, charged BEFORE the work they pay for.
+
+    One unit is one elementary step: a position scanned, a grid registration,
+    an edge pair compared, or an (edge, point) pair examined in a batched
+    point-in-ring pass. Every geometry stage of a call draws on the same
+    budget -- all candidates, a combined selection, hole and part containment,
+    contact pieces, interior points and normalization -- so no stage can grow
+    without bound. Running out raises GEOMETRIA_DEMASIADO_COMPLEJA.
+    """
+
+    __slots__ = ("limite", "usado")
+
+    def __init__(self, limite: int | None = None) -> None:
+        self.limite = MAX_TRABAJO if limite is None else limite
+        self.usado = 0
+
+    def cargar(self, unidades: int) -> None:
+        self.usado += unidades
+        if self.usado > self.limite:
+            raise _demasiado_complejo()
+
+
+def validar_poligonos(poligonos: Sequence[Poligono],
+                      presupuesto: Presupuesto | None = None) -> KmzError | None:
     """Why these polygons are not one valid terrain boundary, or None.
 
     Rules, all checked without modifying the input:
@@ -606,33 +705,38 @@ def validar_poligonos(poligonos: Sequence[Poligono]) -> KmzError | None:
     - parts may share edges or points but never overlap.
     Arithmetic is plain floating point on longitude/latitude, adequate for
     parcel-scale shapes; it is not a full topology library.
+
+    Raises KmzError (GEOMETRIA_DEMASIADO_COMPLEJA) when the work budget runs out.
     """
+    presupuesto = presupuesto or Presupuesto()
     for poligono in poligonos:
         for i, anillo in enumerate(poligono):
+            presupuesto.cargar(len(anillo))
             error = _validar_anillo(anillo, exterior=i == 0)
             if error:
                 return error
     # Crossings before area: a symmetric bow-tie has zero signed area, and
     # "it crosses itself" is the explanation a person can act on.
-    error, toques = _validar_cruces(poligonos)
+    error, toques = _validar_cruces(poligonos, presupuesto)
     if error:
         return error
     for poligono in poligonos:
         for i, anillo in enumerate(poligono):
+            presupuesto.cargar(len(anillo))
             if abs(_area_plana(anillo)) <= _AREA_MINIMA_GRADOS2:
                 que = "El borde exterior" if i == 0 else "Un hueco"
                 return KmzError("GEOMETRIA_SIN_AREA",
                                 f"{que} del contorno no encierra ninguna área.")
     for poligono in poligonos:
-        exterior, huecos = poligono[0], poligono[1:]
-        for i, hueco in enumerate(huecos):
-            if not _en_anillo(hueco[0], exterior):
-                return KmzError("GEOMETRIA_HUECO_INVALIDO",
-                                "Un hueco del contorno queda fuera de su borde exterior.")
-            if any(_en_anillo(hueco[0], otro) for j, otro in enumerate(huecos) if j != i):
-                return KmzError("GEOMETRIA_HUECO_INVALIDO",
-                                "Un hueco del contorno está dentro de otro hueco.")
-    return _validar_partes(poligonos, toques)
+        error = _validar_huecos(poligono, presupuesto)
+        if error:
+            return error
+    try:
+        return _validar_partes(poligonos, toques, presupuesto)
+    except KmzError as exc:
+        if exc.codigo == "GEOMETRIA_INESTABLE":
+            return exc                   # about this shape, not the whole file
+        raise
 
 
 def _validar_anillo(anillo: Anillo, *, exterior: bool) -> KmzError | None:
@@ -666,15 +770,14 @@ class _Segmento:
     n: int             # segments in its ring
 
 
-def _validar_cruces(poligonos: Sequence[Poligono],
+def _validar_cruces(poligonos: Sequence[Poligono], presupuesto: Presupuesto,
                     ) -> tuple[KmzError | None, list[tuple[_Segmento, _Segmento]]]:
-    """Every edge contact, found through a sparse grid with a bounded budget.
+    """Every edge contact, found through a sparse grid.
 
     Cells start at the median segment length, so detailed edges (a river or
     road side) and long straight sides both register in few cells; the grid
-    coarsens only when long edges would need too many registrations. A shape
-    that still needs more work than the budget is reported as too complex,
-    never accepted unchecked or left running.
+    coarsens only when long edges would need too many registrations. Every
+    registration and every edge pair compared is charged to the budget.
 
     Also returns the touching edge pairs of different parts, which decide
     whether parts that share a boundary overlap.
@@ -684,27 +787,20 @@ def _validar_cruces(poligonos: Sequence[Poligono],
     anillo_id = 0
     for parte, poligono in enumerate(poligonos):
         for anillo in poligono:
+            presupuesto.cargar(len(anillo))
             puntos = _sin_repetidos(anillo)
             n = len(puntos) - 1
             segmentos.extend(_Segmento(puntos[k], puntos[k + 1], parte, anillo_id, k, n)
                              for k in range(n))
             anillo_id += 1
 
-    total = len(segmentos)
-    celdas = _rejilla(segmentos)
-    if celdas is None:
-        return _demasiado_complejo(), toques
-
-    pares = 0
-    limite = _PARES_POR_SEGMENTO * total + _PARES_BASE
-    for lista in celdas.values():
-        for u in range(len(lista)):
+    for lista in _rejilla(segmentos, presupuesto).values():
+        largo = len(lista)
+        presupuesto.cargar(largo * (largo - 1) // 2)
+        for u in range(largo):
             s = segmentos[lista[u]]
-            for v in range(u + 1, len(lista)):
+            for v in range(u + 1, largo):
                 t = segmentos[lista[v]]
-                pares += 1
-                if pares > limite:
-                    return _demasiado_complejo(), toques
                 if s.parte != t.parte:
                     # Parts may share edges or points; crossing means overlap.
                     contacto = _contacto(s.a, s.b, t.a, t.b)
@@ -719,25 +815,27 @@ def _validar_cruces(poligonos: Sequence[Poligono],
     return None, toques
 
 
-def _rejilla(segmentos: Sequence[_Segmento]) -> dict[int, list[int]] | None:
-    """Cells -> segment indices, or None when no cell size fits the budget."""
+def _rejilla(segmentos: Sequence[_Segmento], presupuesto: Presupuesto,
+             ) -> dict[int, list[int]]:
+    """Cells -> segment indices. Raises when no cell size fits the budget."""
     total = len(segmentos)
-    limite = _REGISTROS_POR_SEGMENTO * total + _REGISTROS_BASE
+    objetivo = _REGISTROS_POR_SEGMENTO * total + _REGISTROS_BASE
+    presupuesto.cargar(total)
     x0 = min(min(s.a[0], s.b[0]) for s in segmentos)
     y0 = min(min(s.a[1], s.b[1]) for s in segmentos)
     medidas = sorted(max(abs(s.b[0] - s.a[0]), abs(s.b[1] - s.a[1])) for s in segmentos)
     base = medidas[total // 2] or medidas[-1]
     for factor in (1, 4, 16, 64, 256, 1024):
+        presupuesto.cargar(total)
         lado = base * factor
         estimado = sum((abs(s.b[0] - s.a[0]) + abs(s.b[1] - s.a[1])) / lado + 3
                        for s in segmentos)
-        if estimado <= limite:
+        if estimado <= objetivo:
             break
     else:
-        return None
+        raise _demasiado_complejo()
 
     celdas: dict[int, list[int]] = {}
-    registros = 0
     holgura = lado * 1e-9      # touching segments must share a cell at boundaries
     for idx, s in enumerate(segmentos):
         (ax, ay), (bx, by) = s.a, s.b
@@ -753,12 +851,10 @@ def _rejilla(segmentos: Sequence[_Segmento]) -> dict[int, list[int]] | None:
                 ya, yb = ay + (xa - ax) * pendiente, ay + (xb - ax) * pendiente
             f0 = math.floor((min(ya, yb) - holgura - y0) / lado)
             f1 = math.floor((max(ya, yb) + holgura - y0) / lado)
+            presupuesto.cargar(f1 - f0 + 1)
             for f in range(f0, f1 + 1):
                 # One int per cell; indices start at -1 (the holgura), hence +1.
                 celdas.setdefault(((c + 1) << 32) | (f + 1), []).append(idx)
-            registros += f1 - f0 + 1
-            if registros > limite:
-                return None
     return celdas
 
 
@@ -768,13 +864,10 @@ def _demasiado_complejo() -> KmzError:
 
 
 def _clasificar(s: _Segmento, t: _Segmento) -> KmzError | None:
+    """Contact between two edges of the SAME part."""
     contacto = _contacto(s.a, s.b, t.a, t.b)
     if not contacto:
         return None
-    if s.parte != t.parte:
-        if contacto == 2:
-            return _superpuestas()
-        return None                      # parts may touch or share an edge
     if s.anillo != t.anillo:
         return KmzError("GEOMETRIA_HUECO_INVALIDO",
                         "Un hueco del contorno toca o cruza otro borde.")
@@ -825,22 +918,71 @@ def _contacto(p1: Posicion, p2: Posicion, q1: Posicion, q2: Posicion) -> int:
     return 0
 
 
-def _en_anillo(p: Posicion, anillo: Anillo) -> bool:
-    """Even-odd point-in-ring. Points exactly on the ring are not meaningful here."""
-    x, y = p
-    dentro = False
-    for (x1, y1), (x2, y2) in zip(anillo, anillo[1:]):
-        if (y1 > y) != (y2 > y) and x < x1 + (y - y1) * (x2 - x1) / (y2 - y1):
-            dentro = not dentro
-    return dentro
+def _paridades(puntos: Sequence[Posicion], anillos: Sequence[Anillo],
+               presupuesto: Presupuesto, *, borde: bool,
+               ) -> tuple[set[tuple[int, int]], set[tuple[int, int]]]:
+    """Even-odd point-in-ring for many points against many rings at once.
+
+    Returns (pairs (point, ring) with an odd crossing count -- inside that
+    ring --, pairs within tolerance of that ring when ``borde``). The points
+    are sorted by latitude and each edge visits only the points in its own
+    latitude band, so disjoint holes or parts cost little; every (edge, point)
+    pair visited is charged, so dense overlap of bands ends in the budget,
+    not in quadratic running time.
+    """
+    presupuesto.cargar(len(puntos) + 1)
+    orden = sorted(range(len(puntos)), key=lambda i: puntos[i][1])
+    ys = [puntos[i][1] for i in orden]
+    tol = _TOLERANCIA_GRADOS if borde else 0.0
+    impares: set[tuple[int, int]] = set()
+    sobre: set[tuple[int, int]] = set()
+    for r, anillo in enumerate(anillos):
+        presupuesto.cargar(len(anillo))
+        for (x1, y1), (x2, y2) in zip(anillo, anillo[1:]):
+            desde = bisect.bisect_left(ys, min(y1, y2) - tol)
+            hasta = bisect.bisect_right(ys, max(y1, y2) + tol)
+            if hasta <= desde:
+                continue
+            presupuesto.cargar(hasta - desde)
+            for k in range(desde, hasta):
+                i = orden[k]
+                px, py = puntos[i]
+                if (y1 > py) != (y2 > py) and px < x1 + (py - y1) * (x2 - x1) / (y2 - y1):
+                    clave = (i, r)
+                    if clave in impares:
+                        impares.remove(clave)
+                    else:
+                        impares.add(clave)
+                if borde and _distancia(puntos[i], (x1, y1), (x2, y2)) <= tol:
+                    sobre.add((i, r))
+    return impares, sobre
 
 
-def _en_poligono(p: Posicion, poligono: Poligono) -> bool:
-    return _en_anillo(p, poligono[0]) and not any(_en_anillo(p, h) for h in poligono[1:])
+def _validar_huecos(poligono: Poligono, presupuesto: Presupuesto) -> KmzError | None:
+    """Each hole inside its shell and outside every other hole.
+
+    Rings were already shown not to touch, so one vertex per hole decides.
+    """
+    if len(poligono) < 2:
+        return None
+    puntos = [hueco[0] for hueco in poligono[1:]]      # point i belongs to ring i + 1
+    impares, _ = _paridades(puntos, poligono, presupuesto, borde=False)
+    en_borde_exterior = set()
+    for i, r in impares:
+        if r == 0:
+            en_borde_exterior.add(i)
+        elif r != i + 1:
+            return KmzError("GEOMETRIA_HUECO_INVALIDO",
+                            "Un hueco del contorno está dentro de otro hueco.")
+    if len(en_borde_exterior) != len(puntos):
+        return KmzError("GEOMETRIA_HUECO_INVALIDO",
+                        "Un hueco del contorno queda fuera de su borde exterior.")
+    return None
 
 
 def _validar_partes(poligonos: Sequence[Poligono],
-                    toques: Sequence[tuple[_Segmento, _Segmento]]) -> KmzError | None:
+                    toques: Sequence[tuple[_Segmento, _Segmento]],
+                    presupuesto: Presupuesto) -> KmzError | None:
     """Parts with no crossing edges may still overlap. They do exactly when:
 
     - one part's interior point is strictly inside another (copies, nesting); or
@@ -848,24 +990,31 @@ def _validar_partes(poligonos: Sequence[Poligono],
       strictly inside that other part (overlaps that only share collinear
       edges, which no crossing reveals).
     Between consecutive contacts a piece cannot cross the other boundary, so
-    testing its midpoint decides the whole piece.
+    testing its midpoint decides the whole piece. Both tests are batched.
     """
     if len(poligonos) < 2:
         return None
-    cajas = [_caja(p[0]) for p in poligonos]
-    for i, poligono in enumerate(poligonos):
-        punto = punto_interior(poligono)
-        for j, otro in enumerate(poligonos):
-            w, s, e, n = cajas[j]
-            if i != j and w <= punto[0] <= e and s <= punto[1] <= n \
-                    and _estrictamente_dentro(punto, otro):
-                return _superpuestas()
+    anillos: list[Anillo] = []
+    dueno: list[tuple[int, int]] = []          # ring -> (part, 0 shell / >0 hole)
+    for j, poligono in enumerate(poligonos):
+        for h, anillo in enumerate(poligono):
+            anillos.append(anillo)
+            dueno.append((j, h))
+
+    interiores = [punto_interior(p, presupuesto) for p in poligonos]
+    if _alguno_dentro(interiores, [{j for j in range(len(poligonos)) if j != i}
+                                   for i in range(len(poligonos))],
+                      anillos, dueno, presupuesto):
+        return _superpuestas()
 
     contactos: dict[int, tuple[_Segmento, list[_Segmento]]] = {}
     for s_, t_ in toques:
-        for uno, otro_ in ((s_, t_), (t_, s_)):
-            contactos.setdefault(id(uno), (uno, []))[1].append(otro_)
+        for uno, otro in ((s_, t_), (t_, s_)):
+            contactos.setdefault(id(uno), (uno, []))[1].append(otro)
+    puntos: list[Posicion] = []
+    destinos: list[set[int]] = []
     for segmento, tocados in contactos.values():
+        presupuesto.cargar(3 * len(tocados) + 1)
         cortes = {0.0, 1.0}
         for t in tocados:
             for p in (t.a, t.b):
@@ -875,14 +1024,34 @@ def _validar_partes(poligonos: Sequence[Poligono],
         orden = sorted(cortes)
         partes = {t.parte for t in tocados}
         for u, v in zip(orden, orden[1:]):
+            presupuesto.cargar(len(tocados))
             if v <= u:
                 continue
             m = _en_parametro(segmento, (u + v) / 2)
             if any(_distancia(m, t.a, t.b) <= _TOLERANCIA_GRADOS for t in tocados):
                 continue                 # this piece is the shared boundary itself
-            if any(_estrictamente_dentro(m, poligonos[p]) for p in partes):
-                return _superpuestas()
+            puntos.append(m)
+            destinos.append(partes)
+    if puntos and _alguno_dentro(puntos, destinos, anillos, dueno, presupuesto):
+        return _superpuestas()
     return None
+
+
+def _alguno_dentro(puntos: Sequence[Posicion], destinos: Sequence[set[int]],
+                   anillos: Sequence[Anillo], dueno: Sequence[tuple[int, int]],
+                   presupuesto: Presupuesto) -> bool:
+    """Whether any point lies strictly inside one of ITS target parts: inside
+    the shell, outside every hole, and not within tolerance of any ring."""
+    impares, sobre = _paridades(puntos, anillos, presupuesto, borde=True)
+    en_exterior: set[tuple[int, int]] = set()
+    excluidos: set[tuple[int, int]] = set()
+    for i, r in impares:
+        parte, h = dueno[r]
+        (excluidos if h else en_exterior).add((i, parte))
+    for i, r in sobre:
+        excluidos.add((i, dueno[r][0]))
+    return any(parte in destinos[i] and (i, parte) not in excluidos
+               for i, parte in en_exterior)
 
 
 def _parametro(s: _Segmento, p: Posicion) -> float:
@@ -903,45 +1072,64 @@ def _distancia(p: Posicion, a: Posicion, b: Posicion) -> float:
     return math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy)
 
 
-def _estrictamente_dentro(p: Posicion, poligono: Poligono) -> bool:
-    """Inside the filled area and not within tolerance of any of its rings."""
-    if not _en_poligono(p, poligono):
+def _en_anillo(p: Posicion, anillo: Anillo) -> bool:
+    """Even-odd point-in-ring. Points exactly on the ring are not meaningful here."""
+    x, y = p
+    dentro = False
+    for (x1, y1), (x2, y2) in zip(anillo, anillo[1:]):
+        if (y1 > y) != (y2 > y) and x < x1 + (y - y1) * (x2 - x1) / (y2 - y1):
+            dentro = not dentro
+    return dentro
+
+
+def _dentro_y_fuera_del_borde(p: Posicion, poligono: Poligono) -> bool:
+    """Inside the filled area and not exactly on any ring."""
+    if not (_en_anillo(p, poligono[0]) and not any(_en_anillo(p, h) for h in poligono[1:])):
         return False
-    return not any(_distancia(p, a, b) <= _TOLERANCIA_GRADOS
-                   for anillo in poligono for a, b in zip(anillo, anillo[1:]))
+    return all(_distancia(p, a, b) > 0
+               for anillo in poligono for a, b in zip(anillo, anillo[1:]))
 
 
-def punto_interior(poligono: Poligono) -> Posicion:
+def punto_interior(poligono: Poligono, presupuesto: Presupuesto | None = None) -> Posicion:
     """A point strictly inside the filled area of a VALID polygon, outside holes.
 
-    Scanlines across the shell's latitude range: along each, the even-odd
-    crossings of every ring bound the filled intervals; the midpoint of the
-    widest interval found is inside the polygon by construction.
+    Scanlines run at latitudes halfway between two consecutive distinct vertex
+    latitudes, so no scanline ever passes through a vertex, however many
+    vertices share heights with any sampling pattern. On such a line every
+    crossing is interior to an edge, and the even-odd intervals between
+    crossings are filled area. Up to _LINEAS_INTERIOR lines are tried (the
+    widest latitude gaps first, for numeric margin); the widest interval
+    midpoints are then verified. If floating point defeats all of them -- an
+    extremely thin shape -- the result is GEOMETRIA_INESTABLE, never an
+    unverified point.
     """
-    _, s, _, n = _caja(poligono[0])
-    alturas = {y for anillo in poligono for _, y in anillo}
-    mejor: tuple[float, Posicion] | None = None
-    intentos = 0
-    for k in range(1, 200):
-        # 0.5 first, then a low-discrepancy sequence across the height.
-        fraccion = 0.5 if k == 1 else (0.5 + k * 0.6180339887498949) % 1.0
-        y = s + (n - s) * fraccion
-        if not s < y < n or y in alturas:
-            continue
-        intentos += 1
-        if intentos > 9 and mejor is not None:
-            break
+    presupuesto = presupuesto or Presupuesto()
+    vertices = sum(len(a) for a in poligono)
+    presupuesto.cargar(vertices * max(1, vertices.bit_length()))       # set and sort
+    alturas = sorted({y for anillo in poligono for _, y in anillo})
+    presupuesto.cargar(len(alturas))
+    huecos = heapq.nlargest(_LINEAS_INTERIOR, range(len(alturas) - 1),
+                            key=lambda k: alturas[k + 1] - alturas[k])
+    opciones: list[tuple[float, Posicion]] = []
+    for k in huecos:
+        y = (alturas[k] + alturas[k + 1]) / 2
+        if not alturas[k] < y < alturas[k + 1]:
+            continue                                  # gap below float resolution
+        presupuesto.cargar(vertices * 2)
         cortes = sorted(
             x1 + (y - y1) * (x2 - x1) / (y2 - y1)
             for anillo in poligono
             for (x1, y1), (x2, y2) in zip(anillo, anillo[1:])
             if (y1 > y) != (y2 > y))
-        for a, b in zip(cortes[::2], cortes[1::2]):
-            if b > a and (mejor is None or b - a > mejor[0]):
-                mejor = (b - a, ((a + b) / 2, y))
-    if mejor is None:
-        raise ValueError("no interior point: the polygon was not validated")
-    return mejor[1]
+        opciones.extend((b - a, ((a + b) / 2, y))
+                        for a, b in zip(cortes[::2], cortes[1::2]) if b > a)
+    for _, punto in heapq.nlargest(_LINEAS_INTERIOR, opciones, key=lambda o: o[0]):
+        presupuesto.cargar(vertices * 2)
+        if _dentro_y_fuera_del_borde(punto, poligono):
+            return punto
+    raise KmzError("GEOMETRIA_INESTABLE",
+                   "El contorno es tan angosto que no se pudo calcular con precisión "
+                   "un punto dentro de él.")
 
 
 def _caja(anillo: Anillo) -> tuple[float, float, float, float]:
@@ -969,11 +1157,14 @@ def _area_poligono(poligono: Poligono) -> float:
 
 # -------------------------------------------------------------- normalization
 
-def normalizar(poligonos: Sequence[Poligono]) -> dict[str, Any]:
+def normalizar(poligonos: Sequence[Poligono],
+               presupuesto: Presupuesto | None = None) -> dict[str, Any]:
     """The geometry payload for one VALIDATED boundary."""
+    presupuesto = presupuesto or Presupuesto()
+    presupuesto.cargar(3 * sum(len(a) for p in poligonos for a in p))
     cajas = [_caja(p[0]) for p in poligonos]
     mayor = max(poligonos, key=_area_poligono)
-    lon, lat = punto_interior(mayor)
+    lon, lat = punto_interior(mayor, presupuesto)
     return {
         "geojson": {
             "type": "MultiPolygon",
@@ -989,8 +1180,9 @@ def normalizar(poligonos: Sequence[Poligono]) -> dict[str, Any]:
     }
 
 
-def _describir(c: _Candidato) -> dict[str, Any]:
+def _describir(c: _Candidato, presupuesto: Presupuesto) -> dict[str, Any]:
     """What a person needs to choose a candidate: no coordinates."""
+    presupuesto.cargar(2 * sum(len(a) for p in c.poligonos for a in p) + 1)
     valido = c.error is None
     exteriores = [p[0] for p in c.poligonos if p and p[0]]
     cajas = [_caja(a) for a in exteriores]

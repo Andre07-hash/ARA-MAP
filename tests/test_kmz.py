@@ -735,10 +735,337 @@ class Limites(unittest.TestCase):
         puntos += [(LON, LAT + dientes * 0.0002), (LON, LAT)]
         datos = empaquetar([("doc.kml", documento(poligono_texto(puntos)))])
         self.assertEqual(kmz.procesar_kmz(datos)["estado"], kmz.LISTO)
-        with mock.patch.object(kmz, "_PARES_BASE", 0), \
-                mock.patch.object(kmz, "_PARES_POR_SEGMENTO", 1):
+        with mock.patch.object(kmz, "MAX_TRABAJO", 1000):
             r = kmz.procesar_kmz(datos)
         self.assertEqual(r["error"]["codigo"], "GEOMETRIA_DEMASIADO_COMPLEJA")
+
+
+# ---------------------------------------------------------------------------
+# Supervisor review of B-1 (instruction 3a8b28b): findings F1-F3.
+
+def paquete_con_recursos(xml, recursos=0, directorios=0):
+    """The reviewer's archive shape: doc.kml plus empty resources/directories."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("doc.kml", xml)
+        for i in range(recursos):
+            zf.writestr(f"files/{i}.txt", b"")
+        for i in range(directorios):
+            zf.writestr(f"carpeta{i}/", b"")
+    return buf.getvalue()
+
+
+def kml_poligono(*anillos):
+    def texto(anillo):
+        return " ".join(f"{x},{y}" for x, y in anillo)
+    huecos = "".join(f"<innerBoundaryIs><LinearRing><coordinates>{texto(h)}</coordinates>"
+                     "</LinearRing></innerBoundaryIs>" for h in anillos[1:])
+    return ("<kml><Placemark><Polygon><outerBoundaryIs><LinearRing><coordinates>"
+            + texto(anillos[0]) + "</coordinates></LinearRing></outerBoundaryIs>"
+            + huecos + "</Polygon></Placemark></kml>")
+
+
+RECTANGULO = [(-100.4, 20.6), (-100.39, 20.6), (-100.39, 20.61), (-100.4, 20.61),
+              (-100.4, 20.6)]
+
+
+def rectangulo_con_alturas_de_muestreo():
+    """F1 reproducer: extra collinear vertices at every height the old
+    sampler tried (0.5, then the golden-ratio sequence, 199 values)."""
+    sur, norte = 20.6, 20.61
+    alturas = sorted({sur + (norte - sur) * (0.5 if k == 1 else (0.5 + k * 0.6180339887498949) % 1.0)
+                      for k in range(1, 200)})
+    return RECTANGULO[:4] + [(-100.4, y) for y in reversed(alturas)] + RECTANGULO[:1]
+
+
+def estrictamente_dentro(p, partes):
+    """Inside a filled part, outside its holes, and on no ring."""
+    def en_borde(anillo):
+        for (x1, y1), (x2, y2) in zip(anillo, anillo[1:]):
+            cruz = (x2 - x1) * (p[1] - y1) - (y2 - y1) * (p[0] - x1)
+            if cruz == 0 and min(x1, x2) <= p[0] <= max(x1, x2) \
+                    and min(y1, y2) <= p[1] <= max(y1, y2):
+                return True
+        return False
+    for parte in partes:
+        if any(en_borde(a) for a in parte):
+            return False
+    return any(en_anillo(p, parte[0]) and not any(en_anillo(p, h) for h in parte[1:])
+               for parte in partes)
+
+
+def muchos_huecos(n):
+    """F2 reviewer fixture: one 0.2° shell with n disjoint 0.001° square holes."""
+    exterior = [(-100.4, 20.6), (-100.2, 20.6), (-100.2, 20.8), (-100.4, 20.8), (-100.4, 20.6)]
+    huecos = []
+    for i in range(n):
+        x, y = -100.399 + (i % 50) * 0.003, 20.601 + (i // 50) * 0.003
+        huecos.append([(x, y), (x + .001, y), (x + .001, y + .001), (x, y + .001), (x, y)])
+    return paquete_con_recursos(kml_poligono(exterior, *huecos))
+
+
+class Trabajo:
+    """Records the work charged by the next procesar_kmz call."""
+
+    def __enter__(self):
+        self.usos = []
+        original = kmz.Presupuesto
+        usos = self.usos
+
+        class Registro(original):
+            def __init__(self, limite=None):
+                super().__init__(limite)
+                usos.append(self)
+
+        self._parche = mock.patch.object(kmz, "Presupuesto", Registro)
+        self._parche.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._parche.stop()
+
+    @property
+    def usado(self):
+        return sum(p.usado for p in self.usos)
+
+
+class F1PuntoInterior(unittest.TestCase):
+    def test_reproductor_del_supervisor_es_listo_con_punto_estricto(self):
+        anillo = rectangulo_con_alturas_de_muestreo()
+        self.assertGreater(len(anillo), 200)
+        r = kmz.procesar_kmz(paquete_con_recursos(kml_poligono(anillo)))
+        self.assertEqual(r["estado"], kmz.LISTO, r["error"])
+        g = r["geometria"]
+        self.assertTrue(estrictamente_dentro(g["punto_interior"]["coordinates"],
+                                             g["geojson"]["coordinates"]))
+
+    def test_mismo_caso_con_hueco(self):
+        hueco = [(-100.397, 20.603), (-100.393, 20.603), (-100.393, 20.607),
+                 (-100.397, 20.607), (-100.397, 20.603)]
+        r = kmz.procesar_kmz(paquete_con_recursos(
+            kml_poligono(rectangulo_con_alturas_de_muestreo(), hueco)))
+        self.assertEqual(r["estado"], kmz.LISTO, r["error"])
+        g = r["geometria"]
+        p = g["punto_interior"]["coordinates"]
+        self.assertTrue(estrictamente_dentro(p, g["geojson"]["coordinates"]))
+        self.assertFalse(en_anillo(p, hueco))
+
+    def test_dentro_de_una_seleccion_multiparte(self):
+        # Part validation needs an interior point of every part.
+        def exacto(anillo):
+            # Full float repr: rounding would move the vertices off the heights.
+            return ("<Placemark><Polygon><outerBoundaryIs><LinearRing><coordinates>"
+                    + " ".join(f"{x},{y}" for x, y in anillo)
+                    + "</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>")
+        otro = [(x + 0.02, y) for x, y in RECTANGULO]
+        cuerpo = exacto(rectangulo_con_alturas_de_muestreo()) + exacto(otro)
+        r = kmz.procesar_kmz(empaquetar([("doc.kml", documento(cuerpo))]), [0, 1])
+        self.assertEqual(r["estado"], kmz.LISTO, r["error"])
+        self.assertEqual(r["geometria"]["partes"], 2)
+        self.assertTrue(estrictamente_dentro(r["geometria"]["punto_interior"]["coordinates"],
+                                             r["geometria"]["geojson"]["coordinates"]))
+
+    def test_dentro_de_un_multigeometry(self):
+        def anillo_kml(anillo):
+            return ("<Polygon><outerBoundaryIs><LinearRing><coordinates>"
+                    + " ".join(f"{x},{y}" for x, y in anillo)
+                    + "</coordinates></LinearRing></outerBoundaryIs></Polygon>")
+        otro = [(x + 0.02, y) for x, y in RECTANGULO]
+        cuerpo = ("<Placemark><MultiGeometry>" + anillo_kml(rectangulo_con_alturas_de_muestreo())
+                  + anillo_kml(otro) + "</MultiGeometry></Placemark>")
+        r = kmz.procesar_kmz(empaquetar([("doc.kml", documento(cuerpo))]))
+        self.assertEqual(r["estado"], kmz.LISTO, r["error"])
+
+    def test_concavo_y_huecos_siguen_cubiertos(self):
+        for nombre in ("forma_u", "poligono_con_hueco", "multiparte"):
+            with self.subTest(nombre):
+                g = procesar(nombre)["geometria"]
+                self.assertTrue(estrictamente_dentro(g["punto_interior"]["coordinates"],
+                                                     g["geojson"]["coordinates"]))
+
+    def test_respaldo_acotado_si_ningun_punto_se_verifica(self):
+        # Floating point defeating every verified candidate is reported as a
+        # structured result, never an exception or an unverified point.
+        with mock.patch.object(kmz, "_dentro_y_fuera_del_borde", return_value=False):
+            r = procesar("poligono_simple")
+            self.assertEqual(r["estado"], kmz.RECHAZADO)
+            self.assertEqual(r["error"]["codigo"], "GEOMETRIA_INESTABLE")
+            r = procesar("lotes_contiguos", [0, 1])
+            self.assertEqual(r["estado"], kmz.REQUIERE_SELECCION)
+            self.assertEqual(r["error"]["codigo"], "GEOMETRIA_INESTABLE")
+
+    def test_intentos_acotados(self):
+        llamadas = []
+
+        def contar(p, poligono):
+            llamadas.append(p)
+            return False
+        with mock.patch.object(kmz, "_dentro_y_fuera_del_borde", contar):
+            kmz.procesar_kmz(paquete_con_recursos(kml_poligono(rectangulo_con_alturas_de_muestreo())))
+        self.assertLessEqual(len(llamadas), kmz._LINEAS_INTERIOR)
+
+
+class F2PresupuestoDeTrabajo(unittest.TestCase):
+    def test_muchos_huecos_crecen_casi_linealmente(self):
+        trabajo = {}
+        for n in (100, 500, 1500):
+            with Trabajo() as t:
+                r = kmz.procesar_kmz(muchos_huecos(n))
+            self.assertEqual(r["estado"], kmz.LISTO)
+            self.assertEqual(r["geometria"]["huecos"], n)
+            trabajo[n] = t.usado
+        # Quadratic growth would multiply by 225 from 100 to 1500 holes and by
+        # 9 from 500 to 1500; the batched containment stays near 15 and 3.
+        self.assertLess(trabajo[1500] / trabajo[100], 15 * 2)
+        self.assertLess(trabajo[1500] / trabajo[500], 3 * 1.5)
+
+    def test_la_contencion_de_huecos_no_llama_a_la_prueba_por_pares(self):
+        # Validation must not fall back to one point-in-ring test per pair.
+        with mock.patch.object(kmz, "_en_anillo", side_effect=AssertionError("pairwise")), \
+                mock.patch.object(kmz, "_dentro_y_fuera_del_borde", return_value=True):
+            r = kmz.procesar_kmz(muchos_huecos(500))
+        self.assertEqual(r["estado"], kmz.LISTO)
+
+    def test_limite_exacto_en_cada_etapa(self):
+        """With the budget at exactly the work used the result is unchanged;
+        one unit less ends in GEOMETRIA_DEMASIADO_COMPLEJA."""
+        casos = {
+            "un poligono": (kmz_de("poligono_simple"), None),
+            "hueco y forma U": (kmz_de("poligono_con_hueco"), None),
+            "muchos huecos": (muchos_huecos(300), None),
+            "multiparte": (kmz_de("multiparte"), None),
+            "seleccion contigua": (kmz_de("lotes_contiguos"), [0, 1]),
+            "seleccion encimada": (kmz_de("lotes_encimados"), [0, 1]),
+            "varios candidatos": (kmz_de("ambiguo_tres_lotes"), None),
+            "F1": (paquete_con_recursos(kml_poligono(rectangulo_con_alturas_de_muestreo())), None),
+        }
+        for nombre, (datos, seleccion) in casos.items():
+            with self.subTest(nombre):
+                with Trabajo() as t:
+                    esperado = kmz.procesar_kmz(datos, seleccion)
+                usado = t.usado
+                self.assertGreater(usado, 0)
+                with mock.patch.object(kmz, "MAX_TRABAJO", usado):
+                    self.assertEqual(kmz.procesar_kmz(datos, seleccion), esperado)
+                with mock.patch.object(kmz, "MAX_TRABAJO", usado - 1):
+                    r = kmz.procesar_kmz(datos, seleccion)
+                self.assertEqual(r["error"]["codigo"], "GEOMETRIA_DEMASIADO_COMPLEJA")
+                self.assertIsNone(r["geometria"])
+                json.dumps(r)
+
+    def test_un_solo_presupuesto_para_todos_los_candidatos(self):
+        # 40 valid lots: each cheap alone, together over a budget that one
+        # lot fits in. The whole call shares one budget.
+        lote = circulo(200, 0.0004)
+        cuerpo = "".join(poligono_texto([(x + k * 0.001, y) for x, y in lote])
+                         for k in range(40))
+        datos = empaquetar([("doc.kml", documento(cuerpo))])
+        self.assertEqual(kmz.procesar_kmz(datos)["estado"], kmz.REQUIERE_SELECCION)
+        with Trabajo() as t:
+            kmz.procesar_kmz(empaquetar([("doc.kml", documento(poligono_texto(lote)))]))
+        uno = t.usado
+        with mock.patch.object(kmz, "MAX_TRABAJO", uno * 3):
+            r = kmz.procesar_kmz(datos)
+        self.assertEqual(r["estado"], kmz.RECHAZADO)
+        self.assertEqual(r["error"]["codigo"], "GEOMETRIA_DEMASIADO_COMPLEJA")
+
+    def test_seleccion_que_agota_el_presupuesto_deja_elegir_de_nuevo(self):
+        datos = kmz_de("lotes_contiguos")
+        with Trabajo() as t:
+            kmz.procesar_kmz(datos)                  # candidates only
+        solo_candidatos = t.usado
+        with mock.patch.object(kmz, "MAX_TRABAJO", solo_candidatos + 1):
+            r = kmz.procesar_kmz(datos, [0, 1])
+        self.assertEqual(r["estado"], kmz.REQUIERE_SELECCION)
+        self.assertEqual(r["error"]["codigo"], "GEOMETRIA_DEMASIADO_COMPLEJA")
+        self.assertEqual(len(r["candidatos"]), 2)
+
+    def test_validar_poligonos_directo_tambien_esta_acotado(self):
+        presupuesto = kmz.Presupuesto(10)
+        with self.assertRaises(kmz.KmzError) as caso:
+            kmz.validar_poligonos([[RECTANGULO]], presupuesto)
+        self.assertEqual(caso.exception.codigo, "GEOMETRIA_DEMASIADO_COMPLEJA")
+
+
+class F3DirectorioZip(unittest.TestCase):
+    def falsificar_conteo(self, datos, conteo):
+        datos = bytearray(datos)
+        fin = datos.rfind(b"PK\x05\x06")
+        struct.pack_into("<HH", datos, fin + 8, conteo, conteo)
+        return bytes(datos)
+
+    def test_reproductor_del_supervisor(self):
+        datos = paquete_con_recursos(kml_poligono(RECTANGULO), kmz.MAX_ENTRADAS)
+        datos = self.falsificar_conteo(datos, 1)
+        with mock.patch.object(kmz.zipfile, "ZipFile",
+                               side_effect=AssertionError("directory materialized")):
+            r = kmz.procesar_kmz(datos)
+        self.assertEqual(r["estado"], kmz.RECHAZADO)
+        self.assertEqual(r["error"]["codigo"], "KMZ_DEMASIADAS_ENTRADAS")
+
+    def test_conteo_falso_dentro_del_limite_es_inconsistente(self):
+        datos = self.falsificar_conteo(paquete_con_recursos(kml_poligono(RECTANGULO), 5), 1)
+        self.assertEqual(kmz.procesar_kmz(datos)["error"]["codigo"], "KMZ_DANADO")
+        datos = self.falsificar_conteo(paquete_con_recursos(kml_poligono(RECTANGULO), 5), 9)
+        self.assertEqual(kmz.procesar_kmz(datos)["error"]["codigo"], "KMZ_DANADO")
+
+    def test_limite_y_uno_mas_contando_directorios(self):
+        xml = kml_poligono(RECTANGULO)
+        justo = paquete_con_recursos(xml, kmz.MAX_ENTRADAS - 11, directorios=10)
+        self.assertEqual(kmz.procesar_kmz(justo)["estado"], kmz.LISTO)
+        de_mas = paquete_con_recursos(xml, kmz.MAX_ENTRADAS - 11, directorios=11)
+        r = kmz.procesar_kmz(de_mas)
+        self.assertEqual(r["error"]["codigo"], "KMZ_DEMASIADAS_ENTRADAS")
+        solo_directorios = paquete_con_recursos(xml, 0, directorios=kmz.MAX_ENTRADAS)
+        r = kmz.procesar_kmz(solo_directorios)
+        self.assertEqual(r["error"]["codigo"], "KMZ_DEMASIADAS_ENTRADAS")
+
+    def test_directorio_truncado_o_inconsistente(self):
+        base = paquete_con_recursos(kml_poligono(RECTANGULO), 3)
+        fin = base.rfind(b"PK\x05\x06")
+        tam, ini = struct.unpack_from("<LL", base, fin + 12)
+        casos = {}
+        # Directory size one byte short / long: headers no longer tile it.
+        for nombre, delta in (("tamano_corto", -1), ("tamano_largo", 1)):
+            d = bytearray(base)
+            struct.pack_into("<L", d, fin + 12, tam + delta)
+            casos[nombre] = bytes(d)
+        # Offset pointing past where the directory really starts.
+        d = bytearray(base)
+        struct.pack_into("<L", d, fin + 16, ini + 1)
+        casos["desplazamiento"] = bytes(d)
+        # A central header signature broken.
+        d = bytearray(base)
+        d[fin - tam] ^= 0xFF
+        casos["firma_central"] = bytes(d)
+        # A name length that runs past the end record.
+        d = bytearray(base)
+        struct.pack_into("<H", d, fin - tam + 28, 0xFFFF)
+        casos["nombre_largo"] = bytes(d)
+        # Bytes after the end record that the comment length does not cover.
+        casos["basura_final"] = base + b"x"
+        # The directory cut off in the middle.
+        casos["truncado"] = base[:fin - tam // 2] + base[fin:]
+        for nombre, datos in casos.items():
+            with self.subTest(nombre):
+                r = kmz.procesar_kmz(datos)
+                self.assertEqual(r["estado"], kmz.RECHAZADO)
+                self.assertIn(r["error"]["codigo"], ("KMZ_DANADO", "KMZ_NO_ES_ZIP"))
+
+    def test_archivos_ordinarios_siguen_aceptandose(self):
+        for compresion in (zipfile.ZIP_DEFLATED, zipfile.ZIP_STORED):
+            datos = empaquetar([("doc.kml", kml("poligono_simple")),
+                                ("files/plano.png", b"x")], compresion)
+            self.assertEqual(kmz.procesar_kmz(datos)["estado"], kmz.LISTO)
+        # Data before the archive (as in self-extracting files) is tolerated.
+        datos = b"prefijo ficticio" + kmz_de("poligono_simple")
+        self.assertEqual(kmz.procesar_kmz(datos)["estado"], kmz.LISTO)
+        # A ZIP comment is fine.
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("doc.kml", kml("poligono_simple"))
+            zf.comment = b"comentario ficticio"
+        self.assertEqual(kmz.procesar_kmz(buf.getvalue())["estado"], kmz.LISTO)
 
 
 if __name__ == "__main__":

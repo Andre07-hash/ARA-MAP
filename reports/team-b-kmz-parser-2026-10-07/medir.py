@@ -94,6 +94,47 @@ def _borde_compartido() -> bytes:
                                 + placemark("Este", [[*este, este[0]]])))
 
 
+def _huecos(n: int, por_fila: int = 50, paso: float = 0.003) -> bytes:
+    """The supervisor's F2 fixture: one shell, n disjoint 0.001° square holes."""
+    lado = 0.2 if por_fila == 50 else 0.3
+    exterior = [(LON, LAT), (LON + lado, LAT), (LON + lado, LAT + lado), (LON, LAT + lado),
+                (LON, LAT)]
+    huecos = []
+    for i in range(n):
+        x, y = LON + 0.001 + (i % por_fila) * paso, LAT + 0.001 + (i // por_fila) * paso
+        huecos.append([(x, y), (x + .001, y), (x + .001, y + .001), (x, y + .001), (x, y)])
+    return empaquetar(documento(placemark("H", [exterior, *huecos])))
+
+
+def _fila_de_huecos(n: int) -> bytes:
+    """Adversarial: n holes in ONE row; every horizontal ray crosses the rest."""
+    ancho = n * 0.0002 + 0.001
+    exterior = [(LON, LAT), (LON + ancho, LAT), (LON + ancho, LAT + 0.002), (LON, LAT + 0.002),
+                (LON, LAT)]
+    huecos = [[(x, LAT + .0005), (x + .0001, LAT + .0005), (x + .0001, LAT + .0015),
+               (x, LAT + .0015), (x, LAT + .0005)]
+              for x in (LON + 0.0005 + i * 0.0002 for i in range(n))]
+    return empaquetar(documento(placemark("F", [exterior, *huecos])))
+
+
+def _rectangulo_f1() -> bytes:
+    """The supervisor's F1 reproducer: vertices at every old sampling height."""
+    rect = [(-100.4, 20.6), (-100.39, 20.6), (-100.39, 20.61), (-100.4, 20.61)]
+    alturas = sorted({20.6 + 0.01 * (0.5 if k == 1 else (0.5 + k * 0.6180339887498949) % 1.0)
+                      for k in range(1, 200)})
+    anillo = rect + [(-100.4, y) for y in reversed(alturas)] + rect[:1]
+    coords = " ".join(f"{x},{y}" for x, y in anillo)        # exact, not rounded
+    return empaquetar(documento(
+        "<Placemark><Polygon><outerBoundaryIs><LinearRing><coordinates>" + coords
+        + "</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>"))
+
+
+def _elementos_al_limite() -> bytes:
+    base = documento(placemark("S", [circulo(5)]))
+    relleno = b"<Folder/>" * (kmz.MAX_ELEMENTOS - 20)
+    return empaquetar(base.replace(b"</Document>", relleno + b"</Document>"))
+
+
 def _justo_bajo_el_limite() -> bytes:
     base = documento(placemark("S", [circulo(5)]))
     relleno = kmz.MAX_KML_BYTES - len(base)
@@ -112,13 +153,31 @@ CASOS: dict[str, Callable[[], tuple[bytes, object]]] = {
     "500_lotes_sin_seleccion": lambda: (_lotes(), None),
     "500_lotes_todos_seleccionados": lambda: (_lotes(), list(range(kmz.MAX_CANDIDATOS))),
     "2_partes_borde_compartido_100k": lambda: (_borde_compartido(), [0, 1]),
+    "F1_rectangulo_203_vertices": lambda: (_rectangulo_f1(), None),
+    "F2_huecos_100": lambda: (_huecos(100), None),
+    "F2_huecos_500": lambda: (_huecos(500), None),
+    "F2_huecos_1500": lambda: (_huecos(1500), None),
+    "huecos_19999_100k_vertices": lambda: (_huecos(19_999, 150, 0.0019), None),
+    "fila_de_2000_huecos": lambda: (_fila_de_huecos(2000), None),
+    "fila_de_19999_huecos_adversaria": lambda: (_fila_de_huecos(19_999), None),
+    "500k_elementos_al_limite": lambda: (_elementos_al_limite(), None),
     "vertices_300k_corte_en_100k": lambda: (
         empaquetar(documento(placemark("X", [circulo(3 * kmz.MAX_VERTICES)]))), None),
     "kml_16MiB_justo_bajo_limite": lambda: (_justo_bajo_el_limite(), None),
 }
 
 
+class _Registro(kmz.Presupuesto):
+    """Remembers the work units each processing call charged."""
+    usos: list[kmz.Presupuesto] = []
+
+    def __init__(self, limite: int | None = None) -> None:
+        super().__init__(limite)
+        _Registro.usos.append(self)
+
+
 def medir(nombre: str) -> dict[str, object]:
+    kmz.Presupuesto = _Registro                 # type: ignore[misc]
     datos, seleccion = CASOS[nombre]()
     rss_antes = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     resultado = kmz.procesar_kmz(datos, seleccion)      # first call: RSS growth
@@ -145,6 +204,8 @@ def medir(nombre: str) -> dict[str, object]:
         "rss_pico_mib": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 1),
         "rss_pico_tras_fixture_mib": round((rss_despues - rss_antes) / 1024, 1),
         "resultado_json_bytes": len(json.dumps(resultado, ensure_ascii=False)),
+        "trabajo_unidades": _Registro.usos[0].usado,
+        "trabajo_limite": kmz.MAX_TRABAJO,
     }
 
 
@@ -155,7 +216,8 @@ def main() -> None:
     print(f"python {platform.python_version()} · {platform.machine()} · {platform.system()} "
           f"{platform.release()} · cpus {__import__('os').cpu_count()}")
     print(f"MAX_VERTICES={kmz.MAX_VERTICES} MAX_KML_BYTES={kmz.MAX_KML_BYTES} "
-          f"MAX_CANDIDATOS={kmz.MAX_CANDIDATOS}")
+          f"MAX_CANDIDATOS={kmz.MAX_CANDIDATOS} MAX_ELEMENTOS={kmz.MAX_ELEMENTOS} "
+          f"MAX_TRABAJO={kmz.MAX_TRABAJO}")
     for nombre in CASOS:
         salida = subprocess.run([sys.executable, __file__, nombre], capture_output=True,
                                 text=True, check=True)

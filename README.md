@@ -10,13 +10,15 @@ compartida en Neon Postgres, accesible desde otras computadoras.
 
 ## Desarrollo desde GitHub — prioridad actual
 
+**Nueva dirección del propietario:** la [tabla maestra interactiva, archivos PDF, KMZ y roles](reports/master-table-plan/MASTER_PLAN.md) es el plan vigente. ARA Map será el lugar de captura y edición. Se pausa la conexión automática con Excel/OneDrive, conservando su código e historial para el futuro. BigQuery sigue aplazado. El plan es general; se detallará por fases antes de implementar.
+
 Repositorio privado: [Andre07-hash/ARA-MAP](https://github.com/Andre07-hash/ARA-MAP).
 El código de `main` incluye trabajo de inventario y autenticación que todavía
 no corresponde a la versión publicada el 1 de octubre. La descripción del
 sitio publicado que sigue es histórica; no demuestra que `main` pueda
 desplegarse directamente sobre la base de producción.
 
-Antes de continuar Excel + BigQuery, completar la
+Para preparar el entorno de desarrollo, conservar la
 [preparación de GitHub y Vercel](reports/github-vercel-readiness-2026-10-05/START_HERE.md).
 Trabajar con ramas y pull requests; ejecutar los checks contra datos de prueba.
 Los despliegues automáticos están deshabilitados en `vercel.json` hasta separar
@@ -24,7 +26,7 @@ Preview de Production y verificar esquema, cuentas y arranque de una copia limpi
 Esta opción no impide un despliegue manual por CLI.
 
 Las instrucciones de [Excel + BigQuery](reports/excel-bigquery-developer-handoff-2026-10-05/START_HERE.md)
-son el siguiente hito después de esa preparación. No reanudar el catálogo público.
+se conservan como referencia histórica; ya no son el siguiente hito. No reanudar ese trabajo ni ampliar el catálogo público por seguir un paquete anterior.
 
 ## Publicar en Vercel
 

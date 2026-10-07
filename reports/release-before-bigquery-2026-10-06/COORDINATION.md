@@ -4,9 +4,11 @@ GitHub is the shared record. The supervisor's Mac and each Claude Cloud session 
 
 ## Current assignment
 
-Read [the latest supervisor next steps](SUPERVISOR_NEXT_STEPS_2026-10-06.md) first. This review of implementation `415eb26` resolves the four completion-report questions and narrows the remaining work to integration, cloud acceptance and release. The [original completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) remain supporting context; the latest next steps take precedence where they differ. Direct instructions from the owner take precedence.
+For the two independent Claude Code accounts, use the [two-team delivery plan](../master-table-plan/TWO_TEAM_DELIVERY_PLAN.md) and its Team A/Team B kickoff briefs. Each team owns a feature across backend, interface, and tests; Team A's lead integrates shared-file changes after review. The supervisor remains responsible for planning and review, not implementation.
 
-The release target is the working production app with connected Microsoft Excel Refresh and Neon storage. BigQuery follows later. The supervisor owns planning, review and reporting to the owner; developers own implementation and verification. The owner relays links and makes necessary business/account decisions, without having to interpret technical disagreements.
+Read the [master-table product plan](../master-table-plan/MASTER_PLAN.md) first. The owner has paused connected Excel in favor of direct terrain editing, PDF/KMZ attachments, KMZ-first mapping, filtered datasets, and admin/operator roles. The earlier [connector next steps](SUPERVISOR_NEXT_STEPS_2026-10-06.md) and [completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) are historical context. Preserve that work, but do not resume it as the current assignment. Direct instructions from the owner take precedence. Expand and review one phase packet at a time before implementation.
+
+The release target is the working production app with an interactive master table, files, layouts, roles, and derived maps. Retaining Neon is the current planning recommendation; BigQuery remains deferred. The supervisor owns planning, review and reporting to the owner; developers own implementation and verification. The owner relays links and makes necessary business/account decisions, without having to interpret technical disagreements.
 
 ## How to receive instructions
 
@@ -37,11 +39,11 @@ The supervisor reviews the named implementation commit. If you push a newer comm
 
 ## Evidence and access boundaries
 
-- Local fixture tests, disposable Postgres tests, hosted synthetic tests and real Microsoft workbook tests are separate evidence categories. State which ones passed and which remain blocked.
-- A successful test belongs to the exact commit/environment tested. The older 13/13 Preview result does not prove the inventory fix or connected Refresh works.
+- Local fixture tests, disposable Postgres tests, hosted synthetic tests and real employee/file acceptance are separate evidence categories. State which ones passed and which remain blocked. Real Microsoft workbook tests belong to the paused connector work.
+- A successful test belongs to the exact commit/environment tested. The older 13/13 Preview result does not prove the new master table, roles, attachments, or KMZ workflow works.
 - A blocked Claude Cloud network does not imply a service is unavailable everywhere. Assign cloud verification to an authorized operator with access; do not ask the supervisor to implement or deploy on your behalf.
 - Access or account actions requiring the owner must identify the exact service, account and required step. Continue independent work while waiting.
-- Production remains behind the release gate in the completion instructions. An instruction-document merge is not authorization to migrate or replace production.
+- Production remains behind Phase 6 of the master plan and the subsequent detailed release packet. An instruction-document merge is not authorization to migrate or replace production.
 
 ## Review loop
 

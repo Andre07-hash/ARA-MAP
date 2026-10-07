@@ -1,5 +1,7 @@
 # ARA Map release before BigQuery
 
+> **Superseded product direction:** the owner has paused connected Excel and selected an in-app master table, PDF/KMZ attachments, KMZ-first maps, and admin/operator roles. Follow the [new master plan](../master-table-plan/MASTER_PLAN.md). Preserve the connector and this packet as historical context; do not execute the Excel-first assignments below. Existing data-preservation and production-release boundaries remain applicable.
+
 Current developer assignment: [supervisor next steps after the connector report](SUPERVISOR_NEXT_STEPS_2026-10-06.md). Read the [GitHub coordination protocol](COORDINATION.md) before submitting the next report. The [original completion instructions](SUPERVISOR_COMPLETION_INSTRUCTIONS_2026-10-06.md) are supporting context. The latest next steps govern; the infrastructure observations below remain historical evidence for their named commits.
 
 Owner decisions confirmed October 6, 2026. This file supersedes the previous packet where its order or storage requirements differ.

@@ -1,5 +1,7 @@
 # Next steps: get the real workbook connected, then release
 
+> **Paused by the owner's later direction:** use the [master-table product plan](../master-table-plan/MASTER_PLAN.md) for current work. The Excel connector is retained for future use. The assignments and release ordering below are historical and must not drive the new milestone.
+
 Supervisor review, October 6, 2026. Read this first. It narrows and supersedes conflicting process requirements in the completion instructions at `3c486f9`; the existing data-preservation and credential protections remain applicable.
 
 Reviewed: PR #6 implementation `415eb2640a42d99687fcef7a68ac3575ce8a651e`, completion report `9d452790b4f22a59e9d904d3403be4153cbd810a`. This was a focused source/report review, not an independent execution of the test suite or a hosted acceptance run. The reported local tests are substantial; they do not establish real Microsoft or Vercel compatibility. GitHub CI at report commit `9d45279` passed both JavaScript and Python/disposable Postgres ([run 37544275784](https://github.com/Andre07-hash/ARA-MAP/actions/runs/37544275784)).

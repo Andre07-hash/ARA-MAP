@@ -129,6 +129,19 @@ def _rectangulo_f1() -> bytes:
         + "</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>"))
 
 
+def _multiparte(n: int) -> bytes:
+    """Second review: n disjoint squares in ONE placemark's MultiGeometry."""
+    poligonos = []
+    for i in range(n):
+        x, y = LON + (i % 40) * .003, LAT + (i // 40) * .003
+        anillo = [(x, y), (x + .001, y), (x + .001, y + .001), (x, y + .001), (x, y)]
+        poligonos.append("<Polygon><outerBoundaryIs><LinearRing><coordinates>"
+                         + " ".join(f"{a},{b}" for a, b in anillo)
+                         + "</coordinates></LinearRing></outerBoundaryIs></Polygon>")
+    return empaquetar(documento("<Placemark><MultiGeometry>" + "".join(poligonos)
+                                + "</MultiGeometry></Placemark>"))
+
+
 def _elementos_al_limite() -> bytes:
     base = documento(placemark("S", [circulo(5)]))
     relleno = b"<Folder/>" * (kmz.MAX_ELEMENTOS - 20)
@@ -160,6 +173,11 @@ CASOS: dict[str, Callable[[], tuple[bytes, object]]] = {
     "huecos_19999_100k_vertices": lambda: (_huecos(19_999, 150, 0.0019), None),
     "fila_de_2000_huecos": lambda: (_fila_de_huecos(2000), None),
     "fila_de_19999_huecos_adversaria": lambda: (_fila_de_huecos(19_999), None),
+    "multiparte_100_partes": lambda: (_multiparte(100), None),
+    "multiparte_400_partes": lambda: (_multiparte(400), None),
+    "multiparte_800_partes": lambda: (_multiparte(800), None),
+    "multiparte_4000_partes": lambda: (_multiparte(4000), None),
+    "multiparte_20000_partes_100k_vertices": lambda: (_multiparte(20_000), None),
     "500k_elementos_al_limite": lambda: (_elementos_al_limite(), None),
     "vertices_300k_corte_en_100k": lambda: (
         empaquetar(documento(placemark("X", [circulo(3 * kmz.MAX_VERTICES)]))), None),

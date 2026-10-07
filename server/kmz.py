@@ -971,6 +971,7 @@ def _validar_huecos(poligono: Poligono, presupuesto: Presupuesto) -> KmzError | 
     """
     if len(poligono) < 2:
         return None
+    presupuesto.cargar(len(poligono))
     puntos = [hueco[0] for hueco in poligono[1:]]      # point i belongs to ring i + 1
     impares, _ = _paridades(puntos, poligono, presupuesto, borde=False)
     en_borde_exterior = set()
@@ -997,9 +998,14 @@ def _validar_partes(poligonos: Sequence[Poligono],
       edges, which no crossing reveals).
     Between consecutive contacts a piece cannot cross the other boundary, so
     testing its midpoint decides the whole piece. Both tests are batched.
+
+    Every container here is linear in what was already charged: one entry per
+    ring, part, contact or piece. The interior-point test's targets ("any part
+    but the point's own") are implicit, never a set of other parts per point.
     """
     if len(poligonos) < 2:
         return None
+    presupuesto.cargar(sum(len(p) for p in poligonos) + len(poligonos))
     anillos: list[Anillo] = []
     dueno: list[tuple[int, int]] = []          # ring -> (part, 0 shell / >0 hole)
     for j, poligono in enumerate(poligonos):
@@ -1008,9 +1014,8 @@ def _validar_partes(poligonos: Sequence[Poligono],
             dueno.append((j, h))
 
     interiores = [punto_interior(p, presupuesto) for p in poligonos]
-    if _alguno_dentro(interiores, [{j for j in range(len(poligonos)) if j != i}
-                                   for i in range(len(poligonos))],
-                      anillos, dueno, presupuesto):
+    # Interior point i belongs to part i and may lie in any OTHER part.
+    if _alguno_dentro(interiores, anillos, dueno, presupuesto, propias=range(len(poligonos))):
         return _superpuestas()
 
     contactos: dict[int, tuple[_Segmento, list[_Segmento]]] = {}
@@ -1018,7 +1023,7 @@ def _validar_partes(poligonos: Sequence[Poligono],
         for uno, otro in ((s_, t_), (t_, s_)):
             contactos.setdefault(id(uno), (uno, []))[1].append(otro)
     puntos: list[Posicion] = []
-    destinos: list[set[int]] = []
+    destinos: list[frozenset[int]] = []        # pieces of one edge share one set
     for segmento, tocados in contactos.values():
         presupuesto.cargar(3 * len(tocados) + 1)
         cortes = {0.0, 1.0}
@@ -1028,7 +1033,7 @@ def _validar_partes(poligonos: Sequence[Poligono],
                         _sobre(segmento.a, segmento.b, p):
                     cortes.add(min(1.0, max(0.0, _parametro(segmento, p))))
         orden = sorted(cortes)
-        partes = {t.parte for t in tocados}
+        partes = frozenset(t.parte for t in tocados)    # at most len(tocados), charged
         for u, v in zip(orden, orden[1:]):
             presupuesto.cargar(len(tocados))
             if v <= u:
@@ -1038,16 +1043,25 @@ def _validar_partes(poligonos: Sequence[Poligono],
                 continue                 # this piece is the shared boundary itself
             puntos.append(m)
             destinos.append(partes)
-    if puntos and _alguno_dentro(puntos, destinos, anillos, dueno, presupuesto):
+    if puntos and _alguno_dentro(puntos, anillos, dueno, presupuesto, destinos=destinos):
         return _superpuestas()
     return None
 
 
-def _alguno_dentro(puntos: Sequence[Posicion], destinos: Sequence[set[int]],
-                   anillos: Sequence[Anillo], dueno: Sequence[tuple[int, int]],
-                   presupuesto: Presupuesto) -> bool:
+def _alguno_dentro(puntos: Sequence[Posicion], anillos: Sequence[Anillo],
+                   dueno: Sequence[tuple[int, int]], presupuesto: Presupuesto, *,
+                   propias: Sequence[int] | None = None,
+                   destinos: Sequence[frozenset[int]] | None = None) -> bool:
     """Whether any point lies strictly inside one of ITS target parts: inside
-    the shell, outside every hole, and not within tolerance of any ring."""
+    the shell, outside every hole, and not within tolerance of any ring.
+
+    Targets are given either as ``propias`` (point i may be in any part except
+    propias[i]) or as explicit ``destinos`` (point i only counts inside a part
+    of destinos[i]). Only the (point, part) pairs the batched pass actually
+    visits are examined, so nothing scales with points × parts.
+    """
+    if (propias is None) == (destinos is None):
+        raise ValueError("give exactly one of propias or destinos")
     impares, sobre = _paridades(puntos, anillos, presupuesto, borde=True)
     en_exterior: set[tuple[int, int]] = set()
     excluidos: set[tuple[int, int]] = set()
@@ -1056,6 +1070,10 @@ def _alguno_dentro(puntos: Sequence[Posicion], destinos: Sequence[set[int]],
         (excluidos if h else en_exterior).add((i, parte))
     for i, r in sobre:
         excluidos.add((i, dueno[r][0]))
+    if propias is not None:
+        return any(parte != propias[i] and (i, parte) not in excluidos
+                   for i, parte in en_exterior)
+    assert destinos is not None
     return any(parte in destinos[i] and (i, parte) not in excluidos
                for i, parte in en_exterior)
 

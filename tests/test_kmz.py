@@ -1068,5 +1068,109 @@ class F3DirectorioZip(unittest.TestCase):
         self.assertEqual(kmz.procesar_kmz(buf.getvalue())["estado"], kmz.LISTO)
 
 
+# ---------------------------------------------------------------------------
+# Second supervisor review (badd170): per-part target sets built before the
+# budget. One candidate, many disjoint parts.
+
+def multigeometria(n, por_fila=40, extra=""):
+    """The reviewer's layout: n disjoint 0.001° squares, 40 per row, ONE placemark."""
+    poligonos = []
+    for i in range(n):
+        x, y = -100.4 + (i % por_fila) * .003, 20.6 + (i // por_fila) * .003
+        anillo = [(x, y), (x + .001, y), (x + .001, y + .001), (x, y + .001), (x, y)]
+        poligonos.append("<Polygon><outerBoundaryIs><LinearRing><coordinates>"
+                         + " ".join(f"{a},{b}" for a, b in anillo)
+                         + "</coordinates></LinearRing></outerBoundaryIs></Polygon>")
+    xml = ("<kml><Placemark><MultiGeometry>" + "".join(poligonos) + extra
+           + "</MultiGeometry></Placemark></kml>")
+    return paquete_con_recursos(xml)
+
+
+def pico_de_memoria(datos, seleccion=None):
+    """tracemalloc peak of one call, in bytes, with its result."""
+    import tracemalloc
+    tracemalloc.start()
+    try:
+        resultado = kmz.procesar_kmz(datos, seleccion)
+        _, pico = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    return pico, resultado
+
+
+def poligono_kml(anillo):
+    return ("<Polygon><outerBoundaryIs><LinearRing><coordinates>"
+            + " ".join(f"{a},{b}" for a, b in anillo)
+            + "</coordinates></LinearRing></outerBoundaryIs></Polygon>")
+
+
+class F2SegundaRevisionMuchasPartes(unittest.TestCase):
+    def test_memoria_lineal_en_el_numero_de_partes(self):
+        """8x the parts must stay well under 16x the peak memory. Building a
+        set of the other parts for every part (the reviewed code) grows as
+        parts², which this ratio detects; it is a scaling property, not a
+        wall-clock or absolute-size threshold."""
+        pequeno, r1 = pico_de_memoria(multigeometria(200))
+        grande, r2 = pico_de_memoria(multigeometria(1600))
+        self.assertEqual((r1["estado"], r2["estado"]), (kmz.LISTO, kmz.LISTO))
+        self.assertEqual(r2["geometria"]["partes"], 1600)
+        self.assertLess(grande / pequeno, 16, (pequeno, grande))
+
+    def test_trabajo_lineal_en_el_numero_de_partes(self):
+        trabajo = {}
+        for n in (200, 1600):
+            with Trabajo() as t:
+                self.assertEqual(kmz.procesar_kmz(multigeometria(n))["estado"], kmz.LISTO)
+            trabajo[n] = t.usado
+        self.assertLess(trabajo[1600] / trabajo[200], 8 * 1.5)
+
+    def test_presupuesto_pequeno_se_detiene_antes_de_crecer(self):
+        datos = multigeometria(1600)
+        completo, _ = pico_de_memoria(datos)
+        with mock.patch.object(kmz, "MAX_TRABAJO", 50_000):
+            pico, r = pico_de_memoria(datos)
+        self.assertEqual(r["estado"], kmz.RECHAZADO)
+        self.assertEqual(r["error"]["codigo"], "GEOMETRIA_DEMASIADO_COMPLEJA")
+        self.assertLess(pico, completo)
+
+    def test_partes_que_se_enciman_entre_muchas(self):
+        # One extra square overlapping square 0, among 400 disjoint ones.
+        x, y = -100.4 + .0005, 20.6 + .0005
+        encimado = poligono_kml([(x, y), (x + .001, y), (x + .001, y + .001),
+                                 (x, y + .001), (x, y)])
+        r = kmz.procesar_kmz(multigeometria(400, extra=encimado))
+        self.assertEqual(r["error"]["codigo"], "GEOMETRIA_PARTES_SUPERPUESTAS")
+
+    def test_copia_o_parte_contenida_entre_muchas(self):
+        x, y = -100.4 + .0002, 20.6 + .0002                       # inside square 0
+        contenido = poligono_kml([(x, y), (x + .0005, y), (x + .0005, y + .0005),
+                                  (x, y + .0005), (x, y)])
+        copia = poligono_kml([(-100.4 + .003, 20.6), (-100.4 + .004, 20.6),
+                              (-100.4 + .004, 20.601), (-100.4 + .003, 20.601),
+                              (-100.4 + .003, 20.6)])            # same as square 1
+        for extra in (contenido, copia):
+            with self.subTest(extra=extra[:40]):
+                r = kmz.procesar_kmz(multigeometria(400, extra=extra))
+                self.assertEqual(r["error"]["codigo"], "GEOMETRIA_PARTES_SUPERPUESTAS")
+
+    def test_islas_en_huecos_y_bordes_compartidos_entre_muchas(self):
+        # A part with a hole, an island exactly filling it, and a neighbour
+        # sharing an edge, next to many disjoint squares: all valid.
+        bx, by = -100.4, 20.5
+        exterior = [(bx, by), (bx + .003, by), (bx + .003, by + .003), (bx, by + .003), (bx, by)]
+        hueco = [(bx + .001, by + .001), (bx + .002, by + .001), (bx + .002, by + .002),
+                 (bx + .001, by + .002), (bx + .001, by + .001)]
+        con_hueco = ("<Polygon><outerBoundaryIs><LinearRing><coordinates>"
+                     + " ".join(f"{a},{b}" for a, b in exterior)
+                     + "</coordinates></LinearRing></outerBoundaryIs><innerBoundaryIs>"
+                     "<LinearRing><coordinates>" + " ".join(f"{a},{b}" for a, b in hueco)
+                     + "</coordinates></LinearRing></innerBoundaryIs></Polygon>")
+        vecino = poligono_kml([(bx + .003, by), (bx + .004, by), (bx + .004, by + .003),
+                               (bx + .003, by + .003), (bx + .003, by)])
+        r = kmz.procesar_kmz(multigeometria(400, extra=con_hueco + poligono_kml(hueco) + vecino))
+        self.assertEqual(r["estado"], kmz.LISTO, r["error"])
+        self.assertEqual(r["geometria"]["partes"], 403)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -246,7 +246,7 @@ Who creates a work base is decision D1b. The proposal: administrators create it 
 A sketch for this checkpoint; no prototype code is proposed for production.
 
 ```
- Base Ejemplo ▾                        128 terrenos · Guardado 18:02      [Buscar…] [Filtros] [+ Columna]*
+ Base Ejemplo ▾                        128 terrenos · Guardado 18:02      [Buscar…] [Filtros] [+ Columna] 
  ┌────┬──────────────┬────────────┬───────────┬────────────┬──────────────┬──────────┬───────────┬─────┐
  │    │ Nombre       │ Tipo       │ Estado    │ Superficie │ Asking price │ Archivos │ KMZ       │  …  │
  ├────┼──────────────┼────────────┼───────────┼────────────┼──────────────┼──────────┼───────────┼─────┤

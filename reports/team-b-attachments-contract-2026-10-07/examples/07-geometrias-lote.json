@@ -1,0 +1,90 @@
+{
+  "_nota": "Ficticio. Cada ID se autoriza por separado. no_disponibles no distingue inexistente, fuera de alcance o retirado. Cuerpos > 1 MB van por trozos; el resto se empaca hasta 2 MB y lo demás queda pendiente.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/geometrias/cuerpos",
+    "cuerpo": {
+      "ids": [
+        "fictional-geometry-5",
+        "fictional-geometry-big",
+        "fictional-geometry-other-base",
+        "fictional-geometry-later"
+      ]
+    }
+  },
+  "respuesta": {
+    "estado_http": 200,
+    "encabezados": {
+      "Cache-Control": "private, no-store"
+    },
+    "cuerpo": {
+      "cuerpos": {
+        "fictional-geometry-5": {
+          "geojson": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -100.4,
+                    20.6
+                  ],
+                  [
+                    -100.396,
+                    20.6
+                  ],
+                  [
+                    -100.396,
+                    20.603
+                  ],
+                  [
+                    -100.4,
+                    20.603
+                  ],
+                  [
+                    -100.4,
+                    20.6
+                  ]
+                ]
+              ]
+            ]
+          },
+          "bbox": [
+            -100.4,
+            20.6,
+            -100.396,
+            20.603
+          ],
+          "punto_interior": {
+            "type": "Point",
+            "coordinates": [
+              -100.398,
+              20.6015
+            ]
+          },
+          "partes": 1,
+          "huecos": 0,
+          "vertices": 5
+        }
+      },
+      "por_trozos": [
+        {
+          "id": "fictional-geometry-big",
+          "trozos": 4,
+          "bytes": 3712044,
+          "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      ],
+      "pendientes": [
+        "fictional-geometry-later"
+      ],
+      "no_disponibles": [
+        "fictional-geometry-other-base"
+      ]
+    }
+  },
+  "trozo": {
+    "ruta": "/api/geometrias/fictional-geometry-big/cuerpo?trozo=0",
+    "respuesta": "application/octet-stream; ≤ 1,000,000 bytes del texto GeoJSON almacenado; encabezados X-Trozo: 0/4"
+  }
+}

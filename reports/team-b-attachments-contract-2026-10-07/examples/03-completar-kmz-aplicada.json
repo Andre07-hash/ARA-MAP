@@ -1,0 +1,32 @@
+{
+  "_nota": "Ficticio. Completar verifica el objeto final, procesa con B-1 de forma síncrona y activa la capa (decisión D3) con compare-and-set sobre revision_base.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/subidas/fictional-file-version-5/completar",
+    "cuerpo": {}
+  },
+  "respuesta": {
+    "estado_http": 200,
+    "cuerpo": {
+      "version": {
+        "id": "fictional-file-version-5",
+        "numero": 5,
+        "estado": "disponible",
+        "tamano": 2304,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "intento": {
+        "id": "fictional-attempt-5-1",
+        "resultado": "listo",
+        "avisos": [],
+        "geometria_id": "fictional-geometry-5"
+      },
+      "archivo": {
+        "id": "fictional-file-kmz-1",
+        "revision": 6,
+        "estado_capa": "activa"
+      },
+      "aplicada": true
+    }
+  }
+}

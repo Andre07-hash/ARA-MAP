@@ -37,6 +37,8 @@ Each later handoff must use a GitHub PR/branch and exact commit. Changes that ex
 
 ## Current packet and historical reviews
 
+- [Team B B-2 review and correction packet, October 7](../team-b-b2-review-2026-10-07/START_HERE.md): two corrections requested at PR #11 head `db0b679`; B-3 remains unreleased. Team A A-1 continues unchanged.
+
 - [Approved shared contract and A-1/B-2 packets, October 7](../workspace-contract-2026-10-07/START_HERE.md): current authority for parallel implementation.
 
 - [Team B B-1 acceptance, October 7](../team-b-b1-review-2026-10-07/ACCEPTANCE.md): accepted at PR #9 head `efc3628`, all F1–F3 findings closed. No additional B-1 correction is requested. Earlier reviews remain preserved. Its B-2 hold described the state at that review and is superseded by the approved packet above.

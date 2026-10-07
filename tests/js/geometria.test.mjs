@@ -160,7 +160,8 @@ test("failed replacement: the active descriptor's old body is used, never the pe
   assert.equal(c.estado, "cargado");
   const esperado = FIX.cuerpos["geo-reemplazo-anterior"].geojson.coordinates[0][0][0];
   assert.deepEqual(c.partes[0][0][0], [esperado[1], esperado[0]]);
-  // A body filed under the active ID but from another version is refused.
+  // A body filed under the active ID whose bounds differ from the descriptor's is
+  // refused. (A matching bbox alone would not prove it is the same version.)
   mapa.set("geo-reemplazo-anterior", FIX.cuerpos["geo-reemplazo-pendiente"]);
   assert.equal(g.cuerpoLeaflet(t.geometria, mapa).estado, "invalido");
 });
@@ -185,6 +186,79 @@ test("malformed bodies are invalid, never footprints", () => {
   };
   for (const [nombre, mapa] of Object.entries(casos)) {
     assert.equal(g.cuerpoLeaflet(t.geometria, mapa).estado, "invalido", nombre);
+  }
+});
+
+/* Review F1: coordinates must agree with the bounds they declare. */
+const desplazar = (cuerpo, dLon, dLat = 0) => {
+  const c = structuredClone(cuerpo);
+  for (const poligono of c.geojson.coordinates) {
+    for (const anillo of poligono) for (const p of anillo) { p[0] += dLon; p[1] += dLat; }
+  }
+  return c;
+};
+const conCuerpo = (id, cuerpo) => new Map([[id, cuerpo]]);
+
+test("a body shifted away from its declared bounds is invalid, not drawn elsewhere", () => {
+  const t = fila("t-simple");
+  // The reviewer's reproducer: +2 degrees of longitude, metadata unchanged.
+  const lejos = desplazar(FIX.cuerpos["geo-simple"], 2);
+  assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", lejos)).estado, "invalido");
+  // Any shift beyond the tolerance, on either axis, is caught.
+  for (const [dLon, dLat] of [[1e-6, 0], [0, -1e-6], [-0.0005, 0.0005]]) {
+    const c = desplazar(FIX.cuerpos["geo-simple"], dLon, dLat);
+    assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", c)).estado, "invalido",
+      `${dLon},${dLat}`);
+  }
+  // Last-digit rounding within the documented tolerance still loads.
+  const casi = desplazar(FIX.cuerpos["geo-simple"], g.TOLERANCIA_GRADOS / 4);
+  assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", casi)).estado, "cargado");
+});
+
+test("collapsed or shrunken bodies are invalid", () => {
+  const t = fila("t-simple");
+  const bueno = FIX.cuerpos["geo-simple"];
+  const p0 = bueno.geojson.coordinates[0][0][0];
+  // Four identical points, original non-zero bbox kept (the reviewer's case).
+  const punto = { ...structuredClone(bueno),
+    geojson: { type: "MultiPolygon", coordinates: [[[[...p0], [...p0], [...p0], [...p0]]]] } };
+  assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", punto)).estado, "invalido");
+  // A flat sliver along one edge, still inside the bbox.
+  const [w, s, e] = bueno.bbox;
+  const linea = { ...structuredClone(bueno),
+    geojson: { type: "MultiPolygon", coordinates: [[[[w, s], [e, s], [w + (e - w) / 2, s], [w, s]]]] } };
+  assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", linea)).estado, "invalido");
+  // A real square inside the bbox but not spanning it.
+  const [, , , n] = bueno.bbox;
+  const [mx, my] = [(w + e) / 2, (s + n) / 2];
+  const chico = { ...structuredClone(bueno), geojson: { type: "MultiPolygon",
+    coordinates: [[[[w, s], [mx, s], [mx, my], [w, my], [w, s]]]] } };
+  assert.equal(g.cuerpoLeaflet(t.geometria, conCuerpo("geo-simple", chico)).estado, "invalido");
+});
+
+test("holes and other parts must stay inside the declared bounds too", () => {
+  // A hole moved outside the bbox (the shell still spans it exactly).
+  const tH = fila("t-hueco");
+  const hueco = structuredClone(FIX.cuerpos["geo-hueco"]);
+  for (const p of hueco.geojson.coordinates[0][1]) p[0] += 0.05;
+  assert.equal(g.cuerpoLeaflet(tH.geometria, conCuerpo("geo-hueco", hueco)).estado, "invalido");
+  // A collapsed hole.
+  const plano = structuredClone(FIX.cuerpos["geo-hueco"]);
+  const q = plano.geojson.coordinates[0][1][0];
+  plano.geojson.coordinates[0][1] = [[...q], [...q], [...q], [...q]];
+  assert.equal(g.cuerpoLeaflet(tH.geometria, conCuerpo("geo-hueco", plano)).estado, "invalido");
+  // One part of a multipart moved away.
+  const tM = fila("t-multiparte");
+  const multi = structuredClone(FIX.cuerpos["geo-multiparte"]);
+  for (const p of multi.geojson.coordinates[1][0]) p[0] += 0.5;
+  assert.equal(g.cuerpoLeaflet(tM.geometria, conCuerpo("geo-multiparte", multi)).estado, "invalido");
+});
+
+test("every parser-produced fixture body is consistent and loads", () => {
+  const mapa = cuerpos();
+  for (const t of FIX.filas) {
+    if (!g.descriptorActivo(t.geometria) || !mapa.has(t.geometria.id)) continue;
+    assert.equal(g.cuerpoLeaflet(t.geometria, mapa).estado, "cargado", t.id);
   }
 });
 

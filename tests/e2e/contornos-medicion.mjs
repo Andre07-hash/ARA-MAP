@@ -74,7 +74,11 @@ async function medir({ nombre, fuente }) {
           lon0 + r * Math.cos((2 * Math.PI * k) / (f.v - 1)),
           lat0 + r * Math.sin((2 * Math.PI * k) / (f.v - 1))]);
         anillo.push([...anillo[0]]);
-        const bbox = [lon0 - r, lat0 - r, lon0 + r, lat0 + r];
+        // Bounds from the actual positions, as the B-1 parser derives them:
+        // the renderer refuses a body whose coordinates disagree with its bbox.
+        const xs = anillo.map((p) => p[0]);
+        const ys = anillo.map((p) => p[1]);
+        const bbox = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
         const punto = { type: 'Point', coordinates: [lon0, lat0] };
         const id = `g-${i}`;
         geometrias.set(id, { geojson: { type: 'MultiPolygon', coordinates: [[anillo]] },

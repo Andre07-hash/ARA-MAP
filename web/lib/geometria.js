@@ -28,6 +28,12 @@ export const UMBRAL_CONTORNO_PX = 24;
  * measured browser cost of the largest is recorded in the B-2 report. */
 export const MAX_POSICIONES_CUERPO = 100_000;
 
+/* Degrees of slack when a body's actual extent is compared with a declared
+ * bbox (about 0.1 mm on the ground). The accepted B-1 parser derives bbox as
+ * the exact min/max of the shell coordinates and the values travel as JSON,
+ * so a real body matches exactly; this only absorbs last-digit rounding. */
+export const TOLERANCIA_GRADOS = 1e-9;
+
 const finito = (v) => typeof v === "number" && Number.isFinite(v);
 const lonValida = (v) => finito(v) && v >= -180 && v <= 180;
 const latValida = (v) => finito(v) && v >= -90 && v <= 90;
@@ -112,8 +118,18 @@ export function limitesLeaflet([w, s, e, n]) {
  * part with the largest shell box -- the size that decides whether the
  * outline can be hit; or {estado: "no_disponible"} when the map holds no
  * body for this descriptor; or {estado: "invalido"} for anything malformed,
- * oversized or belonging to a different version. An invalid body is never
- * drawn as if it were a validated footprint.
+ * oversized, inconsistent with its own declared bounds, or declaring bounds
+ * other than the active descriptor's. An invalid body is never drawn as if
+ * it were a validated footprint.
+ *
+ * Consistency, checked in the same single pass over the (bounded) positions:
+ * every position of every ring, holes included, lies inside the declared
+ * bbox; the shells of all parts together span exactly that bbox; and no ring
+ * is collapsed (each has a positive extent on both axes). A body whose
+ * coordinates sit elsewhere than its metadata says is therefore refused, not
+ * drawn away from its descriptor. Matching bounds are a consistency check
+ * only, not proof that the body is the same immutable version: that
+ * guarantee is the ID-keyed lookup of the integration contract.
  */
 export function cuerpoLeaflet(descriptor, geometrias) {
   if (!(geometrias instanceof Map) || !descriptorActivo(descriptor)) {
@@ -130,10 +146,13 @@ export function cuerpoLeaflet(descriptor, geometrias) {
       || !Array.isArray(gj.coordinates) || gj.coordinates.length === 0) {
     return { estado: "invalido" };
   }
+  const [bw, bs, be, bn] = cuerpo.bbox;
+  const t = TOLERANCIA_GRADOS;
   let posiciones = 0;
   const partes = [];
   let cajaMayor = null;
   let areaMayor = -1;
+  let uw = Infinity, us = Infinity, ue = -Infinity, un = -Infinity;   // union of shells
   for (const poligono of gj.coordinates) {
     if (!Array.isArray(poligono) || poligono.length === 0) return { estado: "invalido" };
     const anillos = [];
@@ -145,20 +164,26 @@ export function cuerpoLeaflet(descriptor, geometrias) {
       let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
       for (let k = 0; k < anillo.length; k += 1) {
         const p = anillo[k];
-        if (!Array.isArray(p) || p.length < 2 || !lonValida(p[0]) || !latValida(p[1])) {
+        if (!Array.isArray(p) || p.length < 2 || !lonValida(p[0]) || !latValida(p[1])
+            || p[0] < bw - t || p[0] > be + t || p[1] < bs - t || p[1] > bn + t) {
           return { estado: "invalido" };
         }
         convertido[k] = [p[1], p[0]];                  // [lon, lat] -> [lat, lng]
-        if (indice === 0) {
-          if (p[0] < w) w = p[0];
-          if (p[0] > e) e = p[0];
-          if (p[1] < s) s = p[1];
-          if (p[1] > n) n = p[1];
-        }
+        if (p[0] < w) w = p[0];
+        if (p[0] > e) e = p[0];
+        if (p[1] < s) s = p[1];
+        if (p[1] > n) n = p[1];
       }
-      if (indice === 0 && (e - w) * (n - s) > areaMayor) {
-        areaMayor = (e - w) * (n - s);
-        cajaMayor = [w, s, e, n];
+      if (!(e > w && n > s)) return { estado: "invalido" };          // collapsed ring
+      if (indice === 0) {
+        if (w < uw) uw = w;
+        if (s < us) us = s;
+        if (e > ue) ue = e;
+        if (n > un) un = n;
+        if ((e - w) * (n - s) > areaMayor) {
+          areaMayor = (e - w) * (n - s);
+          cajaMayor = [w, s, e, n];
+        }
       }
       const [a, z] = [anillo[0], anillo[anillo.length - 1]];
       if (a[0] !== z[0] || a[1] !== z[1]) return { estado: "invalido" };
@@ -166,11 +191,12 @@ export function cuerpoLeaflet(descriptor, geometrias) {
     }
     partes.push(anillos);
   }
+  if (!mismaCaja([uw, us, ue, un], cuerpo.bbox)) return { estado: "invalido" };
   return { estado: "cargado", partes, posiciones, cajaMayor };
 }
 
 function mismaCaja(a, b) {
-  return a.every((v, i) => Math.abs(v - b[i]) <= 1e-9);
+  return a.every((v, i) => Math.abs(v - b[i]) <= TOLERANCIA_GRADOS);
 }
 
 /* ------------------------------------------------------------- map geometry */

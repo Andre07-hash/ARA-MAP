@@ -8,6 +8,7 @@ October 7, 2026 · Team B
 | Application baseline | `origin/main` = `09452fd26d38319567dce28a89db100ea61c739a`, freshly fetched; unchanged since PR #8 |
 | Branch | `claude/team-b/kmz-parser`, the name in the packet. This session's assigned branch (`claude/wonderful-pasteur-py6va6`) carries PR #8; it was not rewritten. |
 | Implementation commit | `9a76148e0537c6d9919b36d2a479f2a496a60a3a` (this report is the commit after it) |
+| Review corrections | Supervisor review `3a8b28b` (F1–F3) answered in [RESPUESTA_REVISION_B1.md](RESPUESTA_REVISION_B1.md), commits `94fe5eb` and `27799d4`. Where this report and that response differ, the response is current; the sections below that it supersedes are marked. |
 | Scope | B-1 only. **No** SQL, migrations, routes, roles, storage, upload API, map renderer, grid, deployment or production change. `server/kmz.py` is not imported anywhere in the application, and a test enforces that. |
 
 ## 1. What was delivered
@@ -74,16 +75,18 @@ Example outputs: `ejemplos/01…12-*.json`. These include the supervisor's `[0, 
 | Probe: `[0.0]` | `SELECCION_INVALIDA`; no `TypeError` | same, plus 18 other malformed selections |
 | More than one KML, including duplicate names | `KMZ_VARIOS_KML` even when one of them is `doc.kml` (also `doc.kml` + `DOC.KML`). No chooser. | `test_varios_kml_son_ambiguos_aunque_haya_doc_kml` |
 | Distinct vertices, nonzero area, self-intersection, holes vs. shells | Closed rings with ≥ 3 distinct positions; no self-contact or doubling-back spike; holes strictly inside their shell and outside each other, not touching any ring; parts may share edges or corners but never overlap | `FormasInvalidas` (12 cases), `PartesQueSeTocan`, `Seleccion` |
-| Malformed, truncated, encrypted, unsupported-compression, corrupt ZIP/XML | Controlled `rechazado`. The ZIP end record is validated before `zipfile` builds its directory; nothing is extracted to disk (dangerous paths tested). | `Paquete`, `TextoMalformado`, seeded mutation test |
+| Malformed, truncated, encrypted, unsupported-compression, corrupt ZIP/XML | Controlled `rechazado`. *Corrected after review (F3):* the end record alone was trusted; the real central directory is now walked, bounded by `MAX_ENTRADAS`, before `zipfile` reads it. Nothing is extracted to disk (dangerous paths tested). | `Paquete`, `TextoMalformado`, seeded mutation test |
 | DTD/entities and external fetching disabled | expat with DTD, entity and external-entity handlers that refuse, and parameter entities off. NetworkLinks and overlays are recorded, never fetched; the test patches the socket to prove no network use. | `entidades_dtd`, `entidad_externa`, `test_nunca_usa_la_red` |
-| Bounds enforced while reading | Package bytes; ZIP entries (from the end record, before parsing the directory); KML bytes (declared size and streamed counter); depth, elements, candidates, vertices and token length during parsing. Coordinates are parsed as they stream, so the vertex cap stops work at exactly the limit. | `Limites`: each limit at exactly its value and one past it; real values for entries, depth, candidates, vertices and package size |
-| Validation compatible with the vertex budget | Adaptive sparse grid (cell = median segment length, coarsened only if long edges would exceed the registration budget) with a comparison budget. Beyond either budget → `GEOMETRIA_DEMASIADO_COMPLEJA`, never an unchecked acceptance. | `test_presupuesto_de_validacion`; measurements below |
+| Bounds enforced while reading | *Superseded by the per-stage table in the review response.* Package bytes; ZIP entries (now from the walked directory, F3); KML bytes (declared size and streamed counter); depth, elements, candidates, vertices and token length during parsing. Coordinates are parsed as they stream, so the vertex cap stops work at exactly the limit. | `Limites`: each limit at exactly its value and one past it; real values for entries, depth, candidates, vertices and package size |
+| Validation compatible with the vertex budget | *Corrected after review (F2):* the grid's per-stage budgets did not cover hole/part containment, contact pieces or interior points. One `MAX_TRABAJO` budget per call now covers every geometry stage → `GEOMETRIA_DEMASIADO_COMPLEJA` when exhausted. | `F2PresupuestoDeTrabajo`; review response measurements |
 | Mexico extent as a separate result | `ubicacion` is separate from validity | `Geografia` |
 | Measure time, memory, result size | §4 | `evidencia/medicion-python3.{13,9}.txt` |
 
 The validation rules are deliberately stricter than OGC in one respect: a hole touching its shell at a single point is rejected.
 
 ## 4. Measurements near the limits (synthetic, fictional)
+
+*Superseded:* these are the figures at `9a76148`. Current figures, including work units and the review's many-hole cases, are in the review response; the raw files in `evidencia/` now hold the current run.
 
 Environment: this cloud container — x86_64, Linux 6.18, 4 CPUs. Python 3.13.16 (system) and 3.9.25 (uv-managed CPython, standing in for macOS's 3.9). Limits: 100,000 vertices, 16 MiB KML, 500 candidates, 20 MiB package.
 
@@ -104,7 +107,7 @@ Each case runs in a fresh process.
 | 16 MiB KML just under the limit | listo | 0.05 s | 0.14 s | 34 MiB | 0.5 MiB | 0.7 KB |
 
 **Reading of the measurements**
-- Worst measured completion is under 7 s, against `maxDuration: 120`. Vercel CPU speed is not known from here.
+- *Corrected:* these were measured cases, not a worst case. The bound is now the work budget plus the parse limits; the slowest measured outcome after the review is budget exhaustion at 13.7 s on Python 3.9 (review response). Vercel CPU speed is not known from here.
 - A result at the vertex limit is about 2.8 MB of JSON. That is under the 4.5 MB function response limit but not by much. The geometry-transport point in the packet stands: integration should not return raw full-limit geometry in ordinary list responses.
 - Shapes made of many long overlapping edges are refused as too complex rather than validated slowly.
 - An earlier longitude sweep refused a realistic north–south detailed edge as "too complex"; the adaptive grid replaced it.
@@ -115,14 +118,14 @@ Measurements were not taken on Vercel, real company files, or macOS hardware.
 
 | Check | Result |
 |---|---|
-| `python3 -m unittest tests.test_kmz` (3.13.16) | 71 tests OK, ~2 s |
-| Same on Python 3.9.25 | 71 tests OK |
-| `python3 -m unittest discover -s tests -t .` (3.13 and 3.9) | 743 run, 29 skipped (no Postgres URL), **1 failure**: `test_packaging…test_the_system_python_has_no_openpyxl_of_its_own`. This is environmental: this container's system Python has its own openpyxl. Baseline `09452fd` shows the identical failure (672 run, same 1 failure). |
+| `python3 -m unittest tests.test_kmz` (3.13.16) | 71 tests OK, ~2 s at `c7efcf8`; **89 OK** after the review corrections |
+| Same on Python 3.9.25 | 71 tests OK; **89 OK** after the corrections |
+| `python3 -m unittest discover -s tests -t .` (3.13 and 3.9) | 743 run at `c7efcf8`, **761** after the corrections, 29 skipped (no Postgres URL), **1 failure**: `test_packaging…test_the_system_python_has_no_openpyxl_of_its_own`. This is environmental: this container's system Python has its own openpyxl. Baseline `09452fd` shows the identical failure (672 run, same 1 failure). |
 | `node --test tests/js/*.test.mjs` | 98 pass |
 | `ruff check server/ tests/ reports/team-b-kmz-parser-2026-10-07/` | clean |
 | `mypy server/` (project config, strict defs) | clean, 44 files |
-| Coverage (`coverage run -m unittest discover`) | `server/kmz.py` 97 %; total 94 % (floor 80 %) |
-| Mutation fuzz, separate script, 20,000 seeded mutations of fixtures/KML/ZIP | 0 unhandled exceptions. The first run found `LookupError` on a mangled `encoding=` declaration; it now gives `KML_CODIFICACION_NO_SOPORTADA` and a seeded 600-case version is in the suite. |
+| Coverage (`coverage run -m unittest discover`) | `server/kmz.py` 97 %; total 94 % (floor 80 %). After the corrections: 98 % and 95 %. |
+| Mutation fuzz, separate script, 20,000 seeded mutations of fixtures/KML/ZIP | 0 unhandled exceptions (repeated after the corrections: 0). This did not find F1–F3, which need constructed inputs. The first run found `LookupError` on a mangled `encoding=` declaration; it now gives `KML_CODIFICACION_NO_SOPORTADA` and a seeded 600-case version is in the suite. |
 | `./verificar.sh` | Not run: the container has no `zsh`. Its components were run individually as above, with ruff/mypy/coverage standing in for `--todo`. Browser e2e: not applicable (no UI). |
 
 Postgres CI: B-1 adds no SQL. GitHub Actions on the draft PR will run the suite against its disposable Postgres.

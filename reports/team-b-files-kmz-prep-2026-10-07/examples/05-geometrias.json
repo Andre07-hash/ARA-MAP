@@ -1,0 +1,73 @@
+{
+  "_nota": "Posiciones GeoJSON en orden [longitud, latitud] (igual que KML). punto_simbolo y bbox de Leaflet van en [lat, lon]. Las geometrías son inmutables: un id siempre devuelve lo mismo.",
+  "request": "GET /api/geometrias?ids=00000000-0000-4000-8000-0000000000d1",
+  "response": {
+    "geometrias": [
+      {
+        "id": "00000000-0000-4000-8000-0000000000d1",
+        "archivo_version_id": "00000000-0000-4000-8000-0000000000c2",
+        "bbox": [
+          -100.4,
+          20.6,
+          -100.394,
+          20.604
+        ],
+        "punto_simbolo": [
+          20.602,
+          -100.397
+        ],
+        "geojson": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  -100.4,
+                  20.6
+                ],
+                [
+                  -100.394,
+                  20.6
+                ],
+                [
+                  -100.394,
+                  20.604
+                ],
+                [
+                  -100.4,
+                  20.604
+                ],
+                [
+                  -100.4,
+                  20.6
+                ]
+              ],
+              [
+                [
+                  -100.398,
+                  20.601
+                ],
+                [
+                  -100.397,
+                  20.601
+                ],
+                [
+                  -100.397,
+                  20.602
+                ],
+                [
+                  -100.398,
+                  20.602
+                ],
+                [
+                  -100.398,
+                  20.601
+                ]
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "_nota": "Sin archivo_id crea un archivo nuevo en la columna; con archivo_id agrega una versión (reemplazo). En la nube el navegador sube directo al almacén privado (evita el límite de 4 MB de las funciones); en local la URL es del propio servidor.",
+  "request": {
+    "method": "POST",
+    "path": "/api/inventario/terrenos/00000000-0000-4000-8000-0000000000a1/archivos",
+    "headers": {
+      "Idempotency-Key": "subida-ficticia-0001"
+    },
+    "body": {
+      "columna_id": "core:kmz",
+      "archivo_id": "00000000-0000-4000-8000-0000000000b2",
+      "nombre": "contorno-ficticio-v2.kmz",
+      "tamano": 48213,
+      "sha256": "9f86d0…(64 hex)",
+      "tipo_mime": "application/vnd.google-earth.kmz"
+    }
+  },
+  "response_201": {
+    "version": {
+      "id": "00000000-0000-4000-8000-0000000000c3",
+      "archivo_id": "00000000-0000-4000-8000-0000000000b2",
+      "numero": 2,
+      "estado": "subiendo"
+    },
+    "subida": {
+      "metodo": "PUT",
+      "url": "«efímera, firmada; nunca se guarda ni se muestra»",
+      "encabezados": {
+        "Content-Type": "application/vnd.google-earth.kmz"
+      },
+      "expira_en": "2026-10-07T15:19:05Z"
+    }
+  },
+  "local": {
+    "subida": {
+      "metodo": "PUT",
+      "url": "/api/archivos/versiones/00000000-0000-4000-8000-0000000000c3/contenido",
+      "encabezados": {
+        "Content-Type": "application/octet-stream"
+      }
+    }
+  }
+}

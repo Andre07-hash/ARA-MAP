@@ -1,0 +1,52 @@
+{
+  "_nota": "B propone; A integra en el listado/detalle del registro maestro. 'ubicacion' y 'archivos' son de solo lectura y NO cambian 'version' del registro. El GeoJSON no viaja en el listado: se pide con /api/geometrias.",
+  "terreno": {
+    "id": "00000000-0000-4000-8000-0000000000a1",
+    "version": 7,
+    "draft": {
+      "terreno": null,
+      "lat": null,
+      "lon": null,
+      "...": "campos de A"
+    },
+    "ubicacion": {
+      "modo": "geometria",
+      "xy": "sin_dato",
+      "geometria": {
+        "id": "00000000-0000-4000-8000-0000000000d1",
+        "archivo_version_id": "00000000-0000-4000-8000-0000000000c2",
+        "estado": "activa",
+        "utilizable": true,
+        "bbox": [
+          -100.4,
+          20.6,
+          -100.394,
+          20.604
+        ],
+        "punto_simbolo": [
+          20.602,
+          -100.397
+        ],
+        "area_calculada_m2": 266789.0,
+        "partes": 1,
+        "huecos": 1
+      },
+      "conflicto_xy": false
+    },
+    "archivos": {
+      "core:archivos": {
+        "total": 2,
+        "procesando": 0,
+        "fallidos": 0
+      },
+      "core:kmz": {
+        "archivo_id": "00000000-0000-4000-8000-0000000000b2",
+        "estado": "procesando",
+        "version_activa_id": "00000000-0000-4000-8000-0000000000c2",
+        "version_pendiente_id": "00000000-0000-4000-8000-0000000000c3",
+        "nombre": "contorno-ficticio-v2.kmz",
+        "mensaje": "Procesando el nuevo contorno; se muestra el anterior."
+      }
+    }
+  }
+}

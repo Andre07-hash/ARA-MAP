@@ -1,0 +1,84 @@
+<!doctype html>
+<!-- DISPOSABLE render experiment. Serve the repository root over HTTP and open
+     /reports/team-b-files-kmz-prep-2026-10-07/experiment/render_harness.html
+     (?zoom=N to force a zoom). Uses the app's own vendored Leaflet; no tiles
+     are needed, so it runs offline. Fictional data only. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Experimento de contornos</title>
+<link rel="stylesheet" href="/web/vendor/leaflet.css">
+<style>
+  body { margin: 0; font: 13px system-ui, sans-serif; background: #f4f3ef; color: #1b1b1b; }
+  #mapa { width: 900px; height: 520px; background: #e8e6df; }
+  #resultado { margin: 0; padding: 8px 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+<pre id="resultado">cargando…</pre>
+<script src="/web/vendor/leaflet.js"></script>
+<script type="module">
+import { SYMBOL_RADIUS } from "/web/lib/geo.js";
+import {
+  contornoAEscala, limites, modoUbicacion, particionar,
+} from "./ubicacion_prototype.mjs";
+
+const salida = [];
+const log = (s) => { salida.push(s); document.getElementById("resultado").textContent = salida.join("\n"); };
+
+const terrenos = await (await fetch("./render_data.json")).json();
+const map = L.map("mapa", { zoomControl: false, preferCanvas: true, maxZoom: 20 });
+const capa = L.layerGroup().addTo(map);
+const colores = { "t-hueco": "#2a78d6", "t-multi": "#c2410c", "t-xy": "#15803d" };
+let seleccionado = null;
+const porId = new Map();
+
+const b = limites(terrenos);
+const z = Number(new URLSearchParams(location.search).get("zoom"));
+if (z) map.setView([(b[0][0] + b[1][0]) / 2, (b[0][1] + b[1][1]) / 2], z, { animate: false });
+else map.fitBounds(b, { padding: [24, 24], animate: false });
+
+function dibujar() {
+  capa.clearLayers();
+  porId.clear();
+  const zoom = map.getZoom();
+  const { contornos, puntos, sinUbicacion } = particionar(terrenos);
+  for (const t of contornos) {
+    const fill = colores[t.id];
+    const sel = t.id === seleccionado;
+    const capaT = contornoAEscala(t.geometria.bbox, zoom)
+      // Footprint look from MapCanvas (HUELLA): the real layout, translucent.
+      ? L.geoJSON(t.geometria.geojson, { style: { color: sel ? "#111" : fill, weight: sel ? 3 : 2,
+          fillColor: fill, fillOpacity: sel ? 0.32 : 0.2 } })
+      // Too small to read: the existing symbol, at the boundary's symbol point.
+      : L.circleMarker(t.geometria.punto_simbolo, { radius: SYMBOL_RADIUS, color: "#fff",
+          weight: 2, fillColor: fill, fillOpacity: 0.82 });
+    capaT.on("click", (e) => { L.DomEvent.stop(e); seleccionado = t.id; dibujar(); log(`click → ${t.id}`); });
+    capaT.addTo(capa);
+    porId.set(t.id, capaT);
+  }
+  // X/Y terrains: unchanged code path (circleMarker at [lat, lon]).
+  for (const t of puntos) {
+    const m = L.circleMarker([t.lat, t.lon], { radius: SYMBOL_RADIUS, color: "#fff", weight: 2,
+      fillColor: colores[t.id], fillOpacity: 0.82 });
+    m.on("click", () => { seleccionado = t.id; dibujar(); log(`click → ${t.id}`); });
+    m.addTo(capa);
+    porId.set(t.id, m);
+  }
+  return { contornos: contornos.length, puntos: puntos.length, sin: sinUbicacion.length };
+}
+
+const conteo = dibujar();
+log(`zoom ${map.getZoom()} · contornos ${conteo.contornos} · puntos ${conteo.puntos} · sin ubicación ${conteo.sin}`);
+for (const t of terrenos) {
+  log(`${t.id}: modo=${modoUbicacion(t)} X/Y=${t.lat ?? "—"}/${t.lon ?? "—"}` +
+      (t.geometria ? ` partes=${t.geometria.partes} huecos=${t.geometria.huecos} área calc.=${t.geometria.area_calculada_m2} m²` : ""));
+}
+// Selecting a boundary must select its record id (simulated Leaflet click).
+porId.get("t-multi").fire("click");
+log(`seleccionado=${seleccionado}`);
+document.title = "listo";
+</script>
+</body>
+</html>

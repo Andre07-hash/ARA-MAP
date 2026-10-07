@@ -1,0 +1,94 @@
+{
+  "_nota": "La versión activa sólo cambia cuando la nueva queda 'listo'. Fallido o pendiente de elección conserva la anterior (V_KMZ1).",
+  "request": {
+    "method": "POST",
+    "path": "/api/archivos/versiones/00000000-0000-4000-8000-0000000000c3/completar"
+  },
+  "response_listo": {
+    "version": {
+      "id": "00000000-0000-4000-8000-0000000000c3",
+      "estado": "listo",
+      "geometria_id": "00000000-0000-4000-8000-0000000000d2"
+    },
+    "archivo": {
+      "id": "00000000-0000-4000-8000-0000000000b2",
+      "version_activa_id": "00000000-0000-4000-8000-0000000000c3"
+    },
+    "avisos": [
+      {
+        "codigo": "KML_CONTENIDO_IGNORADO",
+        "mensaje": "Se ignoraron elementos que no son contornos: 1 LineString, 1 Point"
+      }
+    ]
+  },
+  "response_requiere_eleccion": {
+    "version": {
+      "id": "00000000-0000-4000-8000-0000000000c3",
+      "estado": "requiere_eleccion"
+    },
+    "archivo": {
+      "id": "00000000-0000-4000-8000-0000000000b2",
+      "version_activa_id": "00000000-0000-4000-8000-0000000000c2"
+    },
+    "candidatos": [
+      {
+        "indice": 0,
+        "nombre": "Lote A",
+        "carpeta": [
+          "Ficticio",
+          "Lotes ficticios"
+        ],
+        "partes": 1,
+        "area_calculada_m2": 46398.4
+      },
+      {
+        "indice": 1,
+        "nombre": "Lote B",
+        "carpeta": [
+          "Ficticio",
+          "Lotes ficticios"
+        ],
+        "partes": 1,
+        "area_calculada_m2": 46398.4
+      },
+      {
+        "indice": 2,
+        "nombre": "Lote C",
+        "carpeta": [
+          "Ficticio",
+          "Lotes ficticios"
+        ],
+        "partes": 1,
+        "area_calculada_m2": 46398.4
+      }
+    ]
+  },
+  "eleccion": {
+    "request": {
+      "method": "POST",
+      "path": "/api/archivos/versiones/00000000-0000-4000-8000-0000000000c3/eleccion",
+      "body": {
+        "candidatos": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "nota": "Uno o varios índices; varios se unen como un solo terreno multiparte. Queda registrado quién eligió."
+  },
+  "response_fallido": {
+    "version": {
+      "id": "00000000-0000-4000-8000-0000000000c3",
+      "estado": "fallido"
+    },
+    "archivo": {
+      "id": "00000000-0000-4000-8000-0000000000b2",
+      "version_activa_id": "00000000-0000-4000-8000-0000000000c2"
+    },
+    "error": {
+      "codigo": "KML_SIN_POLIGONOS",
+      "mensaje": "El archivo no contiene un contorno de terreno (solo Point)."
+    }
+  }
+}

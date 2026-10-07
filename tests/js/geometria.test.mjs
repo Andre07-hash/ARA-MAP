@@ -125,6 +125,23 @@ test("holes and every part are kept", () => {
   assert.equal(multi.partes.length, 2);
 });
 
+test("cajaMayor is the largest part's shell box, which drives the handover", () => {
+  const multi = g.cuerpoLeaflet(fila("t-multiparte").geometria, cuerpos());
+  const [parteA, parteB] = FIX.cuerpos["geo-multiparte"].geojson.coordinates;
+  const caja = (anillo) => [Math.min(...anillo.map((p) => p[0])), Math.min(...anillo.map((p) => p[1])),
+                            Math.max(...anillo.map((p) => p[0])), Math.max(...anillo.map((p) => p[1]))];
+  const [a, b] = [caja(parteA[0]), caja(parteB[0])];
+  const mayor = (a[2] - a[0]) * (a[3] - a[1]) >= (b[2] - b[0]) * (b[3] - b[1]) ? a : b;
+  assert.deepEqual(multi.cajaMayor, mayor);
+  // Scattered tiny parts: the whole extent would hand over far earlier than
+  // any single part can be hit.
+  const total = fila("t-multiparte").geometria.bbox;
+  assert.ok(g.zoomDeContorno(total, 20) <= g.zoomDeContorno(multi.cajaMayor, 20));
+  // Holes never decide it.
+  const hueco = g.cuerpoLeaflet(fila("t-hueco").geometria, cuerpos());
+  assert.deepEqual(hueco.cajaMayor, fila("t-hueco").geometria.bbox);
+});
+
 test("missing body: no_disponible, never a fabricated outline", () => {
   const t = fila("t-sin-cuerpo");
   const sinEse = cuerpos();

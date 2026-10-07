@@ -281,6 +281,9 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
       tipo: "contorno",
       simbolo, contorno, disponible, fill, dash, symbolic,
       bbox: descriptor.bbox,
+      // The handover follows the largest part: a multipart of small, scattered
+      // parts keeps its symbol until those parts can actually be hit.
+      cajaEscala: disponible ? cuerpo.cajaMayor : descriptor.bbox,
       punto: puntoLeaflet(descriptor.punto_interior),
       posiciones: disponible ? cuerpo.posiciones : 0,
       aEscala: false,
@@ -291,7 +294,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
 
   /** Show the outline or the symbol for this zoom; returns whether it changed. */
   function mostrarContorno(entry, zoom) {
-    const aEscala = Boolean(entry.contorno) && contornoAEscala(entry.bbox, zoom);
+    const aEscala = Boolean(entry.contorno) && contornoAEscala(entry.cajaEscala, zoom);
     const yaVisible = entry.contorno && contornoLayer.hasLayer(entry.contorno);
     if (aEscala === entry.aEscala && (yaVisible || markerLayer.hasLayer(entry.simbolo))) {
       return false;
@@ -490,7 +493,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
    */
   function zoomAlContorno(entry) {
     const maximo = map.getMaxZoom();
-    const requerido = zoomDeContorno(entry.bbox, maximo);
+    const requerido = zoomDeContorno(entry.cajaEscala, maximo);
     map.stop();
     map.fitBounds(limitesLeaflet(entry.bbox), {
       padding: [40, 40], maxZoom: maximo, animate: false,
@@ -503,7 +506,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
       return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo };
     }
     return {
-      estado: contornoAEscala(entry.bbox, zoom) ? "a_escala" : "limite_de_zoom",
+      estado: contornoAEscala(entry.cajaEscala, zoom) ? "a_escala" : "limite_de_zoom",
       contorno: true, zoom, requerido, maximo,
     };
   }

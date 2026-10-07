@@ -19,16 +19,11 @@ import { chromium } from 'playwright-core';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import http from 'node:http';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { opcionesNavegador, RAIZ, servir } from './servidor-estatico.mjs';
 
-const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const BASE = process.env.MAPA_BASE ?? '09452fd26d38319567dce28a89db100ea61c739a';
 const EVIDENCIA = process.env.CONTORNOS_EVIDENCIA ?? null;
-const TIPOS = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
-                '.css': 'text/css', '.json': 'application/json', '.png': 'image/png' };
 
 /* The baseline renderer, with its relative imports pointed at /web/. */
 const mapaBase = execFileSync('git', ['show', `${BASE}:web/components/map/MapCanvas.js`],
@@ -36,29 +31,12 @@ const mapaBase = execFileSync('git', ['show', `${BASE}:web/components/map/MapCan
   .replaceAll('"../../lib/', '"/web/lib/')
   .replaceAll('"./basemaps.js"', '"/web/components/map/basemaps.js"');
 
-const servidor = http.createServer(async (req, res) => {
-  const ruta = decodeURIComponent(new URL(req.url, 'http://local').pathname);
-  try {
-    if (ruta === '/__base/MapCanvas.js') {
-      res.writeHead(200, { 'Content-Type': 'text/javascript' });
-      res.end(mapaBase);
-      return;
-    }
-    const archivo = path.join(RAIZ, path.normalize(ruta));
-    if (!archivo.startsWith(RAIZ)) throw new Error('outside root');
-    const cuerpo = await readFile(archivo);
-    res.writeHead(200, { 'Content-Type': TIPOS[path.extname(archivo)] ?? 'application/octet-stream' });
-    res.end(cuerpo);
-  } catch {
-    res.writeHead(404);
-    res.end();
-  }
+const servidor = await servir({
+  '/__base/MapCanvas.js': () => ({ tipo: 'text/javascript', cuerpo: mapaBase }),
 });
-await new Promise((ok) => servidor.listen(0, '127.0.0.1', ok));
-const URL_HARNESS = `http://127.0.0.1:${servidor.address().port}/tests/e2e/contornos.html`;
+const URL_HARNESS = `${servidor.url}/tests/e2e/contornos.html`;
 
-const browser = await chromium.launch(process.env.CHROMIUM
-  ? { executablePath: process.env.CHROMIUM } : { channel: 'chrome' });
+const browser = await chromium.launch(opcionesNavegador());
 const page = await browser.newPage({ viewport: { width: 1200, height: 640 } });
 const erroresPagina = [];
 page.on('pageerror', (e) => erroresPagina.push(e.message));
@@ -321,6 +299,39 @@ await paso('un clic pendiente sobre un terreno filtrado no llega a seleccionarse
   assert.deepEqual(await h(() => __harness.selecciones), [], 'no late onSelect for a removed terrain');
 });
 
+await paso('multiparte disperso de partes pequeñas: conserva un símbolo clicable', async () => {
+  const r = await h(() => {
+    // 60 squares of ~100 m spread over ~6 km: one terrain.
+    const partes = [];
+    for (let i = 0; i < 60; i += 1) {
+      const x = -100.40 + (i % 10) * 0.006;
+      const y = 20.62 + Math.floor(i / 10) * 0.006;
+      partes.push([[[x, y], [x + 0.001, y], [x + 0.001, y + 0.001], [x, y + 0.001], [x, y]]]);
+    }
+    const bbox = [-100.40, 20.62, -100.40 + 9 * 0.006 + 0.001, 20.62 + 5 * 0.006 + 0.001];
+    const punto = { type: 'Point', coordinates: [-100.3995, 20.6205] };
+    const fila = { id: 'disperso', terreno: 'Disperso ficticio', lat: null, lon: null,
+                   geometria: { id: 'g-disperso', archivo_version_id: 'v', utilizable: true, bbox,
+                                punto_interior: punto } };
+    const geometrias = new Map([['g-disperso', { bbox, punto_interior: punto,
+      geojson: { type: 'MultiPolygon', coordinates: partes } }]]);
+    __harness.filas = [fila];
+    __harness.canvas.render([fila], { colorFor: () => '#7c3aed', geometrias });
+    __harness.canvas.map.fitBounds([[bbox[1], bbox[0]], [bbox[3], bbox[2]]], { animate: false });
+    return { zoom: __harness.canvas.map.getZoom(), p: __harness.canvas.posicionDe('disperso') };
+  });
+  assert.equal(r.p.contorno, false, `symbol at zoom ${r.zoom}, where each part is ~2 px`);
+  await h(() => { __harness.selecciones.length = 0; });
+  await page.mouse.click(r.p.x, r.p.y);
+  await esperarSeleccion();
+  assert.deepEqual(await h(() => __harness.selecciones), ['disperso']);
+  const z = await h(() => __harness.canvas.zoomToScale('disperso'));
+  assert.equal(z.estado, 'a_escala');
+  assert.equal((await pos('disperso')).contorno, true);
+  await foto('08-multiparte-disperso-a-escala');
+  await h(() => __harness.render(__harness.fixture.filas));
+});
+
 await paso('render([]) limpia todo: capas, selección y conteo', async () => {
   assert.equal(await h(() => __harness.render([])), 0);
   for (const t of FIX.filas) assert.equal(await pos(t.id), null);
@@ -410,6 +421,6 @@ await paso('sin errores de página', async () => {
 resumen.fallos = fallos;
 if (EVIDENCIA) writeFileSync(path.join(EVIDENCIA, 'resumen.json'), JSON.stringify(resumen, null, 1));
 await browser.close();
-servidor.close();
+servidor.cerrar();
 console.log(fallos ? `\n${fallos} comprobación(es) fallaron.` : '\nTodas las comprobaciones pasaron.');
 process.exit(fallos ? 1 : 0);

@@ -106,9 +106,11 @@ export function limitesLeaflet([w, s, e, n]) {
 /**
  * A loaded body, validated and converted for L.polygon, or why not.
  *
- * Returns {estado: "cargado", partes, posiciones} where `partes` is the
- * Leaflet multipolygon form [[ring of [lat, lng]], ...] per part (shell
- * first, holes after); or {estado: "no_disponible"} when the map holds no
+ * Returns {estado: "cargado", partes, posiciones, cajaMayor} where `partes`
+ * is the Leaflet multipolygon form [[ring of [lat, lng]], ...] per part
+ * (shell first, holes after) and `cajaMayor` is the GeoJSON bbox of the
+ * part with the largest shell box -- the size that decides whether the
+ * outline can be hit; or {estado: "no_disponible"} when the map holds no
  * body for this descriptor; or {estado: "invalido"} for anything malformed,
  * oversized or belonging to a different version. An invalid body is never
  * drawn as if it were a validated footprint.
@@ -130,20 +132,33 @@ export function cuerpoLeaflet(descriptor, geometrias) {
   }
   let posiciones = 0;
   const partes = [];
+  let cajaMayor = null;
+  let areaMayor = -1;
   for (const poligono of gj.coordinates) {
     if (!Array.isArray(poligono) || poligono.length === 0) return { estado: "invalido" };
     const anillos = [];
-    for (const anillo of poligono) {
+    for (const [indice, anillo] of poligono.entries()) {
       if (!Array.isArray(anillo) || anillo.length < 4) return { estado: "invalido" };
       posiciones += anillo.length;
       if (posiciones > MAX_POSICIONES_CUERPO) return { estado: "invalido" };
       const convertido = new Array(anillo.length);
+      let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
       for (let k = 0; k < anillo.length; k += 1) {
         const p = anillo[k];
         if (!Array.isArray(p) || p.length < 2 || !lonValida(p[0]) || !latValida(p[1])) {
           return { estado: "invalido" };
         }
         convertido[k] = [p[1], p[0]];                  // [lon, lat] -> [lat, lng]
+        if (indice === 0) {
+          if (p[0] < w) w = p[0];
+          if (p[0] > e) e = p[0];
+          if (p[1] < s) s = p[1];
+          if (p[1] > n) n = p[1];
+        }
+      }
+      if (indice === 0 && (e - w) * (n - s) > areaMayor) {
+        areaMayor = (e - w) * (n - s);
+        cajaMayor = [w, s, e, n];
       }
       const [a, z] = [anillo[0], anillo[anillo.length - 1]];
       if (a[0] !== z[0] || a[1] !== z[1]) return { estado: "invalido" };
@@ -151,7 +166,7 @@ export function cuerpoLeaflet(descriptor, geometrias) {
     }
     partes.push(anillos);
   }
-  return { estado: "cargado", partes, posiciones };
+  return { estado: "cargado", partes, posiciones, cajaMayor };
 }
 
 function mismaCaja(a, b) {

@@ -263,6 +263,59 @@ await paso('cuerpo no cargado: símbolo distinto, nunca contorno, aviso escapado
   await page.mouse.move(5, 5);
 });
 
+/* Review F1: a body whose coordinates disagree with its declared bounds (moved
+ * 2 degrees east; or collapsed to one point) is the unavailable symbol at the
+ * DESCRIPTOR's location, never an outline elsewhere. */
+for (const [caso, alterar] of [
+  ['desplazado 2° al este', (c) => {
+    for (const pol of c.geojson.coordinates) for (const a of pol) for (const p of a) p[0] += 2;
+  }],
+  ['colapsado en un punto', (c) => {
+    const p0 = c.geojson.coordinates[0][0][0];
+    c.geojson.coordinates = [[[[...p0], [...p0], [...p0], [...p0]]]];
+  }],
+]) {
+  await paso(`cuerpo inconsistente (${caso}): símbolo no disponible en su lugar`, async () => {
+    const r = await h((codigo) => {
+      const alterar = new Function(`return ${codigo}`)();
+      const fila = structuredClone(__harness.fixture.filas.find((t) => t.id === 't-simple'));
+      const cuerpo = structuredClone(__harness.fixture.cuerpos['geo-simple']);
+      alterar(cuerpo);
+      __harness.filas = [fila];
+      __harness.canvas.render([fila], { colorFor: () => '#2a78d6',
+                                        geometrias: new Map([['geo-simple', cuerpo]]) });
+      const zoom = __harness.canvas.zoomToScale('t-simple');
+      const [lon, lat] = fila.geometria.punto_interior.coordinates;
+      const esperado = __harness.punto(lat, lon);
+      const p = __harness.canvas.posicionDe('t-simple');
+      const v = cuerpo.geojson.coordinates[0][0][0];
+      return { zoom, p, esperado: { x: esperado.x, y: esperado.y }, vertice: v, cuerpo };
+    }, alterar.toString());
+    assert.equal(r.zoom.estado, 'contorno_no_disponible');
+    assert.equal(r.p.tipo, 'contorno');
+    assert.equal(r.p.contorno, false, 'no outline');
+    assert.ok(Math.abs(r.p.x - r.esperado.x) < 1 && Math.abs(r.p.y - r.esperado.y) < 1,
+      'symbol stays on the descriptor interior point');
+    assert.ok(await alfaContorno(r.p.x, r.p.y) > 0, 'symbol is painted');
+    await page.mouse.move(r.p.x, r.p.y);
+    await page.waitForTimeout(300);
+    const aviso = await h(() => document.querySelector('.leaflet-tooltip.mark-tooltip')?.textContent ?? '');
+    assert.match(aviso, /Contorno no disponible/);
+    await foto(`09-inconsistente-${caso.split(' ')[0]}`);
+    await page.mouse.move(5, 5);
+    // Nothing is drawn where the inconsistent coordinates actually are.
+    await quieto(`__harness.canvas.map.setView([${r.vertice[1]}, ${r.vertice[0]}], ${r.zoom.zoom}, { animate: false })`);
+    for (const pol of r.cuerpo.geojson.coordinates) {
+      for (const [lon, lat] of pol[0]) {
+        const { x, y } = await pixel(lon, lat);
+        if (x < 0 || y < 0 || x > 900 || y > 600) continue;
+        assert.equal(await alfaContorno(x, y), 0, `nothing drawn at ${lon},${lat}`);
+      }
+    }
+    await h(() => __harness.render(__harness.fixture.filas));
+  });
+}
+
 await paso('reemplazo fallido: se dibuja el contorno activo anterior, no el pendiente', async () => {
   await clicLista('t-reemplazo');
   assert.equal((await pos('t-reemplazo')).contorno, true);
@@ -372,6 +425,16 @@ await paso('entrada inválida no rompe el mapa ni inventa contornos', async () =
   await h(() => __harness.render(__harness.fixture.filas));
 });
 
+/* Review F2: Leaflet paints its canvas on a later animation frame, so a capture
+ * taken synchronously after render()/select() shows a blank or an earlier,
+ * partial frame depending on the browser. Captures are taken after paint, and
+ * a blank capture is refused rather than compared. */
+const pixelesPintados = (captura) => captura.lienzos.reduce((a, l) => a + l.pintados, 0);
+function exigirPintado(captura, quien) {
+  assert.ok(captura.lienzos.length > 0, `${quien}: no canvas`);
+  assert.ok(pixelesPintados(captura) > 0, `${quien}: blank canvas (nothing painted)`);
+}
+
 await paso('solo XY: idéntico al renderizador de la base', async () => {
   const r = await h(async () => {
     const nuevo = await import('/web/components/map/MapCanvas.js');
@@ -383,7 +446,18 @@ await paso('solo XY: idéntico al renderizador de la base', async () => {
                    ubicado: i % 13 !== 0, asking_m2: 100 + i });
     }
     filas.push({ ...filas[1], id: 'xy-doble' });              // coincident pair
-    const correr = (mod) => {
+    const pintado = () => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+    // Every RGBA byte of every canvas, summarised as a SHA-256 digest.
+    const capturar = async (div) => ({ lienzos: await Promise.all([...div.querySelectorAll('canvas')]
+      .map(async (cv) => {
+        const datos = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+        let pintados = 0;
+        for (let i = 3; i < datos.length; i += 4) if (datos[i] !== 0) pintados += 1;
+        const resumen = new Uint8Array(await crypto.subtle.digest('SHA-256', datos));
+        return { ancho: cv.width, alto: cv.height, pintados,
+                 sha256: [...resumen].map((b) => b.toString(16).padStart(2, '0')).join('') };
+      })) });
+    const correr = async (mod) => {
       const div = document.createElement('div');
       div.style.cssText = 'position:absolute;left:0;top:700px;width:900px;height:600px';
       document.body.append(div);
@@ -398,19 +472,42 @@ await paso('solo XY: idéntico al renderizador de la base', async () => {
       c.setView(vista.center, vista.zoom);
       c.render(filas, { colorFor: (t) => (t.asking_m2 > 130 ? '#c2410c' : '#2a78d6') });
       c.select('xy-5');
-      const pixeles = [...div.querySelectorAll('canvas')].map((cv) => cv.toDataURL());
-      div.remove();
+      const sinPintar = capturar(div);          // started synchronously, as the old capture was
+      await pintado();
+      const imagen = await capturar(div);
+      // Negative control: the same canvases deliberately cleared.
+      for (const cv of div.querySelectorAll('canvas')) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+      const enBlanco = await capturar(div);
+      div.remove();                             // only after the captures
       return { n, vista, zooms, escalas: escalas.map(({ aEscala, total, zoom }) => ({ aEscala, total, zoom })),
-               pixeles };
+               imagen, sinPintar: await sinPintar, enBlanco };
     };
-    return { base: correr(base), nuevo: correr(nuevo) };
+    const resultadoBase = await correr(base);
+    const resultadoNuevo = await correr(nuevo);
+    return { base: resultadoBase, nuevo: resultadoNuevo };
   });
   assert.equal(r.nuevo.n, r.base.n);
   assert.deepEqual(r.nuevo.vista, r.base.vista);
   assert.deepEqual(r.nuevo.zooms, r.base.zooms);
   assert.deepEqual(r.nuevo.escalas, r.base.escalas);
-  assert.equal(r.nuevo.pixeles.length, r.base.pixeles.length);
-  assert.deepEqual(r.nuevo.pixeles, r.base.pixeles, 'same pixels');
+  // Negative control: a deliberately blank result fails the guard.
+  for (const quien of ['base', 'nuevo']) {
+    assert.equal(pixelesPintados(r[quien].enBlanco), 0, `${quien}: cleared canvas is blank`);
+    assert.throws(() => exigirPintado(r[quien].enBlanco, quien), /blank canvas/);
+  }
+  exigirPintado(r.base.imagen, 'base');
+  exigirPintado(r.nuevo.imagen, 'nuevo');
+  assert.equal(r.nuevo.imagen.lienzos.length, r.base.imagen.lienzos.length);
+  assert.deepEqual(r.nuevo.imagen.lienzos.map((l) => [l.ancho, l.alto, l.pintados]),
+                   r.base.imagen.lienzos.map((l) => [l.ancho, l.alto, l.pintados]));
+  assert.deepEqual(r.nuevo.imagen.lienzos.map((l) => l.sha256), r.base.imagen.lienzos.map((l) => l.sha256),
+                   'same painted pixels');
+  resumen.xyPixelesPintados = { base: pixelesPintados(r.base.imagen), nuevo: pixelesPintados(r.nuevo.imagen),
+                                sinPintarBase: pixelesPintados(r.base.sinPintar),
+                                sinPintarNuevo: pixelesPintados(r.nuevo.sinPintar) };
+  console.log(`        píxeles pintados: base ${resumen.xyPixelesPintados.base}, ` +
+              `nuevo ${resumen.xyPixelesPintados.nuevo}; captura síncrona (diagnóstico): ` +
+              `${resumen.xyPixelesPintados.sinPintarBase} y ${resumen.xyPixelesPintados.sinPintarNuevo}`);
 });
 
 await paso('sin errores de página', async () => {

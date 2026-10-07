@@ -1,0 +1,41 @@
+{
+  "_nota": "Ficticio. Un KMZ con tres lotes quedó en requiere_seleccion; la persona elige dos. B-1 valida la selección y produce una geometría multiparte; el puntero se mueve sólo si expected_revision sigue vigente.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/fictional-file-kmz-1/activar",
+    "cuerpo": {
+      "version_id": "fictional-file-version-7",
+      "expected_revision": 7,
+      "seleccion": [
+        0,
+        2
+      ]
+    }
+  },
+  "respuesta": {
+    "estado_http": 200,
+    "cuerpo": {
+      "intento": {
+        "id": "fictional-attempt-7-2",
+        "resultado": "listo",
+        "geometria_id": "fictional-geometry-7"
+      },
+      "archivo": {
+        "id": "fictional-file-kmz-1",
+        "revision": 8,
+        "estado_capa": "activa"
+      },
+      "aplicada": true
+    }
+  },
+  "respuesta_si_obsoleta": {
+    "estado_http": 409,
+    "cuerpo": {
+      "error": "Otra persona cambió este archivo. Revisa el estado actual.",
+      "detalle": {
+        "code": "archivo_conflicto",
+        "revision_actual": 8
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "_nota": "Ficticio. Reemplazo de KMZ. La credencial temporal sólo existe en esta respuesta; nunca se guarda, registra ni repite.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/inventario/terrenos/fictional-terrain-1/archivos/subidas",
+    "encabezados": {
+      "Idempotency-Key": "ficticia-0001-reemplazo-kmz"
+    },
+    "cuerpo": {
+      "columna_id": "core:kmz",
+      "archivo_id": "fictional-file-kmz-1",
+      "expected_revision": 5,
+      "nombre": "poligono-ficticio-v5.kmz",
+      "tamano": 2304,
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "respuesta": {
+    "estado_http": 201,
+    "cuerpo": {
+      "archivo": {
+        "id": "fictional-file-kmz-1",
+        "revision": 5
+      },
+      "version": {
+        "id": "fictional-file-version-5",
+        "numero": 5,
+        "estado": "subiendo",
+        "revision_base": 5,
+        "completar_antes_de": "2026-10-07T19:30:00Z"
+      },
+      "subida": {
+        "metodo": "PUT",
+        "url": "<credencial-temporal-omitida>",
+        "encabezados": {
+          "Content-Type": "application/vnd.google-earth.kmz"
+        },
+        "vence_en": "2026-10-07T18:45:00Z"
+      }
+    }
+  }
+}

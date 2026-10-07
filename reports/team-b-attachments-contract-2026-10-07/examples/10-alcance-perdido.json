@@ -1,0 +1,27 @@
+{
+  "_nota": "Ficticio (§9.1). La persona inició la solicitud con acceso; durante el análisis un administrador movió el terreno a otra base. La confirmación vuelve a verificar el alcance dentro de la misma transacción y no escribe nada.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/subidas/fictional-file-version-9/completar",
+    "cuerpo": {}
+  },
+  "respuesta": {
+    "estado_http": 404,
+    "cuerpo": {
+      "error": "Archivo no encontrado.",
+      "detalle": {
+        "code": "not_found"
+      }
+    }
+  },
+  "estado_despues": {
+    "version": {
+      "id": "fictional-file-version-9",
+      "estado": "subiendo"
+    },
+    "copia_final": "borrada por la solicitud o barrida después; ninguna fila la nombra",
+    "eventos_nuevos": [],
+    "intentos_nuevos": [],
+    "decisiones_nuevas": []
+  }
+}

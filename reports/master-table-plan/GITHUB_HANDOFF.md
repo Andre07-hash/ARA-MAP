@@ -12,11 +12,10 @@ The supervisor supplies an exact instruction commit in the handoff message. Both
 
 Read the repository's `AGENTS.md` and `CLAUDE.md` on the current application baseline as well. Their development/security rules remain applicable. Where older domain descriptions say MXN-only prices, composite name-based terrain identity, or that only X/Y can locate a terrain, the owner's newer master-table requirements govern: retain explicit/unknown currency, stable record IDs, and usable KMZ geometry without X/Y. Do not apply legacy importer identity rules to the new master record. The two Claude teams use the `claude/` branch prefix.
 
-1. `reports/master-table-plan/MASTER_PLAN.md`
-2. `reports/master-table-plan/TWO_TEAM_DELIVERY_PLAN.md`
-3. Your team's brief:
-   - Team A: `reports/master-table-plan/TEAM_A_START_HERE.md`
-   - Team B: `reports/master-table-plan/TEAM_B_START_HERE.md`
+1. `reports/workspace-contract-2026-10-07/START_HERE.md`
+2. `reports/workspace-contract-2026-10-07/SHARED_CONTRACT.md`
+3. Your current packet: `reports/workspace-contract-2026-10-07/TEAM_A_PACKET.md` or `TEAM_B_PACKET.md` in that same directory.
+4. The linked fictional interface example, master plan v2 and delivery plan for scope/ownership.
 
 You can read the immutable GitHub links supplied by the supervisor. If using a repository clone, fetch the instruction branch without changing your checkout:
 
@@ -28,15 +27,17 @@ Then use `git show <instruction-commit>:<repository-path>` for each document. Su
 
 Do not switch branches over uncommitted work or merge unrelated application changes just to read instructions. The application baseline is a separate choice established in the kickoff audit; the instruction commit is not automatically the implementation starting point.
 
-## First assignment and return
+## Current assignment and return
 
-Execute the first preparation assignment in your own brief. Both teams may begin simultaneously. Return a preparation report in your own branch/draft PR, naming the instruction SHA, application baseline SHA, report path, findings, proposed contract, dependencies, and next action. Clearly identify any disposable experiments and their evidence.
+Preparation is complete. The owner approved the work-base proposal with the supervisor's adjustments on October 7. Team A starts **A-1 schema foundation** while Team B starts **B-2 boundary renderer**, using the current packets above. Do not repeat kickoff preparation or treat the historical B-2 hold as current.
 
-The supervisor reviews both reports, consolidates the shared contract, and issues the first bounded implementation packets. Neither team should revive the paused Excel connector, deploy production, or implement unresolved shared contracts from an obsolete handoff.
+Return a draft PR naming the instruction SHA, application baseline, implementation/head SHA, report path, evidence and shared-change requests. Both teams stop at their packet's review checkpoint; later packages, merges and production operations are not authorized by this publication.
 
 Each later handoff must use a GitHub PR/branch and exact commit. Changes that exist only in a local clone have not been delivered to the other team.
 
-## Follow-up packets
+## Current packet and historical reviews
 
-- [Team B B-1 acceptance, October 7](../team-b-b1-review-2026-10-07/ACCEPTANCE.md): accepted at PR #9 head `efc3628`, all F1–F3 findings closed. No additional B-1 correction is requested. Earlier reviews remain preserved. B-2 awaits the shared contract and Team A's preparation assignment is unchanged.
-- [Team B preparation review and B-1 parser packet, October 7](../team-b-review-2026-10-07/REVIEW_AND_NEXT_PACKET.md): accepts preparation at PR #8's reviewed commit and authorizes only the isolated parser/tests while shared-contract consolidation remains pending. Team A's preparation assignment is unchanged. Read this packet at the exact new instruction commit supplied by the supervisor.
+- [Approved shared contract and A-1/B-2 packets, October 7](../workspace-contract-2026-10-07/START_HERE.md): current authority for parallel implementation.
+
+- [Team B B-1 acceptance, October 7](../team-b-b1-review-2026-10-07/ACCEPTANCE.md): accepted at PR #9 head `efc3628`, all F1–F3 findings closed. No additional B-1 correction is requested. Earlier reviews remain preserved. Its B-2 hold described the state at that review and is superseded by the approved packet above.
+- [Team B preparation review and B-1 parser packet, October 7](../team-b-review-2026-10-07/REVIEW_AND_NEXT_PACKET.md): accepts preparation at PR #8's reviewed commit and authorizes only the isolated parser/tests while shared-contract consolidation remains pending. This is historical preparation/parser scope. Read this packet at the exact new instruction commit supplied by the supervisor.

@@ -1,12 +1,12 @@
 # ARA Map — two-team delivery plan
 
-Version 1 · Coordination plan for two independent Claude Code accounts
+Version 2 · October 7, 2026 · Coordination plan for two independent Claude Code accounts
 
 **Decision: split ownership by feature. Team A owns the master table, roles, and shared application integration. Team B owns attachments and KMZ mapping. Each team delivers its feature across interface, backend, and tests.**
 
 Both teams work in separate clones and branches of the same repository. The supervisor plans, resolves shared contracts, reviews, and reports; developers implement. This document assigns work but does not dispatch sessions, merge PRs, or authorize production changes.
 
-The [master plan](MASTER_PLAN.md) governs product scope. Excel connectivity remains parked and preserved. Recommendations and pending owner choices in that plan remain pending; this coordination plan does not silently settle them.
+The [master plan](MASTER_PLAN.md) governs product scope. Excel connectivity remains parked and preserved. The [approved workspace contract](../workspace-contract-2026-10-07/START_HERE.md) settles work-base access, local custom columns, transfer rules and the current A-1/B-2 boundary. Other pending choices remain assigned to their later packets.
 
 ## 1. Ownership
 
@@ -29,7 +29,7 @@ The master plan's phases remain acceptance milestones. Their implementation can 
 | **0 — Preparation** | Audit inventory/auth and existing fixes; identify canonical fields, migrations, and data sources; propose grid experience and record/role contract | Audit current renderer; inspect representative or generated KMZ files; propose file/geometry contract, upload experience, and storage options | Agree a small shared contract before dependent production implementation. Neither team waits idle: both perform their own audit, design, and isolated feasibility work. |
 | **1 — Core implementation** | Master-record APIs, role enforcement, blank creation, grid editing, history/conflict handling | PDF/KMZ service modules and upload widgets; independent KMZ parser tests; render sample polygon geometry through the existing map | B develops against agreed sample terrain/permission responses. A lands necessary shared schema and route registration in small prerequisite PRs. Integrate a real persisted terrain + attachment as early as possible. |
 | **2 — Complete the features** | Custom columns, search/filter/sort, grid/file-cell integration, role-management workflow | Real storage-backed PDF workflow; KMZ validation/processing; boundary-first map selection/fit; X/Y and invalid-file fallback | One Preview demonstrates: create incomplete terrain → attach file → render boundary. Mock-only work is not accepted as integration. |
-| **3 — Derived datasets and history** | Save filter-based datasets; one-action base/map creation; snapshot API/data contract; migration rehearsal preparation | Render derived datasets; geometry/file version retention for snapshots; layout performance and mixed polygon/point behavior | Agree live/frozen semantics before this wave. A owns dataset membership; B owns geographic representation. |
+| **3 — Derived datasets and history** | Save filtered views; one-action view/map creation; snapshot API/data contract; migration rehearsal preparation | Render derived datasets; geometry/file version retention for snapshots; layout performance and mixed polygon/point behavior | Agree live/frozen semantics before this wave. A owns dataset membership; B owns geographic representation. |
 | **4 — Verification and release preparation** | Exercise B's file access, failed replacements, processing errors, and snapshot retention; rehearse data/role migration; integrate fixes | Exercise A's blank creation, permissions, custom columns, concurrent editing, and derived-view behavior; test browser flow with real hosted files | Both report against one combined candidate. The supervisor reviews. The cloud operator completes hosted/recovery/release work under the release packet. |
 
 Each team tests its own feature during implementation; the last wave adds cross-team verification rather than postponing tests until the end. Teams can share findings earlier.
@@ -51,7 +51,7 @@ Avoid an exhaustive design document before anyone can work. First agree only the
 
 The supervisor consolidates this into the phase packet with an exact instruction commit. Small fictional response examples and files travel in Git so both clones use the same contract. Contract changes require a short written impact note and acknowledgment from the dependent team; neither side changes shared field names or behavior silently.
 
-Unresolved business choices only block the work that depends on them. For example, B can build file progress/retry and geometry extraction while the owner settles operator deletion rights. B must not hard-code a permission answer in the meantime.
+Unresolved business choices only block the work that depends on them. The approved contract settles operator archive/restore rights and work-base scope. Provider selection and snapshot details remain later decisions; the current renderer packet does not depend on those choices.
 
 ## 4. File ownership and shared changes
 
@@ -91,14 +91,18 @@ Branches do not isolate databases or uploaded files. Each team's tests must use 
 
 The two Claude accounts may have different cloud access. A blocked cloud action does not stop independent local work. Record the exact access action and assign it to the authorized operator; never commit credentials to share access between teams.
 
-## 6. First assignments
+## 6. Current assignments and dependency order
 
-- **Team A:** follow [TEAM_A_START_HERE.md](TEAM_A_START_HERE.md). Return the baseline/reuse audit, grid concept, proposed master-record/role contract, shared-change plan, and first small PR sequence.
-- **Team B:** follow [TEAM_B_START_HERE.md](TEAM_B_START_HERE.md). Return the file/KMZ feasibility findings, attachment/geometry contract, reusable upload/map component boundaries, storage options, and first small PR sequence.
+Preparation is complete: Team A PR #10 at `5e1b1bfc0f8a2a663972ca45f77128b1c1729cd6`; Team B preparation PR #8 and accepted B-1 parser PR #9 at `efc362818ba64618dbfc23556db8678cde525336`. Earlier kickoff briefs remain historical context.
 
-These preparation assignments can start concurrently. Neither team needs the other's completed feature to prepare its contract or run an isolated feasibility experiment. Production feature implementation follows the detailed phase packet; the overview does not resolve the master plan's remaining business choices.
+- **Team A, A-1:** [schema foundation packet](../workspace-contract-2026-10-07/TEAM_A_PACKET.md), covering work bases, grants, role metadata and local custom-column schema. No new UI or permission enforcement yet.
+- **Team B, B-2:** [boundary renderer packet](../workspace-contract-2026-10-07/TEAM_B_PACKET.md), covering geometry-first map behavior through fixed fictional interface examples. No attachment backend or A-owned application-shell edits.
 
-Once these short preparation reports arrive, the supervisor issues the initial common contract and bounded implementation packets. This is the first checkpoint, not a demand to finish designing the entire application before coding.
+These start concurrently from the current application baseline, each with a draft PR and supervisory checkpoint. The exact common contract is [SHARED_CONTRACT.md](../workspace-contract-2026-10-07/SHARED_CONTRACT.md).
+
+After A-1 review, A-2 access control and A-3 scoped APIs follow. Before B-3, B supplies attachment requirements and A delivers a small shared schema/route prerequisite. The later widget/integration task must not hold that prerequisite: B's attachment API cannot depend on an integration task that itself waits for B's API. Explicitly stacked drafts are permitted; prerequisite commits merge first after review and authorization.
+
+Database-side scoped queries and bounded pagination are required before accepting the global master view. Full-table browser loading is not the rollout approach. See the shared contract for synthetic capacity checks and transfer/history visibility rules.
 
 ## 7. Progress and acceptance
 
@@ -114,7 +118,7 @@ Each team reports at a PR-ready milestone, shared-contract change, or meaningful
 
 The supervisor maintains one owner-facing status table for A, B, integration, and release. The owner should not reconcile conflicting coder reports or decide Git merge conflicts.
 
-**First joint milestone:** an operator signs in, creates an unnamed terrain, edits a cell, uploads a PDF and KMZ, reloads from another session, and sees the stored PDF and KMZ boundary without supplying X/Y; a restricted action is denied. Test this early, before completing every customization and derived-view feature.
+**First joint milestone:** an operator signs in, opens an assigned work base, creates an unnamed terrain, edits a cell, uploads a PDF and KMZ, reloads from another session, and sees the stored PDF and KMZ boundary without supplying X/Y; a restricted action is denied. Test this early, before completing every customization and derived-view feature.
 
 If one team finishes its current package sooner, use cross-testing, fixtures, performance checks, or a newly assigned independent package. Do not let it begin editing the other team's active files simply to stay busy. No assumption of a twofold speed increase: shared design, integration, and release still have sequential steps.
 

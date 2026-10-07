@@ -1,5 +1,8 @@
 # Team B — attachments and KMZ geography
 
+**Preparation complete — current assignment:** read [Team B's approved implementation packet](../workspace-contract-2026-10-07/TEAM_B_PACKET.md) and its shared contract at the supervisor's supplied instruction commit. The preparation brief below is retained as history; do not repeat it.
+
+
 Obtain these instructions from GitHub at the supervisor's named commit; see [GITHUB_HANDOFF.md](GITHUB_HANDOFF.md). Do not rely on desktop paths or assume this packet is already in main.
 
 Read [MASTER_PLAN.md](MASTER_PLAN.md) and [TWO_TEAM_DELIVERY_PLAN.md](TWO_TEAM_DELIVERY_PLAN.md). Record their exact published instruction commit in your response. The owner has paused connected Excel; preserve that work and do not resume its previous assignment.

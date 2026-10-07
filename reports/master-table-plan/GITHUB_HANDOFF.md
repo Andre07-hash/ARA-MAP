@@ -38,4 +38,5 @@ Each later handoff must use a GitHub PR/branch and exact commit. Changes that ex
 
 ## Follow-up packets
 
+- [Team B B-1 review and correction packet, October 7](../team-b-b1-review-2026-10-07/REVIEW.md): PR #9 needs three corrections; update its existing branch. This is the current Team B assignment. B-2 remains pending and Team A's preparation assignment is unchanged.
 - [Team B preparation review and B-1 parser packet, October 7](../team-b-review-2026-10-07/REVIEW_AND_NEXT_PACKET.md): accepts preparation at PR #8's reviewed commit and authorizes only the isolated parser/tests while shared-contract consolidation remains pending. Team A's preparation assignment is unchanged. Read this packet at the exact new instruction commit supplied by the supervisor.

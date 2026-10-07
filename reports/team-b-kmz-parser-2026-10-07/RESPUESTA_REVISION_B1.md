@@ -8,6 +8,7 @@ October 7, 2026 · Team B · PR #9 (additive commits on `claude/team-b/kmz-parse
 | Reviewed head | `c7efcf8754ad42c277f25a1afb8455762a52ba8d` (implementation `9a76148`) |
 | Application baseline | `09452fd26d38319567dce28a89db100ea61c739a` (`origin/main`, unchanged) |
 | Fix commits | `94fe5eb` (F1–F3 and regression tests), `27799d4` (per-row pair charging) |
+| Second review | F1 and F3 accepted; the remaining F2 allocation is answered in [RESPUESTA_SEGUNDA_REVISION_B1.md](RESPUESTA_SEGUNDA_REVISION_B1.md) (`461254a`), which is current where the two differ. |
 | Scope | `server/kmz.py`, `tests/test_kmz.py`, and this report folder. Still not imported by the application. No shared files, SQL, routes, roles, storage, map or deployment changes, and no dependency added. |
 
 ## Disposition

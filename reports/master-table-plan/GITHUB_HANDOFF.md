@@ -35,3 +35,7 @@ Execute the first preparation assignment in your own brief. Both teams may begin
 The supervisor reviews both reports, consolidates the shared contract, and issues the first bounded implementation packets. Neither team should revive the paused Excel connector, deploy production, or implement unresolved shared contracts from an obsolete handoff.
 
 Each later handoff must use a GitHub PR/branch and exact commit. Changes that exist only in a local clone have not been delivered to the other team.
+
+## Follow-up packets
+
+- [Team B preparation review and B-1 parser packet, October 7](../team-b-review-2026-10-07/REVIEW_AND_NEXT_PACKET.md): accepts preparation at PR #8's reviewed commit and authorizes only the isolated parser/tests while shared-contract consolidation remains pending. Team A's preparation assignment is unchanged. Read this packet at the exact new instruction commit supplied by the supervisor.

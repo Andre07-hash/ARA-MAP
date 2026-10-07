@@ -1,0 +1,79 @@
+{
+ "navegador": "141.0.7390.37",
+ "base": "09452fd26d38319567dce28a89db100ea61c739a",
+ "pasos": [
+  {
+   "paso": "cada fila se coloca según contorno, XY o ninguno",
+   "ok": true
+  },
+  {
+   "paso": "el ajuste inicial cubre todas las partes y puntos",
+   "ok": true
+  },
+  {
+   "paso": "discrepancia: se dibuja el contorno, no el X/Y almacenado",
+   "ok": true
+  },
+  {
+   "paso": "lista → selección: encuadra el contorno multiparte entero y lo resalta",
+   "ok": true
+  },
+  {
+   "paso": "clic real en cada parte selecciona el mismo terreno",
+   "ok": true
+  },
+  {
+   "paso": "hueco: sin relleno y sin selección al hacer clic dentro",
+   "ok": true
+  },
+  {
+   "paso": "marca XY heredada: clic real la selecciona",
+   "ok": true
+  },
+  {
+   "paso": "zoom lejano: símbolos en el punto interior; coincidentes como anillos",
+   "ok": true
+  },
+  {
+   "paso": "doble clic en contorno: zoomToScale encuadra y reporta a_escala",
+   "ok": true
+  },
+  {
+   "paso": "cuerpo no cargado: símbolo distinto, nunca contorno, aviso escapado",
+   "ok": true
+  },
+  {
+   "paso": "reemplazo fallido: se dibuja el contorno activo anterior, no el pendiente",
+   "ok": true
+  },
+  {
+   "paso": "filtrar retira capas; las entradas sobrantes del mapa no se dibujan",
+   "ok": true
+  },
+  {
+   "paso": "un clic pendiente sobre un terreno filtrado no llega a seleccionarse",
+   "ok": true
+  },
+  {
+   "paso": "multiparte disperso de partes pequeñas: conserva un símbolo clicable",
+   "ok": true
+  },
+  {
+   "paso": "render([]) limpia todo: capas, selección y conteo",
+   "ok": true
+  },
+  {
+   "paso": "entrada inválida no rompe el mapa ni inventa contornos",
+   "ok": true
+  },
+  {
+   "paso": "solo XY: idéntico al renderizador de la base",
+   "ok": true
+  },
+  {
+   "paso": "sin errores de página",
+   "ok": true
+  }
+ ],
+ "fallos": 0
+}

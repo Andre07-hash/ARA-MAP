@@ -1,5 +1,8 @@
 # B-3S storage review and contract follow-up
 
+**Current status:** [B-3S accepted at `c375a1d`](ACCEPTANCE.md). S1/S2 are closed. No further correction is requested; the next database/API work awaits Team A's prerequisites and the consolidated packet. The original review instructions below are historical.
+
+
 Reviewed October 7, 2026:
 - Storage PR [#13](https://github.com/Andre07-hash/ARA-MAP/pull/13), head `2f4ec1d120a83eb480ea42a5753f9ffe30b568ca`: **two focused corrections before acceptance**, S1 and S2 in [REVIEW.md](REVIEW.md).
 - Contract PR [#12](https://github.com/Andre07-hash/ARA-MAP/pull/12), head `28bf0dbbf718571e35d501a7810d7e7d882ee3dd`: the four requested design refinements are answered. Full database/API contract consolidation and D1–D5 remain pending; this is not implementation approval.

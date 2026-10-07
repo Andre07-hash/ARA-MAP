@@ -37,7 +37,9 @@ Each later handoff must use a GitHub PR/branch and exact commit. Changes that ex
 
 ## Current packet and historical reviews
 
-- [B-3S storage review and contract follow-up](../team-b-storage-review-2026-10-07/START_HERE.md): PR #13 at `2f4ec1d` needs S1/S2 corrections, independently of Team A. PR #12 at `28bf0db` answers the four design refinements; full contract consolidation remains pending.
+- [B-3S acceptance at `c375a1d`](../team-b-storage-review-2026-10-07/ACCEPTANCE.md): S1/S2 closed. B-1, B-2 and standalone storage foundations are accepted; further database/API work awaits Team A's prerequisites and contract consolidation.
+
+- [B-3S storage review and contract follow-up](../team-b-storage-review-2026-10-07/START_HERE.md): historical S1/S2 findings at PR #13 head `2f4ec1d`, now closed by the acceptance above. PR #12 at `28bf0db` answers the four design refinements; full contract consolidation remains pending.
 
 - [Attachment proposal review and B-3S storage-core packet](../team-b-attachments-review-2026-10-07/START_HERE.md): PR #12 reviewed at `ba3ad38`. B may build the standalone local/fake storage core and refine the proposal while A continues. The attachment repository/API still await the consolidated contract and A's prerequisites.
 

@@ -1,0 +1,28 @@
+Chromium 141.0.7390.37
+Build time, 20,000 rings (ms, best of 3):
+┌─────────────────────────────┬────────┐
+│ (index)                     │ Values │
+├─────────────────────────────┼────────┤
+│ closePath                   │ 2020.6 │
+│ lineTo(primero)             │ 6.6    │
+│ Path2D por anillo + addPath │ 27.9   │
+│ Path2D de datos SVG (M…L…Z) │ 23.1   │
+│ Path2D único, closePath     │ 2039.6 │
+└─────────────────────────────┴────────┘
+RGBA bytes that differ from closePath() drawing:
+┌─────────┬────────────────────────────┬────────────────┬─────┬──────────────────────────────┬──────────────────────────────────┬──────────────────────────────────────────────┬──────────────────────────────────────────────┐
+│ (index) │ conjunto                   │ estilo         │ dpr │ píxeles pintados (closePath) │ lineTo(primero): bytes distintos │ Path2D por anillo + addPath: bytes distintos │ Path2D de datos SVG (M…L…Z): bytes distintos │
+├─────────┼────────────────────────────┼────────────────┼─────┼──────────────────────────────┼──────────────────────────────────┼──────────────────────────────────────────────┼──────────────────────────────────────────────┤
+│ 0       │ 'a: fracciones'            │ 'normal'       │ 1   │ 568970                       │ 10018                            │ 0                                            │ 0                                            │
+│ 1       │ 'a: fracciones'            │ 'normal'       │ 2   │ 2110049                      │ 34063                            │ 0                                            │ 0                                            │
+│ 2       │ 'a: fracciones'            │ 'discontinuo'  │ 1   │ 563378                       │ 24                               │ 0                                            │ 0                                            │
+│ 3       │ 'a: fracciones'            │ 'discontinuo'  │ 2   │ 2085305                      │ 6                                │ 0                                            │ 0                                            │
+│ 4       │ 'a: fracciones'            │ 'seleccionado' │ 1   │ 632172                       │ 34892                            │ 0                                            │ 0                                            │
+│ 5       │ 'a: fracciones'            │ 'seleccionado' │ 2   │ 2361250                      │ 34330                            │ 0                                            │ 0                                            │
+│ 6       │ 'b: enteros, 2 posiciones' │ 'normal'       │ 1   │ 364275                       │ 10                               │ 0                                            │ 0                                            │
+│ 7       │ 'b: enteros, 2 posiciones' │ 'normal'       │ 2   │ 1455171                      │ 16                               │ 0                                            │ 0                                            │
+│ 8       │ 'b: enteros, 2 posiciones' │ 'discontinuo'  │ 1   │ 364035                       │ 0                                │ 0                                            │ 0                                            │
+│ 9       │ 'b: enteros, 2 posiciones' │ 'discontinuo'  │ 2   │ 1454574                      │ 0                                │ 0                                            │ 0                                            │
+│ 10      │ 'b: enteros, 2 posiciones' │ 'seleccionado' │ 1   │ 470786                       │ 21                               │ 0                                            │ 0                                            │
+│ 11      │ 'b: enteros, 2 posiciones' │ 'seleccionado' │ 2   │ 1775335                      │ 23                               │ 0                                            │ 0                                            │
+└─────────┴────────────────────────────┴────────────────┴─────┴──────────────────────────────┴──────────────────────────────────┴──────────────────────────────────────────────┴──────────────────────────────────────────────┘

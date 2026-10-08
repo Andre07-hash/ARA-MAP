@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .errors import AraError
 from .protocols import DatabaseConnection
 
 APP_ROOT = Path(__file__).resolve().parent.parent
@@ -738,6 +739,81 @@ def transaction(conn: DatabaseConnection) -> Iterator[DatabaseConnection]:
         raise
     else:
         conn.execute(f"RELEASE {nombre}")
+
+
+class OcupadoError(AraError):
+    """A write could not get its turn (lock wait, deadlock). Nothing was
+    written; the caller may repeat the whole request."""
+
+
+# SQLite connections currently inside escritura(), by id().
+_escrituras: set[int] = set()
+
+
+@contextmanager
+def escritura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
+    """One connection inside one outer WRITE transaction, committed on exit.
+
+    The entry point for any change that must re-check authorization in the
+    transaction that writes (auth.reverificar_*), for Team A's handlers and
+    Team B's attachment repository alike:
+
+        with db.escritura() as conn:
+            alcance = auth.reverificar_terreno(conn, sesion, terreno_id, "archivos.subir")
+            ...  # short writes only; no file, network or parser work in here
+
+    SQLite: BEGIN IMMEDIATE takes the single write reservation before the
+    first read, so no other writer can change what the re-check reads until
+    this commits. transaction() alone is a SAVEPOINT, which starts a read
+    transaction and cannot promise that. Postgres: the session transaction and
+    its advisory lock, unchanged; the re-check adds row locks inside it.
+
+    Any exception rolls everything back, including a deferred foreign key that
+    only fails at COMMIT. A lock that cannot be had raises OcupadoError. Nothing is
+    retried here: a retry belongs to the caller and restarts the whole block.
+    """
+    from . import postgres
+    if path is None and postgres.enabled():
+        try:
+            with postgres.session() as cloud_conn:
+                yield cloud_conn
+        except Exception as exc:
+            if postgres.es_bloqueo(exc):
+                raise OcupadoError() from exc
+            raise
+        return
+    conn = connect(path)
+    try:
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as exc:  # another writer held it past the busy timeout
+            raise OcupadoError() from exc
+        _escrituras.add(id(conn))
+        try:
+            yield conn
+            conn.execute("COMMIT")
+        except BaseException:
+            if conn.in_transaction:
+                conn.execute("ROLLBACK")
+            raise
+        finally:
+            _escrituras.discard(id(conn))
+    finally:
+        conn.close()
+
+
+def en_escritura(conn: DatabaseConnection) -> bool:
+    """Whether conn came from escritura(). A Postgres connection is always in
+    its session transaction, so only SQLite can say no."""
+    return not isinstance(conn, sqlite3.Connection) or id(conn) in _escrituras
+
+
+def bloqueo(conn: DatabaseConnection, exclusivo: bool = False) -> str:
+    """The row-lock suffix for a SELECT on this connection. Empty on SQLite,
+    whose write transaction already excludes every other writer."""
+    if isinstance(conn, sqlite3.Connection):
+        return ""
+    return " FOR UPDATE" if exclusivo else " FOR SHARE"
 
 
 @contextmanager

@@ -1,9 +1,13 @@
-"""Team account provisioning: an operations command, not an in-app role.
+"""Team accounts and roles: a trusted operations command, not a web feature.
 
-Every account it creates has exactly the same powers in ARA Map. It refuses to
+An account is an operator unless created with --rol admin or changed with the
+rol command; nothing promotes anyone automatically. An operator can do nothing
+until an administrator grants a work base in the app. The command refuses to
 run without an explicitly named target and never reads .env.local:
 
     python3 scripts/cuentas.py --sqlite RUTA/ara_map.db crear USUARIO "Nombre visible"
+    python3 scripts/cuentas.py --sqlite RUTA crear USUARIO "Nombre visible" --rol admin
+    python3 scripts/cuentas.py --url-env VARIABLE rol USUARIO admin
     python3 scripts/cuentas.py --url-env VARIABLE restablecer USUARIO
     python3 scripts/cuentas.py --url-env VARIABLE desactivar USUARIO
     python3 scripts/cuentas.py --url-env VARIABLE reactivar USUARIO
@@ -12,8 +16,12 @@ run without an explicitly named target and never reads .env.local:
 --url-env names an environment variable holding a Postgres URL (the URL itself
 never goes on the command line). Passwords are read with a hidden prompt, or,
 for automation, as one line from standard input with --password-stdin; never
-from arguments. Resetting a password or deactivating ends that user's sessions.
-A Postgres target must already be at schema 8 (scripts/esquema.py).
+from arguments. Resetting a password, deactivating or changing a role ends
+that user's sessions. Every change is recorded in team_user_event under the
+command's own identity (auth.ACTOR_CLI), in the same transaction.
+
+A Postgres target must already be at the current schema: this command checks
+and refuses, it never migrates (scripts/esquema.py does, as a release step).
 """
 
 from __future__ import annotations
@@ -41,6 +49,10 @@ def _parser() -> argparse.ArgumentParser:
     crear = sub.add_parser("crear")
     crear.add_argument("usuario")
     crear.add_argument("nombre")
+    crear.add_argument("--rol", choices=("operador", "admin"), default="operador")
+    rol = sub.add_parser("rol")
+    rol.add_argument("usuario")
+    rol.add_argument("rol", choices=("operador", "admin"))
     for accion in ("restablecer", "desactivar", "reactivar"):
         sub.add_parser(accion).add_argument("usuario")
     sub.add_parser("listar")
@@ -73,13 +85,24 @@ def main(argv: Sequence[str] | None = None, ask: Callable[[str], str] = getpass.
 
     from server import auth, db, postgres
 
-    with db.session(sqlite_path) as conn:
-        if sqlite_path is None and (postgres.schema_version(conn) or 0) < 8:
-            raise SystemExit("El destino Postgres no está en el esquema 8; migra primero.")
+    # One write transaction, entered the same way as every other change to
+    # what authorization reads: an account change waits its turn behind a
+    # write that already checked, and is recorded with its audit row or not at all.
+    with db.escritura(sqlite_path) as conn:
+        if sqlite_path is None and (postgres.schema_version(conn) or 0) < db.SCHEMA_VERSION:
+            raise SystemExit(f"El destino Postgres no está en el esquema {db.SCHEMA_VERSION};"
+                             " migra primero. Este comando no migra.")
         try:
             if args.accion == "crear":
-                usuario = auth.create_user(conn, args.usuario, args.nombre, _password(ask))
-                print(f"Cuenta creada: {usuario['login']} ({usuario['display_name']}).")
+                usuario = auth.create_user(conn, args.usuario, args.nombre, _password(ask),
+                                           rol=args.rol)
+                print(f"Cuenta creada: {usuario['login']} ({usuario['display_name']}),"
+                      f" rol {usuario['rol']}.")
+            elif args.accion == "rol":
+                if auth.set_role(conn, args.usuario, args.rol):
+                    print(f"Rol cambiado a {args.rol}; sus sesiones abiertas se cerraron.")
+                else:
+                    print(f"La cuenta ya tenía el rol {args.rol}; no se cambió nada.")
             elif args.accion == "restablecer":
                 auth.set_password(conn, args.usuario, _password(ask))
                 print("Contraseña cambiada; sus sesiones abiertas se cerraron.")
@@ -89,7 +112,7 @@ def main(argv: Sequence[str] | None = None, ask: Callable[[str], str] = getpass.
             else:
                 for u in auth.list_users(conn):
                     estado = "activa" if u["active"] else "desactivada"
-                    print(f"{u['login']}\t{u['display_name']}\t{estado}\t{u['created_at']}")
+                    print(f"{u['login']}\t{u['display_name']}\t{u['rol']}\t{estado}\t{u['created_at']}")
         except auth.AccountError as exc:
             raise SystemExit(str(exc)) from None
     return 0

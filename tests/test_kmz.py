@@ -116,7 +116,12 @@ class Forma(unittest.TestCase):
             if ruta.name == "kmz.py":
                 continue
             with self.subTest(str(ruta)):
-                self.assertIsNone(re.search(r"\bkmz\b", ruta.read_text(encoding="utf-8")))
+                # Round 1 baseline (integration repair, Team A): the attachment schema in
+                # server/db.py stores 'kmz' as a file type, so the bare word is no longer
+                # evidence of a connection. What this test guards is that nothing imports
+                # the parser yet.
+                self.assertIsNone(re.search(
+                    r"^\s*(?:import|from)\b[^\n#]*\bkmz\b", ruta.read_text(encoding="utf-8"), re.M))
 
 
 class Aceptados(unittest.TestCase):

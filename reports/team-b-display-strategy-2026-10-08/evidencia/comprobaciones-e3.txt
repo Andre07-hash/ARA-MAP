@@ -1,0 +1,18 @@
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed
+OK    zoomToScale while preparing returns contorno_pendiente
+OK    pending wording: "Preparando contorno…"
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron

@@ -1,0 +1,15 @@
+e4 run 1: 21 OK, 0 FALLA
+e4 run 2: 21 OK, 0 FALLA
+e4 run 3: 21 OK, 0 FALLA
+e4 run 4: 21 OK, 0 FALLA
+e4 run 5: 21 OK, 0 FALLA
+e4 run 6: 21 OK, 0 FALLA
+e4 run 7: 21 OK, 0 FALLA
+e4 run 8: 21 OK, 0 FALLA
+e4 run 9: 21 OK, 0 FALLA
+e4 run 10: 21 OK, 0 FALLA
+e3 run 1: 17 OK, 0 FALLA
+e3 run 2: 17 OK, 0 FALLA
+e3 run 3: 17 OK, 0 FALLA
+e3 run 4: 17 OK, 0 FALLA
+e3 run 5: 17 OK, 0 FALLA

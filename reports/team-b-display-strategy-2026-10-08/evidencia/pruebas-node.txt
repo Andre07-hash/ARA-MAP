@@ -1,0 +1,48 @@
+TAP version 13
+#   183 bodies compared: 29 cargado, 118 invalido
+# Subtest: constants equal B-2
+ok 1 - constants equal B-2
+  ---
+  duration_ms: 0.83014
+  type: 'test'
+  ...
+# Subtest: same verdict as cuerpoLeaflet on fixtures, limit cases and mutations
+ok 2 - same verdict as cuerpoLeaflet on fixtures, limit cases and mutations
+  ---
+  duration_ms: 2095.757488
+  type: 'test'
+  ...
+# Subtest: over the position limit is invalid in both
+ok 3 - over the position limit is invalid in both
+  ---
+  duration_ms: 31.530366
+  type: 'test'
+  ...
+# Subtest: sliced preparation equals one-shot preparation
+ok 4 - sliced preparation equals one-shot preparation
+  ---
+  duration_ms: 233.695553
+  type: 'test'
+  ...
+# Subtest: planner: shared job, cancellation, no late result
+ok 5 - planner: shared job, cancellation, no late result
+  ---
+  duration_ms: 844.485759
+  type: 'test'
+  ...
+# Subtest: cache: LRU within a byte budget, checked against the descriptor bbox
+ok 6 - cache: LRU within a byte budget, checked against the descriptor bbox
+  ---
+  duration_ms: 254.537651
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3648.095552
+exit 0

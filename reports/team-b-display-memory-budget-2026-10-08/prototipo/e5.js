@@ -175,7 +175,11 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
   function asegurarRenderer(capa) {
     if (renderer) return;
     renderer = capa._renderer;
-    // Decide between the layer updates and the redraw (Leaflet 1.9.4 Canvas._updatePaths).
+    // Decide between the layer updates and the redraw (Leaflet 1.9.4
+    // Canvas._updatePaths). Leaflet registered its own method as the
+    // renderer's "update" listener in onAdd: replace that listener, so that
+    // view changes and resizes reach this decision before any drawing.
+    renderer.off("update", renderer._updatePaths, renderer);
     renderer._updatePaths = function updatePathsE5() {
       if (this._postponeUpdatePaths) return;
       this._redrawBounds = null;
@@ -183,6 +187,7 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       decidir();
       this._redraw();
     };
+    renderer.on("update", renderer._updatePaths, renderer);
     capaBitmap = new CapaBitmap(ctl, { renderer });
     capaBitmap.addTo(map);
     capaBitmap.bringToBack();
@@ -280,17 +285,30 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
     const deseada = lista.map((c) => ({ id: c._id, capa: c, estilo: estiloDe(c.options) }));
     for (const d of deseada) d.clave = `${d.id}|${JSON.stringify(d.estilo)}`;
 
-    // Worker copies first (reserved before posting). An outline refused here
-    // is "sin_memoria" and is left out of the image until memory frees.
+    // An image this size can never fit the budget: say so; post no copies.
+    const bytes = area.ancho * area.alto * 4;
+    if (!presupuesto.cabe(bytes)) {
+      if (mostrada) soltarMostrada();
+      if (enVuelo) enVuelo.obsoleto = true;
+      metricas.demasiadoGrande += 1;
+      return directosLigeros(lista, "demasiado_grande") || true;
+    }
+
+    // Worker copies (reserved before posting), each pinned as soon as it is
+    // admitted so that admitting a later outline never evicts an earlier one
+    // of the same image. An outline refused here is "sin_memoria" and is left
+    // out of the image; the pins are dropped again unless a request is posted.
     const incluidas = [];
     const sinMemoria = new Set();
     let esperar = false;
     for (const d of deseada) {
       const r = cl.asegurar(d.id, d.capa._prep);
-      if (r === "listo") incluidas.push(d);
-      else if (r === "esperar") esperar = true;
+      if (r === "listo") { cl.fijar([d.id]); incluidas.push(d); }
+      else if (r === "esperar") { esperar = true; break; }
       else sinMemoria.add(d.capa);
     }
+    let fijadas = incluidas.map((d) => d.id);
+    const soltarFijadas = () => { cl.soltar(fijadas); fijadas = []; };
     const claveLista = incluidas.map((d) => d.clave).join(";");
 
     // The image shown is usable when it is for this exact area and holds no
@@ -313,20 +331,19 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
     }
     if (sinMemoria.size) metricas.sinMemoria += 1;
     if (completa) {
+      soltarFijadas();
       if (enVuelo) enVuelo.obsoleto = true;
       return cambio;
     }
     if (enVuelo) {
+      soltarFijadas();
       if (enVuelo.claveArea !== claveArea || enVuelo.claveLista !== claveLista) enVuelo.obsoleto = true;
       return cambio;                          // one in flight per map; decide again when it returns
     }
-    if (cl.estado !== "listo") return cambio; // worker starting: decide again when ready
-    if (esperar) { metricas.esperas += 1; return cambio; }
-    if (!incluidas.length) return cambio;
-    const bytes = area.ancho * area.alto * 4;
-    if (!presupuesto.cabe(bytes)) {
-      metricas.demasiadoGrande += 1;
-      return directosLigeros(lista, "demasiado_grande") || cambio;
+    if (cl.estado !== "listo" || esperar || !incluidas.length) {
+      soltarFijadas();                        // worker starting / releases pending / nothing admitted
+      if (esperar) metricas.esperas += 1;
+      return cambio;
     }
     let reserva = presupuesto.reservar("raster", bytes, dueno);
     if (!reserva && mostrada) {               // no room for both: give up the image shown first
@@ -336,12 +353,12 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       reserva = presupuesto.reservar("raster", bytes, dueno);
     }
     if (!reserva) {
+      soltarFijadas();
       if (presupuesto.pendienteDeLiberar > 0) { metricas.esperas += 1; return cambio; }
       metricas.sinMemoria += 1;
       return directosLigeros(lista, "sin_memoria") || cambio;
     }
-    const pedidoLista = incluidas.map((d) => ({ id: d.id, clave: d.clave }));
-    cl.fijar(pedidoLista.map((x) => x.id));
+    const pedidoLista = incluidas.map((d) => ({ id: d.id, clave: d.clave }));   // pins held until the reply
     const vuelo = { numero: null, reserva, area, claveArea, claveLista, lista: pedidoLista, obsoleto: false };
     enVuelo = vuelo;
     metricas.rasters += 1;

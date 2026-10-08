@@ -85,7 +85,7 @@
    let generacion = 0;
    const map = L.map(container, {
      zoomControl: false,
-@@ -99,6 +141,12 @@
+@@ -99,6 +141,14 @@
  
    map.fitBounds(MEXICO_BOUNDS);
    L.control.zoom({ position: "topright" }).addTo(map);
@@ -95,10 +95,12 @@
 +                                       plazoMs: PLAZO_E5_MS, ...o }),
 +    alEstado: (capa, estado) => capa._avisarE5?.(estado),
 +  }) : null;
++  // A body that leaves the registry leaves the worker too: copies follow cache membership.
++  registro?.alQuitar((id) => controlador.expulsado(id));
    map.attributionControl.setPrefix("");
  
    // Outlines share the map's single canvas renderer with every circle and
-@@ -209,6 +257,11 @@
+@@ -209,6 +259,11 @@
    function render(terrenos, { colorFor, dashFor = null, geometrias = null,
                               cargando = null } = {}) {
      generacion += 1;
@@ -110,7 +112,7 @@
      contornoLayer.clearLayers();
      markerLayer.clearLayers();
      byId = new Map();
-@@ -276,7 +329,11 @@
+@@ -276,7 +331,11 @@
      // PROTOTYPE: preparation nobody needs any more is cancelled; an empty
      // render is the session/scope reset, which also drops every cached body.
      planificador.conservarSolo(new Set(contornos.map((t) => t.geometria.id)));
@@ -123,7 +125,7 @@
      for (const terreno of contornos) {
        if (byId.has(terreno.id)) continue;           // one logical mark per terrain
        byId.set(terreno.id, crearContorno(
-@@ -358,6 +415,10 @@
+@@ -358,6 +417,10 @@
            enCache: () => cache.contiene(descriptor.id),
            alCambiarEstado: (estado) => alDibujo(entrada, terreno, estado),
          });
@@ -134,7 +136,7 @@
        } else capa = new CapaContorno(c, opciones);
        capa.bindTooltip(tooltipHtml(terreno), { sticky: true, opacity: 1,
                                                className: "mark-tooltip" });
-@@ -651,9 +712,9 @@
+@@ -651,9 +714,9 @@
      }
      const zoom = map.getZoom();
      // PROTOTYPE: never report an outline that is still loading or being prepared.
@@ -146,7 +148,7 @@
      }
      if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"
          || entry.estadoContorno === "dibujando") {
-@@ -705,11 +766,13 @@
+@@ -705,11 +768,13 @@
      destruir() {
        planificador.detener();
        cache.vaciar();
@@ -161,7 +163,7 @@
                      get reinicioTrabajador() { return reinicioTrabajador; },
                      // Test hook: the symbol tooltip text (state wording) of a terrain.
                      aviso: (id) => byId.get(id)?.simbolo?.getTooltip()?.getContent() ?? null },
-@@ -720,7 +783,7 @@
+@@ -720,7 +785,7 @@
  /** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
  function simboloStyle({ fill, dash, disponible: cargado, estadoContorno = null, selected = false }) {
    // F3: an outline refused by the worker budget looks "not available", never pending.

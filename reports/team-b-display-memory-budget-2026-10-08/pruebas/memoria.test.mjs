@@ -435,3 +435,42 @@ test('controller: a refused map retries when held items become evictable, withou
   assert.equal(otro.viva, false);
   ctl.cerrar();
 });
+
+test('worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it', async () => {
+  const u = bytesDe(preparado(10_000));
+  const p = crearPresupuesto(4 * u);
+  const reg = crearRegistro(p, 'm');
+  const { c, t } = cliente(p);
+  reg.alQuitar((id) => c.expulsado(id));                  // as MapCanvas (e5) wires it
+  await drenar(2);
+  const d = (id) => ({ id, bbox: [0, 0, 1, 1] });
+  reg.guardar(d('x'), preparado(10_000), reg.reservar(u));
+  reg.guardar(d('y'), preparado(10_000), reg.reservar(u));
+  assert.equal(c.asegurar('x', preparado(10_000)), 'listo');
+  assert.equal(c.asegurar('y', preparado(10_000)), 'listo');
+  await drenar();
+  assert.equal(p.usados, 4 * u);
+  // 1. 'x' is evicted from the main cache to make room: its worker copy is forgotten too.
+  assert.ok(reg.reservar(u));
+  assert.equal(reg.obtener(d('x')), null);
+  assert.deepEqual(c.ids(), ['y']);
+  await drenar();
+  assert.deepEqual([...t.manejar.cuerpos.keys()], ['y']);
+  // 2. 'y' is pinned by a request in flight when its body leaves: forgotten only when unpinned.
+  c.fijar(['y']);
+  reg.vaciar();
+  assert.equal(reg.tamano, 0);
+  await drenar();
+  assert.ok(t.manejar.cuerpos.has('y'), 'a pinned copy stays while its request needs it');
+  c.soltar(['y']);
+  await drenar();
+  assert.equal(t.manejar.cuerpos.size, 0);
+  assert.equal(p.porCategoria().copia, 0);
+  // 3. Re-admitted before unpinning: the copy is wanted again and is kept.
+  reg.guardar(d('z'), preparado(10_000), reg.reservar(u));
+  assert.equal(c.asegurar('z', preparado(10_000)), 'listo');
+  c.fijar(['z']); c.expulsado('z'); assert.equal(c.asegurar('z', preparado(10_000)), 'listo'); c.soltar(['z']);
+  await drenar();
+  assert.ok(t.manejar.cuerpos.has('z'));
+  c.cerrar(); reg.cerrar();
+});

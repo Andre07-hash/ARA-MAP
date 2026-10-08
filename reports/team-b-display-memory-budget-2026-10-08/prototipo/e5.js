@@ -433,6 +433,8 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       programar();
     },
     alFondo() { capaBitmap?.bringToBack(); },
+    /** The map's registry dropped a body: its worker copy follows. */
+    expulsado(id) { cliente?.expulsado(id); },
     /** Only an actual change of the outline's style needs a new decision. */
     cambioDeEstilo(capa) {
       const clave = JSON.stringify(estiloDe(capa.options));

@@ -150,6 +150,8 @@ export function createMapCanvas(container, {
                                        plazoMs: PLAZO_E5_MS, ...o }),
     alEstado: (capa, estado) => capa._avisarE5?.(estado),
   }) : null;
+  // A body that leaves the registry leaves the worker too: copies follow cache membership.
+  registro?.alQuitar((id) => controlador.expulsado(id));
   map.attributionControl.setPrefix("");
 
   // Outlines share the map's single canvas renderer with every circle and

@@ -91,7 +91,9 @@ EDICIONES: list[tuple[str, str]] = [
      '    crearCliente: (o) => crearCliente({ presupuesto: presupuestoE5, dueno: duenoE5, simular: SIMULAR_E5,\n'
      '                                       plazoMs: PLAZO_E5_MS, ...o }),\n'
      '    alEstado: (capa, estado) => capa._avisarE5?.(estado),\n'
-     '  }) : null;\n'),
+     '  }) : null;\n'
+     '  // A body that leaves the registry leaves the worker too: copies follow cache membership.\n'
+     '  registro?.alQuitar((id) => controlador.expulsado(id));\n'),
     ('    generacion += 1;\n'
      '    contornoLayer.clearLayers();\n'
      '    markerLayer.clearLayers();\n'

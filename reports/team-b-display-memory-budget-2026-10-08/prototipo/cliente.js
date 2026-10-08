@@ -135,7 +135,7 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     asegurar(id, p) {
       if (estado === "fallido" || estado === "cerrado") return "fallido";
       const c = copias.get(id);
-      if (c) { copias.delete(id); copias.set(id, c); return "listo"; }
+      if (c) { c.expulsar = false; copias.delete(id); copias.set(id, c); return "listo"; }
       const reserva = presupuesto.reservar("copia", bytesDe(p), dueno);
       if (!reserva) {
         if (presupuesto.pendienteDeLiberar > 0) return "esperar";
@@ -150,7 +150,24 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       return "listo";
     },
     fijar(ids) { for (const id of ids) { const c = copias.get(id); if (c) c.fijos += 1; } },
-    soltar(ids) { for (const id of ids) { const c = copias.get(id); if (c) c.fijos = Math.max(0, c.fijos - 1); } },
+    soltar(ids) {
+      for (const id of ids) {
+        const c = copias.get(id);
+        if (!c) continue;
+        c.fijos = Math.max(0, c.fijos - 1);
+        if (c.fijos === 0 && c.expulsar && estado === "listo") olvidar(id);
+      }
+    },
+    /** The main thread dropped `id`'s body: its copy goes too, at once or, if a
+     *  request in flight pins it, when unpinned. A copy already being forgotten
+     *  (awaiting acknowledgement) is not in `copias`: nothing can go stale. */
+    expulsado(id) {
+      const c = copias.get(id);
+      if (!c || estado !== "listo") return;
+      if (c.fijos > 0) c.expulsar = true;
+      else olvidar(id);
+    },
+    ids() { return [...copias.keys()]; },
     /** Ask for a combined raster; `aviso(reply)` gets {bitmap, faltan} or {fallo} or {cancelado}. */
     raster(parametros, aviso) {
       if (estado !== "listo") { aviso({ fallo: motivo ?? "noListo" }); return null; }

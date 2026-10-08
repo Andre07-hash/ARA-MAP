@@ -118,6 +118,10 @@ const AYUDAS = () => {
       const enBitmap = d.controlador.estado().modos.filter(([, modo]) => modo === 'bitmap').length;
       if (enBitmap && !d.controlador.bitmapVigente()) r.errores.push(`map ${i}: ${enBitmap} outlines claim a bitmap that is not current`);
       if (mostrada && !d.controlador.bitmapVigente()) r.errores.push(`map ${i}: an image for another view is still held`);
+      // Worker copies follow the registry: no copy of a body this map no longer holds.
+      const enRegistro = new Set(d.registro.ids());
+      const huerfanas = (cl?.ids?.() ?? []).filter((id) => !enRegistro.has(id));
+      if (huerfanas.length) r.errores.push(`map ${i}: ${huerfanas.length} worker copies of bodies no longer in the registry`);
       if (w && p.pendienteDeLiberar === 0 && w.bytes > (cl?.bytesReservados() ?? 0)) r.errores.push(`map ${i}: worker holds ${w.bytes} > reserved ${cl.bytesReservados()}`);
       r.mapas.push(mapa);
     }

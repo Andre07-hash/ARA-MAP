@@ -16,11 +16,13 @@ function claveCaja(b) { return b.join(","); }
 export function crearRegistro(presupuesto, dueno) {
   const entradas = new Map();              // id -> {caja, preparado, reserva, enCache, fijos}; order = LRU
   const metricas = { expulsados: 0 };
+  const alQuitar = new Set();               // (id) => void: the body left this map (its worker copy should too)
 
   function soltarSiHuerfana(id, e) {
     if (e.enCache || e.fijos > 0) return;
     entradas.delete(id);
     presupuesto.liberar(e.reserva);
+    for (const f of alQuitar) f(id);
   }
 
   const quitarAliviador = presupuesto.registrarAliviador((faltan) => {
@@ -59,6 +61,9 @@ export function crearRegistro(presupuesto, dueno) {
       return e.preparado;
     },
     fijar(id) { const e = entradas.get(id); if (e) e.fijos += 1; },
+    /** Notified with the id of every body that leaves the registry. */
+    alQuitar(f) { alQuitar.add(f); return () => alQuitar.delete(f); },
+    ids() { return [...entradas.keys()]; },
     soltar(id) {
       const e = entradas.get(id);
       if (!e) return;

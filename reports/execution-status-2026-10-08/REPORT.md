@@ -122,3 +122,8 @@ The supervisor owns routine technical choices and contract consolidation. The ow
 Close the current reviews, then release **1A and 1B** with their exact shared baseline and contract. Focus the next three waves on the working employee journey. Treat B's memory result as an input to 4B, not a reason to postpone the master table or to keep extending research without a delivery boundary.
 
 This plan covers the requested first release. Excel automation, BigQuery, permanent purging, custom attachment-column types, arbitrary cross-base custom-field comparison and a full self-service account console remain outside it. Corrections discovered by review stay within the relevant packet; a genuine scope change is reported with its effect on the 12-packet baseline.
+
+
+## Round 1 release update
+
+Following the owner's request for the first instructions, packets **1A and 1B** are now released in [round-1-instructions-2026-10-08/START_HERE.md](../round-1-instructions-2026-10-08/START_HERE.md). The earlier status snapshot above is retained as history. Corrected P2 at `5d0844cfd678c2f7ec55ddb4b364275482d1a801` is now accepted after independent correction verification; evidence is linked in that packet. Team B finishes/submits its current memory handback before starting 1B, but need not await that research's review to develop attachments. The consolidated contract selects local lifecycle defaults and leaves provider/hosted decisions for later. Only this first pair is issued; no merge or deployment is authorized.

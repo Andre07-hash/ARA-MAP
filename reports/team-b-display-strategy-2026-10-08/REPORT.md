@@ -663,7 +663,7 @@ Whether one such map budget is acceptable on the employees' machines, and whethe
 
 - **Negative controls on all 32 B-2 captures behaved as required.** Paint removed from the formerly omitted region lowered coverage wherever that region had paint, in 30 captures. The 1 px and 3 px shifts gave the expected coverage at ±1, ±2 and ±3.
 - **E1:** the differences are anti-aliasing at ring seams; alpha IoU stays 1. This is why the E1 implementation does not use `lineTo`.
-- **E1p:** the `addPath` loss was traced on Leaflet's real parts (`diagnostico-addpath.mjs`). At that view Leaflet leaves 19,999 two-position rings. Up to about 1,000 rings, per-ring `Path2D` + `addPath` paints exactly what `closePath()` paints; beyond that, two-position rings stop being painted (20,000 rings: `closePath()` 107,008 painted pixels, `addPath` 78,520, path data 107,008). A single `Path2D` built from SVG path data (`M…L…Z`), where `Z` is a real close, matches at every size and builds 20,000 rings in 23 ms, against 2,021 ms for `closePath()` (`micro-cierre.mjs`, which also confirms its byte identity on synthetic sets; that synthetic set does not itself reproduce the `addPath` loss). This is the mechanism of the E1 implementation PR.
+- **E1p:** the `addPath` loss was traced on Leaflet's real parts (`diagnostico-addpath.mjs`). At that view Leaflet leaves 19,999 two-position rings. Up to about 1,000 rings, per-ring `Path2D` + `addPath` paints exactly what `closePath()` paints; beyond that, two-position rings stop being painted (20,000 rings: `closePath()` 107,008 painted pixels, `addPath` 78,520, path data 107,008). A single `Path2D` built from SVG path data (`M…L…Z`), where `Z` is a real close, matches at every size and builds 20,000 rings in 23–48 ms (two runs), against 2,021–2,040 ms for `closePath()` (`micro-cierre.mjs`; `evidencia-correcciones-2026-10-08/micro-cierre.txt` and `diagnostico-addpath.txt`, which also confirms its byte identity on synthetic sets; that synthetic set does not itself reproduce the `addPath` loss). This is the mechanism of the E1 implementation PR.
 - **E4:**
   - Every B-2 painted pixel has an E4 painted pixel within 1 px, at both DPRs and in every view.
   - Going the other way, at least 94.5% of E4's pixels are within 1 px of B-2's, and 100% within 2 px.
@@ -714,4 +714,12 @@ SALIDA_JSON=$W/memoria.json node $D/memoria-trabajador.mjs            # §11.5
 
 ### 11.10 Repository verification at the corrections head
 
-Pending in this commit; reported in the next commit of this branch.
+Run at `5a60f7a` (`evidencia-correcciones-2026-10-08/repo-checks.txt`). This branch changes only files in this report folder. `./verificar.sh` needs zsh, which this container lacks, so its parts were run separately:
+
+| Check | Result |
+|---|---|
+| `python3 -m unittest discover -s tests -t .` (3.13.16 and 3.9.25) | 672 run, 29 Postgres-only skips. **1 failure**, the known environmental `test_packaging…no_openpyxl_of_its_own`: this container's `/usr/bin/python3` ships openpyxl. |
+| `node --test tests/js/*.test.mjs` | 98 pass |
+| This folder's Node checks (`pruebas/*.test.mjs`) | 22 pass |
+| `ruff check server/ tests/ <this folder>`, `mypy server/` | Clean |
+| GitHub CI | Green at `14254d6` and `5a60f7a`. CI does not run this folder's browser measurements. |

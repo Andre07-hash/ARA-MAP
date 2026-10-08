@@ -1,0 +1,21 @@
+head 5a60f7a184c1a03650e51d3408d1042b1e866d0f
+== python3 Python 3.13.16
+Ran 672 tests in 61.843s
+
+FAILED (failures=1, skipped=29)
+== Python 3.9.25
+Ran 672 tests in 62.582s
+
+FAILED (failures=1, skipped=29)
+== node
+# tests 98
+# pass 98
+# fail 0
+== prototipo
+# tests 22
+# pass 22
+# fail 0
+== ruff
+All checks passed!
+== mypy
+Success: no issues found in 43 source files

@@ -397,7 +397,7 @@ class SchemaV8(TempDatabase):
         self.conn.close()
         for _ in range(2):
             self.conn = db.connect(self.db_path)
-            self.assertEqual(self.conn.execute("PRAGMA user_version").fetchone()[0], 8)
+            self.assertEqual(self.conn.execute("PRAGMA user_version").fetchone()[0], db.SCHEMA_VERSION)
             self.assertEqual(self.legacy_digest(), antes)
             self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM inventory_terrain").fetchone()[0], 0)
             self.conn.close()

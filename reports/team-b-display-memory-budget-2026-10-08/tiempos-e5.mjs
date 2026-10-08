@@ -6,7 +6,8 @@
  *     node reports/team-b-display-memory-budget-2026-10-08/tiempos-e5.mjs [impl,...] [escena,...]
  *
  * Defaults: impls e5,e4,e3; scenes seis, doce, denso-grande-mas-19999;
- * REPETICIONES=3; DPR=1; MIB=64 (E5's budget). 1200 x 640 viewport.
+ * REPETICIONES=3; DPR=1; MIB=64 (E5's budget); VISTA=1200x640 (viewport).
+ * Input is aimed at the viewport's centre.
  *
  * Method (PR #16 correction F1): every measured phase starts inside a page
  * task (setTimeout 0), long tasks count when they OVERLAP the phase interval,
@@ -50,6 +51,8 @@ const ESCENAS = (process.argv[3] ?? 'seis,doce,denso-grande-mas-19999').split(',
 const REPETICIONES = Number(process.env.REPETICIONES ?? 3);
 const DPR = Number(process.env.DPR ?? 1);
 const MIB = Number(process.env.MIB ?? 64);
+const [ANCHO, ALTO] = (process.env.VISTA ?? '1200x640').split('x').map(Number);
+const CX = Math.round(ANCHO / 2); const CY = Math.round(ALTO / 2);
 let fallas = 0;
 const ok = (cond, que) => { console.log(`${cond ? 'OK   ' : 'FALLA'} ${que}`); if (!cond) fallas += 1; };
 
@@ -108,7 +111,7 @@ const INSTRUMENTOS = () => {
 };
 
 async function abrir(impl) {
-  const page = await browser.newPage({ viewport: { width: 1200, height: 640 }, deviceScaleFactor: DPR });
+  const page = await browser.newPage({ viewport: { width: ANCHO, height: ALTO }, deviceScaleFactor: DPR });
   const errores = [];
   page.on('pageerror', (e) => errores.push(String(e)));
   await page.addInitScript(INSTRUMENTOS);
@@ -147,11 +150,11 @@ async function corrida(impl, escena, control = null) {
       return performance.now();
     }, arrastre ? control : null);
     const espera = page.evaluate(() => window.__trasMover());
-    await page.mouse.move(600, 320);
+    await page.mouse.move(CX, CY);
     if (arrastre) {
       const dx = i % 2 ? 1 : -1;
       await page.mouse.down();
-      for (let k = 1; k <= 6; k += 1) await page.mouse.move(600 + dx * k * 25, 320 + k * 6);
+      for (let k = 1; k <= 6; k += 1) await page.mouse.move(CX + dx * k * 25, CY + k * 6);
       await page.mouse.up();
     } else {
       await page.mouse.wheel(0, i % 2 ? 120 : -120);
@@ -171,10 +174,10 @@ async function corrida(impl, escena, control = null) {
   return r;
 }
 
-const salida = { navegador: browser.version(), dpr: DPR, mib: MIB, repeticiones: REPETICIONES,
+const salida = { navegador: browser.version(), dpr: DPR, mib: MIB, vista: `${ANCHO}x${ALTO}`, repeticiones: REPETICIONES,
                  maquina: { cpu: os.cpus()[0]?.model ?? '?', nucleos: os.cpus().length, sistema: `${os.type()} ${os.release()}` },
                  controles: [], corridas: [] };
-console.log(`Chromium ${salida.navegador} · ${salida.maquina.cpu} ×${salida.maquina.nucleos} · DPR ${DPR} · E5 ${MIB} MiB`);
+console.log(`Chromium ${salida.navegador} · ${salida.maquina.cpu} ×${salida.maquina.nucleos} · ${ANCHO}x${ALTO} DPR ${DPR} · E5 ${MIB} MiB`);
 
 // Negative controls first, through the same phase code.
 {
@@ -250,7 +253,7 @@ salida.tabla = tabla;
 console.table(tabla);
 if (EVIDENCIA) {
   mkdirSync(EVIDENCIA, { recursive: true });
-  const nombre = `tiempos-e5-dpr${DPR}-${IMPLS.join('_')}-${ESCENAS.join('_')}.json`;
+  const nombre = `tiempos-e5-${ANCHO}x${ALTO}-dpr${DPR}-${IMPLS.join('_')}-${ESCENAS.join('_')}.json`;
   writeFileSync(path.join(EVIDENCIA, nombre), JSON.stringify(salida, null, 1));
 }
 await browser.close();

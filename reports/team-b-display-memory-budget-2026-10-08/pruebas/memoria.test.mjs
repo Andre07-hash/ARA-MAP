@@ -341,3 +341,97 @@ for (const [simular, motivo] of [['error', 'error'], ['silencio', 'sinRespuesta'
     c.cerrar();
   });
 }
+
+/* The map controller against a minimal fake of Leaflet's Canvas renderer:
+ * enough for decidir() (draw order, bounds, container size, pixel origin). */
+const { crearControlador } = await imp('e5.js');
+function controladorFalso({ presupuesto, capas: n = 2, alEstado, cliente }) {
+  const oyentes = [];
+  const renderer = {
+    _bounds: { min: { x: 0, y: 0 }, max: { x: 100, y: 50 } }, _container: { width: 100, height: 50 }, _layers: {},
+    _drawFirst: null, _redraw() {}, _updatePaths() {},
+    on(ev, f) { oyentes.push(f); }, off() {},
+  };
+  const map = { getPixelOrigin: () => ({ x: 0, y: 0 }), getZoom: () => 10, options: { crs: { scale: (z) => 256 * 2 ** z } } };
+  class CapaBitmap { constructor() {} addTo() { return this; } bringToBack() {} redraw() {} get _map() { return map; } }
+  const ctl = crearControlador({ L: null, map, CapaBitmap, presupuesto, dueno: 'mapa', alEstado,
+                                 crearCliente: () => cliente });
+  const capas = [];
+  let previo = null;
+  for (let i = 0; i < n; i += 1) {
+    const capa = { _id: `g-${i}`, _renderer: renderer, _map: map, _nVisibles: 1, _carga: { anillos: 5000, posiciones: 50000 },
+                   _prep: preparado(10), options: { color: '#123456', weight: 2 } };
+    const nodo = { layer: capa, next: null };
+    if (previo) previo.next = nodo; else renderer._drawFirst = nodo;
+    previo = nodo;
+    capas.push(capa);
+    ctl.agregar(capa);
+  }
+  return { ctl, capas };
+}
+const clienteFalso = () => ({ estado: 'listo', asegurar: () => 'listo', fijar() {}, soltar() {}, raster() { return 1; },
+                              descartar() {}, bytesReservados: () => 0, cerrar() {} });
+
+test('controller: a refused raster reports only the final state and does not loop', async () => {
+  const p = crearPresupuesto(30_000);
+  const otro = p.reservar('raster', 15_000, 'otro mapa');     // another map's image: 100x50x4 = 20,000 B cannot fit now
+  assert.ok(otro);
+  const informados = [];
+  let ctl;
+  // As MapCanvas does: a reported state re-applies the outline's (unchanged) style in a microtask.
+  // (Capped so that a regression fails the assertions instead of hanging the test run.)
+  const alEstado = (capa, estado) => {
+    informados.push([capa._id, estado]);
+    if (informados.length < 400) queueMicrotask(() => ctl.cambioDeEstilo(capa));
+  };
+  ({ ctl } = controladorFalso({ presupuesto: p, alEstado, cliente: clienteFalso() }));
+  await drenar(50);
+  assert.ok(ctl.metricas.decisiones < 10, `${ctl.metricas.decisiones} decisions: the controller keeps re-deciding`);
+  assert.deepEqual(informados, [['g-0', 'sin_memoria'], ['g-1', 'sin_memoria']]);   // never a transient "dibujando"
+  assert.equal(p.porCategoria().raster, 15_000);              // nothing reserved for the refused image
+  // The other map releases its image: one new decision, and the raster is requested.
+  const antes = ctl.metricas.decisiones;
+  p.liberar(otro);
+  await drenar(50);
+  assert.ok(ctl.metricas.decisiones - antes <= 3);
+  assert.equal(ctl.metricas.rasters, 1);
+  assert.equal(p.porCategoria().raster, 20_000);
+  assert.deepEqual(informados.slice(2), [['g-0', 'dibujando'], ['g-1', 'dibujando']]);
+  ctl.cerrar();
+  assert.equal(p.usados, 0);
+});
+
+test('budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement', () => {
+  const p = crearPresupuesto(10_000);
+  const a = p.reservar('copia', 4_000); const b = p.reservar('copia', 4_000);
+  const llamadas = [];
+  // First reliever: a worker forget, announced now, acknowledged later.
+  p.registrarAliviador((faltan) => { llamadas.push(['uno', faltan]); p.anunciarPorConfirmar(4_000); });
+  p.registrarAliviador((faltan) => { llamadas.push(['dos', faltan]); });
+  assert.equal(p.reservar('raster', 5_000), null);            // nothing freed yet: refused, caller waits
+  assert.deepEqual(llamadas, [['uno', 3_000]]);                // the second reliever was not asked: 4,000 already coming
+  llamadas.length = 0;
+  assert.equal(p.reservar('raster', 5_000), null);            // still pending: no further eviction
+  assert.deepEqual(llamadas, []);
+  p.anunciarPorConfirmar(-4_000); p.liberar(a);                 // acknowledged
+  assert.ok(p.reservar('raster', 5_000));
+  p.liberar(b);
+});
+
+test('controller: a refused map retries when held items become evictable, without any release', async () => {
+  const p = crearPresupuesto(30_000);
+  let fijado = true;
+  const otro = p.reservar('copia', 15_000, 'otro mapa');      // the other map's copy, pinned by its request in flight
+  p.registrarAliviador(() => { if (!fijado && otro.viva) p.liberar(otro); });
+  const { ctl } = controladorFalso({ presupuesto: p, alEstado: () => {}, cliente: clienteFalso() });
+  await drenar(30);
+  assert.equal(ctl.metricas.rasters, 0);
+  assert.deepEqual(ctl.estado().modos.map(([, , e]) => e), ['sin_memoria', 'sin_memoria']);
+  fijado = false;                                              // the other request returned: unpinned, nothing released
+  p.avisarDisponible();
+  await drenar(30);
+  assert.equal(ctl.metricas.rasters, 1);
+  assert.equal(p.porCategoria().raster, 20_000);
+  assert.equal(otro.viva, false);
+  ctl.cerrar();
+});

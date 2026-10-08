@@ -53,9 +53,11 @@ for (let i = 0; i < nMapas; i += 1) {
     onSelect: (id) => selecciones.push({ mapa: i, id, t: performance.now() }),
     onContornoEstado: (id, estado) => estados.push({ mapa: i, id, estado, t: performance.now() }),
   });
-  c.invalidate();
   canvases.push(c);
 }
+// Every container exists now: size each map to its real share of the window
+// (sizing map 0 before map 1's container existed left it at full width).
+for (const c of canvases) c.invalidate();
 const COLORES = ["#2a78d6", "#c2410c", "#15803d", "#7c3aed", "#b45309", "#0e7490"];
 const colorFor = (t) => COLORES[(t.color ?? 0) % COLORES.length];
 

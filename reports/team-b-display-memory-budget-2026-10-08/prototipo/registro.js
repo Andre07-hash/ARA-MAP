@@ -64,6 +64,8 @@ export function crearRegistro(presupuesto, dueno) {
       if (!e) return;
       e.fijos = Math.max(0, e.fijos - 1);
       soltarSiHuerfana(id, e);
+      // Unpinned but still cached: evictable now, a refused caller may retry.
+      if (e.fijos === 0 && e.enCache) presupuesto.avisarDisponible();
     },
     /** Reset or teardown: drop the cache; pinned bodies go when their layers leave. */
     vaciar() {

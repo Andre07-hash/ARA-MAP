@@ -190,12 +190,22 @@ async function escenario(nombre, fn) {
   if (!ELEGIDOS.includes(nombre)) return;
   console.log(`\n== ${nombre}`);
   salida.escenarios[nombre] = await fn();
+  if (EVIDENCIA) {
+    mkdirSync(EVIDENCIA, { recursive: true });
+    const parte = nombre === 'matriz' && (process.env.MATRIZ_MIB || process.env.MATRIZ_DPR)
+      ? `-${process.env.MATRIZ_MIB ?? 'todos'}mib-dpr${process.env.MATRIZ_DPR ?? 'todos'}` : '';
+    writeFileSync(path.join(EVIDENCIA, `memoria-${nombre}${parte}.json`),
+                  JSON.stringify({ navegador: salida.navegador, escenario: nombre, resultado: salida.escenarios[nombre] }, null, 1));
+  }
 }
 
 // 1. Matrix.
 await escenario('matriz', async () => {
   const filas = [];
-  for (const mib of [64, 128]) for (const dpr of [1, 2]) for (const [ancho, alto] of [[1200, 640], [1920, 1080]]) for (const n of [1, 6, 12]) {
+  // MATRIZ_MIB / MATRIZ_DPR restrict the matrix so it can be run in pieces.
+  const mibs = process.env.MATRIZ_MIB ? [Number(process.env.MATRIZ_MIB)] : [64, 128];
+  const dprs = process.env.MATRIZ_DPR ? [Number(process.env.MATRIZ_DPR)] : [1, 2];
+  for (const mib of mibs) for (const dpr of dprs) for (const [ancho, alto] of [[1200, 640], [1920, 1080]]) for (const n of [1, 6, 12]) {
     const { page, errores } = await pagina({ mib, dpr, ancho, alto });
     const r = await page.evaluate(PINTAR, { n });
     const a = await page.evaluate(() => window.__auditar());
@@ -378,32 +388,42 @@ await escenario('fallos', async () => {
   return filas;
 });
 
-// 8. Reset and teardown.
+// 8. Reset and teardown, audited per map (the other map keeps its own holdings).
 await escenario('reinicio', async () => {
   const { page, errores } = await pagina({ mib: 64, dpr: 1, mapas: 2 });
   await page.evaluate(PINTAR, { n: 6, seleccionar: false });
   const r = await page.evaluate(async () => {
     const m = window.__m5; const p = m.presupuesto;
-    const antes = p.porCategoria();
+    const antes = await window.__auditar();
     m.canvases[0].render([]);
     const contadoAntesDeConfirmar = p.porCategoria();
     const confirmado = await m.canvases[0]._diagnostico.reinicioTrabajador;
     await new Promise((ok) => setTimeout(ok, 50));
-    const trasReinicio = p.porCategoria();
-    const otro = (await window.__auditar()).mapas[1];
+    const trasReinicio = await window.__auditar();
+    // Map 0's remaining holdings, to compare with the ledger once map 1 is gone.
+    const d0 = m.canvases[0]._diagnostico;
+    const br0 = d0.controlador.bytesRaster();
+    const resto0 = d0.registro.bytesReservados() + d0.planificador.bytesReservados
+      + (d0.controlador.cliente?.bytesReservados() ?? 0) + br0.reservadaMostrada + br0.enVuelo;
     m.canvases[1].destruir();
     await new Promise((ok) => setTimeout(ok, 50));
-    return { antes, contadoAntesDeConfirmar, confirmado, trasReinicio, otroMapaAntesDeDestruir: otro.registro, trasDestruir: p.porCategoria(), usados: p.usados };
+    return { antes, contadoAntesDeConfirmar, confirmado, trasReinicio, resto0, trasDestruir: p.porCategoria(), usados: p.usados };
   });
   await page.close();
-  ok(r.confirmado && r.trasReinicio.raster === 0 && r.trasDestruir.preparado === r.trasReinicio.preparado - r.otroMapaAntesDeDestruir.reservados
-     && r.trasDestruir.copia === 0 && errores.length === 0,
-     `reset of map 0 acknowledged (copies counted until then: ${r.contadoAntesDeConfirmar.copia} B); teardown of map 1 releases its `
-     + `${r.otroMapaAntesDeDestruir.reservados} B of prepared bodies, its copies and its image; left ${r.usados} B (map 0's cached bodies)`);
+  const m0 = r.trasReinicio.mapas[0]; const m1a = r.antes.mapas[1]; const m1b = r.trasReinicio.mapas[1];
+  const raster0 = m0.raster.reservadaMostrada + m0.raster.enVuelo;
+  const intacto1 = m1b.registro.reservados === m1a.registro.reservados && m1b.cliente.reservados === m1a.cliente.reservados
+    && m1b.raster.reservadaMostrada === m1a.raster.reservadaMostrada;
+  ok(r.confirmado && r.antes.errores.length === 0 && r.trasReinicio.errores.length === 0 && raster0 === 0 && !m0.bitmap
+     && m0.cliente.reservados === 0 && m0.registro.entradas === 0 && intacto1
+     && r.contadoAntesDeConfirmar.copia === r.antes.ledger.copia && r.usados === r.resto0 && errores.length === 0,
+     `reset of map 0: image and prepared bodies released at once, its ${m1a.cliente ? r.antes.mapas[0].cliente.reservados : 0} B of worker `
+     + `copies counted until the worker acknowledged (${r.confirmado}); map 1 untouched (${m1b.registro.reservados} B prepared, `
+     + `${m1b.cliente.reservados} B copies, ${m1b.raster.reservadaMostrada} B image); teardown of map 1 releases all of it: ledger `
+     + `${r.usados} B = map 0's remaining ${r.resto0} B ${r.antes.errores.concat(r.trasReinicio.errores, errores).join('; ')}`);
   return { ...r, errores };
 });
 
-if (EVIDENCIA) { mkdirSync(EVIDENCIA, { recursive: true }); writeFileSync(path.join(EVIDENCIA, 'memoria.json'), JSON.stringify(salida, null, 1)); }
 await browser.close();
 servidor.cerrar();
 console.log(fallas ? `${fallas} fallo(s)` : 'Todas las comprobaciones pasaron');

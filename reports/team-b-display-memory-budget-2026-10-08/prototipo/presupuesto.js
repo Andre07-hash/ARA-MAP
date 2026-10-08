@@ -28,7 +28,7 @@ export function crearPresupuesto(total) {
   const porCategoria = { preparado: 0, copia: 0, raster: 0 };
   const picoPorCategoria = { preparado: 0, copia: 0, raster: 0 };
   const aliviadores = new Set();          // (bytesFaltantes) => void: free unpinned items
-  const oyentes = new Set();              // () => void: something was released
+  const oyentes = new Set();              // () => void: something was released or became evictable
   let usados = 0;
   let pico = 0;
   let rechazos = 0;
@@ -47,11 +47,13 @@ export function crearPresupuesto(total) {
     reservar(categoria, bytes, dueno = "") {
       if (!(categoria in porCategoria)) throw new Error(`unknown category ${categoria}`);
       if (!Number.isFinite(bytes) || bytes < 0) throw new Error(`bad size ${bytes}`);
-      if (usados + bytes > total) {
-        for (const aliviar of aliviadores) {
-          if (usados + bytes <= total) break;
-          aliviar(usados + bytes - total);
-        }
+      // Bytes already given up but not yet acknowledged will be freed: they
+      // count against the shortage, so each reliever frees only what is still
+      // missing (every reliever used to free the whole shortage).
+      const faltan = () => usados - porConfirmar + bytes - total;
+      for (const aliviar of aliviadores) {
+        if (faltan() <= 0) break;
+        aliviar(faltan());
       }
       if (usados + bytes > total) { rechazos += 1; return null; }
       siguienteId += 1;
@@ -78,7 +80,11 @@ export function crearPresupuesto(total) {
     /** Whether `bytes` could ever fit (the whole budget, nothing else held). */
     cabe(bytes) { return bytes <= total; },
     registrarAliviador(f) { aliviadores.add(f); return () => aliviadores.delete(f); },
+    /** Listeners run (coalesced, in a microtask) after a release, or after
+     *  `avisarDisponible`: held items became evictable (unpinned), so a
+     *  caller refused earlier may now fit. */
     alLiberar(f) { oyentes.add(f); return () => oyentes.delete(f); },
+    avisarDisponible() { avisarLiberado(); },
     get usados() { return usados; },
     get pico() { return pico; },
     get rechazos() { return rechazos; },

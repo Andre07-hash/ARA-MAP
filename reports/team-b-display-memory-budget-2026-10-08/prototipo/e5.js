@@ -240,10 +240,25 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
     return lista;
   }
 
+  // A decision may assign a layer twice (provisionally "dibujando", then
+  // "sin_memoria" once the raster is refused). Assignments are collected and
+  // applied once at the end, so only the final state is ever reported: an
+  // intermediate state made the map re-apply the outline's style, which asked
+  // for another decision, a microtask loop that never yielded.
+  const plan = new Map();
   function poner(capa, modo, estado) {
+    plan.set(capa, [modo, estado]);
+    return false;
+  }
+  function aplicarPlan() {
     let cambio = false;
-    if (capa._modo !== modo) { capa._modo = modo; cambio = true; }
-    if (capa._estadoE5 !== estado) { capa._estadoE5 = estado; alEstado(capa, estado); cambio = true; }
+    const avisos = [];
+    for (const [capa, [modo, estado]] of plan) {
+      if (capa._modo !== modo) { capa._modo = modo; cambio = true; }
+      if (capa._estadoE5 !== estado) { capa._estadoE5 = estado; avisos.push([capa, estado]); cambio = true; }
+    }
+    plan.clear();
+    for (const [capa, estado] of avisos) alEstado(capa, estado);
     return cambio;
   }
 
@@ -262,6 +277,11 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
   function decidir() {
     if (cerrado || !renderer) return false;
     metricas.decisiones += 1;
+    const cambio = decidirModos();
+    return aplicarPlan() || cambio;
+  }
+
+  function decidirModos() {
     let cambio = false;
     // Layers not in view: nothing to draw, nothing claimed missing.
     for (const c of capas) if (!(c._map && c._nVisibles > 0)) cambio = poner(c, "nada", "listo") || cambio;
@@ -292,6 +312,16 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       if (enVuelo) enVuelo.obsoleto = true;
       metricas.demasiadoGrande += 1;
       return directosLigeros(lista, "demasiado_grande") || true;
+    }
+
+    // The image shown already holds every wanted outline, in this area, with
+    // its current style: nothing to request, so no worker copy is admitted
+    // (that would re-post, for nothing, copies evicted since the image was made).
+    const claveDeseada = deseada.map((d) => d.clave).join(";");
+    if (mostrada && mostrada.claveArea === claveArea && mostrada.claveLista === claveDeseada) {
+      for (const d of deseada) cambio = poner(d.capa, "bitmap", "listo") || cambio;
+      if (enVuelo) enVuelo.obsoleto = true;
+      return cambio;
     }
 
     // Worker copies (reserved before posting), each pinned as soon as it is
@@ -327,7 +357,7 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       }
     } else {
       cambio = directosLigeros(lista, "dibujando") || cambio;
-      for (const c of sinMemoria) if (c._modo === "nada") cambio = poner(c, "nada", "sin_memoria") || cambio;
+      for (const c of sinMemoria) if (plan.get(c)?.[0] === "nada") cambio = poner(c, "nada", "sin_memoria") || cambio;
     }
     if (sinMemoria.size) metricas.sinMemoria += 1;
     if (completa) {
@@ -372,6 +402,9 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
     if (enVuelo !== vuelo) { respuesta.bitmap?.close(); return; }
     cliente?.soltar(vuelo.lista.map((x) => x.id));
     enVuelo = null;
+    // The request's copies are unpinned (evictable) now: a map refused while
+    // they were pinned must hear of it, though nothing was released.
+    presupuesto.avisarDisponible();
     if (respuesta.fallo || respuesta.cancelado || vuelo.obsoleto || cerrado || !respuesta.bitmap) {
       if (vuelo.obsoleto) metricas.obsoletos += 1;
       respuesta.bitmap?.close();
@@ -400,7 +433,13 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       programar();
     },
     alFondo() { capaBitmap?.bringToBack(); },
-    cambioDeEstilo() { programar(); },
+    /** Only an actual change of the outline's style needs a new decision. */
+    cambioDeEstilo(capa) {
+      const clave = JSON.stringify(estiloDe(capa.options));
+      if (clave === capa._claveEstilo) return;
+      capa._claveEstilo = clave;
+      programar();
+    },
     bitmapVigente() {
       return Boolean(mostrada && renderer && mostrada.claveArea === claveDeArea(areaActual()));
     },

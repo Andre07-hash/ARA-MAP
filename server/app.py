@@ -25,6 +25,7 @@ from .api import carpetas as api_carpetas
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
+from .api import maestra as api_maestra
 from .api import mapas as api_mapas
 from .api import sesion as api_sesion
 from .router import Request, Router
@@ -45,42 +46,54 @@ router.add("POST", "/api/login", api_sesion.login)
 router.add("POST", "/api/logout", api_sesion.logout)
 router.add("GET", "/api/publico/terrenos", api_inventario.public_listing)
 router.add("GET", "/api/publico/terrenos/:id", api_inventario.public_detail)
-# Everything below requires a signed-in team user.
-router.add("GET", "/api/inventario/terrenos", api_inventario.listing)
-router.add("POST", "/api/inventario/terrenos", api_inventario.create)
-router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail)
-router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update)
-router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history)
-router.add("GET", "/api/bases", api_bases.listing)
-router.add("GET", "/api/bases/:id", api_bases.detail)
-router.add("GET", "/api/bases/:id/terrenos", api_bases.terrenos)
-router.add("POST", "/api/bases/:id/terrenos", api_bases.add_terreno)
-router.add("PATCH", "/api/bases/:id", api_bases.rename)
-router.add("PATCH", "/api/bases/:id/carpeta", api_bases.move)
-router.add("DELETE", "/api/bases/:id", api_bases.remove)
-router.add("POST", "/api/bases/:id/adjuntar", api_importar.append)
-router.add("POST", "/api/importar/vista-previa", api_importar.preview)
-router.add("POST", "/api/importar/confirmar", api_importar.confirm)
-router.add("POST", "/api/importar/analizar", api_asistente.analizar)
-router.add("POST", "/api/importar/preparar", api_asistente.preparar)
-router.add("GET", "/api/formatos", api_asistente.formatos)
-router.add("PATCH", "/api/formatos/:id", api_asistente.renombrar_formato)
-router.add("DELETE", "/api/formatos/:id", api_asistente.eliminar_formato)
-router.add("GET", "/api/mapas", api_mapas.listing)
-router.add("POST", "/api/mapas", api_mapas.create)
-router.add("GET", "/api/mapas/:id", api_mapas.detail)
-router.add("GET", "/api/mapas/:id/terrenos", api_mapas.terrenos)
-router.add("POST", "/api/mapas/:id/actualizar", api_mapas.refresh)
-router.add("POST", "/api/mapas/combinar/vista-previa", api_mapas.plan_merge)
-router.add("POST", "/api/mapas/combinar", api_mapas.merge)
-router.add("PATCH", "/api/mapas/:id", api_mapas.update)
-router.add("PATCH", "/api/mapas/:id/carpeta", api_mapas.move)
-router.add("DELETE", "/api/mapas/:id", api_mapas.remove)
-router.add("POST", "/api/exportar", api_exportar.export)
-router.add("GET", "/api/carpetas", api_carpetas.listing)
-router.add("POST", "/api/carpetas", api_carpetas.create)
-router.add("PATCH", "/api/carpetas/:id", api_carpetas.rename)
-router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove)
+# Everything below requires a signed-in team user whose role has the named
+# capability; a private route registered without one is refused to everybody.
+# The record routes also check the terrain's work base (auth.require_terreno).
+# The two unscoped ones are the administrators' master table.
+router.add("GET", "/api/inventario/terrenos", api_inventario.listing, "maestra.global")
+router.add("POST", "/api/inventario/terrenos", api_inventario.create, "maestra.global")
+router.add("GET", "/api/inventario/terrenos/:id", api_inventario.detail, "maestra.ver")
+router.add("PATCH", "/api/inventario/terrenos/:id", api_inventario.update, "maestra.editar")
+router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.history, "maestra.ver")
+router.add("GET", "/api/maestra/bases", api_maestra.listing, "maestra.ver")
+router.add("POST", "/api/maestra/bases", api_maestra.create, "bases.gestionar")
+router.add("PATCH", "/api/maestra/bases/:bid", api_maestra.rename, "bases.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/archivar", api_maestra.archive, "bases.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/restaurar", api_maestra.restore, "bases.gestionar")
+router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
+router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
+# The legacy workspace (imported bases, saved maps, folders, formats, import,
+# export) is the administrators': derivados.ver to read, .gestionar to change.
+router.add("GET", "/api/bases", api_bases.listing, "derivados.ver")
+router.add("GET", "/api/bases/:id", api_bases.detail, "derivados.ver")
+router.add("GET", "/api/bases/:id/terrenos", api_bases.terrenos, "derivados.ver")
+router.add("POST", "/api/bases/:id/terrenos", api_bases.add_terreno, "derivados.gestionar")
+router.add("PATCH", "/api/bases/:id", api_bases.rename, "derivados.gestionar")
+router.add("PATCH", "/api/bases/:id/carpeta", api_bases.move, "derivados.gestionar")
+router.add("DELETE", "/api/bases/:id", api_bases.remove, "derivados.gestionar")
+router.add("POST", "/api/bases/:id/adjuntar", api_importar.append, "derivados.gestionar")
+router.add("POST", "/api/importar/vista-previa", api_importar.preview, "derivados.gestionar")
+router.add("POST", "/api/importar/confirmar", api_importar.confirm, "derivados.gestionar")
+router.add("POST", "/api/importar/analizar", api_asistente.analizar, "derivados.gestionar")
+router.add("POST", "/api/importar/preparar", api_asistente.preparar, "derivados.gestionar")
+router.add("GET", "/api/formatos", api_asistente.formatos, "derivados.ver")
+router.add("PATCH", "/api/formatos/:id", api_asistente.renombrar_formato, "derivados.gestionar")
+router.add("DELETE", "/api/formatos/:id", api_asistente.eliminar_formato, "derivados.gestionar")
+router.add("GET", "/api/mapas", api_mapas.listing, "derivados.ver")
+router.add("POST", "/api/mapas", api_mapas.create, "derivados.gestionar")
+router.add("GET", "/api/mapas/:id", api_mapas.detail, "derivados.ver")
+router.add("GET", "/api/mapas/:id/terrenos", api_mapas.terrenos, "derivados.ver")
+router.add("POST", "/api/mapas/:id/actualizar", api_mapas.refresh, "derivados.gestionar")
+router.add("POST", "/api/mapas/combinar/vista-previa", api_mapas.plan_merge, "derivados.gestionar")
+router.add("POST", "/api/mapas/combinar", api_mapas.merge, "derivados.gestionar")
+router.add("PATCH", "/api/mapas/:id", api_mapas.update, "derivados.gestionar")
+router.add("PATCH", "/api/mapas/:id/carpeta", api_mapas.move, "derivados.gestionar")
+router.add("DELETE", "/api/mapas/:id", api_mapas.remove, "derivados.gestionar")
+router.add("POST", "/api/exportar", api_exportar.export, "derivados.ver")
+router.add("GET", "/api/carpetas", api_carpetas.listing, "derivados.ver")
+router.add("POST", "/api/carpetas", api_carpetas.create, "derivados.gestionar")
+router.add("PATCH", "/api/carpetas/:id", api_carpetas.rename, "derivados.gestionar")
+router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove, "derivados.gestionar")
 
 # POSTs that only read: allowed in read-only mode.
 READ_ONLY_POSTS = {"/api/exportar"}
@@ -99,6 +112,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         self._dispatch("POST")
+
+    def do_PUT(self) -> None:
+        self._dispatch("PUT")
 
     def do_PATCH(self) -> None:
         self._dispatch("PATCH")
@@ -130,9 +146,11 @@ class Handler(BaseHTTPRequestHandler):
         # Deny by default, before routing, so an unknown /api path can never
         # reach a fallback anonymously. Normalized exactly as the router does.
         api_path = urlparse(self.path).path.rstrip("/") or "/"
-        user = None
+        sesion = None
+        private = False
         if auth.is_api(api_path):
             public = auth.is_public(method, api_path)
+            private = not public
             token = auth.token_from_cookie(self.headers.get("Cookie"))
             if token is None and not public:
                 return self._unauthenticated()
@@ -142,9 +160,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(
                     {"error": "La base compartida no está configurada."}, HTTPStatus.SERVICE_UNAVAILABLE)
             if token is not None and ready:
-                with db.session() as conn:
-                    user = auth.user_for_token(conn, token)
-            if user is None and not public:
+                # On Postgres even this read waits for the workspace lock, and
+                # can time out waiting. That is "busy", answered like a busy
+                # handler, not an unanswered connection.
+                try:
+                    with db.session() as conn:
+                        sesion = auth.sesion_de_token(conn, token)
+                except db.OcupadoError:
+                    return self._busy()
+            if sesion is None and not public:
                 return self._unauthenticated()
 
         handler, context = router.resolve(method, self.path)
@@ -157,17 +181,29 @@ class Handler(BaseHTTPRequestHandler):
             status = HTTPStatus.METHOD_NOT_ALLOWED if context else HTTPStatus.NOT_FOUND
             return self._send_json({"error": "Ruta no encontrada."}, status)
 
+        # The role's capability, before the handler runs. A private route with
+        # none declared is denied to everyone rather than left open.
+        if private:
+            assert sesion is not None
+            capacidad = context["capacidad"]
+            if capacidad is None or capacidad not in auth.CAPACIDADES[sesion.rol]:
+                self.close_connection = True  # the body may be unread
+                exc = auth.prohibido(capacidad)
+                return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
+
         try:
             request = Request(
                 method=method, path=context["path"], query=context["query"],
                 params=context["params"], body=self._read_body(), headers=self.headers,
-                user=user, cloud=self.CLOUD,
+                user=sesion.actor if sesion else None, cloud=self.CLOUD, sesion=sesion,
             )
             result = handler(request)
         except ApiError as exc:
             if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
+        except db.OcupadoError:
+            return self._busy()
         except Exception:  # noqa: BLE001 - logged here, never sent to the caller
             import traceback
             traceback.print_exc()
@@ -187,6 +223,14 @@ class Handler(BaseHTTPRequestHandler):
                        "Cache-Control": "no-store"},
             )
         return self._send_json(result, extra=request.response_headers)
+
+    def _busy(self) -> None:
+        """A lock could not be had in time. Nothing was written and nothing is
+        retried here; the caller may repeat the whole request."""
+        self.close_connection = True  # the body may be unread
+        return self._send_json(
+            {"error": "El sistema está ocupado con otro cambio. Inténtalo de nuevo.",
+             "detalle": {"code": "ocupado"}}, HTTPStatus.SERVICE_UNAVAILABLE)
 
     def _unauthenticated(self) -> None:
         # The body may be unread; do not let it be parsed as the next request.

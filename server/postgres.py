@@ -34,6 +34,9 @@ TABLES = LEGACY_TABLES + INVENTORY_TABLES + ATTACHMENT_TABLES
 # its rows still need generated ids.
 ID_TABLES = (set(LEGACY_TABLES) - {"mapa_capa"}) | {"uso_ia"}
 LOCK_ID = 84202026
+# How long a session waits for the workspace lock, or any row lock, before it
+# fails as busy (db.OcupadoError). A name so tests can shorten the wait.
+LOCK_TIMEOUT = "30s"
 SCHEMA_VERSION_KEY = "schema_version"
 
 
@@ -100,9 +103,20 @@ def session() -> Iterator[Connection]:
     with psycopg.connect(os.environ["ARA_MAP_DATABASE_URL"], row_factory=row_factory,
                          connect_timeout=15) as raw:
         raw.execute("SET LOCAL statement_timeout = '60s'")
-        raw.execute("SET LOCAL lock_timeout = '30s'")
+        raw.execute(f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'")
         raw.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (LOCK_ID,))
         yield Connection(raw)
+
+
+def es_bloqueo(exc: BaseException) -> bool:
+    """Whether a failure was a lock that could not be had: a lock or statement
+    timeout, or a deadlock the server broke by aborting this transaction."""
+    import sys
+
+    psycopg = sys.modules.get("psycopg")  # never imported means it cannot be one of its errors
+    return psycopg is not None and isinstance(
+        exc, (psycopg.errors.LockNotAvailable, psycopg.errors.DeadlockDetected,
+              psycopg.errors.QueryCanceled))
 
 
 def _to_postgres(sql: str) -> str:

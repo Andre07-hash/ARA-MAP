@@ -35,12 +35,34 @@ AHORA = "2026-10-08T00:00:00+00:00"
 
 def poblar(conn):
     """Fictional schema-8 content: accounts, an edited terrain, a legacy base and a saved map."""
+    # Written out as schema-8 SQL, not through auth.create_user or the inventory
+    # repository: today's writers name columns and tables that schema 8 lacks.
     for login in ("ana", "beto"):
-        auth.create_user(conn, login, login.capitalize() + " Prueba", TEST_PASSWORD, iterations=1000)
+        conn.execute(
+            "INSERT INTO team_user (id, login, display_name, password_hash, active,"
+            " credential_revision, created_at, updated_at) VALUES (?, ?, ?, ?, 1, 1, ?, ?)",
+            (str(uuid.uuid4()), login, login.capitalize() + " Prueba",
+             auth.hash_password(TEST_PASSWORD, 1000), AHORA, AHORA))
     ana = dict(conn.execute("SELECT id, display_name FROM team_user WHERE login = 'ana'").fetchone())
-    terreno = repo.create(conn, {"terreno": "Lote ficticio", "asking_price": 100, "moneda": "MXN"},
-                          ana, str(uuid.uuid4()), "hash")["terreno"]
-    repo.update(conn, terreno["id"], terreno["version"], {"estado": "Jalisco"}, (), ana)
+    terreno, primera, segunda = (str(uuid.uuid4()) for _ in range(3))
+    conn.execute("INSERT INTO inventory_terrain (id, version, created_at, created_by, updated_at,"
+                 " updated_by) VALUES (?, 2, ?, ?, ?, ?)", (terreno, AHORA, ana["id"], AHORA, ana["id"]))
+    for numero, (revision, estado) in enumerate(((primera, None), (segunda, "Jalisco")), 1):
+        conn.execute(
+            "INSERT INTO inventory_revision (id, inventory_id, revision_number, terreno, estado,"
+            " asking_price, moneda, created_at, created_by) VALUES (?, ?, ?, 'Lote ficticio', ?,"
+            " 100, 'MXN', ?, ?)", (revision, terreno, numero, estado, AHORA, ana["id"]))
+    conn.execute("UPDATE inventory_terrain SET draft_revision_id = ? WHERE id = ?", (segunda, terreno))
+    for version, accion, antes, despues in ((1, "create", None, primera), (2, "update", primera, segunda)):
+        conn.execute(
+            "INSERT INTO inventory_event (id, inventory_id, version, action, actor_id, actor_name, at,"
+            " before_revision_id, after_revision_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (str(uuid.uuid4()), terreno, version, accion, ana["id"], ana["display_name"], AHORA,
+             antes, despues))
+    conn.execute(
+        "INSERT INTO inventory_operation_result (operation, idempotency_key, request_hash,"
+        " result_json, actor_id, created_at) VALUES ('create', ?, 'hash', '{}', ?, ?)",
+        (str(uuid.uuid4()), ana["id"], AHORA))
     leido = read_workbook(FIXTURE)
     base_id = bases.create(conn, "Base importada ficticia", "ficticia.xlsx", leido.hoja)
     terrenos.insert(conn, base_id, leido.records, validate_all(leido.records))

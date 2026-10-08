@@ -70,7 +70,10 @@ class InventoryServer(TempDatabase):
         return self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
 
 
-class EqualTeamAccess(InventoryServer):
+class AdministratorsShareTheMasterTable(InventoryServer):
+    """Before roles this was "every team user": the unscoped inventory is now
+    the administrators' master table, and these three accounts are admins."""
+
     def test_three_users_create_edit_and_reopen_each_others_records(self):
         status, body = self.create(COMPLETO, "ana")
         self.assertEqual(status, 200)
@@ -390,7 +393,10 @@ class SchemaV8(TempDatabase):
         session_cookie(self.conn)
         antes = self.legacy_digest()
         # Back to a v7 file: no inventory or account tables.
-        for tabla in ("inventory_operation_result", "inventory_event", "inventory_terrain",
+        for tabla in ("archivo_trabajo", "archivo_evento", "geometria", "archivo_intento",
+                      "archivo_version", "archivo", "maestra_base_event", "team_user_event",
+                      "inventory_column", "maestra_base_acceso", "maestra_base",
+                      "inventory_operation_result", "inventory_event", "inventory_terrain",
                       "inventory_revision", "team_session", "team_login_failure", "team_user"):
             self.conn.execute(f"DROP TABLE {tabla}")
         self.conn.execute("PRAGMA user_version = 7")

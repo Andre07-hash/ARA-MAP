@@ -19,8 +19,13 @@ class Route:
     """One method plus path pattern, bound to its handler."""
 
 
-    def __init__(self, method: str, pattern: str, handler: Handler) -> None:
+    def __init__(self, method: str, pattern: str, handler: Handler,
+                 capacidad: str | None = None) -> None:
         self.method = method
+        self.path = pattern
+        # What a signed-in caller's role must allow. None on a private route
+        # means nobody may call it: the dispatcher denies by default.
+        self.capacidad = capacidad
         # ":name" in a path becomes a named integer capture group.
         regex = re.sub(r":(\w+)", r"(?P<\1>[^/]+)", pattern)
         self.pattern = re.compile(f"^{regex}$")
@@ -41,6 +46,7 @@ class Request:
         headers: Any,
         user: dict[str, Any] | None = None,
         cloud: bool = False,
+        sesion: Any = None,
     ) -> None:
         self.method = method
         self.path = path
@@ -51,6 +57,9 @@ class Request:
         # The signed-in team user, resolved by the server from the session
         # cookie -- never from anything the client sends in the body.
         self.user = user
+        # The validated session (auth.Sesion) behind that user, for the
+        # authorization helpers. Internal: never serialized.
+        self.sesion = sesion
         # Whether this is the HTTPS cloud deployment rather than loopback.
         self.cloud = cloud
         # Headers a handler adds to its response (only Set-Cookie today).
@@ -89,9 +98,14 @@ class Router:
     def __init__(self) -> None:
         self._routes: list[Route] = []
 
-    def add(self, method: str, pattern: str, handler: Handler) -> None:
+    def add(self, method: str, pattern: str, handler: Handler,
+            capacidad: str | None = None) -> None:
         """Register a handler. ":name" in the pattern captures a segment."""
-        self._routes.append(Route(method, pattern, handler))
+        self._routes.append(Route(method, pattern, handler, capacidad))
+
+    @property
+    def routes(self) -> tuple[Route, ...]:
+        return tuple(self._routes)
 
     def resolve(self, method: str, raw_path: str) -> tuple[Handler | None, Any]:
         """Return (handler, request) or (None, path_matched_other_method)."""
@@ -107,6 +121,7 @@ class Router:
             if route.method != method:
                 other_method = True
                 continue
-            return route.handler, {"path": path, "query": query, "params": match.groupdict()}
+            return route.handler, {"path": path, "query": query, "params": match.groupdict(),
+                                   "capacidad": route.capacidad}
 
         return None, other_method

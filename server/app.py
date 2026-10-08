@@ -160,8 +160,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(
                     {"error": "La base compartida no está configurada."}, HTTPStatus.SERVICE_UNAVAILABLE)
             if token is not None and ready:
-                with db.session() as conn:
-                    sesion = auth.sesion_de_token(conn, token)
+                # On Postgres even this read waits for the workspace lock, and
+                # can time out waiting. That is "busy", answered like a busy
+                # handler, not an unanswered connection.
+                try:
+                    with db.session() as conn:
+                        sesion = auth.sesion_de_token(conn, token)
+                except db.OcupadoError:
+                    return self._busy()
             if sesion is None and not public:
                 return self._unauthenticated()
 
@@ -197,10 +203,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
         except db.OcupadoError:
-            self.close_connection = True
-            return self._send_json(
-                {"error": "El sistema está ocupado con otro cambio. Inténtalo de nuevo.",
-                 "detalle": {"code": "ocupado"}}, HTTPStatus.SERVICE_UNAVAILABLE)
+            return self._busy()
         except Exception:  # noqa: BLE001 - logged here, never sent to the caller
             import traceback
             traceback.print_exc()
@@ -220,6 +223,14 @@ class Handler(BaseHTTPRequestHandler):
                        "Cache-Control": "no-store"},
             )
         return self._send_json(result, extra=request.response_headers)
+
+    def _busy(self) -> None:
+        """A lock could not be had in time. Nothing was written and nothing is
+        retried here; the caller may repeat the whole request."""
+        self.close_connection = True  # the body may be unread
+        return self._send_json(
+            {"error": "El sistema está ocupado con otro cambio. Inténtalo de nuevo.",
+             "detalle": {"code": "ocupado"}}, HTTPStatus.SERVICE_UNAVAILABLE)
 
     def _unauthenticated(self) -> None:
         # The body may be unread; do not let it be parsed as the next request.

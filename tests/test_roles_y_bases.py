@@ -780,6 +780,22 @@ class RolesSqlite(Matriz, unittest.TestCase):
             self.assertEqual(auth.require_terreno(type("R", (), {"sesion": sesion})(), self.t1,
                                                   "archivos.subir", conn).base_id, self.b1)
 
+    def test_only_lock_failures_are_reported_as_busy(self):
+        for mensaje in ("database is locked", "database table is locked"):
+            with self.assertRaises(db.OcupadoError), db.session():
+                raise sqlite3.OperationalError(mensaje)
+        for error in (sqlite3.OperationalError("no such table: nada"), sqlite3.IntegrityError("UNIQUE"),
+                      ValueError("otra cosa"), ApiError("no", 404)):
+            with self.assertRaises(type(error)), db.session():
+                raise error
+            with self.assertRaises(type(error)), db.escritura():
+                raise error
+        status, body = self.call("GET", "/api/maestra/bases")  # an unrelated failure is still a 500
+        with patch.object(app_module.api_maestra.repo, "listar", side_effect=sqlite3.OperationalError("otra")), \
+                contextlib.redirect_stderr(io.StringIO()):
+            status, body = self.call("GET", "/api/maestra/bases")
+        self.assertEqual((status, body["detalle"]), (500, {"code": "internal"}))
+
     def test_a_write_that_cannot_get_its_turn_is_a_clean_503(self):
         ocupante = sqlite3.connect(self.db_path, isolation_level=None)
         ocupante.execute("BEGIN IMMEDIATE")
@@ -794,6 +810,23 @@ class RolesSqlite(Matriz, unittest.TestCase):
         self.assertEqual((self.version(self.t1), self.cuenta("inventory_event", "inventory_id = ?", (self.t1,))),
                          (1, 1))
         self.assertEqual(self.patch(self.t1, {"estado": "Jalisco"}, "olga")[0], 200)  # retried as a whole
+
+    def test_a_legacy_write_behind_another_writer_is_also_a_clean_503(self):
+        # Review F1: the busy answer must not depend on the handler using db.escritura().
+        ocupante = sqlite3.connect(self.db_path, isolation_level=None)
+        ocupante.execute("BEGIN IMMEDIATE")
+        real = sqlite3.connect
+        try:
+            with patch.object(db.sqlite3, "connect", lambda *a, **k: real(*a, **{**k, "timeout": 0.2})):
+                status, body = self.call("POST", "/api/carpetas", {"tipo": "bases", "nombre": "Ocupada"})
+                lectura = self.call("GET", "/api/maestra/bases", user="olga")[0]
+        finally:
+            ocupante.execute("ROLLBACK")
+            ocupante.close()
+        self.assertEqual((status, body["detalle"]), (503, {"code": "ocupado"}))
+        self.assertEqual(lectura, 200)  # readers are not blocked by a writer
+        self.assertEqual(self.cuenta("carpeta"), 0)
+        self.assertEqual(self.call("POST", "/api/carpetas", {"tipo": "bases", "nombre": "Ocupada"})[0], 200)
 
     def patch_sin_leer(self, terreno):
         return self.call("PATCH", f"/api/inventario/terrenos/{terreno}",
@@ -905,6 +938,80 @@ class RolesPostgres(Matriz, unittest.TestCase):
     def limpiar(self):
         with postgres.session() as conn:
             conn.raw.execute("TRUNCATE team_user, team_login_failure CASCADE")
+
+    def cruda(self):
+        """An independent connection to this fixture's schema, with no advisory lock taken."""
+        import psycopg
+        conexion = psycopg.connect(self.conninfo)
+        self.addCleanup(conexion.close)
+        return conexion
+
+    def test_waiting_for_the_workspace_lock_ends_in_503_not_a_dropped_connection(self):
+        # Review F1. The dispatcher's own sign-in lookup takes the workspace
+        # advisory lock before any handler runs; a timeout there used to escape
+        # as an unanswered connection. Same lock acquisition, shorter wait.
+        antes = {t: filas(t) for t in AUDITADAS + ("team_session", "inventory_terrain")}
+        ocupante = self.cruda()
+        ocupante.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (postgres.LOCK_ID,))
+        try:
+            with patch.object(postgres, "LOCK_TIMEOUT", "300ms"):
+                casos = {
+                    "administrator write": self.call("POST", "/api/maestra/bases", {"nombre": "Ocupada"}),
+                    "operator write": self.patch_fijo("olga"),
+                    "operator read": self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga"),
+                    "legacy read": self.call("GET", "/api/bases"),
+                    "session with a cookie": self.call("GET", "/api/session", user="olga"),
+                    "sign-in": self.call("POST", "/api/login", {"username": "olga", "password": TEST_PASSWORD},
+                                         user=None),
+                    "sign-out": self.call("POST", "/api/logout", user="omar"),
+                }
+                # What needs no database is answered as before.
+                self.assertEqual(self.call("GET", "/api/session", user=None), (200, {"authenticated": False}))
+                self.assertEqual(self.call("GET", "/api/maestra/bases", user=None)[0], 401)
+                self.assertEqual(self.call("GET", "/api/publico/terrenos", user=None)[0], 200)
+        finally:
+            ocupante.rollback()
+        for nombre, (status, body) in casos.items():
+            with self.subTest(nombre):
+                self.assertEqual((status, body["detalle"]), (503, {"code": "ocupado"}))
+        # Nothing was written, no session ended, and the same requests now succeed in full.
+        self.assertEqual({t: filas(t) for t in antes}, antes)
+        self.assertEqual(self.call("POST", "/api/maestra/bases", {"nombre": "Ocupada"})[0], 200)
+        self.assertEqual(self.patch_fijo("olga")[0], 200)
+        self.assertEqual(self.call("GET", "/api/maestra/bases", user="omar")[0], 200)
+
+    def test_a_row_lock_inside_the_write_boundary_ends_in_503(self):
+        # The other place a write can wait: past the workspace lock, on a row.
+        ocupante = self.cruda()
+        ocupante.execute("SELECT id FROM inventory_terrain WHERE id = %s FOR UPDATE", (self.t1,))
+        try:
+            with patch.object(postgres, "LOCK_TIMEOUT", "300ms"):
+                status, body = self.patch_fijo("olga")
+                otro = self.patch(self.t2, {"estado": "Colima"}, "omar")[0]
+        finally:
+            ocupante.rollback()
+        self.assertEqual((status, body["detalle"]), (503, {"code": "ocupado"}))
+        self.assertEqual(otro, 200)  # only the locked terrain was busy
+        self.assertEqual((self.version(self.t1), self.cuenta("inventory_event", "inventory_id = ?", (self.t1,))),
+                         (1, 1))
+        self.assertEqual(self.patch_fijo("olga")[0], 200)
+
+    def patch_fijo(self, user):
+        return self.call("PATCH", f"/api/inventario/terrenos/{self.t1}",
+                         {"expected_version": 1, "changes": {"estado": "Jalisco"}}, user)
+
+    def test_only_lock_failures_are_reported_as_busy(self):
+        import psycopg
+        for error in (psycopg.errors.LockNotAvailable(), psycopg.errors.DeadlockDetected(),
+                      psycopg.errors.QueryCanceled()):
+            with self.assertRaises(db.OcupadoError), db.session():
+                raise error
+        for error in (psycopg.errors.UniqueViolation(), psycopg.OperationalError("conexión rechazada"),
+                      ValueError("otra cosa"), ApiError("no", 404)):
+            with self.assertRaises(type(error)), db.session():
+                raise error
+            with self.assertRaises(type(error)), db.escritura():
+                raise error
 
     def test_the_accounts_command_checks_the_schema_and_never_migrates(self):
         import importlib.util

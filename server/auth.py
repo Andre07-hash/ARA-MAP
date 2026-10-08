@@ -417,7 +417,9 @@ def reverificar_terreno(conn: DatabaseConnection, sesion: Sesion, terreno_id: st
     """The authorization check at the write boundary.
 
     Call it first inside ``with db.escritura() as conn``, with the Sesion the
-    request was authenticated with, before the first write. It reads again,
+    request was authenticated with, before the first write. db.escritura() is
+    the only supported way in, on both databases; a connection from anywhere
+    else is refused on SQLite and NOT detected on Postgres. It reads again,
     on that connection, everything the decision depends on: the session
     (revoked, expired, credential generation), the account (active, role), the
     terrain (exists, current base, archived), that base (archived) and the
@@ -441,7 +443,9 @@ def _verificar(conn: DatabaseConnection, sesion: Sesion, capacidad: str, *,
                terreno_id: str | None = None, base_id: str | None = None,
                bloquear: bool = False, exclusivo: bool = False) -> Alcance:
     """Every authorization decision, in one place. ``bloquear`` is the
-    write-boundary form: it insists on db.escritura() and takes row locks."""
+    write-boundary form: it takes row locks, and refuses a SQLite connection
+    that did not come from db.escritura(). It cannot check that for Postgres
+    (see db.en_escritura): there the caller is trusted to have used it."""
     if bloquear and not db.en_escritura(conn):
         raise RuntimeError("reverificar_* debe llamarse dentro de db.escritura().")
     compartido = db.bloqueo(conn) if bloquear else ""

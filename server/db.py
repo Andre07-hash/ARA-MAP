@@ -773,38 +773,66 @@ def escritura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
     retried here: a retry belongs to the caller and restarts the whole block.
     """
     from . import postgres
-    if path is None and postgres.enabled():
-        try:
+    with _ocupado():
+        if path is None and postgres.enabled():
             with postgres.session() as cloud_conn:
                 yield cloud_conn
-        except Exception as exc:
-            if postgres.es_bloqueo(exc):
-                raise OcupadoError() from exc
-            raise
-        return
-    conn = connect(path)
-    try:
+            return
+        conn = connect(path)
         try:
-            conn.execute("BEGIN IMMEDIATE")
-        except sqlite3.OperationalError as exc:  # another writer held it past the busy timeout
-            raise OcupadoError() from exc
-        _escrituras.add(id(conn))
-        try:
-            yield conn
-            conn.execute("COMMIT")
-        except BaseException:
-            if conn.in_transaction:
-                conn.execute("ROLLBACK")
-            raise
+            conn.execute("BEGIN IMMEDIATE")  # waits out the busy timeout, then is "locked"
+            _escrituras.add(id(conn))
+            try:
+                yield conn
+                conn.execute("COMMIT")
+            except BaseException:
+                if conn.in_transaction:
+                    conn.execute("ROLLBACK")
+                raise
+            finally:
+                _escrituras.discard(id(conn))
         finally:
-            _escrituras.discard(id(conn))
-    finally:
-        conn.close()
+            conn.close()
+
+
+@contextmanager
+def _ocupado() -> Iterator[None]:
+    """Turn "could not get the lock" into OcupadoError, and nothing else.
+
+    Shared by session() and escritura(), so it covers opening the connection
+    (SQLite's migration check, Postgres's workspace advisory lock), every
+    statement in the block and the commit.
+    """
+    try:
+        yield
+    except OcupadoError:
+        raise
+    except Exception as exc:
+        if _es_bloqueo(exc):
+            raise OcupadoError() from exc
+        raise
+
+
+def _es_bloqueo(exc: BaseException) -> bool:
+    if isinstance(exc, sqlite3.OperationalError):
+        # SQLITE_BUSY and SQLITE_LOCKED. Matched by message: sqlite_errorcode
+        # needs Python 3.11 and the local app runs on 3.9.
+        return "database is locked" in str(exc) or "table is locked" in str(exc)
+    from . import postgres
+    return postgres.es_bloqueo(exc)
 
 
 def en_escritura(conn: DatabaseConnection) -> bool:
-    """Whether conn came from escritura(). A Postgres connection is always in
-    its session transaction, so only SQLite can say no."""
+    """A guard against one SQLite mistake, not proof of a safe transaction.
+
+    False for a SQLite connection that did not come from escritura(): it may
+    already hold a read snapshot, which cannot be upgraded to the write
+    reservation the re-check needs. For any other connection this returns
+    True without knowing anything: it cannot tell a Postgres connection opened
+    by escritura() from one opened elsewhere, in autocommit or without the
+    workspace lock. Callers must enter through escritura() on both databases;
+    this only catches the SQLite case that would otherwise fail silently.
+    """
     return not isinstance(conn, sqlite3.Connection) or id(conn) in _escrituras
 
 
@@ -825,15 +853,16 @@ def session(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
     per request.
     """
     from . import postgres
-    if path is None and postgres.enabled():
-        with postgres.session() as cloud_conn:
-            yield cloud_conn
-        return
-    conn = connect(path)
-    try:
-        yield conn
-    finally:
-        conn.close()
+    with _ocupado():
+        if path is None and postgres.enabled():
+            with postgres.session() as cloud_conn:
+                yield cloud_conn
+            return
+        conn = connect(path)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
 
 def migrate(conn: sqlite3.Connection) -> None:

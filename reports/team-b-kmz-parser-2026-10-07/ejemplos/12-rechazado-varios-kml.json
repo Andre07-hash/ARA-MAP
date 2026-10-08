@@ -1,0 +1,16 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "rechazado",
+  "error": {
+    "codigo": "KMZ_VARIOS_KML",
+    "mensaje": "El KMZ contiene varios documentos KML; no se puede saber cuál describe el terreno."
+  },
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

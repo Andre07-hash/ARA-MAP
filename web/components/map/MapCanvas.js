@@ -268,7 +268,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
 
     let contorno = null;
     if (disponible) {
-      contorno = L.polygon(cuerpo.partes, {
+      contorno = new (poligonoDeContorno())(cuerpo.partes, {
         fillColor: fill,
         bubblingMouseEvents: false,
         ...contornoStyle({ fill, dash }),
@@ -543,6 +543,91 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     invalidate: () => map.invalidateSize(),
     get basemap() { return basemapKey; },
   };
+}
+
+/* Drawing a boundary's rings (Leaflet 1.9.4, Canvas renderer).
+ *
+ * Leaflet draws a polygon as ONE canvas path and calls ctx.closePath() after
+ * every ring. In Chromium (measured on 141) each closePath() costs time that
+ * grows with the subpaths already in that path, so an outline of 20,000
+ * rings spent about 2 s per redraw in closePath() alone. Here the same rings,
+ * in the same order, become one Path2D built from SVG path data, where "Z"
+ * closes each ring exactly as closePath() does but without that cost.
+ * Leaflet's own _fillStroke then fills and strokes that path: same even-odd
+ * fill, same closePath() joins and dashes, same styles and selection.
+ * Projection, clipping, smoothing and hit testing stay Leaflet's.
+ *
+ * Two cheaper-looking alternatives are NOT the same drawing and are not used:
+ * closing with lineTo back to the first point (the seam gets two round caps
+ * instead of a join; its anti-aliased pixels differ), and closing each ring
+ * on its own Path2D merged with addPath (beyond about a thousand rings,
+ * two-point rings stop being painted). See
+ * reports/team-b-boundary-path-drawing-2026-10-08/.
+ *
+ * Only where every assumption holds: Leaflet 1.9.4, its Canvas renderer,
+ * Path2D built from path data, and whole-pixel positions (Leaflet rounds
+ * projected and clipped points), so the text form is exact. Anything else
+ * draws exactly as Leaflet does. */
+const LEAFLET_CON_TRAZO_POR_DATOS = "1.9.4";
+let PoligonoDeContorno = null;
+
+function poligonoDeContorno() {
+  if (PoligonoDeContorno) return PoligonoDeContorno;
+  PoligonoDeContorno = L.Polygon.extend({
+    _updatePath() {
+      const renderer = this._renderer;
+      const posible = trazoPorDatosPosible(renderer);
+      if (posible && (!renderer._drawing || !this._parts.length)) return;
+      const datos = posible ? datosDeTrazo(this._parts) : null;
+      if (datos === null) {
+        L.Polygon.prototype._updatePath.call(this);
+        return;
+      }
+      renderer._ctx.beginPath();
+      renderer._fillStroke(contextoConTrazo(renderer._ctx, new Path2D(datos)), this);
+    },
+  });
+  return PoligonoDeContorno;
+}
+
+function trazoPorDatosPosible(renderer) {
+  return L.version === LEAFLET_CON_TRAZO_POR_DATOS
+    && renderer instanceof L.Canvas
+    && typeof renderer._fillStroke === "function"
+    && typeof renderer._ctx?.fill === "function"
+    && typeof Path2D === "function";
+}
+
+/** SVG path data for the rings ("M x y L x y ... Z" each), or null if any
+ *  position is not a whole pixel. */
+function datosDeTrazo(partes) {
+  const trozos = [];
+  for (const anillo of partes) {
+    if (!anillo.length) continue;
+    for (let i = 0; i < anillo.length; i += 1) {
+      const { x, y } = anillo[i];
+      if (!Number.isInteger(x) || !Number.isInteger(y)) return null;
+      trozos.push(i ? "L" : "M", x, " ", y);
+    }
+    trozos.push("Z");
+  }
+  return trozos.join("");
+}
+
+/** The renderer's context, with fill(rule) and stroke() applied to `trazo`. */
+function contextoConTrazo(ctx, trazo) {
+  return new Proxy(ctx, {
+    get(destino, clave) {
+      if (clave === "fill") return (regla) => destino.fill(trazo, regla);
+      if (clave === "stroke") return () => destino.stroke(trazo);
+      const valor = destino[clave];
+      return typeof valor === "function" ? valor.bind(destino) : valor;
+    },
+    set(destino, clave, valor) {
+      destino[clave] = valor;
+      return true;
+    },
+  });
 }
 
 /** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */

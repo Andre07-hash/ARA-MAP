@@ -1,0 +1,123 @@
+{
+  "_nota": "Ficticio. Every request is made by an administrator unless it says otherwise. Ids are illustrative.",
+  "crear": {
+    "peticion": "POST /api/maestra/bases",
+    "cuerpo": {"nombre": "Base Ejemplo"},
+    "respuesta_200": {
+      "base": {
+        "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+        "nombre": "Base Ejemplo",
+        "version": 1,
+        "archivada": false,
+        "archived_at": null,
+        "terrenos": 0,
+        "created_at": "2026-10-08T15:00:00+00:00",
+        "updated_at": "2026-10-08T15:00:00+00:00"
+      },
+      "usuarios": []
+    }
+  },
+  "otorgar": {
+    "peticion": "PUT /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/acceso",
+    "cuerpo": {"expected_version": 1, "usuarios": ["5b0c1f0e-0000-4000-8000-000000000001"]},
+    "respuesta_200": {
+      "base": {
+        "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+        "nombre": "Base Ejemplo",
+        "version": 2,
+        "archivada": false,
+        "archived_at": null,
+        "terrenos": 0,
+        "created_at": "2026-10-08T15:00:00+00:00",
+        "updated_at": "2026-10-08T15:01:00+00:00"
+      },
+      "usuarios": [
+        {
+          "id": "5b0c1f0e-0000-4000-8000-000000000001",
+          "login": "olga",
+          "display_name": "Olga Ficticia",
+          "active": true,
+          "granted_at": "2026-10-08T15:01:00+00:00"
+        }
+      ]
+    }
+  },
+  "revocar_a_todos": {
+    "peticion": "PUT /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/acceso",
+    "cuerpo": {"expected_version": 2, "usuarios": []}
+  },
+  "renombrar": {
+    "peticion": "PATCH /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1",
+    "cuerpo": {"expected_version": 2, "nombre": "Base Ejemplo Norte"}
+  },
+  "archivar": {
+    "peticion": "POST /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/archivar",
+    "cuerpo": {"expected_version": 3}
+  },
+  "restaurar": {
+    "peticion": "POST /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/restaurar",
+    "cuerpo": {"expected_version": 4}
+  },
+  "listar_como_operadora": {
+    "peticion": "GET /api/maestra/bases",
+    "respuesta_200": {
+      "bases": [
+        {
+          "id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+          "nombre": "Base Ejemplo",
+          "version": 2,
+          "archivada": false,
+          "archived_at": null,
+          "terrenos": 0,
+          "created_at": "2026-10-08T15:00:00+00:00",
+          "updated_at": "2026-10-08T15:01:00+00:00"
+        }
+      ],
+      "total": 1
+    }
+  },
+  "errores": {
+    "version_vencida_409": {
+      "error": "Otra persona cambió esta base de trabajo. Revisa su versión antes de repetir el cambio.",
+      "detalle": {"code": "conflict", "base": {"id": "7a1e2b3c-0000-4000-8000-0000000000b1", "version": 3, "…": "the current base"}}
+    },
+    "lista_con_usuarios_invalidos_422": {
+      "error": "Revisa los campos marcados.",
+      "detalle": {
+        "code": "validation_failed",
+        "fields": {"usuarios": "Hay usuarios que no pueden recibir acceso."},
+        "usuarios": {
+          "00000000-0000-4000-8000-00000000dead": "no_existe",
+          "5b0c1f0e-0000-4000-8000-000000000002": "no_es_operador",
+          "5b0c1f0e-0000-4000-8000-000000000003": "inactivo"
+        }
+      }
+    },
+    "base_archivada_409": {
+      "error": "La base de trabajo está archivada.",
+      "detalle": {"code": "base_archivada"}
+    },
+    "sin_capacidad_403": {
+      "_caso": "An operator calls POST /api/maestra/bases",
+      "error": "Tu cuenta no tiene permiso para esta acción.",
+      "detalle": {"code": "forbidden", "capacidad": "bases.gestionar"}
+    },
+    "fuera_de_alcance_o_inexistente_404": {
+      "_caso": "A terrain that is missing, unassigned, in another base or in an archived base; the same bytes in every case",
+      "error": "El terreno no existe.",
+      "detalle": {"code": "not_found"}
+    },
+    "base_inexistente_404": {
+      "error": "La base de trabajo no existe.",
+      "detalle": {"code": "not_found"}
+    },
+    "terreno_archivado_409": {
+      "error": "El terreno está archivado; restáuralo para hacer cambios.",
+      "detalle": {"code": "terreno_archivado"}
+    },
+    "ocupado_503": {
+      "error": "El sistema está ocupado con otro cambio. Inténtalo de nuevo.",
+      "detalle": {"code": "ocupado"}
+    }
+  }
+}

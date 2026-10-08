@@ -1,0 +1,39 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "rechazado",
+  "error": {
+    "codigo": "GEOMETRIA_VERTICES_INSUFICIENTES",
+    "mensaje": "El borde exterior del contorno tiene menos de tres vértices distintos."
+  },
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Predio Ficticio Degenerado",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 4,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.4,
+        20.6
+      ],
+      "area_aproximada_m2": null,
+      "valido": false,
+      "error": {
+        "codigo": "GEOMETRIA_VERTICES_INSUFICIENTES",
+        "mensaje": "El borde exterior del contorno tiene menos de tres vértices distintos."
+      }
+    }
+  ],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

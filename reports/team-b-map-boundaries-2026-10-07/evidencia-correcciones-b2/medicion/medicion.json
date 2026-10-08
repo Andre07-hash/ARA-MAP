@@ -1,0 +1,317 @@
+{
+ "navegador": "141.0.7390.37",
+ "casos": [
+  {
+   "caso": "fixture-12-filas",
+   "filas": 12,
+   "posiciones": 59,
+   "colocados": 11,
+   "renderMs": 2.3999999999068677,
+   "primerPintadoMs": 29.79999999993015,
+   "enfoqueMs": 272.69999999995343,
+   "zoomEnfoque": 17,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 29.599999999976717,
+    "zoomMs": 33.40000000002328
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 17,
+    "contorno": true,
+    "ms": 29,
+    "panMs": 33.5,
+    "zoomMs": 33.199999999953434
+   },
+   "arrastre": {
+    "cuadros": 48,
+    "p50": 16.699999999999818,
+    "p95": 16.800000000000182,
+    "max": 16.800000000000182
+   },
+   "clic": {
+    "seleccionado": "t-simple",
+    "msHastaSeleccion": 289.5999999999767,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 9.599999999976717
+   },
+   "heapMiB": {
+    "antes": 1.9,
+    "despues": 2.3
+   }
+  },
+  {
+   "caso": "mixto-100x64+100xy",
+   "filas": 200,
+   "posiciones": 6400,
+   "colocados": 200,
+   "renderMs": 24.5,
+   "primerPintadoMs": 27.300000000046566,
+   "enfoqueMs": 26.400000000023283,
+   "zoomEnfoque": 16,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 27,
+    "zoomMs": 33.300000000046566
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 16,
+    "contorno": true,
+    "ms": 29.900000000023283,
+    "panMs": 34.09999999997672,
+    "zoomMs": 32.59999999997672
+   },
+   "arrastre": {
+    "cuadros": 48,
+    "p50": 16.700000000000045,
+    "p95": 16.799999999999955,
+    "max": 16.800000000000182
+   },
+   "clic": {
+    "seleccionado": "c-0",
+    "msHastaSeleccion": 288.60000000009313,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 8.600000000093132
+   },
+   "heapMiB": {
+    "antes": 2.3,
+    "despues": 3.9
+   }
+  },
+  {
+   "caso": "mixto-500x64+500xy",
+   "filas": 1000,
+   "posiciones": 32000,
+   "colocados": 1000,
+   "renderMs": 62.09999999997672,
+   "primerPintadoMs": 65.69999999995343,
+   "enfoqueMs": 56,
+   "zoomEnfoque": 16,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 29.599999999976717,
+    "zoomMs": 33.199999999953434
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 16,
+    "contorno": true,
+    "ms": 30,
+    "panMs": 33.300000000046566,
+    "zoomMs": 33.40000000002328
+   },
+   "arrastre": {
+    "cuadros": 49,
+    "p50": 16.699999999999932,
+    "p95": 16.799999999999955,
+    "max": 16.799999999999955
+   },
+   "clic": {
+    "seleccionado": "c-0",
+    "msHastaSeleccion": 292.19999999995343,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 12.199999999953434
+   },
+   "heapMiB": {
+    "antes": 3.6,
+    "despues": 10.1
+   }
+  },
+  {
+   "caso": "mixto-2000x64+2000xy",
+   "filas": 4000,
+   "posiciones": 128000,
+   "colocados": 4000,
+   "renderMs": 215.79999999993015,
+   "primerPintadoMs": 234.39999999990687,
+   "enfoqueMs": 169.20000000006985,
+   "zoomEnfoque": 16,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 22.400000000023283,
+    "zoomMs": 99.69999999995343
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 16,
+    "contorno": true,
+    "ms": 30.400000000023283,
+    "panMs": 33.800000000046566,
+    "zoomMs": 82.39999999990687
+   },
+   "arrastre": {
+    "cuadros": 50,
+    "p50": 16.699999999999818,
+    "p95": 16.700000000000273,
+    "max": 16.800000000000182
+   },
+   "clic": {
+    "seleccionado": "c-0",
+    "msHastaSeleccion": 304.79999999993015,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 24.79999999993015
+   },
+   "heapMiB": {
+    "antes": 8.7,
+    "despues": 32.9
+   }
+  },
+  {
+   "caso": "mixto-500x1000+500xy",
+   "filas": 1000,
+   "posiciones": 500000,
+   "colocados": 1000,
+   "renderMs": 282.80000000004657,
+   "primerPintadoMs": 286.5999999999767,
+   "enfoqueMs": 437.60000000009313,
+   "zoomEnfoque": 16,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 26.599999999976717,
+    "zoomMs": 333.5
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 16,
+    "contorno": true,
+    "ms": 4.699999999953434,
+    "panMs": 33.70000000006985,
+    "zoomMs": 283.29999999993015
+   },
+   "arrastre": {
+    "cuadros": 50,
+    "p50": 16.699999999999818,
+    "p95": 16.73400000000038,
+    "max": 16.800000000000182
+   },
+   "clic": {
+    "seleccionado": "c-0",
+    "msHastaSeleccion": 292,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 12
+   },
+   "heapMiB": {
+    "antes": 24.2,
+    "despues": 74.6
+   }
+  },
+  {
+   "caso": "limite-circulo-100k",
+   "filas": 2,
+   "posiciones": 100000,
+   "colocados": 2,
+   "renderMs": 115.80000000004657,
+   "primerPintadoMs": 117.60000000009313,
+   "enfoqueMs": 314.5999999999767,
+   "zoomEnfoque": 14,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 13.600000000093132,
+    "zoomMs": 66.59999999997672
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 14,
+    "contorno": true,
+    "ms": 30.600000000093132,
+    "panMs": 33.59999999997672,
+    "zoomMs": 66.5
+   },
+   "arrastre": {
+    "cuadros": 49,
+    "p50": 16.699999999999818,
+    "p95": 16.700000000000273,
+    "max": 16.799999999999955
+   },
+   "clic": {
+    "seleccionado": "grande",
+    "msHastaSeleccion": 288,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 8
+   },
+   "heapMiB": {
+    "antes": 6.1,
+    "despues": 17.6
+   }
+  },
+  {
+   "caso": "limite-multiparte-20000",
+   "filas": 2,
+   "posiciones": 100000,
+   "colocados": 2,
+   "renderMs": 102.59999999997672,
+   "primerPintadoMs": 106,
+   "enfoqueMs": 293.4000000000233,
+   "zoomEnfoque": 11,
+   "contornoVisible": false,
+   "redibujo": {
+    "panMs": 30,
+    "zoomMs": 33.199999999953434
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 16,
+    "contorno": true,
+    "ms": 83.5,
+    "panMs": 29.5,
+    "zoomMs": 66.79999999993015
+   },
+   "arrastre": {
+    "cuadros": 48,
+    "p50": 16.699999999999818,
+    "p95": 16.700000000000045,
+    "max": 16.799999999999955
+   },
+   "clic": {
+    "seleccionado": "grande",
+    "msHastaSeleccion": 289.4000000000233,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 9.400000000023283
+   },
+   "heapMiB": {
+    "antes": 7.2,
+    "despues": 21.2
+   }
+  },
+  {
+   "caso": "limite-grande-mas-19999-pequenas",
+   "filas": 2,
+   "posiciones": 100000,
+   "colocados": 2,
+   "renderMs": 120.09999999997672,
+   "primerPintadoMs": 180.40000000002328,
+   "enfoqueMs": 2830.9000000000233,
+   "zoomEnfoque": 11,
+   "contornoVisible": true,
+   "redibujo": {
+    "panMs": 1394.4000000000233,
+    "zoomMs": 2216.600000000093
+   },
+   "escala": {
+    "estado": "a_escala",
+    "zoom": 11,
+    "contorno": true,
+    "ms": 2640.20000000007,
+    "panMs": 1374.1999999999534,
+    "zoomMs": 1415.9000000000233
+   },
+   "arrastre": {
+    "cuadros": 45,
+    "p50": 16.700000000000728,
+    "p95": 16.799999999999272,
+    "max": 16.799999999999272
+   },
+   "clic": {
+    "seleccionado": "grande",
+    "msHastaSeleccion": 1401.6999999999534,
+    "ventanaDobleClicMs": 280,
+    "msSinVentana": 1121.6999999999534
+   },
+   "heapMiB": {
+    "antes": 7.2,
+    "despues": 23.1
+   }
+  }
+ ]
+}

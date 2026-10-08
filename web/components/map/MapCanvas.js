@@ -3,6 +3,13 @@
  * Kept deliberately imperative and self-contained -- Leaflet owns its own DOM,
  * so the rest of the app talks to it through this small surface instead of
  * re-rendering it.
+ *
+ * Two kinds of mark share that surface. XY rows are the established circles
+ * (symbol, then true-scale footprint). Rows with an ACTIVE boundary
+ * (t.geometria, shared contract v1 §4) are drawn from their geometry body:
+ * a symbol on the interior point while small, the real outline -- every
+ * part, holes included -- once it is big enough to hit. A boundary is never
+ * drawn as a circle scaled from declared area.
  */
 
 import { MARK_RING } from "../../lib/colors.js";
@@ -10,6 +17,10 @@ import { fmtArea, fmtUnitPrice } from "../../lib/format.js";
 import {
   coincidentRingOffsets, markRadius, SYMBOL_RADIUS, trueScaleZoom,
 } from "../../lib/geo.js";
+import {
+  contornoAEscala, cuerpoLeaflet, limitesDeFilas, limitesLeaflet, MODO, modoDeFila,
+  puntoDeSimbolo, puntoLeaflet, zoomDeContorno,
+} from "../../lib/geometria.js";
 import { BASEMAPS, MEXICO_BOUNDS } from "./basemaps.js";
 
 /* A mark has two jobs and two looks.
@@ -20,6 +31,10 @@ import { BASEMAPS, MEXICO_BOUNDS } from "./basemaps.js";
  * to see the land underneath the shape that claims to describe it. */
 const SIMBOLO = { fillOpacity: 0.82, weight: 2, ring: MARK_RING };
 const HUELLA  = { fillOpacity: 0.20, weight: 2 };
+
+/* A boundary whose body has not loaded (or failed validation) keeps its place
+ * with a hollow, dashed symbol, so it never passes for a loaded outline. */
+const SIN_CONTORNO = { fillOpacity: 0.18, weight: 2, dashArray: "3 3" };
 
 /* How long a second activation on the same terrain still counts as a double.
  * An interaction choice, not a geometry constant: kept here so both the mouse
@@ -43,6 +58,10 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
   L.control.zoom({ position: "topright" }).addTo(map);
   map.attributionControl.setPrefix("");
 
+  // Outlines share the map's single canvas renderer with every circle and
+  // symbol: a second canvas would sit on top and swallow their mouse events.
+  // They are kept at the back of that canvas (see mostrarContorno).
+  const contornoLayer = L.layerGroup().addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
   let tileLayers = [];
   let basemapKey = null;
@@ -131,13 +150,37 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     container.dataset.basemap = key;
   }
 
-  /** Draw a set of terrains. `colorFor` maps a terrain to its fill colour. */
-  function render(terrenos, { colorFor, dashFor = null } = {}) {
+  /**
+   * Draw a set of terrains. `colorFor` maps a terrain to its fill colour.
+   *
+   * `geometrias` (optional) is a Map from geometry ID to loaded geometry
+   * body. Rows carrying an active usable `t.geometria` descriptor are drawn
+   * from it; entries for terrains not in `terrenos`, or for any geometry that
+   * is not a row's active descriptor, are ignored. Without the option every
+   * row takes the established XY path.
+   *
+   * Returns how many terrains were placed (XY marks plus boundaries), as
+   * before. render([]) clears every layer, the selection and any pending
+   * click -- the reset path for a session or scope change.
+   */
+  function render(terrenos, { colorFor, dashFor = null, geometrias = null } = {}) {
+    contornoLayer.clearLayers();
     markerLayer.clearLayers();
     byId = new Map();
 
-    const plotted = terrenos.filter((t) => t.ubicado);
-    const offsets = coincidentRingOffsets(plotted);
+    const filas = Array.isArray(terrenos) ? terrenos : [];
+    const plotted = [];
+    const contornos = [];
+    for (const terreno of filas) {
+      const modo = modoDeFila(terreno);
+      if (modo === MODO.PUNTO) plotted.push(terreno);
+      else if (modo === MODO.GEOMETRIA) contornos.push(terreno);
+    }
+
+    // Boundary symbols and XY marks stacked on one point read as concentric
+    // rings, using the established grouping.
+    const offsets = coincidentRingOffsets(
+      [...plotted, ...contornos].map(puntoDeSimbolo).filter(Boolean));
 
     // Each mark has one symbol size for every terrain and a true footprint. The
     // drawn radius is whichever is larger, so zooming in hands over from symbol
@@ -175,30 +218,117 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
         opacity: 1,
         className: "mark-tooltip",
       });
-      marker.on("click", (event) => {
-        L.DomEvent.stop(event);
-        activar(terreno.id, event);
-      });
-      // Swallow the marker's own double-click so Leaflet does not also apply
-      // its ordinary zoom-in. Background double-click keeps working.
-      marker.on("dblclick", (event) => L.DomEvent.stop(event));
+      wireActivation(marker, terreno.id);
 
       marker.addTo(markerLayer);
       byId.set(terreno.id, {
+        tipo: "punto",
         marker, radius, dash, symbolic, fill, aEscala,
         m2: terreno.superficie_m2, lat: terreno.lat, lon: terreno.lon,
       });
     }
 
+    for (const terreno of contornos) {
+      if (byId.has(terreno.id)) continue;           // one logical mark per terrain
+      byId.set(terreno.id, crearContorno(
+        terreno, geometrias, zoom, offsets.get(terreno.id) ?? 0, colorFor, dashFor));
+    }
+
+    // A selection or a pending click on a terrain that is no longer drawn
+    // must not survive a filter change or reset.
+    if (selectedId !== null && !byId.has(selectedId)) selectedId = null;
+    if (gesto.id !== null && !byId.has(gesto.id)) olvidarGesto();
+
     applySelection();
     reportScale();
-    return plotted.length;
+    return plotted.length + contornos.length;
+  }
+
+  /** One boundary terrain: its symbol, and its outline when the body loaded. */
+  function crearContorno(terreno, geometrias, zoom, extra, colorFor, dashFor) {
+    const descriptor = terreno.geometria;
+    const cuerpo = cuerpoLeaflet(descriptor, geometrias);
+    const disponible = cuerpo.estado === "cargado";
+    const fill = colorFor(terreno);
+    const dash = dashFor?.(terreno) ?? null;
+    const symbolic = SYMBOL_RADIUS + extra;
+    const html = tooltipHtml(terreno, { sinContorno: !disponible });
+
+    const simbolo = L.circleMarker(puntoLeaflet(descriptor.punto_interior), {
+      radius: symbolic,
+      opacity: 1,
+      fillColor: fill,
+      bubblingMouseEvents: false,
+      ...simboloStyle({ fill, dash, disponible }),
+    });
+    simbolo.bindTooltip(html, {
+      direction: "top", offset: [0, -symbolic - 2], opacity: 1, className: "mark-tooltip",
+    });
+    wireActivation(simbolo, terreno.id);
+
+    let contorno = null;
+    if (disponible) {
+      contorno = new (poligonoDeContorno())(cuerpo.partes, {
+        fillColor: fill,
+        bubblingMouseEvents: false,
+        ...contornoStyle({ fill, dash }),
+      });
+      contorno.bindTooltip(html, { sticky: true, opacity: 1, className: "mark-tooltip" });
+      wireActivation(contorno, terreno.id);
+    }
+
+    const entry = {
+      tipo: "contorno",
+      simbolo, contorno, disponible, fill, dash, symbolic,
+      bbox: descriptor.bbox,
+      // The handover follows the largest part: a multipart of small, scattered
+      // parts keeps its symbol until those parts can actually be hit.
+      cajaEscala: disponible ? cuerpo.cajaMayor : descriptor.bbox,
+      punto: puntoLeaflet(descriptor.punto_interior),
+      posiciones: disponible ? cuerpo.posiciones : 0,
+      aEscala: false,
+    };
+    mostrarContorno(entry, zoom);
+    return entry;
+  }
+
+  /** Show the outline or the symbol for this zoom; returns whether it changed. */
+  function mostrarContorno(entry, zoom) {
+    const aEscala = Boolean(entry.contorno) && contornoAEscala(entry.cajaEscala, zoom);
+    const yaVisible = entry.contorno && contornoLayer.hasLayer(entry.contorno);
+    if (aEscala === entry.aEscala && (yaVisible || markerLayer.hasLayer(entry.simbolo))) {
+      return false;
+    }
+    entry.aEscala = aEscala;
+    if (aEscala) {
+      markerLayer.removeLayer(entry.simbolo);
+      entry.contorno.addTo(contornoLayer);
+      entry.contorno.bringToBack();          // below every circle and symbol
+    } else {
+      if (entry.contorno) contornoLayer.removeLayer(entry.contorno);
+      entry.simbolo.addTo(markerLayer);
+    }
+    return true;
+  }
+
+  function wireActivation(layer, id) {
+    layer.on("click", (event) => {
+      L.DomEvent.stop(event);
+      activar(id, event);
+    });
+    // Swallow the mark's own double-click so Leaflet does not also apply
+    // its ordinary zoom-in. Background double-click keeps working.
+    layer.on("dblclick", (event) => L.DomEvent.stop(event));
   }
 
   /** Re-measure every mark against the new zoom. */
   function resizeMarks() {
     const zoom = map.getZoom();
     for (const [id, entry] of byId) {
+      if (entry.tipo === "contorno") {
+        if (mostrarContorno(entry, zoom)) aplicarEstiloContorno(entry, id === selectedId);
+        continue;
+      }
       const { radius, aEscala } = markRadius(
         entry.m2, entry.lat, zoom, { extra: entry.symbolic - SYMBOL_RADIUS });
       if (radius !== entry.radius) {
@@ -219,11 +349,23 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     if (!onScaleChange) return;
     const zoom = map.getZoom();
     let aEscala = 0;
+    let contornos = 0;
+    let contornosAEscala = 0;
     for (const entry of byId.values()) {
+      if (entry.tipo === "contorno") {
+        // A drawn outline is real ground, like a circle at true scale.
+        contornos += 1;
+        if (entry.aEscala) {
+          contornosAEscala += 1;
+          aEscala += 1;
+        }
+        continue;
+      }
       const extra = entry.symbolic - SYMBOL_RADIUS;
       if (markRadius(entry.m2, entry.lat, zoom, { extra }).aEscala) aEscala += 1;
     }
-    onScaleChange({ aEscala, total: byId.size, zoom });
+    // contornos / contornosAEscala are additive: XY-only maps report 0.
+    onScaleChange({ aEscala, total: byId.size, zoom, contornos, contornosAEscala });
   }
 
   /** How a mark looks, given what it currently represents. */
@@ -245,9 +387,21 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
   function applySelection() {
     for (const [id, entry] of byId) {
       const selected = id === selectedId;
+      if (entry.tipo === "contorno") {
+        aplicarEstiloContorno(entry, selected);
+        continue;
+      }
       entry.marker.setStyle(markStyle({ ...entry, selected }));
       if (selected) entry.marker.bringToFront();
     }
+  }
+
+  function aplicarEstiloContorno(entry, selected) {
+    entry.simbolo.setStyle(simboloStyle({ ...entry, selected }));
+    if (entry.contorno) entry.contorno.setStyle(contornoStyle({ ...entry, selected }));
+    // A selected symbol comes forward; a selected outline stays behind the
+    // symbols so it never hides a mark standing on it.
+    if (selected && markerLayer.hasLayer(entry.simbolo)) entry.simbolo.bringToFront();
   }
 
   function select(id, { pan = false } = {}) {
@@ -255,6 +409,13 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     applySelection();
     const entry = byId.get(id);
     if (entry && pan) {
+      if (entry.tipo === "contorno") {
+        // The whole boundary, every part, framed -- not just its centre.
+        map.fitBounds(limitesLeaflet(entry.bbox), {
+          padding: [40, 40], maxZoom: ZOOM_MAXIMO, animate: !prefersReducedMotion(),
+        });
+        return;
+      }
       map.setView(entry.marker.getLatLng(), Math.max(map.getZoom(), 13), {
         animate: !prefersReducedMotion(),
       });
@@ -262,16 +423,24 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
   }
 
   function fitTo(terrenos) {
-    const points = terrenos.filter((t) => t.ubicado).map((t) => [t.lat, t.lon]);
-    if (!points.length) {
-      map.fitBounds(MEXICO_BOUNDS);
+    const filas = Array.isArray(terrenos) ? terrenos : [];
+    const conContorno = filas.some((t) => modoDeFila(t) === MODO.GEOMETRIA);
+    if (!conContorno) {
+      // XY only: exactly the established framing.
+      const points = filas.filter((t) => modoDeFila(t) === MODO.PUNTO).map((t) => [t.lat, t.lon]);
+      if (!points.length) {
+        map.fitBounds(MEXICO_BOUNDS);
+        return;
+      }
+      if (points.length === 1) {
+        map.setView(points[0], 13);
+        return;
+      }
+      map.fitBounds(L.latLngBounds(points).pad(0.12));
       return;
     }
-    if (points.length === 1) {
-      map.setView(points[0], 13);
-      return;
-    }
-    map.fitBounds(L.latLngBounds(points).pad(0.12));
+    // Boundaries contribute their whole extent, every part included.
+    map.fitBounds(L.latLngBounds(limitesDeFilas(filas)).pad(0.12), { maxZoom: ZOOM_MAXIMO });
   }
 
   function setView(center, zoom) {
@@ -287,6 +456,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
   function zoomToScale(id) {
     const entry = byId.get(id);
     if (!entry) return { estado: "sin_marca" };
+    if (entry.tipo === "contorno") return zoomAlContorno(entry);
     if (!Number.isFinite(entry.m2) || entry.m2 <= 0) return { estado: "sin_area" };
     if (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lon)) {
       return { estado: "sin_ubicacion" };
@@ -315,6 +485,45 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     };
   }
 
+  /**
+   * Boundary version of zoomToScale: frame the whole boundary. Additive
+   * result fields: `contorno: true` always; `requerido`, the zoom at which
+   * the outline first shows. Additive state: "contorno_no_disponible" when
+   * the body is not loaded (framed by the descriptor's bbox, no outline).
+   */
+  function zoomAlContorno(entry) {
+    const maximo = map.getMaxZoom();
+    const requerido = zoomDeContorno(entry.cajaEscala, maximo);
+    map.stop();
+    map.fitBounds(limitesLeaflet(entry.bbox), {
+      padding: [40, 40], maxZoom: maximo, animate: false,
+    });
+    if (requerido !== null && map.getZoom() < requerido) {
+      map.setView(entry.punto, requerido, { animate: false });
+    }
+    const zoom = map.getZoom();
+    if (!entry.disponible) {
+      return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo };
+    }
+    return {
+      estado: contornoAEscala(entry.cajaEscala, zoom) ? "a_escala" : "limite_de_zoom",
+      contorno: true, zoom, requerido, maximo,
+    };
+  }
+
+  /**
+   * Where a placed terrain can be clicked, in container pixels: the XY
+   * centre, the boundary symbol, or a point inside the drawn outline. For
+   * test hooks; null when the terrain is not drawn.
+   */
+  function posicionDe(id) {
+    const entry = byId.get(id);
+    if (!entry) return null;
+    const latlng = entry.tipo === "contorno" ? entry.punto : entry.marker.getLatLng();
+    const p = map.latLngToContainerPoint(latlng);
+    return { x: p.x, y: p.y, tipo: entry.tipo, contorno: Boolean(entry.aEscala && entry.contorno) };
+  }
+
   /** The current viewport, for storing in a saved map's view state. */
   function viewport() {
     const center = map.getCenter();
@@ -330,12 +539,118 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     setView,
     viewport,
     zoomToScale,
+    posicionDe,
     invalidate: () => map.invalidateSize(),
     get basemap() { return basemapKey; },
   };
 }
 
-function tooltipHtml(terreno) {
+/* Drawing a boundary's rings (Leaflet 1.9.4, Canvas renderer).
+ *
+ * Leaflet draws a polygon as ONE canvas path and calls ctx.closePath() after
+ * every ring. In Chromium (measured on 141) each closePath() costs time that
+ * grows with the subpaths already in that path, so an outline of 20,000
+ * rings spent about 2 s per redraw in closePath() alone. Here the same rings,
+ * in the same order, become one Path2D built from SVG path data, where "Z"
+ * closes each ring exactly as closePath() does but without that cost.
+ * Leaflet's own _fillStroke then fills and strokes that path: same even-odd
+ * fill, same closePath() joins and dashes, same styles and selection.
+ * Projection, clipping, smoothing and hit testing stay Leaflet's.
+ *
+ * Two cheaper-looking alternatives are NOT the same drawing and are not used:
+ * closing with lineTo back to the first point (the seam gets two round caps
+ * instead of a join; its anti-aliased pixels differ), and closing each ring
+ * on its own Path2D merged with addPath (beyond about a thousand rings,
+ * two-point rings stop being painted). See
+ * reports/team-b-boundary-path-drawing-2026-10-08/.
+ *
+ * Only where every assumption holds: Leaflet 1.9.4, its Canvas renderer,
+ * Path2D built from path data, and whole-pixel positions (Leaflet rounds
+ * projected and clipped points), so the text form is exact. Anything else
+ * draws exactly as Leaflet does. */
+const LEAFLET_CON_TRAZO_POR_DATOS = "1.9.4";
+let PoligonoDeContorno = null;
+
+function poligonoDeContorno() {
+  if (PoligonoDeContorno) return PoligonoDeContorno;
+  PoligonoDeContorno = L.Polygon.extend({
+    _updatePath() {
+      const renderer = this._renderer;
+      const posible = trazoPorDatosPosible(renderer);
+      if (posible && (!renderer._drawing || !this._parts.length)) return;
+      const datos = posible ? datosDeTrazo(this._parts) : null;
+      if (datos === null) {
+        L.Polygon.prototype._updatePath.call(this);
+        return;
+      }
+      renderer._ctx.beginPath();
+      renderer._fillStroke(contextoConTrazo(renderer._ctx, new Path2D(datos)), this);
+    },
+  });
+  return PoligonoDeContorno;
+}
+
+function trazoPorDatosPosible(renderer) {
+  return L.version === LEAFLET_CON_TRAZO_POR_DATOS
+    && renderer instanceof L.Canvas
+    && typeof renderer._fillStroke === "function"
+    && typeof renderer._ctx?.fill === "function"
+    && typeof Path2D === "function";
+}
+
+/** SVG path data for the rings ("M x y L x y ... Z" each), or null if any
+ *  position is not a whole pixel. */
+function datosDeTrazo(partes) {
+  const trozos = [];
+  for (const anillo of partes) {
+    if (!anillo.length) continue;
+    for (let i = 0; i < anillo.length; i += 1) {
+      const { x, y } = anillo[i];
+      if (!Number.isInteger(x) || !Number.isInteger(y)) return null;
+      trozos.push(i ? "L" : "M", x, " ", y);
+    }
+    trozos.push("Z");
+  }
+  return trozos.join("");
+}
+
+/** The renderer's context, with fill(rule) and stroke() applied to `trazo`. */
+function contextoConTrazo(ctx, trazo) {
+  return new Proxy(ctx, {
+    get(destino, clave) {
+      if (clave === "fill") return (regla) => destino.fill(trazo, regla);
+      if (clave === "stroke") return () => destino.stroke(trazo);
+      const valor = destino[clave];
+      return typeof valor === "function" ? valor.bind(destino) : valor;
+    },
+    set(destino, clave, valor) {
+      destino[clave] = valor;
+      return true;
+    },
+  });
+}
+
+/** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
+function simboloStyle({ fill, dash, disponible, selected = false }) {
+  if (selected) {
+    return { color: "#111111", weight: 3, dashArray: disponible ? null : SIN_CONTORNO.dashArray,
+             fillOpacity: disponible ? 1 : 0.32 };
+  }
+  if (!disponible) {
+    return { color: fill, weight: SIN_CONTORNO.weight, dashArray: SIN_CONTORNO.dashArray,
+             fillOpacity: SIN_CONTORNO.fillOpacity };
+  }
+  return { color: SIMBOLO.ring, weight: dash ? 2.5 : SIMBOLO.weight, dashArray: dash,
+           fillOpacity: SIMBOLO.fillOpacity };
+}
+
+/** A drawn outline: the footprint look, the selection look when selected. */
+function contornoStyle({ fill, dash, selected = false }) {
+  if (selected) return { color: "#111111", weight: 3, dashArray: null, fillOpacity: 0.32 };
+  return { color: fill, weight: HUELLA.weight, dashArray: dash, fillOpacity: HUELLA.fillOpacity };
+}
+
+function tooltipHtml(terreno, { sinContorno = false } = {}) {
   const name = escapeHtml(terreno.terreno);
   const place = escapeHtml(
     [terreno.municipio, terreno.estado].filter(Boolean).join(", ")
@@ -347,7 +662,8 @@ function tooltipHtml(terreno) {
   return (
     `<strong>${name}</strong>` +
     (place ? `<span>${place}</span>` : "") +
-    (figures ? `<span class="figure">${escapeHtml(figures)}</span>` : "")
+    (figures ? `<span class="figure">${escapeHtml(figures)}</span>` : "") +
+    (sinContorno ? `<span class="mark-tooltip-aviso">Contorno no disponible</span>` : "")
   );
 }
 

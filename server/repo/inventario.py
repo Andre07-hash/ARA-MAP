@@ -172,11 +172,16 @@ def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
             if name not in stamps and current["confirmations"][name]:
                 previous = current["confirmations"][name]
                 stamps[name] = {"at": previous["at"], "id": previous["by"]["id"]}
-        # Raw source extras are not editable: they ride along unchanged.
-        extra_json = conn.execute("SELECT extra_json FROM inventory_revision WHERE id = ?",
-                                  (current["draft_revision_id"],)).fetchone()["extra_json"]
-        revision_id = _insert_revision(conn, inventory_id, current["revision_number"] + 1,
-                                       draft, stamps, actor, ahora, extra_json)
+        # Not editable here, so they ride along unchanged: the raw source
+        # extras, the land type and the custom values. base_id is the base the
+        # terrain belongs to now, which is what a revision records.
+        previa = conn.execute(
+            "SELECT r.extra_json, r.tipo_terreno, r.custom_json, t.base_id"
+            " FROM inventory_revision r JOIN inventory_terrain t ON t.id = r.inventory_id"
+            " WHERE r.id = ?", (current["draft_revision_id"],)).fetchone()
+        revision_id = _insert_revision(
+            conn, inventory_id, current["revision_number"] + 1, draft, stamps, actor, ahora,
+            previa["extra_json"], previa["base_id"], previa["tipo_terreno"], previa["custom_json"])
         conn.execute("UPDATE inventory_terrain SET draft_revision_id = ? WHERE id = ?",
                      (revision_id, inventory_id))
         details: dict[str, Any] = {"changes": cambios}
@@ -201,15 +206,17 @@ def _claim(conn: DatabaseConnection, inventory_id: str, expected_version: int,
 
 def _insert_revision(conn: DatabaseConnection, inventory_id: str, number: int,
                      draft: Mapping[str, Any], stamps: Mapping[str, Mapping[str, str]],
-                     actor: Mapping[str, Any], ahora: str, extra_json: str | None = None) -> str:
+                     actor: Mapping[str, Any], ahora: str, extra_json: str | None = None,
+                     base_id: str | None = None, tipo_terreno: str | None = None,
+                     custom_json: str = "{}") -> str:
     revision_id = str(uuid.uuid4())
     values = {f: draft[f] for f in REVISION_FIELDS}
     values["price_on_request"] = 1 if draft["price_on_request"] else 0
     columns = ["id", "inventory_id", "revision_number", *REVISION_FIELDS, "extra_json",
-               "price_confirmed_at", "price_confirmed_by", "availability_confirmed_at",
+               "base_id", "tipo_terreno", "custom_json", "price_confirmed_at", "price_confirmed_by", "availability_confirmed_at",
                "availability_confirmed_by", "created_at", "created_by"]
     params = [revision_id, inventory_id, number, *values.values(), extra_json,
-              stamps.get("price", {}).get("at"), stamps.get("price", {}).get("id"),
+              base_id, tipo_terreno, custom_json, stamps.get("price", {}).get("at"), stamps.get("price", {}).get("id"),
               stamps.get("availability", {}).get("at"), stamps.get("availability", {}).get("id"),
               ahora, actor["id"]]
     conn.execute(f"INSERT INTO inventory_revision ({', '.join(columns)})"

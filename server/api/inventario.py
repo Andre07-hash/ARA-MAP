@@ -1,7 +1,11 @@
 """Endpoints for the shared terrain inventory (internal) and the public catalog.
 
 Every internal route needs a signed-in team user; the actor always comes from
-the session (request.user), never from the request body.
+the session (request.user), never from the request body. The unscoped list
+and create are the administrators' master table (maestra.global). The routes
+that name one terrain check its work base: an operator reaches a record only
+if it is assigned to an active base granted to that person, and writes check
+that again inside the transaction that saves.
 """
 
 from __future__ import annotations
@@ -12,7 +16,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from .. import db, inventario
+from .. import auth, db, inventario
 from ..repo import inventario as repo
 from ..router import Request
 from ..web_util import ApiError, parse_json
@@ -62,9 +66,10 @@ def listing(request: Request) -> Respuesta:
 
 
 def detail(request: Request) -> Respuesta:
-    _actor(request)
+    inventory_id = request.uuid_param("id")
     with db.session() as conn:
-        terreno = repo.get(conn, request.uuid_param("id"))
+        auth.require_terreno(request, inventory_id, "maestra.ver", conn)
+        terreno = repo.get(conn, inventory_id)
     if terreno is None:
         raise _not_found()
     return {"terreno": terreno}
@@ -85,7 +90,8 @@ def create(request: Request) -> Respuesta:
     request_hash = hashlib.sha256(
         json.dumps(fields, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
     try:
-        with db.session() as conn:
+        with db.escritura() as conn:
+            auth.reverificar(conn, request.sesion, "maestra.global")
             return repo.create(conn, fields, actor, key, request_hash)
     except repo.IdempotencyConflictError:
         raise ApiError("Esa Idempotency-Key ya se usó con otros datos.", 409,
@@ -113,7 +119,11 @@ def update(request: Request) -> Respuesta:
     fields, field_errors = inventario.clean_changes(data.get("changes", {}))
     errors.update(field_errors)
 
-    with db.session() as conn:
+    with db.escritura() as conn:
+        # Authorization is decided here, in the transaction that saves, and
+        # before any validation answer: out of scope is 404 whatever was sent.
+        auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.editar",
+                                 exclusivo=True)
         current = repo.get(conn, inventory_id)
         if current is None:
             raise _not_found()
@@ -149,8 +159,7 @@ def history(request: Request) -> Respuesta:
     if errors:
         raise _invalid(errors, "Parámetros inválidos.")
     with db.session() as conn:
-        if repo.get(conn, inventory_id) is None:
-            raise _not_found()
+        auth.require_terreno(request, inventory_id, "maestra.ver", conn)
         eventos, total, siguiente = repo.history(
             conn, inventory_id, int(cursor) if cursor else None, limit)
     return {"eventos": eventos, "total": total,

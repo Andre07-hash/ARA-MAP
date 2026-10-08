@@ -1,0 +1,88 @@
+<!doctype html>
+<!-- B-2 browser harness: the REAL createMapCanvas with the repository's
+     vendored Leaflet, the fictional fixture tests/js/fixtures/geometria/
+     contornos.json, and a small terrain list standing in for the grid.
+     Served from the repository root by tests/e2e/contornos.mjs. No tiles,
+     no network, no app shell. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Contornos · arnés B-2</title>
+<link rel="stylesheet" href="/web/vendor/leaflet.css">
+<link rel="stylesheet" href="/web/styles/tokens.css">
+<link rel="stylesheet" href="/web/styles/map.css">
+<style>
+  body { margin: 0; display: flex; font: 13px system-ui, sans-serif; background: #f4f3ef; }
+  #mapa { width: 900px; height: 600px; background: #e8e6df; }
+  #lista { width: 280px; margin: 0; padding: 8px; list-style: none; }
+  #lista button { width: 100%; text-align: left; padding: 4px 6px; margin: 1px 0;
+                  border: 1px solid transparent; background: none; cursor: pointer; }
+  #lista button[aria-pressed="true"] { border-color: #111; background: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+<ul id="lista"></ul>
+<script src="/web/vendor/leaflet.js"></script>
+<script type="module">
+import { createMapCanvas } from "/web/components/map/MapCanvas.js";
+import { ubicacionDe } from "/web/lib/geometria.js";
+
+const fixture = await (await fetch("/tests/js/fixtures/geometria/contornos.json")).json();
+// The descriptor of t-sin-cuerpo is active but its body is deliberately not
+// "loaded": it is left out of the map the renderer receives.
+const NO_CARGADOS = new Set(["geo-sin-cuerpo"]);
+const geometrias = new Map(
+  Object.entries(fixture.cuerpos).filter(([id]) => !NO_CARGADOS.has(id)));
+
+const COLORES = ["#2a78d6", "#c2410c", "#15803d", "#7c3aed", "#b45309", "#0e7490"];
+const colorFor = (t) => COLORES[[...String(t.id)].reduce((a, c) => a + c.charCodeAt(0), 0)
+                                % COLORES.length];
+
+const h = {
+  fixture, geometrias, filas: fixture.filas, seleccionado: null,
+  selecciones: [], dobles: [], escalas: [], errores: [],
+};
+window.__harness = h;
+
+const lista = document.getElementById("lista");
+function pintarLista() {
+  lista.replaceChildren(...h.filas.map((t) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.dataset.id = t.id;
+    b.textContent = `${t.terreno ?? "Sin nombre"} · ${ubicacionDe(t).modo}`;   // text, not HTML
+    b.setAttribute("aria-pressed", String(t.id === h.seleccionado));
+    b.addEventListener("click", () => {
+      h.seleccionado = t.id;
+      h.canvas.select(t.id, { pan: true });
+      pintarLista();
+    });
+    li.append(b);
+    return li;
+  }));
+}
+
+h.canvas = createMapCanvas(document.getElementById("mapa"), {
+  onSelect: (id) => { h.seleccionado = id; h.selecciones.push(id); pintarLista(); },
+  onDoubleSelect: (id) => { h.dobles.push({ id, resultado: h.canvas.zoomToScale(id) }); },
+  onScaleChange: (e) => { h.escalas.push(e); },
+});
+h.canvas.invalidate();
+
+h.render = (filas, conGeometrias = true) => {
+  h.filas = filas;
+  const n = h.canvas.render(filas, { colorFor, ...(conGeometrias ? { geometrias } : {}) });
+  pintarLista();
+  return n;
+};
+h.latlng = (p) => h.canvas.map.containerPointToLatLng(p);
+h.punto = (lat, lon) => h.canvas.map.latLngToContainerPoint([lat, lon]);
+window.addEventListener("error", (e) => h.errores.push(String(e.message)));
+
+h.colocados = h.render(fixture.filas);
+h.canvas.fitTo(fixture.filas);
+document.title = "listo";
+</script>
+</body>
+</html>

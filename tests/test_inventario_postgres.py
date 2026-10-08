@@ -54,7 +54,9 @@ class InventarioPostgres(unittest.TestCase):
             conn.raw.execute("TRUNCATE inventory_operation_result, inventory_event, inventory_revision,"
                              " inventory_terrain, team_session, team_login_failure, team_user,"
                              " workspace_backup CASCADE")
-            self.actors = [dict(auth.create_user(conn, n, n.capitalize(), TEST_PASSWORD, iterations=1000),
+            # Administrators: this suite exercises the unscoped inventory, the master table.
+            self.actors = [dict(auth.create_user(conn, n, n.capitalize(), TEST_PASSWORD, iterations=1000,
+                                                 rol="admin"),
                                 display_name=n.capitalize()) for n in ("ana", "beto", "carla")]
 
     def create(self, fields=None, key=None):
@@ -66,7 +68,7 @@ class InventarioPostgres(unittest.TestCase):
         with db.session() as conn:
             return conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]
 
-    def test_schema_is_v8_with_the_pointer_constraints(self):
+    def test_schema_is_current_with_the_pointer_constraints(self):
         with db.session() as conn:
             self.assertEqual(postgres.schema_version(conn), db.SCHEMA_VERSION)
             nombres = {r["conname"] for r in conn.execute(

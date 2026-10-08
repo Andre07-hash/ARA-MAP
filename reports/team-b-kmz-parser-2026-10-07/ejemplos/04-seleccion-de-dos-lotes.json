@@ -1,0 +1,154 @@
+{
+  "_entrada": {
+    "seleccion": [
+      0,
+      2
+    ]
+  },
+  "estado": "listo",
+  "error": null,
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Lote A",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.398,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    },
+    {
+      "indice": 1,
+      "nombre": "Lote B",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.3975,
+        20.6,
+        -100.3955,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    },
+    {
+      "indice": 2,
+      "nombre": "Lote C",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.395,
+        20.6,
+        -100.393,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": [
+    0,
+    2
+  ],
+  "geometria": {
+    "geojson": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              -100.4,
+              20.6
+            ],
+            [
+              -100.398,
+              20.6
+            ],
+            [
+              -100.398,
+              20.602
+            ],
+            [
+              -100.4,
+              20.602
+            ],
+            [
+              -100.4,
+              20.6
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              -100.395,
+              20.6
+            ],
+            [
+              -100.393,
+              20.6
+            ],
+            [
+              -100.393,
+              20.602
+            ],
+            [
+              -100.395,
+              20.602
+            ],
+            [
+              -100.395,
+              20.6
+            ]
+          ]
+        ]
+      ]
+    },
+    "bbox": [
+      -100.4,
+      20.6,
+      -100.393,
+      20.602
+    ],
+    "punto_interior": {
+      "type": "Point",
+      "coordinates": [
+        -100.399,
+        20.601
+      ]
+    },
+    "area_aproximada_m2": 92796.8,
+    "partes": 2,
+    "huecos": 0,
+    "vertices": 10
+  },
+  "ubicacion": {
+    "dentro_de_mexico": true,
+    "utilizable": true
+  }
+}

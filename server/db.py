@@ -15,13 +15,14 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .errors import AraError
 from .protocols import DatabaseConnection
 
 APP_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = APP_ROOT / "datos" / "ara_map.db"
 BACKUPS_KEPT = 10
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 10
 
 # Savepoint names only need to be unique while nested.
 _savepoints = itertools.count()
@@ -212,7 +213,8 @@ CREATE INDEX IF NOT EXISTS idx_uso_ia_mes ON uso_ia(mes);
 # cycle in one statement: postgres.py strips the two "fk_inventory_" lines and
 # adds those constraints after both tables exist.
 INVENTORY_SCHEMA = """
--- No role column: every active account has identical powers.
+-- rol arrives through V9_COLUMNS. Nothing reads it yet: until role enforcement
+-- ships, every active account still has identical powers.
 CREATE TABLE IF NOT EXISTS team_user (
   id                  TEXT PRIMARY KEY,
   login               TEXT NOT NULL UNIQUE,
@@ -328,6 +330,333 @@ CREATE TABLE IF NOT EXISTS inventory_operation_result (
 );
 """
 
+# v9: work bases, access grants, base-local custom columns and their audit.
+# Storage only: no route, role check or screen uses these yet.
+#
+# Nothing here cascades. A base, account or column that anything refers to
+# cannot be deleted, so removing one can never take terrains, revisions,
+# retained custom values or history with it; bases and columns are archived
+# or retired instead. Grants are the exception that IS deleted: a revoked
+# grant survives as its team_user_event rows, which name the user and the
+# base rather than the grant.
+WORK_BASE_SCHEMA = """
+-- A container that records are assigned to and people are granted access to.
+-- version is the concurrency counter for administration, as on a terrain.
+CREATE TABLE IF NOT EXISTS maestra_base (
+  id          TEXT PRIMARY KEY,
+  nombre      TEXT NOT NULL,
+  version     INTEGER NOT NULL DEFAULT 1,
+  archived_at TEXT,
+  archived_by TEXT REFERENCES team_user(id),
+  created_at  TEXT NOT NULL,
+  created_by  TEXT NOT NULL REFERENCES team_user(id),
+  updated_at  TEXT NOT NULL,
+  updated_by  TEXT NOT NULL REFERENCES team_user(id)
+);
+
+CREATE TABLE IF NOT EXISTS maestra_base_acceso (
+  base_id    TEXT NOT NULL REFERENCES maestra_base(id),
+  user_id    TEXT NOT NULL REFERENCES team_user(id),
+  granted_at TEXT NOT NULL,
+  granted_by TEXT NOT NULL REFERENCES team_user(id),
+  PRIMARY KEY (base_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_maestra_base_acceso_user ON maestra_base_acceso(user_id);
+
+-- Custom columns only, each owned by one base. The fourteen core columns are
+-- fixed in code and never become rows here. The API spells an id as
+-- "custom:<id>"; values live in inventory_revision.custom_json under that key.
+CREATE TABLE IF NOT EXISTS inventory_column (
+  id            TEXT PRIMARY KEY,
+  base_id       TEXT NOT NULL REFERENCES maestra_base(id),
+  nombre        TEXT NOT NULL,
+  tipo          TEXT NOT NULL CHECK (tipo IN ('texto', 'numero', 'opcion', 'fecha')),
+  opciones_json TEXT NOT NULL DEFAULT '[]',
+  orden         INTEGER NOT NULL,
+  version       INTEGER NOT NULL DEFAULT 1,
+  retired_at    TEXT,
+  retired_by    TEXT REFERENCES team_user(id),
+  created_at    TEXT NOT NULL,
+  created_by    TEXT NOT NULL REFERENCES team_user(id),
+  updated_at    TEXT NOT NULL,
+  updated_by    TEXT NOT NULL REFERENCES team_user(id)
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_column_base ON inventory_column(base_id, orden);
+
+-- Append-only account, role and grant history. base_id is set for grant
+-- events. actor_id is NULL when the change came from the operator's command
+-- line (scripts/cuentas.py), which has no signed-in account.
+CREATE TABLE IF NOT EXISTS team_user_event (
+  id           TEXT PRIMARY KEY,
+  user_id      TEXT NOT NULL REFERENCES team_user(id),
+  action       TEXT NOT NULL,
+  base_id      TEXT REFERENCES maestra_base(id),
+  actor_id     TEXT REFERENCES team_user(id),
+  actor_name   TEXT NOT NULL,
+  at           TEXT NOT NULL,
+  details_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_team_user_event_user ON team_user_event(user_id);
+CREATE INDEX IF NOT EXISTS idx_team_user_event_base ON team_user_event(base_id);
+
+-- Append-only history of a base (column_id NULL) and of its column
+-- definitions. One event per version of each, as in inventory_event.
+CREATE TABLE IF NOT EXISTS maestra_base_event (
+  id           TEXT PRIMARY KEY,
+  base_id      TEXT NOT NULL REFERENCES maestra_base(id),
+  column_id    TEXT REFERENCES inventory_column(id),
+  version      INTEGER NOT NULL,
+  action       TEXT NOT NULL,
+  actor_id     TEXT NOT NULL REFERENCES team_user(id),
+  actor_name   TEXT NOT NULL,
+  at           TEXT NOT NULL,
+  details_json TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maestra_base_event_base
+  ON maestra_base_event(base_id, version) WHERE column_id IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maestra_base_event_column
+  ON maestra_base_event(column_id, version) WHERE column_id IS NOT NULL;
+"""
+
+# v9 columns on the v8 tables. This is their only definition: a new database
+# gets them the same way an upgraded one does, so the two cannot drift. Shared
+# with the Postgres upgrade.
+#
+# Every existing account becomes 'operador' and every existing terrain stays
+# unassigned (NULL): the migration promotes nobody and invents no membership.
+# inventory_revision.base_id is the base the record belonged to when that
+# revision was written, so membership can be read back from history.
+V9_COLUMNS = (
+    ("team_user", "rol", "TEXT NOT NULL DEFAULT 'operador' CHECK (rol IN ('admin', 'operador'))"),
+    ("inventory_terrain", "base_id", "TEXT REFERENCES maestra_base(id)"),
+    ("inventory_revision", "base_id", "TEXT REFERENCES maestra_base(id)"),
+    ("inventory_revision", "tipo_terreno", "TEXT"),
+    ("inventory_revision", "custom_json", "TEXT NOT NULL DEFAULT '{}'"),
+)
+
+# After V9_COLUMNS, for the reason FOLDER_INDEXES gives below.
+V9_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_inventory_terrain_base ON inventory_terrain(base_id);
+"""
+
+# v10: attachment storage (PDF and KMZ of a terrain). Storage only: nothing
+# writes these tables yet. Table and column names are the ones Team B's
+# attachment repository is written against; do not rename them in passing.
+#
+# The rows form a chain: geometria -> archivo_intento -> archivo_version ->
+# archivo -> inventory_terrain. Every link is a composite foreign key that
+# repeats the owner's ids, so a row cannot name a parent of another version,
+# attachment or terrain. Composite keys are MATCH SIMPLE on both databases (a
+# NULL column switches the whole key off), so each nullable reference that
+# must not slip through that way has a CHECK beside it.
+#
+# Three references close cycles (an attachment points at its current version
+# and active geometry; an attempt points back at its geometry). They are the
+# "fk_archivo_" constraints: deferred, so they are checked at COMMIT, and on
+# Postgres added after the tables exist (postgres.archivos_sql). Each must
+# stay on one line, last in its table.
+#
+# Nothing cascades. What the database cannot see -- that an active geometry is
+# usable, that its version is disponible, that terminal rows are never updated
+# again -- is the job of the repository's transactions.
+#
+# A CHECK passes when its expression is NULL, not only when it is true. Every
+# comparison on a nullable column below is therefore guarded with IS NOT NULL
+# (or is a deliberate "NULL is allowed").
+ATTACHMENT_SCHEMA = """
+-- The decision row: one attachment in a core column of one terrain. Only this
+-- row changes after creation, by compare-and-set on revision. It never touches
+-- inventory_terrain.version or inventory_event.
+CREATE TABLE IF NOT EXISTS archivo (
+  id                  TEXT PRIMARY KEY NOT NULL,
+  inventory_id        TEXT NOT NULL REFERENCES inventory_terrain(id),
+  columna_id          TEXT NOT NULL CHECK (columna_id IN ('core:archivos', 'core:kmz')),
+  tipo                TEXT NOT NULL CHECK (tipo IN ('pdf', 'kmz')),
+  revision            INTEGER NOT NULL DEFAULT 1 CHECK (revision > 0),
+  version_actual_id   TEXT,
+  geometria_activa_id TEXT,
+  retirado_en         TEXT,
+  retirado_por        TEXT REFERENCES team_user(id),
+  retirado_motivo     TEXT CHECK (retirado_motivo IN ('usuario', 'sin_contenido')),
+  creado_en           TEXT NOT NULL,
+  creado_por          TEXT NOT NULL REFERENCES team_user(id),
+  actualizado_en      TEXT NOT NULL,
+  actualizado_por     TEXT NOT NULL REFERENCES team_user(id),
+  UNIQUE (id, inventory_id),
+  CHECK ((columna_id = 'core:archivos' AND tipo = 'pdf') OR (columna_id = 'core:kmz' AND tipo = 'kmz')),
+  CHECK (geometria_activa_id IS NULL OR (version_actual_id IS NOT NULL AND tipo = 'kmz')),
+  CHECK ((retirado_en IS NULL) = (retirado_motivo IS NULL)),
+  CHECK (retirado_por IS NULL OR retirado_en IS NOT NULL),
+  CONSTRAINT fk_archivo_version_actual FOREIGN KEY (id, version_actual_id) REFERENCES archivo_version(archivo_id, id) DEFERRABLE INITIALLY DEFERRED,
+  CONSTRAINT fk_archivo_geometria_activa FOREIGN KEY (id, version_actual_id, geometria_activa_id) REFERENCES geometria(archivo_id, archivo_version_id, id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX IF NOT EXISTS idx_archivo_terreno ON archivo(inventory_id, columna_id);
+-- One live KMZ per terrain; a replacement is a new version of that attachment.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_archivo_kmz_vivo
+  ON archivo(inventory_id) WHERE columna_id = 'core:kmz' AND retirado_en IS NULL;
+
+-- One upload. Immutable once estado leaves 'subiendo'.
+--   terminado_*  : the row stopped being 'subiendo', whatever the reason
+--                  (completed, failed, cancelled, expired).
+--   finalizado_* : the bytes were finalized and judged; only 'disponible' and
+--                  'fallido' have it, together with the outcome in aplicada.
+-- clave_temporal and clave_final are storage keys: server-only, never in a
+-- response, an event or a log.
+CREATE TABLE IF NOT EXISTS archivo_version (
+  id                 TEXT PRIMARY KEY NOT NULL,
+  archivo_id         TEXT NOT NULL,
+  inventory_id       TEXT NOT NULL,
+  numero             INTEGER NOT NULL CHECK (numero > 0),
+  estado             TEXT NOT NULL
+    CHECK (estado IN ('subiendo', 'disponible', 'fallido', 'cancelado', 'expirado')),
+  revision_base      INTEGER NOT NULL CHECK (revision_base > 0),
+  nombre_original    TEXT NOT NULL,
+  tamano_declarado   INTEGER NOT NULL CHECK (tamano_declarado >= 0),
+  sha256_declarado   TEXT NOT NULL,
+  tamano             INTEGER CHECK (tamano >= 0),
+  sha256             TEXT,
+  tipo_detectado     TEXT,
+  clave_temporal     TEXT NOT NULL,
+  clave_final        TEXT,
+  subida_vence_en    TEXT NOT NULL,
+  completar_antes_de TEXT NOT NULL,
+  error_codigo       TEXT,
+  error_mensaje      TEXT,
+  aplicada           INTEGER CHECK (aplicada IN (0, 1)),
+  motivo_no_aplicada TEXT CHECK (motivo_no_aplicada IN ('superada', 'retirado')),
+  iniciado_en        TEXT NOT NULL,
+  iniciado_por       TEXT NOT NULL REFERENCES team_user(id),
+  finalizado_en      TEXT,
+  finalizado_por     TEXT REFERENCES team_user(id),
+  terminado_en       TEXT,
+  terminado_por      TEXT REFERENCES team_user(id),
+  UNIQUE (archivo_id, numero),
+  UNIQUE (archivo_id, id),
+  UNIQUE (id, archivo_id, inventory_id),
+  FOREIGN KEY (archivo_id, inventory_id) REFERENCES archivo(id, inventory_id),
+  CHECK ((aplicada IS NULL) = (estado IN ('subiendo', 'cancelado', 'expirado'))),
+  CHECK (motivo_no_aplicada IS NULL OR (aplicada IS NOT NULL AND aplicada = 0)),
+  CHECK (estado <> 'fallido'
+         OR (aplicada IS NOT NULL AND aplicada = 0 AND motivo_no_aplicada IS NULL)),
+  CHECK ((finalizado_en IS NULL) = (estado IN ('subiendo', 'cancelado', 'expirado'))),
+  CHECK ((finalizado_en IS NULL) = (finalizado_por IS NULL)),
+  CHECK ((terminado_en IS NULL) = (estado = 'subiendo')),
+  CHECK (terminado_por IS NULL OR terminado_en IS NOT NULL),
+  CHECK (estado <> 'disponible'
+         OR (clave_final IS NOT NULL AND tamano IS NOT NULL AND sha256 IS NOT NULL))
+);
+CREATE INDEX IF NOT EXISTS idx_archivo_version_plazo ON archivo_version(estado, completar_antes_de);
+CREATE INDEX IF NOT EXISTS idx_archivo_version_iniciador ON archivo_version(iniciado_por, estado);
+CREATE INDEX IF NOT EXISTS idx_archivo_version_terreno ON archivo_version(inventory_id);
+
+-- One parser run over one finalized KMZ version, inserted with its result:
+-- there is no "running" state. A 'listo' run has exactly one geometry.
+CREATE TABLE IF NOT EXISTS archivo_intento (
+  id                 TEXT PRIMARY KEY NOT NULL,
+  archivo_version_id TEXT NOT NULL REFERENCES archivo_version(id),
+  numero             INTEGER NOT NULL CHECK (numero > 0),
+  origen             TEXT NOT NULL CHECK (origen IN ('completar', 'reintento', 'seleccion')),
+  seleccion_json     TEXT,
+  resultado          TEXT NOT NULL
+    CHECK (resultado IN ('listo', 'requiere_seleccion', 'rechazado', 'error_interno')),
+  resultado_json     TEXT NOT NULL,
+  analizador         TEXT NOT NULL,
+  geometria_id       TEXT,
+  creado_en          TEXT NOT NULL,
+  creado_por         TEXT NOT NULL REFERENCES team_user(id),
+  UNIQUE (archivo_version_id, numero),
+  UNIQUE (id, archivo_version_id),
+  UNIQUE (id, archivo_version_id, geometria_id),
+  CHECK ((geometria_id IS NOT NULL) = (resultado = 'listo')),
+  CONSTRAINT fk_archivo_intento_geometria FOREIGN KEY (geometria_id, id, archivo_version_id) REFERENCES geometria(id, intento_id, archivo_version_id) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_archivo_intento_completar
+  ON archivo_intento(archivo_version_id) WHERE origen = 'completar';
+
+-- An immutable normalized boundary, and the only result of the attempt that
+-- names it: the attempt points at the geometry and the geometry at the
+-- attempt, same version on both sides, so neither can claim the other's. geojson is GeoJSON, positions
+-- [longitude, latitude]; punto_lon/punto_lat are never copied into the
+-- terrain's X/Y. bytes_geojson and sha256_geojson describe exactly the text
+-- stored in geojson, not any response that later carries it.
+CREATE TABLE IF NOT EXISTS geometria (
+  id                 TEXT PRIMARY KEY NOT NULL,
+  archivo_id         TEXT NOT NULL,
+  archivo_version_id TEXT NOT NULL,
+  inventory_id       TEXT NOT NULL,
+  intento_id         TEXT NOT NULL UNIQUE,
+  geojson            TEXT NOT NULL,
+  bbox_oeste         REAL NOT NULL,
+  bbox_sur           REAL NOT NULL,
+  bbox_este          REAL NOT NULL,
+  bbox_norte         REAL NOT NULL,
+  punto_lon          REAL NOT NULL,
+  punto_lat          REAL NOT NULL,
+  partes             INTEGER NOT NULL CHECK (partes >= 0),
+  huecos             INTEGER NOT NULL CHECK (huecos >= 0),
+  vertices           INTEGER NOT NULL CHECK (vertices >= 0),
+  area_aproximada_m2 REAL,
+  utilizable         INTEGER NOT NULL CHECK (utilizable IN (0, 1)),
+  bytes_geojson      INTEGER NOT NULL CHECK (bytes_geojson >= 0),
+  sha256_geojson     TEXT NOT NULL,
+  creado_en          TEXT NOT NULL,
+  UNIQUE (archivo_id, archivo_version_id, id),
+  UNIQUE (id, intento_id, archivo_version_id),
+  FOREIGN KEY (intento_id, archivo_version_id, id)
+    REFERENCES archivo_intento(id, archivo_version_id, geometria_id),
+  FOREIGN KEY (archivo_version_id, archivo_id, inventory_id)
+    REFERENCES archivo_version(id, archivo_id, inventory_id)
+);
+
+-- Append-only attachment history. revision is set by the events that move
+-- archivo.revision, one per revision; informational events leave it NULL and
+-- may repeat. base_id is the terrain's work base when the event happened.
+-- details_json never holds a storage key or a signed URL.
+CREATE TABLE IF NOT EXISTS archivo_evento (
+  id                 TEXT PRIMARY KEY NOT NULL,
+  archivo_id         TEXT NOT NULL,
+  inventory_id       TEXT NOT NULL,
+  archivo_version_id TEXT,
+  intento_id         TEXT,
+  geometria_id       TEXT,
+  accion             TEXT NOT NULL CHECK (accion IN (
+    'subida_iniciada', 'version_disponible', 'version_fallida', 'subida_cancelada',
+    'subida_expirada', 'procesado', 'version_actual_cambiada', 'capa_activada',
+    'decision_superada', 'retirado')),
+  revision           INTEGER CHECK (revision > 0),
+  base_id            TEXT REFERENCES maestra_base(id),
+  actor_id           TEXT NOT NULL REFERENCES team_user(id),
+  actor_name         TEXT NOT NULL,
+  at                 TEXT NOT NULL,
+  details_json       TEXT,
+  UNIQUE (archivo_id, revision),
+  CHECK (intento_id IS NULL OR archivo_version_id IS NOT NULL),
+  CHECK (geometria_id IS NULL OR archivo_version_id IS NOT NULL),
+  FOREIGN KEY (archivo_id, inventory_id) REFERENCES archivo(id, inventory_id),
+  FOREIGN KEY (archivo_version_id, archivo_id, inventory_id)
+    REFERENCES archivo_version(id, archivo_id, inventory_id),
+  FOREIGN KEY (intento_id, archivo_version_id) REFERENCES archivo_intento(id, archivo_version_id),
+  FOREIGN KEY (archivo_id, archivo_version_id, geometria_id)
+    REFERENCES geometria(archivo_id, archivo_version_id, id),
+  FOREIGN KEY (geometria_id, intento_id, archivo_version_id)
+    REFERENCES geometria(id, intento_id, archivo_version_id)
+);
+CREATE INDEX IF NOT EXISTS idx_archivo_evento_terreno ON archivo_evento(inventory_id);
+
+-- A lease on one version while a request finalizes, parses or activates it.
+-- trabajo_id is the fencing token. Coordination only: never referenced by
+-- history, absent from backups (a restore must not resurrect a worker), and
+-- always safe to delete once expired.
+CREATE TABLE IF NOT EXISTS archivo_trabajo (
+  archivo_version_id TEXT PRIMARY KEY NOT NULL REFERENCES archivo_version(id),
+  trabajo_id         TEXT NOT NULL,
+  actor_id           TEXT NOT NULL REFERENCES team_user(id),
+  operacion          TEXT NOT NULL CHECK (operacion IN ('completar', 'procesar', 'activar')),
+  inicio             TEXT NOT NULL,
+  vence_en           TEXT NOT NULL
+);
+"""
+
 # Kept out of SCHEMA on purpose: SCHEMA runs before the column migrations, and
 # on a database from before folders these columns do not exist yet, so an index
 # on them there would fail. Shared with the Postgres upgrade.
@@ -412,6 +741,109 @@ def transaction(conn: DatabaseConnection) -> Iterator[DatabaseConnection]:
         conn.execute(f"RELEASE {nombre}")
 
 
+class OcupadoError(AraError):
+    """A write could not get its turn (lock wait, deadlock). Nothing was
+    written; the caller may repeat the whole request."""
+
+
+# SQLite connections currently inside escritura(), by id().
+_escrituras: set[int] = set()
+
+
+@contextmanager
+def escritura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
+    """One connection inside one outer WRITE transaction, committed on exit.
+
+    The entry point for any change that must re-check authorization in the
+    transaction that writes (auth.reverificar_*), for Team A's handlers and
+    Team B's attachment repository alike:
+
+        with db.escritura() as conn:
+            alcance = auth.reverificar_terreno(conn, sesion, terreno_id, "archivos.subir")
+            ...  # short writes only; no file, network or parser work in here
+
+    SQLite: BEGIN IMMEDIATE takes the single write reservation before the
+    first read, so no other writer can change what the re-check reads until
+    this commits. transaction() alone is a SAVEPOINT, which starts a read
+    transaction and cannot promise that. Postgres: the session transaction and
+    its advisory lock, unchanged; the re-check adds row locks inside it.
+
+    Any exception rolls everything back, including a deferred foreign key that
+    only fails at COMMIT. A lock that cannot be had raises OcupadoError. Nothing is
+    retried here: a retry belongs to the caller and restarts the whole block.
+    """
+    from . import postgres
+    with _ocupado():
+        if path is None and postgres.enabled():
+            with postgres.session() as cloud_conn:
+                yield cloud_conn
+            return
+        conn = connect(path)
+        try:
+            conn.execute("BEGIN IMMEDIATE")  # waits out the busy timeout, then is "locked"
+            _escrituras.add(id(conn))
+            try:
+                yield conn
+                conn.execute("COMMIT")
+            except BaseException:
+                if conn.in_transaction:
+                    conn.execute("ROLLBACK")
+                raise
+            finally:
+                _escrituras.discard(id(conn))
+        finally:
+            conn.close()
+
+
+@contextmanager
+def _ocupado() -> Iterator[None]:
+    """Turn "could not get the lock" into OcupadoError, and nothing else.
+
+    Shared by session() and escritura(), so it covers opening the connection
+    (SQLite's migration check, Postgres's workspace advisory lock), every
+    statement in the block and the commit.
+    """
+    try:
+        yield
+    except OcupadoError:
+        raise
+    except Exception as exc:
+        if _es_bloqueo(exc):
+            raise OcupadoError() from exc
+        raise
+
+
+def _es_bloqueo(exc: BaseException) -> bool:
+    if isinstance(exc, sqlite3.OperationalError):
+        # SQLITE_BUSY and SQLITE_LOCKED. Matched by message: sqlite_errorcode
+        # needs Python 3.11 and the local app runs on 3.9.
+        return "database is locked" in str(exc) or "table is locked" in str(exc)
+    from . import postgres
+    return postgres.es_bloqueo(exc)
+
+
+def en_escritura(conn: DatabaseConnection) -> bool:
+    """A guard against one SQLite mistake, not proof of a safe transaction.
+
+    False for a SQLite connection that did not come from escritura(): it may
+    already hold a read snapshot, which cannot be upgraded to the write
+    reservation the re-check needs. For any other connection this returns
+    True without knowing anything: it cannot tell a Postgres connection opened
+    by escritura() from one opened elsewhere, in autocommit or without the
+    workspace lock. Callers must enter through escritura() on both databases;
+    this only catches the SQLite case that would otherwise fail silently.
+    """
+    return not isinstance(conn, sqlite3.Connection) or id(conn) in _escrituras
+
+
+def bloqueo(conn: DatabaseConnection, exclusivo: bool = False) -> str:
+    """The row-lock suffix for a SELECT on this connection. Empty on SQLite,
+    whose write transaction already excludes every other writer."""
+    if isinstance(conn, sqlite3.Connection):
+        return ""
+    return " FOR UPDATE" if exclusivo else " FOR SHARE"
+
+
 @contextmanager
 def session(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
     """Open a connection for one unit of work and close it afterwards.
@@ -421,15 +853,16 @@ def session(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
     per request.
     """
     from . import postgres
-    if path is None and postgres.enabled():
-        with postgres.session() as cloud_conn:
-            yield cloud_conn
-        return
-    conn = connect(path)
-    try:
-        yield conn
-    finally:
-        conn.close()
+    with _ocupado():
+        if path is None and postgres.enabled():
+            with postgres.session() as cloud_conn:
+                yield cloud_conn
+            return
+        conn = connect(path)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
 
 def migrate(conn: sqlite3.Connection) -> None:
@@ -458,6 +891,8 @@ def migrate(conn: sqlite3.Connection) -> None:
 
     conn.executescript(SCHEMA)
     conn.executescript(INVENTORY_SCHEMA)  # v7 -> v8, additive and idempotent
+    _migrate_bases_de_trabajo(conn)
+    conn.executescript(ATTACHMENT_SCHEMA)  # v9 -> v10, additive and idempotent
     # Before any snapshot below copies terrains: the copy names this column.
     _migrate_moneda(conn)
 
@@ -598,6 +1033,15 @@ def _migrate_moneda(conn: sqlite3.Connection) -> None:
             conn.execute(f"ALTER TABLE {table} ADD COLUMN moneda {definicion}")
 
 
+def _migrate_bases_de_trabajo(conn: sqlite3.Connection) -> None:
+    """v8 -> v9: work bases, grants, roles, custom columns. Additive and idempotent."""
+    conn.executescript(WORK_BASE_SCHEMA)
+    for table, column, definicion in V9_COLUMNS:
+        if column not in _columns(conn, table):
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definicion}")
+    conn.executescript(V9_INDEXES)
+
+
 def _table_names(conn: sqlite3.Connection) -> set[str]:
     return {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
 
@@ -650,10 +1094,11 @@ def backup(path: Path | str | None = None) -> Path | None:
     try:
         with copia:
             origen.backup(copia)
-            # Sessions and login throttling are operational state, not content:
-            # a restored copy must not bring old sign-ins back to life.
+            # Sessions, login throttling and attachment leases are operational
+            # state, not content: a restored copy must not bring old sign-ins
+            # or a long-gone worker's lease back to life. The source keeps them.
             tablas = _table_names(copia)
-            for operativa in ("team_session", "team_login_failure"):
+            for operativa in ("team_session", "team_login_failure", "archivo_trabajo"):
                 if operativa in tablas:
                     copia.execute(f"DELETE FROM {operativa}")
     finally:

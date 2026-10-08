@@ -1,0 +1,24 @@
+== python3 Python 3.13.16
+ : this test only means something without a system openpyxl
+
+----------------------------------------------------------------------
+Ran 672 tests in 63.123s
+
+FAILED (failures=1, skipped=29)
+== Python 3.9.25
+ : this test only means something without a system openpyxl
+
+----------------------------------------------------------------------
+Ran 672 tests in 63.317s
+
+FAILED (failures=1, skipped=29)
+== node
+# tests 120
+# pass 120
+# fail 0
+== ruff
+All checks passed!
+== mypy
+Success: no issues found in 43 source files
+== zsh
+no zsh

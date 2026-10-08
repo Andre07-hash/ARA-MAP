@@ -1,0 +1,56 @@
+{
+  "snapshot_utc": "2026-10-08T23:17:49Z",
+  "repository": "Andre07-hash/ARA-MAP",
+  "role": "Supervisor: plan, review, advise, publish instructions; no application coding",
+  "instruction_commit": "f3fd0f05c0ba9f28bd8b3e7321f374368027e784",
+  "instruction_folder": "reports/round-1-instructions-2026-10-08",
+  "main_sha": "09452fd26d38319567dce28a89db100ea61c739a",
+  "supervisor_branch": "codex/supervisor-completion-brief",
+  "supervisor_pr": 5,
+  "released_packets": [
+    "1A",
+    "1B"
+  ],
+  "future_packets_not_released": [
+    "2A",
+    "2B",
+    "3A",
+    "3B",
+    "4A",
+    "4B",
+    "5A",
+    "5B",
+    "6A",
+    "6B"
+  ],
+  "team_a": {
+    "assignment": "Publish tested prerequisite baseline early, then scoped master-record backend",
+    "accepted_p2_head": "5d0844cfd678c2f7ec55ddb4b364275482d1a801",
+    "baseline_branch": "claude/integration/round-1-baseline",
+    "feature_branch": "claude/team-a/master-record-backend",
+    "new_branches_observed": false
+  },
+  "team_b": {
+    "assignment": "Submit memory research handback, then attachment lifecycle core; no wait for research acceptance",
+    "research_branch": "claude/team-b/display-memory-budget",
+    "observed_research_head": "a9b6970da824a7b561b84bad6fc53f2d9e8ca30f",
+    "final_research_pr_observed": false,
+    "feature_branch": "claude/team-b/attachment-lifecycle",
+    "feature_branch_observed": false
+  },
+  "next_supervisor_action": "Refresh only relevant GitHub deltas; review A baseline and/or B final memory handback when available",
+  "do_not_infer": [
+    "Prompts were delivered to external sessions",
+    "Teams are currently running",
+    "Accepted components are merged",
+    "CI proves hosted readiness"
+  ],
+  "not_authorized": [
+    "Merge to main",
+    "Deployment",
+    "Provisioning or purchase",
+    "Real-account changes",
+    "New recurring monitors"
+  ],
+  "update_rule": "Refresh snapshot and changed facts after review; preserve exact evidence/version links and open findings. Do not treat this timestamped snapshot as live status."
+}

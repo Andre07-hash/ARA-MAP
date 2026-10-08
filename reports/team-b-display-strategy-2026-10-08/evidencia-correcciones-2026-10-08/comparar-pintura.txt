@@ -1,0 +1,234 @@
+Chromium 141.0.7390.37
+Negative controls on the accepted renderer's captures (must change):
+┌─────────┬─────┬──────────────────────────┬───────────┬──────┬─────────────┬───────────────────────┬────────────────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
+│ (index) │ dpr │ caso                     │ vista     │ zoom │ lienzo      │ pintadosRegionOmitida │ coberturaSinRegion │ x+1 a ±1 │ x+3 a ±2 │ x+3 a ±3 │ y+1 a ±1 │ y+3 a ±2 │ y+3 a ±3 │
+├─────────┼─────┼──────────────────────────┼───────────┼──────┼─────────────┼───────────────────────┼────────────────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0       │ 1   │ 'circulo-100k'           │ 'parte'   │ 14   │ '1440x768'  │ 27102                 │ 0.8576             │ 1        │ 0.9992   │ 1        │ 1        │ 0.9993   │ 1        │
+│ 1       │ 1   │ 'circulo-100k'           │ 'parte'   │ 16   │ '1440x768'  │ 337920                │ 0.6971             │ 1        │ 0.9993   │ 1        │ 1        │ 0.9987   │ 1        │
+│ 2       │ 1   │ 'circulo-100k'           │ 'parte'   │ 18   │ '1440x768'  │ 337920                │ 0.6971             │ 1        │ 0.9993   │ 1        │ 1        │ 0.9987   │ 1        │
+│ 3       │ 1   │ 'circulo-100k'           │ 'costura' │ 17   │ '1440x768'  │ 164831                │ 0.7002             │ 1        │ 0.9986   │ 1        │ 1        │ 0.9987   │ 1        │
+│ 4       │ 1   │ 'multiparte-20000'       │ 'parte'   │ 16   │ '1440x768'  │ 9856                  │ 0.4563             │ 1        │ 0.9773   │ 1        │ 1        │ 0.9709   │ 1        │
+│ 5       │ 1   │ 'multiparte-20000'       │ 'parte'   │ 18   │ '1440x768'  │ 0                     │                    │ 1        │ 0.9912   │ 1        │ 1        │ 0.9945   │ 1        │
+│ 6       │ 1   │ 'multiparte-20000'       │ 'parte'   │ 20   │ '1440x768'  │ 141907                │ 0.7099             │ 1        │ 0.9985   │ 1        │ 1        │ 0.9986   │ 1        │
+│ 7       │ 1   │ 'multiparte-20000'       │ 'costura' │ 19   │ '1440x768'  │ 0                     │                    │ 1        │ 0.997    │ 1        │ 1        │ 0.9972   │ 1        │
+│ 8       │ 1   │ 'grande-mas-19999'       │ 'parte'   │ 10   │ '1440x768'  │ 56080                 │ 0.3958             │ 1        │ 0.9961   │ 1        │ 1        │ 0.9959   │ 1        │
+│ 9       │ 1   │ 'grande-mas-19999'       │ 'parte'   │ 12   │ '1440x768'  │ 23409                 │ 0.3746             │ 1        │ 0.7786   │ 0.9931   │ 1        │ 0.7905   │ 1        │
+│ 10      │ 1   │ 'grande-mas-19999'       │ 'parte'   │ 14   │ '1440x768'  │ 13833                 │ 0.3718             │ 1        │ 0.9196   │ 1        │ 1        │ 0.9243   │ 1        │
+│ 11      │ 1   │ 'grande-mas-19999'       │ 'costura' │ 13   │ '1440x768'  │ 25664                 │ 0.8278             │ 1        │ 0.9295   │ 1        │ 1        │ 0.9338   │ 1        │
+│ 12      │ 1   │ 'denso-grande-mas-19999' │ 'parte'   │ 12   │ '1440x768'  │ 130505                │ 0.3953             │ 1        │ 0.9982   │ 1        │ 1        │ 0.9971   │ 1        │
+│ 13      │ 1   │ 'denso-grande-mas-19999' │ 'parte'   │ 14   │ '1440x768'  │ 267469                │ 0.3907             │ 1        │ 0.9992   │ 1        │ 1        │ 0.997    │ 1        │
+│ 14      │ 1   │ 'denso-grande-mas-19999' │ 'parte'   │ 16   │ '1440x768'  │ 212252                │ 0.3864             │ 1        │ 0.9761   │ 1        │ 1        │ 0.9787   │ 1        │
+│ 15      │ 1   │ 'denso-grande-mas-19999' │ 'costura' │ 15   │ '1440x768'  │ 226934                │ 0.7038             │ 1        │ 0.9668   │ 1        │ 1        │ 0.9679   │ 1        │
+│ 16      │ 2   │ 'circulo-100k'           │ 'parte'   │ 14   │ '2880x1536' │ 738093                │ 0                  │ 1        │ 0.9996   │ 1        │ 1        │ 0.9997   │ 1        │
+│ 17      │ 2   │ 'circulo-100k'           │ 'parte'   │ 16   │ '2880x1536' │ 3655680               │ 0.1749             │ 1        │ 0.9997   │ 1        │ 1        │ 0.9993   │ 1        │
+│ 18      │ 2   │ 'circulo-100k'           │ 'parte'   │ 18   │ '2880x1536' │ 3655680               │ 0.1749             │ 1        │ 0.9997   │ 1        │ 1        │ 0.9993   │ 1        │
+│ 19      │ 2   │ 'circulo-100k'           │ 'costura' │ 17   │ '2880x1536' │ 1807349               │ 0.1721             │ 1        │ 0.9993   │ 1        │ 1        │ 0.9994   │ 1        │
+│ 20      │ 2   │ 'multiparte-20000'       │ 'parte'   │ 16   │ '2880x1536' │ 72512                 │ 0                  │ 1        │ 0.9886   │ 1        │ 1        │ 0.9854   │ 1        │
+│ 21      │ 2   │ 'multiparte-20000'       │ 'parte'   │ 18   │ '2880x1536' │ 165984                │ 0                  │ 1        │ 0.9956   │ 1        │ 1        │ 0.9973   │ 1        │
+│ 22      │ 2   │ 'multiparte-20000'       │ 'parte'   │ 20   │ '2880x1536' │ 1643660               │ 0.1534             │ 1        │ 0.9993   │ 1        │ 1        │ 0.9993   │ 1        │
+│ 23      │ 2   │ 'multiparte-20000'       │ 'costura' │ 19   │ '2880x1536' │ 340222                │ 0.3038             │ 1        │ 0.9985   │ 1        │ 1        │ 0.9986   │ 1        │
+│ 24      │ 2   │ 'grande-mas-19999'       │ 'parte'   │ 10   │ '2880x1536' │ 369152                │ 0                  │ 1        │ 0.998    │ 1        │ 1        │ 0.9979   │ 1        │
+│ 25      │ 2   │ 'grande-mas-19999'       │ 'parte'   │ 12   │ '2880x1536' │ 149732                │ 0                  │ 1        │ 0.891    │ 1        │ 1        │ 0.8953   │ 1        │
+│ 26      │ 2   │ 'grande-mas-19999'       │ 'parte'   │ 14   │ '2880x1536' │ 88076                 │ 0                  │ 1        │ 0.9598   │ 1        │ 1        │ 0.9622   │ 1        │
+│ 27      │ 2   │ 'grande-mas-19999'       │ 'costura' │ 13   │ '2880x1536' │ 508882                │ 0.1482             │ 1        │ 0.9648   │ 1        │ 1        │ 0.9669   │ 1        │
+│ 28      │ 2   │ 'denso-grande-mas-19999' │ 'parte'   │ 12   │ '2880x1536' │ 855872                │ 0                  │ 1        │ 0.9988   │ 1        │ 1        │ 0.9984   │ 1        │
+│ 29      │ 2   │ 'denso-grande-mas-19999' │ 'parte'   │ 14   │ '2880x1536' │ 1739112               │ 0                  │ 1        │ 0.9996   │ 1        │ 1        │ 0.9985   │ 1        │
+│ 30      │ 2   │ 'denso-grande-mas-19999' │ 'parte'   │ 16   │ '2880x1536' │ 1383680               │ 0                  │ 1        │ 0.988    │ 1        │ 1        │ 0.9894   │ 1        │
+│ 31      │ 2   │ 'denso-grande-mas-19999' │ 'costura' │ 15   │ '2880x1536' │ 2463342               │ 0.1894             │ 1        │ 0.983    │ 1        │ 1        │ 0.9839   │ 1        │
+└─────────┴─────┴──────────────────────────┴───────────┴──────┴─────────────┴───────────────────────┴────────────────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+┌─────────┬─────┬──────────────────────────┬───────┬───────────┬──────┬─────────────┬─────────┬─────────────┬──────────┬───────────────┬──────────┬──────────────────┬──────────────────────┬──────────────────┬──────────────────────┐
+│ (index) │ dpr │ caso                     │ impl  │ vista     │ zoom │ lienzo      │ estado  │ pintados b2 │ pintados │ RGBA idéntico │ IoU alfa │ b2 cubierto ±1px │ cubierto por b2 ±1px │ b2 cubierto ±2px │ cubierto por b2 ±2px │
+├─────────┼─────┼──────────────────────────┼───────┼───────────┼──────┼─────────────┼─────────┼─────────────┼──────────┼───────────────┼──────────┼──────────────────┼──────────────────────┼──────────────────┼──────────────────────┤
+│ 0       │ 1   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 185012      │ 185012   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 1       │ 1   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 2       │ 1   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 3       │ 1   │ 'circulo-100k'           │ 'e1'  │ 'costura' │ 17   │ '1440x768'  │ 'listo' │ 545077      │ 545077   │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 4       │ 1   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 185012      │ 185012   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 5       │ 1   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 6       │ 1   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 7       │ 1   │ 'circulo-100k'           │ 'e1p' │ 'costura' │ 17   │ '1440x768'  │ 'listo' │ 545077      │ 545077   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 8       │ 1   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 185012      │ 184707   │ false         │ 0.9975   │ 1                │ 1                    │ 1                │ 1                    │
+│ 9       │ 1   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 10      │ 1   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 1105920     │ 1105920  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 11      │ 1   │ 'circulo-100k'           │ 'e4'  │ 'costura' │ 17   │ '1440x768'  │ 'listo' │ 545077      │ 545058   │ false         │ 0.9997   │ 1                │ 1                    │ 1                │ 1                    │
+│ 12      │ 1   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 18128       │ 18128    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 13      │ 1   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 41496       │ 41496    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 14      │ 1   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 20   │ '1440x768'  │ 'listo' │ 484560      │ 484560   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 15      │ 1   │ 'multiparte-20000'       │ 'e1'  │ 'costura' │ 19   │ '1440x768'  │ 'listo' │ 121680      │ 121680   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 16      │ 1   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 18128       │ 18128    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 17      │ 1   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 41496       │ 41496    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 18      │ 1   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 20   │ '1440x768'  │ 'listo' │ 484560      │ 484560   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 19      │ 1   │ 'multiparte-20000'       │ 'e1p' │ 'costura' │ 19   │ '1440x768'  │ 'listo' │ 121680      │ 121680   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 20      │ 1   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 18128       │ 18703    │ false         │ 0.9693   │ 1                │ 1                    │ 1                │ 1                    │
+│ 21      │ 1   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 18   │ '1440x768'  │ 'listo' │ 41496       │ 41860    │ false         │ 0.9913   │ 1                │ 1                    │ 1                │ 1                    │
+│ 22      │ 1   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 20   │ '1440x768'  │ 'listo' │ 484560      │ 486628   │ false         │ 0.9958   │ 1                │ 1                    │ 1                │ 1                    │
+│ 23      │ 1   │ 'multiparte-20000'       │ 'e4'  │ 'costura' │ 19   │ '1440x768'  │ 'listo' │ 121680      │ 122712   │ false         │ 0.9916   │ 1                │ 1                    │ 1                │ 1                    │
+│ 24      │ 1   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 10   │ '1440x768'  │ 'listo' │ 92288       │ 92288    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 25      │ 1   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 37433       │ 37433    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 26      │ 1   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 22019       │ 22019    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 27      │ 1   │ 'grande-mas-19999'       │ 'e1'  │ 'costura' │ 13   │ '1440x768'  │ 'listo' │ 149045      │ 149045   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 28      │ 1   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 10   │ '1440x768'  │ 'listo' │ 92288       │ 67000    │ false         │ 0.726    │ 0.726            │ 1                    │ 0.9995           │ 1                    │
+│ 29      │ 1   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 37433       │ 37433    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 30      │ 1   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 22019       │ 22019    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 31      │ 1   │ 'grande-mas-19999'       │ 'e1p' │ 'costura' │ 13   │ '1440x768'  │ 'listo' │ 149045      │ 149045   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 32      │ 1   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 10   │ '1440x768'  │ 'listo' │ 92288       │ 184863   │ false         │ 0.4992   │ 1                │ 1                    │ 1                │ 1                    │
+│ 33      │ 1   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 37433       │ 50012    │ false         │ 0.7485   │ 1                │ 1                    │ 1                │ 1                    │
+│ 34      │ 1   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 22019       │ 25017    │ false         │ 0.8802   │ 1                │ 1                    │ 1                │ 1                    │
+│ 35      │ 1   │ 'grande-mas-19999'       │ 'e4'  │ 'costura' │ 13   │ '1440x768'  │ 'listo' │ 149045      │ 162522   │ false         │ 0.9171   │ 1                │ 1                    │ 1                │ 1                    │
+│ 36      │ 1   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 213968      │ 213968   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 37      │ 1   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 434778      │ 434778   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 38      │ 1   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 345920      │ 345920   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 39      │ 1   │ 'denso-grande-mas-19999' │ 'e1'  │ 'costura' │ 15   │ '1440x768'  │ 'listo' │ 758226      │ 758226   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 40      │ 1   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 213968      │ 213968   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 41      │ 1   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 434778      │ 434778   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 42      │ 1   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 345920      │ 345920   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 43      │ 1   │ 'denso-grande-mas-19999' │ 'e1p' │ 'costura' │ 15   │ '1440x768'  │ 'listo' │ 758226      │ 758226   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 44      │ 1   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 12   │ '1440x768'  │ 'listo' │ 213968      │ 215357   │ false         │ 0.9936   │ 1                │ 1                    │ 1                │ 1                    │
+│ 45      │ 1   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 14   │ '1440x768'  │ 'listo' │ 434778      │ 493327   │ false         │ 0.8813   │ 1                │ 1                    │ 1                │ 1                    │
+│ 46      │ 1   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 16   │ '1440x768'  │ 'listo' │ 345920      │ 356804   │ false         │ 0.9695   │ 1                │ 1                    │ 1                │ 1                    │
+│ 47      │ 1   │ 'denso-grande-mas-19999' │ 'e4'  │ 'costura' │ 15   │ '1440x768'  │ 'listo' │ 758226      │ 799009   │ false         │ 0.949    │ 1                │ 1                    │ 1                │ 1                    │
+│ 48      │ 2   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 738093      │ 738093   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 49      │ 2   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 50      │ 2   │ 'circulo-100k'           │ 'e1'  │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 51      │ 2   │ 'circulo-100k'           │ 'e1'  │ 'costura' │ 17   │ '2880x1536' │ 'listo' │ 2179549     │ 2179549  │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 52      │ 2   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 738093      │ 738093   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 53      │ 2   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 54      │ 2   │ 'circulo-100k'           │ 'e1p' │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 55      │ 2   │ 'circulo-100k'           │ 'e1p' │ 'costura' │ 17   │ '2880x1536' │ 'listo' │ 2179549     │ 2179549  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 56      │ 2   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 738093      │ 737357   │ false         │ 0.9977   │ 1                │ 1                    │ 1                │ 1                    │
+│ 57      │ 2   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 58      │ 2   │ 'circulo-100k'           │ 'e4'  │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 4423680     │ 4423680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 59      │ 2   │ 'circulo-100k'           │ 'e4'  │ 'costura' │ 17   │ '2880x1536' │ 'listo' │ 2179549     │ 2179571  │ false         │ 0.9997   │ 1                │ 1                    │ 1                │ 1                    │
+│ 60      │ 2   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 72512       │ 72512    │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 61      │ 2   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 165984      │ 165984   │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 62      │ 2   │ 'multiparte-20000'       │ 'e1'  │ 'parte'   │ 20   │ '2880x1536' │ 'listo' │ 1938240     │ 1938240  │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 63      │ 2   │ 'multiparte-20000'       │ 'e1'  │ 'costura' │ 19   │ '2880x1536' │ 'listo' │ 486720      │ 486720   │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 64      │ 2   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 72512       │ 72512    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 65      │ 2   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 165984      │ 165984   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 66      │ 2   │ 'multiparte-20000'       │ 'e1p' │ 'parte'   │ 20   │ '2880x1536' │ 'listo' │ 1938240     │ 1938240  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 67      │ 2   │ 'multiparte-20000'       │ 'e1p' │ 'costura' │ 19   │ '2880x1536' │ 'listo' │ 486720      │ 486720   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 68      │ 2   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 72512       │ 73642    │ false         │ 0.9841   │ 1                │ 1                    │ 1                │ 1                    │
+│ 69      │ 2   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 18   │ '2880x1536' │ 'listo' │ 165984      │ 167162   │ false         │ 0.9929   │ 1                │ 1                    │ 1                │ 1                    │
+│ 70      │ 2   │ 'multiparte-20000'       │ 'e4'  │ 'parte'   │ 20   │ '2880x1536' │ 'listo' │ 1938240     │ 1942372  │ false         │ 0.9979   │ 1                │ 1                    │ 1                │ 1                    │
+│ 71      │ 2   │ 'multiparte-20000'       │ 'e4'  │ 'costura' │ 19   │ '2880x1536' │ 'listo' │ 486720      │ 488779   │ false         │ 0.9958   │ 1                │ 1                    │ 1                │ 1                    │
+│ 72      │ 2   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 10   │ '2880x1536' │ 'listo' │ 369152      │ 369152   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 73      │ 2   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 149732      │ 149732   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 74      │ 2   │ 'grande-mas-19999'       │ 'e1'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 88076       │ 88076    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 75      │ 2   │ 'grande-mas-19999'       │ 'e1'  │ 'costura' │ 13   │ '2880x1536' │ 'listo' │ 596180      │ 596180   │ false         │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 76      │ 2   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 10   │ '2880x1536' │ 'listo' │ 369152      │ 268000   │ false         │ 0.726    │ 0.726            │ 1                    │ 0.726            │ 1                    │
+│ 77      │ 2   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 149732      │ 149732   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 78      │ 2   │ 'grande-mas-19999'       │ 'e1p' │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 88076       │ 88076    │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 79      │ 2   │ 'grande-mas-19999'       │ 'e1p' │ 'costura' │ 13   │ '2880x1536' │ 'listo' │ 596180      │ 596180   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 80      │ 2   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 10   │ '2880x1536' │ 'listo' │ 369152      │ 589850   │ false         │ 0.5714   │ 1                │ 0.9448               │ 1                │ 1                    │
+│ 81      │ 2   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 149732      │ 171597   │ false         │ 0.8175   │ 1                │ 1                    │ 1                │ 1                    │
+│ 82      │ 2   │ 'grande-mas-19999'       │ 'e4'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 88076       │ 93606    │ false         │ 0.9325   │ 1                │ 1                    │ 1                │ 1                    │
+│ 83      │ 2   │ 'grande-mas-19999'       │ 'e4'  │ 'costura' │ 13   │ '2880x1536' │ 'listo' │ 596180      │ 619426   │ false         │ 0.9463   │ 1                │ 1                    │ 1                │ 1                    │
+│ 84      │ 2   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 855872      │ 855872   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 85      │ 2   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 1739112     │ 1739112  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 86      │ 2   │ 'denso-grande-mas-19999' │ 'e1'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 1383680     │ 1383680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 87      │ 2   │ 'denso-grande-mas-19999' │ 'e1'  │ 'costura' │ 15   │ '2880x1536' │ 'listo' │ 3032904     │ 3032904  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 88      │ 2   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 855872      │ 855872   │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 89      │ 2   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 1739112     │ 1739112  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 90      │ 2   │ 'denso-grande-mas-19999' │ 'e1p' │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 1383680     │ 1383680  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 91      │ 2   │ 'denso-grande-mas-19999' │ 'e1p' │ 'costura' │ 15   │ '2880x1536' │ 'listo' │ 3032904     │ 3032904  │ true          │ 1        │ 1                │ 1                    │ 1                │ 1                    │
+│ 92      │ 2   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 12   │ '2880x1536' │ 'listo' │ 855872      │ 858751   │ false         │ 0.9966   │ 1                │ 1                    │ 1                │ 1                    │
+│ 93      │ 2   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 14   │ '2880x1536' │ 'listo' │ 1739112     │ 1856547  │ false         │ 0.926    │ 1                │ 1                    │ 1                │ 1                    │
+│ 94      │ 2   │ 'denso-grande-mas-19999' │ 'e4'  │ 'parte'   │ 16   │ '2880x1536' │ 'listo' │ 1383680     │ 1403978  │ false         │ 0.9788   │ 1                │ 1                    │ 1                │ 1                    │
+│ 95      │ 2   │ 'denso-grande-mas-19999' │ 'e4'  │ 'costura' │ 15   │ '2880x1536' │ 'listo' │ 3032904     │ 3114386  │ false         │ 0.9693   │ 1                │ 1                    │ 1                │ 1                    │
+└─────────┴─────┴──────────────────────────┴───────┴───────────┴──────┴─────────────┴─────────┴─────────────┴──────────┴───────────────┴──────────┴──────────────────┴──────────────────────┴──────────────────┴──────────────────────┘
+1 circulo-100k e1 parte z14 b2 0af0e3b07185f1b6aa2f014f83918e7370b4064c1d8b2a1b4cf49299000cdf0d e1 0af0e3b07185f1b6aa2f014f83918e7370b4064c1d8b2a1b4cf49299000cdf0d
+1 circulo-100k e1 parte z16 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e1 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e1 parte z18 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e1 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e1 costura z17 b2 628f73828bf82ef8fa931b2759953f3ca7c67aff92595978ff7ed1e9ffbc8d1a e1 03b9a8f50654971b150037bcd04048ad227141171db8bfad922960756c808dc1
+1 circulo-100k e1p parte z14 b2 0af0e3b07185f1b6aa2f014f83918e7370b4064c1d8b2a1b4cf49299000cdf0d e1p 0af0e3b07185f1b6aa2f014f83918e7370b4064c1d8b2a1b4cf49299000cdf0d
+1 circulo-100k e1p parte z16 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e1p 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e1p parte z18 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e1p 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e1p costura z17 b2 628f73828bf82ef8fa931b2759953f3ca7c67aff92595978ff7ed1e9ffbc8d1a e1p 628f73828bf82ef8fa931b2759953f3ca7c67aff92595978ff7ed1e9ffbc8d1a
+1 circulo-100k e4 parte z14 b2 0af0e3b07185f1b6aa2f014f83918e7370b4064c1d8b2a1b4cf49299000cdf0d e4 47c32035fec59ccad073ef5c3e8e550e4addb068cce4c4b6e95ea9f786ed4237
+1 circulo-100k e4 parte z16 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e4 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e4 parte z18 b2 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb e4 4861b4a9ee8489d393bba90faae09b72b16f5b01adfbfcc22d682e8fcc5b1efb
+1 circulo-100k e4 costura z17 b2 628f73828bf82ef8fa931b2759953f3ca7c67aff92595978ff7ed1e9ffbc8d1a e4 1c62bacce58abceb25c4ca44ab9c9456541810310ea36f507e859743dfa1d18e
+1 multiparte-20000 e1 parte z16 b2 5983abad053e5cd59278c332d994bd7308ea19d3bd0513ebc2b0556673445aac e1 5983abad053e5cd59278c332d994bd7308ea19d3bd0513ebc2b0556673445aac
+1 multiparte-20000 e1 parte z18 b2 ba6321fbcf1e7f34a9b332d0ddcb876d81682c32fe1dbc7354c38ff6aafd8dd3 e1 ba6321fbcf1e7f34a9b332d0ddcb876d81682c32fe1dbc7354c38ff6aafd8dd3
+1 multiparte-20000 e1 parte z20 b2 5184617ea739c8b65a4f43443b5e824625501f7327a964eb236e43838ff4a398 e1 5184617ea739c8b65a4f43443b5e824625501f7327a964eb236e43838ff4a398
+1 multiparte-20000 e1 costura z19 b2 411db6126c3a555b213dd09556dec1a3d4ea9cc228f3a9e25e8debe7ec1751d5 e1 411db6126c3a555b213dd09556dec1a3d4ea9cc228f3a9e25e8debe7ec1751d5
+1 multiparte-20000 e1p parte z16 b2 5983abad053e5cd59278c332d994bd7308ea19d3bd0513ebc2b0556673445aac e1p 5983abad053e5cd59278c332d994bd7308ea19d3bd0513ebc2b0556673445aac
+1 multiparte-20000 e1p parte z18 b2 ba6321fbcf1e7f34a9b332d0ddcb876d81682c32fe1dbc7354c38ff6aafd8dd3 e1p ba6321fbcf1e7f34a9b332d0ddcb876d81682c32fe1dbc7354c38ff6aafd8dd3
+1 multiparte-20000 e1p parte z20 b2 5184617ea739c8b65a4f43443b5e824625501f7327a964eb236e43838ff4a398 e1p 5184617ea739c8b65a4f43443b5e824625501f7327a964eb236e43838ff4a398
+1 multiparte-20000 e1p costura z19 b2 411db6126c3a555b213dd09556dec1a3d4ea9cc228f3a9e25e8debe7ec1751d5 e1p 411db6126c3a555b213dd09556dec1a3d4ea9cc228f3a9e25e8debe7ec1751d5
+1 multiparte-20000 e4 parte z16 b2 5983abad053e5cd59278c332d994bd7308ea19d3bd0513ebc2b0556673445aac e4 a5245b2d9f1c89497d00479f2c65fb1039226850b3ee39a56b5aa4350c3b01c7
+1 multiparte-20000 e4 parte z18 b2 ba6321fbcf1e7f34a9b332d0ddcb876d81682c32fe1dbc7354c38ff6aafd8dd3 e4 3528ec74f6e370f9d052a413b39326cbc0d4a287ce24a04bb54932461ae52efc
+1 multiparte-20000 e4 parte z20 b2 5184617ea739c8b65a4f43443b5e824625501f7327a964eb236e43838ff4a398 e4 eb4120f8b1f46b80862175cd82552e601a9d791953199e5ea180bd8c4285374c
+1 multiparte-20000 e4 costura z19 b2 411db6126c3a555b213dd09556dec1a3d4ea9cc228f3a9e25e8debe7ec1751d5 e4 acde64b9b92863f93b2e38fc099ec04d09918b2c0274cb1be7c35a7170abe200
+1 grande-mas-19999 e1 parte z10 b2 40352c8e4aded4fd1f4bb2f74386f1a96c57a21906bbb279674463bb6e8a546d e1 40352c8e4aded4fd1f4bb2f74386f1a96c57a21906bbb279674463bb6e8a546d
+1 grande-mas-19999 e1 parte z12 b2 fa34dd542384ebb536b8ece0e5bf6e8275c8fd3fb893721968e465391d68ee28 e1 fa34dd542384ebb536b8ece0e5bf6e8275c8fd3fb893721968e465391d68ee28
+1 grande-mas-19999 e1 parte z14 b2 0fe07a46c89f3e3c3aedc752cb3edaa61781d129c5abb5e859e4123d3957a62a e1 0fe07a46c89f3e3c3aedc752cb3edaa61781d129c5abb5e859e4123d3957a62a
+1 grande-mas-19999 e1 costura z13 b2 5dfe95aa979be06eb9883cbb383b28e805e043c9cf4de946c633a0df18b73f4e e1 5dfe95aa979be06eb9883cbb383b28e805e043c9cf4de946c633a0df18b73f4e
+1 grande-mas-19999 e1p parte z10 b2 40352c8e4aded4fd1f4bb2f74386f1a96c57a21906bbb279674463bb6e8a546d e1p a179327c3435b10811809ad4f8ddd9d9283c46d47bd69216bc9e48f4987e8387
+1 grande-mas-19999 e1p parte z12 b2 fa34dd542384ebb536b8ece0e5bf6e8275c8fd3fb893721968e465391d68ee28 e1p fa34dd542384ebb536b8ece0e5bf6e8275c8fd3fb893721968e465391d68ee28
+1 grande-mas-19999 e1p parte z14 b2 0fe07a46c89f3e3c3aedc752cb3edaa61781d129c5abb5e859e4123d3957a62a e1p 0fe07a46c89f3e3c3aedc752cb3edaa61781d129c5abb5e859e4123d3957a62a
+1 grande-mas-19999 e1p costura z13 b2 5dfe95aa979be06eb9883cbb383b28e805e043c9cf4de946c633a0df18b73f4e e1p 5dfe95aa979be06eb9883cbb383b28e805e043c9cf4de946c633a0df18b73f4e
+1 grande-mas-19999 e4 parte z10 b2 40352c8e4aded4fd1f4bb2f74386f1a96c57a21906bbb279674463bb6e8a546d e4 836f779fd1253ef9a0ca591da0b6d7afcd536922b0c3746360f9ac84cd8c0011
+1 grande-mas-19999 e4 parte z12 b2 fa34dd542384ebb536b8ece0e5bf6e8275c8fd3fb893721968e465391d68ee28 e4 4d01d2c42c2195eb17213a9ec20321000ead3e732d21c207c019dbb0b04d1af9
+1 grande-mas-19999 e4 parte z14 b2 0fe07a46c89f3e3c3aedc752cb3edaa61781d129c5abb5e859e4123d3957a62a e4 d990eb16a00b41ae22031f02a8e6bb03d8a15888b4bc5d0ee98e403dac8672f9
+1 grande-mas-19999 e4 costura z13 b2 5dfe95aa979be06eb9883cbb383b28e805e043c9cf4de946c633a0df18b73f4e e4 37fda72ffc2829c6da3c5d2b2b23128037fc21fffb19108b874c06413105a878
+1 denso-grande-mas-19999 e1 parte z12 b2 1bceb9836d9e40fe2037bc77bbffccddd17941db80079dc038a6a868bbcaef89 e1 1bceb9836d9e40fe2037bc77bbffccddd17941db80079dc038a6a868bbcaef89
+1 denso-grande-mas-19999 e1 parte z14 b2 83b9b0c801b19cf912283b38c3eab82681c93cf0e8abccd4574d5243dfb7e1e4 e1 83b9b0c801b19cf912283b38c3eab82681c93cf0e8abccd4574d5243dfb7e1e4
+1 denso-grande-mas-19999 e1 parte z16 b2 31301150b0aa155776fa793b7cc3a5b177581f4219c45528380d08f4f59b042f e1 31301150b0aa155776fa793b7cc3a5b177581f4219c45528380d08f4f59b042f
+1 denso-grande-mas-19999 e1 costura z15 b2 d3a6e75285b1d1c599ebe0c3c39e5aa493d57209fe525c6a2314d8692fd483ed e1 d3a6e75285b1d1c599ebe0c3c39e5aa493d57209fe525c6a2314d8692fd483ed
+1 denso-grande-mas-19999 e1p parte z12 b2 1bceb9836d9e40fe2037bc77bbffccddd17941db80079dc038a6a868bbcaef89 e1p 1bceb9836d9e40fe2037bc77bbffccddd17941db80079dc038a6a868bbcaef89
+1 denso-grande-mas-19999 e1p parte z14 b2 83b9b0c801b19cf912283b38c3eab82681c93cf0e8abccd4574d5243dfb7e1e4 e1p 83b9b0c801b19cf912283b38c3eab82681c93cf0e8abccd4574d5243dfb7e1e4
+1 denso-grande-mas-19999 e1p parte z16 b2 31301150b0aa155776fa793b7cc3a5b177581f4219c45528380d08f4f59b042f e1p 31301150b0aa155776fa793b7cc3a5b177581f4219c45528380d08f4f59b042f
+1 denso-grande-mas-19999 e1p costura z15 b2 d3a6e75285b1d1c599ebe0c3c39e5aa493d57209fe525c6a2314d8692fd483ed e1p d3a6e75285b1d1c599ebe0c3c39e5aa493d57209fe525c6a2314d8692fd483ed
+1 denso-grande-mas-19999 e4 parte z12 b2 1bceb9836d9e40fe2037bc77bbffccddd17941db80079dc038a6a868bbcaef89 e4 b03951bf9cfe55faa7a5b118d5c21cb91726e8d3b87f88c2e22a93859f5fdb51
+1 denso-grande-mas-19999 e4 parte z14 b2 83b9b0c801b19cf912283b38c3eab82681c93cf0e8abccd4574d5243dfb7e1e4 e4 2f0092b409e147284165336395879be585988826aa715a6e452b5196459f3858
+1 denso-grande-mas-19999 e4 parte z16 b2 31301150b0aa155776fa793b7cc3a5b177581f4219c45528380d08f4f59b042f e4 c16f875dc6ce486874bcda3d2b43a8b00fabb86a1e3554d952165e5ca6d942d2
+1 denso-grande-mas-19999 e4 costura z15 b2 d3a6e75285b1d1c599ebe0c3c39e5aa493d57209fe525c6a2314d8692fd483ed e4 9b54abaf5a4e8969685616588a84905b3dd4ba974f1323423a7d12357088f5c1
+2 circulo-100k e1 parte z14 b2 155cc7fc93aaca740b2e4014e1eeaf785f19b6a4584afc0086efa337ae321ac2 e1 155cc7fc93aaca740b2e4014e1eeaf785f19b6a4584afc0086efa337ae321ac2
+2 circulo-100k e1 parte z16 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e1 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e1 parte z18 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e1 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e1 costura z17 b2 11ad00a382a2f60f61b01d97f41874c280aba51cf4d69d6ea57b3336a635b455 e1 03b472b62e9ebbbd20911fbfd2a133308c0137d05e3756d4b701ebe99e00059a
+2 circulo-100k e1p parte z14 b2 155cc7fc93aaca740b2e4014e1eeaf785f19b6a4584afc0086efa337ae321ac2 e1p 155cc7fc93aaca740b2e4014e1eeaf785f19b6a4584afc0086efa337ae321ac2
+2 circulo-100k e1p parte z16 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e1p 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e1p parte z18 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e1p 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e1p costura z17 b2 11ad00a382a2f60f61b01d97f41874c280aba51cf4d69d6ea57b3336a635b455 e1p 11ad00a382a2f60f61b01d97f41874c280aba51cf4d69d6ea57b3336a635b455
+2 circulo-100k e4 parte z14 b2 155cc7fc93aaca740b2e4014e1eeaf785f19b6a4584afc0086efa337ae321ac2 e4 37c8882360950b58e593b492766bef04a7c8ca4bd2cbc496cfd569e2d361adf1
+2 circulo-100k e4 parte z16 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e4 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e4 parte z18 b2 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e e4 3e5b713ca47f14b9aced20999c5febada7be9df2f5f8f40263dd62c73062932e
+2 circulo-100k e4 costura z17 b2 11ad00a382a2f60f61b01d97f41874c280aba51cf4d69d6ea57b3336a635b455 e4 4fe38837e19d8b779f5703f84bb50f81085ca420bf7eef72bf34ed6e19c35e59
+2 multiparte-20000 e1 parte z16 b2 f1fc5f2d2a504ce15daa13be23b13571d923982d918f46b5de8c45584b5e0835 e1 2c0593f6cf9d1b501ee197f50ea8d6b777183ab3090964ffc301e924752d44a0
+2 multiparte-20000 e1 parte z18 b2 4afb41729b689fe87855b68f3d52e751d4e7154987c9e9a9f1b2b53f5afe2ebc e1 27daa1eeba5355ed435a715eeae25a0f29998ca3ab5f4a24362e286f8cc450ca
+2 multiparte-20000 e1 parte z20 b2 eda6a7086fcbc423866f91f606a9332819cfa6cbd5d797b8563291d982990114 e1 f18cab8602276b995bdad20d2d2a7e39084ddd40a875eab48466bc490783d7bf
+2 multiparte-20000 e1 costura z19 b2 f0c9e0a5f6507889c3f87b5d4b3988fa77d95b238c64ed57617f69216d2bcd8d e1 2454ab0c9cb4e1f299a5ea922e28be2c37f70dc0ee872804f62a84fd51670c87
+2 multiparte-20000 e1p parte z16 b2 f1fc5f2d2a504ce15daa13be23b13571d923982d918f46b5de8c45584b5e0835 e1p f1fc5f2d2a504ce15daa13be23b13571d923982d918f46b5de8c45584b5e0835
+2 multiparte-20000 e1p parte z18 b2 4afb41729b689fe87855b68f3d52e751d4e7154987c9e9a9f1b2b53f5afe2ebc e1p 4afb41729b689fe87855b68f3d52e751d4e7154987c9e9a9f1b2b53f5afe2ebc
+2 multiparte-20000 e1p parte z20 b2 eda6a7086fcbc423866f91f606a9332819cfa6cbd5d797b8563291d982990114 e1p eda6a7086fcbc423866f91f606a9332819cfa6cbd5d797b8563291d982990114
+2 multiparte-20000 e1p costura z19 b2 f0c9e0a5f6507889c3f87b5d4b3988fa77d95b238c64ed57617f69216d2bcd8d e1p f0c9e0a5f6507889c3f87b5d4b3988fa77d95b238c64ed57617f69216d2bcd8d
+2 multiparte-20000 e4 parte z16 b2 f1fc5f2d2a504ce15daa13be23b13571d923982d918f46b5de8c45584b5e0835 e4 871f99aca352baa41be09666dbe4fcac2a34f9c7ffec8393d9f5d3d36dd68be9
+2 multiparte-20000 e4 parte z18 b2 4afb41729b689fe87855b68f3d52e751d4e7154987c9e9a9f1b2b53f5afe2ebc e4 5bf3f7727ba867e456b20ef8231e3ca38bdff010afe44f21edf8bfb646ec7de9
+2 multiparte-20000 e4 parte z20 b2 eda6a7086fcbc423866f91f606a9332819cfa6cbd5d797b8563291d982990114 e4 8a9e4d651b86ab0912c83ec1700fd86304368369057bfc805f9b6b6567df42cb
+2 multiparte-20000 e4 costura z19 b2 f0c9e0a5f6507889c3f87b5d4b3988fa77d95b238c64ed57617f69216d2bcd8d e4 690955eda68774e61fdd763e1bc3dc1ef4c32ead846bc605575d7ac989d8f0d8
+2 grande-mas-19999 e1 parte z10 b2 818b13afac172d51944b8e42ce0309d2e4939cdbe27add1a3a97cfcad3aca99a e1 818b13afac172d51944b8e42ce0309d2e4939cdbe27add1a3a97cfcad3aca99a
+2 grande-mas-19999 e1 parte z12 b2 a48a16ca154fa558252a36b0015c27360eb5979bb0c990f243f79c0c0461d213 e1 a48a16ca154fa558252a36b0015c27360eb5979bb0c990f243f79c0c0461d213
+2 grande-mas-19999 e1 parte z14 b2 914400a0221397ce2804fb1d0aa75079f08f477df7525afd9d2e9773754d1a64 e1 914400a0221397ce2804fb1d0aa75079f08f477df7525afd9d2e9773754d1a64
+2 grande-mas-19999 e1 costura z13 b2 8d2c19e071b020abf31be31ebb0d20af6b268a7d02e1d5f6da7b48db4508e607 e1 013e81d85b5cf7cfa59a07adae505c38bbbc941dabbd58c24544f81ce9184c01
+2 grande-mas-19999 e1p parte z10 b2 818b13afac172d51944b8e42ce0309d2e4939cdbe27add1a3a97cfcad3aca99a e1p 64e5713b8b0418d6fa0df4b667067a8b07b2ddc9e2e673ed2c2ad759870b03c7
+2 grande-mas-19999 e1p parte z12 b2 a48a16ca154fa558252a36b0015c27360eb5979bb0c990f243f79c0c0461d213 e1p a48a16ca154fa558252a36b0015c27360eb5979bb0c990f243f79c0c0461d213
+2 grande-mas-19999 e1p parte z14 b2 914400a0221397ce2804fb1d0aa75079f08f477df7525afd9d2e9773754d1a64 e1p 914400a0221397ce2804fb1d0aa75079f08f477df7525afd9d2e9773754d1a64
+2 grande-mas-19999 e1p costura z13 b2 8d2c19e071b020abf31be31ebb0d20af6b268a7d02e1d5f6da7b48db4508e607 e1p 8d2c19e071b020abf31be31ebb0d20af6b268a7d02e1d5f6da7b48db4508e607
+2 grande-mas-19999 e4 parte z10 b2 818b13afac172d51944b8e42ce0309d2e4939cdbe27add1a3a97cfcad3aca99a e4 8fe927fa94af333754442b22bc6f921896a098f0944dd1685591a69f60eba924
+2 grande-mas-19999 e4 parte z12 b2 a48a16ca154fa558252a36b0015c27360eb5979bb0c990f243f79c0c0461d213 e4 54cfd469ec782ada4b01d2101d1ce27fbd22bf0bf6c867c24f869fe647f4749e
+2 grande-mas-19999 e4 parte z14 b2 914400a0221397ce2804fb1d0aa75079f08f477df7525afd9d2e9773754d1a64 e4 cf2ad916e7adc4bc7841d9cdaa979e4569d977027e6ea99eb2806f36bb00640c
+2 grande-mas-19999 e4 costura z13 b2 8d2c19e071b020abf31be31ebb0d20af6b268a7d02e1d5f6da7b48db4508e607 e4 321d93c1e642c01a85ed989daacae9761a3f06f8e1c277e92c62286dc60608fb
+2 denso-grande-mas-19999 e1 parte z12 b2 212fcd105aa082b927fbb3aa4951edc2d1bbfe0e142159f38a10de31c26abd17 e1 212fcd105aa082b927fbb3aa4951edc2d1bbfe0e142159f38a10de31c26abd17
+2 denso-grande-mas-19999 e1 parte z14 b2 82a503397201115649f78430d97d72407441ec0821df73bc050528cf8f3b2c66 e1 82a503397201115649f78430d97d72407441ec0821df73bc050528cf8f3b2c66
+2 denso-grande-mas-19999 e1 parte z16 b2 65037a4462bb1951ac331a11f15924a746aab9d4724289fce01a91899bda7585 e1 65037a4462bb1951ac331a11f15924a746aab9d4724289fce01a91899bda7585
+2 denso-grande-mas-19999 e1 costura z15 b2 922050450a3bafe04455de0745b84586e023a1567b1cc7308f80b25a08877d23 e1 922050450a3bafe04455de0745b84586e023a1567b1cc7308f80b25a08877d23
+2 denso-grande-mas-19999 e1p parte z12 b2 212fcd105aa082b927fbb3aa4951edc2d1bbfe0e142159f38a10de31c26abd17 e1p 212fcd105aa082b927fbb3aa4951edc2d1bbfe0e142159f38a10de31c26abd17
+2 denso-grande-mas-19999 e1p parte z14 b2 82a503397201115649f78430d97d72407441ec0821df73bc050528cf8f3b2c66 e1p 82a503397201115649f78430d97d72407441ec0821df73bc050528cf8f3b2c66
+2 denso-grande-mas-19999 e1p parte z16 b2 65037a4462bb1951ac331a11f15924a746aab9d4724289fce01a91899bda7585 e1p 65037a4462bb1951ac331a11f15924a746aab9d4724289fce01a91899bda7585
+2 denso-grande-mas-19999 e1p costura z15 b2 922050450a3bafe04455de0745b84586e023a1567b1cc7308f80b25a08877d23 e1p 922050450a3bafe04455de0745b84586e023a1567b1cc7308f80b25a08877d23
+2 denso-grande-mas-19999 e4 parte z12 b2 212fcd105aa082b927fbb3aa4951edc2d1bbfe0e142159f38a10de31c26abd17 e4 e69f31b36c4dc898f4d2461d5f2f4ecd197f6206dea65c3bb97dbc3c1b8832cb
+2 denso-grande-mas-19999 e4 parte z14 b2 82a503397201115649f78430d97d72407441ec0821df73bc050528cf8f3b2c66 e4 916e3e1aff833608378e6836002a7e9c6702ffafbf567f9fdf8429b6a64fcb8a
+2 denso-grande-mas-19999 e4 parte z16 b2 65037a4462bb1951ac331a11f15924a746aab9d4724289fce01a91899bda7585 e4 fa6248232b975087bd5f8af91e3f01950be6211f0cb9b446f8d3a0cbc74fc017
+2 denso-grande-mas-19999 e4 costura z15 b2 922050450a3bafe04455de0745b84586e023a1567b1cc7308f80b25a08877d23 e4 d309d397f94e9f2903c965fe4ff50d9dcdcb1a77ae0d0c8a5779cd393cf14545

@@ -1,11 +1,13 @@
-/* Ring closing: cost and stroke identity of four ways to close rings,
+/* Ring closing: cost and stroke identity of five ways to close rings,
  * outside Leaflet (follow-up to the supervisory review of PR #16).
  *
  *   CHROMIUM=/path/to/chrome node reports/team-b-display-strategy-2026-10-08/micro-cierre.mjs
  *
- * Rings: 4,000 small irregular quads on a grid (many crossing the canvas
- * edges), plus six 400-position rings each with a 50-position hole, all at
- * non-integer positions. Paint is Leaflet 1.9.4's _fillStroke sequence with
+ * Identity sets: (a) 4,000 small irregular quads on a grid (many crossing
+ * the canvas edges), plus six 400-position rings each with a 50-position
+ * hole, all at non-integer positions; (b) Leaflet-like whole-pixel rings:
+ * one 60-position ring and 19,999 two-position rings 1 px tall, as Leaflet
+ * leaves small parts after its 1 px smoothing at an overview zoom. Paint is Leaflet 1.9.4's _fillStroke sequence with
  * the outline styles the renderer uses: normal (weight 2, fill 0.20), dashed
  * ("3 2", from layerDash) and selected (#111111, weight 3, fill 0.32), round
  * caps and joins, at DPR 1 and 2. Each way is compared, byte for byte, with
@@ -44,6 +46,11 @@ const r = await page.evaluate(async () => {
       }
       return p;
     },
+    'Path2D de datos SVG (M…L…Z)': (anillos) => {
+      let t = '';
+      for (const a of anillos) { t += `M${a[0][0]} ${a[0][1]}`; for (let j = 1; j < a.length; j += 1) t += `L${a[j][0]} ${a[j][1]}`; t += 'Z'; }
+      return new Path2D(t);
+    },
     'Path2D único, closePath': (anillos) => {
       const p = new Path2D();
       for (const a of anillos) { p.moveTo(...a[0]); for (let j = 1; j < a.length; j += 1) p.lineTo(...a[j]); p.closePath(); }
@@ -73,14 +80,18 @@ const r = await page.evaluate(async () => {
     anillos.push(Array.from({ length: 400 }, (_, j) => [cx + R * Math.cos((j / 400) * 2 * Math.PI), cy + R * Math.sin((j / 400) * 2 * Math.PI)]));
     anillos.push(Array.from({ length: 50 }, (_, j) => [cx + 40 * Math.cos((-j / 50) * 2 * Math.PI), cy + 40 * Math.sin((-j / 50) * 2 * Math.PI)]));
   }
+  const enteros = [Array.from({ length: 60 }, (_, j) => [Math.round(700 + 300 * Math.cos(j / 60 * 2 * Math.PI)),
+                                                        Math.round(380 + 300 * Math.sin(j / 60 * 2 * Math.PI))])];
+  for (let i = 0; i < 19999; i += 1) { const x = 100 + (i % 400) * 3; const y = 40 + Math.floor(i / 400) * 14; enteros.push([[x, y + 1], [x, y]]); }
+  const CONJUNTOS = { 'a: fracciones': anillos, 'b: enteros, 2 posiciones': enteros };
   const ESTILOS = {
     normal: { fillOpacity: 0.2, fillColor: '#2a78d6', color: '#2a78d6', weight: 2, dash: [] },
     discontinuo: { fillOpacity: 0.2, fillColor: '#2a78d6', color: '#2a78d6', weight: 2, dash: [3, 2] },
     seleccionado: { fillOpacity: 0.32, fillColor: '#2a78d6', color: '#111111', weight: 3, dash: [] },
   };
-  const pintar = (e, dpr, f) => {
+  const pintar = (e, dpr, f, conjunto) => {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); ctx.scale(dpr, dpr);
-    const p = f(anillos);
+    const p = f(conjunto);
     ctx.globalAlpha = e.fillOpacity; ctx.fillStyle = e.fillColor;
     if (p) ctx.fill(p, 'evenodd'); else ctx.fill('evenodd');
     ctx.setLineDash(e.dash); ctx.globalAlpha = 1; ctx.lineWidth = e.weight; ctx.strokeStyle = e.color;
@@ -89,14 +100,14 @@ const r = await page.evaluate(async () => {
     return ctx.getImageData(0, 0, c.width, c.height).data;
   };
   const identidad = [];
-  for (const [estilo, e] of Object.entries(ESTILOS)) {
+  for (const [nombreConjunto, conjunto] of Object.entries(CONJUNTOS)) for (const [estilo, e] of Object.entries(ESTILOS)) {
     for (const dpr of [1, 2]) {
-      const base = pintar(e, dpr, MODOS.closePath);
+      const base = pintar(e, dpr, MODOS.closePath, conjunto);
       let pintados = 0;
       for (let i = 3; i < base.length; i += 4) if (base[i]) pintados += 1;
-      const fila = { estilo, dpr, 'píxeles pintados (closePath)': pintados };
-      for (const nombre of Object.keys(MODOS).filter((n) => n !== 'closePath')) {
-        const d = pintar(e, dpr, MODOS[nombre]);
+      const fila = { conjunto: nombreConjunto, estilo, dpr, 'píxeles pintados (closePath)': pintados };
+      for (const nombre of Object.keys(MODOS).filter((n) => n !== 'closePath' && n !== 'Path2D único, closePath')) {
+        const d = pintar(e, dpr, MODOS[nombre], conjunto);
         let distintos = 0;
         for (let i = 0; i < d.length; i += 1) if (d[i] !== base[i]) distintos += 1;
         fila[`${nombre}: bytes distintos`] = distintos;

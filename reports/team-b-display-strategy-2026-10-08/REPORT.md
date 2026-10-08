@@ -13,6 +13,12 @@ Team B · bounded investigation · October 8, 2026
 | Browser / machine | Headless Chromium **141.0.7390.37** (Playwright's build); software rasterization, no GPU. Intel Xeon @ 2.80 GHz, 4 cores, 15.7 GiB RAM, Linux 6.18. Node 22.22.0. |
 | Scope | Everything lives in this folder. No application file, accepted B branch, Team A file, CI, deployment or real data changed. No service or credential was used. |
 
+> **Corrections after supervisory review (October 8, 2026; `7561139`): see §11.** Sections 1–10 are kept as history; where they disagree with §11, §11 applies.
+> - Every long-task figure ("longest task", "0 = no task of 50 ms or more") in §1, §3.1 and §5 is **withdrawn as measured**, because the harness could not see synchronous work run directly by the benchmark (F1). Corrected figures: §11.4.
+> - "E1 is pixel-identical to B-2" is **withdrawn**: `lineTo(first)` changes the stroke at ring seams (§11.6). The E1 implementation uses a different mechanism.
+> - The E4 tolerance coverage of §3.3 came from a helper using the wrong canvas dimensions (F2); it is recomputed in §11.6.
+> - Worker copies of prepared bodies were not bounded (F3); they are now (§11.3, §11.5). Bitmap memory is measured and a budget proposed (§11.5).
+
 ---
 
 ## 1. Answer in brief
@@ -127,6 +133,8 @@ Five renderers were measured on the same page and rows, all derived from or equa
 
 ### 3.1 Results
 
+> **Superseded (F1):** the "longest task" and "count" columns below are withdrawn; see §11.4 for corrected figures. Wall-clock, selection and cleanliness columns are kept as history.
+
 Median / worst over 3 runs. View actions: 14 per run (6 real drags, 4 real wheel steps, 4 direct redraws), 42 in total per row. **Task** = longest main-thread task in that phase (Long Tasks API; 0 = none of 50 ms or more). **Input→paint** = worst Event Timing duration, input to next paint.
 
 | Case | Renderer | Cold: outline painted (ms) | Cold: first frame (ms) | Cold: longest task | Views: wall clock (ms) | Views: longest task / count of 50 ms or more | Exact outline complete after input (ms) | Input→paint, worst | Selection correct / longest task | Cancellation: longest task / clean | Teardown clean |
@@ -188,6 +196,8 @@ Pans inside that area are blits. A new zoom shows the interior-point symbol in t
 
 ### 3.3 Paint fidelity against the accepted renderer
 
+> **Superseded (F2, seams):** E1's identity claim and E4's tolerance-coverage figures below are withdrawn; see §11.6.
+
 Captured after two frames, with blank canvases rejected (`comparar-pintura.mjs`, output in `evidencia/comparar-pintura.txt`). Views are the outline zoom and 2 and 4 levels deeper, centred on the body's last small part. The comparison also covers the overview and detail captures of every benchmark case (`banco.json` → `comparacionPintura`).
 
 | Renderer | Against B-2 |
@@ -243,6 +253,8 @@ The frozen part of the interface is unchanged: `render(terrenos, {colorFor, dash
 | Cold work | Counted in the budget: preparation is sliced at 8 ms or less, interleaved with input and painting. The longest slice observed in the node planner test was under 30 ms (ceiling asserted), and no long task appeared in E3/E4 cold loads (§3). | §3, node test |
 | Worker bitmaps (E4) | Two bitmaps (normal and selected style) per heavy layer, each covering about 2× the renderer bounds in each dimension: at 1,200 × 640 that is 2,880 × 1,536 × 4 B ≈ **17.7 MB each, 35 MB per heavy outline**. This is an estimate from dimensions, not measured; external memory is not visible in the JS heap metric. Released on zoom change, layer removal and teardown. | Code; see §7 for the recommended reduction |
 
+> **Superseded (F1, F3):** the long-task column of the visits table and the worker-bitmap estimate are replaced in §11.4 and §11.5; worker copies were unbounded until §11.3.
+
 **Many visits** (`banco.mjs`, `visitas`): 45 distinct fictional bodies of 60,000 positions each, rendered one after another with each outline drawn at scale, then the reset `render([])`:
 
 | Renderer | Bodies visited | Cache peak (bytes / entries) | Cache after reset | JS heap after GC, MiB (after visits → after reset) | Long tasks during visits / longest |
@@ -274,6 +286,8 @@ E4 is the only renderer with no long task over the 45 visits. B-2 and E1 rebuild
 ---
 
 ## 7. Recommended implementation plan
+
+> **Updated in §11.8.** E1 is implemented with path data, not `lineTo`; E4 remains pending, with the memory budget of §11.5.
 
 **Step 1 — E1, small and immediately safe.**
 - A two-function change in B-owned `web/components/map/MapCanvas.js`: an `L.Polygon` subclass used only for boundary outlines. It overrides `_updatePath` to close rings with `lineTo(first)`.
@@ -392,3 +406,312 @@ Run on the branch head before pushing. The branch adds only files under this rep
 | GitHub CI | Reported on the draft PR |
 
 Browser measurements are separate evidence from CI. CI does not run anything in this folder.
+
+---
+
+## 11. Corrections after supervisory review (October 8, 2026)
+
+Review: `75611396a1d085372d5a32cd0c76866d99b3d930`, `reports/team-b-display-review-2026-10-08/START_HERE.md`, of head `27022841…` and measured prototype `45117497…`.
+
+**Corrected code:** `14254d620dbe5c0727dc075241fa421bd64637bb`. Every figure in this section was measured at that commit, from a disposable `git archive` of it, on the same machine and browser as §1–§10: Chromium 141.0.7390.37 headless, software raster; Intel Xeon @ 2.80 GHz ×4; Linux 6.18; Node 22.22.0.
+
+**Evidence:** `evidencia-correcciones-2026-10-08/`.
+
+**Sections 1–10 are kept unchanged as history.** Figures there that this section withdraws or replaces are marked at the top of the report.
+
+### 11.0 What changed in the conclusions
+
+| Original claim | Status now |
+|---|---|
+| "0 = no task of 50 ms or more" in the tables of §1, §3.1 and §5 | **Withdrawn as measured.** The harness could not see synchronous work run directly by the benchmark (§11.1). Corrected figures are in §11.4. Some old zeros were real long tasks: for example, accepted B-2 on the single ring, cold, was **227 ms**, not 0. |
+| E4 had no main-thread task of 50 ms or more in any phase of any case | **Narrowed.** E4 still had **none** on the four limit cases, the 12-row fixture, selection, rapid cancellation and 45 visits. It had **one 52 ms cold-load task, in 1 of 3 runs of the 500-point XY control** (synchronous call 52.5 ms; the other two runs reached 38–39 ms). |
+| E1 (`lineTo(first)`) is pixel-identical to B-2 in every case and zoom | **Withdrawn.** It is not stroke-identical at ring seams (§11.2): 1 of 16 views differs at DPR 1 and 6 of 16 at DPR 2. The anti-aliasing changes; alpha IoU stays 1. The E1 implementation (separate PR) uses another mechanism. |
+| E4 "100% of B-2's painted pixels within 1 px" | **Recomputed with the corrected helper (§11.2).** It holds at DPR 1 and DPR 2 in all 32 views. The old figures came from the wrong stride and are not used. |
+| Worker memory: main cache bounded at 32 MiB | Main cache bounded; **worker copies were not** (F3). **Corrected (§11.3):** both are now bounded. |
+| ~35 MB of bitmaps per heavy outline (estimated) | **Measured: 35.4 MB at DPR 1 and 141.6 MB at DPR 2 per heavy outline;** six heavy outlines at DPR 2 hold 849 MB. Bitmaps are not bounded; a budget is proposed in §11.5. |
+
+### 11.1 F1 — long-task measurement: two causes, both corrected
+
+**Cause 1: the start-time filter (as reviewed).** `__desde(t0)` kept only long tasks starting at or after `t0`. A phase marker taken inside a running task is preceded by that task's start, so the task was dropped.
+
+**Cause 2: found by the new negative controls.** Synchronous work that `page.evaluate` runs directly (a DevTools-protocol task) is **not reported by the Long Tasks API at all** in this Chromium, whatever the filter.
+
+`control-tarea-cdp.mjs` runs 150 ms of busy work three ways, 3 runs each:
+
+| Where the busy work runs | Long task reported |
+|---|---|
+| Directly in `page.evaluate` | **none**, in 3 of 3 runs |
+| After `setTimeout(0)` (a page task) | 150 ms, 3 of 3 |
+| After `requestAnimationFrame` | 150 ms, 3 of 3 |
+
+The original harness ran exactly these in position (1):
+- the cold render;
+- the first direct redraw;
+- the first render of the cancellation phase;
+- the 45-visit loop's first body.
+
+The overlap filter alone did not fix it. The first smoke run of the corrected filter still reported **0** for 150 ms controls in the cold phase and the first direct redraw.
+
+**Correction (`banco.mjs`):**
+- **Overlap.** A long task counts for a phase when it overlaps `[t0, t1]`.
+- **Drain.** Before a phase is summarized, `__drenar` waits for the measured task to end, then two frames, then reads `takeRecords()` from both observers.
+- **Page task.** Every measured phase that starts inside an evaluate first yields to a page task (`await __tarea()`, which is `setTimeout(0)`). The phases affected are cold render, direct redraw, cancellation and visits.
+- **Call time recorded separately.** The synchronous call time of the cold render, each direct redraw and the first cancellation render is kept apart from the long task. A long call with no reported task would show up as an inconsistency, never as zero blocking.
+- **Negative controls run first, through the same phase code.**
+  - The control adds 5 ms of busy work before the phase marker and 150 ms after the renderer call, in the same task. It covers the cold render, the four direct redraws and the cancellation.
+  - A further control is a 150 ms task that ends before the marker. It must *not* be counted.
+  - The run stops if any control is missed.
+
+Negative controls of the corrected run, the first phase of `banco.mjs`, B-2 fixture. The 150 ms of busy work runs after the call:
+
+| Phase | Long task reported (corrected) | Old start-time filter on the same data | Synchronous call |
+|---|---:|---:|---:|
+| Cold render | 171 ms | 0 | 162 ms |
+| Direct pan +200 | 155 ms | 0 | 150 ms |
+| Direct pan −200 | 155 ms | 0 | 150 ms |
+| Direct zoom +1 | 156 ms | 0 | 151 ms |
+| Direct zoom −1 | 158 ms | 0 | 153 ms |
+| Cancellation (first render) | 156 ms | 121 | 152 ms |
+| A 150 ms task that **ends before** the marker | 0 (correctly not counted) | 0 | — |
+
+Every control fails the 50 ms criterion, as it must. The supervisor's own probe (`review-probes.mjs`, rerun here on Chromium 141) gives the same answer: a 155 ms task, missed by the start filter and found by overlap (`evidencia-correcciones-2026-10-08/review-probes.txt`).
+
+**Audit of the other phases:**
+- **Real drags, wheel steps and clicks:** their marker is taken in a separate evaluate before the input. The input then runs in input-event tasks, which are reported. They now use the overlap filter and the drain too.
+- **Teardown:** not a timed phase.
+
+### 11.2 F2 — paint comparison: real dimensions, controls, three separate measures
+
+`pintura.mjs` holds pure helpers, with Node tests in `pruebas/pintura.test.mjs`:
+- Every mask carries the real canvas `ancho × alto`.
+- Comparing masks of different sizes throws.
+- Every neighbourhood is computed in the mask's own stride, by a separable square dilation.
+
+`comparar-pintura.mjs` now:
+- runs at **DPR 1 and 2**: the canvas is 1440 × 768 and 2880 × 1536, asserted from the page;
+- records the full SHA-256 of both RGBA buffers;
+- reports separately:
+  - **RGBA identity**;
+  - **alpha-mask IoU**;
+  - **tolerance coverage** at ±1 and ±2 px, in both directions;
+- adds a **ring-seam view**: the first position of the first ring, 3 levels deeper;
+- runs **negative controls on every accepted-renderer capture**, and stops if any fails:
+  - **Paint removed from the formerly omitted region.** That is every pixel at linear index ≥ 1200 × 640. Coverage must drop below 1 wherever that region had paint, and at least one capture must have paint there.
+  - **The capture moved by 1 and 3 px in x and in y.** At ±1, coverage of a 1 px shift must be exactly 1. At ±2, coverage of a 3 px shift must be below 1; at ±3 it must be exactly 1. Captures with paint in the last 4 rows or columns are excluded, because a shift drops pixels off the edge.
+
+The Node tests add synthetic controls at both canvas sizes:
+- paint only beyond the old 768,000th entry;
+- 1 px lines moved 0–4 px, checked against every radius 0–3 in x and y;
+- end-of-row and start-of-next-row pixels, which must not be neighbours.
+
+None of the three measures, alone or together, proves that every polygon and hole is semantically correct. They are evidence of where pixels are.
+
+### 11.3 F3 — bounded worker geometry
+
+Worker copies are now bounded and coordinated with the main cache (`raster.js`, `trabajador-raster.js`, `capa.js`, `planificador.js`):
+
+| Rule | How |
+|---|---|
+| Byte budget for worker copies (default 32 MiB) | The client counts each posted copy until the worker **acknowledges** dropping it (`olvidado`). Copies still queued in the message channel therefore count. A body is posted only when its copy fits. If room will be free once pending forgets are acknowledged, the body (and its raster requests) waits on the main side, where no extra copy exists. |
+| Coordinated with the main cache | Every LRU eviction is reported (`alExpulsar`). The worker drops an evicted body at once unless a layer pins it. Unpinned worker bodies are therefore always a subset of the main cache. |
+| Active (pinned) copies bounded | A layer pins its body only when it first needs a raster, and unpins it on removal. Pins count in the same budget. When pinned bodies alone fill it, the outline gets the explicit state **`sin_memoria`**. It is shown as the dashed "not available" symbol with the wording "Contorno no disponible: demasiados contornos a la vez" (a proposal). `zoomToScale` returns `contorno_no_disponible` with `motivo: "sin_memoria"`. It is never drawn and never pending. |
+| Sent IDs | A forgotten ID leaves the client's state, so a revisit posts it again. |
+| Queued and in-flight work | Each layer has at most one raster request in flight. A newer need waits on the main side and replaces any older waiting one. The worker queues requests and runs one per task, so a `cancelar` arriving before a request starts removes it, and that request is never rasterized. A request whose body is absent is answered (`sinCuerpo`), never left pending. |
+| Reset and teardown | `olvidarTodo()` returns a promise that resolves when the worker **acknowledges** it has dropped everything. Until then the client still counts the bytes. `cerrar()` terminates the worker. There is nothing to acknowledge: the browser discards the worker with its queue and copies, and the client stops counting at once. |
+
+Bitmaps are counted too, at width × height × 4 for those layers hold. That is what makes the measured bitmap figures in §11.4 possible.
+
+
+### 11.4 Corrected comparative timings (all six renderers rerun)
+
+These are the full benchmark scenarios of §3, unchanged apart from the corrections in §11.1:
+- 3 runs per case and renderer, each in a fresh page;
+- real drags and wheel steps;
+- 4 direct redraws, then selection, cancellation and teardown;
+- in (parentheses), the original figure, kept for history.
+
+The renderer `E1p` is new: each ring is closed on its own `Path2D`, merged with `addPath` (§11.6).
+
+**Column definitions:**
+- **Longest task:** the longest overlapping Long Task, where 0 means no task of 50 ms or more.
+- **Synchronous call:** the renderer call alone, worst of the runs.
+- **Direct redraw call:** the non-animated `panBy` or `setZoom` call, which includes Leaflet's redraw of the canvas.
+
+| Case | Renderer | Cold: longest task, new (old) | Cold: synchronous call, worst | Views: longest task, new (old) | Views: tasks ≥ 50 ms, new (old) | Direct redraw: call, worst | Input→paint worst | Selection longest task | Cancellation longest task, new (old) | Cancellation / teardown clean |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| B-2 fixture, 12 rows | b2 | **0** (0) | 10 | **0** (0) | 0 (0) | 1 | 32 | 0 | **137** (143) | yes / yes |
+| B-2 fixture, 12 rows | E1 (lineTo) | **0** (0) | 11 | **0** (0) | 0 (0) | 1 | 32 | 0 | **119** (144) | yes / yes |
+| B-2 fixture, 12 rows | E1p (Path2D) | **0** (n/a) | 14 | **0** (n/a) | 0 (n/a) | 1 | 24 | 0 | **140** (n/a) | yes / yes |
+| B-2 fixture, 12 rows | E2 | **0** (0) | 12 | **0** (0) | 0 (0) | 2 | 40 | 0 | **66** (73) | yes / yes |
+| B-2 fixture, 12 rows | E3 | **0** (0) | 10 | **0** (0) | 0 (0) | 3 | 24 | 0 | **0** (0) | yes / yes |
+| B-2 fixture, 12 rows | E4 | **0** (0) | 12 | **0** (0) | 0 (0) | 1 | 24 | 0 | **0** (0) | yes / yes |
+| 500 XY points | b2 | **0** (0) | 28 | **0** (0) | 0 (0) | 3 | 24 | 0 | **140** (133) | yes / yes |
+| 500 XY points | E1 (lineTo) | **0** (0) | 26 | **0** (0) | 0 (0) | 3 | 32 | 0 | **98** (109) | yes / yes |
+| 500 XY points | E1p (Path2D) | **0** (n/a) | 31 | **0** (n/a) | 0 (n/a) | 3 | 32 | 0 | **98** (n/a) | yes / yes |
+| 500 XY points | E2 | **0** (0) | 30 | **0** (0) | 0 (0) | 3 | 40 | 0 | **0** (0) | yes / yes |
+| 500 XY points | E3 | **0** (0) | 35 | **0** (0) | 0 (0) | 4 | 32 | 0 | **0** (0) | yes / yes |
+| 500 XY points | E4 | **52** (0) | 36 | **0** (0) | 0 (0) | 3 | 40 | 0 | **0** (0) | yes / yes |
+| One ring, 100,000 positions | b2 | **227** (0) | 59 | **74** (53) | 5 (4) | 74 | 32 | 0 | **106** (106) | yes / yes |
+| One ring, 100,000 positions | E1 (lineTo) | **204** (0) | 50 | **97** (65) | 9 (5) | 98 | 24 | 0 | **130** (105) | yes / yes |
+| One ring, 100,000 positions | E1p (Path2D) | **220** (n/a) | 60 | **99** (n/a) | 7 (n/a) | 100 | 32 | 0 | **110** (n/a) | yes / yes |
+| One ring, 100,000 positions | E2 | **317** (300) | 33 | **228** (357) | 42 (39) | 7 | 152 | 138 | **226** (159) | yes / yes |
+| One ring, 100,000 positions | E3 | **135** (139) | 9 | **214** (278) | 42 (39) | 7 | 200 | 180 | **142** (157) | yes / yes |
+| One ring, 100,000 positions | E4 | **0** (0) | 12 | **0** (0) | 0 (0) | 1 | 24 | 0 | **0** (0) | yes / yes |
+| 20,000 scattered parts | b2 | **237** (0) | 108 | **90** (0) | 3 (0) | 91 | 24 | 0 | **131** (161) | yes / yes |
+| 20,000 scattered parts | E1 (lineTo) | **227** (0) | 125 | **77** (51) | 4 (1) | 78 | 32 | 0 | **158** (145) | yes / yes |
+| 20,000 scattered parts | E1p (Path2D) | **240** (n/a) | 118 | **80** (n/a) | 6 (n/a) | 80 | 56 | 0 | **152** (n/a) | yes / yes |
+| 20,000 scattered parts | E2 | **0** (0) | 43 | **0** (0) | 0 (0) | 1 | 32 | 0 | **0** (0) | yes / yes |
+| 20,000 scattered parts | E3 | **0** (0) | 10 | **81** (0) | 2 (0) | 1 | 32 | 0 | **0** (0) | yes / yes |
+| 20,000 scattered parts | E4 | **0** (0) | 10 | **0** (0) | 0 (0) | 2 | 32 | 0 | **0** (0) | yes / yes |
+| One large part + 19,999 small | b2 | **2,351** (2,433) | 134 | **1,186** (1,177) | 40 (28) | 582 | 976 | 957 | **945** (939) | yes / yes |
+| One large part + 19,999 small | E1 (lineTo) | **290** (185) | 117 | **138** (123) | 36 (21) | 111 | 168 | 135 | **185** (110) | yes / yes |
+| One large part + 19,999 small | E1p (Path2D) | **410** (n/a) | 142 | **115** (n/a) | 25 (n/a) | 116 | 136 | 109 | **128** (n/a) | yes / yes |
+| One large part + 19,999 small | E2 | **392** (385) | 40 | **234** (230) | 29 (24) | 6 | 232 | 221 | **214** (196) | yes / yes |
+| One large part + 19,999 small | E3 | **219** (193) | 14 | **201** (213) | 29 (24) | 5 | 208 | 195 | **212** (259) | yes / yes |
+| One large part + 19,999 small | E4 | **0** (0) | 10 | **0** (0) | 0 (0) | 2 | 32 | 0 | **0** (0) | yes / yes |
+| Dense: large + 19,999, all visible | b2 | **4,469** (4,423) | 175 | **2,490** (2,300) | 46 (27) | 970 | 1,536 | 1,523 | **1,469** (1,523) | yes / yes |
+| Dense: large + 19,999, all visible | E1 (lineTo) | **297** (334) | 117 | **278** (181) | 37 (26) | 98 | 168 | 154 | **133** (140) | yes / yes |
+| Dense: large + 19,999, all visible | E1p (Path2D) | **378** (n/a) | 140 | **179** (n/a) | 37 (n/a) | 96 | 136 | 126 | **138** (n/a) | yes / yes |
+| Dense: large + 19,999, all visible | E2 | **344** (366) | 52 | **176** (212) | 28 (23) | 6 | 176 | 165 | **168** (201) | yes / yes |
+| Dense: large + 19,999, all visible | E3 | **185** (236) | 9 | **198** (266) | 30 (25) | 4 | 176 | 165 | **190** (199) | yes / yes |
+| Dense: large + 19,999, all visible | E4 | **0** (0) | 10 | **0** (0) | 0 (0) | 3 | 24 | 0 | **0** (0) | yes / yes |
+
+Selection correct everywhere: True
+
+Selection was correct in every run and every case.
+
+The 45-visit run (§5) was repeated with the corrected phase, including worker copies and bitmaps:
+
+| Renderer | Long tasks during visits / longest, new (old) | Main cache peak | Worker bodies after visits | Reset |
+|---|---|---|---|---|
+| b2 | 19 / 193 ms (11 / 101) | — | — | — |
+| E1 | 18 / 140 ms (22 / 98) | — | — | cache 0 B |
+| E1p | 11 / 172 ms (new) | — | — | cache 0 B |
+| E2 | 53 / 107 ms (58 / 107) | 32,641,632 B / 34 | — | cache 0 B |
+| E3 | 4 / 81 ms (12 / 162) | 32,641,632 B / 34 | — | cache 0 B |
+| E4 | **0 / 0** (0 / 0) | 32,641,632 B / 34 | **32,641,632 B / 34**; the client's count, including queued copies, never exceeded it. Bitmaps at most 35.4 MB, one heavy outline at a time. | cache 0 B; worker **acknowledged**: 32.6 MB counted until the acknowledgement, then 0 B / 0 bodies |
+
+**What this changes and what it does not:**
+- The corrected harness finds the long tasks the old one missed: B-2 and E1 cold loads of 204–290 ms on the single ring and the scattered parts.
+- E4 is still the only renderer without long tasks on the large cases. The single 52 ms XY cold-load task is reported, not hidden.
+- The view-change figures for B-2 and E1 on the two adversarial cases are close to the originals, because those tasks ran in input or animation tasks, which were always reported.
+
+### 11.5 Worker geometry and bitmap memory: measurements and proposed budget
+
+**Geometry (F3)**, through the real module worker (`memoria-trabajador.mjs`); budgets are 32 MiB for the main cache and 32 MiB for the worker:
+
+| Scenario | Main cache | Worker (reported by the worker itself) | Total |
+|---|---|---|---|
+| 45 visits of 60,000-position bodies, each pinned while "on the map" | 32,641,632 B / 34 | 32,641,632 B / 34. The same IDs: unpinned worker bodies ⊆ main cache. 11 bodies waited for acknowledgements. | 65,283,264 B |
+| Revisit of the first, evicted body | — | Posted again (a new copy), rasterized | — |
+| The supervisor's pattern: 45 bodies pinned, never released | 32,641,632 B / 34 | 32,641,632 B / 34; **11 refused** (`rechazado`, never posted) | 65,283,264 B |
+| The supervisor's own probe, unchanged, on the corrected code | 32,641,632 B / 34 | **32,641,632 B / 34**, against 43,202,160 B / 45 before; reset 0 / 0 | 65,283,264 B |
+| Reset | 0 | 32.6 MB counted until the worker acknowledged, then 0 B / 0 | 0 |
+| Teardown | 0 | Worker terminated. Further calls are refused and statistics return nothing. | 0 |
+
+Node tests (`pruebas/memoria-trabajador.test.mjs`, 8 tests) drive the same client against the real worker message handler. Messages are copied with `structuredClone` and delivered in later tasks. After every step they assert:
+
+`worker-held bytes + bytes of body copies still queued ≤ budget ≤ client's count`
+
+This holds through a burst of 45 bodies with no waiting, an 8 MiB budget, and 37 bodies waiting for acknowledgements. The tests also cover:
+- cancellation of a queued raster request (it is not rasterized);
+- the reply to a request whose body is missing;
+- reset acknowledgement;
+- termination.
+
+A browser behaviour check covers `sin_memoria`:
+- with a test-only budget for two bodies, two outlines are drawn and the third is `sin_memoria`, with `zoomToScale` returning `contorno_no_disponible` (`motivo: "sin_memoria"`);
+- when the other two leave, the third is drawn.
+
+**Bitmaps (measured, not bounded yet).** The prototype keeps, for each heavy outline, two bitmaps (normal and selected) covering twice the renderer bounds in each dimension:
+
+| Heavy outlines visible at once | DPR 1: bitmaps | DPR 2: bitmaps | Prepared data (main + worker) |
+|---:|---:|---:|---:|
+| 1 | 35.4 MB | 141.6 MB | 0.96 MB |
+| 3 | 106.2 MB | 424.7 MB | 2.9 MB |
+| 6 | 212.3 MB | **849.3 MB** | 5.8 MB |
+
+Those six outlines have 30,000 positions each; the bitmap bytes are width × height × 4 of the bitmaps actually held. GPU and other external memory were not measured.
+
+**Proposed total map budget (for an E4 production packet; not implemented):**
+
+| Component | Proposal | Bound at DPR 1 / DPR 2 |
+|---|---|---|
+| Main cache of prepared bodies | Byte-bounded LRU, as now | 32 MiB |
+| Worker copies, pinned included | Byte-bounded as now; consider 16 MiB | 32 MiB (16) |
+| Preparation in progress | Bounded by the number of concurrent jobs times the 100,000-position limit (about 1.6 MB each); proposal: at most 2 jobs | ≈ 3.2 MB |
+| Raster requests in flight | At most one per map, not per outline (below) | included in the bitmap figure |
+| Bitmaps | **One bitmap for all heavy outlines of the view**, not one pair per outline. Area: the renderer's padded bounds (1,440 × 768 CSS px) instead of twice them. Keep the one shown plus the one being prepared. Draw the selected outline in a second, separate bitmap pair only while a heavy outline is selected. | (4.4 MB × DPR²) × 2 (shown, next) × 2 (normal, selected) = **17.7 MB / 70.8 MB**, whatever the number of outlines |
+| **Total** | | **≈ 85 MB / ≈ 138 MB**, against 849 MB measured now for six outlines at DPR 2 |
+
+Whether one such map budget is acceptable on the employees' machines, and whether a second map instance (for example, comparison) doubles it, are decisions for the E4 packet. Unsupported or failed workers remain an explicit later choice. Falling back to E3 does not preserve the 50 ms target (§11.4).
+
+### 11.6 Paint fidelity (corrected helpers; DPR 1 and 2; four views per case)
+
+`comparar-pintura.mjs` compares the four limit cases against B-2:
+- three views per case: the outline zoom and 2 and 4 levels deeper, centred on the last part;
+- plus a ring-seam view: the first position of the first ring, 3 levels deeper;
+- 16 views per renderer and DPR.
+
+| Renderer | DPR | RGBA-identical views | Alpha IoU, min | B-2 pixels within 1 px of the renderer's, min | Renderer's pixels within 1 px / 2 px of B-2's, min |
+|---|---|---:|---:|---:|---:|
+| E1 (`lineTo`) | 1 | 15 / 16. The single ring's seam view differs. | 1 | 1 | 1 / 1 |
+| E1 (`lineTo`) | 2 | 10 / 16. Seams differ in the ring, 20,000-part and large-part cases. | 1 | 1 | 1 / 1 |
+| E1p (`addPath`) | 1 and 2 | 15 / 16 each. The large-part overview at zoom 10 loses paint. | **0.726** | **0.726** | 1 / 1 |
+| E4 | 1 | 2 / 16 | 0.499 | **1** | 1 / 1 |
+| E4 | 2 | 2 / 16 | 0.571 | **1** | 0.945 / 1 |
+
+- **Negative controls on all 32 B-2 captures behaved as required.** Paint removed from the formerly omitted region lowered coverage wherever that region had paint, in 30 captures. The 1 px and 3 px shifts gave the expected coverage at ±1, ±2 and ±3.
+- **E1:** the differences are anti-aliasing at ring seams; alpha IoU stays 1. This is why the E1 implementation does not use `lineTo`.
+- **E1p:** the `addPath` loss was traced on Leaflet's real parts (`diagnostico-addpath.mjs`). At that view Leaflet leaves 19,999 two-position rings. Up to about 1,000 rings, per-ring `Path2D` + `addPath` paints exactly what `closePath()` paints; beyond that, two-position rings stop being painted (20,000 rings: `closePath()` 107,008 painted pixels, `addPath` 78,520, path data 107,008). A single `Path2D` built from SVG path data (`M…L…Z`), where `Z` is a real close, matches at every size and builds 20,000 rings in 23 ms, against 2,021 ms for `closePath()` (`micro-cierre.mjs`, which also confirms its byte identity on synthetic sets; that synthetic set does not itself reproduce the `addPath` loss). This is the mechanism of the E1 implementation PR.
+- **E4:**
+  - Every B-2 painted pixel has an E4 painted pixel within 1 px, at both DPRs and in every view.
+  - Going the other way, at least 94.5% of E4's pixels are within 1 px of B-2's, and 100% within 2 px.
+  - Overlap is lowest (0.50–0.57) where 20,000 tiny parts are sub-pixel. There E4 draws the exact squares and B-2 draws Leaflet's whole-pixel simplification (§3.3).
+  - These three measures place pixels. They do not prove every polygon and hole semantically correct; the hole and multipart click checks (§11.7) are separate evidence.
+
+### 11.7 Behaviour checks: the pending-wording assertion
+
+The supervisor saw one 20/21 run. The check read the state, waited two frames, then required the wording still to say "Preparando contorno…". Preparation could already have advanced, which is a race in the check.
+
+Now (`comprobaciones.mjs`):
+- **Held at the asynchronous boundary, test-only.** Preparation slices are scheduled with `scheduler.postTask`. The check holds them while it reads state, wording and painted claim together, then releases them. Renderer code and timing are unchanged.
+- **Unheld.** State and wording are also sampled together, in separate tasks, until preparation ends; every pair must agree.
+- **On failure,** the observed state and wording are printed.
+
+**Results:**
+- **E4:** 26/26 checks in **10 of 10** runs. That includes the held wording check, the paired samples and the new `sin_memoria` checks.
+- **E3:** 18/18 in **5 of 5** runs.
+
+The full output is in `evidencia-correcciones-2026-10-08/comprobaciones-repeticiones.txt`.
+
+### 11.8 Updated recommendation
+
+1. **E1: implement, with a different closing mechanism.** The draft implementation PR builds one `Path2D` from SVG path data, so `closePath()` semantics are kept without its cost. It uses it only with Leaflet 1.9.4, its Canvas renderer and whole-pixel positions, and falls back to Leaflet's drawing otherwise. `lineTo(first)` (seams) and per-ring `Path2D` + `addPath` (two-position rings) were measured to be different drawings and are not used. E1 alone does not meet the 50 ms target: E1's view tasks on the adversarial cases are still 138–278 ms (§11.4).
+2. **E4: still a candidate, still pending.**
+   - The corrected measurements keep its main result: no long task on any large case or during 45 visits.
+   - One 52 ms XY cold-load task was seen.
+   - Worker geometry is now bounded and coordinated.
+   - Bitmaps are not bounded: up to 849 MB measured for six heavy outlines at DPR 2. §11.5 proposes the total budget an E4 production packet should meet.
+   - Not tested: Safari, Firefox, touch, GPU or external memory, and real company geometry.
+3. **Pending presentation.** The supervisor's direction is noted for the later E4 packet: one employee-facing phrase, "Cargando contorno…", for every transient state, with "Contorno no disponible" and "Contorno no válido" kept distinct. The prototype still shows its internal wording per state, so its checks remain specific. The new `sin_memoria` wording is a proposal for that packet.
+
+### 11.9 Reproduce the corrections
+
+Setup is as in §9. With the same `B2_DIR`, `CASOS_DIR` and `CHROMIUM`, from a checkout of this branch:
+
+```bash
+D=reports/team-b-display-strategy-2026-10-08
+node --test $D/pruebas/*.test.mjs                     # 22 Node checks (verdicts, slicing, cache, worker memory, paint helpers)
+node $D/control-tarea-cdp.mjs                         # §11.1 CDP control
+node $D/micro-cierre.mjs                              # ring closing: cost and identity
+REPETICIONES=3 EVIDENCIA=$W/ev node $D/banco.mjs b2,e1,e1p,e2,e3,e4   # §11.4 (controls first; about 25 min)
+SALIDA_JSON=$W/pintura.json node $D/comparar-pintura.mjs e1,e1p,e4    # §11.6 (DPR 1 and 2)
+node $D/diagnostico-addpath.mjs                       # §11.6 addPath trace
+node $D/comprobaciones.mjs e4                         # §11.7 (also e3)
+SALIDA_JSON=$W/memoria.json node $D/memoria-trabajador.mjs            # §11.5
+```
+
+### 11.10 Repository verification at the corrections head
+
+Pending in this commit; reported in the next commit of this branch.

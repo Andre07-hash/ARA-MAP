@@ -1,0 +1,380 @@
+== e4 run 1
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 2
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 3
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (3 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 4
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 5
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 6
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 7
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 8
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (3 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 9
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e4 run 10
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → dibujando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    E4 zoom: "dibujando" at once, no outline claimed
+OK    E4 zoomToScale agrees with what is painted (a_escala)
+OK    E4 wording: "Dibujando contorno…"
+OK    E4: exact outline completes after drawing
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+OK    worker budget for two: two outlines drawn, one "sin_memoria" (["listo","listo","sin_memoria"])
+OK    refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed ({"estado":"contorno_no_disponible","contorno":true,"zoom":14,"requerido":11,"maximo":20,"motivo":"sin_memoria"})
+OK    refused outline wording ("<strong>Contorno 2</strong><span class=\"mark-tooltip-aviso\">Contorno no disponible: demasiados contornos a la vez</span>")
+OK    after the others leave, the refused outline is drawn; worker 480048 B <= 1100000 B
+Todas las comprobaciones pasaron
+== e3 run 1
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (3 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron
+== e3 run 2
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron
+== e3 run 3
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron
+== e3 run 4
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (5 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron
+== e3 run 5
+OK    click inside a hole selects nothing
+OK    click on the filled area selects the terrain
+OK    multipart part 1 selects the same terrain ID
+OK    multipart part 2 selects the same terrain ID
+OK    missing body: contorno_no_disponible, no outline
+OK    missing body wording: "Contorno no disponible"
+OK    large body starts "preparando", no outline claimed ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>"})
+OK    zoomToScale while preparing returns contorno_pendiente (contorno_pendiente)
+OK    pending wording while preparation is held: "Preparando contorno…" ({"estado":"preparando","contorno":false,"aviso":"<strong>Contorno ficticio</strong><span class=\"mark-tooltip-aviso\">Preparando contorno…</span>","tareasRetenidas":1})
+OK    state and wording agree in every sample (4 samples; mismatches [])
+OK    after preparation: outline drawn, a_escala
+OK    state sequence preparando → listo
+OK    selection retained across preparation (195846 selected-outline pixels)
+OK    inconsistent body (F1): "invalido", never drawn, contorno_no_disponible
+OK    inconsistent body wording: "Contorno no válido"
+OK    caller-loading body: "cargando", contorno_pendiente
+OK    caller-loading wording: "Cargando contorno…"
+OK    a newer render cancels older preparation; no late outline ({"tarde":[],"pend":0,"dibujado":null})
+Todas las comprobaciones pasaron

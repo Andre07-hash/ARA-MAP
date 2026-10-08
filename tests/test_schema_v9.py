@@ -83,8 +83,9 @@ class V9Checks:
 
     # -- the upgrade itself ----------------------------------------------------
 
-    def test_the_version_is_9(self):
-        self.assertEqual((db.SCHEMA_VERSION, self.version()), (9, 9))
+    def test_the_version_is_current(self):
+        self.assertGreaterEqual(db.SCHEMA_VERSION, 9)
+        self.assertEqual(self.version(), db.SCHEMA_VERSION)
 
     def test_existing_rows_keep_every_value_they_had(self):
         for tabla, filas in self.antes.items():

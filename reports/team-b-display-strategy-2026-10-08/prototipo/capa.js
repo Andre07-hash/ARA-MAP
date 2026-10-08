@@ -40,6 +40,35 @@ export function crearClases(L) {
     },
   });
 
+  /* 1b. PoligonoPath2D (e1p, added after the supervisory review): the
+   *    lineTo(first) closing of E1 is NOT stroke-identical to closePath() at
+   *    each ring's seam (round caps meet instead of a round join; anti-aliasing
+   *    differs there). Here each ring is its own Path2D closed with
+   *    closePath() (cheap: one subpath), merged with addPath, then filled and
+   *    stroked by Leaflet's own _fillStroke through a context view whose
+   *    fill()/stroke() use that path. Byte-identical to closePath() drawing in
+   *    the measured cases; see the report's follow-up section. */
+  const PoligonoPath2D = L.Polygon.extend({
+    _updatePath() {
+      const r = this._renderer;
+      if (!r._drawing) return;
+      const partes = this._parts;
+      if (!partes.length) return;
+      const trazo = new Path2D();
+      for (let i = 0; i < partes.length; i += 1) {
+        const anillo = partes[i];
+        if (!anillo.length) continue;
+        const a = new Path2D();
+        a.moveTo(anillo[0].x, anillo[0].y);
+        for (let j = 1; j < anillo.length; j += 1) a.lineTo(anillo[j].x, anillo[j].y);
+        a.closePath();
+        trazo.addPath(a);
+      }
+      r._ctx.beginPath();
+      r._fillStroke(conTrazo(r._ctx, trazo), this);
+    },
+  });
+
   const CapaContorno = L.Path.extend({
     options: { fill: true },
 
@@ -162,30 +191,41 @@ export function crearClases(L) {
    * outline is rasterized by the worker (exact same path, both styles) for
    * an area larger than the view; the main thread only draws the bitmap.
    * Until a bitmap for THIS zoom covering THIS view arrives, nothing is
-   * drawn or hit-testable and the state is "dibujando". */
+   * drawn or hit-testable and the state is "dibujando".
+   *
+   * F3 correction: the body is sent to the worker only when the layer first
+   * needs a raster, and pinned there while the layer is on the map; it is
+   * released on removal. If the worker budget is held by other pinned
+   * outlines the state is "sin_memoria" (explicit, not pending). At most one
+   * raster request per layer is in flight; a newer need waits in _siguiente
+   * and replaces any older waiting one. */
   const CapaContornoRaster = CapaContorno.extend({
-    initialize(preparado, options, { id, cliente, estilos, alCambiarEstado }) {
+    initialize(preparado, options, { id, cliente, estilos, alCambiarEstado, enCache }) {
       CapaContorno.prototype.initialize.call(this, preparado, options);
       this._id = id;
       this._cliente = cliente;
       this._estilos = estilos;               // [normal, selected] Leaflet path options
       this._avisar = alCambiarEstado;
+      this._enCache = enCache ?? (() => false);
       this._raster = null;                    // {escala, x0, y0, ancho, alto, bitmaps}
-      this._pedido = null;                    // {numero, escala, x0, y0, ancho, alto}
+      this._pedido = null;                    // in flight: {numero, escala, x0, y0, ancho, alto}
+      this._siguiente = null;                 // waiting: {area, vista}
+      this._fijado = false;
       this._estado = "listo";
       this._pesado = false;
-      cliente.asegurar(id, preparado);
     },
 
     onRemove(map) {
       if (this._pedido) this._cliente.descartar(this._pedido.numero);
       this._pedido = null;
+      this._siguiente = null;
       this._soltarRaster();
+      if (this._fijado) { this._cliente.liberar(this._id); this._fijado = false; }
       CapaContorno.prototype.onRemove.call(this, map);
     },
 
     _soltarRaster() {
-      if (this._raster) for (const b of this._raster.bitmaps) b.close();
+      if (this._raster) this._cliente.soltarBitmaps(this._raster.bitmaps);
       this._raster = null;
     },
 
@@ -198,6 +238,43 @@ export function crearClases(L) {
     _cubre(r, minX, minY, maxX, maxY) {
       return r && r.escala === this._escala && r.x0 <= minX && r.y0 <= minY
         && r.x0 + r.ancho >= maxX && r.y0 + r.alto >= maxY;
+    },
+
+    /** Pin the body in the worker; false when the worker budget refuses it. */
+    _asegurar() {
+      if (this._fijado) return true;
+      const r = this._cliente.asegurar(this._id, this._prep, { enCache: this._enCache() });
+      if (r === "rechazado") return false;
+      this._fijado = true;                    // "listo" or "esperando": requests queue behind it
+      return true;
+    },
+
+    _lanzar(area) {
+      const numero = this._cliente.pedir({ id: this._id, ...area, dpr: window.devicePixelRatio || 1,
+                                           estilos: this._estilos }, (respuesta) => this._recibir(respuesta));
+      this._pedido = numero === null ? null : { numero, ...area };
+    },
+
+    _recibir(respuesta) {
+      if (!this._pedido || respuesta.pedido !== this._pedido.numero) {
+        this._cliente.soltarBitmaps(respuesta.bitmaps);
+        return;
+      }
+      const area = this._pedido;
+      this._pedido = null;
+      const siguiente = this._siguiente;
+      this._siguiente = null;
+      if (siguiente || !respuesta.bitmaps.length) {
+        // A newer view needs a different area (or the worker had no body):
+        // this reply is not shown; ask for what the view needs now.
+        this._cliente.soltarBitmaps(respuesta.bitmaps);
+        if (siguiente) this._lanzar(siguiente.area);
+        return;
+      }
+      this._soltarRaster();
+      this._raster = { escala: area.escala, x0: area.x0, y0: area.y0, ancho: area.ancho,
+                       alto: area.alto, bitmaps: respuesta.bitmaps };
+      if (this._map) this.redraw();           // re-checks coverage; becomes "listo" if it fits
     },
 
     _update() {
@@ -233,25 +310,22 @@ export function crearClases(L) {
         this._updatePath();
         return;
       }
+      if (!this._asegurar()) {
+        this._ponerEstado("sin_memoria");
+        return;
+      }
       this._ponerEstado("dibujando");
-      if (this._cubre(this._pedido, minX, minY, maxX, maxY)) return;     // already asked
-      if (this._pedido) this._cliente.descartar(this._pedido.numero);
+      if (this._cubre(this._pedido, minX, minY, maxX, maxY)) { this._siguiente = null; return; }
       // Area: the view plus half its size on every side, so pans reuse it.
       const mx = (maxX - minX) / 2; const my = (maxY - minY) / 2;
       const area = { escala: k, x0: Math.floor(minX - mx), y0: Math.floor(minY - my),
                      ancho: Math.ceil(maxX - minX + 2 * mx), alto: Math.ceil(maxY - minY + 2 * my) };
-      const numero = this._cliente.pedir({ id: this._id, ...area, dpr: window.devicePixelRatio || 1,
-                                           estilos: this._estilos }, (respuesta) => {
-        if (!this._pedido || respuesta.pedido !== this._pedido.numero) {
-          for (const bm of respuesta.bitmaps) bm.close();
-          return;
-        }
-        this._pedido = null;
-        this._soltarRaster();
-        this._raster = { ...area, bitmaps: respuesta.bitmaps };
-        if (this._map) this.redraw();         // re-checks coverage; becomes "listo" if it fits
-      });
-      this._pedido = { numero, ...area };
+      if (this._pedido) {
+        // One request in flight per outline: the newest need waits, replacing older ones.
+        this._siguiente = { area };
+        return;
+      }
+      this._lanzar(area);
     },
 
     _updatePath() {
@@ -266,13 +340,26 @@ export function crearClases(L) {
     },
 
     _containsPoint(punto) {
-      // Hit testing follows what is painted: nothing while "dibujando".
+      // Hit testing follows what is painted: nothing while "dibujando" or "sin_memoria".
       if (this._pesado && this._estado !== "listo") return false;
       return CapaContorno.prototype._containsPoint.call(this, punto);
     },
   });
 
-  return { PoligonoSinClosePath, CapaContorno, CapaContornoRaster };
+  return { PoligonoSinClosePath, PoligonoPath2D, CapaContorno, CapaContornoRaster };
+}
+
+/** The 2D context, with fill(rule) and stroke() applied to `trazo`. */
+function conTrazo(ctx, trazo) {
+  return new Proxy(ctx, {
+    get(t, k) {
+      if (k === "fill") return (regla) => t.fill(trazo, regla);
+      if (k === "stroke") return () => t.stroke(trazo);
+      const v = t[k];
+      return typeof v === "function" ? v.bind(t) : v;
+    },
+    set(t, k, v) { t[k] = v; return true; },
+  });
 }
 
 /* Above these, drawing on the main thread exceeds the 50 ms task budget on

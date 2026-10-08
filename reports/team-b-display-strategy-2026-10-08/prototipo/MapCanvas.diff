@@ -1,6 +1,6 @@
 --- a/web/components/map/MapCanvas.js
 +++ b/web/components/map/MapCanvas.js
-@@ -12,16 +12,27 @@
+@@ -12,16 +12,31 @@
   * drawn as a circle scaled from declared area.
   */
  
@@ -29,11 +29,15 @@
 + * cancellable preparation with an explicit pending status; "e4" = e3 +
 + * worker rasterization when the visible geometry is heavy. */
 +let ESTRATEGIA = "e3";
-+export function configurarPrototipo({ estrategia }) { ESTRATEGIA = estrategia; }
++let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default
++export function configurarPrototipo({ estrategia, presupuestoTrabajador }) {
++  ESTRATEGIA = estrategia;
++  PRESUPUESTO_TRABAJADOR = presupuestoTrabajador;
++}
  
  /* A mark has two jobs and two looks.
   *
-@@ -35,6 +46,17 @@
+@@ -35,17 +50,42 @@
  /* A boundary whose body has not loaded (or failed validation) keeps its place
   * with a hollow, dashed symbol, so it never passes for a loaded outline. */
  const SIN_CONTORNO = { fillOpacity: 0.18, weight: 2, dashArray: "3 3" };
@@ -45,13 +49,20 @@
 +  cargando: "Cargando contorno…",
 +  preparando: "Preparando contorno…",
 +  dibujando: "Dibujando contorno…",
++  // F3: the worker budget is held by other outlines on the map; explicit, never pending.
++  sin_memoria: "Contorno no disponible: demasiados contornos a la vez",
 +  no_disponible: "Contorno no disponible",
 +  invalido: "Contorno no válido",
 +};
  
  /* How long a second activation on the same terrain still counts as a double.
   * An interaction choice, not a geometry constant: kept here so both the mouse
-@@ -45,7 +67,14 @@
+  * and touch paths use one value. */
+ const DOBLE_ACTIVACION_MS = 280;
++/* PROTOTYPE (F3): E4 states where the outline layer is attached but not painted. */
++const NO_PINTADO = new Set(["dibujando", "sin_memoria"]);
+ /* A second tap further than this from the first is a new gesture, not a double. */
+ const DOBLE_ACTIVACION_PX = 28;
  
  export const ZOOM_MAXIMO = 20;
  
@@ -59,15 +70,18 @@
 +export function createMapCanvas(container, {
 +  onSelect, onScaleChange, onDoubleSelect, onContornoEstado,
 +} = {}) {
-+  const { PoligonoSinClosePath, CapaContorno, CapaContornoRaster } = crearClases(L);
-+  const raster = ESTRATEGIA === "e4" ? crearClienteRaster() : null;
-+  const cache = crearCache();
++  const { PoligonoSinClosePath, PoligonoPath2D, CapaContorno, CapaContornoRaster } = crearClases(L);
++  const raster = ESTRATEGIA === "e4"
++    ? crearClienteRaster({ presupuesto: PRESUPUESTO_TRABAJADOR }) : null;
++  // F3: an evicted body leaves the worker too, unless a layer still pins it.
++  const cache = crearCache(undefined, { alExpulsar: (id) => raster?.expulsado(id) });
++  let reinicioTrabajador = null;                 // F3: resolves when the worker confirms
 +  const planificador = crearPlanificador();
 +  let generacion = 0;
    const map = L.map(container, {
      zoomControl: false,
      attributionControl: true,
-@@ -163,7 +192,9 @@
+@@ -163,7 +203,9 @@
     * before. render([]) clears every layer, the selection and any pending
     * click -- the reset path for a session or scope change.
     */
@@ -78,14 +92,14 @@
      contornoLayer.clearLayers();
      markerLayer.clearLayers();
      byId = new Map();
-@@ -228,10 +259,15 @@
+@@ -228,10 +270,15 @@
        });
      }
  
 +    // PROTOTYPE: preparation nobody needs any more is cancelled; an empty
 +    // render is the session/scope reset, which also drops every cached body.
 +    planificador.conservarSolo(new Set(contornos.map((t) => t.geometria.id)));
-+    if (!filas.length) { cache.vaciar(); raster?.olvidarTodo(); }
++    if (!filas.length) { cache.vaciar(); if (raster) reinicioTrabajador = raster.olvidarTodo(); }
      for (const terreno of contornos) {
        if (byId.has(terreno.id)) continue;           // one logical mark per terrain
        byId.set(terreno.id, crearContorno(
@@ -95,7 +109,7 @@
      }
  
      // A selection or a pending click on a terrain that is no longer drawn
-@@ -245,37 +281,74 @@
+@@ -245,37 +292,76 @@
    }
  
    /** One boundary terrain: its symbol, and its outline when the body loaded. */
@@ -108,7 +122,7 @@
 +    // large body inside render(); it starts (or joins) a cooperative job.
 +    let cuerpo;
 +    let estadoContorno;
-+    if (ESTRATEGIA === "e1") {
++    if (ESTRATEGIA === "e1" || ESTRATEGIA === "e1p") {
 +      cuerpo = cuerpoLeaflet(descriptor, geometrias);
 +    } else {
 +      cuerpo = cache.obtener(descriptor);
@@ -164,6 +178,7 @@
 +                         ...contornoStyle({ fill, dash }) };
 +      let capa;
 +      if (ESTRATEGIA === "e1") capa = new PoligonoSinClosePath(c.partes, opciones);
++      else if (ESTRATEGIA === "e1p") capa = new PoligonoPath2D(c.partes, opciones);
 +      else if (ESTRATEGIA === "e4") {
 +        const completo = (sel) => {
 +          const o = L.Util.extend({}, L.Path.prototype.options, { fill: true }, opciones,
@@ -173,6 +188,7 @@
 +        };
 +        capa = new CapaContornoRaster(c, opciones, {
 +          id: descriptor.id, cliente: raster, estilos: [completo(false), completo(true)],
++          enCache: () => cache.contiene(descriptor.id),
 +          alCambiarEstado: (estado) => alDibujo(entrada, terreno, estado),
 +        });
 +      } else capa = new CapaContorno(c, opciones);
@@ -185,7 +201,7 @@
  
      const entry = {
        tipo: "contorno",
-@@ -287,9 +360,67 @@
+@@ -287,9 +373,67 @@
        punto: puntoLeaflet(descriptor.punto_interior),
        posiciones: disponible ? cuerpo.posiciones : 0,
        aEscala: false,
@@ -225,7 +241,7 @@
 +   * this from inside its redraw loop) and coalesced to the last state. */
 +  function alDibujo(entry, terreno, estado) {
 +    if (!entry || byId.get(terreno.id) !== entry || !entry.disponible) return;
-+    const nuevo = estado === "dibujando" && entry.aEscala ? "dibujando" : "listo";
++    const nuevo = NO_PINTADO.has(estado) && entry.aEscala ? estado : "listo";
 +    if (nuevo === entry.estadoContorno) return;
 +    entry.estadoContorno = nuevo;
 +    if (entry.visualPendiente) return;
@@ -236,7 +252,7 @@
 +      const actual = entry.estadoContorno;          // idempotent: apply the latest state
 +      // Pending: the interior-point symbol stays, in the pending look, over the
 +      // undrawn outline; never an outline that is not painted yet.
-+      if (actual === "dibujando") entry.simbolo.addTo(markerLayer);
++      if (NO_PINTADO.has(actual)) entry.simbolo.addTo(markerLayer);
 +      else if (entry.aEscala) markerLayer.removeLayer(entry.simbolo);
 +      entry.simbolo.setTooltipContent(tooltipHtml(terreno, { aviso: AVISOS[actual] ?? null }));
 +      aplicarEstiloContorno(entry, terreno.id === selectedId);
@@ -253,34 +269,38 @@
    }
  
    /** Show the outline or the symbol for this zoom; returns whether it changed. */
-@@ -301,11 +432,12 @@
+@@ -301,11 +445,12 @@
      }
      entry.aEscala = aEscala;
      if (aEscala) {
 -      markerLayer.removeLayer(entry.simbolo);
-+      if (entry.estadoContorno !== "dibujando") markerLayer.removeLayer(entry.simbolo);
++      if (!NO_PINTADO.has(entry.estadoContorno)) markerLayer.removeLayer(entry.simbolo);
        entry.contorno.addTo(contornoLayer);
        entry.contorno.bringToBack();          // below every circle and symbol
      } else {
        if (entry.contorno) contornoLayer.removeLayer(entry.contorno);
-+      if (entry.estadoContorno === "dibujando") entry.estadoContorno = "listo";
++      if (NO_PINTADO.has(entry.estadoContorno)) entry.estadoContorno = "listo";
        entry.simbolo.addTo(markerLayer);
      }
      return true;
-@@ -355,7 +487,7 @@
+@@ -355,7 +500,7 @@
        if (entry.tipo === "contorno") {
          // A drawn outline is real ground, like a circle at true scale.
          contornos += 1;
 -        if (entry.aEscala) {
-+        if (entry.aEscala && entry.estadoContorno !== "dibujando") {
++        if (entry.aEscala && !NO_PINTADO.has(entry.estadoContorno)) {
            contornosAEscala += 1;
            aEscala += 1;
          }
-@@ -502,6 +634,12 @@
+@@ -502,6 +647,16 @@
        map.setView(entry.punto, requerido, { animate: false });
      }
      const zoom = map.getZoom();
 +    // PROTOTYPE: never report an outline that is still loading or being prepared.
++    if (entry.estadoContorno === "sin_memoria") {
++      return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo,
++               motivo: "sin_memoria" };
++    }
 +    if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"
 +        || entry.estadoContorno === "dibujando") {
 +      return { estado: "contorno_pendiente", contorno: true, zoom, requerido, maximo,
@@ -289,18 +309,18 @@
      if (!entry.disponible) {
        return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo };
      }
-@@ -521,7 +659,9 @@
+@@ -521,7 +676,9 @@
      if (!entry) return null;
      const latlng = entry.tipo === "contorno" ? entry.punto : entry.marker.getLatLng();
      const p = map.latLngToContainerPoint(latlng);
 -    return { x: p.x, y: p.y, tipo: entry.tipo, contorno: Boolean(entry.aEscala && entry.contorno) };
 +    return { x: p.x, y: p.y, tipo: entry.tipo, contorno: Boolean(entry.aEscala && entry.contorno
-+                                       && entry.estadoContorno !== "dibujando"),
++                                       && !NO_PINTADO.has(entry.estadoContorno)),
 +             estadoContorno: entry.estadoContorno ?? null };
    }
  
    /** The current viewport, for storing in a saved map's view state. */
-@@ -541,15 +681,33 @@
+@@ -541,15 +698,36 @@
      zoomToScale,
      posicionDe,
      invalidate: () => map.invalidateSize(),
@@ -313,6 +333,7 @@
 +      map.remove();
 +    },
 +    _diagnostico: { planificador, cache, raster,
++                    get reinicioTrabajador() { return reinicioTrabajador; },
 +                    // Test hook: the symbol tooltip text (state wording) of a terrain.
 +                    aviso: (id) => byId.get(id)?.simbolo?.getTooltip()?.getContent() ?? null },
      get basemap() { return basemapKey; },
@@ -321,7 +342,9 @@
  
  /** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
 -function simboloStyle({ fill, dash, disponible, selected = false }) {
-+function simboloStyle({ fill, dash, disponible, estadoContorno = null, selected = false }) {
++function simboloStyle({ fill, dash, disponible: cargado, estadoContorno = null, selected = false }) {
++  // F3: an outline refused by the worker budget looks "not available", never pending.
++  const disponible = cargado && estadoContorno !== "sin_memoria";
 +  const pendiente = estadoContorno === "preparando" || estadoContorno === "cargando"
 +    || estadoContorno === "dibujando";
    if (selected) {
@@ -336,7 +359,7 @@
    }
    if (!disponible) {
      return { color: fill, weight: SIN_CONTORNO.weight, dashArray: SIN_CONTORNO.dashArray,
-@@ -561,11 +719,15 @@
+@@ -561,11 +739,15 @@
  
  /** A drawn outline: the footprint look, the selection look when selected. */
  function contornoStyle({ fill, dash, selected = false }) {
@@ -355,7 +378,7 @@
    const name = escapeHtml(terreno.terreno);
    const place = escapeHtml(
      [terreno.municipio, terreno.estado].filter(Boolean).join(", ")
-@@ -578,7 +740,7 @@
+@@ -578,7 +760,7 @@
      `<strong>${name}</strong>` +
      (place ? `<span>${place}</span>` : "") +
      (figures ? `<span class="figure">${escapeHtml(figures)}</span>` : "") +

@@ -25,7 +25,9 @@ if (impl === "b2") {
   ({ createMapCanvas } = await import("/b2/web/components/map/MapCanvas.js"));
 } else {
   const proto = await import("/proto/prototipo/MapCanvas.js");
-  proto.configurarPrototipo({ estrategia: impl });
+  // ?presupuesto=<bytes>: a smaller worker budget, for the F3 behaviour check only.
+  const presupuesto = Number(new URLSearchParams(location.search).get("presupuesto")) || undefined;
+  proto.configurarPrototipo({ estrategia: impl, presupuestoTrabajador: presupuesto });
   createMapCanvas = proto.createMapCanvas;
 }
 

@@ -12,6 +12,8 @@
  *   cancelled job never reports a result.
  * - Cache: prepared bodies by immutable geometry ID, checked against the
  *   descriptor bbox, evicted least-recently-used beyond a byte budget.
+ *   F3 correction: every eviction is reported (alExpulsar) so the worker's
+ *   copy of an evicted body is dropped too, unless a layer still pins it.
  */
 
 import { bytesDe, crearPreparacion } from "./preparar.js";
@@ -21,7 +23,7 @@ export const PRESUPUESTO_CACHE_BYTES = 32 * 1024 * 1024;   // ~1.4M positions
 
 function claveCaja(b) { return b.join(","); }
 
-export function crearCache(presupuesto = PRESUPUESTO_CACHE_BYTES) {
+export function crearCache(presupuesto = PRESUPUESTO_CACHE_BYTES, { alExpulsar = null } = {}) {
   const entradas = new Map();          // id -> {caja, preparado, bytes}; insertion order = LRU
   let bytes = 0;
   return {
@@ -44,8 +46,11 @@ export function crearCache(presupuesto = PRESUPUESTO_CACHE_BYTES) {
         if (bytes <= presupuesto) break;
         entradas.delete(id);
         bytes -= e.bytes;
+        alExpulsar?.(id);
       }
     },
+    /** Whether `id` is cached (no LRU change). */
+    contiene(id) { return entradas.has(id); },
     vaciar() { entradas.clear(); bytes = 0; },
     get bytes() { return bytes; },
     get tamano() { return entradas.size; },

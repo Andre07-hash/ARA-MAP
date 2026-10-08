@@ -357,6 +357,70 @@ EDICIONES: list[tuple[str, str]] = [
      '  }\n'
      '  return { color: fill, weight: HUELLA.weight, dashArray: dash, fillOpacity: HUELLA.fillOpacity,\n'
      '           seleccionado: false };'),
+    # ---- F3 correction (supervisory review): bounded worker copies, applied last.
+    ('  dibujando: "Dibujando contorno…",\n',
+     '  dibujando: "Dibujando contorno…",\n'
+     '  // F3: the worker budget is held by other outlines on the map; explicit, never pending.\n'
+     '  sin_memoria: "Contorno no disponible: demasiados contornos a la vez",\n'),
+    ('const DOBLE_ACTIVACION_MS = 280;\n',
+     'const DOBLE_ACTIVACION_MS = 280;\n'
+     '/* PROTOTYPE (F3): E4 states where the outline layer is attached but not painted. */\n'
+     'const NO_PINTADO = new Set(["dibujando", "sin_memoria"]);\n'),
+    ('  const cache = crearCache();\n',
+     '  // F3: an evicted body leaves the worker too, unless a layer still pins it.\n'
+     '  const cache = crearCache(undefined, { alExpulsar: (id) => raster?.expulsado(id) });\n'
+     '  let reinicioTrabajador = null;                 // F3: resolves when the worker confirms\n'),
+    ('    if (!filas.length) { cache.vaciar(); raster?.olvidarTodo(); }\n',
+     '    if (!filas.length) { cache.vaciar(); if (raster) reinicioTrabajador = raster.olvidarTodo(); }\n'),
+    ('          id: descriptor.id, cliente: raster, estilos: [completo(false), completo(true)],\n',
+     '          id: descriptor.id, cliente: raster, estilos: [completo(false), completo(true)],\n'
+     '          enCache: () => cache.contiene(descriptor.id),\n'),
+    ('    const nuevo = estado === "dibujando" && entry.aEscala ? "dibujando" : "listo";\n',
+     '    const nuevo = NO_PINTADO.has(estado) && entry.aEscala ? estado : "listo";\n'),
+    ('      if (actual === "dibujando") entry.simbolo.addTo(markerLayer);\n',
+     '      if (NO_PINTADO.has(actual)) entry.simbolo.addTo(markerLayer);\n'),
+    ('      if (entry.estadoContorno !== "dibujando") markerLayer.removeLayer(entry.simbolo);\n',
+     '      if (!NO_PINTADO.has(entry.estadoContorno)) markerLayer.removeLayer(entry.simbolo);\n'),
+    ('      if (entry.estadoContorno === "dibujando") entry.estadoContorno = "listo";\n',
+     '      if (NO_PINTADO.has(entry.estadoContorno)) entry.estadoContorno = "listo";\n'),
+    ('        if (entry.aEscala && entry.estadoContorno !== "dibujando") {\n',
+     '        if (entry.aEscala && !NO_PINTADO.has(entry.estadoContorno)) {\n'),
+    ('                                       && entry.estadoContorno !== "dibujando"),\n',
+     '                                       && !NO_PINTADO.has(entry.estadoContorno)),\n'),
+    ('    if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"\n'
+     '        || entry.estadoContorno === "dibujando") {\n',
+     '    if (entry.estadoContorno === "sin_memoria") {\n'
+     '      return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo,\n'
+     '               motivo: "sin_memoria" };\n'
+     '    }\n'
+     '    if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"\n'
+     '        || entry.estadoContorno === "dibujando") {\n'),
+    ('    _diagnostico: { planificador, cache, raster,\n',
+     '    _diagnostico: { planificador, cache, raster,\n'
+     '                    get reinicioTrabajador() { return reinicioTrabajador; },\n'),
+    ('function simboloStyle({ fill, dash, disponible, estadoContorno = null, selected = false }) {\n',
+     'function simboloStyle({ fill, dash, disponible: cargado, estadoContorno = null, selected = false }) {\n'
+     '  // F3: an outline refused by the worker budget looks "not available", never pending.\n'
+     '  const disponible = cargado && estadoContorno !== "sin_memoria";\n'),
+    # ---- Review follow-up: "e1p" closes each ring with closePath() on its own
+    # Path2D (exact closePath stroke semantics), merged with addPath.
+    ('  const { PoligonoSinClosePath, CapaContorno, CapaContornoRaster } = crearClases(L);\n',
+     '  const { PoligonoSinClosePath, PoligonoPath2D, CapaContorno, CapaContornoRaster } = crearClases(L);\n'),
+    ('    if (ESTRATEGIA === "e1") {\n',
+     '    if (ESTRATEGIA === "e1" || ESTRATEGIA === "e1p") {\n'),
+    ('      if (ESTRATEGIA === "e1") capa = new PoligonoSinClosePath(c.partes, opciones);\n',
+     '      if (ESTRATEGIA === "e1") capa = new PoligonoSinClosePath(c.partes, opciones);\n'
+     '      else if (ESTRATEGIA === "e1p") capa = new PoligonoPath2D(c.partes, opciones);\n'),
+    # F3: a test may lower the worker budget (behaviour check of "sin_memoria").
+    ('export function configurarPrototipo({ estrategia }) { ESTRATEGIA = estrategia; }',
+     'let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default\n'
+     'export function configurarPrototipo({ estrategia, presupuestoTrabajador }) {\n'
+     '  ESTRATEGIA = estrategia;\n'
+     '  PRESUPUESTO_TRABAJADOR = presupuestoTrabajador;\n'
+     '}'),
+    ('  const raster = ESTRATEGIA === "e4" ? crearClienteRaster() : null;\n',
+     '  const raster = ESTRATEGIA === "e4"\n'
+     '    ? crearClienteRaster({ presupuesto: PRESUPUESTO_TRABAJADOR }) : null;\n'),
 ]
 
 

@@ -19,10 +19,10 @@ const browser = await chromium.launch(process.env.CHROMIUM
 const fallos = [];
 const ok = (cond, que) => { console.log(`${cond ? 'OK   ' : 'FALLA'} ${que}`); if (!cond) fallos.push(que); };
 
-async function pagina() {
+async function pagina(extra = '') {
   const page = await browser.newPage({ viewport: { width: 1200, height: 640 } });
   page.on('pageerror', (e) => fallos.push(`pageerror: ${e}`));
-  await page.goto(`${servidor.url}/proto/banco.html?impl=${impl}`);
+  await page.goto(`${servidor.url}/proto/banco.html?impl=${impl}${extra}`);
   await page.waitForFunction(() => document.title === 'listo');
   await page.evaluate(() => {
     window.__dos = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -88,17 +88,45 @@ const clic = async (page, x, y) => {
     const b = window.__banco;
     b.d = await b.cargar('grande-mas-19999');
     b.estados.length = 0;
+    // Test-only control of the asynchronous boundary (review: the wording
+    // check raced the preparation). Preparation slices are scheduled with
+    // scheduler.postTask; they are held while the pending state is inspected
+    // and released afterwards. Renderer code and timing are unchanged.
+    const real = scheduler.postTask.bind(scheduler);
+    const retenidas = [];
+    scheduler.postTask = (fn, o) => { retenidas.push([fn, o]); return Promise.resolve(); };
+    const leer = () => ({ estado: b.canvas.posicionDe('contorno')?.estadoContorno ?? null,
+                          contorno: b.canvas.posicionDe('contorno')?.contorno ?? null,
+                          aviso: b.canvas._diagnostico.aviso('contorno') });
     b.canvas.render(b.d.filas, { colorFor: b.colorFor, geometrias: b.d.geometrias });
-    const inicial = b.canvas.posicionDe('contorno');
+    const inicial = leer();
     const z = b.canvas.zoomToScale('contorno');
     b.canvas.select('contorno');
     await window.__dos();
-    const p = b.canvas.posicionDe('contorno');
-    return { inicial, z, p, aviso: b.canvas._diagnostico.aviso('contorno') };
+    await new Promise((ok) => setTimeout(ok, 50));
+    const retenido = { ...leer(), tareasRetenidas: retenidas.length };
+    delete scheduler.postTask;                     // back to the browser's own
+    for (const [fn, o] of retenidas.splice(0)) real(fn, o);
+    // Without any hold: state and wording read together, in separate tasks,
+    // until preparation ends; each pair must agree.
+    const pares = [];
+    for (let i = 0; i < 2000 && leer().estado === 'preparando'; i += 1) {
+      pares.push(leer());
+      await new Promise((ok) => setTimeout(ok, 1));
+    }
+    pares.push(leer());
+    return { inicial, z, retenido, pares };
   });
-  ok(r.inicial.estadoContorno === 'preparando' && !r.inicial.contorno, 'large body starts "preparando", no outline claimed');
-  ok(r.z.estado === 'contorno_pendiente', 'zoomToScale while preparing returns contorno_pendiente');
-  ok(r.aviso.includes('Preparando contorno…'), 'pending wording: "Preparando contorno…"');
+  const VERBO = { preparando: 'Preparando contorno…', dibujando: 'Dibujando contorno…' };
+  ok(r.inicial.estado === 'preparando' && !r.inicial.contorno,
+     `large body starts "preparando", no outline claimed (${JSON.stringify(r.inicial)})`);
+  ok(r.z.estado === 'contorno_pendiente', `zoomToScale while preparing returns contorno_pendiente (${r.z.estado})`);
+  ok(r.retenido.estado === 'preparando' && r.retenido.aviso?.includes('Preparando contorno…') && !r.retenido.contorno,
+     `pending wording while preparation is held: "Preparando contorno…" (${JSON.stringify(r.retenido)})`);
+  const desacuerdos = r.pares.filter((x) => (VERBO[x.estado] ? !x.aviso?.includes(VERBO[x.estado])
+    : /Preparando|Dibujando|Cargando/.test(x.aviso ?? '')));
+  ok(desacuerdos.length === 0,
+     `state and wording agree in every sample (${r.pares.length} samples; mismatches ${JSON.stringify(desacuerdos.slice(0, 3))})`);
   const fin = await page.evaluate(async () => {
     const b = window.__banco;
     await window.__esperar('contorno', ['preparando']);
@@ -184,6 +212,66 @@ const clic = async (page, x, y) => {
   ok(r.cargando.aviso.includes('Cargando contorno…'), 'caller-loading wording: "Cargando contorno…"');
   ok(r.aunPreparando && r.tarde.length === 0 && r.pend === 0 && r.dibujado === null,
      `a newer render cancels older preparation; no late outline (${JSON.stringify({ tarde: r.tarde, pend: r.pend, dibujado: r.dibujado })})`);
+  await page.close();
+}
+
+// 4. F3: when the worker budget is held by other outlines on the map, the
+// outline is "sin_memoria": explicit, located, not pending, not drawn.
+if (impl === 'e4') {
+  const page = await pagina('&presupuesto=1100000');    // two 30,000-position bodies (480 KB each)
+  const r = await page.evaluate(async () => {
+    const b = window.__banco;
+    const geometrias = new Map();
+    const filas = [];
+    for (let i = 0; i < 3; i += 1) {
+      const m = 30_000; const lon0 = -100.5 + i * 0.03; const lat0 = 20.6; const rad = 0.012;
+      const anillo = Array.from({ length: m - 1 }, (_, k) => [lon0 + rad * Math.cos((2 * Math.PI * k) / (m - 1)),
+                                                             lat0 + rad * Math.sin((2 * Math.PI * k) / (m - 1))]);
+      anillo.push([...anillo[0]]);
+      const bbox = [lon0 - rad, lat0 - rad, lon0 + rad, lat0 + rad];
+      const punto = { type: 'Point', coordinates: [lon0, lat0] };
+      geometrias.set(`g-${i}`, { geojson: { type: 'MultiPolygon', coordinates: [[anillo]] }, bbox, punto_interior: punto });
+      filas.push({ id: `t-${i}`, terreno: `Contorno ${i}`, lat: null, lon: null,
+                   geometria: { id: `g-${i}`, archivo_version_id: `v${i}`, utilizable: true, bbox, punto_interior: punto } });
+    }
+    const leer = (id) => ({ estado: b.canvas.posicionDe(id)?.estadoContorno, contorno: b.canvas.posicionDe(id)?.contorno,
+                            aviso: b.canvas._diagnostico.aviso(id) });
+    const asentar = async () => {
+      const fin = performance.now() + 20000;
+      while (filas.some((f) => ['preparando', 'dibujando'].includes(b.canvas.posicionDe(f.id)?.estadoContorno))
+             && performance.now() < fin) await new Promise((ok) => setTimeout(ok, 10));
+      await window.__dos();
+    };
+    b.canvas.render(filas, { colorFor: b.colorFor, geometrias });
+    await asentar();
+    b.canvas.map.fitBounds([[20.585, -100.515], [20.615, -100.425]], { animate: false });
+    await asentar();
+    const estados = filas.map((f) => leer(f.id));
+    const negado = filas.find((f) => b.canvas.posicionDe(f.id)?.estadoContorno === 'sin_memoria');
+    const z = negado ? b.canvas.zoomToScale(negado.id) : null;
+    await window.__dos();
+    const trasZoom = negado ? leer(negado.id) : null;
+    // Release the others (filter change): the refused outline can now be drawn.
+    if (negado) b.canvas.render([negado], { colorFor: b.colorFor, geometrias });
+    if (negado) b.canvas.zoomToScale(negado.id);
+    const fin = performance.now() + 20000;
+    while (negado && b.canvas.posicionDe(negado.id)?.estadoContorno !== 'listo' && performance.now() < fin) {
+      b.canvas.map.panBy([1, 0], { animate: false });     // a redraw asks again
+      await new Promise((ok) => setTimeout(ok, 50));
+    }
+    const despues = negado ? leer(negado.id) : null;
+    const w = await b.canvas._diagnostico.raster.estadisticas();
+    return { estados, z, trasZoom, despues, trabajadorBytes: w.bytes, presupuesto: b.canvas._diagnostico.raster.presupuesto };
+  });
+  const n = r.estados.filter((e) => e.estado === 'sin_memoria').length;
+  ok(n === 1 && r.estados.filter((e) => e.estado === 'listo' && e.contorno).length === 2,
+     `worker budget for two: two outlines drawn, one "sin_memoria" (${JSON.stringify(r.estados.map((e) => e.estado))})`);
+  ok(r.z?.estado === 'contorno_no_disponible' && r.z?.motivo === 'sin_memoria' && !r.trasZoom?.contorno,
+     `refused outline: zoomToScale contorno_no_disponible (sin_memoria), nothing claimed (${JSON.stringify(r.z)})`);
+  ok(r.trasZoom?.aviso?.includes('Contorno no disponible: demasiados contornos a la vez'),
+     `refused outline wording (${JSON.stringify(r.trasZoom?.aviso)})`);
+  ok(r.despues?.estado === 'listo' && r.despues?.contorno && r.trabajadorBytes <= r.presupuesto,
+     `after the others leave, the refused outline is drawn; worker ${r.trabajadorBytes} B <= ${r.presupuesto} B`);
   await page.close();
 }
 

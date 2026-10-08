@@ -181,3 +181,78 @@ are in the PR. Local runs skip Postgres.
 ## Next
 
 Stop for review of P1. A-2/P2 authorization is not started.
+
+---
+
+## Correction after supervisory review (F1, F2)
+
+Review: instruction `7f5f24b28638d9f81cc48f67cee350477fdef819`,
+`reports/team-a-p1-review-2026-10-08/START_HERE.md`, of head
+`75886658f5c41d5fb6ebe591b6833350958ccace`. The text above is the original
+submission and is kept as history. The five stricter rules were accepted and are
+unchanged. Schema stays **10**: `origin/main` is still
+`09452fd26d38319567dce28a89db100ea61c739a`, nothing was merged or deployed, and
+PR #14 is untouched at `24073dc43a2d9f6bafa6b42b35f1967e151ba7e9`.
+
+### F1 — NULL bypass in the non-application reason: fixed
+
+`CHECK (motivo_no_aplicada IS NULL OR aplicada = 0)` evaluated to NULL when
+`aplicada` was NULL, and a CHECK accepts NULL. It is now
+`CHECK (motivo_no_aplicada IS NULL OR (aplicada IS NOT NULL AND aplicada = 0))`.
+The state table above now holds as written: `subiendo`, `cancelado` and
+`expirado` cannot carry a reason.
+
+The same audit was applied to every other CHECK in `ATTACHMENT_SCHEMA`. One more
+had the same shape, `estado <> 'fallido' OR (aplicada = 0 AND …)`; it was not
+exploitable, because the outcome check beside it already rejects a `fallido` row
+with a NULL outcome, but it is guarded the same way now. The remaining CHECKs
+compare only NOT NULL columns or `IS [NOT] NULL` results, or allow NULL on
+purpose (`aplicada IN (0, 1)`, `tamano >= 0`, the event's `revision > 0`). A
+comment in `server/db.py` records the rule for whoever adds the next one.
+
+Regression, on both backends
+(`test_a_reason_not_applied_needs_an_explicit_zero_outcome`): each of
+`subiendo`/`cancelado`/`expirado` with each of `superada`/`retirado` is rejected
+(six cases, each with its own version number so one cannot mask another);
+controls commit the three states with a NULL reason, `disponible` with
+`aplicada = 0` and each reason, `disponible` with `aplicada = 0` and no reason,
+and `fallido`. Without the fix all six rejections fail.
+
+**Why the removal check missed it:** deleting a CHECK and seeing a test fail
+shows the CHECK matters, not that every branch of it works. That check is
+evidence of coverage of constraints, not of their NULL combinations.
+
+### F2 — SQLite backups kept leases: fixed
+
+`db.backup()` copies the whole file and then clears operational tables from the
+copy. `archivo_trabajo` joins `team_session` and `team_login_failure` in that
+existing list, under the same table-presence test, so a database that predates
+schema 10 is backed up exactly as before. Nothing is deleted from the live
+database and no cleanup job is added.
+
+Regressions (SQLite):
+
+- `test_a_backup_file_drops_leases_and_keeps_everything_durable`: a schema-10
+  file with an activated KMZ (the full cycle), a pending upload and a
+  future-dated lease, through the real `db.backup`. The copy has zero leases,
+  identical rows in the five durable tables, the active pointers, the pending
+  version, and a clean `PRAGMA foreign_key_check`. The source is unchanged and
+  still holds its lease. Without the fix it fails.
+- `test_a_backup_of_an_older_database_has_no_lease_table_to_clear`: the automatic
+  copy taken before the 9 → 10 upgrade is a schema-9 file with its content and
+  no attachment tables. The existing older-version backup tests still pass.
+
+The Postgres payload exclusion and the restore-order test are unchanged.
+
+The supervisor's `reproduce.py` was run against the corrected working tree: F1
+rejected for all three states; F2 `backup_leases: 0`, `backup_pending: 1`,
+`source_leases: 1`; no remaining failures.
+
+### Writer contract, restated
+
+A reason for not applying is stored only with `aplicada = 0` on a `disponible`
+version. A change to any constraint here needs its migration/fixture test and a
+stated writer consequence; the earlier remark that such a change is "one line"
+described its size, not what accepting it requires.
+
+Evidence for the corrected head is in the PR.

@@ -458,6 +458,10 @@ CREATE INDEX IF NOT EXISTS idx_inventory_terrain_base ON inventory_terrain(base_
 # Nothing cascades. What the database cannot see -- that an active geometry is
 # usable, that its version is disponible, that terminal rows are never updated
 # again -- is the job of the repository's transactions.
+#
+# A CHECK passes when its expression is NULL, not only when it is true. Every
+# comparison on a nullable column below is therefore guarded with IS NOT NULL
+# (or is a deliberate "NULL is allowed").
 ATTACHMENT_SCHEMA = """
 -- The decision row: one attachment in a core column of one terrain. Only this
 -- row changes after creation, by compare-and-set on revision. It never touches
@@ -530,8 +534,9 @@ CREATE TABLE IF NOT EXISTS archivo_version (
   UNIQUE (id, archivo_id, inventory_id),
   FOREIGN KEY (archivo_id, inventory_id) REFERENCES archivo(id, inventory_id),
   CHECK ((aplicada IS NULL) = (estado IN ('subiendo', 'cancelado', 'expirado'))),
-  CHECK (motivo_no_aplicada IS NULL OR aplicada = 0),
-  CHECK (estado <> 'fallido' OR (aplicada = 0 AND motivo_no_aplicada IS NULL)),
+  CHECK (motivo_no_aplicada IS NULL OR (aplicada IS NOT NULL AND aplicada = 0)),
+  CHECK (estado <> 'fallido'
+         OR (aplicada IS NOT NULL AND aplicada = 0 AND motivo_no_aplicada IS NULL)),
   CHECK ((finalizado_en IS NULL) = (estado IN ('subiendo', 'cancelado', 'expirado'))),
   CHECK ((finalizado_en IS NULL) = (finalizado_por IS NULL)),
   CHECK ((terminado_en IS NULL) = (estado = 'subiendo')),
@@ -984,10 +989,11 @@ def backup(path: Path | str | None = None) -> Path | None:
     try:
         with copia:
             origen.backup(copia)
-            # Sessions and login throttling are operational state, not content:
-            # a restored copy must not bring old sign-ins back to life.
+            # Sessions, login throttling and attachment leases are operational
+            # state, not content: a restored copy must not bring old sign-ins
+            # or a long-gone worker's lease back to life. The source keeps them.
             tablas = _table_names(copia)
-            for operativa in ("team_session", "team_login_failure"):
+            for operativa in ("team_session", "team_login_failure", "archivo_trabajo"):
                 if operativa in tablas:
                     copia.execute(f"DELETE FROM {operativa}")
     finally:

@@ -291,6 +291,25 @@ class V10Checks:
             with self.subTest(nombre):
                 self.rechaza(lambda c, e=estado, x=extra: self.version(c, a, inv, 9, e, **x))
 
+    def test_a_reason_not_applied_needs_an_explicit_zero_outcome(self):
+        # Review F1: with aplicada NULL, "motivo IS NULL OR aplicada = 0" is NULL, which a
+        # CHECK accepts. The states whose outcome must be NULL could carry a reason.
+        inv, a, _ = self.kmz()
+        numero = iter(range(2, 99))
+        for estado in ("subiendo", "cancelado", "expirado"):
+            for motivo in ("superada", "retirado"):
+                with self.subTest(estado=estado, motivo=motivo):
+                    self.rechaza(lambda c, e=estado, m=motivo: self.version(
+                        c, a, inv, next(numero), e, motivo_no_aplicada=m))
+            self.confirmar(lambda c, e=estado: self.version(c, a, inv, next(numero), e))
+        for motivo in ("superada", "retirado", None):
+            self.confirmar(lambda c, m=motivo: self.version(
+                c, a, inv, next(numero), aplicada=0, motivo_no_aplicada=m))
+        self.confirmar(lambda c: self.version(c, a, inv, next(numero), "fallido"))
+        self.assertEqual(self.cuenta("archivo_version", "archivo_id = ?", (a,)), 8)
+        self.assertEqual(self.cuenta("archivo_version", "archivo_id = ? AND aplicada IS NULL"
+                                     " AND motivo_no_aplicada IS NOT NULL", (a,)), 0)
+
     # -- 3. same-version integrity ---------------------------------------------
 
     def test_the_active_geometry_must_belong_to_the_current_version(self):
@@ -523,6 +542,54 @@ class SchemaV10Sqlite(V10Checks, unittest.TestCase):
 
     def test_the_upgrade_took_exactly_one_backup(self):
         self.assertEqual(len(list(db.backup_dir(self.path).glob("*.db"))), 1)
+
+    def test_a_backup_file_drops_leases_and_keeps_everything_durable(self):
+        # Review F2: db.backup copies the whole file; a lease must not survive in the copy.
+        from tests.support import create_user
+        with tempfile.TemporaryDirectory() as tmp:
+            self.path = Path(tmp) / "con-arriendo.db"  # shadows the class database for this test
+            self.confirmar(create_user)
+            inv, a, (v, _i, g) = self.kmz()
+
+            def activar_y_dejar_pendiente(conn):
+                conn.execute("UPDATE archivo SET version_actual_id = ?, geometria_activa_id = ?"
+                             " WHERE id = ?", (v, g, a))
+                pendiente = self.version(conn, a, inv, 2, "subiendo")
+                insertar(conn, "archivo_trabajo", archivo_version_id=pendiente, trabajo_id=nuevo(),
+                         actor_id=self.ana(conn)["id"], operacion="completar", inicio=AHORA,
+                         vence_en="2999-01-01T00:00:00+00:00")
+                return pendiente
+            pendiente = self.confirmar(activar_y_dejar_pendiente)
+            antes = self.confirmar(lambda conn: foto(conn, V10_TABLES))
+
+            copia = sqlite3.connect(db.backup(self.path))
+            copia.row_factory = sqlite3.Row
+            try:
+                respaldo = foto(copia, V10_TABLES)
+                self.assertEqual(copia.execute("PRAGMA foreign_key_check").fetchall(), [])
+            finally:
+                copia.close()
+            self.assertEqual(respaldo["archivo_trabajo"], [])
+            for tabla in DURABLES:
+                self.assertEqual(respaldo[tabla], antes[tabla], tabla)
+            self.assertEqual([(f["version_actual_id"], f["geometria_activa_id"]) for f in respaldo["archivo"]],
+                             [(v, g)])
+            self.assertIn(pendiente, [f["id"] for f in respaldo["archivo_version"] if f["estado"] == "subiendo"])
+            # The live database is untouched: same content, lease still held.
+            self.assertEqual(self.confirmar(lambda conn: foto(conn, V10_TABLES)), antes)
+            self.assertEqual(len(antes["archivo_trabajo"]), 1)
+
+    def test_a_backup_of_an_older_database_has_no_lease_table_to_clear(self):
+        # The copy taken before this class's 9 -> 10 upgrade predates the attachment tables.
+        (respaldo,) = db.backup_dir(type(self).path).glob("*.db")
+        copia = sqlite3.connect(respaldo)
+        try:
+            tablas = {r[0] for r in copia.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+            self.assertEqual(copia.execute("PRAGMA user_version").fetchone()[0], 9)
+            self.assertTrue(copia.execute("SELECT COUNT(*) FROM maestra_base").fetchone()[0])
+        finally:
+            copia.close()
+        self.assertFalse(tablas & set(V10_TABLES))
 
     def test_a_new_database_gets_the_attachment_tables(self):
         with tempfile.TemporaryDirectory() as tmp, db.session(Path(tmp) / "nueva.db") as conn:

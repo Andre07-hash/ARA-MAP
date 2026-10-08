@@ -1,0 +1,133 @@
+<!doctype html>
+<!-- Memory-budget harness page. ?impl=e5 loads this folder's prototype;
+     e3/e4 load PR #16's prototype; b2 and e1 load the ACCEPTED renderers from
+     their archives. Same Leaflet, CSS and fictional rows for all. Maps fill
+     the viewport; ?mapas=2 puts two maps side by side (E5: one shared budget).
+     E5 options: ?mib=64 (budget), ?simular=constructor|sinOffscreen|error|silencio,
+     ?plazo=<ms> (unanswered-request deadline). No tiles, no network. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>cargando</title>
+<link rel="stylesheet" href="/b2/web/vendor/leaflet.css">
+<link rel="stylesheet" href="/b2/web/styles/tokens.css">
+<link rel="stylesheet" href="/b2/web/styles/map.css">
+<style>
+  html, body { margin: 0; height: 100%; background: #f4f3ef; font: 13px system-ui, sans-serif; }
+  #mapas { display: flex; width: 100vw; height: 100vh; }
+  .mapa { flex: 1; height: 100%; background: #e8e6df; }
+</style>
+</head>
+<body>
+<div id="mapas"></div>
+<script src="/b2/web/vendor/leaflet.js"></script>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const impl = q.get("impl") ?? "e5";
+const nMapas = Number(q.get("mapas") ?? 1);
+let createMapCanvas;
+let presupuesto = null;
+if (impl === "b2") ({ createMapCanvas } = await import("/b2/web/components/map/MapCanvas.js"));
+else if (impl === "e1") ({ createMapCanvas } = await import("/e1/web/components/map/MapCanvas.js"));
+else if (impl === "e5") {
+  const m = await import("/mem/prototipo/MapCanvas.js");
+  m.configurarPrototipo({ estrategia: "e5" });
+  presupuesto = m.configurarE5({ bytes: Number(q.get("mib") ?? 64) * 1024 * 1024,
+                                 simular: q.get("simular"), plazoMs: Number(q.get("plazo") ?? 8000) });
+  createMapCanvas = m.createMapCanvas;
+} else {
+  const m = await import("/proto/prototipo/MapCanvas.js");
+  m.configurarPrototipo({ estrategia: impl });
+  createMapCanvas = m.createMapCanvas;
+}
+
+const selecciones = [];
+const estados = [];
+const canvases = [];
+for (let i = 0; i < nMapas; i += 1) {
+  const div = document.createElement("div");
+  div.className = "mapa";
+  div.id = `mapa-${i}`;
+  document.getElementById("mapas").append(div);
+  const c = createMapCanvas(div, {
+    onSelect: (id) => selecciones.push({ mapa: i, id, t: performance.now() }),
+    onContornoEstado: (id, estado) => estados.push({ mapa: i, id, estado, t: performance.now() }),
+  });
+  c.invalidate();
+  canvases.push(c);
+}
+const COLORES = ["#2a78d6", "#c2410c", "#15803d", "#7c3aed", "#b45309", "#0e7490"];
+const colorFor = (t) => COLORES[(t.color ?? 0) % COLORES.length];
+
+/** One generated limit case: the boundary terrain plus an XY control. */
+async function cargar(caso) {
+  const { descriptor, cuerpo } = await (await fetch(`/casos/${caso}.json`)).json();
+  return {
+    filas: [
+      { id: "contorno", terreno: "Contorno ficticio", lat: null, lon: null, geometria: descriptor },
+      { id: "xy", terreno: "Punto ficticio", lat: descriptor.bbox[1] - 0.004, lon: descriptor.bbox[0] - 0.004,
+        superficie_m2: 5000, geometria: null, color: 1 },
+    ],
+    geometrias: new Map([[descriptor.id, cuerpo]]),
+  };
+}
+
+/* Fictional heavy outlines, generated here: `n` terrains near 20.6 N,
+ * 100.4 W on a grid (`paso` degrees apart; smaller than the radius makes
+ * them overlap). Kinds cycle: a large ring with one hole; a multipart of
+ * many tiny squares; a single large ring. Plus `ligeros` light outlines and
+ * `xy` XY points interleaved, so layers mix. Bodies carry exact bboxes. */
+function sinteticos({ n = 6, posiciones = 30000, paso = 0.03, radio = 0.012, ligeros = 0, xy = 0, semilla = 0 } = {}) {
+  const geometrias = new Map();
+  const filas = [];
+  const anillo = (cx, cy, r, m, sentido = 1) => {
+    const a = Array.from({ length: m - 1 }, (_, k) => [cx + r * Math.cos(sentido * 2 * Math.PI * k / (m - 1)),
+                                                      cy + r * Math.sin(sentido * 2 * Math.PI * k / (m - 1))]);
+    a.push([...a[0]]);
+    return a;
+  };
+  const cajaDe = (polys) => {
+    let w = Infinity, s = Infinity, e = -Infinity, nn = -Infinity;
+    for (const p of polys) for (const r of p) for (const [x, y] of r) { w = Math.min(w, x); e = Math.max(e, x); s = Math.min(s, y); nn = Math.max(nn, y); }
+    return [w, s, e, nn];
+  };
+  const agregar = (id, nombre, polys, color, punto) => {
+    const bbox = cajaDe(polys);
+    const pi = { type: "Point", coordinates: punto };
+    geometrias.set(`g-${id}`, { geojson: { type: "MultiPolygon", coordinates: polys }, bbox, punto_interior: pi });
+    filas.push({ id, terreno: nombre, lat: null, lon: null, color,
+                 geometria: { id: `g-${id}`, archivo_version_id: `v-${id}`, utilizable: true, bbox, punto_interior: pi } });
+  };
+  for (let i = 0; i < n; i += 1) {
+    const cx = -100.5 + (i % 4) * paso; const cy = 20.6 + Math.floor(i / 4) * paso;
+    const tipo = (i + semilla) % 3;
+    let polys;
+    if (tipo === 0) polys = [[anillo(cx, cy, radio, posiciones - 200), anillo(cx, cy, radio / 3, 200, -1)]];
+    else if (tipo === 1) {
+      polys = [];
+      const lado = Math.ceil(Math.sqrt(posiciones / 5));
+      for (let k = 0; k < Math.floor(posiciones / 5); k += 1) {
+        const x = cx - radio + (k % lado) * (2 * radio / lado); const y = cy - radio + Math.floor(k / lado) * (2 * radio / lado);
+        const d = radio / lado / 2;
+        polys.push([[[x, y], [x + d, y], [x + d, y + d], [x, y + d], [x, y]]]);
+      }
+    } else polys = [[anillo(cx, cy, radio, posiciones)]];
+    const p = tipo === 1 ? polys[Math.floor(polys.length / 2)][0][0] : [cx + radio * 0.66, cy];
+    agregar(`t-${i}`, `Contorno ficticio ${i}`, polys, i, tipo === 1 ? [p[0] + 1e-9, p[1] + 1e-9] : p);
+  }
+  for (let i = 0; i < ligeros; i += 1) {
+    const cx = -100.5 + (i % 4) * paso + paso / 2; const cy = 20.6 + Math.floor(i / 4) * paso + paso / 3;
+    agregar(`l-${i}`, `Ligero ficticio ${i}`, [[anillo(cx, cy, radio / 2, 64)]], i + 2, [cx, cy]);
+  }
+  for (let i = 0; i < xy; i += 1) {
+    filas.push({ id: `p-${i}`, terreno: `Punto ficticio ${i}`, lat: 20.6 + (i % 5) * paso / 2, lon: -100.5 + Math.floor(i / 5) * paso / 2,
+                 superficie_m2: 20000, geometria: null, color: i });
+  }
+  return { filas, geometrias };
+}
+
+window.__m5 = { impl, canvases, canvas: canvases[0], presupuesto, colorFor, cargar, sinteticos, selecciones, estados };
+document.title = "listo";
+</script>
+</body>
+</html>

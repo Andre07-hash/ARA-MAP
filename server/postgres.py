@@ -25,7 +25,11 @@ LEGACY_TABLES = ("carpeta", "base", "terreno", "incidencia", "mapa", "mapa_capa"
 INVENTORY_TABLES = ("team_user", "maestra_base", "maestra_base_acceso", "inventory_terrain",
                     "inventory_revision", "inventory_event", "inventory_operation_result",
                     "inventory_column", "team_user_event", "maestra_base_event")
-TABLES = LEGACY_TABLES + INVENTORY_TABLES
+# v10: attachments, parents first. Their three "fk_archivo_" cycles are
+# deferred, so this order loads inside one transaction. archivo_trabajo holds
+# live leases and is deliberately absent: a restore must not resurrect a worker.
+ATTACHMENT_TABLES = ("archivo", "archivo_version", "archivo_intento", "geometria", "archivo_evento")
+TABLES = LEGACY_TABLES + INVENTORY_TABLES + ATTACHMENT_TABLES
 # uso_ia is operational metadata, not workspace content: not in backups, but
 # its rows still need generated ids.
 ID_TABLES = (set(LEGACY_TABLES) - {"mapa_capa"}) | {"uso_ia"}
@@ -123,7 +127,7 @@ CREATE TABLE IF NOT EXISTS workspace_backup (
   created TIMESTAMPTZ NOT NULL DEFAULT now(), payload TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS workspace_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-""" + BORRADOR_SQL + inventory_sql()
+""" + BORRADOR_SQL + inventory_sql() + archivos_sql()
 
 
 def inventory_sql() -> str:
@@ -147,6 +151,27 @@ END $$;""" for nombre, columna in (("fk_inventory_draft", "draft_revision_id"),
                        for tabla, columna, definicion in V9_COLUMNS)
     return (_to_postgres(sin_ciclo) + restricciones + "\n"
             + _to_postgres(WORK_BASE_SCHEMA) + columnas + V9_INDEXES)
+
+
+def archivos_sql() -> str:
+    """The v10 attachment tables, idempotently. As in ``inventory_sql``, the
+    deferred "fk_archivo_" cycle constraints are left out of the CREATE TABLEs
+    and added once every table exists."""
+    from .db import ATTACHMENT_SCHEMA
+
+    ciclo = re.compile(r",?\s*CONSTRAINT (fk_archivo_\w+) (FOREIGN KEY[^\n]*?),?(?=\n)")
+    restricciones = ""
+    for tabla in re.finditer(r"CREATE TABLE IF NOT EXISTS (\w+) \(.*?\n\);", ATTACHMENT_SCHEMA, re.S):
+        for nombre, definicion in ciclo.findall(tabla.group(0)):
+            restricciones += f"""
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{nombre}'
+                 AND conrelid = '{tabla.group(1)}'::regclass) THEN
+    ALTER TABLE {tabla.group(1)} ADD CONSTRAINT {nombre} {definicion};
+  END IF;
+END $$;"""
+    assert restricciones.count("ADD CONSTRAINT") == 3
+    return _to_postgres(ciclo.sub("", ATTACHMENT_SCHEMA)) + restricciones + "\n"
 
 
 # Import-assistant drafts: the parsed file and the choices made so far, kept
@@ -181,7 +206,7 @@ def migrate_sql() -> str:
     from .db import FOLDER_INDEXES, SCHEMA, SCHEMA_VERSION
 
     return ("".join(_crear_tabla(SCHEMA, t) for t in NUEVAS_TABLAS) + BORRADOR_SQL
-            + inventory_sql() + """
+            + inventory_sql() + archivos_sql() + """
 ALTER TABLE base ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE mapa ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE terreno ADD COLUMN IF NOT EXISTS moneda TEXT CHECK (moneda IN ('USD', 'MXN'));

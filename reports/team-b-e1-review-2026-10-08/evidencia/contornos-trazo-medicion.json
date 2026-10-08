@@ -1,0 +1,532 @@
+{
+ "navegador": "154.0.8037.98",
+ "base": "5d8e2dcc125a688dbba38a260d5d7eca88a6d223",
+ "actual": "eed9a4cb404406b8b261803c38947e8297a5edec",
+ "maquina": {
+  "cpu": "Apple M3",
+  "nucleos": 8,
+  "memoriaGiB": 16,
+  "sistema": "Darwin 25.6.0",
+  "node": "v23.7.0"
+ },
+ "repeticiones": 1,
+ "dprs": [
+  1
+ ],
+ "controles": [
+  {
+   "mapa": "base",
+   "fase": "frio",
+   "tareaMaxMs": 159,
+   "llamadaMs": 154.1,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.3,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.3,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.3,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "frio",
+   "tareaMaxMs": 159,
+   "llamadaMs": 153.9,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.2,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.1,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.3,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.3,
+   "detectada": true
+  }
+ ],
+ "corridas": [
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 3.7,
+    "dosCuadrosMs": 12,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.2,
+     "dosCuadrosMs": 33.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.1,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 33.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.1,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 4.2,
+    "dosCuadrosMs": 27.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.2,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.2,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 7.9,
+    "dosCuadrosMs": 32.5,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.6,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.6,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.4,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 8.1,
+    "dosCuadrosMs": 26.5,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.5,
+     "dosCuadrosMs": 33.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.5,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.7,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2.2,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 495.8,
+    "dosCuadrosMs": 1298.5,
+    "estado": "a_escala",
+    "tareaMaxMs": 802,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 406.2,
+     "dosCuadrosMs": 406.6,
+     "tareaMaxMs": 406,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 414.2,
+     "dosCuadrosMs": 414.4,
+     "tareaMaxMs": 414,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 404.1,
+     "dosCuadrosMs": 404.6,
+     "tareaMaxMs": 404,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 428.3,
+     "dosCuadrosMs": 428.6,
+     "tareaMaxMs": 428,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 72.8,
+    "dosCuadrosMs": 79,
+    "estado": "a_escala",
+    "tareaMaxMs": 73,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 6.9,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 8.8,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 34.1,
+     "dosCuadrosMs": 34.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 33.1,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 873.7,
+    "dosCuadrosMs": 2475.3,
+    "estado": "a_escala",
+    "tareaMaxMs": 1601,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 809.2,
+     "dosCuadrosMs": 809.7,
+     "tareaMaxMs": 809,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 804.3,
+     "dosCuadrosMs": 804.5,
+     "tareaMaxMs": 804,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 550.8,
+     "dosCuadrosMs": 551.1,
+     "tareaMaxMs": 550,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 824.1,
+     "dosCuadrosMs": 824.5,
+     "tareaMaxMs": 824,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 76.5,
+    "dosCuadrosMs": 86.7,
+    "estado": "a_escala",
+    "tareaMaxMs": 76,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 9.2,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 11.2,
+     "dosCuadrosMs": 33.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 32.4,
+     "dosCuadrosMs": 32.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 33.2,
+     "dosCuadrosMs": 33.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 12
+  }
+ ],
+ "resumen": [
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "3.7 / 3.7",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "0.2 / 1.1",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "4.2 / 4.2",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "0.2 / 1",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "7.9 / 7.9",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "0.6 / 2",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "8.1 / 8.1",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "0.5 / 2.2",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "495.8 / 495.8",
+   "frío: tarea más larga ms": 802,
+   "directo: llamada ms (mediana / peor)": "406.2 / 428.3",
+   "directo: tarea más larga ms (mediana / peor)": "406 / 428",
+   "directo: tareas ≥ 50 ms": "4 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "72.8 / 72.8",
+   "frío: tarea más larga ms": 73,
+   "directo: llamada ms (mediana / peor)": "8.8 / 34.1",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "873.7 / 873.7",
+   "frío: tarea más larga ms": 1601,
+   "directo: llamada ms (mediana / peor)": "804.3 / 824.1",
+   "directo: tarea más larga ms (mediana / peor)": "804 / 824",
+   "directo: tareas ≥ 50 ms": "4 de 4"
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "n": 1,
+   "frío: llamada ms (mediana / peor)": "76.5 / 76.5",
+   "frío: tarea más larga ms": 76,
+   "directo: llamada ms (mediana / peor)": "11.2 / 33.2",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 4"
+  }
+ ]
+}

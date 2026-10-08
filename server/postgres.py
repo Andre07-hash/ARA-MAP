@@ -21,8 +21,10 @@ LEGACY_TABLES = ("carpeta", "base", "terreno", "incidencia", "mapa", "mapa_capa"
                  "formato_importacion", "importacion")
 # v8: accounts and inventory content. team_session and team_login_failure are
 # operational and deliberately absent. Text UUID keys: never in ID_TABLES.
-INVENTORY_TABLES = ("team_user", "inventory_terrain", "inventory_revision", "inventory_event",
-                    "inventory_operation_result")
+# v9 adds the work-base tables, each after the tables it references.
+INVENTORY_TABLES = ("team_user", "maestra_base", "maestra_base_acceso", "inventory_terrain",
+                    "inventory_revision", "inventory_event", "inventory_operation_result",
+                    "inventory_column", "team_user_event", "maestra_base_event")
 TABLES = LEGACY_TABLES + INVENTORY_TABLES
 # uso_ia is operational metadata, not workspace content: not in backups, but
 # its rows still need generated ids.
@@ -125,10 +127,11 @@ CREATE TABLE IF NOT EXISTS workspace_metadata (key TEXT PRIMARY KEY, value TEXT 
 
 
 def inventory_sql() -> str:
-    """The v8 tables, idempotently. The inventory/revision pointer cycle is
-    created without its two foreign keys, which are then added once both
-    tables exist (Postgres has no ADD CONSTRAINT IF NOT EXISTS)."""
-    from .db import INVENTORY_SCHEMA
+    """The v8 tables and the v9 work-base additions, idempotently. The
+    inventory/revision pointer cycle is created without its two foreign keys,
+    which are then added once both tables exist (Postgres has no ADD
+    CONSTRAINT IF NOT EXISTS)."""
+    from .db import INVENTORY_SCHEMA, V9_COLUMNS, V9_INDEXES, WORK_BASE_SCHEMA
 
     sin_ciclo = re.sub(r",?\s*CONSTRAINT fk_inventory_\w+ FOREIGN KEY[^\n]*", "", INVENTORY_SCHEMA)
     restricciones = "".join(f"""
@@ -140,7 +143,10 @@ DO $$ BEGIN
   END IF;
 END $$;""" for nombre, columna in (("fk_inventory_draft", "draft_revision_id"),
                                    ("fk_inventory_published", "published_revision_id")))
-    return _to_postgres(sin_ciclo) + restricciones + "\n"
+    columnas = "".join(f"ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS {columna} {definicion};\n"
+                       for tabla, columna, definicion in V9_COLUMNS)
+    return (_to_postgres(sin_ciclo) + restricciones + "\n"
+            + _to_postgres(WORK_BASE_SCHEMA) + columnas + V9_INDEXES)
 
 
 # Import-assistant drafts: the parsed file and the choices made so far, kept

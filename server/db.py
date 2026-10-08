@@ -21,7 +21,7 @@ APP_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = APP_ROOT / "datos" / "ara_map.db"
 BACKUPS_KEPT = 10
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 # Savepoint names only need to be unique while nested.
 _savepoints = itertools.count()
@@ -212,7 +212,8 @@ CREATE INDEX IF NOT EXISTS idx_uso_ia_mes ON uso_ia(mes);
 # cycle in one statement: postgres.py strips the two "fk_inventory_" lines and
 # adds those constraints after both tables exist.
 INVENTORY_SCHEMA = """
--- No role column: every active account has identical powers.
+-- rol arrives through V9_COLUMNS. Nothing reads it yet: until role enforcement
+-- ships, every active account still has identical powers.
 CREATE TABLE IF NOT EXISTS team_user (
   id                  TEXT PRIMARY KEY,
   login               TEXT NOT NULL UNIQUE,
@@ -326,6 +327,115 @@ CREATE TABLE IF NOT EXISTS inventory_operation_result (
   created_at      TEXT NOT NULL,
   PRIMARY KEY (operation, idempotency_key)
 );
+"""
+
+# v9: work bases, access grants, base-local custom columns and their audit.
+# Storage only: no route, role check or screen uses these yet.
+#
+# Nothing here cascades. A base, account or column that anything refers to
+# cannot be deleted, so removing one can never take terrains, revisions,
+# retained custom values or history with it; bases and columns are archived
+# or retired instead. Grants are the exception that IS deleted: a revoked
+# grant survives as its team_user_event rows, which name the user and the
+# base rather than the grant.
+WORK_BASE_SCHEMA = """
+-- A container that records are assigned to and people are granted access to.
+-- version is the concurrency counter for administration, as on a terrain.
+CREATE TABLE IF NOT EXISTS maestra_base (
+  id          TEXT PRIMARY KEY,
+  nombre      TEXT NOT NULL,
+  version     INTEGER NOT NULL DEFAULT 1,
+  archived_at TEXT,
+  archived_by TEXT REFERENCES team_user(id),
+  created_at  TEXT NOT NULL,
+  created_by  TEXT NOT NULL REFERENCES team_user(id),
+  updated_at  TEXT NOT NULL,
+  updated_by  TEXT NOT NULL REFERENCES team_user(id)
+);
+
+CREATE TABLE IF NOT EXISTS maestra_base_acceso (
+  base_id    TEXT NOT NULL REFERENCES maestra_base(id),
+  user_id    TEXT NOT NULL REFERENCES team_user(id),
+  granted_at TEXT NOT NULL,
+  granted_by TEXT NOT NULL REFERENCES team_user(id),
+  PRIMARY KEY (base_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_maestra_base_acceso_user ON maestra_base_acceso(user_id);
+
+-- Custom columns only, each owned by one base. The fourteen core columns are
+-- fixed in code and never become rows here. The API spells an id as
+-- "custom:<id>"; values live in inventory_revision.custom_json under that key.
+CREATE TABLE IF NOT EXISTS inventory_column (
+  id            TEXT PRIMARY KEY,
+  base_id       TEXT NOT NULL REFERENCES maestra_base(id),
+  nombre        TEXT NOT NULL,
+  tipo          TEXT NOT NULL CHECK (tipo IN ('texto', 'numero', 'opcion', 'fecha')),
+  opciones_json TEXT NOT NULL DEFAULT '[]',
+  orden         INTEGER NOT NULL,
+  version       INTEGER NOT NULL DEFAULT 1,
+  retired_at    TEXT,
+  retired_by    TEXT REFERENCES team_user(id),
+  created_at    TEXT NOT NULL,
+  created_by    TEXT NOT NULL REFERENCES team_user(id),
+  updated_at    TEXT NOT NULL,
+  updated_by    TEXT NOT NULL REFERENCES team_user(id)
+);
+CREATE INDEX IF NOT EXISTS idx_inventory_column_base ON inventory_column(base_id, orden);
+
+-- Append-only account, role and grant history. base_id is set for grant
+-- events. actor_id is NULL when the change came from the operator's command
+-- line (scripts/cuentas.py), which has no signed-in account.
+CREATE TABLE IF NOT EXISTS team_user_event (
+  id           TEXT PRIMARY KEY,
+  user_id      TEXT NOT NULL REFERENCES team_user(id),
+  action       TEXT NOT NULL,
+  base_id      TEXT REFERENCES maestra_base(id),
+  actor_id     TEXT REFERENCES team_user(id),
+  actor_name   TEXT NOT NULL,
+  at           TEXT NOT NULL,
+  details_json TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_team_user_event_user ON team_user_event(user_id);
+CREATE INDEX IF NOT EXISTS idx_team_user_event_base ON team_user_event(base_id);
+
+-- Append-only history of a base (column_id NULL) and of its column
+-- definitions. One event per version of each, as in inventory_event.
+CREATE TABLE IF NOT EXISTS maestra_base_event (
+  id           TEXT PRIMARY KEY,
+  base_id      TEXT NOT NULL REFERENCES maestra_base(id),
+  column_id    TEXT REFERENCES inventory_column(id),
+  version      INTEGER NOT NULL,
+  action       TEXT NOT NULL,
+  actor_id     TEXT NOT NULL REFERENCES team_user(id),
+  actor_name   TEXT NOT NULL,
+  at           TEXT NOT NULL,
+  details_json TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maestra_base_event_base
+  ON maestra_base_event(base_id, version) WHERE column_id IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_maestra_base_event_column
+  ON maestra_base_event(column_id, version) WHERE column_id IS NOT NULL;
+"""
+
+# v9 columns on the v8 tables. This is their only definition: a new database
+# gets them the same way an upgraded one does, so the two cannot drift. Shared
+# with the Postgres upgrade.
+#
+# Every existing account becomes 'operador' and every existing terrain stays
+# unassigned (NULL): the migration promotes nobody and invents no membership.
+# inventory_revision.base_id is the base the record belonged to when that
+# revision was written, so membership can be read back from history.
+V9_COLUMNS = (
+    ("team_user", "rol", "TEXT NOT NULL DEFAULT 'operador' CHECK (rol IN ('admin', 'operador'))"),
+    ("inventory_terrain", "base_id", "TEXT REFERENCES maestra_base(id)"),
+    ("inventory_revision", "base_id", "TEXT REFERENCES maestra_base(id)"),
+    ("inventory_revision", "tipo_terreno", "TEXT"),
+    ("inventory_revision", "custom_json", "TEXT NOT NULL DEFAULT '{}'"),
+)
+
+# After V9_COLUMNS, for the reason FOLDER_INDEXES gives below.
+V9_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_inventory_terrain_base ON inventory_terrain(base_id);
 """
 
 # Kept out of SCHEMA on purpose: SCHEMA runs before the column migrations, and
@@ -458,6 +568,7 @@ def migrate(conn: sqlite3.Connection) -> None:
 
     conn.executescript(SCHEMA)
     conn.executescript(INVENTORY_SCHEMA)  # v7 -> v8, additive and idempotent
+    _migrate_bases_de_trabajo(conn)
     # Before any snapshot below copies terrains: the copy names this column.
     _migrate_moneda(conn)
 
@@ -596,6 +707,15 @@ def _migrate_moneda(conn: sqlite3.Connection) -> None:
                               ("mapa_terreno", "TEXT")):
         if "moneda" not in _columns(conn, table):
             conn.execute(f"ALTER TABLE {table} ADD COLUMN moneda {definicion}")
+
+
+def _migrate_bases_de_trabajo(conn: sqlite3.Connection) -> None:
+    """v8 -> v9: work bases, grants, roles, custom columns. Additive and idempotent."""
+    conn.executescript(WORK_BASE_SCHEMA)
+    for table, column, definicion in V9_COLUMNS:
+        if column not in _columns(conn, table):
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definicion}")
+    conn.executescript(V9_INDEXES)
 
 
 def _table_names(conn: sqlite3.Connection) -> set[str]:

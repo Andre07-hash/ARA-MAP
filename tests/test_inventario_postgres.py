@@ -66,7 +66,7 @@ class InventarioPostgres(unittest.TestCase):
         with db.session() as conn:
             return conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]
 
-    def test_schema_is_v8_with_the_pointer_constraints(self):
+    def test_schema_is_current_with_the_pointer_constraints(self):
         with db.session() as conn:
             self.assertEqual(postgres.schema_version(conn), db.SCHEMA_VERSION)
             nombres = {r["conname"] for r in conn.execute(

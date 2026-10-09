@@ -6,8 +6,10 @@ the network can reach it even if the machine is on shared Wi-Fi.
 
 from __future__ import annotations
 
+import email.errors
 import mimetypes
 import os
+import re
 import socket
 import sys
 import threading
@@ -18,16 +20,19 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse, urlsplit
 
-from . import auth, db
+from . import almacen, auth, db, postgres
+from .api import archivos as api_archivos
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
+from .api import columnas as api_columnas
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
 from .api import maestra as api_maestra
 from .api import mapas as api_mapas
 from .api import sesion as api_sesion
+from .api.binario import RespuestaBinaria
 from .router import Request, Router
 from .web_util import ApiError, encode
 
@@ -37,6 +42,10 @@ ALLOWED_HOSTS = {"localhost", "127.0.0.1", "[::1]"}
 # The same machine, as a URL's hostname rather than a Host header (no brackets).
 ALLOWED_ORIGIN_HOSTS = {"localhost", "127.0.0.1", "::1"}
 MAX_BODY = 25 * 1024 * 1024
+# What the header parser reports when it could not read the block whole. Its
+# other defects are about a multipart *body* it never had, and say nothing of
+# the headers: a multipart Content-Type alone raises them.
+_CABECERAS_ROTAS = (email.errors.HeaderDefect, email.errors.MissingHeaderBodySeparatorDefect)
 
 router = Router()
 # Anonymous allowlist (auth.PUBLIC_API): these four plus the public catalog.
@@ -70,6 +79,16 @@ router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.tra
            "bases.gestionar")
 router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
 router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
+router.add("GET", "/api/maestra/operadores", api_maestra.operators, "bases.gestionar")
+# A base's custom columns. Their values are saved by the terrain PATCH above.
+router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "maestra.ver")
+router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")
+router.add("PATCH", "/api/maestra/bases/:bid/columnas/:cid", api_columnas.update,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/retirar", api_columnas.retire,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/restaurar", api_columnas.restore,
+           "columnas.gestionar")
 # The legacy workspace (imported bases, saved maps, folders, formats, import,
 # export) is the administrators': derivados.ver to read, .gestionar to change.
 router.add("GET", "/api/bases", api_bases.listing, "derivados.ver")
@@ -102,9 +121,13 @@ router.add("GET", "/api/carpetas", api_carpetas.listing, "derivados.ver")
 router.add("POST", "/api/carpetas", api_carpetas.create, "derivados.gestionar")
 router.add("PATCH", "/api/carpetas/:id", api_carpetas.rename, "derivados.gestionar")
 router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove, "derivados.gestionar")
+# Terrain attachments (server/api/archivos.py owns the table): all private,
+# each with its capability, the literal segments ahead of the :aid patterns.
+for _metodo, _ruta, _handler, _capacidad in api_archivos.RUTAS:
+    router.add(_metodo, _ruta, _handler, _capacidad)
 
 # POSTs that only read: allowed in read-only mode.
-READ_ONLY_POSTS = {"/api/exportar"}
+READ_ONLY_POSTS = {"/api/exportar"} | api_archivos.POSTS_DE_LECTURA
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -114,6 +137,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     # The cloud adapter (api/index.py) sets this: HTTPS, Secure cookies.
     CLOUD = False
+    _mantener = True  # close_connection as the request's own headers asked
 
     def do_GET(self) -> None:
         self._dispatch("GET")
@@ -136,6 +160,13 @@ class Handler(BaseHTTPRequestHandler):
             sys.stderr.write(f"  {fmt % args}\n")
 
     def _dispatch(self, method: str) -> None:
+        # Until the declared body has been read in full, every return below
+        # leaves its bytes on the socket, where the next read would parse them
+        # as a new request. So the connection closes after this response
+        # unless _read_body() gets that far and hands keep-alive back. A body
+        # is never read just to keep a refused connection open.
+        self._mantener = self.close_connection
+        self.close_connection = True
         if not self._host_is_local():
             return self._send(HTTPStatus.FORBIDDEN, b"Forbidden", "text/plain")
         if method != "GET" and not self._origin_is_local():
@@ -207,8 +238,6 @@ class Handler(BaseHTTPRequestHandler):
             )
             result = handler(request)
         except ApiError as exc:
-            if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
-                self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
         except db.OcupadoError:
             return self._busy()
@@ -222,6 +251,9 @@ class Handler(BaseHTTPRequestHandler):
                 HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
+        if isinstance(result, RespuestaBinaria):  # exactly these bytes, type and headers
+            return self._send(result.status, result.cuerpo, result.tipo,
+                              extra=dict(result.cabeceras))
         if isinstance(result, tuple):  # a file download
             payload, filename = result
             return self._send(
@@ -271,10 +303,24 @@ class Handler(BaseHTTPRequestHandler):
         return (urlsplit(origin).hostname or "") in ALLOWED_ORIGIN_HOSTS
 
     def _read_body(self) -> bytes:
-        length = int(self.headers.get("Content-Length") or 0)
+        """The declared body, whole. Only a single Content-Length body is
+        understood; anything else is refused unread, and the connection then
+        closes. Every occurrence of the framing fields counts, an empty one
+        included: headers.get() would show only the first. A header block the
+        parser could not read whole (it drops every line from the first
+        malformed one on) may have hidden one, so it is refused too."""
+        largos = self.headers.get_all("Content-Length") or []
+        rotas = any(isinstance(d, _CABECERAS_ROTAS) for d in self.headers.defects)
+        if (rotas or self.headers.get_all("Transfer-Encoding") or len(largos) > 1
+                or (largos and not re.fullmatch(r"[0-9]{1,12}", largos[0]))):
+            raise ApiError("La petición no declara bien su tamaño.", 400)
+        length = int(largos[0]) if largos else 0
         if length > MAX_BODY:
             raise ApiError("La petición es demasiado grande.", 413)
-        return self.rfile.read(length) if length else b""
+        body = self.rfile.read(length) if length else b""
+        if len(body) == length:
+            self.close_connection = self._mantener  # nothing of this request is left unread
+        return body
 
     def _serve_static(self) -> None:
         relative = unquote(self.path.split("?", 1)[0]).lstrip("/") or "index.html"
@@ -304,7 +350,7 @@ class Handler(BaseHTTPRequestHandler):
     def _send(
         self,
         status: HTTPStatus | int,
-        payload: bytes,
+        payload: bytes | bytearray,
         content_type: str,
         extra: dict[str, str] | None = None,
     ) -> None:
@@ -327,15 +373,51 @@ def find_port(preferred: int = DEFAULT_PORT) -> int:
     raise SystemExit("No se encontró un puerto libre.")
 
 
+def raiz_de_archivos() -> Path | None:
+    """Where this local server keeps attachment bytes, or None for nowhere.
+
+    ARA_MAP_ARCHIVOS names it explicitly. Without it, a local SQLite database
+    gets the sibling folder "archivos"; a Postgres database gets none, so a
+    local server pointed at a shared database never starts a byte store on
+    whatever machine it happens to run on.
+    """
+    explicita = os.environ.get("ARA_MAP_ARCHIVOS")
+    if explicita:
+        return Path(explicita)
+    return None if postgres.enabled() else db.db_path().parent / "archivos"
+
+
+def configurar_archivos() -> str:
+    """Wire the local byte store for serve(); returns the console line.
+
+    Only that one directory is created, owner-only. If it cannot be created or
+    opened nothing is wired: content routes then answer 503
+    almacen_no_configurado. There is no in-memory stand-in.
+    """
+    api_archivos.configurar_almacen(None)
+    raiz = raiz_de_archivos()
+    if raiz is None:
+        return "sin configurar (define ARA_MAP_ARCHIVOS); subir y descargar responderán 503"
+    try:
+        raiz.mkdir(mode=0o700, exist_ok=True)  # never parents
+        almacen.AlmacenLocal(raiz).close()
+    except (OSError, almacen.FalloAlmacenError) as exc:
+        return f"NO DISPONIBLES en {raiz} ({exc}); subir y descargar responderán 503"
+    api_archivos.configurar_almacen(api_archivos.almacen_local(str(raiz)))
+    return str(raiz)
+
+
 def serve(port: int | None = None, open_browser: bool = True) -> None:
     """Start the server and, unless told otherwise, open a browser at it."""
     db.connect().close()  # create/migrate before the first request
+    archivos = configurar_archivos()
     port = port or find_port()
     url = f"http://localhost:{port}/"
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
 
     print(f"\n  ARA Map  ->  {url}")
     print(f"  Datos:   {db.db_path()}")
+    print(f"  Archivos: {archivos}")
     print("  Para cerrar, presiona Ctrl+C o cierra esta ventana.\n")
 
     if open_browser:

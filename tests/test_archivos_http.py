@@ -1,7 +1,8 @@
 """Packet 2B: attachment HTTP handlers and bounded geometry delivery.
 
-HTTP HARNESS EVIDENCE, NOT APPLICATION-MOUNTED ENDPOINT ACCEPTANCE: routes are
-registered temporarily on the real router (tests/archivos_http_harness.py).
+Since the Round 3 checkpoint C1 these run against the routes as mounted in
+server/app.py: one unmodified production Handler, no temporary registration and
+no binary subclass (tests/archivos_http_harness.py only starts the server).
 Every request goes over a real loopback connection with a real cookie session
 through the real dispatcher; the same checks run on SQLite and on a disposable
 Postgres schema.
@@ -30,7 +31,8 @@ from server import archivos, auth, db, postgres
 from server.almacen import AlmacenEnMemoria
 from server.api import archivos as api
 from server.repo import maestra
-from tests.archivos_http_harness import Cliente, HandlerBinario, Servidor, rutas_registradas
+from server.web_util import ApiError
+from tests.archivos_http_harness import Cliente, Servidor
 from tests.support import TEST_PASSWORD
 
 URL = os.environ.get("ARA_MAP_TEST_DATABASE_URL")
@@ -121,14 +123,9 @@ class HTTPChecks:
             self.terreno = self._terreno(conn, self.base)
             self.terreno2 = self._terreno(conn, self.base2)
             self.ajeno = self._terreno(conn, None)          # unassigned: administrators only
-        self.rutas = rutas_registradas()
-        self.rutas.__enter__()
-        self.addCleanup(self.rutas.__exit__, None, None, None)
-        self.json_srv = Servidor(app_module.Handler)
-        self.bin_srv = Servidor(HandlerBinario)
+        self.json_srv = Servidor(app_module.Handler)  # JSON and binary: the one production handler
         self.addCleanup(self.json_srv.cerrar)
-        self.addCleanup(self.bin_srv.cerrar)
-        self.c = Cliente(self.json_srv.port, self.bin_srv.port)
+        self.c = Cliente(self.json_srv.port, self.json_srv.port)
 
     # -- fixtures --------------------------------------------------------------
 
@@ -684,14 +681,49 @@ class HTTPChecks:
         return int(cabeza.split(b" ", 2)[1]), json.loads(resto)
 
     def test_content_length_is_checked_as_ascii_decimal_too(self):
+        """Two layers. Mounted (C1): the dispatcher admits one Content-Length of
+        1-12 ASCII digits and answers anything else 400 before the handler.
+        Handler alone: the same value must be plain digits, up to 20 of them."""
         s, inicio = self.iniciar(PDF)
-        clave_temporal = self.filas("archivo_version", "id = ?", (inicio["version_id"],))[0]["clave_temporal"]
-        # The dispatcher's int() accepts a sign; the declared length must still be plain digits.
-        s, r = self._put_crudo(inicio["version_id"], f"+{len(PDF)}", PDF)
-        self.assertEqual((s, r["detalle"]["code"]), (400, "cuerpo_incompleto"))
-        self.assertIsNone(self.store.tamano_de(clave_temporal))
-        s, r = self._put_crudo(inicio["version_id"], f"{len(PDF):020d}", PDF)   # leading zeros
+        vid = inicio["version_id"]
+        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"]
+        for longitud in (f"+{len(PDF)}", f"{len(PDF):020d}"):       # a sign; more than 12 digits
+            s, r = self._put_crudo(vid, longitud, PDF)
+            self.assertEqual((s, r["detalle"]), (400, None), longitud)   # the dispatcher's refusal
+            self.assertIsNone(self.store.tamano_de(clave_temporal))
+        s, r = self._put_crudo(vid, f"{len(PDF):012d}", PDF)        # leading zeros within 12 digits
         self.assertEqual(s, 200, r)
+        self.assertEqual(self.store.tamano_de(clave_temporal), len(PDF))
+
+    def _contenido_directo(self, vid, cabeceras):
+        """The handler without the dispatcher: its own validation of the headers."""
+        from email.message import Message
+
+        from server.router import Request
+        h = Message()
+        for nombre, valor in {"Content-Type": "application/pdf", **cabeceras}.items():
+            h[nombre] = valor
+        with db.session() as conn:
+            sesion = auth.sesion_de_token(conn, self.tokens["ana"])
+        return api.contenido(Request(method="PUT", path="", query={}, params={"vid": vid}, body=PDF,
+                                     headers=h, user=sesion.actor, sesion=sesion))
+
+    def test_handler_alone_validates_the_declared_length_and_encoding(self):
+        s, inicio = self.iniciar(PDF)
+        vid = inicio["version_id"]
+        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"]
+        for cabeceras, estado, codigo in (
+                ({"Content-Length": f"+{len(PDF)}"}, 400, "cuerpo_incompleto"),
+                ({"Content-Length": "²"}, 400, "cuerpo_incompleto"),
+                ({"Content-Length": str(len(PDF) + 1)}, 400, "cuerpo_incompleto"),
+                ({}, 400, "cuerpo_incompleto"),
+                ({"Content-Length": str(len(PDF)), "Transfer-Encoding": "chunked"}, 411, "longitud_requerida")):
+            with self.subTest(cabeceras=cabeceras):
+                with self.assertRaises(ApiError) as ctx:
+                    self._contenido_directo(vid, cabeceras)
+                self.assertEqual((ctx.exception.status, ctx.exception.detalle["code"]), (estado, codigo))
+                self.assertIsNone(self.store.tamano_de(clave_temporal))
+        self._contenido_directo(vid, {"Content-Length": f"{len(PDF):020d}"})   # 20 digits: the handler's own bound
         self.assertEqual(self.store.tamano_de(clave_temporal), len(PDF))
 
     # -- geometry metadata -------------------------------------------------------------
@@ -740,12 +772,14 @@ class HTTPChecks:
             with db.session() as conn:
                 conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         with patch.dict(os.environ, {"ARA_MAP_READ_ONLY": "1"}):
+            # Mounted (C1): the exemption is the application's own READ_ONLY_POSTS.
             s, r = self.j("POST", "/api/archivos/geometrias/metadatos", datos={"ids": [mio["gid"]]})
+            self.assertEqual((s, list(r["geometrias"])), (200, [mio["gid"]]))
+            s, r = self.completar(mio["vid"])
             self.assertEqual(s, 403)
-            with patch.object(app_module, "READ_ONLY_POSTS", app_module.READ_ONLY_POSTS | api.POSTS_DE_LECTURA):
+            self.assertEqual(app_module.READ_ONLY_POSTS - {"/api/exportar"}, set(api.POSTS_DE_LECTURA))
+            with patch.object(app_module, "READ_ONLY_POSTS", {"/api/exportar"}):   # without it: refused
                 s, r = self.j("POST", "/api/archivos/geometrias/metadatos", datos={"ids": [mio["gid"]]})
-                self.assertEqual((s, list(r["geometrias"])), (200, [mio["gid"]]))
-                s, r = self.completar(mio["vid"])
                 self.assertEqual(s, 403)
 
     # -- geometry chunks -----------------------------------------------------------------

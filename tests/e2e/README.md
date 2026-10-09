@@ -38,3 +38,22 @@ node contornos-medicion.mjs     # tiempos y memoria (opcional: archivos de lími
 
 `CHROMIUM=/ruta/a/chrome` usa ese binario en lugar del canal `chrome`.
 `CONTORNOS_EVIDENCIA=/ruta` guarda capturas y un resumen JSON.
+
+## Tabla de empleados (2A)
+
+Recorridos integrados: servidor real, sesiones reales, Chrome real. Cada
+corrida necesita un servidor **nuevo**; `tabla_servidor.py` levanta uno con una
+base SQLite temporal y cuentas ficticias, y lo borra al cerrar.
+
+```bash
+python3 tests/e2e/tabla_servidor.py --puerto 8433          # terminal 1
+cd tests/e2e && npm ci
+ARA_URL=http://localhost:8433 node tabla-integrada.mjs [carpeta-de-capturas]
+```
+
+Medición local (25,000 terrenos sintéticos, 3,000 en una base, cinco sesiones):
+
+```bash
+python3 tests/e2e/tabla_servidor.py --puerto 8434 --registros 25000   # terminal 1
+ARA_URL=http://localhost:8434 node tests/e2e/tabla-medicion.mjs [salida.json]
+```

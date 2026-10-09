@@ -559,7 +559,7 @@ class Registros(Escenario):
             ("asking_price", cursor("asking_price", float("inf"), uno)),
             ("-asking_price", cursor("-asking_price", float("-inf"), uno)),
             ("asking_price", base64.urlsafe_b64encode(
-                ('["asking_price", 1e999, "%s"]' % uno).encode()).decode()),
+                f'["asking_price", 1e999, "{uno}"]'.encode()).decode()),
             ("superficie_m2", cursor("superficie_m2", True, uno)),
             ("superficie_m2", cursor("superficie_m2", [1], uno)),
             ("superficie_m2", cursor("superficie_m2", {"a": 1}, uno)),

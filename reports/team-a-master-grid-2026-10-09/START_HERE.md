@@ -622,3 +622,64 @@ batches.
 
 Stop for supervisory review. Nothing was merged or deployed; no real account or
 data was used.
+
+## 12. Correction 2 (review `f2939edc4f680fab596605e51a6bd8a48f792ea4`)
+
+Only **R2-A5**, additive to `cda5c20580179abcd8673010797a9975b1b7a06d`.
+
+**Defect.** `_read_body()` read the framing fields with `headers.get()`, which
+shows the first occurrence only, and `... or "0"` took an explicitly empty
+`Content-Length:` for an absent one. A second `Content-Length`, an empty one,
+or an empty `Transfer-Encoding:` ahead of a real one therefore left the body on
+the socket with keep-alive handed back, and the body was answered as a second
+request.
+
+**Fix** (`server/app.py`, `_read_body` only). Every occurrence is inspected
+with `get_all()`. A request is refused with one 400, unread, and the connection
+closes when: any `Transfer-Encoding` field is present, whatever its value
+(empty and `identity` included); `Content-Length` appears more than once, equal
+values included; or its single value is not 1–12 ASCII digits (empty, signed,
+comma-combined, non-ASCII). An absent `Content-Length` is still an empty body.
+The 413 gate, the refusal order before it (Host, Origin, read-only, session,
+route, capability) and the close-unless-read rule are unchanged. No body is
+drained; no auth policy, schema, route or Team B file was touched.
+
+**Tests** (`tests/test_despachador_cuerpos.py`, raw sockets, real dispatcher;
+each body is a hidden `GET /api/config`, each case asserts exactly `[400]` and
+closure): the three supplied cases; reversed duplicate orders; equal duplicate
+lengths; empty length alone, before and after a real one; comma-combined
+lengths (different, equal, trailing comma); empty/chunked encoding in both
+orders with a length; chunked plus length in both orders; `identity` plus
+length; an empty encoding alone. A second test keeps absent and zero lengths
+as an empty body followed by a normally answered second request. The earlier
+tests (read-only, Origin, Host, negative, non-numeric, oversize, chunked,
+keep-alive after a read body) are unchanged and pass.
+
+**Evidence** (`evidencia/correccion-2/`):
+
+| File | Content |
+|---|---|
+| `antes-framing.jsonl` | supervisor's unmodified `probe_edges.py framing` on `cda5c20`: three cases `[401, 200]` |
+| `despues-framing.jsonl` | same probe after the fix: all six cases one status (`400`, `400`, `413`, `400`, `400`, `400`), closed |
+| `antes-pruebas.log` | the new tests against the previous `server/app.py`: 10 subtests fail |
+| `despues-pruebas.log` | the same module after the fix: 5 tests OK |
+
+Of the 17 new cases, 7 already passed before the fix (those whose first
+`Content-Length` was not numeric or whose first `Transfer-Encoding` was not
+empty); they are kept as regressions.
+
+**Verification on this head.** `./verificar.sh`: 1,154 Python OK (179 skipped
+need Postgres), full suite on Python 3.9.6 OK, JavaScript 128/128. Disposable
+local Postgres 16: 1,154 OK, zero skipped. `ruff check server/ tests/` and
+`mypy server/` clean. Browser, memory and coverage evidence of §11 is reused,
+not rerun: no browser code changed.
+
+**Limits.** Only the three fields' occurrence and form are checked; header
+syntax the standard library's parser itself accepts or drops (a space before
+the colon, obsolete line folding) was not surveyed beyond confirming a folded
+length is refused as non-numeric. A legitimate client that sends
+`Transfer-Encoding` or two identical `Content-Length` fields is now refused;
+the application's own client and browsers send neither.
+
+Stop for supervisory review. Nothing was merged or deployed; no real account or
+data was used.

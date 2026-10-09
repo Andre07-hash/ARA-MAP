@@ -289,12 +289,15 @@ class Handler(BaseHTTPRequestHandler):
         return (urlsplit(origin).hostname or "") in ALLOWED_ORIGIN_HOSTS
 
     def _read_body(self) -> bytes:
-        """The declared body, whole. Only a Content-Length body is understood;
-        anything else is refused unread, and the connection then closes."""
-        declarado = self.headers.get("Content-Length") or "0"
-        if self.headers.get("Transfer-Encoding") or not re.fullmatch(r"[0-9]{1,12}", declarado):
+        """The declared body, whole. Only a single Content-Length body is
+        understood; anything else is refused unread, and the connection then
+        closes. Every occurrence of the framing fields counts, an empty one
+        included: headers.get() would show only the first."""
+        largos = self.headers.get_all("Content-Length") or []
+        if (self.headers.get_all("Transfer-Encoding") or len(largos) > 1
+                or (largos and not re.fullmatch(r"[0-9]{1,12}", largos[0]))):
             raise ApiError("La petición no declara bien su tamaño.", 400)
-        length = int(declarado)
+        length = int(largos[0]) if largos else 0
         if length > MAX_BODY:
             raise ApiError("La petición es demasiado grande.", 413)
         body = self.rfile.read(length) if length else b""

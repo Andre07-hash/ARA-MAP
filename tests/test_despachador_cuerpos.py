@@ -88,6 +88,42 @@ class Cuerpos(TempDatabase):
             with self.subTest(nombre):
                 self.assertEqual(self.enviar(peticion), ([esperado], True))
 
+    def test_ambiguous_framing_is_refused_once_before_the_body(self):
+        """R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+        field. Anonymous login would answer 401 and keep the connection."""
+        n = str(len(OCULTA)).encode()
+        cl, te = b"Content-Length: ", b"Transfer-Encoding: "
+        casos = {
+            "0 then the real length": (cl + b"0", cl + n),
+            "the real length then 0": (cl + n, cl + b"0"),
+            "the same length twice": (cl + n, cl + n),
+            "empty length": (cl,),
+            "empty length then a real one": (cl, cl + n),
+            "a real length then an empty one": (cl + n, cl),
+            "comma-combined lengths": (cl + b"0, " + n,),
+            "comma-combined equal lengths": (cl + n + b", " + n,),
+            "length with a trailing comma": (cl + n + b",",),
+            "0, empty encoding, chunked": (cl + b"0", te, te + b"chunked"),
+            "chunked, empty encoding, 0": (te + b"chunked", te, cl + b"0"),
+            "empty encoding and a length": (te, cl + n),
+            "a length and an empty encoding": (cl + n, te),
+            "chunked and a length": (te + b"chunked", cl + n),
+            "a length and chunked": (cl + n, te + b"chunked"),
+            "identity encoding and a length": (te + b"identity", cl + n),
+            "empty encoding alone": (te,),
+        }
+        for nombre, cabeceras in casos.items():
+            with self.subTest(nombre):
+                self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+                                 ([400], True))
+
+    def test_absent_and_zero_lengths_are_still_an_empty_body(self):
+        ver = OCULTA
+        for nombre, largo in (("absent", False), ("zero", 0)):
+            with self.subTest(nombre):
+                self.assertEqual(self.enviar(self.post("/api/logout", cuerpo=b"", largo=largo) + ver),
+                                 ([200, 200], True))
+
     def test_read_only_mode_refuses_once_and_closes(self):
         with patch.dict(os.environ, {"ARA_MAP_READ_ONLY": "1"}):
             self.assertEqual(self.enviar(self.post()), ([403], True))

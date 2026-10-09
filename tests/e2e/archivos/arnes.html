@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- 3B standalone browser harness: B's REAL file widgets and geometry loader,
+     the unchanged createMapCanvas with the vendored Leaflet, against the real
+     local server started by tests/e2e/archivos_servidor.py. Not the product:
+     A's host owns the real table, detail panel and map page. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Archivos · arnés 3B</title>
+<link rel="stylesheet" href="/vendor/leaflet.css">
+<link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/typography.css">
+<link rel="stylesheet" href="/styles/controls.css">
+<link rel="stylesheet" href="/styles/panels.css">
+<link rel="stylesheet" href="/styles/map.css">
+<link rel="stylesheet" href="/styles/archivos.css">
+<style>
+  body { margin: 0; padding: 12px; font: 13px system-ui, sans-serif; background: #f4f3ef; }
+  .fila { display: grid; grid-template-columns: 220px 160px 160px; gap: 8px; align-items: center;
+          padding: 4px 8px; border-bottom: 1px solid #ddd; }
+  .fila button { text-align: left; }
+  #detalles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+  #mapa { width: 640px; height: 420px; margin-top: 12px; background: #e8e6df; }
+  #aviso-mapa { margin: 4px 0; }
+</style>
+</head>
+<body>
+<form id="entrar">
+  <label>Usuario <input name="usuario" autocomplete="off"></label>
+  <label>Contraseña <input name="clave" type="password" autocomplete="off"></label>
+  <button type="submit" class="btn btn-quiet btn-small">Entrar</button>
+  <button type="button" id="salir" class="btn btn-quiet btn-small">Salir</button>
+  <span id="quien" role="status"></span>
+</form>
+<p id="modo" class="secondary"></p>
+<div id="tabla" role="table" aria-label="Terrenos de prueba"></div>
+<div id="detalles"></div>
+<p id="aviso-mapa" class="secondary" role="status"></p>
+<div id="mapa"></div>
+<script src="/vendor/leaflet.js"></script>
+<script type="module" src="/__arnes/arnes.js"></script>
+</body>
+</html>

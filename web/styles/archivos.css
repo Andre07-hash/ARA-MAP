@@ -29,6 +29,9 @@
 
 /* ---------------------------------------------------------------- detail */
 
+/* Every rule below sets `display`; the hidden attribute must still win. */
+.archivos-detalle [hidden] { display: none !important; }
+
 .archivos-detalle {
   display: grid;
   gap: var(--space-3);

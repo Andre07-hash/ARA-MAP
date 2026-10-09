@@ -84,9 +84,11 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   const listaSubidas = el("ul", { class: "archivos-subidas", "aria-label": `Subidas de ${ETIQUETA}` });
   const lista = el("ul", { class: "archivos-lista", "aria-label": `${ETIQUETA} de este terreno` });
   const masArchivos = el("button", { type: "button", class: "btn btn-quiet btn-small", hidden: true }, "Cargar más");
+  const avisoLista = el("button", { type: "button", class: "btn btn-quiet btn-small", hidden: true },
+    "La lista cambió: actualizar");
   const raiz = el("section", { class: "archivos-detalle", dataset: { tipo } },
     el("h3", { class: "archivos-titulo" }, tipo === "pdf" ? "Archivos PDF" : "KMZ del terreno"),
-    resumenLinea, zona, listaSubidas, estado, lista, masArchivos);
+    resumenLinea, zona, listaSubidas, estado, avisoLista, lista, masArchivos);
   container.replaceChildren(raiz);
 
   /* ------------------------------------------------------------ helpers */
@@ -131,9 +133,11 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     return claves.get(operacion);
   }
 
-  function boton(texto, onclick, { peligro = false, deshabilitado = false, etiqueta } = {}) {
+  /* `escritura` marks a control that changes server state: read-only mode hides it at once. */
+  function boton(texto, onclick, { peligro = false, deshabilitado = false, etiqueta, escritura = false } = {}) {
     return el("button", { type: "button", class: ["btn", "btn-small", peligro ? "btn-peligro" : "btn-quiet"],
-      disabled: deshabilitado, "aria-label": etiqueta, onclick }, texto);
+      disabled: deshabilitado, "aria-label": etiqueta, onclick, dataset: escritura ? { escritura: "1" } : null,
+      hidden: escritura && solo }, texto);
   }
 
   /* A confirmation built on the shared dialog, so this mount can close it. */
@@ -182,7 +186,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       controles.push(boton("Quitar de la lista", () => quitarSubida(s)));
     }
     li.dataset.fase = e.fase;
-    li.replaceChildren(
+    li.replaceChildren(...[
       el("span", { class: "archivos-subida-nombre" }, e.nombre || ETIQUETA),
       el("span", { class: "archivos-subida-fase" }, FASE_TEXTO[e.fase] ?? e.fase),
       EN_PROGRESO.has(e.fase) ? el("progress", { class: "archivos-progreso", "aria-label": FASE_TEXTO[e.fase] }) : null,
@@ -190,7 +194,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       e.limpiezaPendiente ? el("span", { class: "archivos-subida-mensaje secondary" },
         "El servidor aún debe limpiar contenido temporal.") : null,
       el("span", { class: "archivos-acciones" }, controles),
-    );
+    ].filter(Boolean));       // native replaceChildren would print "null"
     if (esTerminal(e.fase)) ctx.subidas.quitar(s);
   }
 
@@ -212,7 +216,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     const s = crearSubida({
       cliente: ctx.cliente, terrenoId, tipo, archivo, pendiente, turno: ctx.turno,
       alCambiar: () => pintarSubida(s),
-      alServidor: () => { notificarCambio(); cargarLista(); },
+      alServidor: () => { notificarCambio(); refrescarLista(); },
     });
     subidas.set(s, li);
     ctx.subidas.agregar(s);
@@ -279,7 +283,8 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
         document.body.append(a);
         a.click();
         a.remove();
-        setTimeout(() => { URL.revokeObjectURL(url); urls.delete(url); }, 0);
+        // Revoking in the same task can cancel the save in some browsers; destroy() revokes it anyway.
+        setTimeout(() => { if (urls.delete(url)) URL.revokeObjectURL(url); }, 30_000);
       }
       avisar(abrir ? "Archivo abierto en una pestaña nueva." : "Descarga lista.");
     } catch (error) {
@@ -300,12 +305,12 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       if (!vivo) return;
       avisar(geometriaId ? "Contorno activado." : "Versión activada.");
       notificarCambio();
-      cargarLista();
+      cargarLista({ forzar: true });
     } catch (error) {
       if (error instanceof ErrorArchivos && error.codigo === "revision_conflictiva") {
         claves.delete(operacion);
         avisar("El archivo cambió mientras tanto. Se actualizó la lista: revisa y vuelve a elegir.", "error");
-        cargarLista();
+        cargarLista({ forzar: true });
         return;
       }
       fallo(error, "No se pudo activar");
@@ -330,12 +335,12 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       avisar(r?.limpieza_pendiente ? "Archivo retirado. El servidor terminará de limpiar el contenido temporal."
         : "Archivo retirado.");
       notificarCambio();
-      cargarLista();
+      cargarLista({ forzar: true });
     } catch (error) {
       if (error instanceof ErrorArchivos && error.codigo === "revision_conflictiva") {
         claves.delete(operacion);
         avisar("El archivo cambió mientras tanto; no se retiró. Revisa la lista actualizada.", "error");
-        cargarLista();
+        cargarLista({ forzar: true });
         return;
       }
       fallo(error, "No se pudo retirar");
@@ -402,14 +407,14 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       acciones.push(boton("Descargar", () => descargar(v), { etiqueta: `Descargar versión ${v.numero}` }));
       if (tipo === "pdf") acciones.push(boton("Abrir", () => descargar(v, true), { etiqueta: `Abrir versión ${v.numero}` }));
       if (tipo === "pdf" && !actual && !archivo.retirado_en && !solo) {
-        acciones.push(boton("Hacer actual", () => activar(archivo, v.id, null)));
+        acciones.push(boton("Hacer actual", () => activar(archivo, v.id, null), { escritura: true }));
       }
     }
     if (v.estado === "subiendo" && v.propia && !solo) {
       acciones.push(boton("Continuar subida", () => {
         const s = nuevaSubida({ pendiente: { ...v, archivo_id: archivo.id } });
         s?.ejecutar();
-      }));
+      }, { escritura: true }));
     }
     partes.push(el("span", { class: "archivos-acciones" }, acciones));
     return el("li", { class: "archivos-version", dataset: { estado: v.estado } }, partes);
@@ -436,10 +441,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     const activa = intento.geometria_id && intento.geometria_id === archivo.geometria_activa_id;
     if (activa) acciones.append(el("span", { class: "archivos-chip archivos-chip-actual" }, "Contorno activo"));
     if (intento.resultado === "listo" && intento.geometria_id && !activa && !archivo.retirado_en && !solo) {
-      acciones.append(boton("Activar este contorno", () => activar(archivo, version.id, intento.geometria_id)));
+      acciones.append(boton("Activar este contorno", () => activar(archivo, version.id, intento.geometria_id), { escritura: true }));
     }
     if (intento.candidatos > 1 && !solo && !archivo.retirado_en) {
-      acciones.append(boton("Elegir contornos…", () => elegirCandidatos(archivo, version, intento, li, recargar)));
+      acciones.append(boton("Elegir contornos…", () => elegirCandidatos(archivo, version, intento, li, recargar), { escritura: true }));
     }
     return li;
   }
@@ -464,7 +469,8 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       const id = `cand-${intento.id}-${indice}`;
       const casilla = el("input", { type: "checkbox", id, value: String(indice), disabled: !c.valido });
       casillas.push(casilla);
-      const nombre = [c.carpeta, c.nombre].filter(Boolean).join(" / ") || `Contorno ${indice + 1}`;
+      const carpeta = Array.isArray(c.carpeta) ? c.carpeta.join(" / ") : c.carpeta;
+      const nombre = [carpeta, c.nombre].filter(Boolean).join(" / ") || `Contorno ${indice + 1}`;
       return el("div", { class: "archivos-candidato" }, casilla,
         el("label", { for: id }, `${nombre} · ${c.partes} parte${c.partes === 1 ? "" : "s"}, ${c.vertices} vértices`),
         c.error?.mensaje ? el("span", { class: "archivos-error" }, c.error.mensaje) : null);
@@ -481,12 +487,11 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
         claves.delete(operacion);
         if (!vivo) return;
         notificarCambio();
+        // The attempts panel reloads below, so the outcome goes to the mount's status line.
         if (r?.geometria_id && r?.intento?.resultado === "listo") {
-          resultado.textContent = "Selección válida. Todavía no está activa.";
-          resultado.after(boton("Activar este contorno", () => activar(archivo, version.id, r.geometria_id)));
+          avisar("Selección válida. Todavía no está activa: usa «Activar este contorno» en el intento nuevo.");
         } else {
-          resultado.textContent = r?.intento?.resultado_detalle?.error?.mensaje
-            ?? "La selección no produjo un contorno utilizable.";
+          avisar(r?.intento?.resultado_detalle?.error?.mensaje ?? "La selección no produjo un contorno utilizable.", "error");
         }
         recargar();
       } catch (error) {
@@ -551,7 +556,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
             } catch (error) {
               fallo(error, "No se pudo procesar");
             }
-          }));
+          }, { escritura: true }));
         }
         let panelIntentos = null;
         panelIntentos = panel(`Intentos de la versión ${version.numero}`, verIntentos, linea, async (cursor) => {
@@ -566,20 +571,35 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       return { items: r.eventos ?? [], cursor: r.cursor_siguiente };
     }, lineaEvento);
     if (!archivo.retirado_en && !solo) {
-      const b = boton("Retirar…", () => retirar(archivo, b), { peligro: true, etiqueta: `Retirar ${nombre}` });
+      const b = boton("Retirar…", () => retirar(archivo, b), { peligro: true, etiqueta: `Retirar ${nombre}`, escritura: true });
       acciones.append(b);
     }
     return li;
   }
 
-  let cursorLista = null;
-  async function cargarLista(siguiente = false) {
+  /* A change from elsewhere must not wipe a panel or a choice the person has
+   * open: offer to refresh instead. Actions taken here reload the list. */
+  const enUso = () => Boolean(lista.querySelector(".archivos-panel:not([hidden]), .archivos-candidatos"));
+  function refrescarLista() {
     if (!vivo) return;
+    if (enUso()) { avisoLista.hidden = false; return; }
+    cargarLista();
+  }
+  avisoLista.addEventListener("click", () => cargarLista({ forzar: true }));
+
+  /* `forzar`: replace the list even if a panel is open (after an action taken
+   * here). Otherwise a page that arrives while the person is using a panel
+   * only offers the refresh. */
+  let cursorLista = null;
+  async function cargarLista({ siguiente = false, forzar = false } = {}) {
+    if (!vivo) return;
+    if (!siguiente) avisoLista.hidden = true;
     const mia = siguiente ? listaGen : ++listaGen;
     if (!siguiente) cursorLista = null;
     try {
-      const r = await ctx.cliente.listar(terrenoId, { cursor: cursorLista, limite: PAGINA_ARCHIVOS, signal: senal() });
+      const r = await ctx.cliente.listar(terrenoId, { cursor: siguiente ? cursorLista : null, limite: PAGINA_ARCHIVOS, signal: senal() });
       if (!vivo || mia !== listaGen) return;
+      if (!siguiente && !forzar && enUso()) { avisoLista.hidden = false; return; }
       const propios = (r.archivos ?? []).filter((a) => a.tipo === tipo);
       if (!siguiente) lista.replaceChildren();
       for (const a of propios) lista.append(lineaArchivo(a));
@@ -592,7 +612,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       if (mia === listaGen) fallo(error, "No se pudo cargar la lista");
     }
   }
-  masArchivos.addEventListener("click", () => cargarLista(true));
+  masArchivos.addEventListener("click", () => cargarLista({ siguiente: true }));
 
   /* ---------------------------------------------------------- render */
 
@@ -606,6 +626,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     raiz.dataset.soloLectura = solo ? "1" : "0";
     zona.hidden = solo;
     botonElegir.disabled = solo;
+    for (const b of raiz.querySelectorAll("[data-escritura]")) b.hidden = solo;
     for (const s of subidas.keys()) pintarSubida(s);
   }
 
@@ -623,10 +644,8 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       const cambioResumen = nuevoResumen !== undefined && huella(nuevoResumen) !== huella(ultimoResumen);
       if (nuevoResumen !== undefined) ultimoResumen = nuevoResumen;
       pintarResumen();
-      if (solo !== antesSolo || cambioResumen) {
-        pintarModo();
-        cargarLista();          // the list shows server state; the controls follow `solo`
-      }
+      if (solo !== antesSolo) pintarModo();
+      if (cambioResumen) refrescarLista();
     },
     destroy() {
       if (!vivo) return;

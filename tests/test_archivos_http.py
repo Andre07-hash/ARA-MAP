@@ -934,6 +934,34 @@ class HTTPChecks:
         s, r = self.subir(tarde["version_id"], PDF)
         self.assertEqual((s, r["detalle"]["code"]), (409, "subida_no_pendiente"))
 
+
+class Disposicion(unittest.TestCase):
+    """Content-Disposition stays one safe header whatever the stored name holds.
+
+    The lifecycle already refuses control characters at start (nombre_invalido);
+    this is the defense in depth for names that reach the header builder.
+    """
+
+    def test_control_characters_never_reach_the_header(self) -> None:
+        h = api.disposicion("a\r\nSet-Cookie: x=1.pdf", "pdf")
+        self.assertNotIn("\r", h)
+        self.assertNotIn("\n", h)
+        self.assertEqual(h, "attachment; filename=\"aSet-Cookie: x=1.pdf\"; "
+                            "filename*=UTF-8''aSet-Cookie%3A%20x%3D1.pdf")
+
+    def test_quotes_backslashes_and_separators_are_replaced_in_the_fallback(self) -> None:
+        self.assertEqual(api.disposicion('x"y\\z;w.pdf', "pdf"),
+                         "attachment; filename=\"x_y_z_w.pdf\"; filename*=UTF-8''x%22y%5Cz%3Bw.pdf")
+
+    def test_unicode_keeps_its_utf8_form_and_gets_an_ascii_fallback(self) -> None:
+        self.assertEqual(api.disposicion("地図", "kmz"),
+                         "attachment; filename=\"archivo.kmz\"; filename*=UTF-8''%E5%9C%B0%E5%9B%B3")
+        self.assertEqual(api.disposicion("...", "pdf"),
+                         "attachment; filename=\"archivo.pdf\"; filename*=UTF-8''...")
+        self.assertTrue(api.disposicion("Plano.KMZ", "kmz").startswith('attachment; filename="Plano.KMZ";'))
+        self.assertTrue(api.disposicion("reporte", "pdf").startswith('attachment; filename="reporte.pdf";'))
+
+
 class HTTPSQLite(HTTPChecks, unittest.TestCase):
     def preparar_bd(self) -> None:
         self._dir = tempfile.TemporaryDirectory()

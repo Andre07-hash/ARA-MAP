@@ -136,11 +136,17 @@ class CreateIdempotency(InventoryServer):
 
     def test_same_key_replays_and_different_body_conflicts(self):
         _, first = self.create({"terreno": "Uno"}, key="clave-fija-1")
-        _, again = self.create({"terreno": "Uno"}, "beto", key="clave-fija-1")
+        _, again = self.create({"terreno": "Uno"}, key="clave-fija-1")
         self.assertEqual(again, first)
         status, body = self.create({"terreno": "Dos"}, key="clave-fija-1")
         self.assertEqual((status, body["detalle"]["code"]), (409, "idempotency_conflict"))
         self.assertEqual((self.count("inventory_terrain"), self.count("inventory_event")), (1, 1))
+        # A key belongs to the account that used it (round 1): the same key from
+        # someone else is theirs, and never returns the first person's record.
+        _, ajeno = self.create({"terreno": "Uno"}, "beto", key="clave-fija-1")
+        self.assertNotEqual(ajeno["terreno"]["id"], first["terreno"]["id"])
+        self.assertEqual(ajeno["terreno"]["created_by"]["display_name"], "Beto")
+        self.assertEqual((self.count("inventory_terrain"), self.count("inventory_event")), (2, 2))
 
     def test_concurrent_same_key_creates_one_record(self):
         resultados = []
@@ -256,7 +262,7 @@ class FieldValidation(InventoryServer):
                                ({"availability": "vendido"}, "availability"),
                                ({"price_on_request": "si"}, "price_on_request"),
                                ({"terreno": 5}, "terreno"), ({"lon": float("inf")}, "lon"),
-                               ({"moneda": None, "asking_price": 5}, "moneda")):
+                               ({"tipo_terreno": "x" * 101}, "tipo_terreno")):
             with self.subTest(changes=changes):
                 status, body = self.patch(tid, 1, changes)
                 self.assertEqual(status, 422)
@@ -287,6 +293,15 @@ class FieldValidation(InventoryServer):
             status, body = self.create({"terreno": "C", **coords})
             self.assertEqual(status, 200, coords)
             self.assertIn("location_invalid", {r["code"] for r in body["terreno"]["attention"]})
+        # An amount whose currency is not known saves as it is (round 1); the
+        # currency stays unknown, is never assumed, and blocks only publication.
+        status, body = self.create({"asking_price": 1500000})
+        self.assertEqual((status, body["terreno"]["draft"]["asking_price"], body["terreno"]["draft"]["moneda"]),
+                         (200, 1500000, None))
+        self.assertIn("currency_required", {r["code"] for r in body["terreno"]["attention"]})
+        status, body = self.patch(body["terreno"]["id"], 1, {"asking_m2": 99.5, "tipo_terreno": " Industrial  ligero "})
+        self.assertEqual((status, body["terreno"]["draft"]["moneda"], body["terreno"]["draft"]["tipo_terreno"]),
+                         (200, None, "Industrial ligero"))
         status, body = self.create({"terreno": "=HYPERLINK(\"x\")", "asking_m2": 122.5, "moneda": "USD"})
         self.assertEqual(body["terreno"]["draft"]["terreno"], "=HYPERLINK(\"x\")")  # literal text
         self.assertEqual(body["terreno"]["draft"]["asking_m2"], 122.5)  # cents kept
@@ -304,7 +319,8 @@ class InternalList(InventoryServer):
 
     def test_251_records_page_without_gaps_or_duplicates(self):
         ids = self.seed(251)
-        for limit, pages in ((None, 3), ("250", 2)):
+        self.assertEqual(self.call("GET", "/api/inventario/terrenos?limit=201")[0], 422)  # was 250
+        for limit, pages in ((None, 3), ("200", 2)):
             vistos, cursor, paginas = [], None, 0
             while True:
                 query = "&".join(p for p in (f"limit={limit}" if limit else "",

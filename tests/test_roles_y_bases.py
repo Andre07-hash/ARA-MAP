@@ -467,14 +467,15 @@ class Matriz(Escenario):
             "expected_version": 1, "changes": {"estado": "Jalisco"}, "rol": "admin",
             "actor_id": self.ids["ada"], "base_id": self.b2, "user": {"id": self.ids["ada"]}}, "olga", falsos)
         self.assertEqual((status, set(body["detalle"]["fields"])), (422, {"rol", "actor_id", "base_id", "user"}))
-        for campo in ("base_id", "rol", "tipo_terreno", "custom_json", "custom"):
+        for campo in ("base_id", "rol", "custom_json", "custom"):
             status, body = self.patch(self.t1, {campo: "x"}, "olga")
             self.assertEqual((status, list(body["detalle"]["fields"])), (422, [campo]))
         status, body = self.patch(self.t1, {"estado": "Jalisco"}, "olga")
         self.assertEqual((status, body["terreno"]["updated_by"]["id"]), (200, self.ids["olga"]))
         self.assertEqual(self.call("GET", "/api/session", user="olga", headers=falsos)[1]["user"]["rol"], "operador")
 
-    def test_an_edit_keeps_the_fields_this_packet_does_not_expose(self):
+    def test_an_edit_keeps_the_fields_it_does_not_touch(self):
+        # custom:folio names no column of Base Uno: a value this base does not define.
         sql(lambda c: c.execute(
             "UPDATE inventory_revision SET tipo_terreno = 'Industrial', custom_json = ?"
             " WHERE inventory_id = ?", ('{"custom:folio": "SENTINELA-77"}', self.t1)))
@@ -485,14 +486,17 @@ class Matriz(Escenario):
                                 for r in revisiones), [
             (1, self.b1, "Industrial", '{"custom:folio": "SENTINELA-77"}'),
             (2, self.b1, "Industrial", '{"custom:folio": "SENTINELA-77"}')])
-        # ... and none of them, nor the base, appears in any existing response.
+        # The record reports its type and base; a stored value no current column
+        # defines is kept and shown to nobody, administrators included.
+        self.assertEqual((body["terreno"]["draft"]["tipo_terreno"], body["terreno"]["base_id"],
+                          body["terreno"]["custom"]), ("Industrial", self.b1, {}))
         textos = [json.dumps(body), *(json.dumps(self.call("GET", ruta, user=u)[1]) for u in ("olga", "ada")
                   for ruta in (f"/api/inventario/terrenos/{self.t1}",
                                f"/api/inventario/terrenos/{self.t1}/historial"))]
         textos.append(json.dumps(self.call("GET", "/api/inventario/terrenos")[1]))
         for texto in textos:
-            for prohibido in ("SENTINELA-77", "tipo_terreno", "custom", "Industrial", "base_id", self.b1):
-                self.assertNotIn(prohibido, texto)
+            self.assertNotIn("SENTINELA-77", texto)
+            self.assertNotIn("custom_json", texto)
         # A terrain with no base keeps none.
         self.patch(self.t0, {"municipio": "Colima"}, "ada")
         self.assertEqual({r["base_id"] for r in filas("inventory_revision", "inventory_id = ?", (self.t0,))}, {None})

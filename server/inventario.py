@@ -1,20 +1,28 @@
 """Inventory rules shared by every route: editable fields, their validation,
-the publication gate, attention reasons and list filtering.
+the publication gate, attention reasons and list query parameters.
 
 Pure functions over plain dicts. The repository stores; this module decides.
-Stage 2 (preview, publish, public catalog) reuses publication_blockers and the
-list functions here rather than restating them.
+The list queries themselves run in SQL (server/repo/inventario.py).
 """
 
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Iterable, Mapping, Sequence
+import uuid
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from .importer import TerrainRecord
-from .normalize import fold
-from .validation import UBICACION_VALIDA, location_state, validate_record
+from .validation import (
+    AFECTACION_ALTA,
+    AREA_TOLERANCE_M2,
+    AVISO,
+    PRICE_TOLERANCE,
+    UBICACION_VALIDA,
+    location_state,
+    sql_ubicacion_valida,
+    validate_record,
+)
 
 AVAILABILITY = ("unknown", "available", "negotiation", "sold", "withdrawn")
 PUBLIC_AVAILABILITY = ("available", "negotiation")
@@ -22,7 +30,7 @@ MONEDAS = ("USD", "MXN")
 PUBLICATION_STATES = ("draft", "published", "unpublished", "archived")
 
 # Text fields and their length limits. Short ones are single-spaced.
-SHORT_TEXT = {"terreno": 200, "estado": 100, "municipio": 100}
+SHORT_TEXT = {"terreno": 200, "estado": 100, "municipio": 100, "tipo_terreno": 100}
 LONG_TEXT = {"direccion": 500, "public_description": 5000, "contacto": 2000,
              "notas_internas": 10000}
 NUMBERS = ("superficie_m2", "superficie_ha", "afectaciones_pct", "afectaciones_m2",
@@ -35,7 +43,8 @@ EDITABLE = (*SHORT_TEXT, *LONG_TEXT, *NUMBERS, "moneda", "price_on_request", "av
 CONFIRMABLE = ("price", "availability")
 
 DEFAULT_LIMIT = 100
-MAX_LIMIT = 250
+MAX_LIMIT = 250          # history pages
+MAX_LIST_LIMIT = 200     # terrain lists
 
 # Validation findings that a publication blocker already reports.
 _COVERED_BY_BLOCKERS = {"SIN_COORDENADAS", "COORD_INVERTIDA", "COORD_FUERA_MEXICO"}
@@ -111,18 +120,10 @@ def _number(name: str, value: Any) -> float | None:
     return number
 
 
-def check_merged(changes: Mapping[str, Any], merged: Mapping[str, Any]) -> dict[str, str]:
-    """Rules that span fields, applied only to what this change touches, so an
-    edit elsewhere never fails on an adopted record's old gaps."""
-    # A half or out-of-Mexico coordinate pair saves (INTEGRATION_DECISIONS §9);
-    # it only blocks publication. Impossible values fail in _number().
-    errors: dict[str, str] = {}
-    priced = any(changes.get(n) is not None for n in ("asking_price", "asking_m2"))
-    if priced and merged["moneda"] is None:
-        # A price typed by hand states its currency; it is never assumed.
-        errors["moneda"] = "Indica la moneda del precio: USD o MXN."
-    return errors
-
+# No rule spans fields when saving. Every business value is optional and
+# independent: a half coordinate pair saves, and so does an amount whose
+# currency is not known (moneda stays NULL, never assumed). Those gaps only
+# block publication, below.
 
 # -- publication gate and attention -------------------------------------------
 
@@ -160,8 +161,28 @@ def warnings(draft: Mapping[str, Any]) -> list[dict[str, str]]:
     valores: dict[str, Any] = {n: draft.get(n) for n in (
         "estado", "municipio", "direccion", *NUMBERS, "moneda")}
     record = TerrainRecord(orden=0, fila=0, terreno=draft.get("terreno") or "", **valores)
-    return [{"code": f.codigo, "severity": f.severidad, "message": f.mensaje}
-            for f in validate_record(record) if f.codigo not in _COVERED_BY_BLOCKERS]
+    found = [{"code": f.codigo, "severity": f.severidad, "message": f.mensaje}
+             for f in validate_record(record) if f.codigo not in _COVERED_BY_BLOCKERS]
+    if any(_fuera_de_rango(draft.get(n)) for n in _CRUZADOS):
+        found.append({"code": "VALOR_FUERA_DE_RANGO", "severity": AVISO,
+                      "message": "Un valor es demasiado grande o pequeño para comprobar su"
+                                 " consistencia automáticamente; revísalo."})
+    return found
+
+
+# The numbers the findings multiply and divide. This is a technical guard for
+# those consistency checks, not a business limit: the value is stored as
+# entered and nothing about saving or publishing changes. Beyond this
+# deliberately conservative range a product can overflow or underflow, which
+# Postgres reports as an error, so the checks are not computed: the record is
+# flagged instead, and sql_atencion() does no arithmetic on it. It says
+# nothing about what a database can hold or what a property may cost.
+_CRUZADOS = ("superficie_m2", "superficie_ha", "asking_price", "asking_m2")
+RANGO_COMPROBABLE = (1e-100, 1e100)
+
+
+def _fuera_de_rango(value: Any) -> bool:
+    return bool(value) and not RANGO_COMPROBABLE[0] <= abs(value) <= RANGO_COMPROBABLE[1]
 
 
 def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> list[dict[str, str]]:
@@ -178,6 +199,51 @@ def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> lis
     return reasons
 
 
+def sql_atencion(d: str = "d") -> str:
+    """Whether attention() is non-empty, as a SQL predicate over the draft
+    revision aliased ``d``. Never NULL, so NOT (...) is its exact complement.
+
+    Built from the same constants and the same floating-point operations in
+    the same order as the Python rules, so a list filtered by it and the
+    reasons shown on each record cannot disagree. A test compares the two on
+    both databases, tolerance boundaries included.
+    """
+    m2, ha, precio, unitario = (f"{d}.{n}" for n in _CRUZADOS)
+    a_consultar = f"{d}.price_on_request = 1"
+    sin_monto = f"(COALESCE({precio}, 0) <= 0 AND COALESCE({unitario}, 0) <= 0)"
+    disponibles = ", ".join(f"'{a}'" for a in AVAILABILITY[1:])
+    monedas = ", ".join(f"'{m}'" for m in MONEDAS)
+    implicito = f"{unitario} * {m2}"
+    fuera = " OR ".join(f"({c} <> 0 AND ({c} < {RANGO_COMPROBABLE[0]!r} OR {c} > {RANGO_COMPROBABLE[1]!r}))"
+                        for c in (m2, ha, precio, unitario))
+    hallazgos = (
+        f"COALESCE({d}.estado, '') = ''",
+        f"COALESCE({d}.municipio, '') = ''",
+        f"({m2} IS NOT NULL AND {ha} IS NOT NULL"
+        f" AND ABS({ha} * 10000 - {m2}) > {AREA_TOLERANCE_M2!r})",
+        # A zero amount first: it is its own finding and would divide by zero below.
+        f"CASE WHEN {precio} = 0 OR {unitario} = 0 THEN 1 = 1"
+        f" WHEN {precio} IS NULL OR {unitario} IS NULL OR {m2} IS NULL THEN 1 = 0"
+        f" ELSE ABS({implicito} - {precio}) / (CASE WHEN ABS({implicito}) >= ABS({precio})"
+        f" THEN ABS({implicito}) ELSE ABS({precio}) END) > {PRICE_TOLERANCE!r} END",
+        f"COALESCE({d}.afectaciones_pct, 0) > {AFECTACION_ALTA!r}",
+    )
+    return "(" + " OR ".join((
+        # publication_blockers()
+        f"TRIM(COALESCE({d}.terreno, '')) = ''",
+        f"NOT {sql_ubicacion_valida(f'{d}.lat', f'{d}.lon')}",
+        f"(COALESCE({m2}, 0) <= 0 AND COALESCE({ha}, 0) <= 0)",
+        f"COALESCE({d}.availability, '') NOT IN ({disponibles})",
+        f"({a_consultar} AND ({precio} IS NOT NULL OR {unitario} IS NOT NULL))",
+        f"(NOT {a_consultar} AND ({sin_monto} OR COALESCE({d}.moneda, '') NOT IN ({monedas})))",
+        # never confirmed
+        f"(NOT {a_consultar} AND COALESCE({d}.price_confirmed_at, '') = '')",
+        f"COALESCE({d}.availability_confirmed_at, '') = ''",
+        # warnings(); CASE, because it alone fixes the order of evaluation
+        f"CASE WHEN {fuera} THEN 1 = 1 ELSE ({' OR '.join(hallazgos)}) END",
+    )) + ")"
+
+
 # -- list queries -------------------------------------------------------------
 
 class QueryError(ValueError):
@@ -188,9 +254,17 @@ class QueryError(ValueError):
 
 PUBLIC_QUERY = ("q", "estado", "municipio", "area_min_m2", "area_max_m2", "moneda",
                 "price_min", "price_max", "price_basis", "cursor", "limit")
-INTERNAL_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
-                  "include_archived")
-_MULTI = ("estado", "municipio", "publication_state", "availability")
+# One work base's list. "sort" names a key of SORTS, "-" in front for descending.
+SCOPED_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
+                "include_archived", "tipo_terreno", "sort")
+# The administrators' master table adds the base filter: base ids and/or
+# SIN_ASIGNAR for records that belong to no base.
+INTERNAL_QUERY = (*SCOPED_QUERY, "base")
+_MULTI = ("estado", "municipio", "publication_state", "availability", "tipo_terreno", "base")
+SIN_ASIGNAR = "sin_asignar"
+# Sort keys a client may name, and whether the column is text (sorted folded).
+SORTS = {"id": False, "terreno": True, "estado": True, "municipio": True, "tipo_terreno": True,
+         "superficie_m2": False, "asking_price": False, "updated_at": False}
 
 
 def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dict[str, Any]:
@@ -217,10 +291,20 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     q["cursor"] = single.get("cursor") or None
     try:
         q["limit"] = int(single.get("limit") or DEFAULT_LIMIT)
-        if not 1 <= q["limit"] <= MAX_LIMIT:
+        if not 1 <= q["limit"] <= MAX_LIST_LIMIT:
             raise ValueError
     except ValueError:
-        errors["limit"] = f"Usa un número entero de 1 a {MAX_LIMIT}."
+        errors["limit"] = f"Usa un número entero de 1 a {MAX_LIST_LIMIT}."
+    q["sort"] = single.get("sort") or "id"
+    if q["sort"].lstrip("-") not in SORTS or q["sort"].startswith("--"):
+        errors["sort"] = f"Valores admitidos: {', '.join(SORTS)} (con «-» delante para descendente)."
+    bases = []
+    for valor in q["base"]:
+        try:
+            bases.append(valor if valor == SIN_ASIGNAR else str(uuid.UUID(valor)))
+        except ValueError:
+            errors["base"] = f"Usa identificadores de base o «{SIN_ASIGNAR}»."
+    q["base"] = bases
     for name, choices in (("publication_state", PUBLICATION_STATES), ("availability", AVAILABILITY)):
         if any(v not in choices for v in q[name]):
             errors[name] = f"Valores admitidos: {', '.join(choices)}."
@@ -232,63 +316,3 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     if errors:
         raise QueryError(errors)
     return q
-
-
-Fields = Callable[[Mapping[str, Any]], Mapping[str, Any]]
-
-
-def matches(fields: Mapping[str, Any], q: Mapping[str, Any]) -> bool:
-    """Business-field filters, identical for the internal list and the public
-    catalog (which passes published-revision fields, never draft ones)."""
-    if q["estado"] and fields.get("estado") not in q["estado"]:
-        return False
-    if q["municipio"] and fields.get("municipio") not in q["municipio"]:
-        return False
-    if not _in_range(fields.get("superficie_m2"), q["area_min_m2"], q["area_max_m2"]):
-        return False
-    if q["moneda"] and (q["price_min"] is not None or q["price_max"] is not None):
-        # One explicit currency; other and unknown currencies are left out.
-        amount = fields.get("asking_price" if q["price_basis"] == "total" else "asking_m2")
-        if fields.get("moneda") != q["moneda"] or amount is None:
-            return False
-        if not _in_range(amount, q["price_min"], q["price_max"]):
-            return False
-    elif q["moneda"] and fields.get("moneda") != q["moneda"]:
-        return False
-    if q["q"]:
-        haystack = fold(" ".join(str(fields.get(n) or "") for n in
-                                 ("terreno", "municipio", "estado", "direccion")))
-        if fold(q["q"]) not in haystack:
-            return False
-    return True
-
-
-def _in_range(value: float | None, low: float | None, high: float | None) -> bool:
-    if low is not None and (value is None or value < low):
-        return False
-    return not (high is not None and (value is None or value > high))
-
-
-def facets(items: Iterable[Mapping[str, Any]], fields: Fields, q: Mapping[str, Any]) -> dict[str, list[str]]:
-    """Options over the whole candidate set, not one page. Municipalities
-    narrow to the selected states."""
-    rows = [fields(i) for i in items]
-
-    def distinct(values: Iterable[Any]) -> list[str]:
-        return sorted({v for v in values if v}, key=fold)
-
-    return {
-        "estados": distinct(r.get("estado") for r in rows),
-        "municipios": distinct(r.get("municipio") for r in rows
-                               if not q["estado"] or r.get("estado") in q["estado"]),
-        "monedas": distinct(r.get("moneda") for r in rows),
-    }
-
-
-def page(items: Sequence[Mapping[str, Any]], q: Mapping[str, Any]) -> tuple[list[Any], str | None]:
-    """Stable id order. The cursor is the last id already returned."""
-    ordered = sorted(items, key=lambda i: i["id"])
-    if q["cursor"]:
-        ordered = [i for i in ordered if i["id"] > q["cursor"]]
-    chunk = ordered[:q["limit"]]
-    return list(chunk), (chunk[-1]["id"] if len(ordered) > q["limit"] else None)

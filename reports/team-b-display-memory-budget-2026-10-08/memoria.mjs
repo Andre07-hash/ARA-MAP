@@ -22,7 +22,10 @@
  *               equals the canvas's real device size;
  *   capa      = (R1, 2026-10-09) every live outline layer's own reservation,
  *               and each equals that layer's actual _visibles byteLength;
- *               a reservation whose layer is gone shows as a ledger excess.
+ *               a reservation whose layer is gone shows as a ledger excess;
+ *   (R1a)       every unique prepared body reachable through a live layer
+ *               must be the registry's own, pinned, entry: a body the layer
+ *               keeps after the registry released it is held but unreserved.
  * A per-frame sampler checks, during work, that the bytes held on the main
  * thread (typed arrays + displayed bitmaps) never exceed the ledger's
  * preparado + raster, and records the ledger peak; the ledger itself can
@@ -41,7 +44,7 @@ const { chromium } = require('playwright-core');
 const servidor = await servir(entorno());
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : { channel: 'chrome' });
 const EVIDENCIA = process.env.EVIDENCIA ?? null;
-const ELEGIDOS = (process.argv[2] ?? 'matriz,cambio,dos-mapas,visitas,rafaga,pequeno,fallos,cola,reinicio').split(',');
+const ELEGIDOS = (process.argv[2] ?? 'matriz,cambio,dos-mapas,visitas,rafaga,pequeno,fallos,cola,presion,reinicio').split(',');
 const salida = { navegador: browser.version(), escenarios: {} };
 let fallas = 0;
 const ok = (cond, que) => { console.log(`${cond ? 'OK   ' : 'FALLA'} ${que}`); if (!cond) fallas += 1; };
@@ -79,8 +82,9 @@ const AYUDAS = () => {
       for (const c of m.canvases) {
         const d = c._diagnostico;
         if (!d?.registro) continue;
+        const capas = d.capasE5();
         real += d.registro.bytesReales() + d.planificador.bytesReservados + d.controlador.bytesRaster().mostrada
-          + d.capasE5().real;
+          + capas.real + capas.fueraDeRegistro;
       }
       const cat = m.presupuesto.porCategoria();
       window.__muestreo.muestras += 1;
@@ -94,14 +98,26 @@ const AYUDAS = () => {
   /** Ledger vs actual holdings, all maps. */
   window.__auditar = async () => {
     const m = window.__m5; const p = m.presupuesto;
+    // Worker statistics are a round trip: collect them FIRST, then read the
+    // ledger and every owner in one synchronous pass, so an acknowledgement
+    // landing during the await cannot split the comparison (correction 2).
+    const estadisticas = [];
+    for (const c of m.canvases) {
+      const cl = c._diagnostico.controlador.cliente;
+      estadisticas.push(cl && cl.estado === 'listo' ? await cl.estadisticas() : null);
+    }
     const r = { total: p.total, usados: p.usados, pico: p.pico, ledger: p.porCategoria(), picoPorCategoria: p.picoPorCategoria(),
                 rechazos: p.rechazos, pendienteDeLiberar: p.pendienteDeLiberar, mapas: [], errores: [] };
     let prep = 0; let copia = 0; let raster = 0; let capa = 0;
+    // Test-only fillers (owner "prueba:…") are one ledger entry each with nothing
+    // allocated; they are reported and set apart, never hidden.
+    r.relleno = { preparado: 0, copia: 0, raster: 0, capa: 0 };
+    for (const v of p.vivas()) if (String(v.dueno).startsWith('prueba:')) r.relleno[v.categoria] += v.bytes;
     for (const [i, c] of m.canvases.entries()) {
       const d = c._diagnostico;
       const reg = d.registro.bytesReservados(); const regReal = d.registro.bytesReales(); const plan = d.planificador.bytesReservados;
       const cl = d.controlador.cliente;
-      const w = cl && cl.estado === 'listo' ? await cl.estadisticas() : null;
+      const w = cl && cl.estado === 'listo' ? estadisticas[i] : null;
       const br = d.controlador.bytesRaster();
       const lienzo = c.map.getContainer().querySelector('.leaflet-overlay-pane canvas');
       const mostrada = d.controlador.mostrada;
@@ -109,6 +125,9 @@ const AYUDAS = () => {
       const capas = d.capasE5();
       capa += capas.reservado;
       if (capas.reservado !== capas.real) r.errores.push(`map ${i}: layer arrays reserved ${capas.reservado} != byteLength ${capas.real}`);
+      if (capas.fueraDeRegistro) {
+        r.errores.push(`map ${i}: live layers retain ${capas.fueraDeRegistro} B of prepared bodies outside the registry (${capas.idsFuera.join(', ')})`);
+      }
       const mapa = { i, registro: { reservados: reg, reales: regReal, entradas: d.registro.tamano, fijados: d.registro.fijados() },
                      preparando: plan, cliente: cl ? { estado: cl.estado, motivo: cl.motivo, reservados: cl.bytesReservados(), copias: cl.copias } : null,
                      trabajador: w ? { bytes: w.bytes, entradas: w.entradas, lienzos: w.lienzos } : null,
@@ -136,10 +155,11 @@ const AYUDAS = () => {
       if (w && p.pendienteDeLiberar === 0 && w.bytes > (cl?.bytesReservados() ?? 0)) r.errores.push(`map ${i}: worker holds ${w.bytes} > reserved ${cl.bytesReservados()}`);
       r.mapas.push(mapa);
     }
-    if (prep !== r.ledger.preparado) r.errores.push(`ledger preparado ${r.ledger.preparado} != owners ${prep}`);
-    if (copia !== r.ledger.copia) r.errores.push(`ledger copia ${r.ledger.copia} != clients ${copia}`);
-    if (raster !== r.ledger.raster) r.errores.push(`ledger raster ${r.ledger.raster} != maps ${raster}`);
-    if (capa !== r.ledger.capa) r.errores.push(`ledger capa ${r.ledger.capa} != live layers ${capa}`);
+    const sin = (k) => r.ledger[k] - r.relleno[k];
+    if (prep !== sin('preparado')) r.errores.push(`ledger preparado ${sin('preparado')} != owners ${prep}`);
+    if (copia !== sin('copia')) r.errores.push(`ledger copia ${sin('copia')} != clients ${copia}`);
+    if (raster !== sin('raster')) r.errores.push(`ledger raster ${sin('raster')} != maps ${raster}`);
+    if (capa !== sin('capa')) r.errores.push(`ledger capa ${sin('capa')} != live layers ${capa}`);
     if (r.pico > r.total) r.errores.push(`peak ${r.pico} > budget ${r.total}`);
     r.muestreo = { ...window.__muestreo, violaciones: window.__muestreo.violaciones.slice(0, 5), nViolaciones: window.__muestreo.violaciones.length };
     if (window.__muestreo.violaciones.length) r.errores.push(`sampler: ${window.__muestreo.violaciones.length} frames held more than reserved`);
@@ -443,6 +463,145 @@ await escenario('cola', async () => {
      + `first-round states ${JSON.stringify(primera.estados)}; after ${rondas.length} explicit renders `
      + `${JSON.stringify(ultima.estados)}; peak ${ultima.auditoria.MiB.pico} MiB ${errs.concat(errores).join('; ')}`);
   return { rondas, errores };
+});
+
+// R1a/R2a. Pressure exactly at the layer's own admission, a forget that fails
+// under pressure, and the audit's negative control. A filler reservation (one
+// ledger entry, nothing allocated) makes the budget exactly tight.
+const PRESION = () => {
+  const m = window.__m5; const p = m.presupuesto; const c = m.canvas; const d = c._diagnostico;
+  const asentar = (filas) => window.__asentar(filas, 30000);
+  const estado = (id) => c.posicionDe(id)?.estadoContorno;
+  /** The exact bytes preparar.js reserves for a body (typed arrays only). */
+  const bytesPrep = (g) => {
+    let total = 0; let anillos = 0;
+    for (const pol of g.geojson.coordinates) for (const a of pol) { total += a.length; anillos += 1; }
+    const partes = g.geojson.coordinates.length;
+    return { prep: total * 16 + (anillos + 1) * 4 + (partes + 1) * 4 + partes * 32, capa: partes * 4 };
+  };
+  const pintar = (x) => c.render(x.filas, { colorFor: m.colorFor, geometrias: x.geometrias });
+  return { m, p, c, d, asentar, estado, bytesPrep, pintar };
+};
+await escenario('presion', async () => {
+  const salida = {};
+  // A. Cache hit: the body is cached and unpinned; the room left is one byte
+  // short of its layer's array. The only evictable thing is that very body.
+  {
+    const { page, errores } = await pagina({ mib: 64 });
+    salida.cacheHit = await page.evaluate(async (PRESION) => {
+      const { m, p, d, asentar, estado, bytesPrep, pintar } = eval(`(${PRESION})`)();
+      const a = m.sinteticos({ n: 1, ligeros: 0, xy: 0 });
+      const vacio = m.sinteticos({ n: 0, xy: 1 });
+      pintar(a); m.canvas.fitTo(a.filas); await asentar(a.filas);
+      pintar(vacio); await asentar(vacio.filas);
+      const { capa } = bytesPrep(a.geometrias.get('g-t-0'));
+      // Copies are forgotten before the filler: only the cached body can be relieved.
+      await d.controlador.cliente?.olvidarTodo?.();
+      const relleno = p.reservar('raster', p.libres - (capa - 1), 'prueba:relleno');
+      const antes = { entrada: d.registro.entrada('g-t-0'), libres: p.libres };
+      pintar(a); await asentar(a.filas);
+      const rechazado = { estado: estado('t-0'), entrada: d.registro.entrada('g-t-0'), auditoria: await window.__auditar() };
+      p.liberar(relleno);
+      pintar(a); await asentar(a.filas);
+      const final = { estado: estado('t-0'), auditoria: await window.__auditar() };
+      return { capa, antes: { fijos: antes.entrada?.fijos, libres: antes.libres },
+               rechazado: { estado: rechazado.estado, cuerpoEnRegistro: Boolean(rechazado.entrada), fijos: rechazado.entrada?.fijos,
+                            errores: rechazado.auditoria.errores, capas: rechazado.auditoria.mapas[0].capas },
+               final: { estado: final.estado, errores: final.auditoria.errores, capas: final.auditoria.mapas[0].capas } };
+    }, PRESION.toString());
+    salida.cacheHit.erroresPagina = errores;
+    await page.close();
+    const r = salida.cacheHit;
+    ok(r.rechazado.estado === 'sin_memoria' && r.rechazado.cuerpoEnRegistro && r.rechazado.fijos === 0
+       && r.rechazado.errores.length === 0 && r.final.estado === 'listo' && r.final.errores.length === 0 && !errores.length,
+       `R1a cache hit, room one byte short of the layer array: ${r.rechazado.estado}, body kept in the registry `
+       + `(pins ${r.rechazado.fijos}), audit ${JSON.stringify(r.rechazado.capas)}; after the filler goes: ${r.final.estado} `
+       + `${r.rechazado.errores.concat(r.final.errores, errores).join('; ')}`);
+  }
+  // B. New body: the room holds its prepared arrays but is one byte short of
+  // its layer's array at the completion handoff. Nothing else is evictable.
+  {
+    const { page, errores } = await pagina({ mib: 64 });
+    salida.cuerpoNuevo = await page.evaluate(async (PRESION) => {
+      const { m, p, d, asentar, estado, bytesPrep, pintar } = eval(`(${PRESION})`)();
+      const b = m.sinteticos({ n: 1, ligeros: 0, xy: 0 });
+      const { prep, capa } = bytesPrep(b.geometrias.get('g-t-0'));
+      const relleno = p.reservar('raster', p.libres - (prep + capa - 1), 'prueba:relleno');
+      pintar(b); m.canvas.fitTo(b.filas); await asentar(b.filas);
+      const rechazado = { estado: estado('t-0'), entrada: d.registro.entrada('g-t-0'), auditoria: await window.__auditar() };
+      p.liberar(relleno);
+      pintar(b); await asentar(b.filas);
+      const final = { estado: estado('t-0'), auditoria: await window.__auditar() };
+      return { prep, capa,
+               rechazado: { estado: rechazado.estado, cuerpoEnRegistro: Boolean(rechazado.entrada), fijos: rechazado.entrada?.fijos,
+                            errores: rechazado.auditoria.errores, ledger: rechazado.auditoria.ledger },
+               final: { estado: final.estado, errores: final.auditoria.errores, capas: final.auditoria.mapas[0].capas } };
+    }, PRESION.toString());
+    salida.cuerpoNuevo.erroresPagina = errores;
+    await page.close();
+    const r = salida.cuerpoNuevo;
+    ok(r.rechazado.estado === 'sin_memoria' && r.rechazado.cuerpoEnRegistro && r.rechazado.fijos === 0
+       && r.rechazado.errores.length === 0 && r.final.estado === 'listo' && r.final.errores.length === 0 && !errores.length,
+       `R1a new body, room for its ${r.prep} B but one byte short of its ${r.capa} B layer array: ${r.rechazado.estado}, `
+       + `body kept cached (pins ${r.rechazado.fijos}); after the filler goes: ${r.final.estado} `
+       + `${r.rechazado.errores.concat(r.final.errores, errores).join('; ')}`);
+  }
+  // C. A forget whose send fails while new copies are being admitted under
+  // pressure (simular=envioOlvido, one-shot per page), then the explicit retry.
+  {
+    const { page, errores } = await pagina({ mib: 8, simular: 'envioOlvido' });
+    salida.olvidoBajoPresion = await page.evaluate(async (PRESION) => {
+      const { m, d, asentar, pintar } = eval(`(${PRESION})`)();
+      const renombrar = (x, pre) => ({
+        filas: x.filas.map((f) => ({ ...f, id: `${pre}${f.id}`, geometria: f.geometria && { ...f.geometria, id: `${pre}${f.geometria.id}` } })),
+        geometrias: new Map([...x.geometrias].map(([k, v]) => [`${pre}${k}`, v])) });
+      const a = m.sinteticos({ n: 3, ligeros: 0, xy: 0 });
+      const b = renombrar(m.sinteticos({ n: 3, ligeros: 0, xy: 0, semilla: 1 }), 'b');
+      pintar(a); m.canvas.fitTo(a.filas); await asentar(a.filas);
+      const trasA = window.__estados(a.filas);
+      pintar(b); await asentar(b.filas);
+      const fallo = { estados: window.__estados(b.filas), cliente: d.controlador.estado(), auditoria: await window.__auditar() };
+      pintar(b); await asentar(b.filas);                          // explicit retry: one fresh worker
+      const reintento = { estados: window.__estados(b.filas), cliente: d.controlador.estado(), auditoria: await window.__auditar() };
+      return { trasA, fallo: { estados: fallo.estados, cliente: fallo.cliente.cliente, motivo: fallo.cliente.motivo,
+                               ledger: fallo.auditoria.ledger, errores: fallo.auditoria.errores },
+               reintento: { estados: reintento.estados, cliente: reintento.cliente.cliente, errores: reintento.auditoria.errores,
+                            pico: reintento.auditoria.MiB.pico } };
+    }, PRESION.toString());
+    salida.olvidoBajoPresion.erroresPagina = errores;
+    await page.close();
+    const r = salida.olvidoBajoPresion;
+    ok(r.fallo.cliente === 'fallido' && r.fallo.motivo === 'envio' && r.fallo.ledger.copia === 0
+       && (r.fallo.estados.sin_trabajador ?? 0) > 0 && r.fallo.errores.length === 0
+       && r.reintento.cliente === 'listo' && (r.reintento.estados.pintado ?? 0) + (r.reintento.estados.listo ?? 0) === 3
+       && (r.reintento.estados.pintado ?? 0) >= 2 && r.reintento.errores.length === 0 && !errores.length,
+       `R2a forget failing under pressure (8 MiB): ${r.fallo.cliente}/${r.fallo.motivo}, states ${JSON.stringify(r.fallo.estados)}, `
+       + `copies reserved ${r.fallo.ledger.copia} B; explicit retry ${JSON.stringify(r.reintento.estados)} with client ${r.reintento.cliente}; `
+       + `peak ${r.reintento.pico} MiB ${r.fallo.errores.concat(r.reintento.errores, errores).join('; ')}`);
+  }
+  // D. Negative control for the R1a audit: emulate the reviewed bug (a live
+  // layer's pin is lost) and let pressure evict the body. The audit must say so.
+  {
+    const { page, errores } = await pagina({ mib: 64 });
+    salida.controlNegativo = await page.evaluate(async (PRESION) => {
+      const { m, p, d, asentar, bytesPrep, pintar } = eval(`(${PRESION})`)();
+      const a = m.sinteticos({ n: 1, ligeros: 0, xy: 0 });
+      pintar(a); m.canvas.fitTo(a.filas); await asentar(a.filas);
+      const limpia = await window.__auditar();
+      d.registro.soltar('g-t-0');                                 // the injected defect: one pin too few
+      const { prep } = bytesPrep(a.geometrias.get('g-t-0'));
+      const presion = p.reservar('raster', p.libres + prep, 'prueba:presion');   // relieved only by evicting that body
+      const sucia = await window.__auditar();
+      p.liberar(presion);
+      return { antes: limpia.errores, evictado: !d.registro.entrada('g-t-0'), reservaConcedida: Boolean(presion), errores: sucia.errores,
+               capas: sucia.mapas[0].capas };
+    }, PRESION.toString());
+    await page.close();
+    const r = salida.controlNegativo;
+    ok(r.antes.length === 0 && r.evictado && r.reservaConcedida && r.errores.some((e) => e.includes('outside the registry')),
+       `R1a audit negative control: a live layer whose body was evicted is detected (${r.errores.join('; ')})`);
+  }
+  return salida;
 });
 
 // 8. Reset and teardown, audited per map (the other map keeps its own holdings).

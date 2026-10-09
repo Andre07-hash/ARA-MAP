@@ -17,7 +17,7 @@
 +import { crearRegistro } from "./registro.js";
 +import { crearPlanificador as crearPlanificadorE5 } from "./planificador.js";
 +import { crearCliente } from "./cliente.js";
-+import { crearClasesE5, crearControlador, bytesDeCapa } from "./e5.js";
++import { crearClasesE5, crearControlador, bytesDeCapa, inventarioCapas } from "./e5.js";
  
  /* PROTOTYPE switch for the benchmark: "e1" closes rings without closePath;
   * "e2" draws cached prepared bodies with culling; "e3" = e2 + cooperative,
@@ -129,34 +129,43 @@
      for (const terreno of contornos) {
        if (byId.has(terreno.id)) continue;           // one logical mark per terrain
        byId.set(terreno.id, crearContorno(
-@@ -320,6 +383,11 @@
+@@ -320,6 +383,18 @@
      }
      if (estadoContorno === "no_disponible" && cargando?.has?.(descriptor.id)) {
        estadoContorno = "cargando";
 +    }
 +    let reservaCapa = null;
++    let fijadaCapa = false;
 +    if (E5 && estadoContorno === "listo") {
-+      reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);
-+      if (!reservaCapa) estadoContorno = "sin_memoria";
++      // R1a: pin the cached body first; the reservation may relieve pressure.
++      fijadaCapa = registro.fijar(descriptor.id);
++      if (fijadaCapa) reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);
++      if (!reservaCapa) {
++        if (fijadaCapa) registro.soltar(descriptor.id);
++        fijadaCapa = false;
++        estadoContorno = "sin_memoria";
++      }
      }
      const disponible = estadoContorno === "listo";
      const fill = colorFor(terreno);
-@@ -358,6 +426,14 @@
+@@ -358,6 +433,16 @@
            enCache: () => cache.contiene(descriptor.id),
            alCambiarEstado: (estado) => alDibujo(entrada, terreno, estado),
          });
 +      } else if (E5) {
-+        // R1: the layer's own array is admitted before the layer is built.
-+        capa = CapaContornoE5.crear(c, opciones, { id: descriptor.id, controlador, presupuesto: presupuestoE5,
-+                                                  dueno: duenoE5, reserva: reservaCapa });
-+        reservaCapa = null;                         // owned by the layer now, or released
++        // R1/R1a: the body is pinned for this entry's lifetime BEFORE the layer's
++        // own array is reserved, so that reservation's pressure relief can never
++        // evict the body this layer keeps; the pin is undone on refusal or failure.
++        capa = CapaContornoE5.crearFijada(c, opciones, { id: descriptor.id, controlador,
++                                                        presupuesto: presupuestoE5, dueno: duenoE5, registro,
++                                                        reserva: reservaCapa, yaFijada: fijadaCapa });
++        reservaCapa = null; fijadaCapa = false;     // owned by the layer now, or released
 +        if (!capa) return null;                     // no room: the caller reports "sin_memoria"
-+        registro.fijar(descriptor.id);              // pinned for this entry's lifetime
 +        capa._avisarE5 = (estado) => alDibujo(entrada, terreno, estado);
        } else capa = new CapaContorno(c, opciones);
        capa.bindTooltip(tooltipHtml(terreno), { sticky: true, opacity: 1,
                                                className: "mark-tooltip" });
-@@ -390,8 +466,13 @@
+@@ -390,8 +475,13 @@
          entry.disponible = r.estado === "cargado";
          if (entry.disponible) {
            entry.contorno = crearCapa(r);
@@ -172,7 +181,16 @@
          }
          entry.simbolo.setTooltipContent(tooltipHtml(terreno, {
            aviso: AVISOS[entry.estadoContorno] ?? null }));
-@@ -651,9 +732,9 @@
+@@ -453,7 +543,7 @@
+       entry.contorno.bringToBack();          // below every circle and symbol
+     } else {
+       if (entry.contorno) contornoLayer.removeLayer(entry.contorno);
+-      if (NO_PINTADO.has(entry.estadoContorno)) entry.estadoContorno = "listo";
++      if (NO_PINTADO.has(entry.estadoContorno) && (entry.contorno || !E5)) entry.estadoContorno = "listo";
+       entry.simbolo.addTo(markerLayer);
+     }
+     return true;
+@@ -651,9 +741,9 @@
      }
      const zoom = map.getZoom();
      // PROTOTYPE: never report an outline that is still loading or being prepared.
@@ -184,7 +202,7 @@
      }
      if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"
          || entry.estadoContorno === "dibujando") {
-@@ -705,11 +786,24 @@
+@@ -705,11 +795,19 @@
      destruir() {
        planificador.detener();
        cache.vaciar();
@@ -197,20 +215,15 @@
      },
 -    _diagnostico: { planificador, cache, raster,
 +    _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,
-+                    // R1 audit: the layers' own arrays, reserved vs actually held.
++                    // R1/R1a audit: the live layers' own arrays and the prepared bodies
++                    // reachable through them, checked against the registry.
 +                    capasE5() {
-+                      let reservado = 0; let real = 0; let n = 0;
-+                      for (const e of byId.values()) {
-+                        const c = e.contorno;
-+                        if (!c?._reservaCapa) continue;
-+                        n += 1; reservado += c._reservaCapa.bytes; real += c.bytesCapaE5();
-+                      }
-+                      return { reservado, real, n };
++                      return inventarioCapas([...byId.values()].map((e) => e.contorno), registro);
 +                    },
                      get reinicioTrabajador() { return reinicioTrabajador; },
                      // Test hook: the symbol tooltip text (state wording) of a terrain.
                      aviso: (id) => byId.get(id)?.simbolo?.getTooltip()?.getContent() ?? null },
-@@ -720,7 +814,7 @@
+@@ -720,7 +818,7 @@
  /** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
  function simboloStyle({ fill, dash, disponible: cargado, estadoContorno = null, selected = false }) {
    // F3: an outline refused by the worker budget looks "not available", never pending.

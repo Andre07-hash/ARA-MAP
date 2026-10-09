@@ -96,7 +96,7 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     if (estado !== "listo") return;
     let liberado = 0;
     for (const [id, c] of copias) {
-      if (liberado >= faltan) break;
+      if (liberado >= faltan || estado !== "listo") break;   // a failed forget ends relief
       if (c.fijos === 0) liberado += olvidar(id);
     }
   });
@@ -108,8 +108,8 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     trabajador = crearTrabajador ? crearTrabajador(url) : new Worker(url, { type: "module" });
     // Test-only (R2): make one kind of send throw synchronously, as a clone
     // or a dead port can. "envioCuerpo" fails the first body copy, "envioRaster"
-    // the first raster request.
-    const falla = { envioCuerpo: "cuerpo", envioRaster: "raster" }[simular];
+    // the first raster request, "envioOlvido" (R2a) the first forget.
+    const falla = { envioCuerpo: "cuerpo", envioRaster: "raster", envioOlvido: "olvidar" }[simular];
     if (falla) {
       const real = trabajador.postMessage.bind(trabajador);
       trabajador.postMessage = (m, t) => {
@@ -173,6 +173,13 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       const c = copias.get(id);
       if (c) { c.expulsar = false; copias.delete(id); copias.set(id, c); return "listo"; }
       const reserva = presupuesto.reservar("copia", bytesDe(p), dueno);
+      // R2a: reservar may have run this client's own reliever, whose forget
+      // send can fail and terminate the client while we are still here.
+      // Nothing may be installed or posted after that: give the bytes back.
+      if (estado === "fallido" || estado === "cerrado") {
+        presupuesto.liberar(reserva);
+        return "fallido";
+      }
       if (!reserva) {
         if (presupuesto.pendienteDeLiberar > 0) return "esperar";
         metricas.sinMemoria += 1;

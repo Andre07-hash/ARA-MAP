@@ -33,7 +33,7 @@ EDICIONES: list[tuple[str, str]] = [
      'import { crearRegistro } from "./registro.js";\n'
      'import { crearPlanificador as crearPlanificadorE5 } from "./planificador.js";\n'
      'import { crearCliente } from "./cliente.js";\n'
-     'import { crearClasesE5, crearControlador, bytesDeCapa } from "./e5.js";\n'),
+     'import { crearClasesE5, crearControlador, bytesDeCapa, inventarioCapas } from "./e5.js";\n'),
     ('let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default\n',
      'let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default\n'
      '/* E5: ONE budget shared by every map created on the page (two maps compete),\n'
@@ -119,12 +119,14 @@ EDICIONES: list[tuple[str, str]] = [
      '    }\n'),
     ('      } else capa = new CapaContorno(c, opciones);\n',
      '      } else if (E5) {\n'
-     '        // R1: the layer\'s own array is admitted before the layer is built.\n'
-     '        capa = CapaContornoE5.crear(c, opciones, { id: descriptor.id, controlador, presupuesto: presupuestoE5,\n'
-     '                                                  dueno: duenoE5, reserva: reservaCapa });\n'
-     '        reservaCapa = null;                         // owned by the layer now, or released\n'
+     '        // R1/R1a: the body is pinned for this entry\'s lifetime BEFORE the layer\'s\n'
+     '        // own array is reserved, so that reservation\'s pressure relief can never\n'
+     '        // evict the body this layer keeps; the pin is undone on refusal or failure.\n'
+     '        capa = CapaContornoE5.crearFijada(c, opciones, { id: descriptor.id, controlador,\n'
+     '                                                        presupuesto: presupuestoE5, dueno: duenoE5, registro,\n'
+     '                                                        reserva: reservaCapa, yaFijada: fijadaCapa });\n'
+     '        reservaCapa = null; fijadaCapa = false;     // owned by the layer now, or released\n'
      '        if (!capa) return null;                     // no room: the caller reports "sin_memoria"\n'
-     '        registro.fijar(descriptor.id);              // pinned for this entry\'s lifetime\n'
      '        capa._avisarE5 = (estado) => alDibujo(entrada, terreno, estado);\n'
      '      } else capa = new CapaContorno(c, opciones);\n'),
     # R1: a cached body's layer array is admitted before availability is decided,
@@ -132,9 +134,16 @@ EDICIONES: list[tuple[str, str]] = [
     ('    const disponible = estadoContorno === "listo";\n'
      '    const fill = colorFor(terreno);\n',
      '    let reservaCapa = null;\n'
+     '    let fijadaCapa = false;\n'
      '    if (E5 && estadoContorno === "listo") {\n'
-     '      reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);\n'
-     '      if (!reservaCapa) estadoContorno = "sin_memoria";\n'
+     '      // R1a: pin the cached body first; the reservation may relieve pressure.\n'
+     '      fijadaCapa = registro.fijar(descriptor.id);\n'
+     '      if (fijadaCapa) reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);\n'
+     '      if (!reservaCapa) {\n'
+     '        if (fijadaCapa) registro.soltar(descriptor.id);\n'
+     '        fijadaCapa = false;\n'
+     '        estadoContorno = "sin_memoria";\n'
+     '      }\n'
      '    }\n'
      '    const disponible = estadoContorno === "listo";\n'
      '    const fill = colorFor(terreno);\n'),
@@ -166,16 +175,16 @@ EDICIONES: list[tuple[str, str]] = [
      '      registro?.cerrar();\n'),
     ('    _diagnostico: { planificador, cache, raster,\n',
      '    _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,\n'
-     '                    // R1 audit: the layers\' own arrays, reserved vs actually held.\n'
+     '                    // R1/R1a audit: the live layers\' own arrays and the prepared bodies\n'
+     '                    // reachable through them, checked against the registry.\n'
      '                    capasE5() {\n'
-     '                      let reservado = 0; let real = 0; let n = 0;\n'
-     '                      for (const e of byId.values()) {\n'
-     '                        const c = e.contorno;\n'
-     '                        if (!c?._reservaCapa) continue;\n'
-     '                        n += 1; reservado += c._reservaCapa.bytes; real += c.bytesCapaE5();\n'
-     '                      }\n'
-     '                      return { reservado, real, n };\n'
+     '                      return inventarioCapas([...byId.values()].map((e) => e.contorno), registro);\n'
      '                    },\n'),
+    # R1a follow-up: a layer refused at creation leaves the entry without a layer
+    # and "sin_memoria". The F3 reset below (a layer handed back to its symbol is
+    # no longer "unpainted") must not erase that explicit state in E5.
+    ('      if (NO_PINTADO.has(entry.estadoContorno)) entry.estadoContorno = "listo";\n',
+     '      if (NO_PINTADO.has(entry.estadoContorno) && (entry.contorno || !E5)) entry.estadoContorno = "listo";\n'),
     ('  const disponible = cargado && estadoContorno !== "sin_memoria";\n',
      '  const disponible = cargado && !NO_DISPONIBLE_E5.has(estadoContorno);\n'),
 ]

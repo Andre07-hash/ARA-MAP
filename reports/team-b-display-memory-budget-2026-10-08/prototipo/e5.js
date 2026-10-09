@@ -61,6 +61,40 @@ function estiloDe(o) {
 /** Bytes of a layer's own visible-part index (CapaContorno's Int32Array(partes)). */
 export function bytesDeCapa(preparado) { return Int32Array.BYTES_PER_ELEMENT * preparado.partes; }
 
+function bytesDePreparado(q) {
+  return q.x.byteLength + q.y.byteLength + q.inicioAnillo.byteLength + q.inicioParte.byteLength
+    + q.cajasParte.byteLength;
+}
+
+/**
+ * R1a audit: what live E5 layers of one map actually hold, compared with the
+ * registry. `capas` are the live layers; `registro` the map's registry.
+ * - reservado / real: the layers' own arrays (ledger "capa" vs byteLength);
+ * - preparados: unique prepared bodies reachable through live layers (each
+ *   counted once however many layers share it);
+ * - fueraDeRegistro: those bodies' bytes that the registry no longer records
+ *   (or records as another object, or as unpinned while a layer holds it).
+ *   Any such byte is held but no longer reserved: it must be zero.
+ */
+export function inventarioCapas(capas, registro) {
+  let reservado = 0; let real = 0; let n = 0;
+  const vistos = new Map();                 // preparado -> {id, capas}
+  for (const c of capas) {
+    if (!c?._reservaCapa) continue;
+    n += 1; reservado += c._reservaCapa.bytes; real += c.bytesCapaE5();
+    const v = vistos.get(c._prep);
+    if (v) v.capas += 1; else vistos.set(c._prep, { id: c._id, capas: 1 });
+  }
+  let preparados = 0; let fueraDeRegistro = 0; const ids = [];
+  for (const [q, { id, capas: k }] of vistos) {
+    const b = bytesDePreparado(q);
+    preparados += b;
+    const e = registro.entrada(id);
+    if (!e || e.preparado !== q || e.fijos < k) { fueraDeRegistro += b; ids.push(id); }
+  }
+  return { reservado, real, n, preparados, nPreparados: vistos.size, fueraDeRegistro, idsFuera: ids };
+}
+
 export function crearClasesE5(L, CapaContorno) {
   /** An outline drawn directly, from the bitmap, or not at all, as its controller decides.
    *  Build it with `crear`, never `new`: its own array is admitted first. */
@@ -165,6 +199,24 @@ export function crearClasesE5(L, CapaContorno) {
     const reserva = previa ?? presupuesto.reservar("capa", bytesDeCapa(preparado), dueno);
     if (!reserva) return null;
     return new CapaContornoE5(preparado, options, { id, controlador, presupuesto, reserva });
+  };
+  /** R1a: build the layer of a REGISTERED body. The body is pinned before the
+   *  layer's own array is reserved (that reservation's pressure relief may
+   *  evict unpinned bodies), and the pin is undone on refusal or failure.
+   *  `reserva` may be one already admitted while the body was pinned. */
+  CapaContornoE5.crearFijada = (preparado, options, { id, controlador, presupuesto, dueno, registro,
+                                                      reserva = null, yaFijada = false }) => {
+    if (!yaFijada && !registro.fijar(id)) {        // the body is not (or no longer) in the registry
+      presupuesto.liberar(reserva);
+      return null;
+    }
+    let capa = null;
+    try {
+      capa = CapaContornoE5.crear(preparado, options, { id, controlador, presupuesto, dueno, reserva });
+    } finally {
+      if (!capa) registro.soltar(id);
+    }
+    return capa;
   };
 
   return { CapaContornoE5, CapaBitmap };
@@ -376,6 +428,12 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       }
       else sinMemoria.add(d.capa);
     }
+    // R2a: an admission above may have relieved pressure by forgetting a copy
+    // whose send failed; the client is then terminal even if it said "listo".
+    if (cl.estado === "fallido") {
+      if (mostrada) soltarMostrada();
+      return directosLigeros(lista, "sin_trabajador") || true;
+    }
     let fijadas = incluidas.map((d) => d.id);
     const soltarFijadas = () => { cl.soltar(fijadas); fijadas = []; };
     const claveLista = incluidas.map((d) => d.clave).join(";");
@@ -420,6 +478,10 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       soltarMostrada();
       cambio = directosLigeros(lista, "dibujando") || true;
       reserva = presupuesto.reservar("raster", bytes, dueno);
+    }
+    if (reserva && cl.estado !== "listo") {     // R2a: the raster's own relief failed the client
+      presupuesto.liberar(reserva);
+      return directosLigeros(lista, "sin_trabajador") || true;
     }
     if (!reserva) {
       soltarFijadas();

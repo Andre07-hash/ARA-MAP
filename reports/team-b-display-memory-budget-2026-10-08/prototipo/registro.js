@@ -60,7 +60,12 @@ export function crearRegistro(presupuesto, dueno) {
       e.enCache = true;
       return e.preparado;
     },
-    fijar(id) { const e = entradas.get(id); if (e) e.fijos += 1; },
+    /** Pin `id` for a layer. R1a: callers pin BEFORE any reservation whose
+     *  pressure relief could otherwise evict the body they are about to keep.
+     *  Returns whether the body was there to pin. */
+    fijar(id) { const e = entradas.get(id); if (e) e.fijos += 1; return Boolean(e); },
+    /** Audit: the registry's own record of `id` (its body and pin count), or null. */
+    entrada(id) { const e = entradas.get(id); return e ? { preparado: e.preparado, fijos: e.fijos } : null; },
     /** Notified with the id of every body that leaves the registry. */
     alQuitar(f) { alQuitar.add(f); return () => alQuitar.delete(f); },
     ids() { return [...entradas.keys()]; },

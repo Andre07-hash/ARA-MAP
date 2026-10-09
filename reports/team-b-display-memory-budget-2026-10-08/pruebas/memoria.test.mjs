@@ -562,12 +562,26 @@ test('R1: multiplicity, replacement, teardown and allocation failure keep the le
   assert.equal(p.porCategoria().capa, 2 * bytesDeCapa(q));
   for (const c of mapaA) c.liberarMemoriaE5();
   assert.equal(p.porCategoria().capa, 0);
-  // The allocation itself fails after admission: the reservation is released.
-  const enorme = { ...preparadoPartes(1), partes: 2 ** 32 };
-  const grande = crearPresupuesto(Number.MAX_SAFE_INTEGER);
-  assert.throws(() => CapaContornoE5.crear(enorme, {}, { id: 'h', controlador: {}, presupuesto: grande, dueno: 'x' }),
+});
+
+test('R1-test: an allocation failure after admission releases the reservation (injected, small fixture)', () => {
+  // The inherited initializer is replaced by one that throws as an allocation
+  // can; no platform array limit and no large request is assumed.
+  const Falla = LM.Path.extend({ initialize() { throw new RangeError('injected allocation failure'); } });
+  const { CapaContornoE5: E5Falla } = crearClasesE5(LM, Falla);
+  const q = preparadoPartes(3);
+  const p = crearPresupuesto(1024);
+  assert.throws(() => E5Falla.crear(q, {}, { id: 'h', controlador: {}, presupuesto: p, dueno: 'x' }), RangeError);
+  assert.equal(p.usados, 0);
+  assert.equal(p.vivas().length, 0);
+  // The pinned constructor also undoes its pin.
+  const reg = crearRegistro(p, 'm');
+  reg.guardar({ id: 'h', bbox: [0, 0, 1, 1] }, q, reg.reservar(bytesDe(q)));
+  assert.throws(() => E5Falla.crearFijada(q, {}, { id: 'h', controlador: {}, presupuesto: p, dueno: 'x', registro: reg }),
                 RangeError);
-  assert.equal(grande.usados, 0);
+  assert.equal(reg.entrada('h').fijos, 0);
+  assert.equal(p.usados, bytesDe(q));
+  reg.cerrar();
 });
 
 // R2: one synchronous send failure at each stage of the client.
@@ -753,4 +767,206 @@ test('R3: an admitted job keeps only its own body reachable, not the caller\'s M
   await tarea(); gc(); await tarea(); gc();
   assert.equal(cuerpos.filter((r) => r.deref()).length, 0, 'cancellation drops every retained body');
   plan.detener(); reg.cerrar();
+});
+
+// ------------------------------------------- R1a / R2a corrections (2026-10-09, round 2)
+
+const { inventarioCapas } = await imp('e5.js');
+const D = (id) => ({ id, bbox: [0, 0, 1, 1] });
+
+test('R1a: the reviewed cache-hit order evicts the body the layer keeps, and the audit says so', () => {
+  // Reviewed order (MapCanvas at 68077cc): obtain, reserve the layer, build, pin.
+  const q = preparadoPartes(20);
+  const p = crearPresupuesto(bytesDe(q) + bytesDeCapa(q) - 1);
+  const reg = crearRegistro(p, 'm');
+  reg.guardar(D('g'), q, reg.reservar(bytesDe(q)));
+  const cuerpo = reg.obtener(D('g'));
+  const reserva = p.reservar('capa', bytesDeCapa(cuerpo), 'm');
+  const capa = CapaContornoE5.crear(cuerpo, {}, { id: 'g', controlador: {}, presupuesto: p, dueno: 'm', reserva });
+  assert.equal(reg.fijar('g'), false, 'the body was evicted by the layer\'s own reservation');
+  const inv = inventarioCapas([capa], reg);
+  assert.equal(inv.fueraDeRegistro, bytesDe(q), 'audit negative control: the untracked body is detected');
+  assert.deepEqual(inv.idsFuera, ['g']);
+  assert.ok(bytesDe(capa._prep) + capa.bytesCapaE5() > p.total);
+  capa.liberarMemoriaE5(); reg.cerrar();
+});
+
+test('R1a: cache hit — the body is pinned before the layer reservation; refusal unwinds, nothing is evicted', () => {
+  const q = preparadoPartes(20);
+  const p = crearPresupuesto(bytesDe(q) + bytesDeCapa(q) - 1);       // one byte short of both
+  const reg = crearRegistro(p, 'm');
+  reg.guardar(D('g'), q, reg.reservar(bytesDe(q)));
+  const cuerpo = reg.obtener(D('g'));
+  const capa = CapaContornoE5.crearFijada(cuerpo, {}, { id: 'g', controlador: {}, presupuesto: p, dueno: 'm', registro: reg });
+  assert.equal(capa, null);
+  assert.deepEqual(reg.entrada('g'), { preparado: q, fijos: 0 }, 'body kept, pin undone');
+  assert.equal(p.usados, bytesDe(q));
+  // With room, the layer is built over the registry's own pinned body.
+  const p2 = crearPresupuesto(bytesDe(q) + bytesDeCapa(q));
+  const reg2 = crearRegistro(p2, 'm');
+  reg2.guardar(D('g'), q, reg2.reservar(bytesDe(q)));
+  const ok = CapaContornoE5.crearFijada(reg2.obtener(D('g')), {}, { id: 'g', controlador: {}, presupuesto: p2, dueno: 'm',
+                                                                   registro: reg2 });
+  assert.ok(ok);
+  assert.equal(reg2.entrada('g').fijos, 1);
+  assert.equal(p2.usados, bytesDe(ok._prep) + ok.bytesCapaE5());
+  assert.deepEqual(inventarioCapas([ok], reg2), { reservado: bytesDeCapa(q), real: bytesDeCapa(q), n: 1,
+                                                   preparados: bytesDe(q), nPreparados: 1, fueraDeRegistro: 0, idsFuera: [] });
+  // A body not (or no longer) in the registry is never built over.
+  assert.equal(CapaContornoE5.crearFijada(q, {}, { id: 'otro', controlador: {}, presupuesto: p2, dueno: 'm', registro: reg2 }), null);
+  ok.liberarMemoriaE5(); reg2.soltar('g'); reg2.cerrar(); reg.cerrar();
+  assert.equal(p2.usados, 0);
+});
+
+test('R1a: preparation completion — the handed-over body survives its layer\'s refused admission', async () => {
+  const { descriptor, cuerpo } = cuerpoValido('g', 2_000);
+  const parcial = crearPresupuesto(64 * MiB);
+  const medir = crearRegistro(parcial, 'x');
+  let medida = null;
+  const planMedida = crearPlanificador({ registro: medir, presupuesto: parcial, alPreparar: (d, r, res) => medir.guardar(d, r, res) });
+  planMedida.pedir(descriptor, new Map([[descriptor.id, cuerpo]]), (r) => { medida = r; });
+  await hasta(() => medida);
+  planMedida.detener(); medir.cerrar();
+  // Room for the prepared arrays, one byte short of the layer's array too.
+  const p = crearPresupuesto(bytesDe(medida) + bytesDeCapa(medida) - 1);
+  const reg = crearRegistro(p, 'm');
+  const capas = [];
+  const plan = crearPlanificador({ registro: reg, presupuesto: p, alPreparar: (d, r, res) => reg.guardar(d, r, res) });
+  let hecho = false;
+  plan.pedir(descriptor, new Map([[descriptor.id, cuerpo]]), (r) => {
+    // As MapCanvas's completion callback: build the layer of the handed-over body.
+    capas.push(CapaContornoE5.crearFijada(r, {}, { id: descriptor.id, controlador: {}, presupuesto: p, dueno: 'm',
+                                                    registro: reg }));
+    hecho = true;
+  });
+  await hasta(() => hecho);
+  assert.deepEqual(capas, [null]);
+  assert.equal(reg.entrada('g').fijos, 0);
+  assert.equal(reg.entrada('g').preparado.x.byteLength, medida.x.byteLength, 'body still the registry\'s, cached');
+  assert.equal(p.usados, bytesDe(medida));
+  plan.detener(); reg.cerrar();
+  assert.equal(p.usados, 0);
+});
+
+test('R1a: sharing, two maps, existing pinned rasters, replacement and teardown keep the inventory exact', () => {
+  const q = preparadoPartes(50);
+  const raster = 10_000;
+  const p = crearPresupuesto(raster + 2 * bytesDe(q) + 3 * bytesDeCapa(q));
+  const imagen = p.reservar('raster', raster, 'mapa A');         // a displayed image already held
+  const regA = crearRegistro(p, 'A'); const regB = crearRegistro(p, 'B');
+  const qB = preparadoPartes(50);
+  regA.guardar(D('g'), q, regA.reservar(bytesDe(q)));
+  regB.guardar(D('g'), qB, regB.reservar(bytesDe(qB)));
+  const crear = (reg, cuerpo, dueno) => CapaContornoE5.crearFijada(cuerpo, {}, { id: 'g', controlador: {}, presupuesto: p,
+                                                                               dueno, registro: reg });
+  const a1 = crear(regA, regA.obtener(D('g')), 'A'); const a2 = crear(regA, regA.obtener(D('g')), 'A');
+  const b1 = crear(regB, regB.obtener(D('g')), 'B');
+  assert.ok(a1 && a2 && b1);
+  const invA = inventarioCapas([a1, a2], regA);
+  assert.equal(invA.nPreparados, 1, 'a shared body is counted once');
+  assert.equal(invA.preparados, bytesDe(q));
+  assert.equal(invA.fueraDeRegistro, 0);
+  assert.equal(regA.entrada('g').fijos, 2);
+  assert.equal(p.usados, p.total);
+  // A fourth layer cannot fit; nothing held (raster, bodies, layers) is released for it.
+  assert.equal(crear(regA, regA.obtener(D('g')), 'A'), null);
+  assert.equal(regA.entrada('g').fijos, 2);
+  assert.ok(imagen.viva);
+  // Replacement: release a layer (and its pin) before its successor.
+  a1.liberarMemoriaE5(); regA.soltar('g');
+  const a3 = crear(regA, regA.obtener(D('g')), 'A');
+  assert.ok(a3);
+  assert.equal(inventarioCapas([a2, a3], regA).fueraDeRegistro, 0);
+  // Unpinned while held is flagged too (one pin too few).
+  regA.soltar('g');
+  assert.equal(inventarioCapas([a2, a3], regA).fueraDeRegistro, bytesDe(q));
+  regA.fijar('g');
+  // Teardown of map B, then map A.
+  b1.liberarMemoriaE5(); regB.soltar('g'); regB.cerrar();
+  for (const c of [a2, a3]) { c.liberarMemoriaE5(); regA.soltar('g'); }
+  regA.cerrar(); p.liberar(imagen);
+  assert.equal(p.usados, 0);
+});
+
+// R2a: a forget send failing inside reservar's relief, while asegurar is on the stack.
+function trabajadorOlvidoFalla({ lanzaTrasTerminar }) {
+  const w = { enviados: [], terminado: false, onmessage: null };
+  w.postMessage = (m) => {
+    w.enviados.push({ tipo: m.tipo, trasTerminar: w.terminado });
+    if (w.terminado && lanzaTrasTerminar) throw new Error('dead port');
+    if (m.tipo === 'olvidar') throw new Error('injected forget failure');
+  };
+  w.terminate = () => { w.terminado = true; };
+  return w;
+}
+
+for (const lanzaTrasTerminar of [false, true]) {
+  test(`R2a: a forget failing during a copy's pressure relief stops asegurar (post after termination ${lanzaTrasTerminar ? 'throws' : 'returns'})`, () => {
+    const q = preparado(1);
+    const p = crearPresupuesto(bytesDe(q));                 // room for one copy only
+    const w = trabajadorOlvidoFalla({ lanzaTrasTerminar });
+    const fallos = [];
+    const c = crearCliente({ presupuesto: p, dueno: 'prueba', crearTrabajador: () => w, alFallar: (m) => fallos.push(m) });
+    w.onmessage({ data: { tipo: 'listo', offscreen: true } });
+    assert.equal(c.asegurar('primero', q), 'listo');
+    assert.equal(c.asegurar('segundo', q), 'fallido', 'never "listo" after a terminal transition');
+    assert.equal(c.estado, 'fallido');
+    assert.equal(c.motivo, 'envio');
+    assert.deepEqual(fallos, ['envio'], 'one terminal notification');
+    assert.deepEqual(w.enviados.filter((e) => e.trasTerminar), [], 'nothing posted after termination');
+    assert.equal(p.usados, 0);
+    assert.equal(p.pendienteDeLiberar, 0);
+    assert.equal(c.copias, 0);
+    assert.equal(c.bytesReservados(), 0);
+    assert.equal(c.asegurar('tercero', q), 'fallido');
+    assert.equal(p.usados, 0);
+    c.cerrar();
+  });
+}
+
+test('R2a: the controller settles to "sin_trabajador" when copy relief fails the worker, then retries once', async () => {
+  const bytesCopiaUna = bytesDe(preparado(10));
+  // Shown image (100x50x4) + the old copy + the new copy, minus one byte: the new
+  // copy can only be admitted by forgetting the old one, and that send fails.
+  const p = crearPresupuesto(20_000 + 2 * bytesCopiaUna - 1);
+  const informados = [];
+  const creados = [];
+  const fabrica = (o) => {
+    const primero = creados.length === 0;
+    const w = trabajadorFalso();
+    if (primero) {
+      const real = w.postMessage;
+      w.postMessage = (m) => { if (m.tipo === 'olvidar') throw new Error('injected forget failure'); return real(m); };
+    }
+    const c = crearCliente({ presupuesto: p, dueno: 'mapa', crearTrabajador: () => w, plazoMs: 5000, ...o });
+    creados.push({ w, c });
+    return c;
+  };
+  const renderer = { _bounds: { min: { x: 0, y: 0 }, max: { x: 100, y: 50 } }, _container: { width: 100, height: 50 },
+                     _layers: {}, _drawFirst: null, _redraw() {}, _updatePaths() {}, on() {}, off() {} };
+  const map = { getPixelOrigin: () => ({ x: 0, y: 0 }), getZoom: () => 10, options: { crs: { scale: (z) => 256 * 2 ** z } } };
+  class CapaBitmap { constructor() {} addTo() { return this; } bringToBack() {} redraw() {} get _map() { return map; } }
+  const ctl = crearControlador({ L: null, map, CapaBitmap, presupuesto: p, dueno: 'mapa', crearCliente: fabrica,
+                                 alEstado: (capa, estado) => informados.push([capa._id, estado]) });
+  const capa = (id) => ({ _id: id, _renderer: renderer, _map: map, _nVisibles: 1, _carga: { anillos: 5000, posiciones: 50000 },
+                          _prep: preparado(10), options: { color: '#123456', weight: 2 } });
+  const a = capa('g-a');
+  renderer._drawFirst = { layer: a, next: null };
+  ctl.agregar(a);
+  await hasta(() => ctl.mostrada);
+  const b = capa('g-b');
+  renderer._drawFirst = { layer: b, next: null };
+  ctl.quitar(a); ctl.agregar(b);
+  await hasta(() => informados.some(([id, e]) => id === 'g-b' && e === 'sin_trabajador'));
+  assert.equal(ctl.cliente.motivo, 'envio');
+  assert.equal(p.usados, 0, 'image, copies and pins all released');
+  assert.equal(creados[0].w.terminado, true);
+  ctl.reintentar();
+  b.options = { color: '#654321', weight: 2 };
+  ctl.cambioDeEstilo(b);
+  await hasta(() => ctl.mostrada);
+  assert.equal(creados.length, 2, 'exactly one fresh worker');
+  assert.deepEqual(informados.at(-1), ['g-b', 'listo']);
+  ctl.cerrar();
+  assert.equal(p.usados, 0);
 });

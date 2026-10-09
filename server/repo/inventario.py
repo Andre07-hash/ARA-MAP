@@ -661,6 +661,31 @@ def publication_state(row: Mapping[str, Any]) -> str:
     return "unpublished" if row["first_published_at"] else "draft"
 
 
+def descriptores_activos(conn: DatabaseConnection,
+                         inventory_ids: Sequence[str]) -> dict[str, dict[str, Any]]:
+    """The active, usable boundary of each terrain that has one, by terrain id:
+    the descriptor of the shared contract, never the vertex body.
+
+    One query for the whole page. Only a live KMZ's active geometry counts: a
+    pending or failed replacement leaves the previous one in place, and a
+    retired attachment has none. The caller has authorized every id.
+    """
+    if not inventory_ids:
+        return {}
+    rows = conn.execute(
+        "SELECT a.inventory_id, g.id, g.archivo_version_id, g.bbox_oeste, g.bbox_sur, g.bbox_este,"
+        " g.bbox_norte, g.punto_lon, g.punto_lat FROM archivo a"
+        " JOIN geometria g ON g.id = a.geometria_activa_id AND g.inventory_id = a.inventory_id"
+        " WHERE a.tipo = 'kmz' AND a.retirado_en IS NULL AND g.utilizable = 1"
+        f" AND a.inventory_id IN ({', '.join('?' for _ in inventory_ids)})",
+        tuple(inventory_ids)).fetchall()
+    return {r["inventory_id"]: {
+        "id": r["id"], "archivo_version_id": r["archivo_version_id"], "utilizable": True,
+        "bbox": [r["bbox_oeste"], r["bbox_sur"], r["bbox_este"], r["bbox_norte"]],
+        "punto_interior": {"type": "Point", "coordinates": [r["punto_lon"], r["punto_lat"]]},
+    } for r in rows}
+
+
 def _dtos(conn: DatabaseConnection, rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Records for a page of rows, with one query for the custom columns of
     the bases on that page however many rows there are."""

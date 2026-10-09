@@ -231,7 +231,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
   assert.equal(t.version, 17);   // one version per saved cell: 16 cells after the create
   // The file columns are honest placeholders: no count, no control.
   for (const col of ['core:archivos', 'core:kmz']) {
-    assert.equal(await textoDe(page, lote, col), 'No disponible aún');
+    assert.equal(await textoDe(page, lote, col), 'No disponible');
     assert.equal(await celda(page, lote, col).locator('button, input, a').count(), 0);
   }
   await foto(page, '05-todas-las-celdas-editadas');
@@ -412,7 +412,7 @@ await caso('archive and restore a terrain; an archived row is read-only', async 
   const fila = page.locator(`tr[data-id="${lote}"]`);
   await fila.getByRole('button', { name: /^Abrir terreno/ }).click();
   const detalle = page.getByRole('dialog', { name: NOMBRE });
-  await detalle.getByText('No disponible aún').first().waitFor();      // the detail mount of the file slots
+  await detalle.getByText('No disponible').first().waitFor();      // the detail mount of the file slots
   assert.equal(await detalle.getByRole('button', { name: /Transferir/ }).count(), 0, 'operators do not transfer');
   await foto(page, '09-detalle-del-terreno');
   await detalle.getByRole('button', { name: 'Archivar terreno' }).click();

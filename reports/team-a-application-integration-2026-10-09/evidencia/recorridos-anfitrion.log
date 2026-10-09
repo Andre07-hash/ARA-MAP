@@ -1,0 +1,9 @@
+ok   without Team B's modules the table works, says the files are unavailable, and the page map is honest
+ok   stand-in widgets receive the real summary in cells and in the detail; no placeholder, no fake zero
+ok   a file change refreshes that terrain once and never disturbs an open editor
+ok   the page map loads only the selected boundary, through the loader, and keeps one body
+ok   logout during a boundary load tears everything down; the next account gets nothing of it
+ok   a second authorized session sees the same stored boundary; losing the grant removes it
+
+6/6 recorridos
+exit 0

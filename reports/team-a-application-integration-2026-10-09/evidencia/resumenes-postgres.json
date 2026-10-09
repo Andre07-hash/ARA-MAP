@@ -1,0 +1,47 @@
+{
+  "backend": "postgres",
+  "registros": 25000,
+  "en_la_base": 3000,
+  "con_archivos_en_la_primera_pagina": 60,
+  "paginas": [
+    {
+      "limit": 50,
+      "lista_2a": {
+        "ms_mediana": 92.5,
+        "ms_max": 94.8,
+        "bytes": 86867
+      },
+      "lista_3a": {
+        "ms_mediana": 128.0,
+        "ms_max": 130.3,
+        "bytes": 110717
+      }
+    },
+    {
+      "limit": 100,
+      "lista_2a": {
+        "ms_mediana": 95.0,
+        "ms_max": 95.9,
+        "bytes": 172296
+      },
+      "lista_3a": {
+        "ms_mediana": 146.7,
+        "ms_max": 148.8,
+        "bytes": 206156
+      }
+    },
+    {
+      "limit": 200,
+      "lista_2a": {
+        "ms_mediana": 97.9,
+        "ms_max": 103.7,
+        "bytes": 344610
+      },
+      "lista_3a": {
+        "ms_mediana": 194.0,
+        "ms_max": 198.0,
+        "bytes": 391570
+      }
+    }
+  ]
+}

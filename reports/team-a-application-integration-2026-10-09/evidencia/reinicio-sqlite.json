@@ -1,0 +1,50 @@
+{
+  "backend": "sqlite",
+  "pasos": [
+    {
+      "proceso": 1,
+      "pid": 43972,
+      "subidos": [
+        "kmz",
+        "pdf"
+      ],
+      "modo": "geometria"
+    },
+    {
+      "proceso": 1,
+      "detenido": true
+    },
+    {
+      "proceso": 2,
+      "pid": 43973,
+      "archivos": {
+        "pdf": {
+          "descarga": 200,
+          "bytes_iguales": true,
+          "sha256_igual": true,
+          "historial": 200,
+          "eventos": 3,
+          "sin_acceso": 404,
+          "sin_acceso_recibe_bytes": false
+        },
+        "kmz": {
+          "descarga": 200,
+          "bytes_iguales": true,
+          "sha256_igual": true,
+          "historial": 200,
+          "eventos": 4,
+          "sin_acceso": 404,
+          "sin_acceso_recibe_bytes": false
+        }
+      },
+      "misma_geometria": true,
+      "mismo_resumen": true,
+      "contorno": {
+        "estado": 200,
+        "sha256_coincide": true
+      },
+      "version_del_terreno_sin_cambio": true,
+      "sin_acceso_terreno": 404
+    }
+  ]
+}

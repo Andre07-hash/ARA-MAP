@@ -214,6 +214,7 @@ async function cargarContorno(id) {
     registro.resultado = "cargado";
     registro.bytes = cuerpo.bytes;
     registro.vertices = cuerpo.vertices;
+    registro.sha256 = cuerpo.sha256;
     $("#aviso-mapa").textContent = `${pagina} Contorno del terreno seleccionado cargado; los demás se cargan al seleccionarlos.`;
   } catch (error) {
     registro.resultado = error?.name === "AbortError" ? "cancelado" : error?.codigo ?? "error";

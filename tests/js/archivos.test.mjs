@@ -454,3 +454,8 @@ test("summary: download names lose separators and control characters", () => {
   assert.equal(R.tamanoLegible(1536), "1.5 KB");
   assert.equal(R.tamanoLegible(undefined), "");
 });
+
+test("client: a 401 the bridge reports (after its teardown) is a session error, not uncertainty", async () => {
+  const cliente = A.crearClienteArchivos({ peticionPrivada: async () => { throw Object.assign(new Error("x"), { status: 401 }); } });
+  await assert.rejects(cliente.listar(TERRENO), (e) => e.codigo === "unauthenticated" && e.incierto === false);
+});

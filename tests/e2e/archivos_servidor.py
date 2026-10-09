@@ -136,7 +136,11 @@ def construir(almacen: Path):
         for metodo, ruta, handler, capacidad in api.RUTAS:
             app.router.add(metodo, ruta, handler, capacidad)
         app.READ_ONLY_POSTS = set(app.READ_ONLY_POSTS) | set(api.POSTS_DE_LECTURA)
-    if api._fabrica is None:
+    if montado and hasattr(app, "configurar_archivos"):
+        # C1's own startup wiring (what serve() calls), pointed at this temporary folder.
+        os.environ["ARA_MAP_ARCHIVOS"] = str(almacen)
+        print(f"Archivos: {app.configurar_archivos()}", file=sys.stderr, flush=True)
+    elif api._fabrica is None:
         api.configurar_almacen(api.almacen_local(almacen))
 
     def estado_archivos(request):

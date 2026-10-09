@@ -178,8 +178,10 @@ export function crearClienteArchivos({ peticionPrivada }) {
       resultado = await peticionPrivada(ruta, opciones);
     } catch (error) {
       if (esAbort(error)) throw error;
-      // fetch reports a connection that failed or dropped as a TypeError; the
-      // request may or may not have reached the server.
+      // The bridge has already run the expiry teardown for a 401.
+      if (error?.status === 401) throw new ErrorArchivos("unauthenticated", mensajeDe("unauthenticated"), { status: 401 });
+      // A connection that failed or dropped: the request may or may not have
+      // reached the server.
       throw new ErrorArchivos("red", mensajeDe("red"), { incierto: true });
     }
     return resultado;

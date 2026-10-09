@@ -42,6 +42,7 @@ const MENSAJES = {
   red: "No se pudo descargar el contorno. Revisa la conexión y vuelve a intentarlo.",
   servidor: "El servidor no pudo entregar el contorno. Vuelve a intentarlo.",
   destruido: "El cargador ya no está activo.",
+  sesion: "Tu sesión terminó. Vuelve a entrar.",
 };
 
 export class ErrorGeometria extends Error {
@@ -199,7 +200,7 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
       resultado = await peticionPrivada(ruta, opciones);
     } catch (e) {
       if (esAbort(e)) throw e;
-      throw new ErrorGeometria("red");
+      throw new ErrorGeometria(e?.status === 401 ? "sesion" : "red", { status: e?.status ?? 0 });
     }
     for (const s of [...senales, resultado.signal]) if (s?.aborted) throw abortError();
     return resultado;

@@ -429,3 +429,10 @@ test("a session-ended bridge (AbortError) is a cancellation, not an error", asyn
     response: new Response("{}", { status: 200 }), signal: muerto.signal }) });
   await abortada(tardio.cargar({ terrenoId: TERRENO, geometria: g.descriptor }));
 });
+
+test("a 401 reported by the bridge is a session error, never a drawn body", async () => {
+  const g = geometria();
+  const cargador = crearCargadorGeometrias({ peticionPrivada: async () => { throw Object.assign(new Error("x"), { status: 401 }); } });
+  await falla(cargador.cargar({ terrenoId: TERRENO, geometria: g.descriptor }), "sesion");
+  assert.equal(cargador.estado().listos, 0);
+});

@@ -436,3 +436,21 @@ test("a 401 reported by the bridge is a session error, never a drawn body", asyn
   await falla(cargador.cargar({ terrenoId: TERRENO, geometria: g.descriptor }), "sesion");
   assert.equal(cargador.estado().listos, 0);
 });
+
+test("selecting back a body whose obsolete load was just cancelled loads it again", async () => {
+  // X in flight → Y (X cancelled, Y waits) → X again (Y replaced): X must load,
+  // not inherit the cancelled promise of the first X.
+  const [x, y] = [geometria(), geometria()];
+  const puerta = compuerta();
+  const { peticionPrivada } = servidor([x, y], { retener: puerta.retener });
+  const cargador = crearCargadorGeometrias({ peticionPrivada });
+  const x1 = cargador.cargar({ terrenoId: TERRENO, geometria: x.descriptor });
+  await tick();
+  const y1 = cargador.cargar({ terrenoId: TERRENO, geometria: y.descriptor });
+  const x2 = cargador.cargar({ terrenoId: TERRENO, geometria: x.descriptor });
+  await abortada(x1);
+  await abortada(y1);
+  while (puerta.pendientes || cargador.estado().enCurso) { puerta.soltar(); await tick(); }
+  assert.equal((await x2).id, x.meta.id);
+  assert.deepEqual(cargador.estado(), { enCurso: 0, enEspera: 0, listos: 1, destruido: false });
+});

@@ -186,7 +186,6 @@ function cuerpoDe(geojson, meta) {
 export function crearCargadorGeometrias({ peticionPrivada }) {
   if (typeof peticionPrivada !== "function") throw new TypeError("peticionPrivada es obligatoria");
 
-  let generacion = 0;
   let destruido = false;
   let enCurso = null;     // {clave, control, promesa}
   let espera = null;      // {clave, control, resolve, reject, peticion}
@@ -208,10 +207,9 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
 
   /* One verified load. Throws AbortError as soon as it becomes obsolete. */
   async function descargar(terrenoId, geometria, control, signalExterna) {
-    const gen = generacion;
     const senales = [control.signal, signalExterna];
     const vigente = (alcance) => {
-      if (gen !== generacion || destruido || control.signal.aborted || signalExterna?.aborted
+      if (destruido || control.signal.aborted || signalExterna?.aborted
           || alcance?.aborted) {
         throw abortError();
       }
@@ -309,7 +307,8 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
     if (signal?.aborted) return Promise.reject(abortError());
     const clave = claveDe(terrenoId, geometria);
     if (listo?.clave === clave) return Promise.resolve(listo.cuerpo);
-    if (enCurso?.clave === clave) return enCurso.promesa;
+    // The same body already in flight is shared, unless it was cancelled as obsolete.
+    if (enCurso?.clave === clave && !enCurso.control.signal.aborted) return enCurso.promesa;
     if (espera?.clave === clave) return espera.promesa;
 
     // A different body is wanted: what is ready or in flight is obsolete.
@@ -326,8 +325,9 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
     return nueva.promesa;
   }
 
+  /* Aborting what is in flight is what forbids a late install: every await in
+   * a load re-checks its own controller. */
   function reset() {
-    generacion += 1;
     listo = null;
     if (espera) { espera.reject(abortError()); espera = null; }
     if (enCurso) enCurso.control.abort();

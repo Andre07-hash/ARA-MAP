@@ -213,6 +213,7 @@ await revisar("un reemplazo válido se activa y una versión retenida se puede v
 
 /* A second, independent session. */
 const omar = await sesion("omar");
+paginaActual = omar.page;
 
 await revisar("una segunda sesión autorizada lee los archivos guardados y el contorno real", async () => {
   await textoCelda(omar.page, T.uno.id, "pdf", "1 PDF");
@@ -225,6 +226,34 @@ await revisar("una segunda sesión autorizada lee los archivos guardados y el co
   igual(r.geometria, geometriaOriginal, "la misma geometría activa");
 });
 
+await revisar("selecciones rápidas: una carga en curso, una en espera, un cuerpo listo; lo obsoleto se cancela", async () => {
+  const antes = await omar.page.evaluate(() => window.__arnes.cargas.length);
+  await omar.page.evaluate(([a, b]) => {
+    for (let i = 0; i < 10; i += 1) document.querySelector(`.fila[data-id="${i % 2 ? b : a}"] button`).click();
+  }, [T.uno.id, T.dos.id]);
+  const maximos = await omar.page.evaluate(async () => {
+    let enCurso = 0, enEspera = 0;
+    for (let i = 0; i < 200; i += 1) {
+      const e = window.__arnes.estadoCargador();
+      enCurso = Math.max(enCurso, e.enCurso); enEspera = Math.max(enEspera, e.enEspera);
+      if (window.__arnes.cargas.at(-1)?.resultado) break;
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    return { enCurso, enEspera };
+  });
+  await omar.page.waitForFunction(() => window.__arnes.cargas.at(-1)?.resultado === "cargado", null, { timeout: 30000 });
+  const r = await omar.page.evaluate((n) => ({ rafaga: window.__arnes.cargas.slice(n), sel: window.__arnes.seleccionado,
+    estado: window.__arnes.estadoCargador(), render: window.__arnes.ultimoRender }), antes);
+  igual(r.sel, T.dos.id, "la última selección");
+  igual(r.rafaga.at(-1).id, T.dos.id, "solo la última se dibuja");
+  igual(r.rafaga.filter((c) => c.resultado === "cargado").length, 1, "cuerpos instalados en la ráfaga");
+  cierto(r.rafaga.slice(0, -1).every((c) => c.resultado === "cancelado" || c.resultado === "obsoleto"), JSON.stringify(r.rafaga.map((c) => c.resultado)));
+  igual(r.estado, { enCurso: 0, enEspera: 0, listos: 1, destruido: false }, "residencia final");
+  igual(r.render.cuerpos, 1, "cuerpos en el renderer");
+  cierto(maximos.enCurso <= 1 && maximos.enEspera <= 1, JSON.stringify(maximos));
+  return { selecciones: r.rafaga.length, resultados: r.rafaga.map((c) => c.resultado), maximos };
+});
+
 await revisar("la subida pendiente de otra cuenta se ve genérica, sin nombre ni tamaño", async () => {
   // olga registers an upload and stops before the PUT (its file stays local).
   const vid = await olga.page.evaluate(async ([t, s]) => {
@@ -233,6 +262,7 @@ await revisar("la subida pendiente de otra cuenta se ve genérica, sin nombre ni
       body: JSON.stringify({ tipo: "pdf", nombre_original: "Privado ficticio.pdf", tamano_declarado: 1234, sha256_declarado: s }) });
     return (await r.json()).version_id;
   }, [T.dos.id, "a".repeat(64)]);
+  await seleccionar(omar.page, T.tres.id);      // a fresh detail mount for dos, after olga's upload began
   await seleccionar(omar.page, T.dos.id);
   const texto = await detalle(omar.page, "pdf").textContent();
   cierto(!texto.includes("Privado ficticio"), "el nombre ajeno aparece");
@@ -243,6 +273,7 @@ await revisar("la subida pendiente de otra cuenta se ve genérica, sin nombre ni
 });
 
 const otto = await sesion("otto");
+paginaActual = otto.page;
 await revisar("una cuenta sin permiso no ve nada: 404 indistinguible en lista, descarga y contorno", async () => {
   const r = await otto.page.evaluate(async ([t, g]) => {
     const pedir = async (ruta, o) => { const x = await fetch(ruta, o); return [x.status, await x.text()]; };
@@ -264,6 +295,7 @@ await revisar("una cuenta sin permiso no ve nada: 404 indistinguible en lista, d
   return { estado_harness: r.estado[0] };
 });
 
+paginaActual = olga.page;
 await revisar("solo lectura deshabilita controles pero no descargas", async () => {
   await seleccionar(olga.page, T.uno.id);
   const d = detalle(olga.page, "pdf");

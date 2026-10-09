@@ -1,0 +1,3 @@
+{"probe": "superscript_two", "content_length": "\u00b2", "bytes_sent_after_headers": 2, "status_line": "HTTP/1.1 500 Internal Server Error", "body_start": "{\"error\": \"Ocurri\u00f3 un error inesperado. Int\u00e9ntalo de nuevo; si se repite, avisa al equipo.\", \"detalle\": {\"code\": \"internal\"}}"}
+{"probe": "negative_one_then_half_close", "content_length": "-1", "bytes_sent_after_headers": 27262976, "status_line": "HTTP/1.1 413 Content Too Large", "body_start": "{\"error\": \"La petici\u00f3n es demasiado grande.\", \"detalle\": null}"}
+{"probe": "negative_one_kept_open", "content_length": "-1", "bytes_sent_after_headers": 2, "status_line": "(no response within 5 s)", "body_start": ""}

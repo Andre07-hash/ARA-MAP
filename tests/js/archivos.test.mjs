@@ -406,3 +406,51 @@ test("upload: a reloaded own pending upload needs the same file again", async ()
   assert.equal(s.estado().fase, FASE.LISTO);
   assert.equal(srv.versiones.size, 1);
 });
+
+/* ------------------------------------------------------- summary text */
+
+const R = await import("../../web/components/archivos/resumen.js");
+const fila = (extra = {}, ultima = null) => ({ id: randomUUID(), tipo: "pdf", revision: 1, retirado: false,
+  version_actual_id: null, geometria_activa_id: null, ultima_version: ultima, ...extra });
+
+test("summary: undefined is loading, not zero; zero is said as such", () => {
+  assert.equal(R.describirResumen(undefined, "pdf").estado, R.ESTADO.CARGANDO);
+  assert.equal(R.describirResumen(undefined, "kmz").texto, "…");
+  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "pdf").texto, "Sin PDF");
+  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "kmz").texto, "Sin KMZ");
+  assert.equal(R.describirResumen({ pdf_recientes: [] }, "pdf").estado, R.ESTADO.CARGANDO);   // no count: not zero
+});
+
+test("summary: another account's pending upload stays generic; own states are named", () => {
+  const ajena = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({}, { estado: "subiendo", propia: false })], kmz: null }, "pdf");
+  assert.equal(ajena.estado, R.ESTADO.PENDIENTE);
+  assert.equal(ajena.nota, "Otra cuenta está subiendo una versión");
+  const vid = randomUUID();
+  const lista = R.describirResumen({ pdf_total: 3, pdf_recientes: [fila({ version_actual_id: vid },
+    { id: vid, numero: 1, estado: "disponible", nombre_original: "a.pdf" })], kmz: null }, "pdf");
+  assert.deepEqual([lista.estado, lista.texto, lista.nota], [R.ESTADO.LISTO, "3 PDF", null]);
+  const fallida = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({}, { id: vid, estado: "fallido" })], kmz: null }, "pdf");
+  assert.equal(fallida.estado, R.ESTADO.FALLIDO);
+});
+
+test("summary: KMZ keeps the active boundary while a replacement is pending or failed", () => {
+  const gid = randomUUID(), activa = randomUUID(), nueva = randomUUID();
+  const k = (ultima) => ({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz", version_actual_id: activa,
+    geometria_activa_id: gid }, ultima) });
+  assert.equal(R.describirResumen(k({ id: activa, estado: "disponible" }), "kmz").texto, "Contorno activo");
+  const pendiente = R.describirResumen(k({ estado: "subiendo", propia: false }), "kmz");
+  assert.deepEqual([pendiente.texto, pendiente.estado], ["Contorno activo", R.ESTADO.PENDIENTE]);
+  const fallo = R.describirResumen(k({ id: nueva, estado: "fallido" }), "kmz");
+  assert.deepEqual([fallo.texto, fallo.estado], ["Contorno activo", R.ESTADO.FALLIDO]);
+  const sinActivar = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz" },
+    { id: nueva, estado: "disponible" }) }, "kmz");
+  assert.equal(sinActivar.estado, R.ESTADO.SIN_ACTIVAR);
+});
+
+test("summary: download names lose separators and control characters", () => {
+  assert.equal(R.nombreSeguro("../../etc/passwd", "pdf"), ".._.._etc_passwd.pdf");
+  assert.equal(R.nombreSeguro("Avalúo\r\n\"final\".PDF", "pdf"), "Avalúo_final_.PDF");
+  assert.equal(R.nombreSeguro("", "kmz"), "archivo.kmz");
+  assert.equal(R.tamanoLegible(1536), "1.5 KB");
+  assert.equal(R.tamanoLegible(undefined), "");
+});

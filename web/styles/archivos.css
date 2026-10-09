@@ -1,0 +1,136 @@
+/* File cells and detail controls (web/components/archivos, packet 3B).
+   Built on the shared tokens; the host links this sheet. */
+
+/* ----------------------------------------------------------- compact cell */
+
+.archivos-celda {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-small);
+}
+.archivos-celda[data-estado="cargando"],
+.archivos-celda[data-estado="vacio"] { color: var(--ink-muted); }
+.archivos-celda[data-estado="pendiente"]::after,
+.archivos-celda[data-estado="fallido"]::after,
+.archivos-celda[data-estado="sin_activar"]::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-left: var(--space-1);
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--status-aviso);
+}
+.archivos-celda[data-estado="fallido"]::after { background: var(--status-error); }
+
+/* ---------------------------------------------------------------- detail */
+
+.archivos-detalle {
+  display: grid;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+}
+.archivos-titulo { margin: 0; font-size: var(--text-body); }
+.archivos-resumen { margin: 0; }
+
+.archivos-zona {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.archivos-zona-activa { border-color: var(--ink); background: var(--paper-sunken); }
+.archivos-entrada { display: none; }
+
+.archivos-subidas,
+.archivos-lista,
+.archivos-panel-lista {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archivos-subida,
+.archivos-item {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-overlay);
+}
+.archivos-subida { grid-template-columns: minmax(0, 1fr) auto; }
+.archivos-subida-nombre,
+.archivos-item-nombre { font-weight: 500; overflow-wrap: anywhere; }
+.archivos-subida-mensaje { grid-column: 1 / -1; }
+.archivos-subida[data-fase="fallido"],
+.archivos-subida[data-fase="expirado"] { border-color: var(--status-error); }
+.archivos-subida[data-fase="incierto"],
+.archivos-subida[data-fase="en_curso"],
+.archivos-subida[data-fase="requiere_archivo"] { border-color: var(--status-aviso); }
+.archivos-progreso { grid-column: 1 / -1; width: 100%; }
+
+.archivos-item[data-retirado="1"] { background: var(--paper-sunken); }
+.archivos-item-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.archivos-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  grid-column: 1 / -1;
+}
+
+.archivos-chip {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-size: var(--text-micro);
+  white-space: nowrap;
+}
+.archivos-chip-actual { border-color: var(--status-ok); }
+.archivos-chip-retirado { color: var(--ink-secondary); }
+
+.archivos-panel {
+  margin-top: var(--space-1);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--rule);
+}
+.archivos-version,
+.archivos-evento,
+.archivos-intento {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.archivos-version-num { font-family: var(--font-mono); }
+
+.archivos-candidatos {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.archivos-candidato { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+
+.archivos-mensaje { margin: 0; min-height: 1.2em; }
+.archivos-mensaje[data-tipo="error"],
+.archivos-error { color: var(--status-error); }

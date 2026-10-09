@@ -136,13 +136,14 @@
     "round_3_released": false
   },
   "latest_supervisor_review": {
-    "checked_at_utc": "2026-10-09T19:08:28Z",
-    "report": "reports/round-2-corrections-review-2026-10-09/START_HERE.md",
+    "checked_at_utc": "2026-10-09T19:40:24Z",
+    "report": "reports/team-b-2b-closeout-2026-10-09/START_HERE.md",
     "baseline_pr": 24,
     "frozen_baseline_head": "7117f57f0c52c092d421e5d4bacbcf068f8a65d0",
     "team_a": {
       "pr": 26,
       "reviewed_head": "cda5c20580179abcd8673010797a9975b1b7a06d",
+      "observed_new_head_not_reviewed": "32a2a55e4a7417499cc384109bd44666e7a568cb",
       "verdict": "original_reproductions_closed_bounded_framing_followup_required",
       "closed_findings": ["R2-A1_original_early_refusals", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint", "B_R7_negative_nonascii_content_length"],
       "findings": ["R2-A5_empty_duplicate_framing_headers"],
@@ -152,15 +153,16 @@
     },
     "team_b": {
       "pr": 25,
-      "reviewed_head": "704d8b8745b79f7b72f35350079ccd788e6d2e0a",
-      "verdict": "R2-B1_accepted_inherited_test_only_correction_required",
-      "closed_findings": ["R2-B1_unicode_integer_query_parsing"],
-      "findings": ["R2-B2_public_uuid_substring_false_positive_in_privacy_test"],
+      "reviewed_head": "bf4c6a694ca95087368bb2d89325d7a240a7b676",
+      "verdict": "accepted_2b_http_harness_scope_not_app_mounted",
+      "closed_findings": ["R2-B1_unicode_integer_query_parsing", "R2-B2_public_uuid_substring_false_positive_in_privacy_test"],
+      "findings": [],
       "instructions": "reports/round-2-corrections-review-2026-10-09/TEAM_B.md",
-      "independent_tests": "63 HTTP/composition tests with SQLite/Postgres, zero skips; 63 Python 3.9 with 30 PG skips; original numeric probes pass; deterministic public-ID collision reproduces faulty assertion on both backends with correctly redacted data",
-      "ci_run": 37975159654
+      "report": "reports/team-b-2b-closeout-2026-10-09/START_HERE.md",
+      "independent_tests": "145 lifecycle/HTTP/composition tests with SQLite/Postgres, zero skips; 82 lifecycle tests on Python 3.9 with 41 PG skips; original deterministic collision passes on both backends; all six leaky-code mutations detected on both backends; changed-file ruff clean",
+      "ci_run": 37980122942
     },
-    "next_owner": "A corrects R2-A5 in #26; B independently corrects only tests/evidence for R2-B2 in #25. Preserve #24 and all accepted old pins. Supervisor reviews deltas before releasing 3A/3B.",
+    "next_owner": "B has no further 2B corrections; preserve #25 and wait. Supervisor reviews A's new exact-head R2-A5 handback before next integration/client release. Preserve #24 and all accepted old pins; 3A/3B remain unreleased.",
     "correction_prompts_delivered": false,
     "round_3_released": false
   }

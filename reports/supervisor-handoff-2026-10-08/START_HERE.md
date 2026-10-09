@@ -295,3 +295,18 @@ not resend that repair. Do not modify the frozen #24 or accepted #21/#23.
 STATE.latest_supervisor_review is current; round_2_first_review preserves the
 previous findings. No 3A/3B, merge, deployment or open-ended memory research is
 released. The owner still relays the new bounded correction prompts.
+
+### Team B packet 2B closed — 2026-10-09, 19:40 UTC
+
+**2B accepted for HTTP-harness scope** at #25
+`bf4c6a694ca95087368bb2d89325d7a240a7b676`; R2-B1 and R2-B2 closed.
+Only tests/evidence changed. The deterministic UUID collision passes on both
+databases and all six deliberate production-path leak mutations are detected.
+Independent affected suite: 145 SQLite/Postgres tests, zero skips; Python 3.9
+lifecycle: 82 run with 41 PG skips. Exact-head GitHub CI is green. See
+[closeout and raw evidence](../team-b-2b-closeout-2026-10-09/START_HERE.md).
+
+B has no remaining 2B correction; preserve its draft and wait. A's new #26
+head `32a2a55e4a7417499cc384109bd44666e7a568cb` was observed but not reviewed
+in this closeout, so R2-A5 awaits verification. #21/#23/#24 remain unchanged.
+No app-mounted endpoint acceptance, 3A/3B, merge or deployment is released.

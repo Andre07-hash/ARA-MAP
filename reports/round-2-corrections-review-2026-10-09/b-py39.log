@@ -1,0 +1,6 @@
+...sssssssssssssssssssssssssssss.............................s  "GET /api/inventario/terrenos/f5392fce-9c20-4743-b0e9-d555f098320d HTTP/1.1" 404 -
+.
+----------------------------------------------------------------------
+Ran 63 tests in 32.596s
+
+OK (skipped=30)

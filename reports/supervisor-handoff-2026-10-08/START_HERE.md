@@ -275,3 +275,23 @@ are verified, with inherited dispatcher correction explicitly carried to A.
 Keep #24 frozen; corrections stay additive in #26/#25. B does not need to wait
 for A to return its own correction. No 3A/3B, PR/main merge, deployment or E5
 integration is released. See latest_supervisor_review for exact evidence/owners.
+
+### Round 2 correction review — 2026-10-09, 19:08 UTC
+
+Reviewed A #26 `cda5c20580179abcd8673010797a9975b1b7a06d` and B #25
+`704d8b8745b79f7b72f35350079ccd788e6d2e0a`, both draft with exact-head CI green.
+See [review and bounded next instructions](../round-2-corrections-review-2026-10-09/START_HERE.md).
+The original A1–A4 and B1 reproductions are corrected. A's 16 identity/editor
+journeys and the original supervisor browser probes pass independently.
+
+Two residual actions, independent and on the same feature PRs: A owns R2-A5,
+empty/repeated HTTP framing headers that still let the body become a second
+public request; B owns R2-B2, a test-only privacy assertion repair because a
+public UUID can contain the byte-count substring. Both are independently
+reproduced; the latter is not an observed privacy leak. B's new R-7 negative/
+non-ASCII Content-Length issue is already fixed at A's reviewed head, so do
+not resend that repair. Do not modify the frozen #24 or accepted #21/#23.
+
+STATE.latest_supervisor_review is current; round_2_first_review preserves the
+previous findings. No 3A/3B, merge, deployment or open-ended memory research is
+released. The owner still relays the new bounded correction prompts.

@@ -1,0 +1,437 @@
+...................................................................................................................sssssssssssssssssssssssssssssssssssssss................................................................................................asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: presupuesto
+asistencia automática sin resultado: invalido
+....asistencia automática sin resultado: error
+asistencia automática sin resultado: error
+.asistencia automática sin resultado: tiempo
+........................asistencia automática sin resultado: limite
+asistencia automática sin resultado: error
+asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: rechazo
+asistencia automática sin resultado: invalido
+.....el uso informado superó la reserva máxima; se registra completo
+......................  "POST /api/importar/analizar HTTP/1.1" 401 -
+  "POST /api/importar/preparar HTTP/1.1" 401 -
+  "GET /api/formatos HTTP/1.1" 401 -
+  "PATCH /api/formatos/1 HTTP/1.1" 401 -
+  "DELETE /api/formatos/1 HTTP/1.1" 401 -
+.....................................................................  "POST /api/carpetas HTTP/1.1" 401 -
+  "PATCH /api/carpetas/1 HTTP/1.1" 401 -
+  "DELETE /api/carpetas/1 HTTP/1.1" 401 -
+  "PATCH /api/bases/1/carpeta HTTP/1.1" 401 -
+  "PATCH /api/mapas/1/carpeta HTTP/1.1" 401 -
+.....  "GET /api/carpetas?tipo=bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 403 -
+  "POST /api/carpetas HTTP/1.1" 403 -
+  "PATCH /api/carpetas/1 HTTP/1.1" 403 -
+  "DELETE /api/carpetas/1 HTTP/1.1" 403 -
+  "PATCH /api/bases/1/carpeta HTTP/1.1" 403 -
+  "PATCH /api/mapas/1/carpeta HTTP/1.1" 403 -
+.....  "POST /api/importar/vista-previa?csv_decimal=dot HTTP/1.1" 401 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases/1/terrenos HTTP/1.1" 401 -
+  "GET /api/mapas/1/terrenos HTTP/1.1" 401 -
+  "GET /api/carpetas HTTP/1.1" 401 -
+  "POST /api/exportar HTTP/1.1" 401 -
+  "DELETE /api/bases/1 HTTP/1.1" 401 -
+  "PATCH /api/bases/1 HTTP/1.1" 401 -
+  "POST /api/mapas HTTP/1.1" 401 -
+  "POST /api/importar/confirmar HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/cualquier-cosa HTTP/1.1" 401 -
+.  "DELETE /api/bases/1 HTTP/1.1" 401 -
+.  "GET /api/session HTTP/1.1" 503 -
+  "POST /api/login HTTP/1.1" 503 -
+  "GET /api/bases HTTP/1.1" 503 -
+.  "POST /api/login HTTP/1.1" 500 -
+.  "POST /api/importar/vista-previa HTTP/1.1" 413 -
+.  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 429 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 403 -
+  "POST /api/mapas HTTP/1.1" 403 -
+.  "POST /api/login HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+.  "POST /api/login HTTP/1.1" 413 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "POST /api/login HTTP/1.1" 401 -
+.....................................................................................................................................  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c9d10cec-557d-4b44-96c1-ab2661a6a6dd HTTP/1.1" 422 -
+.  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/af32c82f-3284-42b1-9fdc-3f7552ca050d HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/af32c82f-3284-42b1-9fdc-3f7552ca050d/historial HTTP/1.1" 401 -
+  "PATCH /api/inventario/terrenos/af32c82f-3284-42b1-9fdc-3f7552ca050d HTTP/1.1" 401 -
+  "POST /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/publico/terrenos/af32c82f-3284-42b1-9fdc-3f7552ca050d HTTP/1.1" 404 -
+..Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/app.py", line 200, in _dispatch
+    result = handler(request)
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/api/inventario.py", line 95, in create
+    return repo.create(conn, fields, actor, key, request_hash)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/repo/inventario.py", line 109, in create
+    return _create(conn, fields, actor, key, request_hash)
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/repo/inventario.py", line 139, in _create
+    _event(conn, inventory_id, 1, "create", actor, ahora, None, revision_id, {"changes": cambios})
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1234, in _execute_mock_call
+    raise effect
+RuntimeError: falla simulada
+  "POST /api/inventario/terrenos HTTP/1.1" 500 -
+..  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+.  "POST /api/inventario/terrenos HTTP/1.1" 409 -
+..  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f2ed9f60-d08a-4a7c-8e9b-432098402063 HTTP/1.1" 422 -
+.  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+...  "GET /api/inventario/terrenos/23163634-7401-4993-bcd7-d7ea60c42f8c/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/no-es-uuid HTTP/1.1" 404 -
+.  "GET /api/inventario/terrenos?price_min=5 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?limit=251 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?limit=0 HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?moneda=EUR HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?contacto=x HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?publication_state=vendido HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?attention=quizas HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos?area_min_m2=abc HTTP/1.1" 422 -
+.....Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/app.py", line 200, in _dispatch
+    result = handler(request)
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/api/inventario.py", line 134, in update
+    return {"terreno": repo.update(conn, inventory_id, expected, fields,
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   tuple(dict.fromkeys(confirm)), actor)}
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/server/repo/inventario.py", line 190, in update
+    _event(conn, inventory_id, expected_version + 1, "update", actor, ahora,
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+           current["draft_revision_id"], revision_id, details)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/unittest/mock.py", line 1234, in _execute_mock_call
+    raise effect
+RuntimeError: falla simulada
+  "PATCH /api/inventario/terrenos/2467dd33-3268-4a93-b705-9ca2c3abe416 HTTP/1.1" 500 -
+....  "PATCH /api/inventario/terrenos/b28b2b33-f4fe-45da-8eca-dec06f703bd8 HTTP/1.1" 409 -
+  "PATCH /api/inventario/terrenos/b28b2b33-f4fe-45da-8eca-dec06f703bd8 HTTP/1.1" 409 -
+.  "PATCH /api/inventario/terrenos/5175198b-0f8b-4237-a127-15e46b8f24a8 HTTP/1.1" 409 -
+.ssssssss..........................................................................................................................................F.....sssssssssssssssssssss........................................asistencia automática sin resultado: tiempo
+asistencia automática sin resultado: error
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: limite
+asistencia automática sin resultado: rechazo
+.......asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+asistencia automática sin resultado: invalido
+..asistencia automática sin resultado: invalido
+..................sssssssssssssssssssssssssss  "PUT /api/maestra/bases/6d540821-66b5-46d0-8a2d-b1c68d719815/acceso HTTP/1.1" 422 -
+.  "POST /api/carpetas HTTP/1.1" 503 -
+.  "GET /api/sin-declarar HTTP/1.1" 401 -
+  "GET /api/sin-declarar HTTP/1.1" 403 -
+  "GET /api/sin-declarar HTTP/1.1" 403 -
+.  "GET /api/inventario/terrenos/249b879d-0696-451f-92a5-38d80d8ab832 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/249b879d-0696-451f-92a5-38d80d8ab832 HTTP/1.1" 404 -
+..  "PATCH /api/inventario/terrenos/6abb9c52-cbe5-4343-abe8-39007a9c875e HTTP/1.1" 503 -
+..  "PATCH /api/maestra/bases/0578980f-c9e1-437a-aea9-aeb697fe1201 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0578980f-c9e1-437a-aea9-aeb697fe1201/archivar HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/0578980f-c9e1-437a-aea9-aeb697fe1201 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0578980f-c9e1-437a-aea9-aeb697fe1201/restaurar HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0578980f-c9e1-437a-aea9-aeb697fe1201/restaurar HTTP/1.1" 409 -
+..  "PATCH /api/inventario/terrenos/36829cab-deb1-41d2-97ec-1e07e343f055 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/b4a0de57-bafd-4f7d-8c0a-5a43a1aad5d1 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/82e0e268-a272-415d-bc3d-ebf5c9eba796 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/f2590ce8-bd56-405a-a08a-1ef6ef129e78 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/36829cab-deb1-41d2-97ec-1e07e343f055 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/c37616d9-b0b5-4944-a9d0-938949e289d8 HTTP/1.1" 409 -
+  "PATCH /api/inventario/terrenos/82e0e268-a272-415d-bc3d-ebf5c9eba796 HTTP/1.1" 409 -
+.  "GET /api/inventario/terrenos/8aa374cc-acce-476b-9b8a-acf618b0dae0 HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/d7647789-d94d-43ca-9fab-425a7eab9828 HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/bfcdf37a-5720-4d76-a6b2-d39e7d280b49 HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/c61dfafe-9e9f-4dba-b1eb-999887a71e40 HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/8aa374cc-acce-476b-9b8a-acf618b0dae0/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/d7647789-d94d-43ca-9fab-425a7eab9828/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/bfcdf37a-5720-4d76-a6b2-d39e7d280b49/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/f5f76bb7-7626-447f-909e-9c714ef268c3/historial HTTP/1.1" 404 -
+.  "GET /api/inventario/terrenos/6c1f6ecc-e133-41ca-837a-fbcefc37d0d1 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/6c1f6ecc-e133-41ca-837a-fbcefc37d0d1 HTTP/1.1" 409 -
+.  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83 HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/archivar HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/archivar HTTP/1.1" 422 -
+  "PUT /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/acceso HTTP/1.1" 422 -
+  "PUT /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/acceso HTTP/1.1" 422 -
+  "PUT /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/acceso HTTP/1.1" 422 -
+  "PUT /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/acceso HTTP/1.1" 422 -
+  "PUT /api/maestra/bases/c8609161-12d4-4323-b0bf-8a41d8d59c83/acceso HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/8a6871f7-c39e-497b-a198-f2e5697554fd HTTP/1.1" 404 -
+  "POST /api/maestra/bases/90c84361-0549-498f-a655-a5e7c9bd2207/archivar HTTP/1.1" 404 -
+  "POST /api/maestra/bases/c1b0cb83-2295-4b3d-959d-e04dd7486077/restaurar HTTP/1.1" 404 -
+  "GET /api/maestra/bases/977172b9-17a4-48c2-be9c-3ef193e5aa51/acceso HTTP/1.1" 404 -
+  "PUT /api/maestra/bases/7a538e4d-f33b-4f7c-9437-fc6e82fa7ccc/acceso HTTP/1.1" 404 -
+....  "PUT /api/maestra/bases/c505f98f-07ee-4093-9ccd-1c6806e3a16a/acceso HTTP/1.1" 409 -
+.  "GET /api/bases HTTP/1.1" 403 -
+  "GET /api/inventario/terrenos/f4bb85d6-176f-472f-bd4a-48adf954e3ea HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/f4bb85d6-176f-472f-bd4a-48adf954e3ea?base_id=583c6079-24c8-4e16-a964-5fbeb10e7068&rol=admin HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/c7f6eb9c-824a-4193-9bfd-56384a8985e6 HTTP/1.1" 422 -
+..  "GET /api/maestra/bases HTTP/1.1" 401 -
+  "GET /api/maestra/bases HTTP/1.1" 401 -
+  "GET /api/maestra/bases HTTP/1.1" 401 -
+  "GET /api/maestra/bases HTTP/1.1" 401 -
+..  "GET /api/bases HTTP/1.1" 403 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 401 -
+..  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos HTTP/1.1" 403 -
+  "POST /api/inventario/terrenos HTTP/1.1" 401 -
+  "POST /api/inventario/terrenos HTTP/1.1" 403 -
+  "POST /api/inventario/terrenos HTTP/1.1" 422 -
+  "GET /api/inventario/terrenos/ab755fe9-7dbd-4ae1-a54d-ce84e69fbd84 HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/ab755fe9-7dbd-4ae1-a54d-ce84e69fbd84 HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/ab755fe9-7dbd-4ae1-a54d-ce84e69fbd84 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/3bdf146c-a10b-44b6-9d4b-39d86bdd655c HTTP/1.1" 401 -
+  "PATCH /api/inventario/terrenos/3bdf146c-a10b-44b6-9d4b-39d86bdd655c HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/3bdf146c-a10b-44b6-9d4b-39d86bdd655c HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/58fa6b45-f255-484d-b44b-3b1ab028ce0c/historial HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos/58fa6b45-f255-484d-b44b-3b1ab028ce0c/historial HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/58fa6b45-f255-484d-b44b-3b1ab028ce0c/historial HTTP/1.1" 404 -
+  "GET /api/maestra/bases HTTP/1.1" 401 -
+  "POST /api/maestra/bases HTTP/1.1" 401 -
+  "POST /api/maestra/bases HTTP/1.1" 403 -
+  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/510fca7c-88ac-4ffd-97e8-437756f565f7 HTTP/1.1" 401 -
+  "PATCH /api/maestra/bases/510fca7c-88ac-4ffd-97e8-437756f565f7 HTTP/1.1" 403 -
+  "PATCH /api/maestra/bases/510fca7c-88ac-4ffd-97e8-437756f565f7 HTTP/1.1" 422 -
+  "POST /api/maestra/bases/891961fd-2884-445f-8343-bb8825457336/archivar HTTP/1.1" 401 -
+  "POST /api/maestra/bases/891961fd-2884-445f-8343-bb8825457336/archivar HTTP/1.1" 403 -
+  "POST /api/maestra/bases/891961fd-2884-445f-8343-bb8825457336/archivar HTTP/1.1" 422 -
+  "POST /api/maestra/bases/5e295524-8b52-42a2-be93-9ef9ca5558fa/restaurar HTTP/1.1" 401 -
+  "POST /api/maestra/bases/5e295524-8b52-42a2-be93-9ef9ca5558fa/restaurar HTTP/1.1" 403 -
+  "POST /api/maestra/bases/5e295524-8b52-42a2-be93-9ef9ca5558fa/restaurar HTTP/1.1" 422 -
+  "GET /api/maestra/bases/adbc9e32-797b-4a41-909b-a6ee9aa2ce6d/acceso HTTP/1.1" 401 -
+  "GET /api/maestra/bases/adbc9e32-797b-4a41-909b-a6ee9aa2ce6d/acceso HTTP/1.1" 403 -
+  "GET /api/maestra/bases/adbc9e32-797b-4a41-909b-a6ee9aa2ce6d/acceso HTTP/1.1" 404 -
+  "PUT /api/maestra/bases/a62ea0ef-a0d8-49e2-a8af-da164bb1a0f9/acceso HTTP/1.1" 401 -
+  "PUT /api/maestra/bases/a62ea0ef-a0d8-49e2-a8af-da164bb1a0f9/acceso HTTP/1.1" 403 -
+  "PUT /api/maestra/bases/a62ea0ef-a0d8-49e2-a8af-da164bb1a0f9/acceso HTTP/1.1" 422 -
+  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases HTTP/1.1" 403 -
+  "GET /api/bases/999 HTTP/1.1" 401 -
+  "GET /api/bases/999 HTTP/1.1" 403 -
+  "GET /api/bases/999 HTTP/1.1" 404 -
+  "GET /api/bases/999/terrenos HTTP/1.1" 401 -
+  "GET /api/bases/999/terrenos HTTP/1.1" 403 -
+  "GET /api/bases/999/terrenos HTTP/1.1" 404 -
+  "POST /api/bases/999/terrenos HTTP/1.1" 401 -
+  "POST /api/bases/999/terrenos HTTP/1.1" 403 -
+  "POST /api/bases/999/terrenos HTTP/1.1" 400 -
+  "PATCH /api/bases/999 HTTP/1.1" 401 -
+  "PATCH /api/bases/999 HTTP/1.1" 403 -
+  "PATCH /api/bases/999 HTTP/1.1" 400 -
+  "PATCH /api/bases/999/carpeta HTTP/1.1" 401 -
+  "PATCH /api/bases/999/carpeta HTTP/1.1" 403 -
+  "PATCH /api/bases/999/carpeta HTTP/1.1" 400 -
+  "DELETE /api/bases/999 HTTP/1.1" 401 -
+  "DELETE /api/bases/999 HTTP/1.1" 403 -
+  "DELETE /api/bases/999 HTTP/1.1" 404 -
+  "POST /api/bases/999/adjuntar HTTP/1.1" 401 -
+  "POST /api/bases/999/adjuntar HTTP/1.1" 403 -
+  "POST /api/bases/999/adjuntar HTTP/1.1" 400 -
+  "POST /api/importar/vista-previa HTTP/1.1" 401 -
+  "POST /api/importar/vista-previa HTTP/1.1" 403 -
+  "POST /api/importar/vista-previa HTTP/1.1" 400 -
+  "POST /api/importar/confirmar HTTP/1.1" 401 -
+  "POST /api/importar/confirmar HTTP/1.1" 403 -
+  "POST /api/importar/confirmar HTTP/1.1" 400 -
+  "POST /api/importar/analizar HTTP/1.1" 401 -
+  "POST /api/importar/analizar HTTP/1.1" 403 -
+  "POST /api/importar/analizar HTTP/1.1" 400 -
+  "POST /api/importar/preparar HTTP/1.1" 401 -
+  "POST /api/importar/preparar HTTP/1.1" 403 -
+  "POST /api/importar/preparar HTTP/1.1" 400 -
+  "GET /api/formatos HTTP/1.1" 401 -
+  "GET /api/formatos HTTP/1.1" 403 -
+  "PATCH /api/formatos/999 HTTP/1.1" 401 -
+  "PATCH /api/formatos/999 HTTP/1.1" 403 -
+  "PATCH /api/formatos/999 HTTP/1.1" 400 -
+  "DELETE /api/formatos/999 HTTP/1.1" 401 -
+  "DELETE /api/formatos/999 HTTP/1.1" 403 -
+  "DELETE /api/formatos/999 HTTP/1.1" 404 -
+  "GET /api/mapas HTTP/1.1" 401 -
+  "GET /api/mapas HTTP/1.1" 403 -
+  "POST /api/mapas HTTP/1.1" 401 -
+  "POST /api/mapas HTTP/1.1" 403 -
+  "POST /api/mapas HTTP/1.1" 400 -
+  "GET /api/mapas/999 HTTP/1.1" 401 -
+  "GET /api/mapas/999 HTTP/1.1" 403 -
+  "GET /api/mapas/999 HTTP/1.1" 404 -
+  "GET /api/mapas/999/terrenos HTTP/1.1" 401 -
+  "GET /api/mapas/999/terrenos HTTP/1.1" 403 -
+  "GET /api/mapas/999/terrenos HTTP/1.1" 404 -
+  "POST /api/mapas/999/actualizar HTTP/1.1" 401 -
+  "POST /api/mapas/999/actualizar HTTP/1.1" 403 -
+  "POST /api/mapas/999/actualizar HTTP/1.1" 404 -
+  "POST /api/mapas/combinar/vista-previa HTTP/1.1" 401 -
+  "POST /api/mapas/combinar/vista-previa HTTP/1.1" 403 -
+  "POST /api/mapas/combinar/vista-previa HTTP/1.1" 400 -
+  "POST /api/mapas/combinar HTTP/1.1" 401 -
+  "POST /api/mapas/combinar HTTP/1.1" 403 -
+  "POST /api/mapas/combinar HTTP/1.1" 400 -
+  "PATCH /api/mapas/999 HTTP/1.1" 401 -
+  "PATCH /api/mapas/999 HTTP/1.1" 403 -
+  "PATCH /api/mapas/999 HTTP/1.1" 404 -
+  "PATCH /api/mapas/999/carpeta HTTP/1.1" 401 -
+  "PATCH /api/mapas/999/carpeta HTTP/1.1" 403 -
+  "PATCH /api/mapas/999/carpeta HTTP/1.1" 400 -
+  "DELETE /api/mapas/999 HTTP/1.1" 401 -
+  "DELETE /api/mapas/999 HTTP/1.1" 403 -
+  "DELETE /api/mapas/999 HTTP/1.1" 404 -
+  "POST /api/exportar HTTP/1.1" 401 -
+  "POST /api/exportar HTTP/1.1" 403 -
+  "POST /api/exportar HTTP/1.1" 400 -
+  "GET /api/carpetas HTTP/1.1" 401 -
+  "GET /api/carpetas HTTP/1.1" 403 -
+  "GET /api/carpetas HTTP/1.1" 400 -
+  "POST /api/carpetas HTTP/1.1" 401 -
+  "POST /api/carpetas HTTP/1.1" 403 -
+  "POST /api/carpetas HTTP/1.1" 400 -
+  "PATCH /api/carpetas/999 HTTP/1.1" 401 -
+  "PATCH /api/carpetas/999 HTTP/1.1" 403 -
+  "PATCH /api/carpetas/999 HTTP/1.1" 400 -
+  "DELETE /api/carpetas/999 HTTP/1.1" 401 -
+  "DELETE /api/carpetas/999 HTTP/1.1" 403 -
+  "DELETE /api/carpetas/999 HTTP/1.1" 404 -
+..  "GET /api/inventario/terrenos HTTP/1.1" 403 -
+  "GET /api/inventario/terrenos?base=99a22ece-352e-442e-81a8-ef77d57e6eb8&base_id=99a22ece-352e-442e-81a8-ef77d57e6eb8 HTTP/1.1" 403 -
+  "POST /api/inventario/terrenos HTTP/1.1" 403 -
+  "GET /api/bases HTTP/1.1" 403 -
+  "GET /api/mapas HTTP/1.1" 403 -
+  "GET /api/carpetas HTTP/1.1" 403 -
+  "GET /api/formatos HTTP/1.1" 403 -
+  "POST /api/exportar HTTP/1.1" 403 -
+  "POST /api/importar/vista-previa HTTP/1.1" 403 -
+  "POST /api/carpetas HTTP/1.1" 403 -
+  "POST /api/maestra/bases HTTP/1.1" 403 -
+  "GET /api/maestra/bases/99a22ece-352e-442e-81a8-ef77d57e6eb8/acceso HTTP/1.1" 403 -
+  "PUT /api/maestra/bases/99a22ece-352e-442e-81a8-ef77d57e6eb8/acceso HTTP/1.1" 403 -
+  "POST /api/maestra/bases/167d675a-f68d-444a-9cd9-9412d39ada9e/restaurar HTTP/1.1" 403 -
+..  "GET /api/no-existe HTTP/1.1" 401 -
+  "GET /api/no-existe HTTP/1.1" 404 -
+  "POST /api/no-existe HTTP/1.1" 401 -
+  "POST /api/no-existe HTTP/1.1" 404 -
+  "PUT /api/no-existe HTTP/1.1" 401 -
+  "PUT /api/no-existe HTTP/1.1" 404 -
+  "PATCH /api/no-existe HTTP/1.1" 401 -
+  "PATCH /api/no-existe HTTP/1.1" 404 -
+  "DELETE /api/no-existe HTTP/1.1" 401 -
+  "DELETE /api/no-existe HTTP/1.1" 404 -
+  "GET /api/publico/terrenos/aa22593f-768e-4346-aa97-cacde884846d HTTP/1.1" 404 -
+  "GET /api/maestra/bases HTTP/1.1" 401 -
+.ssssssssssssssssssssssssssss...........................sssssssssssssss...............  "GET /api/bases HTTP/1.1" 401 -
+.  "GET /api/bases HTTP/1.1" 401 -
+  "GET /api/bases/1 HTTP/1.1" 401 -
+  "GET /api/bases/1/terrenos HTTP/1.1" 401 -
+  "GET /api/mapas HTTP/1.1" 401 -
+  "GET /api/mapas/1 HTTP/1.1" 401 -
+  "GET /api/mapas/1/terrenos HTTP/1.1" 401 -
+  "GET /api/carpetas HTTP/1.1" 401 -
+  "GET /api/formatos HTTP/1.1" 401 -
+  "POST /api/exportar HTTP/1.1" 401 -
+  "POST /api/importar/vista-previa HTTP/1.1" 401 -
+  "GET /api/inventario/terrenos HTTP/1.1" 401 -
+  "GET /api/no-existe HTTP/1.1" 401 -
+  "GET /api/bases/ HTTP/1.1" 401 -
+  "GET /api HTTP/1.1" 401 -
+..  "GET /api/publico/terrenos/abc HTTP/1.1" 404 -
+.  "GET /api/bases/999 HTTP/1.1" 404 -
+..  "POST /api/mapas HTTP/1.1" 400 -
+.  "GET /api/bases/abc HTTP/1.1" 404 -
+.  "GET /api/no-existe HTTP/1.1" 404 -
+.  "POST /api/login HTTP/1.1" 500 -
+..  "DELETE /api/bases HTTP/1.1" 405 -
+.  "GET / HTTP/1.1" 403 -
+.  "POST /api/mapas HTTP/1.1" 403 -
+...  "POST /api/mapas HTTP/1.1" 400 -
+...  "GET /../server/db.py HTTP/1.1" 403 -
+  "GET /../../etc/passwd HTTP/1.1" 403 -
+  "GET /%2e%2e/%2e%2e/server/app.py HTTP/1.1" 403 -
+................................/usr/lib/python3.13/xml/etree/ElementTree.py:1667: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f76dba08400>
+  return self.target.start(tag, attrib)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..................................................................................
+======================================================================
+FAIL: test_the_system_python_has_no_openpyxl_of_its_own (tests.test_packaging.CleanMachine.test_the_system_python_has_no_openpyxl_of_its_own)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-ARA-MAP/c8a5e35a-0ce4-5f92-9f0e-2773cdf8c5eb/scratchpad/lifecycle/tests/test_packaging.py", line 51, in test_the_system_python_has_no_openpyxl_of_its_own
+    self.assertEqual(out.stdout.strip(), "False",
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     "this test only means something without a system openpyxl")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'True' != 'False'
+- True
++ False
+ : this test only means something without a system openpyxl
+
+----------------------------------------------------------------------
+Ran 1065 tests in 135.902s
+
+FAILED (failures=1, skipped=138)

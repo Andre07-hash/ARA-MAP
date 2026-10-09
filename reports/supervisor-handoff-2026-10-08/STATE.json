@@ -11,11 +11,11 @@
     "1A",
     "1B",
     "2A",
-    "2B"
+    "2B",
+    "3A",
+    "3B"
   ],
   "future_packets_not_released": [
-    "3A",
-    "3B",
     "4A",
     "4B",
     "5A",
@@ -38,7 +38,7 @@
     "feature_branch": "claude/team-b/attachment-lifecycle",
     "feature_branch_observed": false
   },
-  "next_supervisor_action": "Refresh only relevant GitHub deltas; review A baseline and/or B final memory handback when available",
+  "next_supervisor_action": "Round 3 released: review A's early mounted C1 checkpoint when published, then B widgets/loader and A's final combined local employee journey. Do not repeat closed Round 2 corrections.",
   "do_not_infer": [
     "Prompts were delivered to external sessions",
     "Teams are currently running",
@@ -93,17 +93,19 @@
   },
   "latest_instruction_release": {
     "date": "2026-10-09",
-    "folder": "reports/round-2-instructions-2026-10-09",
-    "packets": ["2A", "2B"],
+    "folder": "reports/round-3-instructions-2026-10-09",
+    "packets": ["3A", "3B"],
     "commit_rule": "Use the exact supervisor commit that adds this folder; never silently substitute a moving branch tip.",
     "baseline_owner": "Team A",
-    "baseline_branch": "claude/integration/round-2-baseline",
-    "baseline_sources": ["1ef2238766eae3e111c031b4fa24f9d849ef4753", "a9dc8af8cc511bde0a67168da335398353b80aa6"],
-    "team_a_branch": "claude/team-a/master-grid",
-    "team_b_branch": "claude/team-b/attachment-http",
-    "delivery_to_external_teams_confirmed": true,
-    "new_checkpoint_observed": true,
-    "stop": "Separate draft handbacks for review; no 3A/3B, main merge or deployment"
+    "baseline_branch": "claude/integration/round-3-baseline",
+    "baseline_sources": ["32a2a55e4a7417499cc384109bd44666e7a568cb", "bf4c6a694ca95087368bb2d89325d7a240a7b676"],
+    "baseline_scope": "C1 includes recorded pure composition plus early 3A routes/binary/local-store/read-only/private-transport wiring and integration tests, then freezes. Not a baseline-only merge.",
+    "team_a_branch": "claude/team-a/application-integration",
+    "team_b_branch": "claude/team-b/file-ui-geometry-client",
+    "delivery_to_external_teams_confirmed": false,
+    "new_checkpoint_observed": false,
+    "final_composition_rule": "B supplies a named green-CI 3B candidate on C1; A merges that exact candidate into its new 3A feature branch and demonstrates the combined workflow. No circular feature merge and no GitHub PR/main merge authorization.",
+    "stop": "C1 plus separate 3A/3B draft handbacks for review; no 4A/4B, main merge or deployment"
   },
   "round_2_first_review": {
     "checked_at_utc": "2026-10-09T18:21:00Z",
@@ -136,20 +138,19 @@
     "round_3_released": false
   },
   "latest_supervisor_review": {
-    "checked_at_utc": "2026-10-09T19:40:24Z",
-    "report": "reports/team-b-2b-closeout-2026-10-09/START_HERE.md",
+    "checked_at_utc": "2026-10-09T20:32:39Z",
+    "report": "reports/round-3-instructions-2026-10-09/ACCEPTANCE_2A.md",
     "baseline_pr": 24,
     "frozen_baseline_head": "7117f57f0c52c092d421e5d4bacbcf068f8a65d0",
     "team_a": {
       "pr": 26,
-      "reviewed_head": "cda5c20580179abcd8673010797a9975b1b7a06d",
-      "observed_new_head_not_reviewed": "32a2a55e4a7417499cc384109bd44666e7a568cb",
-      "verdict": "original_reproductions_closed_bounded_framing_followup_required",
-      "closed_findings": ["R2-A1_original_early_refusals", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint", "B_R7_negative_nonascii_content_length"],
-      "findings": ["R2-A5_empty_duplicate_framing_headers"],
-      "instructions": "reports/round-2-corrections-review-2026-10-09/TEAM_A.md",
-      "independent_tests": "33 focused SQLite/Postgres tests, zero skips; 33 Python 3.9 with 15 PG skips; 128 JS; 16 Chrome identity/editor journeys; original browser/input/refusal probes pass; three additional malformed framing cases produce an unintended second public response",
-      "ci_run": 37976622134
+      "reviewed_head": "32a2a55e4a7417499cc384109bd44666e7a568cb",
+      "verdict": "accepted_2a_table_and_shared_dispatcher_not_combined_file_map_workflow",
+      "closed_findings": ["R2-A1_original_early_refusals", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint", "B_R7_negative_nonascii_content_length", "R2-A5_empty_duplicate_framing_headers"],
+      "findings": [],
+      "instructions": "reports/round-3-instructions-2026-10-09/TEAM_A.md",
+      "independent_tests": "39 dispatcher/API tests pass; 5 dispatcher tests on Python 3.9 pass; six framing-edge probes each return one controlled refusal and close; three original early-refusal probes pass; ruff clean. Prior unchanged SQL/frontend evidence reused.",
+      "ci_run": 37980805663
     },
     "team_b": {
       "pr": 25,
@@ -157,13 +158,12 @@
       "verdict": "accepted_2b_http_harness_scope_not_app_mounted",
       "closed_findings": ["R2-B1_unicode_integer_query_parsing", "R2-B2_public_uuid_substring_false_positive_in_privacy_test"],
       "findings": [],
-      "instructions": "reports/round-2-corrections-review-2026-10-09/TEAM_B.md",
+      "instructions": "reports/round-3-instructions-2026-10-09/TEAM_B.md",
       "report": "reports/team-b-2b-closeout-2026-10-09/START_HERE.md",
       "independent_tests": "145 lifecycle/HTTP/composition tests with SQLite/Postgres, zero skips; 82 lifecycle tests on Python 3.9 with 41 PG skips; original deterministic collision passes on both backends; all six leaky-code mutations detected on both backends; changed-file ruff clean",
       "ci_run": 37980122942
     },
-    "next_owner": "B has no further 2B corrections; preserve #25 and wait. Supervisor reviews A's new exact-head R2-A5 handback before next integration/client release. Preserve #24 and all accepted old pins; 3A/3B remain unreleased.",
-    "correction_prompts_delivered": false,
-    "round_3_released": false
+    "next_owner": "Owner relays exact-commit Round 3 packet. A publishes C1 early then implements host integration; B begins widgets/geometry client immediately and consumes pinned C1. Supervisor reviews exact heads and final combined journey. Preserve old accepted PRs.",
+    "round_3_released": true
   }
 }

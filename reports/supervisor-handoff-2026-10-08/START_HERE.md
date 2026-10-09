@@ -310,3 +310,27 @@ B has no remaining 2B correction; preserve its draft and wait. A's new #26
 head `32a2a55e4a7417499cc384109bd44666e7a568cb` was observed but not reviewed
 in this closeout, so R2-A5 awaits verification. #21/#23/#24 remain unchanged.
 No app-mounted endpoint acceptance, 3A/3B, merge or deployment is released.
+
+### 2A accepted; Round 3 released — 2026-10-09
+
+A #26 **`32a2a55e4a7417499cc384109bd44666e7a568cb` accepted**, R2-A5 closed.
+Independent 39 dispatcher/API tests, 5 Python-3.9 dispatcher tests, six framing
+edge probes and three earlier refusal probes pass. Exact-head CI is green.
+B #25 remains accepted at `bf4c6a694ca95087368bb2d89325d7a240a7b676`.
+See [A acceptance](../round-3-instructions-2026-10-09/ACCEPTANCE_2A.md).
+
+The owner requested the next instructions. **3A and 3B are released** in the
+[Round 3 packet](../round-3-instructions-2026-10-09/START_HERE.md), superseding
+earlier stop-before-3 statements. Preserve all accepted old PRs/checkpoints.
+A owns one new early C1 checkpoint merging the exact 2A/2B pins plus narrowly
+scoped route/binary/local-store/shared-transport wiring, tested and then frozen.
+B begins its new file-widget/geometry-client branch from accepted 2B now and
+merges named C1 when published; it need not wait for all of A's host feature.
+
+Separate new 3A/3B drafts follow C1. B supplies an exact green candidate, which
+A may integrate on its new feature branch for the first complete local
+employee journey. No GitHub PR/main merge or deployment is authorized. The
+map preview is explicitly current-page with one selected outline loaded;
+whole-base view/snapshot persistence and large-map renderer policy remain
+Round 4. No E5, cloud provider, real account/data or schema work is released.
+Prompt delivery and active external sessions are not inferred from publication.

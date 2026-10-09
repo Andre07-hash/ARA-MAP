@@ -1,0 +1,7 @@
+{"backend": "postgres", "mutation": "control (no mutation)", "result": "pass", "first_line": ""}
+{"backend": "postgres", "mutation": "history keeps the private details", "result": "fail", "first_line": "Lists differ: [{'id[234 chars]s': {'nombre': 'privado-ficticio.pdf', 'numero[111 chars]se}}] != [{'id[234 chars]s': {}, 'privado': True, 'version': {'estado':[26 chars]se}}]"}
+{"backend": "postgres", "mutation": "history keeps the uploader", "result": "fail", "first_line": "Lists differ: [{'id[181 chars]or': {'id': 'd9c3b2b1-7463-4ed2-b678-fe0eea1dc[153 chars]se}}] != [{'id[181 chars]or': None, 'at': '2026-10-08T12:00:00+00:00', [79 chars]se}}]"}
+{"backend": "postgres", "mutation": "listing projection adds the byte count", "result": "fail", "first_line": "{'estado': 'subiendo', 'propia': False, 'tamano_declarado': 145} != {'estado': 'subiendo', 'propia': False}"}
+{"backend": "postgres", "mutation": "listing projection adds the file name", "result": "fail", "first_line": "{'est[14 chars]o', 'propia': False, 'nombre_original': 'privado-ficticio.pdf'} != {'est[14 chars]o', 'propia': False}"}
+{"backend": "postgres", "mutation": "privacy rule removed everywhere", "result": "fail", "first_line": "{'id': '46a16a6e-23a0-4afc-b3ac-3c54c21358f[552 chars]True} != {'estado': 'subiendo', 'propia': False}"}
+{"backend": "postgres", "mutation": "listing item carries the byte count as text", "result": "fail", "first_line": "Lists differ: ['$[0].bytes_pendientes'] != []"}

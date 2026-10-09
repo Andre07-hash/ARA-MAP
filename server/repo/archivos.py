@@ -733,3 +733,109 @@ def _event(conn: DatabaseConnection, *, attachment_id: str, terrain_id: str, act
         """, (str(uuid.uuid4()), attachment_id, terrain_id, version_id, attempt_id, geometry_id,
                 action, revision, base_id, actor["id"], actor["display_name"], now,
                 _json(details) if details else None))
+
+
+# -- 2B read support: versions, attempts and geometry delivery ------------------
+
+def _es_sqlite(conn: DatabaseConnection) -> bool:
+    import sqlite3
+    return isinstance(conn, sqlite3.Connection)
+
+
+def versions_page(conn: DatabaseConnection, attachment_id: str, actor_id: str, now: str,
+                  cursor: int | None, limit: int) -> tuple[list[dict[str, Any]], str | None]:
+    """One bounded page of an attachment's versions, newest number first.
+
+    The same caller-aware projection as every other read surface.
+    """
+    where = "v.archivo_id = ?"
+    params: list[Any] = [now, attachment_id]
+    if cursor is not None:
+        where += " AND v.numero < ?"
+        params.append(cursor)
+    params.append(limit + 1)
+    rows = conn.execute(
+        "SELECT " + ", ".join(f"v.{name}" for name in _VERSION_COLUMNS)
+        + ", EXISTS (SELECT 1 FROM archivo_trabajo t WHERE t.archivo_version_id = v.id"
+        " AND t.vence_en > ?) AS lease_live FROM archivo_version v WHERE " + where
+        + " ORDER BY v.numero DESC LIMIT ?", tuple(params)).fetchall()
+    items = [projected_version(row, bool(row["lease_live"]), actor_id, now) for row in rows[:limit]]
+    following = str(int(rows[limit - 1]["numero"])) if len(rows) > limit else None
+    return items, following
+
+
+def _attempt_summary(row: Mapping[str, Any]) -> dict[str, Any]:
+    detail = json.loads(row["resultado_json"])
+    return {"id": row["id"], "archivo_version_id": row["archivo_version_id"],
+            "numero": int(row["numero"]), "origen": row["origen"],
+            "seleccion": json.loads(row["seleccion_json"]) if row["seleccion_json"] else None,
+            "resultado": row["resultado"], "geometria_id": row["geometria_id"],
+            "candidatos": len(detail.get("candidatos") or []),
+            "creado_en": row["creado_en"], "creado_por": row["creado_por"]}
+
+
+def attempts_page(conn: DatabaseConnection, version_id: str, cursor: int | None,
+                  limit: int) -> tuple[list[dict[str, Any]], str | None]:
+    """Attempt summaries of one version, newest first; no candidate bodies."""
+    where = "archivo_version_id = ?"
+    params: list[Any] = [version_id]
+    if cursor is not None:
+        where += " AND numero < ?"
+        params.append(cursor)
+    params.append(limit + 1)
+    rows = conn.execute("SELECT * FROM archivo_intento WHERE " + where
+                        + " ORDER BY numero DESC LIMIT ?", tuple(params)).fetchall()
+    items = [_attempt_summary(row) for row in rows[:limit]]
+    following = str(int(rows[limit - 1]["numero"])) if len(rows) > limit else None
+    return items, following
+
+
+def attempt_resource(conn: DatabaseConnection, attempt_id: str) -> dict[str, Any] | None:
+    """One attempt with the version and terrain it belongs to."""
+    return _dict(conn.execute(
+        "SELECT i.*, v.inventory_id, v.archivo_id, v.estado AS version_estado"
+        " FROM archivo_intento i JOIN archivo_version v ON v.id = i.archivo_version_id"
+        " WHERE i.id = ?", (attempt_id,)).fetchone())
+
+
+_GEOMETRY_META = (
+    "g.id, g.archivo_id, g.archivo_version_id, g.inventory_id, g.intento_id,"
+    " g.bbox_oeste, g.bbox_sur, g.bbox_este, g.bbox_norte, g.punto_lon, g.punto_lat,"
+    " g.partes, g.huecos, g.vertices, g.area_aproximada_m2, g.utilizable,"
+    " g.bytes_geojson, g.sha256_geojson, g.creado_en, a.geometria_activa_id, a.retirado_en")
+
+
+def geometry_descriptors(conn: DatabaseConnection, ids: Sequence[str]) -> dict[str, dict[str, Any]]:
+    """Descriptors (never bodies) of at most a caller-bounded list of IDs, one query."""
+    if not ids:
+        return {}
+    marks = ", ".join("?" for _ in ids)
+    rows = conn.execute(
+        "SELECT " + _GEOMETRY_META + " FROM geometria g JOIN archivo a ON a.id = g.archivo_id"
+        " WHERE g.id IN (" + marks + ")", tuple(ids)).fetchall()
+    return {str(row["id"]): dict(row) for row in rows}
+
+
+def geometry_resource(conn: DatabaseConnection, geometry_id: str) -> dict[str, Any] | None:
+    rows = geometry_descriptors(conn, [geometry_id])
+    return rows.get(geometry_id)
+
+
+def geometry_chunk(conn: DatabaseConnection, geometry_id: str, offset: int,
+                   length: int) -> tuple[int, bytes] | None:
+    """(actual stored UTF-8 byte length, bytes [offset, offset+length)) by SQL range.
+
+    Only the requested slice reaches Python; the database computes it.
+    """
+    if _es_sqlite(conn):
+        sql = ("SELECT length(CAST(geojson AS BLOB)) AS n,"
+               " substr(CAST(geojson AS BLOB), ?, ?) AS trozo FROM geometria WHERE id = ?")
+    else:
+        sql = ("SELECT octet_length(geojson) AS n,"
+               " substring(convert_to(geojson, 'UTF8') FROM ? FOR ?) AS trozo"
+               " FROM geometria WHERE id = ?")
+    row = conn.execute(sql, (offset + 1, length, geometry_id)).fetchone()
+    if row is None:
+        return None
+    return int(row["n"]), bytes(row["trozo"] or b"")
+

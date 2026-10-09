@@ -1,0 +1,7 @@
+{"backend": "sqlite", "mutation": "control (no mutation)", "result": "pass", "first_line": ""}
+{"backend": "sqlite", "mutation": "history keeps the private details", "result": "fail", "first_line": "Lists differ: [{'id[234 chars]s': {'nombre': 'privado-ficticio.pdf', 'numero[111 chars]se}}] != [{'id[234 chars]s': {}, 'privado': True, 'version': {'estado':[26 chars]se}}]"}
+{"backend": "sqlite", "mutation": "history keeps the uploader", "result": "fail", "first_line": "Lists differ: [{'id[181 chars]or': {'id': '562484f1-1b52-48d6-bae8-c45f9e209[153 chars]se}}] != [{'id[181 chars]or': None, 'at': '2026-10-08T12:00:00+00:00', [79 chars]se}}]"}
+{"backend": "sqlite", "mutation": "listing projection adds the byte count", "result": "fail", "first_line": "{'estado': 'subiendo', 'propia': False, 'tamano_declarado': 145} != {'estado': 'subiendo', 'propia': False}"}
+{"backend": "sqlite", "mutation": "listing projection adds the file name", "result": "fail", "first_line": "{'est[14 chars]o', 'propia': False, 'nombre_original': 'privado-ficticio.pdf'} != {'est[14 chars]o', 'propia': False}"}
+{"backend": "sqlite", "mutation": "privacy rule removed everywhere", "result": "fail", "first_line": "{'id': 'b40dbb9a-93ef-410d-b762-2545b6f75d7[552 chars]True} != {'estado': 'subiendo', 'propia': False}"}
+{"backend": "sqlite", "mutation": "listing item carries the byte count as text", "result": "fail", "first_line": "Lists differ: ['$[0].bytes_pendientes'] != []"}

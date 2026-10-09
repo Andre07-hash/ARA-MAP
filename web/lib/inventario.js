@@ -10,7 +10,7 @@ import { MONEDAS } from "./format.js";
 
 /* The server's maximum page. Fewer round trips; the default (100) is the
  * server's business, and the assembly loop works with either. */
-export const PAGE_LIMIT = 250;
+export const PAGE_LIMIT = 200;   // the server's list maximum
 
 export const DISPONIBILIDAD = Object.freeze({
   unknown: "Sin confirmar",

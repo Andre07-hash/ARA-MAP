@@ -94,7 +94,7 @@ test("a page query keeps the filters and adds the cursor and the maximum limit",
   const q = new URLSearchParams(consultaDePagina(consultaDe({ estados: ["A", "B"] }), "abc"));
   assert.deepEqual(q.getAll("estado"), ["A", "B"]);
   assert.equal(q.get("cursor"), "abc");
-  assert.equal(q.get("limit"), "250");
+  assert.equal(q.get("limit"), "200");
 });
 
 /* ------------------------------------------------------------- pagination */

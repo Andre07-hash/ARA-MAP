@@ -3,12 +3,30 @@
 
 import { el } from "../../lib/dom.js";
 
+let abiertos = 0;
+const vivos = new Set();   // every dialog currently in the document
+
+/**
+ * Remove every dialog now, contents included. For when what they show stops
+ * belonging to whoever is looking: a closed <dialog> left in the document
+ * still holds its text.
+ */
+export function closeAllDialogs() {
+  for (const dialog of [...vivos]) {
+    vivos.delete(dialog);
+    if (dialog.open) dialog.close();
+    dialog.remove();
+  }
+}
+
 export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "34rem" }) {
+  // One id per dialog: a dialog opened over another must be named by its own title.
+  const idTitulo = `dialog-title-${abiertos += 1}`;
   const dialog = el("dialog", { class: "dialog", style: { maxWidth: ancho } });
   const body = el("div", { class: "dialog-body" });
 
   const header = el("header", { class: "dialog-header" },
-    el("h2", { id: "dialog-title" }, titulo),
+    el("h2", { id: idTitulo }, titulo),
     descripcion && el("p", { class: "secondary" }, descripcion),
   );
 
@@ -30,13 +48,16 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
 
   body.append(contenido);
   dialog.append(header, body, footer);
-  dialog.setAttribute("aria-labelledby", "dialog-title");
+  dialog.setAttribute("aria-labelledby", idTitulo);
 
   // A click on the backdrop (outside the dialog's own box) dismisses it.
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) close();
   });
   dialog.addEventListener("cancel", () => dialog.remove());
+  // However it closes (a button, Escape, or code calling close()), it leaves the document.
+  dialog.addEventListener("close", () => { vivos.delete(dialog); dialog.remove(); });
+  vivos.add(dialog);
 
   document.body.append(dialog);
   dialog.showModal();

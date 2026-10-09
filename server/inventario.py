@@ -23,6 +23,7 @@ from .validation import (
     sql_ubicacion_valida,
     validate_record,
 )
+from .web_util import texto_seguro
 
 AVAILABILITY = ("unknown", "available", "negotiation", "sold", "withdrawn")
 PUBLIC_AVAILABILITY = ("available", "negotiation")
@@ -84,6 +85,8 @@ def _clean_value(name: str, value: Any) -> Any:
         limit = SHORT_TEXT.get(name) or LONG_TEXT[name]
         if len(text) > limit:
             raise ValueError(f"Admite hasta {limit} caracteres.")
+        if not texto_seguro(text, lineas=name in LONG_TEXT):
+            raise ValueError("Contiene caracteres no admitidos.")
         return text or None
     if name in NUMBERS:
         return _number(name, value)
@@ -313,6 +316,11 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
         if value not in (None, "true", "false", "1", "0"):
             errors[name] = "Usa true o false."
         q[name] = None if value is None else value in ("true", "1")
+    # Text that reaches a bound parameter: a NUL from %00 is refused by Postgres.
+    for name in ("q", "estado", "municipio", "tipo_terreno"):
+        valores = [q[name]] if name == "q" else q[name]
+        if not all(texto_seguro(v) for v in valores):
+            errors[name] = "Contiene caracteres no admitidos."
     if errors:
         raise QueryError(errors)
     return q

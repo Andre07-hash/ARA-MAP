@@ -861,3 +861,272 @@ def resumenes_de_archivos(conn: DatabaseConnection, inventory_ids: Sequence[str]
         authorized.append(terrain_id)
     return {"resultados": repo.summaries(conn, authorized, sesion.user_id, _now(reloj)),
             "no_disponibles": unavailable}
+
+
+# -- 2B reads: versions, attempts, downloads and bounded geometry delivery -----
+
+GEOMETRY_BATCH_MAX = 50
+GEOMETRY_CHUNK = 512 * 1024
+GEOMETRY_BODY_MAX = 16 * 1024 * 1024
+GEOMETRY_META_RESPONSE_MAX = 128 * 1024
+_NUMBER = re.compile(r"^[0-9]{1,9}$")
+
+
+def _number_cursor(value: object) -> int | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not _NUMBER.fullmatch(value):
+        raise _error("cursor_invalido", "El cursor no es válido.")
+    return int(value)
+
+
+def _version_lookup_visible(version_id: object, actor_id: str
+                            ) -> Callable[[DatabaseConnection], dict[str, Any] | None]:
+    """A version, unless it is another account's still-pending upload (private)."""
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        resource = _version(version_id)(conn)
+        if resource is not None and resource["estado"] == "subiendo" \
+                and resource["iniciado_por"] != actor_id:
+            return None
+        return resource
+    return lookup
+
+
+def _in_scope_read(session: auth.Sesion,
+                   lookup: Callable[[DatabaseConnection], dict[str, Any] | None],
+                   capability: str, database: Path | str | None,
+                   read: Callable[[DatabaseConnection, dict[str, Any]], Any]) -> Any:
+    """_in_scope, then `read` on the SAME connection, so the authorization and
+    the data it guards come from one view."""
+    with db.session(database) as conn:
+        resource = lookup(conn)
+        terrain_id = str(resource["inventory_id"]) if resource is not None else _NO_TERRAIN
+        try:
+            auth.require_terreno(_request(session), terrain_id, capability, conn)
+        except ApiError as exc:
+            raise _scoped(exc) from None
+        if resource is None:
+            raise _not_found()
+        return read(conn, resource)
+
+
+def versiones(sesion: auth.Sesion, archivo_id: str, *, cursor: str | None = None,
+              limite: int = HISTORY_DEFAULT, bd: Path | str | None = None,
+              reloj: Clock | None = None) -> dict[str, Any]:
+    """One bounded page of an attachment's versions (caller-aware privacy)."""
+    _valid_session(sesion)
+    limit = _limit(limite)
+    parsed = _number_cursor(cursor)
+    now = _now(reloj)
+    items, following = _in_scope_read(
+        sesion, _attachment(archivo_id), "archivos.ver", bd,
+        lambda conn, _r: repo.versions_page(conn, archivo_id, sesion.user_id, now, parsed, limit))
+    return {"versiones": items, "cursor_siguiente": following}
+
+
+def intentos(sesion: auth.Sesion, version_id: str, *, cursor: str | None = None,
+             limite: int = HISTORY_DEFAULT, bd: Path | str | None = None) -> dict[str, Any]:
+    """Attempt summaries of a version, newest first (no candidate lists)."""
+    _valid_session(sesion)
+    limit = _limit(limite)
+    parsed = _number_cursor(cursor)
+    items, following = _in_scope_read(
+        sesion, _version_lookup_visible(version_id, sesion.user_id), "archivos.ver", bd,
+        lambda conn, r: repo.attempts_page(conn, str(r["id"]), parsed, limit))
+    return {"intentos": items, "cursor_siguiente": following}
+
+
+def intento(sesion: auth.Sesion, intento_id: str, *,
+            bd: Path | str | None = None) -> dict[str, Any]:
+    """One attempt with its parser detail (candidates for an explicit selection)."""
+    _valid_session(sesion)
+
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        if not isinstance(intento_id, str):
+            return None
+        return repo.attempt_resource(conn, intento_id)
+
+    def read(_conn: DatabaseConnection, row: dict[str, Any]) -> dict[str, Any]:
+        dto = repo.attempt_dto(row)
+        dto["archivo_version_id"] = row["archivo_version_id"]
+        dto["archivo_id"] = row["archivo_id"]
+        return dto
+
+    return cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd, read))
+
+
+def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
+              bd: Path | str | None = None) -> dict[str, Any]:
+    """The verified bytes of one finalized immutable version.
+
+    Only a `disponible` version is downloadable; any other version (pending,
+    failed, cancelled, expired) is reported exactly like a missing one. The
+    bytes are read in bounded chunks from the version's own final key and
+    checked against its recorded size and SHA-256 before anything is returned.
+    """
+    _valid_session(sesion)
+
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        resource = _version(version_id)(conn)
+        return resource if resource is not None and resource["estado"] == "disponible" else None
+
+    resource = cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd,
+                                                   lambda _c, r: r))
+    maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    content = bytearray()
+    digest = hashlib.sha256()
+    try:
+        with almacen.leer(str(resource["clave_final"]), maximum) as reading:
+            for chunk in reading:
+                digest.update(chunk)
+                content.extend(chunk)
+    except ObjetoAusenteError as exc:
+        raise _error("contenido_no_disponible", "El contenido del archivo no está disponible.",
+                     503) from exc
+    except AlmacenError as exc:
+        raise _error("almacen_no_disponible", "No fue posible leer el archivo.", 503,
+                     reintentar=True) from exc
+    if len(content) != int(resource["tamano"]) or digest.hexdigest() != resource["sha256"]:
+        raise _error("objeto_final_inconsistente",
+                     "El archivo guardado no coincide con la versión registrada.", 503)
+    return {"version_id": str(resource["id"]), "archivo_id": str(resource["archivo_id"]),
+            "tipo": str(resource["archivo_tipo"]), "tipo_contenido": str(resource["tipo_detectado"]),
+            "nombre_original": str(resource["nombre_original"]), "tamano": len(content),
+            "sha256": digest.hexdigest(), "contenido": content}
+
+
+def _geometry_meta(row: Mapping[str, Any]) -> dict[str, Any]:
+    total = int(row["bytes_geojson"])
+    return {
+        "id": row["id"], "archivo_id": row["archivo_id"],
+        "archivo_version_id": row["archivo_version_id"], "terreno_id": row["inventory_id"],
+        "intento_id": row["intento_id"],
+        "bbox": [row["bbox_oeste"], row["bbox_sur"], row["bbox_este"], row["bbox_norte"]],
+        "punto_interior": {"type": "Point", "coordinates": [row["punto_lon"], row["punto_lat"]]},
+        "partes": int(row["partes"]), "huecos": int(row["huecos"]), "vertices": int(row["vertices"]),
+        "area_aproximada_m2": row["area_aproximada_m2"], "utilizable": bool(row["utilizable"]),
+        "activa": row["geometria_activa_id"] == row["id"] and row["retirado_en"] is None,
+        "bytes": total, "sha256": row["sha256_geojson"],
+        "fragmento_bytes": GEOMETRY_CHUNK, "fragmentos": -(-total // GEOMETRY_CHUNK),
+        "creado_en": row["creado_en"],
+    }
+
+
+def _geometry_ids(value: object) -> list[str]:
+    """Validated, deduplicated geometry IDs in first-occurrence order."""
+    if not isinstance(value, list) or not value or len(value) > GEOMETRY_BATCH_MAX:
+        raise _error("ids_invalidos",
+                     f"Envía entre 1 y {GEOMETRY_BATCH_MAX} identificadores de geometría.",
+                     limite=GEOMETRY_BATCH_MAX)
+    seen: dict[str, None] = {}
+    for item in value:
+        try:
+            if not isinstance(item, str) or len(item) != 36:
+                raise ValueError
+            canonical = str(uuid.UUID(item))
+        except ValueError:
+            raise _error("ids_invalidos", "Cada identificador debe ser un UUID.",
+                         limite=GEOMETRY_BATCH_MAX) from None
+        seen.setdefault(canonical, None)
+    return list(seen)
+
+
+def metadatos_geometrias(sesion: auth.Sesion, ids: object, *,
+                         bd: Path | str | None = None) -> dict[str, Any]:
+    """Descriptors of at most 50 geometries, each authorized on its own terrain.
+
+    Returns ``{"geometrias": {id: descriptor}, "no_disponibles": [id]}``, both in
+    first-occurrence request order. Missing and out-of-scope IDs are one list.
+    One descriptor query; no geometry body is read.
+    """
+    _valid_session(sesion)
+    requested = _geometry_ids(ids)
+    found: dict[str, dict[str, Any]] = {}
+    unavailable: list[str] = []
+    with db.session(bd) as conn:
+        # Session and capability are settled before any ID is examined, so a
+        # dead session or a role without the capability learns nothing.
+        try:
+            auth.require_terreno(_request(sesion), _NO_TERRAIN, "archivos.ver", conn)
+        except ApiError as exc:
+            if exc.status != 404:
+                raise
+        rows = repo.geometry_descriptors(conn, requested)
+        allowed: dict[str, bool] = {}
+        for geometry_id in requested:
+            row = rows.get(geometry_id)
+            terrain_id = str(row["inventory_id"]) if row is not None else None
+            if terrain_id is not None and terrain_id not in allowed:
+                try:
+                    auth.require_terreno(_request(sesion), terrain_id, "archivos.ver", conn)
+                    allowed[terrain_id] = True
+                except ApiError as exc:
+                    if exc.status != 404:
+                        raise
+                    allowed[terrain_id] = False
+            if row is not None and terrain_id is not None and allowed[terrain_id]:
+                found[geometry_id] = _geometry_meta(row)
+            else:
+                unavailable.append(geometry_id)
+    result = {"geometrias": found, "no_disponibles": unavailable}
+    if len(json.dumps(result, ensure_ascii=False).encode("utf-8")) > GEOMETRY_META_RESPONSE_MAX:
+        raise _error("respuesta_excedida", "La respuesta superó su límite.", 500)
+    return result
+
+
+def fragmento_geometria(sesion: auth.Sesion, geometria_id: str, desde: int, *,
+                        bd: Path | str | None = None) -> dict[str, Any]:
+    """Exact stored GeoJSON bytes [desde, desde + 512 KiB), reauthorized now.
+
+    The offset must be a multiple of the chunk size below the total. The
+    final chunk is served only after the whole stored body (at most 16 MiB)
+    matches its recorded length and SHA-256, hashed range by range so that no
+    more than one chunk is ever held here; a corrupt geometry is never
+    presented as complete.
+    """
+    _valid_session(sesion)
+    if isinstance(desde, bool) or not isinstance(desde, int) or desde < 0 \
+            or desde % GEOMETRY_CHUNK or desde >= GEOMETRY_BODY_MAX:
+        raise _error("desplazamiento_invalido", "El desplazamiento no es válido.",
+                     fragmento_bytes=GEOMETRY_CHUNK)
+
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        if not isinstance(geometria_id, str):
+            return None
+        return repo.geometry_resource(conn, geometria_id)
+
+    def read(conn: DatabaseConnection, row: dict[str, Any]) -> dict[str, Any]:
+        total = int(row["bytes_geojson"])
+        if total <= 0 or total > GEOMETRY_BODY_MAX:
+            raise _error("geometria_inconsistente", "La geometría guardada no es válida.", 503)
+        if desde >= total:
+            raise _error("desplazamiento_invalido", "El desplazamiento no es válido.",
+                         fragmento_bytes=GEOMETRY_CHUNK, bytes=total)
+        length = min(GEOMETRY_CHUNK, total - desde)
+        chunk = repo.geometry_chunk(conn, str(row["id"]), desde, length)
+        if chunk is None:
+            raise _not_found()
+        actual, data = chunk
+        if actual != total or len(data) != length:
+            raise _error("geometria_inconsistente", "La geometría guardada no es válida.", 503)
+        final = desde + length == total
+        if final:
+            digest = hashlib.sha256()
+            for start in range(0, total, GEOMETRY_CHUNK):
+                part = data if start == desde else repo.geometry_chunk(
+                    conn, str(row["id"]), start, min(GEOMETRY_CHUNK, total - start))
+                if isinstance(part, tuple):
+                    if part[0] != total:
+                        raise _error("geometria_inconsistente",
+                                     "La geometría guardada no es válida.", 503)
+                    part = part[1]
+                if part is None:
+                    raise _not_found()
+                digest.update(part)
+            if digest.hexdigest() != row["sha256_geojson"]:
+                raise _error("geometria_inconsistente", "La geometría guardada no es válida.", 503)
+        return {"geometria_id": str(row["id"]), "desde": desde, "bytes": total,
+                "longitud": length, "siguiente": None if final else desde + length,
+                "final": final, "sha256": row["sha256_geojson"], "contenido": data}
+
+    return cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd, read))

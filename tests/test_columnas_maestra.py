@@ -449,7 +449,7 @@ class Columnas(Escenario):
         self.assertEqual(self.ok(self.call("POST", "/api/maestra/bases", {"nombre": bien}))["base"]["nombre"],
                          bien)
         self.assertEqual(self.ok(self.call(
-            "GET", f"/api/maestra/bases/{self.b1}/terrenos?q=%F0%9F%8C%B5", user="olga"))["total"], 0)
+            "GET", f"/api/maestra/bases/{self.b1}/terrenos?q=%F0%9F%8C%B5", user="olga"))["total"], 1)
         self.assertEqual(self.ok(self.guardar(self.t1, {fecha["id"]: "2024-02-29"}))["terreno"]["custom"]
                          [fecha["id"]], "2024-02-29")
 

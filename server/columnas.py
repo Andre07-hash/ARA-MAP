@@ -18,6 +18,7 @@ from datetime import date
 from typing import Any
 
 from . import db
+from .web_util import texto_seguro
 
 TIPOS = ("texto", "numero", "opcion", "fecha")
 PREFIJO = "custom:"
@@ -33,7 +34,8 @@ NOMBRES_BASICOS = ("Tipo de terreno", "Nombre de terreno", "Estado", "Municipio"
                    "HA", "Afectaciones %", "Asking price", "Asking $/m2", "Comentarios", "X", "Y",
                    "Archivos", "KMZ")
 _RESERVADOS = frozenset(db.plegar(n) for n in NOMBRES_BASICOS)
-_FECHA = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")
+_FECHA = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")  # used with fullmatch: no trailing newline
+NO_ADMITIDO = "Contiene caracteres no admitidos."
 
 
 def clave(column_id: str) -> str:
@@ -61,6 +63,8 @@ def limpiar_nombre(valor: Any) -> str:
     nombre = " ".join(valor.split()) if isinstance(valor, str) else ""
     if not nombre or len(nombre) > MAX_NOMBRE:
         raise ValueError(f"Escribe un nombre (hasta {MAX_NOMBRE} caracteres).")
+    if not texto_seguro(nombre):
+        raise ValueError(NO_ADMITIDO)
     if plegado(nombre) in _RESERVADOS:
         raise ValueError("Ese nombre es de una columna básica.")
     return nombre
@@ -77,6 +81,8 @@ def limpiar_opciones(valor: Any) -> list[str]:
         texto = " ".join(item.split()) if isinstance(item, str) else ""
         if not texto or len(texto) > MAX_OPCION:
             raise ValueError(f"Cada opción es un texto de 1 a {MAX_OPCION} caracteres.")
+        if not texto_seguro(texto):
+            raise ValueError(NO_ADMITIDO)
         if texto in opciones:
             raise ValueError("Hay opciones repetidas.")
         opciones.append(texto)
@@ -104,12 +110,12 @@ def limpiar_valor(columna: Mapping[str, Any], valor: Any) -> Any:
         texto = valor.strip()
         if len(texto) > MAX_TEXTO:
             raise ValueError(f"Admite hasta {MAX_TEXTO} caracteres.")
-        if "\x00" in texto:
-            raise ValueError("Contiene un carácter no admitido.")
+        if not texto_seguro(texto, lineas=True):
+            raise ValueError(NO_ADMITIDO)
         return texto or None
     if tipo == "fecha":
         try:
-            if not _FECHA.match(valor):
+            if not _FECHA.fullmatch(valor):
                 raise ValueError
             date(int(valor[:4]), int(valor[5:7]), int(valor[8:]))
         except ValueError:

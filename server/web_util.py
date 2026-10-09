@@ -10,7 +10,7 @@ from typing import Any
 from .errors import ApiError
 
 # Re-exported so handlers can import their error type from one place.
-__all__ = ["ApiError", "encode", "parse_json", "require"]
+__all__ = ["ApiError", "encode", "parse_json", "require", "texto_seguro"]
 
 
 def encode(payload: Any) -> bytes:
@@ -24,6 +24,20 @@ def _fallback(value: Any) -> Any:
     if isinstance(value, (set, tuple)):
         return list(value)
     return str(value)
+
+
+def texto_seguro(texto: str, lineas: bool = False) -> bool:
+    """Whether client text can be stored, hashed and sent back on either
+    database: it encodes as UTF-8 (JSON can carry a lone surrogate, which does
+    not) and holds no control character. ``lineas`` allows tab, line feed and
+    carriage return, for free text. Any other Unicode, beyond the BMP too, is
+    fine."""
+    try:
+        texto.encode("utf-8")
+    except UnicodeError:
+        return False
+    permitidos = "\t\n\r" if lineas else ""
+    return not any((c < " " or "\x7f" <= c <= "\x9f") and c not in permitidos for c in texto)
 
 
 def parse_json(body: bytes) -> dict[str, Any]:

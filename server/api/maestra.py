@@ -15,7 +15,7 @@ from .. import auth, db
 from ..protocols import DatabaseConnection
 from ..repo import maestra as repo
 from ..router import Request
-from ..web_util import ApiError, parse_json
+from ..web_util import ApiError, parse_json, texto_seguro
 
 Respuesta = dict[str, Any]
 
@@ -45,6 +45,8 @@ def _nombre(data: dict[str, Any], errors: dict[str, str]) -> str:
     nombre = " ".join(valor.split()) if isinstance(valor, str) else ""
     if not nombre or len(nombre) > MAX_NOMBRE:
         errors["nombre"] = f"Escribe un nombre (hasta {MAX_NOMBRE} caracteres)."
+    elif not texto_seguro(nombre):
+        errors["nombre"] = "Contiene caracteres no admitidos."
     return nombre
 
 
@@ -98,6 +100,8 @@ def operators(request: Request) -> Respuesta:
     buscado = request.q("q") or ""
     if len(buscado) > MAX_NOMBRE:
         errors["q"] = f"Admite hasta {MAX_NOMBRE} caracteres."
+    elif not texto_seguro(buscado):
+        errors["q"] = "Contiene caracteres no admitidos."
     if errors:
         raise ApiError("Parámetros inválidos.", 422, {"code": "validation_failed", "fields": errors})
     with db.session() as conn:

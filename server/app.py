@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import mimetypes
 import os
+import re
 import socket
 import sys
 import threading
@@ -125,6 +126,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     # The cloud adapter (api/index.py) sets this: HTTPS, Secure cookies.
     CLOUD = False
+    _mantener = True  # close_connection as the request's own headers asked
 
     def do_GET(self) -> None:
         self._dispatch("GET")
@@ -147,6 +149,13 @@ class Handler(BaseHTTPRequestHandler):
             sys.stderr.write(f"  {fmt % args}\n")
 
     def _dispatch(self, method: str) -> None:
+        # Until the declared body has been read in full, every return below
+        # leaves its bytes on the socket, where the next read would parse them
+        # as a new request. So the connection closes after this response
+        # unless _read_body() gets that far and hands keep-alive back. A body
+        # is never read just to keep a refused connection open.
+        self._mantener = self.close_connection
+        self.close_connection = True
         if not self._host_is_local():
             return self._send(HTTPStatus.FORBIDDEN, b"Forbidden", "text/plain")
         if method != "GET" and not self._origin_is_local():
@@ -218,8 +227,6 @@ class Handler(BaseHTTPRequestHandler):
             )
             result = handler(request)
         except ApiError as exc:
-            if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
-                self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
         except db.OcupadoError:
             return self._busy()
@@ -282,10 +289,18 @@ class Handler(BaseHTTPRequestHandler):
         return (urlsplit(origin).hostname or "") in ALLOWED_ORIGIN_HOSTS
 
     def _read_body(self) -> bytes:
-        length = int(self.headers.get("Content-Length") or 0)
+        """The declared body, whole. Only a Content-Length body is understood;
+        anything else is refused unread, and the connection then closes."""
+        declarado = self.headers.get("Content-Length") or "0"
+        if self.headers.get("Transfer-Encoding") or not re.fullmatch(r"[0-9]{1,12}", declarado):
+            raise ApiError("La petición no declara bien su tamaño.", 400)
+        length = int(declarado)
         if length > MAX_BODY:
             raise ApiError("La petición es demasiado grande.", 413)
-        return self.rfile.read(length) if length else b""
+        body = self.rfile.read(length) if length else b""
+        if len(body) == length:
+            self.close_connection = self._mantener  # nothing of this request is left unread
+        return body
 
     def _serve_static(self) -> None:
         relative = unquote(self.path.split("?", 1)[0]).lstrip("/") or "index.html"

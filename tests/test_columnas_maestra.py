@@ -388,6 +388,71 @@ class Columnas(Escenario):
                          {"municipio": {"before": "Zapopan", "after": "Tala"},
                           nota["id"]: {"before": "primera", "after": None}})
 
+    def test_text_no_database_can_hold_and_inexact_dates_are_refused_before_anything_is_written(self):
+        """R2-A3. JSON can carry a lone surrogate and a NUL; neither encodes or
+        binds on both databases. Each is a 422 on its field, and nothing at all
+        is written: no definition, terrain version, revision, event or key."""
+        texto, fecha = self.columna(self.b1, "Nota"), self.columna(self.b1, "Visita", "fecha")
+        opcion = self.columna(self.b1, "Etapa", "opcion", opciones=["Uno"])
+        self.ok(self.guardar(self.t1, {texto["id"]: "antes", fecha["id"]: "2026-10-09"}))
+        tablas = ("inventory_column", "maestra_base_event", "inventory_operation_result",
+                  "inventory_terrain", "inventory_revision", "inventory_event", "maestra_base")
+        antes = {t: filas(t) for t in tablas}
+        suelto, nul, control = "Ficticio\ud800", "Ficticio\x00nombre", "Ficticio\x1bnombre"
+
+        def rechazado(respuesta, campo):
+            self.assertEqual((respuesta[0], respuesta[1]["detalle"]["code"],
+                              list(respuesta[1]["detalle"]["fields"])), (422, "validation_failed", [campo]))
+
+        for malo in (suelto, nul, control, "a\x7fb", "a\x9cb"):
+            with self.subTest(malo=malo.encode("unicode_escape")):
+                rechazado(self.crear(self.b1, malo), "nombre")
+                rechazado(self.crear(self.b1, "Otra", "opcion", opciones=["bien", malo]), "opciones")
+                rechazado(self.cambiar(texto, nombre=malo), "nombre")
+                rechazado(self.cambiar(opcion, opciones=["Uno", malo]), "opciones")
+                rechazado(self.guardar(self.t1, {texto["id"]: malo}), texto["id"])
+                # A good core change beside it is not saved either, and core text has the same rule.
+                rechazado(self.guardar(self.t1, {texto["id"]: malo}, cambios={"estado": "Jalisco"}),
+                          texto["id"])
+                rechazado(self.patch(self.t1, {"terreno": malo}, "olga"), "terreno")
+                rechazado(self.patch(self.t1, {"notas_internas": malo}, "olga"), "notas_internas")
+                rechazado(self.call("POST", "/api/maestra/bases", {"nombre": malo}), "nombre")
+                rechazado(self.call("POST", f"/api/maestra/bases/{self.b1}/terrenos", {"municipio": malo},
+                                    "olga", {"Idempotency-Key": "clave-texto-malo-1"}), "municipio")
+        # Dates: exactly AAAA-MM-DD, ASCII digits, a real day. A trailing newline is not that.
+        for mala in ("2026-10-09\n", "2026-10-09 ", " 2026-10-09", "2026-10-09\r\n", "２０２６-10-09",
+                     "2026-10-09\x00", "2026-1０-09", "+026-10-09", "2026-10-9\n"):
+            with self.subTest(mala=mala.encode("unicode_escape")):
+                rechazado(self.guardar(self.t1, {fecha["id"]: mala}), fecha["id"])
+        # A %00 in a search is a controlled refusal too, not a database error.
+        for ruta in (f"/api/maestra/bases/{self.b1}/terrenos?q=a%00b",
+                     f"/api/maestra/bases/{self.b1}/terrenos?estado=a%00b", "/api/inventario/terrenos?q=%00",
+                     "/api/maestra/operadores?q=a%00"):
+            self.assertEqual(self.call("GET", ruta, user="ada")[0], 422, ruta)
+        self.assertEqual({t: filas(t) for t in tablas}, antes)
+
+        # Valid Unicode keeps working everywhere: accents, non-BMP characters, and line
+        # breaks and tabs in free text.
+        bien = "Ñandú 🌵 𝔘𝔫𝔦 東京"
+        col = self.columna(self.b1, bien)
+        self.assertEqual(col["nombre"], bien)
+        varias = self.columna(self.b1, "Con emoji", "opcion", opciones=["🌵 Sí", "No"])
+        self.assertEqual(self.ok(self.cambiar(col, nombre=bien + " dos"))["columna"]["nombre"], bien + " dos")
+        status, body = self.guardar(self.t1, {texto["id"]: "línea uno\n\tlínea 🌵 dos", varias["id"]: "🌵 Sí",
+                                              fecha["id"]: None},
+                                    cambios={"terreno": bien, "notas_internas": "uno\r\ndos\t🌵"})
+        self.assertEqual((status, body["terreno"]["custom"], body["terreno"]["draft"]["terreno"],
+                          body["terreno"]["draft"]["notas_internas"]),
+                         (200, {texto["id"]: "línea uno\n\tlínea 🌵 dos", varias["id"]: "🌵 Sí"}, bien,
+                          "uno\r\ndos\t🌵"))
+        self.assertEqual(self.guardado(self.t1)[texto["id"]], "línea uno\n\tlínea 🌵 dos")
+        self.assertEqual(self.ok(self.call("POST", "/api/maestra/bases", {"nombre": bien}))["base"]["nombre"],
+                         bien)
+        self.assertEqual(self.ok(self.call(
+            "GET", f"/api/maestra/bases/{self.b1}/terrenos?q=%F0%9F%8C%B5", user="olga"))["total"], 0)
+        self.assertEqual(self.ok(self.guardar(self.t1, {fecha["id"]: "2024-02-29"}))["terreno"]["custom"]
+                         [fecha["id"]], "2024-02-29")
+
     # -- 3. the real writer through transfer, retirement and back ----------------
 
     def test_written_values_and_history_follow_the_current_base(self):

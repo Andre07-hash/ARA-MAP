@@ -406,3 +406,219 @@ new tests.
 
 Stop for supervisory review. Nothing was merged to a PR or to main, nothing
 was deployed, and no real account or data was used. 3A was not started.
+
+## 11. Correction 1 (review `750164b6761b3c3fe160010bc4163df1b7b2389f`)
+
+Instructions: `reports/round-2-review-2026-10-09/` at that commit. Additive on
+PR #26 from `517223668405c1d4feb2deffbd2d16a072395fd9`. The checkpoint #24
+stays frozen at `7117f57f0c52c092d421e5d4bacbcf068f8a65d0`; #20, #22 and Team
+B's modules are untouched. No schema change, no auth-policy change, no new
+route. The administrators' Inventario landing page is kept. 3A was not started.
+
+All four findings were reproduced on the reviewed head before anything was
+changed, with the supervisor's three probes run **unmodified** (only the
+Playwright import path was pointed at this checkout), and again afterwards.
+Raw output: [evidencia/correccion-1/antes/](evidencia/correccion-1/antes/),
+[evidencia/correccion-1/despues/](evidencia/correccion-1/despues/).
+
+| Supervisor probe | Reviewed head `5172236` | Corrected |
+|---|---|---|
+| Dispatcher: read-only / foreign Origin / invalid Host | `[403, 200]` ×3 | `[403]` ×3 |
+| NUL in a column name | SQLite 200 stored · Postgres 500 | 422 · 422 |
+| Lone surrogate in a column name | 500 · 500 | 422 · 422 |
+| NUL in a choice | 200 · 200 | 422 · 422 |
+| Date with a trailing newline | 200, stored with the newline (both) | 422, nothing stored (both) |
+| Lone surrogate in a custom text value | 500 · 500 | 422 · 422 |
+| Expiry with an unsaved cell | marker in DOM, 10 rows | no marker, 0 rows |
+| Account switch with a detail open | 1 private dialog, comment visible | 0 dialogs, not visible |
+| New account's direct request | 404 | 404 (unchanged) |
+| First save returns during a second cell's edit | 0 editors, text gone, focus BODY | 1 editor, text kept, focus TEXTAREA |
+
+### R2-A2 — private state across identity changes (first)
+
+What was wrong: expiry with unsaved work kept the whole table behind the
+sign-in dialog; a revalidation that found another account destroyed the table
+but left its dialogs; and a closed dialog stayed in the document with its text.
+
+What changed (`web/components/session/session.js`, `app.js`,
+`ui/dialog.js`, `tabla/Tabla.js`):
+
+- **One invalidation, run before any new identity is set.** Logout, a 401 on a
+  private request, and a revalidation that finds no session, another account or
+  another role all call the same `limpiarPrivado`: private requests aborted,
+  the table destroyed (rows, definitions, headers, filter options, pending and
+  unsaved cells, the save queue, the blank-create key, file-slot mounts), the
+  legacy editor destroyed, toasts cleared, and **every dialog removed from the
+  document** through a registry in `ui/dialog.js` (`closeAllDialogs`). A dialog
+  now also removes itself however it closes.
+- **Nothing is preserved behind the sign-in dialog**, saved or not. This
+  replaces the old keep-the-form behaviour for the legacy terrain editor too:
+  the same rule for all private content. If unsaved work was dropped the
+  message says «Lo que estaba sin guardar se descartó», never the content.
+- **Delayed work cannot resume.** An aborted private request never settles, so
+  nothing queued behind it runs; a queued save checks that its table is alive
+  and its generation current before sending; the deferred blur-commit and the
+  search timer check the same. Dialog requests are private requests and are
+  aborted with the rest.
+- **Inside one identity:** leaving a view, losing it (grant, archive, role) or
+  losing a row (transfer out, 404) also removes the dialogs that showed it.
+
+§4's sentence that an expired session «keeps them behind the sign-in dialog»
+is superseded by this section.
+
+### R2-A1 — refused requests and unread bodies
+
+`server/app.py`: `_dispatch` now marks the connection to close as soon as it
+starts and hands keep-alive back only when `_read_body()` has read the declared
+body in full. Every return before that point therefore closes: invalid Host,
+foreign Origin, read-only mode, no or bad session, a capability the role
+lacks, the unconfigured-database 503, busy, and also three exits the review
+did not list and the audit found: **unknown API route (404), wrong method
+(405) and a page request that carries a body**. A `Transfer-Encoding` body or a
+`Content-Length` that is not a plain decimal is a 400 and is not read (a
+negative length used to reach `rfile.read`). No body is read just to keep a
+refused connection open. Status codes and bodies of the existing refusals are
+unchanged. The cloud adapter (`api/index.py`) inherits this; it was not edited.
+
+This is a framing repair. The probe's second request was the public
+`/api/config`; nothing here demonstrates, or claims, an authorization bypass.
+
+`tests/test_despachador_cuerpos.py`, raw sockets against the real dispatcher:
+twelve refusals plus read-only each answer exactly once and close; requests
+whose body was read (200, a 422 after reading, a failed login) keep the
+connection and the next request on it is answered. 9 of the 13 refusal cases
+failed on the reviewed head.
+
+### R2-A3 — text and dates that no database can hold
+
+`server/web_util.py` `texto_seguro()`: text must encode as UTF-8 (JSON can
+carry a lone surrogate) and hold no control character (C0, DEL, C1); free text
+may contain tab, line feed and carriage return. It is applied **before hashing,
+SQL and audit serialization** to: column names, choices and custom text values
+(`server/columnas.py`), and, as the same defect class found by the audit, core
+text fields (`server/inventario.py`), work-base names, and the search / filter
+query text of the lists and the operator lookup (a `%00` reached a bound
+parameter). The custom date is now `fullmatch` of `[0-9]{4}-[0-9]{2}-[0-9]{2}`:
+no trailing newline, no surrounding space, ASCII digits only. Each is a 422
+`validation_failed` on its field, on both databases. No exception handler was
+added and stored history is not rewritten or revalidated.
+
+`test_text_no_database_can_hold_and_inexact_dates_are_refused_before_anything_is_written`
+(SQLite and Postgres, real HTTP): five bad strings through ten write paths,
+nine bad dates, four bad queries, then a whole-table comparison of
+`inventory_column`, `maestra_base_event`, `inventory_operation_result`,
+`inventory_terrain`, `inventory_revision`, `inventory_event` and `maestra_base`
+showing nothing was written; then valid Unicode (accents, an emoji, a
+mathematical-alphabet and a CJK string, line breaks and tabs in free text)
+saved and read back through every one of those paths.
+
+Behaviour to note: short text is single-spaced first, so a control character
+that Python treats as whitespace (for example U+0085) becomes a space rather
+than a refusal there; in free text it is refused.
+
+### R2-A4 — an open editor survives another cell's response
+
+`Tabla.js` `pintarFila` no longer replaces the row. It repaints cell by cell
+and **skips the cell whose editor is open**; file-slot mounts are kept and told
+about read-only changes. So a save, a conflict or an error returning for one
+cell leaves another cell's editor, text, selection and focus as they were.
+Nothing is saved from a detached editor.
+
+One rule added so versions stay authoritative: if the refreshed row changed
+the very cell being edited (the value is no longer what the editor opened
+with), pressing Enter does not send it at the row's new version. It is listed
+as a conflict with the current value and the typed one, and saving it is the
+explicit *Guardar el mío*.
+
+### Browser evidence
+
+`tests/e2e/tabla-identidad.mjs`: real Chrome 154, real local server, real
+sessions; the supervisor's cases and the ones the first handback lacked. A
+second account signs in through the same cookie jar, as another tab would.
+**16 journeys: 14 fail on the reviewed head, 16 pass now**
+([before](evidencia/correccion-1/antes/recorridos-identidad.log),
+[after](evidencia/correccion-1/despues/recorridos-identidad.log); some of the
+"before" failures may follow from an earlier one in the same run).
+Screenshots: [evidencia/correccion-1/capturas/](evidencia/correccion-1/capturas/).
+
+| Journey | What is asserted |
+|---|---|
+| Expiry with unsaved cells: one save held on its way, one queued behind it, one invalid value in the tray, one open editor | session null; no row, dialog, editor or marker in HTML, text or field values; after the same user signs in again no PATCH is sent and the terrain's version and values are unchanged |
+| A different, zero-grant account signs in over the expired session | nothing of the first account anywhere; nothing sent as the second; its own request for that terrain is 404 |
+| Revalidation finds another account with a detail / a history / the columns dialog / an unsaved editor open, a list answer still in flight | dialogs gone from the document, no marker, the late answer paints nothing, no write sent |
+| Administrator's grants dialog and transfer preview open, an operator takes the cookie jar | no administrator dialog, account name, base or control remains; operator navigation and her one base |
+| Role changed with `scripts/cuentas.py` (which ends the session); same person signs in | old screen gone; operator navigation; the master table is 403 |
+| Same user signs in again after her grants changed while signed out | only the new base; the old row absent; the edit queued before expiry never sent |
+| A terrain transferred away while its detail is open and a save is on its way | the save is refused, the row and its dialog go, the rest of the base stays |
+| Logout with a save's answer still held | nothing remains; the late answer paints nothing and raises no error |
+| Successful save returns during an edit of a core cell, and of a custom cell | one editor, same text, selection 3–9 and focus kept; typing continues at the caret; Enter saves; version 3 |
+| Same, then Escape | editor cancelled, nothing sent, focus on its cell |
+| Conflict returns during an edit | editor kept; conflict listed with both values; Enter saves the open cell at the current version |
+| The refreshed row changed the cell being edited | Enter sends nothing; both values shown; *Guardar el mío* then saves |
+
+The original 13 journeys were re-run on the corrected code: 13/13
+([log](evidencia/correccion-1/despues/recorridos-originales.log)). Its session
+case now asserts that the table is already gone when the sign-in dialog
+appears.
+
+### Bounded memory check
+
+`tests/e2e/tabla-memoria.mjs`, administrator, 25,000 terrains. A warm-up of
+100 transitions, then four equal batches of 100 (20 rounds of: next page,
+previous page, another base, back, open and close a terrain's detail). Every
+measurement in the same state (same base, first page, nothing open or focused)
+after three forced collections. [Raw](evidencia/correccion-1/memoria.json).
+
+| After | JS heap | DOM nodes | Listeners |
+|---|---:|---:|---:|
+| Initial load | 3,213 kB | 4,324 | 225 |
+| Warm-up (100) | 3,919 kB | 4,332 | 225 |
+| Batch 1 | 3,969 kB (+50) | 4,332 | 225 |
+| Batch 2 | 4,034 kB (+65) | 4,332 | 225 |
+| Batch 3 | 4,054 kB (+20) | 4,332 | 225 |
+| Batch 4 | 4,077 kB (+23) | 4,332 | 225 |
+
+DOM nodes and listeners are exactly flat after the warm-up: no row, dialog or
+handler is retained. The heap rises by about 0.7 MB during the warm-up and
+then by 20–65 kB per 100 transitions, shrinking. That is levelling off, not a
+demonstrated zero: about 0.2–0.6 kB per transition remained in the last
+batches and I did not identify what holds it or run longer. No retained owner
+was found and none is claimed.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `./verificar.sh` (macOS, SQLite) | 1,152 Python tests OK, 179 skipped (need Postgres); complete suite on Python 3.9.6 OK; JavaScript 128/128 |
+| Disposable local Postgres 16 (Python 3.12.15, psycopg 3.3.6) | 1,152 tests, 0 skipped, OK on the final tree. **The first run had 1 failure, not in this work:** see below |
+| Coverage (`coverage run` over the full suite with Postgres, `fail_under = 80`) | **96 %** total; gate met. `server/api/columnas.py` 99 %, `server/columnas.py` 97 %, `server/app.py` 92 %, `server/repo/columnas.py` 92 % ([log](evidencia/correccion-1/cobertura.log)) |
+| `ruff check server/ tests/`, `mypy server/` | clean; 52 source files |
+| Browser: identity/editor journeys, original journeys | 16/16, 13/13 |
+| GitHub Actions | in the PR |
+
+**A flaky test in Team B's accepted suite, reported, not changed.**
+`tests/test_archivos.py::test_l2_pending_privacy_is_one_rule_on_every_read_surface`
+failed once on Postgres during the coverage run: it asserts that a short
+hidden value (here the text `145`) does not appear in a serialized result that
+also contains a freshly generated UUID, and that run's UUID was
+`dc4dc145-…`. It passed in three immediate re-runs and in the full re-run. It
+is unrelated to this correction and to the dispatcher change, and is Team B's
+file, so it is left as is for B and the supervisor.
+
+Changed files: `server/app.py`, `server/web_util.py`, `server/columnas.py`,
+`server/inventario.py`, `server/api/maestra.py`,
+`web/components/{app.js,session/session.js,ui/dialog.js,tabla/Tabla.js,inventory/TerrainEditor.js}`
+(the last one message only), tests `tests/test_despachador_cuerpos.py` (new),
+`tests/test_columnas_maestra.py`, `tests/e2e/tabla-identidad.mjs` (new),
+`tests/e2e/tabla-memoria.mjs` (new), `tests/e2e/tabla-integrada.mjs`,
+`tests/e2e/tabla_servidor.py` (prints the disposable database path), this
+report and its evidence.
+
+Limits that remain: the earlier ones in §8 and §10; the legacy terrain editor
+now loses an unsaved form on expiry, by the rule above; the new journeys ran
+against SQLite only; no screen reader; coverage is of the Python server, the
+browser code has no coverage measure; the memory check is one machine and four
+batches.
+
+Stop for supervisory review. Nothing was merged or deployed; no real account or
+data was used.

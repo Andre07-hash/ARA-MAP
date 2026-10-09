@@ -11,6 +11,7 @@ archived base.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import math
 import os
@@ -18,6 +19,7 @@ import sqlite3
 import tempfile
 import threading
 import unittest
+import urllib.parse
 import uuid
 from pathlib import Path
 from unittest.mock import patch
@@ -223,6 +225,60 @@ class Registros(Escenario):
         self.assertEqual(respuesta, BASE_NO_EXISTE)
         self.assertNotIn("SENTINELA-9", json.dumps(respuesta))
         self.assertEqual(self.cuenta("inventory_terrain"), total)
+
+    def test_a_key_stored_before_keys_were_scoped_still_replays_for_its_owner(self):
+        """Before this packet a create was stored as operation 'create', with
+        the hash of the field map alone and a whole response. Such a row must
+        keep answering its own retry, with the record as it is now."""
+        campos, key = {"terreno": "Registro heredado", "estado": "Jalisco"}, "clave-heredada-01"
+        tid = self.ok(self.call("POST", "/api/inventario/terrenos", campos, "ada",
+                                {"Idempotency-Key": key}))["terreno"]["id"]
+        heredado = hashlib.sha256(json.dumps(campos, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        with db.escritura() as conn:
+            conn.execute("UPDATE inventory_operation_result SET operation = 'create', request_hash = ?,"
+                         " result_json = ? WHERE idempotency_key = ?",
+                         (heredado, json.dumps({"terreno": {"id": tid, "draft": {"terreno": "CACHÉ-VIEJA"}}}), key))
+        self.ok(self.patch(tid, {"municipio": "Zapopan"}, "ada"))
+        antes = [self.cuenta(t) for t in ("inventory_terrain", "inventory_revision", "inventory_event",
+                                          "inventory_operation_result")]
+
+        def repetir(cuerpo, user="ada"):
+            return self.call("POST", "/api/inventario/terrenos", cuerpo, user, {"Idempotency-Key": key})
+        status, body = repetir(campos)
+        self.assertEqual((status, body["terreno"]["id"], body["terreno"]["version"],
+                          body["terreno"]["draft"]["municipio"]), (200, tid, 2, "Zapopan"), body)
+        self.assertNotIn("CACHÉ-VIEJA", json.dumps(body, ensure_ascii=False))
+        # The same fields in another order or spacing are the same request, as they were.
+        self.assertEqual(repetir({"estado": " Jalisco ", "terreno": "Registro  heredado"})[1]["terreno"]["id"], tid)
+        status, body = repetir({**campos, "estado": "Colima"})
+        self.assertEqual((status, body["detalle"]["code"]), (409, "idempotency_conflict"))
+        self.assertNotIn(tid, json.dumps(body))
+        self.assertEqual([self.cuenta(t) for t in ("inventory_terrain", "inventory_revision", "inventory_event",
+                                                   "inventory_operation_result")], antes)
+        # A scoped hash never matches a stored field-only one, and the other way round.
+        with db.escritura() as conn:
+            conn.execute("UPDATE inventory_operation_result SET request_hash = ? WHERE idempotency_key = ?",
+                         (hashlib.sha256(json.dumps({"base": None, "campos": campos}, sort_keys=True,
+                                                    ensure_ascii=False).encode()).hexdigest(), key))
+        self.assertEqual(repetir(campos)[0], 409)
+        with db.escritura() as conn:
+            conn.execute("UPDATE inventory_operation_result SET request_hash = ? WHERE idempotency_key = ?",
+                         (heredado, key))
+        # Another account with the same key and body gets its own record, never this one.
+        ajeno = self.ok(repetir(campos, "alan"))["terreno"]
+        self.assertNotEqual(ajeno["id"], tid)
+        self.assertEqual(ajeno["created_by"]["id"], self.ids["alan"])
+        # In a base the key is another key, for its owner too.
+        self.assertNotEqual(self.ok(self.en_base(self.b1, campos, "ada", key))["terreno"]["id"], tid)
+        # Demoted, the owner's own retry returns nothing of the record.
+        with db.escritura() as conn:
+            auth.set_role(conn, "ada", "operador")
+        self.assertEqual(repetir(campos)[0], 401)  # her sessions ended with the role
+        self.cookies["ada"] = self.entrar("ada")
+        respuesta = repetir(campos)
+        self.assertEqual((respuesta[0], respuesta[1]["detalle"]["code"]), (403, "forbidden"))
+        self.assertNotIn(tid, json.dumps(respuesta))
+        self.assertNotIn("heredado", json.dumps(respuesta))
 
     def test_simultaneous_requests_with_one_key_create_one_record(self):
         resultados, barrera = [], threading.Barrier(4)
@@ -480,6 +536,91 @@ class Registros(Escenario):
         self.assertLessEqual({"price_conflict", "area_required", "VALOR_FUERA_DE_RANGO"}, todos_los_codigos)
         self.assertGreater(sum(1 for v in vistas if not v[1]), 10)
 
+    def test_a_cursor_is_validated_before_it_reaches_the_database(self):
+        nueva = self.crear_base("Base Cursores")
+        ids = self.sembrar(nueva, "ada", *(
+            {"terreno": n, "asking_price": p, "superficie_m2": p}
+            for n, p in (("Ébano", 5), ("abeto", None), ("Cedro", 1.7976931348623157e308), (None, 0.5),
+                         ("cedro", 5), (None, None), ("Álamo", 1e-300))))
+
+        def cursor(*partes):
+            return base64.urlsafe_b64encode(json.dumps(list(partes)).encode()).decode()
+
+        def pedir(sort, c, base=None):
+            return self.lista(base or nueva, f"sort={sort}&limit=2&cursor={c}", "ada")
+        uno = ids[0]
+        malos = [
+            # The supervisor's four probes.
+            ("asking_price", cursor("asking_price", "not-a-number", uno)),
+            ("asking_price", cursor("asking_price", 10**1000, uno)),
+            ("terreno", cursor("terreno", 5, uno)),
+            ("terreno", cursor("terreno", float("nan"), uno)),
+            # Not a number a double can hold, or not finite.
+            ("asking_price", cursor("asking_price", float("inf"), uno)),
+            ("-asking_price", cursor("-asking_price", float("-inf"), uno)),
+            ("asking_price", base64.urlsafe_b64encode(
+                ('["asking_price", 1e999, "%s"]' % uno).encode()).decode()),
+            ("superficie_m2", cursor("superficie_m2", True, uno)),
+            ("superficie_m2", cursor("superficie_m2", [1], uno)),
+            ("superficie_m2", cursor("superficie_m2", {"a": 1}, uno)),
+            # Text that is not text, or that no database stores.
+            ("terreno", cursor("terreno", 1.5, uno)), ("updated_at", cursor("updated_at", 5, uno)),
+            ("terreno", cursor("terreno", "a\x00b", uno)), ("estado", cursor("estado", "\ud800", uno)),
+            # Shape, sort and id.
+            ("terreno", "no-es-base64"), ("terreno", "%%%"), ("terreno", "Zm9v"),
+            ("terreno", base64.urlsafe_b64encode(b"\xff\xfe").decode()),
+            ("terreno", cursor("terreno", "a")), ("terreno", cursor("terreno", "a", uno, "más")),
+            ("terreno", base64.urlsafe_b64encode(b'{"sort": "terreno"}').decode()),
+            ("terreno", base64.urlsafe_b64encode(b'"terreno"').decode()),
+            ("-terreno", cursor("terreno", "a", uno)), ("terreno", cursor("-terreno", "a", uno)),
+            ("terreno", cursor("estado", "a", uno)), ("terreno", cursor(["terreno"], "a", uno)),
+            ("terreno", cursor("terreno", "a", "no-es-uuid")), ("terreno", cursor("terreno", "a", 5)),
+            ("terreno", cursor("terreno", "a", None)), ("terreno", cursor("terreno", "a", uno + "\x00")),
+            ("terreno", cursor("terreno", None, "x' OR '1'='1")),
+            ("id", "no-es-uuid"), ("id", cursor("id", None, uno)), ("-id", "5"),
+        ]
+        for sort, c in malos:
+            status, body = pedir(sort, urllib.parse.quote(c))
+            self.assertEqual((status, body.get("detalle", {}).get("fields")),
+                             (422, {"cursor": "Cursor inválido para este orden."}), (sort, c, body))
+        # Everything a list can itself emit is accepted: missing values, both ends of a double.
+        buenos = [("asking_price", cursor("asking_price", None, uno)),
+                  ("asking_price", cursor("asking_price", 1.7976931348623157e308, uno)),
+                  ("-asking_price", cursor("-asking_price", -1.7976931348623157e308, uno)),
+                  ("asking_price", cursor("asking_price", 5e-324, uno)),
+                  ("asking_price", cursor("asking_price", 2**63, uno)),
+                  ("asking_price", cursor("asking_price", 0, uno)),
+                  ("terreno", cursor("terreno", "", uno)), ("terreno", cursor("terreno", "ñ' OR 1=1 --", uno)),
+                  ("terreno", cursor("terreno", None, uno)), ("id", uno), ("id", uno.upper())]
+        for sort, c in buenos:
+            self.assertEqual(pedir(sort, urllib.parse.quote(c))[0], 200, (sort, c))
+
+        # Valid pagination is untouched: every order, both ways, one pass, no repeats.
+        for campo in inventario.SORTS:
+            for sort in (campo, "-" + campo):
+                vistos, c = [], ""
+                while c is not None:
+                    pagina = self.ok(pedir(sort, urllib.parse.quote(c)))
+                    vistos += [t["id"] for t in pagina["terrenos"]]
+                    c = pagina["next_cursor"]
+                self.assertEqual((len(vistos), set(vistos)), (len(ids), set(ids)), sort)
+                if campo in ("asking_price", "terreno"):  # missing values last, either way
+                    claves = [t["draft"][campo] for t in
+                              self.ok(self.lista(nueva, f"sort={sort}&limit=200", "ada"))["terrenos"]]
+                    self.assertEqual([k is None for k in claves], [False] * 5 + [True] * 2, sort)
+        # A cursor from one base selects nothing outside the base it is used in.
+        ajeno = self.ok(pedir("terreno", ""))["next_cursor"]
+        self.assertEqual({t["base_id"] for t in self.ok(pedir("terreno", ajeno, self.b1))["terrenos"]}
+                         - {self.b1}, set())
+        self.assertEqual(self.lista(self.b2, f"sort=terreno&cursor={ajeno}")[0], 404)
+
+        # The history cursor is a version number, nothing else.
+        for c in ("9" * 40, "%C2%B2", "-1", "1.5", "1e3", "0x10"):
+            status, body = self.ver(ids[0], "ada", f"/historial?cursor={c}")
+            self.assertEqual((status, body.get("detalle", {}).get("fields")),
+                             (422, {"cursor": "Cursor inválido."}), c)
+        self.assertEqual(self.ver(ids[0], "ada", "/historial?cursor=999999999999999999")[0], 200)
+
     # -- 4. archive and restore ---------------------------------------------------
 
     def test_archiving_is_reversible_and_changes_only_the_archive_state(self):
@@ -613,6 +754,99 @@ class Registros(Escenario):
         self.assertEqual(custom("olga"), {folio: "FOLIO-SECRETO-1"})
         self.ok(self.accion(self.t1, "transferir", "ada", base_id=None))
         self.assertEqual(custom("ada"), {})
+
+    def test_history_shows_custom_changes_of_the_current_base_only(self):
+        """Stored history may hold custom-value changes (2A will write them).
+        A reader sees those of the terrain's current base's live columns, in
+        the one documented shape; the audit itself is never altered."""
+        origen, destino, retirada = (self.columna(self.b1, "Folio origen"),
+                                     self.columna(self.b2, "Folio destino"), self.columna(self.b2, "Retirada"))
+        secreto, otro = "VALOR-SOLO-DE-ORIGEN", "VALOR-DE-DESTINO"
+        detalles = {
+            "changes": {
+                "terreno": {"before": "Antes", "after": "Después"},
+                "estado": {"before": None, "after": "Jalisco", "etiqueta": secreto},
+                origen: {"before": None, "after": secreto},
+                destino: {"before": None, "after": otro},
+                retirada: {"before": "x", "after": "VALOR-RETIRADO"},
+                # Shapes nothing documents: never passed through.
+                "custom_json": {"before": {}, "after": {origen: secreto}},
+                "custom": {origen: {"before": None, "after": secreto}},
+                "municipio": {"before": {origen: secreto}, "after": [secreto]},
+                "direccion": [secreto], "lat": secreto + "-suelto",
+                "custom:no-es-uuid": {"before": None, "after": secreto},
+                "campo_inventado": {"before": None, "after": secreto},
+            },
+            "confirmed": ["price", secreto, {"x": secreto}],
+            "nota": secreto, "custom": {origen: secreto},
+        }
+        with db.escritura() as conn:
+            conn.execute("UPDATE inventory_revision SET custom_json = ? WHERE inventory_id = ?",
+                         (json.dumps({origen: secreto, destino: otro, retirada: "VALOR-RETIRADO"}), self.t1))
+            conn.execute("UPDATE inventory_event SET details_json = ? WHERE inventory_id = ? AND version = 1",
+                         (json.dumps(detalles), self.t1))
+
+        def primero(user):
+            eventos = self.ok(self.ver(self.t1, user, "/historial"))["eventos"]
+            return [e for e in eventos if e["version"] == 1][0], json.dumps(eventos, ensure_ascii=False)
+        nucleo = {"terreno": {"before": "Antes", "after": "Después"},
+                  "estado": {"before": None, "after": "Jalisco"}}
+        # In the source base: its own column, the core changes, and nothing undocumented.
+        evento, texto = primero("olga")
+        self.assertEqual(evento["changes"], {**nucleo, origen: {"before": None, "after": secreto}})
+        self.assertEqual(evento["confirmed"], ["price"])
+        self.assertEqual(set(evento) - {"id", "version", "action", "at", "actor", "before_revision_id",
+                                        "after_revision_id"}, {"changes", "confirmed"})
+        self.assertNotIn(otro, texto)
+        self.assertNotIn("VALOR-RETIRADO", texto)
+
+        self.ok(self.accion(self.t1, "transferir", "ada", base_id=self.b2))
+        self.ok(self.otorgar(self.b1, "olga"))  # omar keeps the destination only
+        # The source-only reader has no record; the destination-only reader has no source value.
+        self.assertEqual([self.ver(self.t1, "olga", s) for s in ("", "/historial")], [NO_EXISTE] * 2)
+        evento, texto = primero("omar")
+        self.assertEqual(evento["changes"], {**nucleo, destino: {"before": None, "after": otro},
+                                             retirada: {"before": "x", "after": "VALOR-RETIRADO"}})
+        self.assertNotIn(secreto, texto)
+        self.assertNotIn(self.b1, texto)  # nor where it came from
+        with db.escritura() as conn:
+            conn.execute("UPDATE inventory_column SET retired_at = ? WHERE id = ?",
+                         (db.now(), retirada.split(":")[1]))
+        evento, texto = primero("omar")
+        self.assertEqual(evento["changes"], {**nucleo, destino: {"before": None, "after": otro}})
+        self.assertNotIn("VALOR-RETIRADO", texto)
+        # Nothing else he can ask about the record carries it either.
+        otras = [self.ver(self.t1, "omar"), self.lista(self.b2, user="omar"),
+                 self.lista(self.b2, "q=VALOR-SOLO-DE-ORIGEN", "omar"),
+                 self.call("PATCH", f"/api/inventario/terrenos/{self.t1}",
+                           {"expected_version": 1, "changes": {"estado": "Colima"}}, "omar"),
+                 self.call("POST", f"/api/inventario/terrenos/{self.t1}/archivar", {"expected_version": 1}, "omar")]
+        self.assertEqual([r[0] for r in otras], [200, 200, 200, 409, 409])
+        self.assertEqual(otras[2][1]["total"], 0)
+        self.assertEqual(otras[0][1]["terreno"]["custom"], {destino: otro})
+        self.assertNotIn(secreto, json.dumps(otras))
+        self.assertNotIn("VALOR-RETIRADO", json.dumps(otras))
+        # The administrators' audit is whole, in either place.
+        evento, texto = primero("ada")
+        self.assertEqual({k: evento[k] for k in detalles}, detalles)
+        self.assertIn(self.b1, texto)
+
+        self.ok(self.accion(self.t1, "transferir", "ada", base_id=self.b1))
+        # Back in the source base: the value was kept, and its history with it.
+        evento, texto = primero("olga")
+        self.assertEqual(evento["changes"], {**nucleo, origen: {"before": None, "after": secreto}})
+        self.assertNotIn(otro, texto)
+        self.assertEqual(self.ok(self.ver(self.t1))["terreno"]["custom"], {origen: secreto})
+        self.assertEqual(json.loads(filas("inventory_event", "inventory_id = ? AND version = 1",
+                                          (self.t1,))[0]["details_json"]), detalles)
+        # The events the writers produce today come through unchanged.
+        self.ok(self.patch(self.t1, {"estado": "Sonora", "asking_price": 5.5, "price_on_request": False},
+                           "olga", confirm=["availability"]))
+        evento = self.ok(self.ver(self.t1, "olga", "/historial"))["eventos"][0]
+        self.assertEqual((evento["changes"], evento["confirmed"]),
+                         ({"estado": {"before": None, "after": "Sonora"},
+                           "asking_price": {"before": None, "after": 5.5}}, ["availability"]))
+        self.assertEqual(evento, self.ok(self.ver(self.t1, "ada", "/historial"))["eventos"][0])
 
     def test_transfers_are_validated_and_administrators_only(self):
         ruta = f"/api/inventario/terrenos/{self.t1}/transferir"

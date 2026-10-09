@@ -174,17 +174,19 @@ and no statement reads a scope's records to decide it. **No schema change.**
   the Python rules, so the two agree at the tolerance boundaries, not only away
   from them. It never evaluates to NULL, so `attention=false` is its exact
   complement.
-- **One addition to the record, for review.** Postgres raises an error when a
-  double multiplication overflows or underflows; Python and SQLite do not. A
-  stored area or price of `1e200` would therefore have turned every attention
-  list containing it into a 500. The predicate does no arithmetic on a record
-  whose `superficie_m2`, `superficie_ha`, `asking_price` or `asking_m2` is
-  non-zero and outside `1e-100 … 1e100`; it reports that record as needing
-  attention. So that the reasons on the record say why, such a record now
-  carries one more warning, `VALOR_FUERA_DE_RANGO`. No real area or price is
-  near that range, nothing is rejected or changed on save, and no other record's
-  reasons change. Without this the filter and the reasons could disagree for
-  those values only.
+- **One addition to the record (approved in review as a technical guard).**
+  Postgres raises an error when a double multiplication overflows or
+  underflows; Python and SQLite do not. A stored area or price of `1e200` would
+  therefore have turned every attention list containing it into a 500. The
+  predicate does no arithmetic on a record whose `superficie_m2`,
+  `superficie_ha`, `asking_price` or `asking_m2` is non-zero and outside
+  `1e-100 … 1e100`; it reports that record as needing attention, and the record
+  carries the warning `VALOR_FUERA_DE_RANGO`: «Un valor es demasiado grande o
+  pequeño para comprobar su consistencia automáticamente; revísalo.» This is a
+  guard for the consistency checks only, deliberately conservative. It is not a
+  business limit, not the range a database can represent and not a statement
+  about property prices: the value is stored as entered, nothing is rejected,
+  clamped or converted, and saving and publication rules are unchanged.
 - Not indexed: the predicate is evaluated on the same scan as the other
   revision-column filters. The worst case is a filter that matches nothing in
   the whole inventory (§6): 154 ms on SQLite and 57 ms on Postgres at 25,000
@@ -404,8 +406,9 @@ Not run: browser tests, any hosted or Preview environment, coverage.
 9. Search and sort fold ASCII case and Spanish diacritics from one explicit
    table instead of full Unicode normalization, so both databases agree whatever
    their locale. Before, folding was Python's NFKD over the loaded inventory.
-10. The `attention` filter is exact and evaluated in SQL; a record with an area or
-    price outside `1e-100 … 1e100` gains the warning `VALOR_FUERA_DE_RANGO` (§4).
+10. The `attention` filter is exact and evaluated in SQL; a record whose area or
+    price cannot be cross-checked (outside `1e-100 … 1e100`) carries the
+    non-blocking warning `VALOR_FUERA_DE_RANGO` (§4).
 11. Facets keep their existing "before business filters" meaning and gain `tipos`.
 
 ## 9. Reserved for later packets
@@ -422,6 +425,129 @@ Not run: browser tests, any hosted or Preview environment, coverage.
   per account and per base.
 - The current interface still calls the previous contract and is not usable by
   operators; unchanged by this packet.
+
+## 10. Correction 2 (review `6832a9bd1eb6dfbc1b114e517e79475957b01f0f`)
+
+Instructions: `reports/team-a-1a-review-2026-10-08/` at that commit. Additive
+on PR #22 from `f6cd6b2c45385d149f042c8eabd0e2a2e4db8037`; the baseline, PR #20,
+is unchanged at `1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb`. No schema change, no
+Team B file, no interface. Changed files: `server/api/inventario.py`,
+`server/repo/inventario.py`, `server/inventario.py`,
+`tests/test_registros_maestra.py`, this report. Each regression test was
+written first and failed on the reviewed head.
+
+### A1 — a key stored before keys were scoped
+
+A create stored before this packet is `operation = 'create'` with the hash of
+the normalized field map alone. `repo.crear()` now receives both hashes and
+compares each kind of row with its own: a scoped row with the scoped
+`{base, campos}` hash, a legacy row with the field-only hash. Nothing else
+changed: the legacy row is looked up for the same actor and only for an
+unassigned create, the stored response is never returned (only its id is
+read), and the caller is re-authorized for the record as it is now.
+
+`test_a_key_stored_before_keys_were_scoped_still_replays_for_its_owner`: the
+same actor, key and body return the current record (edited since: version 2,
+not the stored draft) with no new terrain, revision, event or operation row;
+a changed body is 409 `idempotency_conflict` without the record; a scoped
+hash stored in a legacy row does not match; another administrator with the same
+key and body gets their own record; the key used in a base is another key; and
+after the owner is demoted the retry is 403 with nothing of the record.
+
+### A2 — history is projected from a documented shape
+
+For a non-administrator, an event's details are now built up from the one
+supported shape rather than filtered down from what is stored:
+
+```json
+{"changes": {"<field>": {"before": <scalar>, "after": <scalar>}},
+ "confirmed": ["price", "availability"]}
+```
+
+- `<field>` is a core field name (`inventario.EDITABLE`) or
+  `custom:<column id>`, the same stable key a custom value is stored under.
+- A `custom:<column id>` entry is shown only while that column is a live
+  (unretired) column of the terrain's **current** base. It follows the record
+  exactly as the `custom` map of the detail does: hidden after a transfer,
+  shown again after a transfer back, hidden once the column is retired.
+- `before` and `after` are scalars (null, text, number, boolean). An entry
+  that is not exactly an object with both, or whose values are objects or
+  lists, is not shown. Extra keys inside an entry (a label, for example) are
+  not shown; a label comes from the current column definition, not from history.
+- Any other key, at either level, is not shown: `custom_json`, a nested
+  `custom` map, the bases of a transfer, anything undocumented.
+- `confirmed` keeps only `price` and `availability`.
+
+The stored event is never changed, and an administrator still receives it
+whole. **For 2A:** write custom-value changes as `changes["custom:<column
+id>"] = {"before", "after"}` with scalar values and they are projected
+correctly with no further work; a different shape will be invisible to
+operators until this projection is deliberately extended.
+
+`test_history_shows_custom_changes_of_the_current_base_only` seeds one event
+with core changes, a source-base, a destination-base and a later-retired custom
+change, and eight undocumented shapes carrying the source value. Through the
+dispatcher: in the source base its reader sees the core and source entries
+only; after the transfer and loss of source access the source-only reader gets
+404 for record and history, and the destination-only reader sees core and
+destination entries and no source value or source base id anywhere; retiring
+the column removes its entry; detail, list, search, a stale edit (409 with
+the current record) and a stale archive carry neither hidden value; the
+administrator's history equals what is stored; after the transfer back the
+source entry and value are visible again and the stored event is byte-for-byte
+what was seeded; an ordinary edit's event is identical for operator and
+administrator. **Limit:** this is a read-side guard over seeded history; no
+writer produces custom-value changes until 2A.
+
+### A3 — cursors are validated before they are bound
+
+`_tras_cursor()` now accepts only what a list can itself emit for the order in
+use: three parts; the exact sort; a terrain id that parses as a UUID (bound in
+canonical form); and a sort value that is missing, or text for a text order
+(no NUL, encodable), or a finite number a double can hold for a numeric order
+(integers are converted, booleans refused). Everything else is the documented
+422 `{"cursor": "Cursor inválido para este orden."}` on both databases, raised
+before any SQL runs. No database error is caught or translated to do this. The
+plain cursor of the default order is validated as a UUID too. The history
+cursor, the same class of input, is now 1–18 ASCII digits (it was
+`str.isdigit()`, which let a 40-digit number or `²` through to a 500).
+
+`test_a_cursor_is_validated_before_it_reaches_the_database`: 34 rejected
+cursors (the review's four probes; infinities, `1e999`, a boolean, containers;
+a number for text, NUL, a lone surrogate; bad base64, non-JSON, wrong length
+and type, wrong or reversed sort, non-UUID / numeric / null / NUL-suffixed ids,
+an injection-shaped id), 11 accepted ones (missing value, both ends of the
+double range, the smallest subnormal, `2**63`, zero, empty and quote-bearing
+text, an upper-case id), a full traversal of all eight orders in both
+directions over records with missing values (every record once, missing values
+last), a cursor from one base used in another (own rows only; 404 where there
+is no grant), and six rejected history cursors.
+
+The review's own `reproduce.py`, unchanged, on this head:
+
+| Probe | SQLite | Postgres |
+|---|---|---|
+| A1 same actor, key, body | 200, one record | 200, one record |
+| A2 hidden value in detail / history | no / no | no / no |
+| A3 four cursors | 422 ×4 | 422 ×4 |
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `./verificar.sh` (macOS, SQLite) | 1,041 Python tests OK, 125 skipped (all need Postgres); complete suite on Python 3.9.6 OK; JavaScript 120/120 |
+| Disposable local Postgres 16 (Python 3.12, psycopg 3) | 1,041 tests, 0 skipped, OK |
+| `tests/test_registros_maestra.py` | 28 tests on SQLite, 26 on Postgres |
+| `ruff check server`, `mypy server` | clean; 47 source files |
+| GitHub Actions | in the PR |
+
+The 25,000-record measurement was not repeated: no list statement changed.
+History reads one more statement for a non-administrator (the terrain's base,
+then its live columns), independent of the page.
+
+Remaining limits: the earlier ones in §6 and §8 stand; the history projection
+has no writer to exercise it until 2A; replay of a legacy key exists only for
+unassigned creates, the only kind that existed.
 
 Stop for supervisory review. Nothing was merged or deployed; no real account or
 data was used.

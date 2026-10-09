@@ -165,20 +165,24 @@ def warnings(draft: Mapping[str, Any]) -> list[dict[str, str]]:
              for f in validate_record(record) if f.codigo not in _COVERED_BY_BLOCKERS]
     if any(_fuera_de_rango(draft.get(n)) for n in _CRUZADOS):
         found.append({"code": "VALOR_FUERA_DE_RANGO", "severity": AVISO,
-                      "message": "Una superficie o un precio está fuera de cualquier rango real."})
+                      "message": "Un valor es demasiado grande o pequeño para comprobar su"
+                                 " consistencia automáticamente; revísalo."})
     return found
 
 
-# The numbers the findings multiply and divide. Outside this range they are no
-# real area or price, and their products leave what a database can compute
-# (Postgres raises on overflow and underflow), so the record is flagged for it
-# and sql_atencion() does no arithmetic on it.
+# The numbers the findings multiply and divide. This is a technical guard for
+# those consistency checks, not a business limit: the value is stored as
+# entered and nothing about saving or publishing changes. Beyond this
+# deliberately conservative range a product can overflow or underflow, which
+# Postgres reports as an error, so the checks are not computed: the record is
+# flagged instead, and sql_atencion() does no arithmetic on it. It says
+# nothing about what a database can hold or what a property may cost.
 _CRUZADOS = ("superficie_m2", "superficie_ha", "asking_price", "asking_m2")
-RANGO_REAL = (1e-100, 1e100)
+RANGO_COMPROBABLE = (1e-100, 1e100)
 
 
 def _fuera_de_rango(value: Any) -> bool:
-    return bool(value) and not RANGO_REAL[0] <= abs(value) <= RANGO_REAL[1]
+    return bool(value) and not RANGO_COMPROBABLE[0] <= abs(value) <= RANGO_COMPROBABLE[1]
 
 
 def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> list[dict[str, str]]:
@@ -210,7 +214,7 @@ def sql_atencion(d: str = "d") -> str:
     disponibles = ", ".join(f"'{a}'" for a in AVAILABILITY[1:])
     monedas = ", ".join(f"'{m}'" for m in MONEDAS)
     implicito = f"{unitario} * {m2}"
-    fuera = " OR ".join(f"({c} <> 0 AND ({c} < {RANGO_REAL[0]!r} OR {c} > {RANGO_REAL[1]!r}))"
+    fuera = " OR ".join(f"({c} <> 0 AND ({c} < {RANGO_COMPROBABLE[0]!r} OR {c} > {RANGO_COMPROBABLE[1]!r}))"
                         for c in (m2, ha, precio, unitario))
     hallazgos = (
         f"COALESCE({d}.estado, '') = ''",

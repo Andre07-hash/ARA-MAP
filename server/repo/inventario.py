@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import sqlite3
 import uuid
 from collections.abc import Mapping, Sequence
@@ -194,22 +195,64 @@ def _cursor(sort: str, row: Mapping[str, Any]) -> str:
 
 def _tras_cursor(sort: str, cursor: str | None, clave: str) -> tuple[str, tuple[Any, ...]]:
     """The predicate for "after this cursor" in the chosen order. It is ANDed
-    onto the scoped query, so no cursor can reach outside the scope."""
+    onto the scoped query, so no cursor can reach outside the scope.
+
+    A cursor is client input. Only what a list can itself emit for this order
+    is bound: a terrain id, and for the other orders a missing value, a text or
+    a finite double according to the column. Anything else is a CursorError
+    here, never a database error.
+    """
     if not cursor:
         return "", ()
     if sort == "id":
-        return " AND t.id > ?", (cursor,)
+        return " AND t.id > ?", (_id_de_cursor(cursor),)
     try:
-        de, valor, ultimo = json.loads(base64.urlsafe_b64decode(cursor.encode("ascii")))
-        if de != sort or not isinstance(ultimo, str) or isinstance(valor, (list, dict, bool)):
-            raise ValueError
-    except (ValueError, TypeError, UnicodeError):
+        partes = json.loads(base64.urlsafe_b64decode(cursor.encode("ascii")))
+    except (ValueError, UnicodeError):
         raise CursorError() from None
+    if not isinstance(partes, list) or len(partes) != 3 or partes[0] != sort:
+        raise CursorError()
+    valor, ultimo = _valor_de_cursor(sort.lstrip("-"), partes[1]), _id_de_cursor(partes[2])
     if valor is None:  # already among the missing values, which come last
         return f" AND ({clave}) IS NULL AND t.id > ?", (ultimo,)
     signo = "<" if sort.startswith("-") else ">"
     return (f" AND (({clave}) IS NULL OR {clave} {signo} ? OR ({clave} = ? AND t.id > ?))",
             (valor, valor, ultimo))
+
+
+def _id_de_cursor(valor: Any) -> str:
+    try:
+        if not isinstance(valor, str):
+            raise ValueError
+        return str(uuid.UUID(valor))
+    except ValueError:
+        raise CursorError() from None
+
+
+def _valor_de_cursor(campo: str, valor: Any) -> str | float | None:
+    """The sort key a cursor carries, as the type its column compares with."""
+    if campo == "id":
+        return _id_de_cursor(valor)
+    if valor is None:
+        return None
+    if campo == "updated_at" or inventario.SORTS[campo]:
+        # Text, and text both databases can receive: no NUL, no lone surrogate.
+        if not isinstance(valor, str) or "\x00" in valor:
+            raise CursorError()
+        try:
+            valor.encode("utf-8")
+        except UnicodeError:
+            raise CursorError() from None
+        return valor
+    if isinstance(valor, bool) or not isinstance(valor, (int, float)):
+        raise CursorError()
+    try:
+        numero = float(valor)  # an integer no double holds raises OverflowError
+    except OverflowError:
+        raise CursorError() from None
+    if not math.isfinite(numero):
+        raise CursorError()
+    return numero
 
 
 def _facetas(conn: DatabaseConnection, q: Mapping[str, Any], donde: str,
@@ -234,9 +277,9 @@ def history(conn: DatabaseConnection, inventory_id: str, before_version: int | N
     """Events newest first. Returns (page, total, next cursor).
 
     ``completo`` is the administrators' audit. Without it an event shows the
-    core-field changes, which travel with the terrain, and nothing about work
-    bases the reader may not be in: a transfer appears, the bases it went
-    between do not.
+    core-field changes, which travel with the terrain, the custom-value
+    changes of the base it is in now, and nothing about work bases the reader
+    may not be in: a transfer appears, the bases it went between do not.
     """
     total = conn.execute("SELECT COUNT(*) AS n FROM inventory_event WHERE inventory_id = ?",
                          (inventory_id,)).fetchone()["n"]
@@ -246,11 +289,17 @@ def history(conn: DatabaseConnection, inventory_id: str, before_version: int | N
         " WHERE inventory_id = ? AND version < ? ORDER BY version DESC LIMIT ?",
         (inventory_id, before_version if before_version is not None else 2**62, limit + 1),
     ).fetchall()
+    propias: set[str] = set()
+    if not completo:
+        terreno = conn.execute("SELECT base_id FROM inventory_terrain WHERE id = ?",
+                               (inventory_id,)).fetchone()
+        if terreno and terreno["base_id"]:
+            propias = _columnas(conn, [terreno["base_id"]])[terreno["base_id"]]
     eventos = []
     for r in rows[:limit]:
         detalles = json.loads(r["details_json"] or "{}")
         if not completo:
-            detalles = {k: v for k, v in detalles.items() if k in _DETALLES_COMUNES}
+            detalles = _detalles_visibles(detalles, propias)
         eventos.append({
             "id": r["id"], "version": r["version"], "action": r["action"], "at": r["at"],
             "actor": {"id": r["actor_id"], "display_name": r["actor_name"]},
@@ -259,9 +308,39 @@ def history(conn: DatabaseConnection, inventory_id: str, before_version: int | N
     return eventos, int(total), (eventos[-1]["version"] if len(rows) > limit else None)
 
 
-# Event details any reader of the terrain may see. Everything else (the bases
-# of a transfer today, custom-value changes later) is for the full audit.
-_DETALLES_COMUNES = ("changes", "confirmed")
+def _detalles_visibles(detalles: Any, propias: set[str]) -> dict[str, Any]:
+    """What a non-administrator may read of one event's stored details.
+
+    Built up from the one documented shape, never filtered down from what is
+    stored, so a key or a nesting nobody documented is not shown:
+
+        {"changes": {<field>: {"before": <scalar>, "after": <scalar>}, ...},
+         "confirmed": ["price" | "availability", ...]}
+
+    where <field> is a core field or "custom:<column id>", and a custom field
+    is shown only while its column is a live column of the terrain's CURRENT
+    base (``propias``). Everything else stays in the audit for administrators.
+    """
+    visibles: dict[str, Any] = {}
+    if not isinstance(detalles, dict):
+        return visibles
+    cambios = detalles.get("changes")
+    if isinstance(cambios, dict):
+        visibles["changes"] = {
+            campo: {"before": cambio["before"], "after": cambio["after"]}
+            for campo, cambio in cambios.items()
+            if (campo in REVISION_FIELDS or campo in propias) and isinstance(cambio, dict)
+            and "before" in cambio and "after" in cambio
+            and all(_es_escalar(cambio[lado]) for lado in ("before", "after"))}
+    confirmados = detalles.get("confirmed")
+    if isinstance(confirmados, list):
+        visibles["confirmed"] = [c for c in confirmados
+                                 if isinstance(c, str) and c in inventario.CONFIRMABLE]
+    return visibles
+
+
+def _es_escalar(valor: Any) -> bool:
+    return valor is None or isinstance(valor, (str, int, float, bool))
 
 
 def _stored_result(conn: DatabaseConnection, operation: str, key: str,
@@ -286,7 +365,8 @@ def create(conn: DatabaseConnection, fields: Mapping[str, Any], actor: Mapping[s
 
 
 def crear(conn: DatabaseConnection, fields: Mapping[str, Any], actor: Mapping[str, Any],
-          key: str, request_hash: str, base_id: str | None = None) -> tuple[str, bool]:
+          key: str, request_hash: str, base_id: str | None = None,
+          hash_heredado: str | None = None) -> tuple[str, bool]:
     """Create a draft record in a work base (or unassigned), or find the one a
     repeated key already created. Returns (terrain id, whether it is a replay).
 
@@ -296,11 +376,17 @@ def crear(conn: DatabaseConnection, fields: Mapping[str, Any], actor: Mapping[st
     answered from the record as it is now, after the caller is authorized for
     it again. The idempotency row is the transaction's first write, so a
     concurrent request with the same key waits for it, then collides.
+
+    Keys stored before they were scoped (operation "create", always
+    unassigned) are honoured for their own actor. Those rows hold the request
+    hash of their time, ``hash_heredado``: each kind of row is compared with
+    its own kind of hash, never with the other's.
     """
     operation = f"create:{base_id or 'global'}:{actor['id']}"
-    previous = (_stored_result(conn, operation, key, actor["id"])
-                # Keys stored before they were scoped: honoured for their own actor only.
-                or (_stored_result(conn, "create", key, actor["id"]) if base_id is None else None))
+    esperado: str | None = request_hash
+    previous = _stored_result(conn, operation, key, actor["id"])
+    if previous is None and base_id is None:
+        previous, esperado = _stored_result(conn, "create", key, actor["id"]), hash_heredado
     if previous is None:
         try:
             with db.transaction(conn):
@@ -308,10 +394,10 @@ def crear(conn: DatabaseConnection, fields: Mapping[str, Any], actor: Mapping[st
         except Exception as exc:
             if not _unique_violation(exc):
                 raise
-        previous = _stored_result(conn, operation, key, actor["id"])
+        previous, esperado = _stored_result(conn, operation, key, actor["id"]), request_hash
         if previous is None:
             raise RuntimeError("Idempotency collision without a stored result.")
-    if previous["request_hash"] != request_hash:
+    if previous["request_hash"] != esperado:
         raise IdempotencyConflictError()
     stored = previous["result"]
     return str(stored["id"] if "id" in stored else stored["terreno"]["id"]), True
@@ -555,14 +641,20 @@ def publication_state(row: Mapping[str, Any]) -> str:
 def _dtos(conn: DatabaseConnection, rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """Records for a page of rows, with one query for the custom columns of
     the bases on that page however many rows there are."""
-    bases = sorted({r["base_id"] for r in rows if r["base_id"]})
+    visibles = _columnas(conn, sorted({r["base_id"] for r in rows if r["base_id"]}))
+    return [_dto(r, visibles) for r in rows]
+
+
+def _columnas(conn: DatabaseConnection, bases: Sequence[str]) -> dict[str, set[str]]:
+    """The live custom columns of each base, as the "custom:<id>" keys their
+    values are stored under."""
     visibles: dict[str, set[str]] = {b: set() for b in bases}
     if bases:
         for c in conn.execute(
                 "SELECT id, base_id FROM inventory_column WHERE retired_at IS NULL"
                 f" AND base_id IN ({', '.join('?' for _ in bases)})", tuple(bases)).fetchall():
             visibles[c["base_id"]].add(f"custom:{c['id']}")
-    return [_dto(r, visibles) for r in rows]
+    return visibles
 
 
 def _dto(row: Mapping[str, Any], visibles: Mapping[str, set[str]]) -> dict[str, Any]:

@@ -110,11 +110,11 @@ def _crear(request: Request, base_id: str | None) -> Respuesta:
         fields, errors = inventario.clean_changes(parse_json(request.body))
         if errors:
             raise _invalid(errors)
-        request_hash = hashlib.sha256(json.dumps(
-            {"base": base_id, "campos": fields}, sort_keys=True, ensure_ascii=False,
-        ).encode("utf-8")).hexdigest()
+        request_hash = _hash({"base": base_id, "campos": fields})
         try:
-            inventory_id, repetida = repo.crear(conn, fields, actor, key, request_hash, base_id)
+            # A key stored before keys were scoped carries the hash of the fields alone.
+            inventory_id, repetida = repo.crear(conn, fields, actor, key, request_hash, base_id,
+                                                hash_heredado=_hash(fields))
         except repo.IdempotencyConflictError:
             raise ApiError("Esa Idempotency-Key ya se usó con otros datos.", 409,
                            {"code": "idempotency_conflict"}) from None
@@ -123,6 +123,11 @@ def _crear(request: Request, base_id: str | None) -> Respuesta:
             # what it is now, and only if this caller may still see it.
             auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.ver")
         return {"terreno": repo.get(conn, inventory_id)}
+
+
+def _hash(cuerpo: Mapping[str, Any]) -> str:
+    return hashlib.sha256(
+        json.dumps(cuerpo, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
 def update(request: Request) -> Respuesta:
@@ -292,7 +297,8 @@ def history(request: Request) -> Respuesta:
         errors["limit"] = f"Usa un número entero de 1 a {inventario.MAX_LIMIT}."
         limit = inventario.DEFAULT_LIMIT
     cursor = request.q("cursor")
-    if cursor is not None and not cursor.isdigit():
+    # A version number: ASCII digits, and few enough for either database's integer.
+    if cursor is not None and not re.fullmatch(r"[0-9]{1,18}", cursor):
         errors["cursor"] = "Cursor inválido."
     if errors:
         raise _invalid(errors, "Parámetros inválidos.")

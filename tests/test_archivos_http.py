@@ -23,6 +23,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import quote
 
 from server import app as app_module
 from server import archivos, auth, db, postgres
@@ -574,6 +575,124 @@ class HTTPChecks:
         self.assertIn(b" 400 ", respuesta.split(b"\r\n", 1)[0])
         self.assertIn(b"cuerpo_incompleto", respuesta)
         self.assertIsNone(self.store.tamano_de(clave_temporal))
+
+    # -- numeric parameters (correction 1, R2-B1) ----------------------------------------
+
+    # str.isdigit() accepts several of these; int() then raises (500 before the fix) or
+    # silently converts a non-ASCII digit.
+    # An empty value ("?limite=") is dropped by the shared router's query parsing and
+    # therefore means the default, as before; it is tested with the valid values.
+    NUMEROS_INVALIDOS = ("²", "³", "¹⁰", "٣", "５", "߁", "+5", "-1", "-0", " 5", "5 ", "1e2",
+                         "0x10", "1_0", "1.0", "5\x00", "9" * 10, "9" * 5000)
+
+    def _tablas_archivo(self):
+        return {t: self.filas(t) for t in ("archivo", "archivo_version", "archivo_intento",
+                                           "archivo_evento", "archivo_trabajo", "geometria")}
+
+    def test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route(self):
+        dentro = self._recursos(self.terreno, login="olga")
+        fuera = self._recursos(self.ajeno)                  # admin-only terrain
+        falso = {"vid": str(uuid.uuid4()), "aid": str(uuid.uuid4())}
+        rutas = {
+            "listar": [f"/api/inventario/terrenos/{t}/archivos"
+                       for t in (self.terreno, self.ajeno, str(uuid.uuid4()))],
+            "historial": [f"/api/archivos/{r['aid']}/historial" for r in (dentro, fuera, falso)],
+            "versiones": [f"/api/archivos/{r['aid']}/versiones" for r in (dentro, fuera, falso)],
+            "intentos": [f"/api/archivos/versiones/{r['vid']}/intentos" for r in (dentro, fuera, falso)],
+        }
+        antes = self._tablas_archivo()
+        rechazo = json.dumps({"error": f"El límite debe estar entre 1 y {archivos.HISTORY_MAX}.",
+                              "detalle": {"code": "limite_invalido"}}, ensure_ascii=False).encode()
+        for nombre, (autorizada, ajena, inexistente) in rutas.items():
+            for valor in self.NUMEROS_INVALIDOS + ("0", "101"):
+                q = f"?limite={quote(valor, safe='')}"
+                with self.subTest(ruta=nombre, limite=valor[:12]):
+                    respuestas = {self.c.pedir("GET", ruta + q, cookie=self.cookie("olga"))[::2]
+                                  for ruta in (autorizada, ajena, inexistente)}
+                    # One answer for every resource state: nothing about existence or scope.
+                    self.assertEqual(respuestas, {(400, rechazo)})
+                    s, _, b = self.c.pedir("GET", autorizada + q)            # no session at all
+                    self.assertEqual((s, json.loads(b)["detalle"]["code"]), (401, "unauthenticated"))
+            for valor, maximo in (("1", 1), ("100", 100), ("0050", 50), ("000000001", 1),
+                                  ("", 50), (None, 50)):
+                q = "" if valor is None else f"?limite={valor}"
+                with self.subTest(ruta=nombre, limite=valor):
+                    s, r = self.j("GET", autorizada + q, "olga")
+                    self.assertEqual(s, 200, r)
+                    listas = [v for v in r.values() if isinstance(v, list)]
+                    self.assertEqual(len(listas), 1)
+                    self.assertLessEqual(len(listas[0]), maximo)
+                    self.assertIn("cursor_siguiente", r)
+        self.assertEqual(self._tablas_archivo(), antes)
+
+    def test_limite_pages_exactly_at_valid_ascii_bounds(self):
+        for n in range(3):
+            self.archivo_completo(PDF + bytes([n]), nombre=f"ficticio-{n}.pdf")
+        ruta = f"/api/inventario/terrenos/{self.terreno}/archivos"
+        s, uno = self.j("GET", ruta + "?limite=01")
+        self.assertEqual((s, len(uno["archivos"])), (200, 1))
+        self.assertIsNotNone(uno["cursor_siguiente"])
+        s, todos = self.j("GET", ruta + "?limite=3")
+        self.assertEqual((s, len(todos["archivos"]), todos["cursor_siguiente"]), (200, 3, None))
+        self.assertEqual(uno["archivos"][0], todos["archivos"][0])
+
+    def test_desde_accepts_only_bounded_ascii_aligned_offsets(self):
+        dentro = self._recursos(self.terreno, login="olga")
+        fuera = self._recursos(self.ajeno)
+        cuerpo = self._reemplazar_geojson(dentro["gid"], self._geojson_de(CHUNK + 1000))
+        rutas = [f"/api/archivos/geometrias/{g}/contenido" for g in (dentro["gid"], fuera["gid"],
+                                                                     str(uuid.uuid4()))]
+        antes = self._tablas_archivo()
+        for valor in self.NUMEROS_INVALIDOS + ("0" * 10, "524288.0", "1", str(CHUNK - 1)):
+            q = f"?desde={quote(valor, safe='')}"
+            with self.subTest(desde=valor[:12]):
+                respuestas = {self.c.pedir("GET", ruta + q, cookie=self.cookie("olga"), binario=True)[::2]
+                              for ruta in rutas}
+                self.assertEqual(len(respuestas), 1)
+                s, b = respuestas.pop()
+                self.assertEqual((s, json.loads(b)["detalle"]["code"]), (400, "desplazamiento_invalido"))
+                s, _, b = self.c.pedir("GET", rutas[0] + q, binario=True)
+                self.assertEqual((s, json.loads(b)["detalle"]["code"]), (401, "unauthenticated"))
+        # Legitimate offsets, including the default and ASCII leading zeros, are unchanged.
+        s, h, primero = self.bajar(rutas[0], "olga")
+        self.assertEqual((s, h["X-Geometria-Desde"], len(primero)), (200, "0", CHUNK))
+        for valor in ("", "0", "000000000"):
+            self.assertEqual(self.bajar(rutas[0] + f"?desde={valor}", "olga")[2], primero)
+        for valor in (str(CHUNK), "000" + str(CHUNK)):
+            with self.subTest(desde=valor):
+                s, h, ultimo = self.bajar(rutas[0] + f"?desde={valor}", "olga")
+                self.assertEqual((s, h["X-Geometria-Final"], h["X-Geometria-Desde"]), (200, "1", str(CHUNK)))
+                self.assertEqual(primero + ultimo, cuerpo)
+        datos, _ = self.geometria_completa(dentro["gid"], "olga")
+        self.assertEqual(datos, cuerpo)
+        self.assertEqual(self._tablas_archivo(), antes)
+
+    def _put_crudo(self, vid, longitud, cuerpo):
+        """PUT content with an exact Content-Length text, over a raw socket."""
+        with socket.create_connection(("127.0.0.1", self.json_srv.port), timeout=10) as sock:
+            sock.sendall((f"PUT /api/archivos/versiones/{vid}/contenido HTTP/1.1\r\n"
+                          f"Host: 127.0.0.1\r\nCookie: {self.cookie('ana')}\r\n"
+                          "Content-Type: application/pdf\r\nConnection: close\r\n"
+                          f"Content-Length: {longitud}\r\n\r\n").encode() + cuerpo)
+            respuesta = b""
+            while True:
+                parte = sock.recv(65536)
+                if not parte:
+                    break
+                respuesta += parte
+        cabeza, _, resto = respuesta.partition(b"\r\n\r\n")
+        return int(cabeza.split(b" ", 2)[1]), json.loads(resto)
+
+    def test_content_length_is_checked_as_ascii_decimal_too(self):
+        s, inicio = self.iniciar(PDF)
+        clave_temporal = self.filas("archivo_version", "id = ?", (inicio["version_id"],))[0]["clave_temporal"]
+        # The dispatcher's int() accepts a sign; the declared length must still be plain digits.
+        s, r = self._put_crudo(inicio["version_id"], f"+{len(PDF)}", PDF)
+        self.assertEqual((s, r["detalle"]["code"]), (400, "cuerpo_incompleto"))
+        self.assertIsNone(self.store.tamano_de(clave_temporal))
+        s, r = self._put_crudo(inicio["version_id"], f"{len(PDF):020d}", PDF)   # leading zeros
+        self.assertEqual(s, 200, r)
+        self.assertEqual(self.store.tamano_de(clave_temporal), len(PDF))
 
     # -- geometry metadata -------------------------------------------------------------
 

@@ -16,6 +16,7 @@ A-owned and listed in the 2B report's INTEGRATION_REQUESTS.md.
 
 from __future__ import annotations
 
+import re
 import threading
 import unicodedata
 from collections.abc import Callable
@@ -94,11 +95,24 @@ def _clave(request: Request) -> Any:
     return request.headers.get("Idempotency-Key")
 
 
+# ASCII digits only: str.isdigit() also accepts "²", "٣" or "５", which int()
+# then rejects or silently converts. No sign, space, separator or exponent.
+_DECIMAL = re.compile(r"[0-9]+")
+
+
+def _decimal(valor: str | None, digitos: int) -> int | None:
+    """A non-negative ASCII decimal of at most `digitos` digits, else None."""
+    if valor is None or len(valor) > digitos or not _DECIMAL.fullmatch(valor):
+        return None
+    return int(valor)
+
+
 def _limite(request: Request) -> Any:
     valor = request.q("limite")
     if valor is None:
         return archivos.HISTORY_DEFAULT
-    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+    numero = _decimal(valor, 9)
+    return valor if numero is None else numero  # the service rejects the rest (limite_invalido)
 
 
 def _parametro(request: Request, nombre: str) -> str:
@@ -155,8 +169,8 @@ def contenido(request: Request) -> Respuesta:
     if request.headers.get("Transfer-Encoding"):
         raise ApiError("Indica Content-Length; no se acepta envío por partes.", 411,
                        {"code": "longitud_requerida"})
-    declarada = request.headers.get("Content-Length")
-    if declarada is None or not declarada.isdigit() or int(declarada) != len(request.body):
+    declarada = _decimal(request.headers.get("Content-Length"), 20)
+    if declarada is None or declarada != len(request.body):
         raise ApiError("El contenido llegó incompleto.", 400, {"code": "cuerpo_incompleto"})
     vista = memoryview(request.body)
     bloques = (vista[i:i + MAX_BLOQUE] for i in range(0, len(vista), MAX_BLOQUE))
@@ -239,9 +253,9 @@ def metadatos_geometrias(request: Request) -> Respuesta:
 
 def fragmento_geometria(request: Request) -> RespuestaBinaria:
     """GET ?desde=<offset>: one 512 KiB slice of the stored UTF-8 GeoJSON."""
-    valor = request.q("desde", "0") or ""
-    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
-    r = archivos.fragmento_geometria(request.sesion, _parametro(request, "gid"), desde)
+    desde = _decimal(request.q("desde", "0"), 9)
+    r = archivos.fragmento_geometria(request.sesion, _parametro(request, "gid"),
+                                     -1 if desde is None else desde)  # -1: desplazamiento_invalido
     return RespuestaBinaria(r["contenido"], "application/octet-stream", {
         "Cache-Control": _SIN_CACHE, "Content-Security-Policy": _AISLADO,
         "X-Geometria-Id": r["geometria_id"], "X-Geometria-Desde": str(r["desde"]),

@@ -3,12 +3,16 @@
 
 import { el } from "../../lib/dom.js";
 
+let abiertos = 0;
+
 export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "34rem" }) {
+  // One id per dialog: a dialog opened over another must be named by its own title.
+  const idTitulo = `dialog-title-${abiertos += 1}`;
   const dialog = el("dialog", { class: "dialog", style: { maxWidth: ancho } });
   const body = el("div", { class: "dialog-body" });
 
   const header = el("header", { class: "dialog-header" },
-    el("h2", { id: "dialog-title" }, titulo),
+    el("h2", { id: idTitulo }, titulo),
     descripcion && el("p", { class: "secondary" }, descripcion),
   );
 
@@ -30,7 +34,7 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
 
   body.append(contenido);
   dialog.append(header, body, footer);
-  dialog.setAttribute("aria-labelledby", "dialog-title");
+  dialog.setAttribute("aria-labelledby", idTitulo);
 
   // A click on the backdrop (outside the dialog's own box) dismisses it.
   dialog.addEventListener("click", (event) => {

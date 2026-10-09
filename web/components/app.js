@@ -20,7 +20,7 @@ import {
   contarFiltros, FILTROS_VACIOS, itemDeInventario, itemPublico, opcionesDeFacetas,
 } from "../lib/inventario.js";
 import {
-  defaultRoute, isPrivateRoute, navigate, parseRoute, routeHash, sameRoute,
+  defaultRoute, isPrivateRoute, navigate, parseRoute, routeAllowed, routeHash, sameRoute,
 } from "../lib/router.js";
 import {
   clearPrivateState, getState, resetFilters, setDataset, setFilter, setState, subscribe,
@@ -45,6 +45,7 @@ import { openTerrainHistory } from "./inventory/TerrainHistory.js";
 import { MapGallery } from "./maps/MapGallery.js";
 import { openOverlayBuilder, openSaveMapDialog } from "./maps/OverlayBuilder.js";
 import { createSession } from "./session/session.js";
+import { createTabla } from "./tabla/Tabla.js";
 import { createFilterRail } from "./terrain/FilterRail.js";
 import { openFiltersDrawer } from "./terrain/FiltersDrawer.js";
 import { TerrainDetail } from "./terrain/TerrainDetail.js";
@@ -53,7 +54,11 @@ import { UnplacedList } from "./terrain/UnplacedList.js";
 import { confirmDialog, openDialog } from "./ui/dialog.js";
 import { clearToasts, toast, toastError } from "./ui/toast.js";
 
+/* Operators get the table of their work bases and the public catalog. The
+ * unscoped inventory and the legacy workspace are the administrators'. */
+const NAV_OPERADOR = [["tabla", "Tabla"], ["catalogo", "Catálogo público"]];
 const NAV_EQUIPO = [
+  ["tabla", "Tabla maestra"],
   ["inventario", "Inventario"],
   ["mapa", "Mapa"],
   ["bases", "Bases"],
@@ -75,6 +80,8 @@ let configReadOnly = false;
 let cloud = false;
 
 let session = null;
+let tabla = null;           // the employee table of the signed-in account, kept alive
+let tablaDe = null;         // "id|rol" of the account that table belongs to
 let editor = null;          // the open TerrainEditor, kept alive across renders
 let editorEstado = null;    // { id, error } while an editor loads or failed to
 let legacyCargado = false;  // bases/maps/folders loaded for this session
@@ -116,12 +123,12 @@ export async function mount(root) {
   session = createSession({
     onSignedIn: alEntrar,
     onSignedOut: limpiarPrivado,
-    hasUnsavedWork: () => Boolean(editor?.dirty),
+    hasUnsavedWork: () => Boolean(editor?.dirty || tabla?.dirty),
   });
 
   window.addEventListener("hashchange", aplicarRuta);
   window.addEventListener("beforeunload", (event) => {
-    if (editor?.dirty) { event.preventDefault(); event.returnValue = ""; }
+    if (editor?.dirty || tabla?.dirty) { event.preventDefault(); event.returnValue = ""; }
   });
   // An open public page catches up when it is looked at again; nothing polls.
   document.addEventListener("visibilitychange", () => {
@@ -139,13 +146,27 @@ export async function mount(root) {
 
 /* ---------------------------------------------------------------- session */
 
-function alEntrar(_usuario, { returnTo, startup }) {
-  loadIndex();
+function alEntrar(usuario, { returnTo, startup }) {
+  // A table left by another account (it signed in over an expired session
+  // that had unsaved cells) is never shown to this one.
+  if (tabla && tablaDe !== `${usuario.id}|${usuario.rol}`) {
+    const habia = tabla.dirty;
+    cerrarTabla();
+    if (habia) toast("Se descartó trabajo sin guardar de la sesión anterior.");
+  }
+  if (usuario.rol === "admin") loadIndex();
   // /api/config's readOnly depends on the session, so it is read again now.
   if (startup) { readOnly = configReadOnly; return; }
-  api.config().then((config) => { readOnly = config.readOnly === true; setState({}); })
-    .catch(() => { readOnly = false; });
-  if (!navigate(returnTo ?? defaultRoute(true), { replace: true })) aplicarRuta();
+  api.config().then((config) => { readOnly = config.readOnly === true; setState({}); tabla?.permisos(); })
+    .catch(() => { readOnly = false; tabla?.permisos(); });
+  const destino = returnTo && routeAllowed(returnTo, usuario.rol) ? returnTo : defaultRoute(true, usuario.rol);
+  if (!navigate(destino, { replace: true })) aplicarRuta();
+}
+
+function cerrarTabla() {
+  tabla?.destroy();
+  tabla = null;
+  tablaDe = null;
 }
 
 /**
@@ -155,6 +176,7 @@ function alEntrar(_usuario, { returnTo, startup }) {
 function limpiarPrivado() {
   abortPrivate();
   cancelarCargas();
+  cerrarTabla();
   editor?.destroy();
   editor = null;
   editorEstado = null;
@@ -197,13 +219,13 @@ async function loadIndex({ forzar = false } = {}) {
 }
 
 async function cerrarSesion() {
-  if (editor?.dirty && !(await confirmarDescarte())) return;
+  if ((editor?.dirty || tabla?.dirty) && !(await confirmarDescarte())) return;
   session.signOut();
 }
 
 const confirmarDescarte = () => confirmDialog({
   titulo: "¿Descartar cambios?",
-  mensaje: "Tienes cambios sin guardar en este terreno. Si sales ahora, se pierden.",
+  mensaje: "Tienes cambios sin guardar. Si sales ahora, se pierden.",
   confirmar: "Descartar cambios",
   peligro: true,
 });
@@ -213,7 +235,14 @@ async function revalidar({ forzar = false } = {}) {
   ultimaRevalidacion = Date.now();
   await session.refresh();
   const { ruta, sesion } = getState();
-  if (ruta.nombre === "catalogo") pedirCarga("catalogo", { inmediato: true });
+  // Another account, or another role for this one, since the table was built.
+  if (tabla && sesion && tablaDe !== `${sesion.id}|${sesion.rol}`) {
+    cerrarTabla();
+    aplicarRuta();
+    return;
+  }
+  if (ruta.nombre === "tabla") tabla?.revalidar();
+  else if (ruta.nombre === "catalogo") pedirCarga("catalogo", { inmediato: true });
   else if (ruta.nombre === "inventario" && sesion) pedirCarga("inventario", { inmediato: true });
 }
 
@@ -225,7 +254,12 @@ async function aplicarRuta() {
   const ruta = parseRoute(location.hash);
   const { sesion } = getState();
   if (!ruta) {
-    if (!navigate(defaultRoute(Boolean(sesion)), { replace: true })) aplicarRuta();
+    if (!navigate(defaultRoute(Boolean(sesion), sesion?.rol), { replace: true })) aplicarRuta();
+    return;
+  }
+  // An operator who follows a link into the administrators' screens lands on the table.
+  if (sesion && !routeAllowed(ruta, sesion.rol)) {
+    navigate(defaultRoute(true, sesion.rol), { replace: true });
     return;
   }
 
@@ -257,6 +291,8 @@ function efectosDeRuta(ruta) {
     if (!state[ruta.nombre].cargado && !state[ruta.nombre].cargando) cargar(ruta.nombre);
     if (ruta.id) cargarDetalle(ruta.nombre, ruta.id);
     else if (state.detalle) setState({ detalle: null });
+  } else if (ruta.nombre === "tabla") {
+    abrirTabla(ruta);
   } else if (ruta.nombre === "editar" || ruta.nombre === "nuevo") {
     if (!editor) abrirEditor(ruta);
   } else if (ruta.nombre === "mapa" && !state.baseActiva && !state.mapaActivo) {
@@ -265,6 +301,37 @@ function efectosDeRuta(ruta) {
     // Other team members add bases and maps too: revalidate on entry.
     loadIndex({ forzar: true });
   }
+}
+
+/* ------------------------------------------------------------------ table */
+
+function abrirTabla(ruta) {
+  const { sesion } = getState();
+  if (!sesion) return;
+  if (tabla) { tabla.abrir(ruta.id); return; }
+  tablaDe = `${sesion.id}|${sesion.rol}`;
+  tabla = createTabla({
+    sesion, soloConsulta: () => readOnly, vistaInicial: ruta.id,
+    // The table says which view it ended up showing; the address follows it.
+    onVista: (vista) => {
+      if (getState().ruta.nombre === "tabla") navigate({ nombre: "tabla", id: vista }, { replace: true });
+    },
+    // The server refused something the role allowed a moment ago: ask who we are now.
+    onPermisos: async () => {
+      cerrarTabla();
+      await session.refresh();
+      if (getState().sesion) aplicarRuta();
+    },
+  });
+  setState({});
+}
+
+function renderTabla(host) {
+  if (tabla) {
+    if (tabla.element.parentNode !== host) clear(host).append(tabla.element);
+    return;
+  }
+  clear(host).append(el("div", { class: "screen" }, el("p", { class: "secondary", role: "status" }, "Cargando…")));
 }
 
 /* ----------------------------------------------------------------- editor */
@@ -340,15 +407,16 @@ let headerClave = null;
 
 function renderHeader(host) {
   const { ruta, sesion, sesionLista, baseActiva, mapaActivo } = getState();
+  const admin = sesion?.rol === "admin";
   const activa = ruta.nombre === "editar" || ruta.nombre === "nuevo" ? "inventario" : ruta.nombre;
   const legacyAbierto = Boolean(baseActiva || mapaActivo);
   // Rebuilding the header on every keystroke is wasted work and a focus hazard
   // for anything inside it, so it is rebuilt only when what it shows changes.
-  const clave = [activa, sesion?.id, sesion?.display_name, sesionLista, legacyAbierto].join("|");
+  const clave = [activa, sesion?.id, sesion?.display_name, sesion?.rol, sesionLista, legacyAbierto].join("|");
   if (headerClave === clave && host.childElementCount) return;
   headerClave = clave;
 
-  const items = (sesion ? NAV_EQUIPO : NAV_PUBLICO)
+  const items = (!sesion ? NAV_PUBLICO : admin ? NAV_EQUIPO : NAV_OPERADOR)
     .filter(([key]) => key !== "mapa" || legacyAbierto);
 
   // append() skips the false of the conditional pieces; the native
@@ -399,6 +467,7 @@ function renderView(host) {
     return undefined;
   }
   switch (state.ruta.nombre) {
+    case "tabla": return renderTabla(host);
     case "bases": return renderBases(host, state);
     case "mapas": return renderMapas(host, state);
     case "editar":

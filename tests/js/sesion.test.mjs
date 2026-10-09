@@ -85,7 +85,7 @@ test("public requests are outside the private scope", async () => {
   abortPrivate();
   assert.deepEqual(await publica, fixture("public-list-empty"));
   assert.equal(calls[0].options.signal, undefined);
-  assert.match(calls[0].url, /^\/api\/publico\/terrenos\?estado=Jalisco&limit=250$/);
+  assert.match(calls[0].url, /^\/api\/publico\/terrenos\?estado=Jalisco&limit=200$/);
 });
 
 test("a private 401 reports the expired session; a failed login does not", async () => {

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import os
 import sqlite3
 import tempfile
@@ -414,6 +415,71 @@ class Registros(Escenario):
         self.assertEqual(no["terrenos"][0]["attention"], [])
         self.assertEqual(self.ok(self.lista(self.b1, "attention=true&limit=1"))["next_cursor"], None)
 
+    def test_the_attention_filter_in_sql_is_the_rule_shown_on_each_record(self):
+        """The filter is a SQL predicate; the reasons on a record are Python.
+        One record per rule, alone and at its tolerance boundary, on each
+        database: the two must agree on every one, page after page."""
+        limpio = {**CAMPOS, "moneda": "USD", "availability": "available"}
+        ambas, cerca = ["price", "availability"], math.nextafter
+        casos = [({}, c) for c in ([], ["price"], ["availability"], ambas)]
+        casos += [(cambio, ambas) for cambio in (
+            {"terreno": None}, {"lat": None}, {"lat": -20.7, "lon": 103.4}, {"lat": 40},
+            {"superficie_m2": None, "superficie_ha": None}, {"superficie_m2": 0, "superficie_ha": 0},
+            {"superficie_m2": None}, {"superficie_ha": None}, {"superficie_m2": 0},
+            {"availability": "unknown"}, {"availability": "sold"},
+            {"asking_price": None, "asking_m2": None}, {"asking_price": None}, {"asking_m2": None},
+            {"moneda": None}, {"moneda": "MXN"}, {"estado": None}, {"municipio": None},
+            {"asking_price": 0}, {"asking_m2": 0}, {"asking_price": 0, "asking_m2": 0},
+            # Area: Ha x 10 000 against m2, one square metre of tolerance.
+            {"superficie_ha": 1.2001}, {"superficie_ha": cerca(1.2001, 2)}, {"superficie_ha": cerca(1.2001, 0)},
+            {"superficie_ha": 1.1999}, {"superficie_ha": cerca(1.1999, 2)}, {"superficie_ha": cerca(1.1999, 0)},
+            {"superficie_ha": 1.3},
+            # Price: unit price x m2 against the total, 2 % of the larger one.
+            {"asking_price": 1500000}, {"asking_price": cerca(1500000, 2e6)}, {"asking_price": cerca(1500000, 0)},
+            {"asking_price": 1440600}, {"asking_price": cerca(1440600, 2e6)}, {"asking_price": cerca(1440600, 0)},
+            {"asking_price": 14700000}, {"asking_m2": 125.0}, {"asking_m2": 120.0},
+            {"afectaciones_pct": 0.5}, {"afectaciones_pct": cerca(0.5, 1)}, {"afectaciones_pct": 0.85},
+            {"afectaciones_pct": 1.5}, {"afectaciones_pct": None},
+            # Numbers no database can multiply: flagged, never computed.
+            {"asking_price": 1e200, "asking_m2": 1e200}, {"asking_m2": 1e-200, "superficie_m2": 1e-200},
+            {"superficie_ha": 1e305}, {"superficie_ha": 1e-150}, {"asking_price": 1.7e308},
+            {"asking_price": 1e100, "asking_m2": 1e100, "superficie_m2": 1, "superficie_ha": 1e-4},
+            {"asking_price": 1e-100, "asking_m2": 1e-100, "superficie_m2": 1, "superficie_ha": 1e-4},
+        )]
+        casos += [({"price_on_request": True, **cambio}, ["availability"]) for cambio in (
+            {}, {"asking_price": None, "asking_m2": None}, {"asking_price": None})]
+        nueva = self.crear_base("Base Atención")
+        for cambio, confirmar in casos:
+            (tid,) = self.sembrar(nueva, "ada", {**limpio, **cambio})
+            if confirmar:
+                self.ok(self.patch(tid, {}, "ada", confirm=confirmar))
+
+        def todas(query):
+            ids, cursor, total = [], "", None
+            while cursor is not None:
+                pagina = self.ok(self.lista(nueva, f"{query}&limit=7&cursor={cursor}", "ada"))
+                self.assertIn(total, (None, pagina["total"]))
+                total, cursor = pagina["total"], pagina["next_cursor"]
+                ids += [(t["id"], sorted({r["code"] for r in t["attention"]})) for t in pagina["terrenos"]]
+            self.assertEqual(total, len(ids))
+            return ids
+
+        for orden in ("id", "-asking_price", "terreno"):
+            vistas = todas(f"sort={orden}")
+            self.assertEqual(len(vistas), len(casos))
+            self.assertEqual(sorted(todas(f"sort={orden}&attention=true")), sorted(v for v in vistas if v[1]))
+            self.assertEqual(sorted(todas(f"sort={orden}&attention=false")), sorted(v for v in vistas if not v[1]))
+        # Every rule is exercised alone, and some record is beyond each boundary on each side.
+        solas = {v[1][0] for v in vistas if len(v[1]) == 1}
+        self.assertLessEqual({
+            "name_required", "location_invalid", "area_required", "availability_unknown", "price_conflict",
+            "price_required", "currency_required", "price_unconfirmed", "availability_unconfirmed",
+            "CAMPO_FALTANTE", "SUPERFICIE_INCONSISTENTE", "PRECIO_CERO", "PRECIO_INCONSISTENTE",
+            "AFECTACION_ALTA", "AFECTACION_FORMATO"}, solas | {"price_conflict", "area_required"})
+        todos_los_codigos = {c for v in vistas for c in v[1]}
+        self.assertLessEqual({"price_conflict", "area_required", "VALOR_FUERA_DE_RANGO"}, todos_los_codigos)
+        self.assertGreater(sum(1 for v in vistas if not v[1]), 10)
+
     # -- 4. archive and restore ---------------------------------------------------
 
     def test_archiving_is_reversible_and_changes_only_the_archive_state(self):
@@ -704,6 +770,25 @@ class RegistrosSqlite(Registros, unittest.TestCase):
         self.sembrar(nueva, "ada", *({"terreno": f"Lote {n}"} for n in range(3, 40)))
         self.assertEqual((pocas, consultas(40)), ((2, pocas[1]), (40, pocas[1])))
         self.assertLessEqual(pocas[1], 7)  # count, page, four facets, custom columns
+
+    def test_the_attention_filter_reads_one_page_and_counts_in_sql(self):
+        nueva = self.crear_base("Base Acotada")
+        self.sembrar(nueva, "ada", *({"terreno": f"Lote {n}"} for n in range(12)))
+        for valor in ("true", "false"):
+            q = inventario.parse_query({"limit": ["5"], "attention": [valor]}, inventario.SCOPED_QUERY)
+            with db.session() as conn:
+                contadas = []
+                conn.set_trace_callback(contadas.append)
+                pagina, total, siguiente, _ = repo.listar(conn, q, nueva)
+                conn.set_trace_callback(None)
+            self.assertEqual((len(pagina), total, bool(siguiente)),
+                             (5, 12, True) if valor == "true" else (0, 0, False))
+            # One COUNT and one page of limit + 1 rows: no statement reads the base's records unbounded.
+            registros = [c for c in contadas if "FROM inventory_terrain t" in c and "DISTINCT" not in c]
+            self.assertEqual(len(registros), 2, contadas)
+            self.assertTrue(registros[0].startswith("SELECT COUNT(*)"))
+            self.assertTrue(registros[1].endswith("LIMIT 6"), registros[1][-40:])
+            self.assertLessEqual(len(contadas), 7)
 
     def test_folding_is_one_table_for_both_databases(self):
         self.assertEqual(db.plegar("ÁRBOL Ñandú Çedilla üÜ"), "arbol nandu cedilla uu")

@@ -13,7 +13,16 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from .importer import TerrainRecord
-from .validation import UBICACION_VALIDA, location_state, validate_record
+from .validation import (
+    AFECTACION_ALTA,
+    AREA_TOLERANCE_M2,
+    AVISO,
+    PRICE_TOLERANCE,
+    UBICACION_VALIDA,
+    location_state,
+    sql_ubicacion_valida,
+    validate_record,
+)
 
 AVAILABILITY = ("unknown", "available", "negotiation", "sold", "withdrawn")
 PUBLIC_AVAILABILITY = ("available", "negotiation")
@@ -152,8 +161,24 @@ def warnings(draft: Mapping[str, Any]) -> list[dict[str, str]]:
     valores: dict[str, Any] = {n: draft.get(n) for n in (
         "estado", "municipio", "direccion", *NUMBERS, "moneda")}
     record = TerrainRecord(orden=0, fila=0, terreno=draft.get("terreno") or "", **valores)
-    return [{"code": f.codigo, "severity": f.severidad, "message": f.mensaje}
-            for f in validate_record(record) if f.codigo not in _COVERED_BY_BLOCKERS]
+    found = [{"code": f.codigo, "severity": f.severidad, "message": f.mensaje}
+             for f in validate_record(record) if f.codigo not in _COVERED_BY_BLOCKERS]
+    if any(_fuera_de_rango(draft.get(n)) for n in _CRUZADOS):
+        found.append({"code": "VALOR_FUERA_DE_RANGO", "severity": AVISO,
+                      "message": "Una superficie o un precio está fuera de cualquier rango real."})
+    return found
+
+
+# The numbers the findings multiply and divide. Outside this range they are no
+# real area or price, and their products leave what a database can compute
+# (Postgres raises on overflow and underflow), so the record is flagged for it
+# and sql_atencion() does no arithmetic on it.
+_CRUZADOS = ("superficie_m2", "superficie_ha", "asking_price", "asking_m2")
+RANGO_REAL = (1e-100, 1e100)
+
+
+def _fuera_de_rango(value: Any) -> bool:
+    return bool(value) and not RANGO_REAL[0] <= abs(value) <= RANGO_REAL[1]
 
 
 def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> list[dict[str, str]]:
@@ -168,6 +193,51 @@ def attention(draft: Mapping[str, Any], confirmations: Mapping[str, Any]) -> lis
                         "message": "La disponibilidad nunca se ha confirmado."})
     reasons.extend({"kind": "warning", "field": "", **w} for w in warnings(draft))
     return reasons
+
+
+def sql_atencion(d: str = "d") -> str:
+    """Whether attention() is non-empty, as a SQL predicate over the draft
+    revision aliased ``d``. Never NULL, so NOT (...) is its exact complement.
+
+    Built from the same constants and the same floating-point operations in
+    the same order as the Python rules, so a list filtered by it and the
+    reasons shown on each record cannot disagree. A test compares the two on
+    both databases, tolerance boundaries included.
+    """
+    m2, ha, precio, unitario = (f"{d}.{n}" for n in _CRUZADOS)
+    a_consultar = f"{d}.price_on_request = 1"
+    sin_monto = f"(COALESCE({precio}, 0) <= 0 AND COALESCE({unitario}, 0) <= 0)"
+    disponibles = ", ".join(f"'{a}'" for a in AVAILABILITY[1:])
+    monedas = ", ".join(f"'{m}'" for m in MONEDAS)
+    implicito = f"{unitario} * {m2}"
+    fuera = " OR ".join(f"({c} <> 0 AND ({c} < {RANGO_REAL[0]!r} OR {c} > {RANGO_REAL[1]!r}))"
+                        for c in (m2, ha, precio, unitario))
+    hallazgos = (
+        f"COALESCE({d}.estado, '') = ''",
+        f"COALESCE({d}.municipio, '') = ''",
+        f"({m2} IS NOT NULL AND {ha} IS NOT NULL"
+        f" AND ABS({ha} * 10000 - {m2}) > {AREA_TOLERANCE_M2!r})",
+        # A zero amount first: it is its own finding and would divide by zero below.
+        f"CASE WHEN {precio} = 0 OR {unitario} = 0 THEN 1 = 1"
+        f" WHEN {precio} IS NULL OR {unitario} IS NULL OR {m2} IS NULL THEN 1 = 0"
+        f" ELSE ABS({implicito} - {precio}) / (CASE WHEN ABS({implicito}) >= ABS({precio})"
+        f" THEN ABS({implicito}) ELSE ABS({precio}) END) > {PRICE_TOLERANCE!r} END",
+        f"COALESCE({d}.afectaciones_pct, 0) > {AFECTACION_ALTA!r}",
+    )
+    return "(" + " OR ".join((
+        # publication_blockers()
+        f"TRIM(COALESCE({d}.terreno, '')) = ''",
+        f"NOT {sql_ubicacion_valida(f'{d}.lat', f'{d}.lon')}",
+        f"(COALESCE({m2}, 0) <= 0 AND COALESCE({ha}, 0) <= 0)",
+        f"COALESCE({d}.availability, '') NOT IN ({disponibles})",
+        f"({a_consultar} AND ({precio} IS NOT NULL OR {unitario} IS NOT NULL))",
+        f"(NOT {a_consultar} AND ({sin_monto} OR COALESCE({d}.moneda, '') NOT IN ({monedas})))",
+        # never confirmed
+        f"(NOT {a_consultar} AND COALESCE({d}.price_confirmed_at, '') = '')",
+        f"COALESCE({d}.availability_confirmed_at, '') = ''",
+        # warnings(); CASE, because it alone fixes the order of evaluation
+        f"CASE WHEN {fuera} THEN 1 = 1 ELSE ({' OR '.join(hallazgos)}) END",
+    )) + ")"
 
 
 # -- list queries -------------------------------------------------------------

@@ -95,22 +95,8 @@ def listar(conn: DatabaseConnection, q: Mapping[str, Any], base_id: str | None =
     pagina_sql = (_SELECT.rstrip().replace("SELECT ", f"SELECT {clave} AS orden_clave, ", 1)
                   + donde + tras + orden)
 
-    if q["attention"] is None:
-        total = conn.execute("SELECT COUNT(*) AS n" + _FROM + donde, params).fetchone()["n"]
-        rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
-    else:
-        # ponytail: "needs attention" is decided by the validation rules in
-        # Python, not by a column, so this one filter reads every row that
-        # passes the others (in SQL order, one row at a time, no page built).
-        # Store the flag on the revision in a migration if this list gets slow.
-        todas = conn.execute(_SELECT + donde, params)
-        total = sum(1 for r in todas if bool(_dto(r, {})["attention"]) == q["attention"])
-        rows = []
-        for row in conn.execute(pagina_sql, (*params, *p_tras)):
-            if bool(_dto(row, {})["attention"]) == q["attention"]:
-                rows.append(row)
-                if len(rows) > q["limit"]:
-                    break
+    total = conn.execute("SELECT COUNT(*) AS n" + _FROM + donde, params).fetchone()["n"]
+    rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
 
     pagina = rows[:q["limit"]]
     siguiente = None
@@ -171,6 +157,8 @@ def _filtros(conn: DatabaseConnection, q: Mapping[str, Any]) -> tuple[list[str],
     if q["publication_state"]:
         partes.append("(" + " OR ".join(_ESTADOS_DE_PUBLICACION[e]
                                         for e in q["publication_state"]) + ")")
+    if q["attention"] is not None:
+        partes.append(("" if q["attention"] else "NOT ") + inventario.sql_atencion("d"))
     buscado = db.plegar(" ".join(q["q"].split()))
     if buscado:
         junto = " || ' ' || ".join(f"COALESCE(d.{c}, '')" for c in _BUSCADOS)

@@ -159,15 +159,38 @@ either.
 - No geometry, file credential or attachment summary is in a list; `ubicacion`
   is not returned. Location filters remain X/Y-only until 3A.
 
-### One filter is not SQL
+### The attention filter is SQL (correction 1)
 
-`attention` ("needs a look") is decided by the publication gate and the
-validation warnings, which are Python rules, not a column. When that filter is
-used, the query still applies scope and every other filter in SQL, then reads
-the remaining rows one at a time to evaluate it; only the page is built. On
-25,000 records that is about a second (§6). The interface does not use this
-filter today. Making it SQL needs a stored flag on the revision, which is a
-schema change; it is listed as a follow-up rather than done here.
+`attention` ("needs a look") is the publication gate, the two never-confirmed
+checks and the validation warnings. Those rules are Python, and they still
+produce the reasons shown on each record. The list filter is now the same rules
+as one SQL predicate, `inventario.sql_atencion()`, ANDed onto the scoped query
+like every other filter: the count is a `COUNT(*)`, the page is `LIMIT n + 1`,
+and no statement reads a scope's records to decide it. **No schema change.**
+
+- It is generated from the same constants (`validation.py` tolerances, the
+  Mexico bounds through the existing `sql_ubicacion_valida`, `AVAILABILITY`,
+  `MONEDAS`) and performs the same IEEE double operations in the same order as
+  the Python rules, so the two agree at the tolerance boundaries, not only away
+  from them. It never evaluates to NULL, so `attention=false` is its exact
+  complement.
+- **One addition to the record, for review.** Postgres raises an error when a
+  double multiplication overflows or underflows; Python and SQLite do not. A
+  stored area or price of `1e200` would therefore have turned every attention
+  list containing it into a 500. The predicate does no arithmetic on a record
+  whose `superficie_m2`, `superficie_ha`, `asking_price` or `asking_m2` is
+  non-zero and outside `1e-100 … 1e100`; it reports that record as needing
+  attention. So that the reasons on the record say why, such a record now
+  carries one more warning, `VALOR_FUERA_DE_RANGO`. No real area or price is
+  near that range, nothing is rejected or changed on save, and no other record's
+  reasons change. Without this the filter and the reasons could disagree for
+  those values only.
+- Not indexed: the predicate is evaluated on the same scan as the other
+  revision-column filters. The worst case is a filter that matches nothing in
+  the whole inventory (§6): 154 ms on SQLite and 57 ms on Postgres at 25,000
+  records, down from 1,250 ms and 824 ms.
+- It relies on one stored-data invariant that already held: text is saved
+  trimmed and blank as NULL (`_clean_value`), the only writer of revisions.
 
 ## 5. Archive, restore, transfer, history
 
@@ -231,48 +254,58 @@ five times. One developer Mac, databases on the same machine.
 
 | Operation | Matching | Rows | Response | SQL statements | Median ms | Max ms |
 |---|---:|---:|---:|---:|---:|---:|
-| Master table, default page (100) | 25,000 | 100 | 163 kB | 7 | 82 | 83 |
-| Master table, 200 rows | 25,000 | 200 | 323 kB | 7 | 86 | 87 |
-| Master table, state + type filter | 625 | 100 | 161 kB | 7 | 94 | 94 |
-| Master table, price range in USD | 1,411 | 100 | 156 kB | 7 | 92 | 93 |
-| Master table, search 'nandu 12' | 220 | 100 | 162 kB | 7 | 185 | 188 |
-| Master table, one base + unassigned | 3,100 | 100 | 160 kB | 7 | 39 | 39 |
-| Master table, sorted by name | 25,000 | 100 | 161 kB | 7 | 141 | 142 |
-| Master table, sorted by area, descending | 25,000 | 100 | 160 kB | 7 | 106 | 107 |
-| Master table, attention=false (the one Python-side filter) | 0 | 0 | 1 kB | 6 | 1250 | 1251 |
-| 3,000-record base, operator, default page | 3,000 | 100 | 161 kB | 7 | 19 | 20 |
-| 3,000-record base, operator, 200 rows sorted by name | 3,000 | 200 | 322 kB | 7 | 27 | 27 |
-| 3,000-record base, operator, search | 880 | 100 | 162 kB | 7 | 30 | 30 |
-| 3,000-record base, operator, state filter | 375 | 100 | 161 kB | 7 | 18 | 18 |
-| Master table, pages 1-10 of 200 by cursor, sorted by name | 25,000 | 200 | 322 kB | 7 | 183 | 185 |
+| Master table, default page (100) | 25,000 | 100 | 162 kB | 7 | 84 | 87 |
+| Master table, 200 rows | 25,000 | 200 | 323 kB | 7 | 89 | 95 |
+| Master table, state + type filter | 625 | 100 | 162 kB | 7 | 98 | 100 |
+| Master table, price range in USD | 1,411 | 100 | 156 kB | 7 | 93 | 96 |
+| Master table, search 'nandu 12' | 220 | 100 | 162 kB | 7 | 183 | 186 |
+| Master table, one base + unassigned | 3,100 | 100 | 160 kB | 7 | 41 | 43 |
+| Master table, sorted by name | 25,000 | 100 | 161 kB | 7 | 148 | 150 |
+| Master table, sorted by area, descending | 25,000 | 100 | 160 kB | 7 | 112 | 114 |
+| Master table, attention=false (no record matches: the whole scan) | 0 | 0 | 1 kB | 6 | 154 | 156 |
+| Master table, attention=true | 25,000 | 100 | 162 kB | 7 | 95 | 96 |
+| Master table, attention=true, 200 rows sorted by name | 25,000 | 200 | 322 kB | 7 | 166 | 168 |
+| Master table, attention=true + state filter | 3,125 | 100 | 161 kB | 7 | 92 | 95 |
+| 3,000-record base, operator, attention=true | 3,000 | 100 | 161 kB | 7 | 22 | 22 |
+| 3,000-record base, operator, attention=false | 0 | 0 | 1 kB | 6 | 16 | 16 |
+| 3,000-record base, operator, default page | 3,000 | 100 | 161 kB | 7 | 20 | 21 |
+| 3,000-record base, operator, 200 rows sorted by name | 3,000 | 200 | 322 kB | 7 | 27 | 28 |
+| 3,000-record base, operator, search | 880 | 100 | 161 kB | 7 | 31 | 34 |
+| 3,000-record base, operator, state filter | 375 | 100 | 161 kB | 7 | 19 | 19 |
+| Master table, pages 1-10 of 200 by cursor, sorted by name | 25,000 | 200 | 322 kB | 7 | 191 | 193 |
 
-Five sessions, 100 edits of 100 different records: 100 accepted, 0 other outcomes; median 33 ms, max 78 ms. Five sessions, one record, same version: responses [200, 409, 409, 409, 409]; the record ends at version 2 with 2 revisions and 2 events.
+Five sessions, 100 edits of 100 different records: 100 accepted, 0 other outcomes; median 31 ms, max 53 ms. Five sessions, one record, same version: responses [200, 409, 409, 409, 409]; the record ends at version 2 with 2 revisions and 2 events.
 
 **PostgreSQL 16, disposable local schema, Python 3.12, after ANALYZE**
 
 | Operation | Matching | Rows | Response | SQL statements | Median ms | Max ms |
 |---|---:|---:|---:|---:|---:|---:|
-| Master table, default page (100) | 25,000 | 100 | 161 kB | 7 | 57 | 60 |
-| Master table, 200 rows | 25,000 | 200 | 321 kB | 7 | 59 | 59 |
-| Master table, state + type filter | 625 | 100 | 161 kB | 7 | 59 | 59 |
-| Master table, price range in USD | 1,411 | 100 | 156 kB | 7 | 57 | 64 |
-| Master table, search 'nandu 12' | 220 | 100 | 162 kB | 7 | 488 | 490 |
-| Master table, one base + unassigned | 3,100 | 100 | 161 kB | 7 | 34 | 35 |
-| Master table, sorted by name | 25,000 | 100 | 161 kB | 7 | 187 | 188 |
-| Master table, sorted by area, descending | 25,000 | 100 | 160 kB | 7 | 99 | 99 |
-| Master table, attention=false (the one Python-side filter) | 0 | 0 | 1 kB | 6 | 824 | 827 |
-| 3,000-record base, operator, default page | 3,000 | 100 | 162 kB | 7 | 31 | 34 |
-| 3,000-record base, operator, 200 rows sorted by name | 3,000 | 200 | 322 kB | 7 | 65 | 66 |
-| 3,000-record base, operator, search | 880 | 100 | 160 kB | 7 | 467 | 468 |
-| 3,000-record base, operator, state filter | 375 | 100 | 161 kB | 7 | 32 | 33 |
-| Master table, pages 1-10 of 200 by cursor, sorted by name | 25,000 | 200 | 322 kB | 7 | 472 | 477 |
+| Master table, default page (100) | 25,000 | 100 | 161 kB | 7 | 55 | 60 |
+| Master table, 200 rows | 25,000 | 200 | 322 kB | 7 | 59 | 66 |
+| Master table, state + type filter | 625 | 100 | 160 kB | 7 | 62 | 66 |
+| Master table, price range in USD | 1,411 | 100 | 156 kB | 7 | 60 | 66 |
+| Master table, search 'nandu 12' | 220 | 100 | 162 kB | 7 | 498 | 499 |
+| Master table, one base + unassigned | 3,100 | 100 | 159 kB | 7 | 36 | 39 |
+| Master table, sorted by name | 25,000 | 100 | 161 kB | 7 | 195 | 196 |
+| Master table, sorted by area, descending | 25,000 | 100 | 160 kB | 7 | 102 | 107 |
+| Master table, attention=false (no record matches: the whole scan) | 0 | 0 | 1 kB | 6 | 57 | 60 |
+| Master table, attention=true | 25,000 | 100 | 161 kB | 7 | 67 | 70 |
+| Master table, attention=true, 200 rows sorted by name | 25,000 | 200 | 322 kB | 7 | 215 | 219 |
+| Master table, attention=true + state filter | 3,125 | 100 | 161 kB | 7 | 60 | 68 |
+| 3,000-record base, operator, attention=true | 3,000 | 100 | 160 kB | 7 | 40 | 43 |
+| 3,000-record base, operator, attention=false | 0 | 0 | 1 kB | 6 | 33 | 37 |
+| 3,000-record base, operator, default page | 3,000 | 100 | 160 kB | 7 | 33 | 37 |
+| 3,000-record base, operator, 200 rows sorted by name | 3,000 | 200 | 322 kB | 7 | 68 | 71 |
+| 3,000-record base, operator, search | 880 | 100 | 162 kB | 7 | 484 | 484 |
+| 3,000-record base, operator, state filter | 375 | 100 | 160 kB | 7 | 33 | 38 |
+| Master table, pages 1-10 of 200 by cursor, sorted by name | 25,000 | 200 | 322 kB | 7 | 541 | 649 |
 
-Five sessions, 100 edits of 100 different records: 100 accepted, 0 other outcomes; median 27 ms, max 32 ms. Five sessions, one record, same version: responses [200, 409, 409, 409, 409]; the record ends at version 2 with 2 revisions and 2 events.
+Five sessions, 100 edits of 100 different records: 100 accepted, 0 other outcomes; median 30 ms, max 35 ms. Five sessions, one record, same version: responses [200, 409, 409, 409, 409]; the record ends at version 2 with 2 revisions and 2 events.
 
 What the numbers say, and do not say:
 
-- Every list is 7 statements (6 when the attention filter replaces the count),
-  independent of the page and of the inventory size. A 100-row page is about
+- Every list is 7 statements (6 when the page is empty and no custom columns are
+  looked up), independent of the page and of the inventory size. A 100-row page is about
   160 kB of JSON; 200 rows about 320 kB.
 - **Plans.** A base's list enters through `idx_inventory_terrain_base` and joins
   the draft revision by primary key. The master table scans `inventory_terrain`
@@ -291,13 +324,16 @@ What the numbers say, and do not say:
   also applies inside a 3,000-record base on Postgres, where the planner folds
   before it narrows to the base. It is bounded and correct; the fix, if wanted,
   is a stored folded column or an expression index, which is a schema change.
-- The attention filter costs about a second on the full inventory (§4).
+- The attention filter is one more predicate on the same scan (§4): 57–215 ms on
+  the full inventory depending on order and database, close to the list
+  without it. These tables were re-measured after correction 1; the first
+  delivery's raw output is kept beside the new one in `evidencia/`.
 - This is a backend measurement on one machine with fictional data. It is not a
   capacity claim for the product, a hosted measurement, or a browser one.
 
 ## 7. Verification
 
-`tests/test_registros_maestra.py`: 23 tests on SQLite, 22 on Postgres, through
+`tests/test_registros_maestra.py`: 25 tests on SQLite, 23 on Postgres, through
 the real dispatcher with real sessions, on the A-2 fixture (two administrators;
 operators with one, two and no grants; two active bases and an archived one;
 assigned, unassigned and archived terrains).
@@ -307,9 +343,20 @@ assigned, unassigned and archived terrains).
 | 1. Blank create where authorized and nowhere else; optional values round-trip | `test_a_blank_record_is_created_where_authorized_and_nowhere_else`, `test_every_core_value_is_optional_and_round_trips`, `test_the_body_cannot_choose_the_owner_actor_or_role` |
 | 2. Idempotency scope and replay; simultaneous edits | `test_a_repeated_key_returns_the_same_record_to_its_owner_only`, `test_a_replay_is_reauthorized_against_the_record_as_it_is_now`, `test_simultaneous_requests_with_one_key_create_one_record`, `test_five_sessions_editing_one_cell_give_one_version_and_four_conflicts` |
 | 3. Archive, restore, transfer; both race orders; retained files; custom redaction | `test_archiving_is_reversible_and_changes_only_the_archive_state`, `test_archive_and_restore_are_refused_out_of_scope_or_in_an_archived_base`, `test_an_operator_cannot_change_what_the_public_sees_by_archiving`, `test_a_transfer_moves_the_one_record_with_its_files_and_history`, `test_custom_values_follow_the_base_that_defines_them`, `test_transfers_are_validated_and_administrators_only`, `test_a_transfer_and_an_edit_never_both_win_on_one_version`, `test_a_transfer_and_a_change_to_its_destination_are_serialized` |
-| 4. Inaccessible rows in no total, facet, history, cursor or error; order parity; injection | `test_a_base_list_holds_only_that_base_in_rows_totals_and_facets`, `test_the_master_table_filters_by_base_type_and_unassigned`, `test_order_missing_values_case_and_accents_are_the_same_on_both_databases`, `test_query_values_are_values_and_identifiers_are_allowlisted`, `test_the_attention_filter_partitions_the_list`, `test_a_page_costs_the_same_number_of_queries_whatever_its_size` (SQLite), folding parity tests on each backend |
+| 4. Inaccessible rows in no total, facet, history, cursor or error; order parity; injection | `test_a_base_list_holds_only_that_base_in_rows_totals_and_facets`, `test_the_master_table_filters_by_base_type_and_unassigned`, `test_order_missing_values_case_and_accents_are_the_same_on_both_databases`, `test_query_values_are_values_and_identifiers_are_allowlisted`, `test_the_attention_filter_partitions_the_list`, `test_the_attention_filter_in_sql_is_the_rule_shown_on_each_record`, `test_the_attention_filter_reads_one_page_and_counts_in_sql` (SQLite), `test_a_page_costs_the_same_number_of_queries_whatever_its_size` (SQLite), folding parity tests on each backend |
 | 5. 25,000 / 3,000 / five sessions | §6, `medir.py` |
 | 6. Existing behaviour preserved | `test_public_output_and_operator_limits_are_unchanged`, and the whole existing suite |
+
+The attention parity test stores one record per rule, alone on an otherwise
+clean and confirmed record, plus records one representable double on either
+side of the area, price and affectation tolerances, records with the
+out-of-range values, and the confirmation and "price on request" combinations
+(56 records). On each database it pages through `attention=true` and
+`attention=false` seven at a time in three orders and requires exactly the
+records whose own reason list is non-empty, or empty. Eleven deliberate breaks
+of the predicate (each comparison turned, each of several terms removed) each
+fail it on SQLite; removing the range guard fails it on Postgres with the
+overflow error it prevents.
 
 Race tests hold the first request inside its write transaction, after its
 authorization and before its write, and start the second: the second has not
@@ -334,8 +381,8 @@ Results on the head named in the PR:
 
 | Check | Result |
 |---|---|
-| `./verificar.sh` (macOS, SQLite) | 1,032 Python tests OK, 121 skipped (all need Postgres); complete suite on Python 3.9.6 OK; JavaScript 120/120 |
-| Disposable local Postgres 16 (Python 3.12, psycopg 3) | 1,032 tests, 0 skipped, OK |
+| `./verificar.sh` (macOS, SQLite) | 1,035 Python tests OK, 122 skipped (all need Postgres); complete suite on Python 3.9.6 OK; JavaScript 120/120 |
+| Disposable local Postgres 16 (Python 3.12, psycopg 3) | 1,035 tests, 0 skipped, OK |
 | `ruff check server/ tests/`, `mypy server/` | clean; 47 source files |
 | GitHub Actions | in the PR |
 
@@ -357,7 +404,8 @@ Not run: browser tests, any hosted or Preview environment, coverage.
 9. Search and sort fold ASCII case and Spanish diacritics from one explicit
    table instead of full Unicode normalization, so both databases agree whatever
    their locale. Before, folding was Python's NFKD over the loaded inventory.
-10. The `attention` filter stays exact and is evaluated in Python (§4).
+10. The `attention` filter is exact and evaluated in SQL; a record with an area or
+    price outside `1e-100 … 1e100` gains the warning `VALOR_FUERA_DE_RANGO` (§4).
 11. Facets keep their existing "before business filters" meaning and gain `tipos`.
 
 ## 9. Reserved for later packets
@@ -368,8 +416,7 @@ Not run: browser tests, any hosted or Preview environment, coverage.
   filter labels.
 - **3A:** attachment and location summaries in the record DTO; KMZ-aware
   located/unplaced filters; mounting B's widgets and handlers.
-- **Schema, when wanted:** a stored attention flag; a stored folded search
-  column or expression index.
+- **Schema, when wanted:** a stored folded search column or expression index.
 - **Release notes to carry:** run `ANALYZE` after a bulk load or restore on
   Postgres; the list maximum changed from 250 to 200; idempotency keys are now
   per account and per base.

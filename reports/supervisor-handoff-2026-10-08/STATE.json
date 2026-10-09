@@ -54,19 +54,22 @@
   ],
   "update_rule": "Refresh snapshot and changed facts after review; preserve exact evidence/version links and open findings. Do not treat this timestamped snapshot as live status.",
   "latest_supervisor_review": {
-    "checked_at_utc": "2026-10-09T02:27:53Z",
-    "report": "reports/team-b-research-closeout-2026-10-09/START_HERE.md",
+    "checked_at_utc": "2026-10-09T14:32:51Z",
+    "report": "reports/team-a-round-1-closeout-2026-10-09/START_HERE.md",
     "baseline_published_head": "1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb",
     "baseline_pr": 20,
+    "baseline_verdict": "accepted_prerequisite_integration_only_not_combined_1a_1b",
+    "baseline_independent_tests": "987 Python tests with disposable UTF-8 Postgres 17, no skips; 987 on Python 3.9 with 99 Postgres skips; 120 JavaScript tests; accepted component ancestry and scoped tree identity checked",
     "team_a_pr": 22,
     "team_a_review": {
-      "checked_at_utc": "2026-10-09T00:43:53Z",
-      "reviewed_head": "f6cd6b2c45385d149f042c8eabd0e2a2e4db8037",
-      "report": "reports/team-a-1a-review-2026-10-08/START_HERE.md",
-      "verdict": "attention_correction_accepted_other_1a_changes_requested",
+      "checked_at_utc": "2026-10-09T14:32:51Z",
+      "reviewed_head": "1ef2238766eae3e111c031b4fa24f9d849ef4753",
+      "report": "reports/team-a-round-1-closeout-2026-10-09/START_HERE.md",
+      "verdict": "accepted_1a_backend_only",
       "numeric_warning": "approved_nonblocking_technical_guard_with_clearer_message",
-      "findings": ["A1_legacy_hash", "A2_embedded_history_projection", "A3_cursor_types"],
-      "independent_tests": "48 record HTTP tests passed on SQLite and disposable UTF-8 Postgres 17 without skips; 2 attention tests passed on Python 3.9; three additional probe groups reproduced remaining gaps on both databases"
+      "findings": [],
+      "closed_findings": ["A1_legacy_hash", "A2_embedded_history_projection", "A3_cursor_types"],
+      "independent_tests": "54 record HTTP tests passed on SQLite and disposable UTF-8 Postgres 17 without skips; 28 on Python 3.9; all three original probe groups passed on both databases"
     },
     "team_b_lifecycle": {
       "pr": 23,
@@ -85,7 +88,7 @@
       "independent_tests": "37 of 37 prototype tests passed twice on Node 23.7; adapted original and edge probes passed; Chrome 154 pressure/resize/reset cases passed including audit negative control and zero-ledger teardown; full matrix, paint and timing not repeated",
       "reserved_limits": ["RGBA difference not approved", "study ledger not total browser memory", "future resize harness must assert requested final sizing explicitly"]
     },
-    "next_owner": "Team B preserves accepted research and lifecycle heads and waits for an explicit later packet; Team A continues correction 2; supervisor reviews A handback and combined baseline before later release",
+    "next_owner": "Both teams preserve accepted draft heads; supervisor prepares next bounded instructions including tested 1A/1B integration dependencies; no further Round 1 corrections or later feature release yet",
     "later_packets_released": false
   }
 }

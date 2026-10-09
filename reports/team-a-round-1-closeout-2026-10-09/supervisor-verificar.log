@@ -1,0 +1,17 @@
+
+── Pruebas unitarias e integración (Python del sistema) ──
+Ran 672 tests in 36.919s
+
+OK (skipped=29)
+   OK   suite de Python
+
+── Compatibilidad con el Python que trae macOS ──
+   OK   suite completa en Python 3.9.6
+
+── Lógica de mapa y comparación (JavaScript) ──
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 208.122667
+   OK   pruebas de JavaScript
+
+Todo en orden.

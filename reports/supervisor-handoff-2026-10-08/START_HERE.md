@@ -220,3 +220,21 @@ B's #23 stays accepted and unchanged at `a9dc8af…`. B preserves both draft
 branches; no further correction is requested now. A's correction 2 remains
 pending at the observed head `f6cd6b2…`; the supervisor next reviews A's new
 handback and the combined baseline. No 2A/2B, merge or deployment is released.
+
+### A correction 2 and prerequisite baseline closed — 2026-10-09, 14:32 UTC
+
+**1A accepted** at #22 `1ef2238766eae3e111c031b4fa24f9d849ef4753`:
+A1/A2/A3 closed, technical warning wording and bounded history cursor accepted.
+Independent 54 SQLite/Postgres record tests, 28 Python-3.9 tests and the three
+original probe groups on both databases passed. Exact-head CI is green.
+
+**Baseline #20 accepted** at `1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb`:
+component ancestry/tree identity confirmed, 987 Python tests with disposable
+Postgres and no skips, Python-3.9 suite with 99 PG skips, 120 JS tests passed.
+This is integration of the prerequisite pins, **not combined 1A + 1B**.
+
+See [closeout/evidence](../team-a-round-1-closeout-2026-10-09/START_HERE.md).
+B's two accepted heads are unchanged. Neither team has further Round 1
+corrections; preserve draft branches while the supervisor prepares the next
+bounded instructions and the 1A/1B integration dependency. No 2A/2B, main merge,
+deployment or E5 integration is released by this closeout.

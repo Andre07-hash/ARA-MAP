@@ -1,0 +1,489 @@
+{
+ "motor": "SQLite (temporary file)",
+ "python": "3.9.6",
+ "registros": 25000,
+ "base_grande": 3000,
+ "segundos_de_siembra": 1.0,
+ "listas": [
+  {
+   "operacion": "Master table, default page (100)",
+   "total": 25000,
+   "filas": 100,
+   "bytes": 166216,
+   "consultas_sql": 7,
+   "ms_mediana": 83.6,
+   "ms_max": 87.1
+  },
+  {
+   "operacion": "Master table, 200 rows",
+   "total": 25000,
+   "filas": 200,
+   "bytes": 330640,
+   "consultas_sql": 7,
+   "ms_mediana": 89.3,
+   "ms_max": 95.3
+  },
+  {
+   "operacion": "Master table, state + type filter",
+   "total": 625,
+   "filas": 100,
+   "bytes": 165444,
+   "consultas_sql": 7,
+   "ms_mediana": 97.7,
+   "ms_max": 100.1
+  },
+  {
+   "operacion": "Master table, price range in USD",
+   "total": 1411,
+   "filas": 100,
+   "bytes": 159249,
+   "consultas_sql": 7,
+   "ms_mediana": 93.2,
+   "ms_max": 96.1
+  },
+  {
+   "operacion": "Master table, search 'nandu 12'",
+   "total": 220,
+   "filas": 100,
+   "bytes": 165626,
+   "consultas_sql": 7,
+   "ms_mediana": 183.0,
+   "ms_max": 185.8
+  },
+  {
+   "operacion": "Master table, one base + unassigned",
+   "total": 3100,
+   "filas": 100,
+   "bytes": 163666,
+   "consultas_sql": 7,
+   "ms_mediana": 41.4,
+   "ms_max": 42.9
+  },
+  {
+   "operacion": "Master table, sorted by name",
+   "total": 25000,
+   "filas": 100,
+   "bytes": 165185,
+   "consultas_sql": 7,
+   "ms_mediana": 148.0,
+   "ms_max": 150.4
+  },
+  {
+   "operacion": "Master table, sorted by area, descending",
+   "total": 25000,
+   "filas": 100,
+   "bytes": 164087,
+   "consultas_sql": 7,
+   "ms_mediana": 111.9,
+   "ms_max": 113.6
+  },
+  {
+   "operacion": "Master table, attention=false (no record matches: the whole scan)",
+   "total": 0,
+   "filas": 0,
+   "bytes": 910,
+   "consultas_sql": 6,
+   "ms_mediana": 154.1,
+   "ms_max": 156.1
+  },
+  {
+   "operacion": "Master table, attention=true",
+   "total": 25000,
+   "filas": 100,
+   "bytes": 166216,
+   "consultas_sql": 7,
+   "ms_mediana": 95.0,
+   "ms_max": 96.3
+  },
+  {
+   "operacion": "Master table, attention=true, 200 rows sorted by name",
+   "total": 25000,
+   "filas": 200,
+   "bytes": 329460,
+   "consultas_sql": 7,
+   "ms_mediana": 166.5,
+   "ms_max": 167.9
+  },
+  {
+   "operacion": "Master table, attention=true + state filter",
+   "total": 3125,
+   "filas": 100,
+   "bytes": 164883,
+   "consultas_sql": 7,
+   "ms_mediana": 92.2,
+   "ms_max": 94.6
+  },
+  {
+   "operacion": "3,000-record base, operator, attention=true",
+   "total": 3000,
+   "filas": 100,
+   "bytes": 164956,
+   "consultas_sql": 7,
+   "ms_mediana": 21.9,
+   "ms_max": 22.3
+  },
+  {
+   "operacion": "3,000-record base, operator, attention=false",
+   "total": 0,
+   "filas": 0,
+   "bytes": 910,
+   "consultas_sql": 6,
+   "ms_mediana": 15.7,
+   "ms_max": 16.2
+  },
+  {
+   "operacion": "3,000-record base, operator, default page",
+   "total": 3000,
+   "filas": 100,
+   "bytes": 164956,
+   "consultas_sql": 7,
+   "ms_mediana": 20.1,
+   "ms_max": 21.4
+  },
+  {
+   "operacion": "3,000-record base, operator, 200 rows sorted by name",
+   "total": 3000,
+   "filas": 200,
+   "bytes": 329275,
+   "consultas_sql": 7,
+   "ms_mediana": 27.1,
+   "ms_max": 28.1
+  },
+  {
+   "operacion": "3,000-record base, operator, search",
+   "total": 880,
+   "filas": 100,
+   "bytes": 165062,
+   "consultas_sql": 7,
+   "ms_mediana": 30.9,
+   "ms_max": 33.6
+  },
+  {
+   "operacion": "3,000-record base, operator, state filter",
+   "total": 375,
+   "filas": 100,
+   "bytes": 165190,
+   "consultas_sql": 7,
+   "ms_mediana": 18.7,
+   "ms_max": 19.1
+  },
+  {
+   "operacion": "Master table, pages 1-10 of 200 by cursor, sorted by name",
+   "total": 25000,
+   "filas": 200,
+   "bytes": 329540,
+   "consultas_sql": 7,
+   "ms_mediana": 191.0,
+   "ms_max": 192.7
+  }
+ ],
+ "cinco_sesiones_registros_distintos": {
+  "ediciones": 100,
+  "aceptadas": 100,
+  "otras": [],
+  "ms_mediana": 30.8,
+  "ms_max": 53.1
+ },
+ "cinco_sesiones_mismo_registro": {
+  "respuestas": [
+   200,
+   409,
+   409,
+   409,
+   409
+  ],
+  "version": 2,
+  "revisiones": 2,
+  "eventos": 2
+ },
+ "planes": {
+  "Master table, default page (100)": [
+   [
+    "5 0 0 SCAN t",
+    "9 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "29 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "37 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "42 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "47 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "55 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, 200 rows": [
+   [
+    "5 0 0 SCAN t",
+    "9 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "29 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "37 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "42 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "47 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "55 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, state + type filter": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "33 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "41 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "46 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "51 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "59 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, price range in USD": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "37 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "45 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "50 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "55 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "63 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, search 'nandu 12'": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "50 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "58 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "63 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "68 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "76 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, one base + unassigned": [
+   [
+    "7 0 0 MULTI-INDEX OR",
+    "8 7 0 INDEX 1",
+    "16 8 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "21 7 0 INDEX 2",
+    "30 21 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "42 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "19 0 0 MULTI-INDEX OR",
+    "20 19 0 INDEX 1",
+    "28 20 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "33 19 0 INDEX 2",
+    "42 33 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "54 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "60 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "68 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "73 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "78 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "86 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "169 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "Master table, sorted by name": [
+   [
+    "5 0 0 SCAN t",
+    "9 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "17 0 0 SCAN t",
+    "21 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "27 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "35 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "40 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "45 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "53 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "142 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "Master table, sorted by area, descending": [
+   [
+    "5 0 0 SCAN t",
+    "9 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "17 0 0 SCAN t",
+    "21 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "27 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "35 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "40 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "45 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "53 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "142 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "Master table, attention=false (no record matches: the whole scan)": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "264 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "272 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "277 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "282 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "290 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, attention=true": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "275 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "283 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "288 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "293 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "301 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "Master table, attention=true, 200 rows sorted by name": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "17 0 0 SCAN t",
+    "21 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "273 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "281 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "286 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "291 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "299 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "388 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "Master table, attention=true + state filter": [
+   [
+    "6 0 0 SCAN t",
+    "10 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SCAN t USING INDEX sqlite_autoindex_inventory_terrain_1",
+    "23 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "278 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "286 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "291 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "296 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "304 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN"
+   ]
+  ],
+  "3,000-record base, operator, attention=true": [
+   [
+    "7 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "14 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "277 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "285 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "290 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "295 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "303 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "386 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "3,000-record base, operator, attention=false": [
+   [
+    "7 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "14 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "266 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "274 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "279 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "284 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "292 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "375 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "3,000-record base, operator, default page": [
+   [
+    "6 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "13 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "31 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "39 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "44 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "49 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "57 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "140 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "3,000-record base, operator, 200 rows sorted by name": [
+   [
+    "6 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "13 0 0 SEARCH d USING COVERING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "31 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "39 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "44 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "49 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "57 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "146 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "3,000-record base, operator, search": [
+   [
+    "7 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "14 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "52 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "60 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "65 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "70 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "78 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "161 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ],
+  "3,000-record base, operator, state filter": [
+   [
+    "7 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "14 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)"
+   ],
+   [
+    "18 0 0 SEARCH t USING INDEX idx_inventory_terrain_base (base_id=?)",
+    "25 0 0 SEARCH d USING INDEX sqlite_autoindex_inventory_revision_1 (id=?)",
+    "33 0 0 SEARCH p USING INDEX sqlite_autoindex_inventory_revision_1 (id=?) LEFT-JOIN",
+    "41 0 0 SEARCH cu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "46 0 0 SEARCH uu USING INDEX sqlite_autoindex_team_user_1 (id=?)",
+    "51 0 0 SEARCH pu USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "59 0 0 SEARCH au USING INDEX sqlite_autoindex_team_user_1 (id=?) LEFT-JOIN",
+    "142 0 0 USE TEMP B-TREE FOR ORDER BY"
+   ]
+  ]
+ }
+}

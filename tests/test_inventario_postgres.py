@@ -91,8 +91,12 @@ class InventarioPostgres(unittest.TestCase):
         t = self.create({"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"}, key="pg-clave-1")
         with db.session() as conn:
             again = repo.create(conn, {"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"},
+                                self.actors[0], "pg-clave-1", "hash")
+            # Round 1: a key belongs to the account that used it.
+            ajeno = repo.create(conn, {"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"},
                                 self.actors[1], "pg-clave-1", "hash")
         self.assertEqual(again["terreno"]["id"], t["id"])
+        self.assertNotEqual(ajeno["terreno"]["id"], t["id"])
         with db.session() as conn:
             repo.update(conn, t["id"], 1, {"terreno": "Lote 2"}, (), self.actors[1])
         with self.assertRaises(repo.ConflictError), db.session() as conn:
@@ -104,7 +108,7 @@ class InventarioPostgres(unittest.TestCase):
             eventos, total, _ = repo.history(conn, t["id"], None, 10)
         self.assertEqual([(e["version"], e["actor"]["display_name"]) for e in eventos],
                          [(2, "Beto"), (1, "Ana")])
-        self.assertEqual(self.count("inventory_revision"), 2)
+        self.assertEqual(self.count("inventory_revision"), 3)  # two of this record, one of Beto's
 
     def test_simultaneous_saves_on_separate_connections_have_one_winner(self):
         t = self.create()

@@ -60,6 +60,14 @@ router.add("POST", "/api/maestra/bases", api_maestra.create, "bases.gestionar")
 router.add("PATCH", "/api/maestra/bases/:bid", api_maestra.rename, "bases.gestionar")
 router.add("POST", "/api/maestra/bases/:bid/archivar", api_maestra.archive, "bases.gestionar")
 router.add("POST", "/api/maestra/bases/:bid/restaurar", api_maestra.restore, "bases.gestionar")
+router.add("GET", "/api/maestra/bases/:bid/terrenos", api_inventario.base_listing, "maestra.ver")
+router.add("POST", "/api/maestra/bases/:bid/terrenos", api_inventario.base_create, "maestra.editar")
+router.add("POST", "/api/inventario/terrenos/:id/archivar", api_inventario.archive, "maestra.archivar")
+router.add("POST", "/api/inventario/terrenos/:id/restaurar", api_inventario.restore, "maestra.archivar")
+router.add("GET", "/api/inventario/terrenos/:id/transferir", api_inventario.transfer_preview,
+           "bases.gestionar")
+router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.transfer,
+           "bases.gestionar")
 router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
 router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
 # The legacy workspace (imported bases, saved maps, folders, formats, import,

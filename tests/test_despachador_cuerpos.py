@@ -129,6 +129,14 @@ class Cuerpos(TempDatabase):
                 self.assertEqual(self.enviar(self.post("/api/logout", cuerpo=b"", largo=largo) + ver),
                                  ([200, 200], True))
 
+    def test_a_multipart_content_type_is_not_a_framing_defect(self):
+        """The header parser reports a multipart type without parts as a
+        defect of the message; the length is still plain, so the body is read
+        and the route answers, with keep-alive."""
+        peticion = self.post("/api/logout", (b"Content-Type: multipart/form-data; boundary=x",),
+                             cuerpo=b"--x\r\n")
+        self.assertEqual(self.enviar(peticion + OCULTA), ([200, 200], True))
+
     def test_read_only_mode_refuses_once_and_closes(self):
         with patch.dict(os.environ, {"ARA_MAP_READ_ONLY": "1"}):
             self.assertEqual(self.enviar(self.post()), ([403], True))

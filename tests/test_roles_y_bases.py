@@ -208,6 +208,14 @@ class Matriz(Escenario):
                                      (403, {"code": "forbidden", "capacidad": route.capacidad}))
                 elif route.path == "/api/maestra/bases":
                     self.assertEqual((status, body["bases"]), (200, []))
+                elif "/archivos" in route.path:
+                    # Attachment routes validate the request's own shape (key,
+                    # media type, store) before looking a resource up, so an
+                    # empty request is refused for that. Never a success; what
+                    # a well-formed request from outside the scope gets is in
+                    # tests/test_archivos_http.py and test_montaje_archivos.py.
+                    self.assertGreaterEqual(status, 400)
+                    self.assertNotEqual(status, 403)
                 else:  # a record route: an operator with no grant is out of every scope
                     self.assertEqual((status, body["detalle"]["code"]), (404, "not_found"))
                 self.assertNotIn(self.call(route.method, path, cuerpo, "ada")[0], (401, 403))

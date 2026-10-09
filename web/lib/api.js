@@ -104,6 +104,53 @@ async function request(path, { method = "GET", body, headers = {}, raw, signal }
   }
 }
 
+const cancelada = () => new DOMException("La petición se canceló.", "AbortError");
+
+/**
+ * The private transport for modules that read bodies themselves (attachments,
+ * geometry chunks). Unlike request() it decodes nothing and buffers nothing.
+ *
+ *   peticionPrivada(ruta, {method, headers, body, signal})
+ *     -> Promise<{response: Response, signal: AbortSignal}>
+ *
+ * `ruta` is a same-origin "/api/..." path; `body` is already encoded. The
+ * request is tied to the private session that is current when it is made: the
+ * returned signal is that session's (combined with the caller's) and stays so
+ * while the caller reads the body. A cancelled or obsolete call rejects with
+ * an AbortError, so a caller can release what it holds in `finally`; this is
+ * deliberately not request()'s never-settling convention. A 401 runs the
+ * session-expiry teardown first and never resolves. Any other status is
+ * returned for the caller to decode.
+ */
+export async function peticionPrivada(ruta, { method = "GET", headers, body, signal } = {}) {
+  // One leading slash, no backslash or control character: nothing a browser
+  // would resolve to another origin.
+  if (typeof ruta !== "string" || !/^\/api\/[^\\\u0000-\u0020]*$/.test(ruta)) {
+    throw new TypeError("peticionPrivada solo admite rutas /api/ de este origen.");
+  }
+  const sesion = privado.signal;
+  const senal = signal ? AbortSignal.any([signal, sesion]) : sesion;
+  if (senal.aborted) throw cancelada();
+  let response;
+  try {
+    response = await fetch(ruta, {
+      method, headers, body, signal: senal, credentials: "same-origin", cache: "no-store",
+    });
+  } catch (error) {
+    if (senal.aborted) throw cancelada();
+    if (error instanceof TypeError) throw errorDeRed();
+    throw error;
+  }
+  if (senal.aborted) throw cancelada();
+  if (response.status === 401) {
+    response.body?.cancel().catch(() => {});
+    const error = Object.assign(new Error("Inicia sesión para continuar."), { status: 401 });
+    alExpirar?.(error);
+    throw sesion.aborted ? cancelada() : error;
+  }
+  return { response, signal: senal };
+}
+
 const page = (consulta, cursor) => consultaDePagina(consulta, cursor);
 const enc = encodeURIComponent;
 

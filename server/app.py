@@ -6,6 +6,7 @@ the network can reach it even if the machine is on shared Wi-Fi.
 
 from __future__ import annotations
 
+import email.errors
 import mimetypes
 import os
 import re
@@ -19,7 +20,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse, urlsplit
 
-from . import auth, db
+from . import almacen, auth, db, postgres
+from .api import archivos as api_archivos
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
@@ -30,6 +32,7 @@ from .api import inventario as api_inventario
 from .api import maestra as api_maestra
 from .api import mapas as api_mapas
 from .api import sesion as api_sesion
+from .api.binario import RespuestaBinaria
 from .router import Request, Router
 from .web_util import ApiError, encode
 
@@ -39,6 +42,10 @@ ALLOWED_HOSTS = {"localhost", "127.0.0.1", "[::1]"}
 # The same machine, as a URL's hostname rather than a Host header (no brackets).
 ALLOWED_ORIGIN_HOSTS = {"localhost", "127.0.0.1", "::1"}
 MAX_BODY = 25 * 1024 * 1024
+# What the header parser reports when it could not read the block whole. Its
+# other defects are about a multipart *body* it never had, and say nothing of
+# the headers: a multipart Content-Type alone raises them.
+_CABECERAS_ROTAS = (email.errors.HeaderDefect, email.errors.MissingHeaderBodySeparatorDefect)
 
 router = Router()
 # Anonymous allowlist (auth.PUBLIC_API): these four plus the public catalog.
@@ -114,9 +121,13 @@ router.add("GET", "/api/carpetas", api_carpetas.listing, "derivados.ver")
 router.add("POST", "/api/carpetas", api_carpetas.create, "derivados.gestionar")
 router.add("PATCH", "/api/carpetas/:id", api_carpetas.rename, "derivados.gestionar")
 router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove, "derivados.gestionar")
+# Terrain attachments (server/api/archivos.py owns the table): all private,
+# each with its capability, the literal segments ahead of the :aid patterns.
+for _metodo, _ruta, _handler, _capacidad in api_archivos.RUTAS:
+    router.add(_metodo, _ruta, _handler, _capacidad)
 
 # POSTs that only read: allowed in read-only mode.
-READ_ONLY_POSTS = {"/api/exportar"}
+READ_ONLY_POSTS = {"/api/exportar"} | api_archivos.POSTS_DE_LECTURA
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -240,6 +251,9 @@ class Handler(BaseHTTPRequestHandler):
                 HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
+        if isinstance(result, RespuestaBinaria):  # exactly these bytes, type and headers
+            return self._send(result.status, result.cuerpo, result.tipo,
+                              extra=dict(result.cabeceras))
         if isinstance(result, tuple):  # a file download
             payload, filename = result
             return self._send(
@@ -296,7 +310,8 @@ class Handler(BaseHTTPRequestHandler):
         parser could not read whole (it drops every line from the first
         malformed one on) may have hidden one, so it is refused too."""
         largos = self.headers.get_all("Content-Length") or []
-        if (self.headers.defects or self.headers.get_all("Transfer-Encoding") or len(largos) > 1
+        rotas = any(isinstance(d, _CABECERAS_ROTAS) for d in self.headers.defects)
+        if (rotas or self.headers.get_all("Transfer-Encoding") or len(largos) > 1
                 or (largos and not re.fullmatch(r"[0-9]{1,12}", largos[0]))):
             raise ApiError("La petición no declara bien su tamaño.", 400)
         length = int(largos[0]) if largos else 0
@@ -335,7 +350,7 @@ class Handler(BaseHTTPRequestHandler):
     def _send(
         self,
         status: HTTPStatus | int,
-        payload: bytes,
+        payload: bytes | bytearray,
         content_type: str,
         extra: dict[str, str] | None = None,
     ) -> None:
@@ -358,15 +373,51 @@ def find_port(preferred: int = DEFAULT_PORT) -> int:
     raise SystemExit("No se encontró un puerto libre.")
 
 
+def raiz_de_archivos() -> Path | None:
+    """Where this local server keeps attachment bytes, or None for nowhere.
+
+    ARA_MAP_ARCHIVOS names it explicitly. Without it, a local SQLite database
+    gets the sibling folder "archivos"; a Postgres database gets none, so a
+    local server pointed at a shared database never starts a byte store on
+    whatever machine it happens to run on.
+    """
+    explicita = os.environ.get("ARA_MAP_ARCHIVOS")
+    if explicita:
+        return Path(explicita)
+    return None if postgres.enabled() else db.db_path().parent / "archivos"
+
+
+def configurar_archivos() -> str:
+    """Wire the local byte store for serve(); returns the console line.
+
+    Only that one directory is created, owner-only. If it cannot be created or
+    opened nothing is wired: content routes then answer 503
+    almacen_no_configurado. There is no in-memory stand-in.
+    """
+    api_archivos.configurar_almacen(None)
+    raiz = raiz_de_archivos()
+    if raiz is None:
+        return "sin configurar (define ARA_MAP_ARCHIVOS); subir y descargar responderán 503"
+    try:
+        raiz.mkdir(mode=0o700, exist_ok=True)  # never parents
+        almacen.AlmacenLocal(raiz).close()
+    except (OSError, almacen.FalloAlmacenError) as exc:
+        return f"NO DISPONIBLES en {raiz} ({exc}); subir y descargar responderán 503"
+    api_archivos.configurar_almacen(api_archivos.almacen_local(str(raiz)))
+    return str(raiz)
+
+
 def serve(port: int | None = None, open_browser: bool = True) -> None:
     """Start the server and, unless told otherwise, open a browser at it."""
     db.connect().close()  # create/migrate before the first request
+    archivos = configurar_archivos()
     port = port or find_port()
     url = f"http://localhost:{port}/"
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
 
     print(f"\n  ARA Map  ->  {url}")
     print(f"  Datos:   {db.db_path()}")
+    print(f"  Archivos: {archivos}")
     print("  Para cerrar, presiona Ctrl+C o cierra esta ventana.\n")
 
     if open_browser:

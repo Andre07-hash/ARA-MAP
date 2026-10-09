@@ -22,6 +22,7 @@ from . import auth, db
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
+from .api import columnas as api_columnas
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
@@ -70,6 +71,16 @@ router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.tra
            "bases.gestionar")
 router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
 router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
+router.add("GET", "/api/maestra/operadores", api_maestra.operators, "bases.gestionar")
+# A base's custom columns. Their values are saved by the terrain PATCH above.
+router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "maestra.ver")
+router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")
+router.add("PATCH", "/api/maestra/bases/:bid/columnas/:cid", api_columnas.update,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/retirar", api_columnas.retire,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/restaurar", api_columnas.restore,
+           "columnas.gestionar")
 # The legacy workspace (imported bases, saved maps, folders, formats, import,
 # export) is the administrators': derivados.ver to read, .gestionar to change.
 router.add("GET", "/api/bases", api_bases.listing, "derivados.ver")

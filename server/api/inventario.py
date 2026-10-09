@@ -17,8 +17,9 @@ import uuid
 from collections.abc import Mapping
 from typing import Any
 
-from .. import auth, db, inventario
+from .. import auth, columnas, db, inventario
 from ..protocols import DatabaseConnection
+from ..repo import columnas as repo_columnas
 from ..repo import inventario as repo
 from ..router import Request
 from ..web_util import ApiError, parse_json
@@ -131,16 +132,19 @@ def _hash(cuerpo: Mapping[str, Any]) -> str:
 
 
 def update(request: Request) -> Respuesta:
-    """Save a new draft revision: {expected_version, changes, confirm?}.
+    """Save a new draft revision: {expected_version, changes?, custom?, confirm?}.
 
-    `confirm` (optional, e.g. ["price"]) stamps the price/availability
-    confirmation with this user and time. Ordinary edits never do.
+    `custom` is {"custom:<column id>": value} for live columns of the terrain's
+    current base; null clears a value and a key left out keeps what is stored.
+    Core and custom changes in one request are one version, one revision and
+    one event, or none of them. `confirm` (optional, e.g. ["price"]) stamps the
+    price/availability confirmation with this user and time.
     """
     actor = _actor(request)
     inventory_id = request.uuid_param("id")
     data = parse_json(request.body)
     errors = {k: "Campo no admitido." for k in data
-              if k not in ("expected_version", "changes", "confirm")}
+              if k not in ("expected_version", "changes", "custom", "confirm")}
     expected: Any = data.get("expected_version")
     if type(expected) is not int or expected < 1:
         errors["expected_version"] = "Envía la versión que estabas editando (entero)."
@@ -154,13 +158,18 @@ def update(request: Request) -> Respuesta:
     with db.escritura() as conn:
         # Authorization is decided here, in the transaction that saves, and
         # before any validation answer: out of scope is 404 whatever was sent.
-        auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.editar",
-                                 exclusivo=True)
+        alcance = auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.editar",
+                                           exclusivo=True)
+        # The base is held by that check, so its live columns cannot change
+        # under this save: a column retired first is refused here.
+        custom, custom_errors = columnas.limpiar_valores(
+            data.get("custom", {}), repo_columnas.vivas(conn, alcance.base_id))
+        errors.update(custom_errors)
         if errors:
             raise _invalid(errors)
         try:
             return {"terreno": repo.update(conn, inventory_id, expected, fields,
-                                           tuple(dict.fromkeys(confirm)), actor)}
+                                           tuple(dict.fromkeys(confirm)), actor, custom)}
         except repo.ConflictError:
             raise _conflicto(conn, inventory_id) from None
 

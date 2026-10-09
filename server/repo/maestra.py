@@ -85,6 +85,30 @@ def accesos(conn: DatabaseConnection, base_id: str) -> list[dict[str, Any]]:
              "active": bool(r["active"]), "granted_at": r["granted_at"]} for r in rows]
 
 
+def operadores(conn: DatabaseConnection, buscado: str, limite: int,
+               ) -> tuple[list[dict[str, Any]], int]:
+    """Operator accounts a grant may name: (one bounded page, how many match).
+
+    Identity and status only. Nothing about passwords, sessions or what each
+    one can open.
+    """
+    donde, params = "rol = 'operador'", []
+    plegado = db.plegar(" ".join(buscado.split()))
+    if plegado:
+        for especial in "!%_":
+            plegado = plegado.replace(especial, "!" + especial)
+        junto = db.sql_plegar(conn, "login || ' ' || display_name")
+        donde += f" AND {junto} LIKE ? ESCAPE '!'"
+        params.append(f"%{plegado}%")
+    total = conn.execute(f"SELECT COUNT(*) AS n FROM team_user WHERE {donde}",
+                         tuple(params)).fetchone()["n"]
+    rows = conn.execute(
+        f"SELECT id, login, display_name, active FROM team_user WHERE {donde}"
+        " ORDER BY display_name, id LIMIT ?", (*params, limite)).fetchall()
+    return ([{"id": r["id"], "login": r["login"], "display_name": r["display_name"],
+              "active": bool(r["active"])} for r in rows], int(total))
+
+
 # -- writes --------------------------------------------------------------------
 
 def crear(conn: DatabaseConnection, nombre: str, actor: Mapping[str, Any]) -> dict[str, Any]:

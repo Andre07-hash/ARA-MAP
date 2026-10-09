@@ -1,0 +1,5 @@
+Accepted ancestry and scoped file identity: 1ef2238766eae3e111c031b4fa24f9d849ef4753
+Accepted ancestry and scoped file identity: a9dc8af8cc511bde0a67168da335398353b80aa6
+After the ordinary merge, only the manifest and composition test were added:
+reports/round-2-baseline-2026-10-09/START_HERE.md
+tests/test_composicion_ronda2.py

@@ -1,0 +1,299 @@
+test_a_cell_save_and_a_grant_loss_or_base_archive_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasPostgres.test_a_cell_save_and_a_grant_loss_or_base_archive_are_serialized_in_both_orders) ...   "PATCH /api/inventario/terrenos/cc006003-ed8a-46cb-953d-e292bec4c3fe HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/cc006003-ed8a-46cb-953d-e292bec4c3fe HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/cc006003-ed8a-46cb-953d-e292bec4c3fe HTTP/1.1" 409 -
+ok
+test_a_cell_save_and_a_retirement_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasPostgres.test_a_cell_save_and_a_retirement_are_serialized_in_both_orders) ...   "PATCH /api/inventario/terrenos/901a1f49-ff0d-45c9-a088-6d93cc9c7b8c HTTP/1.1" 422 -
+ok
+test_a_cell_save_and_a_transfer_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasPostgres.test_a_cell_save_and_a_transfer_are_serialized_in_both_orders) ...   "POST /api/inventario/terrenos/b9c874c8-edac-487b-9ca8-a411c248ef1d/transferir HTTP/1.1" 409 -
+  "PATCH /api/inventario/terrenos/b9c874c8-edac-487b-9ca8-a411c248ef1d HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/b9c874c8-edac-487b-9ca8-a411c248ef1d HTTP/1.1" 422 -
+ok
+test_concurrent_definition_changes_and_grant_changes_do_not_overwrite (tests.test_columnas_maestra.ColumnasPostgres.test_concurrent_definition_changes_and_grant_changes_do_not_overwrite) ...   "PATCH /api/maestra/bases/f9af0023-f85e-471d-8152-f94f6a8a1aec/columnas/9710274a-2aea-4cb8-9163-d30da94b423e HTTP/1.1" 409 -
+  "PUT /api/maestra/bases/f9af0023-f85e-471d-8152-f94f6a8a1aec/acceso HTTP/1.1" 409 -
+ok
+test_core_and_custom_changes_are_one_version_or_none (tests.test_columnas_maestra.ColumnasPostgres.test_core_and_custom_changes_are_one_version_or_none) ...   "PATCH /api/inventario/terrenos/9e840537-307e-40ac-8c6d-313b5c5190c9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/9e840537-307e-40ac-8c6d-313b5c5190c9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/9e840537-307e-40ac-8c6d-313b5c5190c9 HTTP/1.1" 409 -
+ok
+test_definition_input_is_bounded_and_the_type_is_fixed (tests.test_columnas_maestra.ColumnasPostgres.test_definition_input_is_bounded_and_the_type_is_fixed) ...   "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/6425761d-28f0-40b5-8445-1c6b6b1a29f2 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/323e13dd-81d2-4ea5-911b-0149cf8d958d HTTP/1.1" 409 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas HTTP/1.1" 409 -
+  "POST /api/maestra/bases/bdea04a4-0430-4db0-ada6-6f32c3084855/columnas/323e13dd-81d2-4ea5-911b-0149cf8d958d/restaurar HTTP/1.1" 409 -
+ok
+test_definitions_are_created_listed_and_idempotent_per_actor_and_base (tests.test_columnas_maestra.ColumnasPostgres.test_definitions_are_created_listed_and_idempotent_per_actor_and_base) ...   "POST /api/maestra/bases/bfb7f086-7f53-41d0-817b-d0d1efcceb3e/columnas HTTP/1.1" 409 -
+  "POST /api/maestra/bases/bfb7f086-7f53-41d0-817b-d0d1efcceb3e/columnas HTTP/1.1" 409 -
+ok
+test_definitions_follow_the_base_scope_and_an_archived_base_is_read_only (tests.test_columnas_maestra.ColumnasPostgres.test_definitions_follow_the_base_scope_and_an_archived_base_is_read_only) ...   "GET /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/4295f612-d411-45bd-af75-78819314ac88/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/0244cbdb-57bc-4645-8fc6-d05c664b893c/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/25ba538b-542c-46b5-b198-dbebd3667498/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/4295f612-d411-45bd-af75-78819314ac88/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/4295f612-d411-45bd-af75-78819314ac88/columnas HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/e1a02574-2e4b-4f59-be75-3fb8da3f82f4 HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/e1a02574-2e4b-4f59-be75-3fb8da3f82f4/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/4295f612-d411-45bd-af75-78819314ac88/columnas/e1a02574-2e4b-4f59-be75-3fb8da3f82f4 HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/f11b2594-64b3-467f-a761-d7cd318ba234 HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/f11b2594-64b3-467f-a761-d7cd318ba234/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/5cdf8aa9-4390-4c94-9e26-13322fd80257 HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/5cdf8aa9-4390-4c94-9e26-13322fd80257/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/no-es-un-id HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/no-es-un-id/retirar HTTP/1.1" 404 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/e1a02574-2e4b-4f59-be75-3fb8da3f82f4 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas/e1a02574-2e4b-4f59-be75-3fb8da3f82f4/retirar HTTP/1.1" 409 -
+  "POST /api/maestra/bases/9a6e99a0-a1b1-4e8f-bf88-ce17e3672c5c/columnas HTTP/1.1" 404 -
+ok
+test_only_live_columns_of_the_current_base_accept_a_value (tests.test_columnas_maestra.ColumnasPostgres.test_only_live_columns_of_the_current_base_accept_a_value) ...   "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/2b849303-134c-49cc-bb9d-9fedb90f9508 HTTP/1.1" 422 -
+  "POST /api/maestra/bases/21608ed9-ccc6-4d18-bc6d-907f4a458191/terrenos HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/e08465c4-200d-43a2-9984-2e051760de4d HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/105e1fb9-377a-4dbf-ba6f-dc5d42a081f7 HTTP/1.1" 404 -
+ok
+test_rename_order_retire_and_restore_are_versioned_and_audited (tests.test_columnas_maestra.ColumnasPostgres.test_rename_order_retire_and_restore_are_versioned_and_audited) ...   "PATCH /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/669c693f-a8a9-4861-9a86-ddd1d193a29d HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/669c693f-a8a9-4861-9a86-ddd1d193a29d HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/a0787a7f-db44-46d6-b1d0-74909431b039/retirar HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/a0787a7f-db44-46d6-b1d0-74909431b039 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/a0787a7f-db44-46d6-b1d0-74909431b039 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/a0787a7f-db44-46d6-b1d0-74909431b039/restaurar HTTP/1.1" 409 -
+  "POST /api/maestra/bases/0196de68-2ef4-4ee8-a13f-2a93761f1324/columnas/a0787a7f-db44-46d6-b1d0-74909431b039/restaurar HTTP/1.1" 409 -
+ok
+test_the_operator_lookup_is_bounded_minimal_and_for_administrators (tests.test_columnas_maestra.ColumnasPostgres.test_the_operator_lookup_is_bounded_minimal_and_for_administrators) ...   "GET /api/maestra/operadores?limit=0 HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?limit=201 HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?limit=x HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?rol=admin HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx HTTP/1.1" 422 -
+  "GET /api/maestra/operadores HTTP/1.1" 403 -
+  "GET /api/maestra/operadores HTTP/1.1" 403 -
+  "GET /api/maestra/operadores HTTP/1.1" 401 -
+ok
+test_values_are_validated_by_type_and_saved_as_sent (tests.test_columnas_maestra.ColumnasPostgres.test_values_are_validated_by_type_and_saved_as_sent) ...   "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/63965bb3-338b-4a86-9283-850ca92bace9 HTTP/1.1" 422 -
+ok
+test_written_values_and_history_follow_the_current_base (tests.test_columnas_maestra.ColumnasPostgres.test_written_values_and_history_follow_the_current_base)
+Not seeded: every custom value and history entry here was written by ...   "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 409 -
+  "GET /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd/historial HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 409 -
+  "POST /api/maestra/bases/3b17d09c-8994-44f3-bee2-95cb353e1574/terrenos HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 409 -
+  "POST /api/maestra/bases/3b17d09c-8994-44f3-bee2-95cb353e1574/terrenos HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 409 -
+  "GET /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/287c2c42-1c31-44cc-b94e-ab32b1f864fd HTTP/1.1" 409 -
+ok
+test_a_cell_save_and_a_grant_loss_or_base_archive_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasSqlite.test_a_cell_save_and_a_grant_loss_or_base_archive_are_serialized_in_both_orders) ...   "PATCH /api/inventario/terrenos/64c79bc4-0670-4af7-a1c8-aa9a08b92da0 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/64c79bc4-0670-4af7-a1c8-aa9a08b92da0 HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/64c79bc4-0670-4af7-a1c8-aa9a08b92da0 HTTP/1.1" 409 -
+ok
+test_a_cell_save_and_a_retirement_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasSqlite.test_a_cell_save_and_a_retirement_are_serialized_in_both_orders) ...   "PATCH /api/inventario/terrenos/89ae3a9d-a969-4102-a558-e60b22e6d915 HTTP/1.1" 422 -
+ok
+test_a_cell_save_and_a_transfer_are_serialized_in_both_orders (tests.test_columnas_maestra.ColumnasSqlite.test_a_cell_save_and_a_transfer_are_serialized_in_both_orders) ...   "POST /api/inventario/terrenos/0361f3a3-0f87-4a36-94d8-b22fead08e2f/transferir HTTP/1.1" 409 -
+  "PATCH /api/inventario/terrenos/0361f3a3-0f87-4a36-94d8-b22fead08e2f HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/0361f3a3-0f87-4a36-94d8-b22fead08e2f HTTP/1.1" 422 -
+ok
+test_concurrent_definition_changes_and_grant_changes_do_not_overwrite (tests.test_columnas_maestra.ColumnasSqlite.test_concurrent_definition_changes_and_grant_changes_do_not_overwrite) ...   "PATCH /api/maestra/bases/be5ef402-f2f4-41ba-999b-102ecbc6cc8f/columnas/1fbae8c0-0ac8-498b-86b6-95f41ec218d1 HTTP/1.1" 409 -
+  "PUT /api/maestra/bases/be5ef402-f2f4-41ba-999b-102ecbc6cc8f/acceso HTTP/1.1" 409 -
+ok
+test_core_and_custom_changes_are_one_version_or_none (tests.test_columnas_maestra.ColumnasSqlite.test_core_and_custom_changes_are_one_version_or_none) ...   "PATCH /api/inventario/terrenos/f4121247-99d8-4097-9269-18049a762d91 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f4121247-99d8-4097-9269-18049a762d91 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/f4121247-99d8-4097-9269-18049a762d91 HTTP/1.1" 409 -
+ok
+test_definition_input_is_bounded_and_the_type_is_fixed (tests.test_columnas_maestra.ColumnasSqlite.test_definition_input_is_bounded_and_the_type_is_fixed) ...   "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 422 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/3d5bfe2d-23b3-482d-8fb1-b8bd8a5a0064 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/d5426c25-bd06-4cb6-9af2-0e1e90e08da9 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas HTTP/1.1" 409 -
+  "POST /api/maestra/bases/c8dabd96-73c4-4e51-a6f4-59d4e4d47602/columnas/d5426c25-bd06-4cb6-9af2-0e1e90e08da9/restaurar HTTP/1.1" 409 -
+ok
+test_definitions_are_created_listed_and_idempotent_per_actor_and_base (tests.test_columnas_maestra.ColumnasSqlite.test_definitions_are_created_listed_and_idempotent_per_actor_and_base) ...   "POST /api/maestra/bases/426e46b0-0d6d-4e7e-98ec-06600a23e2fc/columnas HTTP/1.1" 409 -
+  "POST /api/maestra/bases/426e46b0-0d6d-4e7e-98ec-06600a23e2fc/columnas HTTP/1.1" 409 -
+ok
+test_definitions_follow_the_base_scope_and_an_archived_base_is_read_only (tests.test_columnas_maestra.ColumnasSqlite.test_definitions_follow_the_base_scope_and_an_archived_base_is_read_only) ...   "GET /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/112372a8-692e-4af5-9549-863adb3ffdbd/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/ee4c6e98-a8e6-4f0a-8aa5-19e5e7768c01/columnas HTTP/1.1" 404 -
+  "GET /api/maestra/bases/1112ddc5-dd90-4907-b3b0-c2a718257dcf/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/112372a8-692e-4af5-9549-863adb3ffdbd/columnas HTTP/1.1" 404 -
+  "POST /api/maestra/bases/112372a8-692e-4af5-9549-863adb3ffdbd/columnas HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/caf581a9-ee07-48ea-81d6-10937a55dc9e HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/caf581a9-ee07-48ea-81d6-10937a55dc9e/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/112372a8-692e-4af5-9549-863adb3ffdbd/columnas/caf581a9-ee07-48ea-81d6-10937a55dc9e HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/cd518f04-e540-47e2-84d3-46c4c75781ec HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/cd518f04-e540-47e2-84d3-46c4c75781ec/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/a58a6646-fb3e-4e87-93f1-993fc9b82fb4 HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/a58a6646-fb3e-4e87-93f1-993fc9b82fb4/retirar HTTP/1.1" 404 -
+  "PATCH /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/no-es-un-id HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/no-es-un-id/retirar HTTP/1.1" 404 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/caf581a9-ee07-48ea-81d6-10937a55dc9e HTTP/1.1" 409 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas/caf581a9-ee07-48ea-81d6-10937a55dc9e/retirar HTTP/1.1" 409 -
+  "POST /api/maestra/bases/ad697d66-dfcb-4e74-9684-8a39e65a338f/columnas HTTP/1.1" 404 -
+ok
+test_only_live_columns_of_the_current_base_accept_a_value (tests.test_columnas_maestra.ColumnasSqlite.test_only_live_columns_of_the_current_base_accept_a_value) ...   "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/6ae930b1-86b0-47a4-9f9a-f486f84810cd HTTP/1.1" 422 -
+  "POST /api/maestra/bases/43829d1f-a8d9-40ce-b1cf-85e72139b987/terrenos HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/2974e9bc-1ea6-4af5-b68f-b4f9349417ee HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/669b547e-f356-4272-92d3-4e5bbe4bcd0b HTTP/1.1" 404 -
+ok
+test_rename_order_retire_and_restore_are_versioned_and_audited (tests.test_columnas_maestra.ColumnasSqlite.test_rename_order_retire_and_restore_are_versioned_and_audited) ...   "PATCH /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/a13576e3-fac3-4dc7-b34b-ab1d4ada7fc8 HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/a13576e3-fac3-4dc7-b34b-ab1d4ada7fc8 HTTP/1.1" 409 -
+  "POST /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/d75ad9a0-1282-4be4-beb9-3e4328f78c5b/retirar HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/d75ad9a0-1282-4be4-beb9-3e4328f78c5b HTTP/1.1" 409 -
+  "PATCH /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/d75ad9a0-1282-4be4-beb9-3e4328f78c5b HTTP/1.1" 409 -
+  "POST /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/d75ad9a0-1282-4be4-beb9-3e4328f78c5b/restaurar HTTP/1.1" 409 -
+  "POST /api/maestra/bases/6973ee00-19bf-4726-b3f9-1edce38c95ba/columnas/d75ad9a0-1282-4be4-beb9-3e4328f78c5b/restaurar HTTP/1.1" 409 -
+ok
+test_the_operator_lookup_is_bounded_minimal_and_for_administrators (tests.test_columnas_maestra.ColumnasSqlite.test_the_operator_lookup_is_bounded_minimal_and_for_administrators) ...   "GET /api/maestra/operadores?limit=0 HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?limit=201 HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?limit=x HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?rol=admin HTTP/1.1" 422 -
+  "GET /api/maestra/operadores?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx HTTP/1.1" 422 -
+  "GET /api/maestra/operadores HTTP/1.1" 403 -
+  "GET /api/maestra/operadores HTTP/1.1" 403 -
+  "GET /api/maestra/operadores HTTP/1.1" 401 -
+ok
+test_values_are_validated_by_type_and_saved_as_sent (tests.test_columnas_maestra.ColumnasSqlite.test_values_are_validated_by_type_and_saved_as_sent) ...   "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/1557588f-ee6b-4021-a158-51a4120aafa8 HTTP/1.1" 422 -
+ok
+test_written_values_and_history_follow_the_current_base (tests.test_columnas_maestra.ColumnasSqlite.test_written_values_and_history_follow_the_current_base)
+Not seeded: every custom value and history entry here was written by ...   "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 409 -
+  "GET /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 404 -
+  "GET /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c/historial HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 409 -
+  "POST /api/maestra/bases/05b59198-fd02-4e97-b2cd-2e56a30f681b/terrenos HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 409 -
+  "POST /api/maestra/bases/05b59198-fd02-4e97-b2cd-2e56a30f681b/terrenos HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 409 -
+  "GET /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 404 -
+  "PATCH /api/inventario/terrenos/24bc7b01-57d7-49c9-bce8-effeab13517c HTTP/1.1" 409 -
+ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionPostgres.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/c0c25332-da5c-4309-a277-ebe8bcd7642b HTTP/1.1" 404 -
+ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionSqlite.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/d695b1ff-7bf9-4b59-b5b3-ad3b79a5c9c1 HTTP/1.1" 404 -
+ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 32.862s
+
+OK

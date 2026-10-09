@@ -254,3 +254,24 @@ mounting of B handlers/widgets remains 3A/3B. The shared seam and geometry
 transport bounds are in INTERFACES.md. Preserve all old PRs and use separate
 drafts. No 3A/3B, main merge, deployment or E5 integration is released.
 Prompt delivery or active external sessions are not inferred from publication.
+
+### Round 2 first review — 2026-10-09, 18:21 UTC
+
+Both handbacks arrived: #26 `517223668405c1d4feb2deffbd2d16a072395fd9` (2A),
+#25 `2ea602a940462fe8bb7d8f0208e0e1dbee19603e` (2B), on #24
+`7117f57f0c52c092d421e5d4bacbcf068f8a65d0`. Exact-head CI is green;
+**both feature PRs require corrections**. See
+[review/probes](../round-2-review-2026-10-09/START_HERE.md) and the TEAM_A/TEAM_B
+files there. Round 1 acceptances are preserved under `STATE.round_1_accepted_review`.
+
+A owns inherited unread-body HTTP refusal framing, client privacy across
+session/identity loss, safe custom text/date validation and row repaint that
+removes another active editor. B owns Unicode integer query parsing that
+currently returns 500. These are independently reproduced findings, not just
+missing screenshots. Retaining Inventario as the admin default is acceptable.
+
+The composition checkpoint's ancestry/trees and 1,121-test SQLite/Postgres run
+are verified, with inherited dispatcher correction explicitly carried to A.
+Keep #24 frozen; corrections stay additive in #26/#25. B does not need to wait
+for A to return its own correction. No 3A/3B, PR/main merge, deployment or E5
+integration is released. See latest_supervisor_review for exact evidence/owners.

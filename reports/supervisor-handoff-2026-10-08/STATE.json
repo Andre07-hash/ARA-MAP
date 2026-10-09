@@ -53,7 +53,7 @@
     "New recurring monitors"
   ],
   "update_rule": "Refresh snapshot and changed facts after review; preserve exact evidence/version links and open findings. Do not treat this timestamped snapshot as live status.",
-  "latest_supervisor_review": {
+  "round_1_accepted_review": {
     "checked_at_utc": "2026-10-09T14:32:51Z",
     "report": "reports/team-a-round-1-closeout-2026-10-09/START_HERE.md",
     "baseline_published_head": "1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb",
@@ -101,8 +101,38 @@
     "baseline_sources": ["1ef2238766eae3e111c031b4fa24f9d849ef4753", "a9dc8af8cc511bde0a67168da335398353b80aa6"],
     "team_a_branch": "claude/team-a/master-grid",
     "team_b_branch": "claude/team-b/attachment-http",
-    "delivery_to_external_teams_confirmed": false,
-    "new_checkpoint_observed": false,
+    "delivery_to_external_teams_confirmed": true,
+    "new_checkpoint_observed": true,
     "stop": "Separate draft handbacks for review; no 3A/3B, main merge or deployment"
+  },
+  "latest_supervisor_review": {
+    "checked_at_utc": "2026-10-09T18:21:00Z",
+    "report": "reports/round-2-review-2026-10-09/START_HERE.md",
+    "baseline": {
+      "pr": 24,
+      "reviewed_head": "7117f57f0c52c092d421e5d4bacbcf068f8a65d0",
+      "verdict": "composition_verified_inherited_dispatcher_defect_assigned_to_A",
+      "independent_tests": "1121 tests on SQLite and disposable UTF-8 Postgres 17, no skips; accepted source ancestry and scoped file identity verified"
+    },
+    "team_a": {
+      "pr": 26,
+      "reviewed_head": "517223668405c1d4feb2deffbd2d16a072395fd9",
+      "verdict": "changes_requested",
+      "findings": ["R2-A1_dispatcher_framing", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint"],
+      "instructions": "reports/round-2-review-2026-10-09/TEAM_A.md",
+      "independent_tests": "28 column/composition tests with SQLite/Postgres; 13 Python 3.9 column tests; 128 JS tests; additional HTTP, socket and Chrome browser probes reproduced findings",
+      "admin_default": "Inventario landing page retained; Tabla maestra remains accessible"
+    },
+    "team_b": {
+      "pr": 25,
+      "reviewed_head": "2ea602a940462fe8bb7d8f0208e0e1dbee19603e",
+      "verdict": "changes_requested_http_harness_only",
+      "findings": ["R2-B1_unicode_integer_query_parsing"],
+      "instructions": "reports/round-2-review-2026-10-09/TEAM_B.md",
+      "independent_tests": "53 HTTP tests with SQLite/Postgres; 28 Python 3.9 tests; additional Unicode query probes return 500 on both databases"
+    },
+    "next_owner": "A and B apply bounded corrections to their existing feature PRs, independently. Preserve frozen #24 and Round 1 accepted heads. Supervisor reviews corrected deltas; 3A/3B not released.",
+    "correction_prompts_delivered": false,
+    "round_3_released": false
   }
 }

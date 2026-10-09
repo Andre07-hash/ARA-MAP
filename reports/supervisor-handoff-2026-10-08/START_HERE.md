@@ -168,3 +168,19 @@ Both B heads have green CI but are not accepted. Team B prioritizes lifecycle
 corrections, with research independent. A's newer #22 head `f6cd6b2` was observed
 but not reviewed in that packet. Later rounds remain unreleased. Verify any
 subsequent changes before presenting these facts as current.
+
+### Subsequent A review — 2026-10-09, 00:43 UTC
+
+PR #22 at `f6cd6b2c45385d149f042c8eabd0e2a2e4db8037` was independently reviewed.
+Its SQL-attention correction is accepted; the extreme-number warning is approved
+as a non-blocking technical guard with clearer wording. Three remaining 1A
+corrections concern legacy idempotency hashes, embedded custom-history projection
+(seeded fixture; current core writers do not produce those custom diffs) and
+typed cursor validation. See
+[`A review and evidence`](../team-a-1a-review-2026-10-08/START_HERE.md) and
+[`bounded correction-2 instructions`](../team-a-1a-review-2026-10-08/TEAM_A.md).
+Independent 48-test SQLite/Postgres module and two Python-3.9 attention tests
+passed; targeted probes reproduced the additional gaps. Baseline #20 remains
+`1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb`; B's instructions and acceptance
+status are unchanged by this A review. No later packet, merge or deployment is
+authorized. Refresh changed facts before claiming live status.

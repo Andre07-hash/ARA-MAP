@@ -59,7 +59,15 @@
     "baseline_published_head": "1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb",
     "baseline_pr": 20,
     "team_a_pr": 22,
-    "team_a_new_head_observed_not_reviewed": "f6cd6b2c45385d149f042c8eabd0e2a2e4db8037",
+    "team_a_review": {
+      "checked_at_utc": "2026-10-09T00:43:53Z",
+      "reviewed_head": "f6cd6b2c45385d149f042c8eabd0e2a2e4db8037",
+      "report": "reports/team-a-1a-review-2026-10-08/START_HERE.md",
+      "verdict": "attention_correction_accepted_other_1a_changes_requested",
+      "numeric_warning": "approved_nonblocking_technical_guard_with_clearer_message",
+      "findings": ["A1_legacy_hash", "A2_embedded_history_projection", "A3_cursor_types"],
+      "independent_tests": "48 record HTTP tests passed on SQLite and disposable UTF-8 Postgres 17 without skips; 2 attention tests passed on Python 3.9; three additional probe groups reproduced remaining gaps on both databases"
+    },
     "team_b_lifecycle": {
       "pr": 23,
       "reviewed_head": "6f303e1d0672c0b0c0e9170a601f8ef388b0f3b7",
@@ -74,7 +82,7 @@
       "findings": ["R1", "R2", "R3", "R4"],
       "independent_tests": "16 of 17 prototype tests passed twice; four additional Node probes reproduced accounting, failure and queue gaps; browser matrix not repeated"
     },
-    "next_owner": "Team B corrects existing PRs, lifecycle priority; supervisor reviews subsequent deltas and A's new correction head separately",
+    "next_owner": "Owner relays bounded A correction-2 and B correction packets; teams preserve separate existing PRs and baseline; supervisor reviews changed heads and combined-baseline acceptance separately",
     "later_packets_released": false
   }
 }

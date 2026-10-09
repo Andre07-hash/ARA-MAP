@@ -136,7 +136,7 @@ class V9Checks:
     def test_existing_code_reads_and_edits_a_migrated_record(self):
         with self.abrir() as conn:
             ana = self.fila(conn, "SELECT id, display_name FROM team_user WHERE login = 'ana'")
-            antes = repo.all_records(conn)[0]
+            antes = repo.get(conn, conn.execute("SELECT id FROM inventory_terrain").fetchone()["id"])
             despues = repo.update(conn, antes["id"], antes["version"],
                                   {"municipio": "Zapopan"}, (), ana)
             guardado = repo.get(conn, antes["id"])
@@ -147,14 +147,19 @@ class V9Checks:
         self.assertTrue(despues)
         self.assertEqual(revision, {"base_id": None, "tipo_terreno": None, "custom_json": "{}"})
 
-    def test_the_new_fields_are_not_exposed_by_existing_output(self):
-        nuevos = {"base_id", "tipo_terreno", "custom_json", "custom", "rol"}
+    def test_the_new_fields_stay_out_of_what_a_client_may_write_or_the_public_may_ask(self):
+        # Since round 1 a record reports its base and its current-base custom
+        # values, and tipo_terreno is an editable core field. What stays closed:
+        # nobody writes a base, a role or custom values through the field map,
+        # and the public catalog can ask about none of them.
         with self.abrir() as conn:
-            registro = repo.all_records(conn)[0]
-        self.assertFalse(nuevos & set(registro))
-        self.assertFalse(nuevos & set(registro["draft"]))
-        self.assertFalse(nuevos & set(inventario.EDITABLE))
-        self.assertFalse(nuevos & set(inventario.PUBLIC_QUERY))
+            registro = repo.get(conn, conn.execute("SELECT id FROM inventory_terrain").fetchone()["id"])
+        self.assertEqual((registro["base_id"], registro["custom"], registro["draft"]["tipo_terreno"]),
+                         (None, {}, None))
+        self.assertFalse({"base_id", "custom_json", "custom", "rol"} & set(registro["draft"]))
+        self.assertFalse({"base_id", "custom_json", "custom", "rol"} & set(inventario.EDITABLE))
+        self.assertFalse({"base_id", "base", "tipo_terreno", "custom_json", "custom", "rol", "sort"}
+                         & set(inventario.PUBLIC_QUERY))
 
     # -- what the new storage accepts ------------------------------------------
 

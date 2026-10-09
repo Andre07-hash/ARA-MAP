@@ -706,6 +706,7 @@ def connect(path: Path | str | None = None) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
+    conn.create_function("ara_plegar", 1, plegar, deterministic=True)
     migrate(conn)
     return conn
 
@@ -739,6 +740,31 @@ def transaction(conn: DatabaseConnection) -> Iterator[DatabaseConnection]:
         raise
     else:
         conn.execute(f"RELEASE {nombre}")
+
+
+# Text is compared and sorted "folded": ASCII case and Spanish diacritics
+# removed. One table drives both databases -- a Python function registered on
+# every SQLite connection, translate() on Postgres -- so a search or a sort
+# gives the same answer on either, whatever the server's locale. It is not
+# full Unicode case folding: characters outside the table compare as written.
+_PLIEGUES = {"a": "ÁÀÄÂÃÅáàäâãå", "e": "ÉÈËÊéèëê", "i": "ÍÌÏÎíìïî", "o": "ÓÒÖÔÕóòöôõ",
+             "u": "ÚÙÜÛúùüû", "n": "Ññ", "c": "Çç"}
+_PLEGAR_DE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "".join(_PLIEGUES.values())
+_PLEGAR_A = "abcdefghijklmnopqrstuvwxyz" + "".join(k * len(v) for k, v in _PLIEGUES.items())
+_PLEGAR = str.maketrans(_PLEGAR_DE, _PLEGAR_A)
+
+
+def plegar(texto: str | None) -> str | None:
+    """Fold text for comparison. NULL stays NULL."""
+    return None if texto is None else str(texto).translate(_PLEGAR)
+
+
+def sql_plegar(conn: DatabaseConnection, expresion: str) -> str:
+    """The SQL for plegar(expresion) on this connection's database. On Postgres
+    the result is compared bytewise (COLLATE "C"), as SQLite compares text."""
+    if isinstance(conn, sqlite3.Connection):
+        return f"ara_plegar({expresion})"
+    return f"translate({expresion}, '{_PLEGAR_DE}', '{_PLEGAR_A}') COLLATE \"C\""
 
 
 class OcupadoError(AraError):

@@ -1,0 +1,10 @@
+memoria-cambio.json      full_audits=  1 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=6722576 peak=55.7MiB
+memoria-cola.json        full_audits=  5 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=3731616 peak=19.8MiB
+memoria-dos-mapas.json   full_audits=  2 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=6722576 peak=88.7MiB
+memoria-fallos.json      full_audits=  7 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=3362360 peak=9.3MiB
+memoria-matriz.json      full_audits= 24 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=6722576 peak=101.3MiB
+memoria-pequeno.json     full_audits=  3 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=3362360 peak=3.3MiB
+memoria-presion.json     full_audits=  0 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=0 peak=0.0MiB
+memoria-rafaga.json      full_audits=  1 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=6722576 peak=27.0MiB
+memoria-reinicio.json    full_audits=  2 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=3362360 peak=14.4MiB
+memoria-visitas.json     full_audits=  1 errors=0 sampler_violations=0 outside_registry_B=0 max_prepared_via_layers_B=960048 peak=63.7MiB

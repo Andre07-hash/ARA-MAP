@@ -1,0 +1,27 @@
+
+== matriz
+OK    64 MiB DPR 1 1200x640 1 heavy: states {"pintado":3}; peak 9.4 MiB (raster peak 8.4); contour 96 ms; selection 21 ms; longest task 0 ms 
+OK    64 MiB DPR 1 1200x640 6 heavy: states {"pintado":6,"listo":2}; peak 13.5 MiB (raster peak 8.4); contour 207 ms; selection 32 ms; longest task 0 ms 
+OK    64 MiB DPR 1 1200x640 12 heavy: states {"pintado":10,"listo":4}; peak 18.6 MiB (raster peak 8.4); contour 275 ms; selection 62 ms; longest task 0 ms 
+OK    64 MiB DPR 1 1920x1080 1 heavy: states {"pintado":3}; peak 23.7 MiB (raster peak 22.8); contour 112 ms; selection 21 ms; longest task 0 ms 
+OK    64 MiB DPR 1 1920x1080 6 heavy: states {"pintado":6,"listo":2}; peak 27.9 MiB (raster peak 22.8); contour 223 ms; selection 42 ms; longest task 0 ms 
+OK    64 MiB DPR 1 1920x1080 12 heavy: states {"pintado":10,"listo":4}; peak 32.9 MiB (raster peak 22.8); contour 322 ms; selection 93 ms; longest task 0 ms 
+OK    64 MiB DPR 2 1200x640 1 heavy: states {"pintado":3}; peak 34.7 MiB (raster peak 33.8); contour 128 ms; selection 41 ms; longest task 0 ms 
+OK    64 MiB DPR 2 1200x640 6 heavy: states {"pintado":6,"listo":2}; peak 38.8 MiB (raster peak 33.8); contour 240 ms; selection 42 ms; longest task 0 ms 
+OK    64 MiB DPR 2 1200x640 12 heavy: states {"pintado":10,"listo":4}; peak 43.9 MiB (raster peak 33.8); contour 357 ms; selection 63 ms; longest task 0 ms 
+OK    64 MiB DPR 2 1920x1080 1 heavy: states {"pintado":3}; peak 46.5 MiB (raster peak 45.6); contour 258 ms; selection 59 ms; longest task 0 ms 
+OK    64 MiB DPR 2 1920x1080 6 heavy: states {"pintado":6,"listo":2}; peak 50.6 MiB (raster peak 45.6); contour 421 ms; selection 81 ms; longest task 50 ms 
+OK    64 MiB DPR 2 1920x1080 12 heavy: states {"pintado":10,"listo":4}; peak 55.7 MiB (raster peak 45.6); contour 565 ms; selection 121 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1200x640 1 heavy: states {"pintado":3}; peak 9.4 MiB (raster peak 8.4); contour 94 ms; selection 21 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1200x640 6 heavy: states {"pintado":6,"listo":2}; peak 13.5 MiB (raster peak 8.4); contour 210 ms; selection 41 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1200x640 12 heavy: states {"pintado":10,"listo":4}; peak 18.6 MiB (raster peak 8.4); contour 254 ms; selection 63 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1920x1080 1 heavy: states {"pintado":3}; peak 23.7 MiB (raster peak 22.8); contour 124 ms; selection 22 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1920x1080 6 heavy: states {"pintado":6,"listo":2}; peak 27.9 MiB (raster peak 22.8); contour 270 ms; selection 57 ms; longest task 0 ms 
+OK    128 MiB DPR 1 1920x1080 12 heavy: states {"pintado":10,"listo":4}; peak 32.9 MiB (raster peak 22.8); contour 334 ms; selection 72 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1200x640 1 heavy: states {"pintado":3}; peak 34.7 MiB (raster peak 33.8); contour 141 ms; selection 32 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1200x640 6 heavy: states {"pintado":6,"listo":2}; peak 38.8 MiB (raster peak 33.8); contour 258 ms; selection 42 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1200x640 12 heavy: states {"pintado":10,"listo":4}; peak 43.9 MiB (raster peak 33.8); contour 293 ms; selection 76 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1920x1080 1 heavy: states {"pintado":3}; peak 92 MiB (raster peak 91.1); contour 419 ms; selection 326 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1920x1080 6 heavy: states {"pintado":6,"listo":2}; peak 96.2 MiB (raster peak 91.1); contour 391 ms; selection 77 ms; longest task 0 ms 
+OK    128 MiB DPR 2 1920x1080 12 heavy: states {"pintado":10,"listo":4}; peak 101.3 MiB (raster peak 91.1); contour 575 ms; selection 99 ms; longest task 55 ms 
+Todas las comprobaciones pasaron

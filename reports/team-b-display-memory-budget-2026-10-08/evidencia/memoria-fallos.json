@@ -1,0 +1,658 @@
+{
+ "navegador": "141.0.7390.37",
+ "escenario": "fallos",
+ "resultado": [
+  {
+   "simular": "constructor",
+   "asentado": true,
+   "contornoFinalMs": 158,
+   "estados": [
+    {
+     "sin_trabajador": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "sin_trabajador",
+     "Contorno ficticio 0  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "sin_trabajador",
+     "Contorno ficticio 2  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-3",
+     "sin_trabajador",
+     "Contorno ficticio 3  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "sin_trabajador",
+     "Contorno ficticio 5  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "cliente": {
+    "modos": [
+     [
+      "g-t-0",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-2",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-3",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-5",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-l-0",
+      "directo",
+      "listo"
+     ],
+     [
+      "g-l-1",
+      "directo",
+      "listo"
+     ]
+    ],
+    "cliente": "fallido",
+    "motivo": "constructor"
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 3362360,
+    "pico": 3362360,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "fallido",
+       "motivo": "constructor",
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": null,
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 0,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 17,
+     "maxReal": 3362360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 3.2,
+     "usados": 3.2
+    }
+   },
+   "errores": [],
+   "ms": 421
+  },
+  {
+   "simular": "sinOffscreen",
+   "asentado": true,
+   "contornoFinalMs": 142,
+   "estados": [
+    {
+     "sin_trabajador": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "sin_trabajador",
+     "Contorno ficticio 0  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "sin_trabajador",
+     "Contorno ficticio 2  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-3",
+     "sin_trabajador",
+     "Contorno ficticio 3  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "sin_trabajador",
+     "Contorno ficticio 5  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "cliente": {
+    "modos": [
+     [
+      "g-t-0",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-2",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-3",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-5",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-l-0",
+      "directo",
+      "listo"
+     ],
+     [
+      "g-l-1",
+      "directo",
+      "listo"
+     ]
+    ],
+    "cliente": "fallido",
+    "motivo": "sinOffscreen"
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 3362360,
+    "pico": 3362360,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 960100,
+     "raster": 0
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "fallido",
+       "motivo": "sinOffscreen",
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": null,
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 7,
+       "rasters": 0,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 1,
+       "ultimoFallo": "sinOffscreen"
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 16,
+     "maxReal": 3362360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 3.2,
+     "usados": 3.2
+    }
+   },
+   "errores": [],
+   "ms": 394
+  },
+  {
+   "simular": "error",
+   "asentado": true,
+   "contornoFinalMs": 160,
+   "estados": [
+    {
+     "sin_trabajador": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "sin_trabajador",
+     "Contorno ficticio 0  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "sin_trabajador",
+     "Contorno ficticio 2  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-3",
+     "sin_trabajador",
+     "Contorno ficticio 3  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "sin_trabajador",
+     "Contorno ficticio 5  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "cliente": {
+    "modos": [
+     [
+      "g-t-0",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-2",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-3",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-5",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-l-0",
+      "directo",
+      "listo"
+     ],
+     [
+      "g-l-1",
+      "directo",
+      "listo"
+     ]
+    ],
+    "cliente": "fallido",
+    "motivo": "error"
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 3362360,
+    "pico": 8744000,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1440152,
+     "raster": 4423680
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "fallido",
+       "motivo": "error",
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": null,
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 9,
+       "rasters": 1,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 1,
+       "ultimoFallo": "error"
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 17,
+     "maxReal": 3362360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 8.3,
+     "usados": 3.2
+    }
+   },
+   "errores": [],
+   "ms": 395
+  },
+  {
+   "simular": "silencio",
+   "asentado": true,
+   "contornoFinalMs": 1641,
+   "estados": [
+    {
+     "sin_trabajador": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "sin_trabajador",
+     "Contorno ficticio 0  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "sin_trabajador",
+     "Contorno ficticio 2  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-3",
+     "sin_trabajador",
+     "Contorno ficticio 3  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "sin_trabajador",
+     "Contorno ficticio 5  Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "cliente": {
+    "modos": [
+     [
+      "g-t-0",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-2",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-3",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-t-5",
+      "nada",
+      "sin_trabajador"
+     ],
+     [
+      "g-l-0",
+      "directo",
+      "listo"
+     ],
+     [
+      "g-l-1",
+      "directo",
+      "listo"
+     ]
+    ],
+    "cliente": "fallido",
+    "motivo": "sinRespuesta"
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 3362360,
+    "pico": 9708384,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 4423680
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "fallido",
+       "motivo": "sinRespuesta",
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": null,
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 9,
+       "rasters": 1,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 1,
+       "ultimoFallo": "sinRespuesta"
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 106,
+     "maxReal": 3362360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 9.3,
+     "usados": 3.2
+    }
+   },
+   "errores": [],
+   "ms": 1881
+  }
+ ]
+}

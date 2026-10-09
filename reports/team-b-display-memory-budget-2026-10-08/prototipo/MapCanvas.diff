@@ -1,0 +1,234 @@
+--- a/prototipo/MapCanvas.js (PR #16)
++++ b/prototipo/MapCanvas.js (e5)
+@@ -25,10 +25,16 @@
+   puntoDeSimbolo, puntoLeaflet, zoomDeContorno,
+ } from "/b2/web/lib/geometria.js";
+ import { BASEMAPS, MEXICO_BOUNDS } from "/b2/web/components/map/basemaps.js";
+-import { crearClases } from "./capa.js";
+-import { prepararAhora } from "./preparar.js";
+-import { crearCache, crearPlanificador } from "./planificador.js";
+-import { crearClienteRaster } from "./raster.js";
++import { crearClases } from "/proto/prototipo/capa.js";
++import { prepararAhora } from "/proto/prototipo/preparar.js";
++import { crearCache, crearPlanificador } from "/proto/prototipo/planificador.js";
++import { crearClienteRaster } from "/proto/prototipo/raster.js";
++// E5 (memory-budget investigation): shared budget, registry, capped planner, worker client, controller.
++import { crearPresupuesto } from "./presupuesto.js";
++import { crearRegistro } from "./registro.js";
++import { crearPlanificador as crearPlanificadorE5 } from "./planificador.js";
++import { crearCliente } from "./cliente.js";
++import { crearClasesE5, crearControlador, bytesDeCapa, inventarioCapas } from "./e5.js";
+ 
+ /* PROTOTYPE switch for the benchmark: "e1" closes rings without closePath;
+  * "e2" draws cached prepared bodies with culling; "e3" = e2 + cooperative,
+@@ -36,6 +42,18 @@
+  * worker rasterization when the visible geometry is heavy. */
+ let ESTRATEGIA = "e3";
+ let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default
++/* E5: ONE budget shared by every map created on the page (two maps compete),
++ * plus test-only failure simulation and the unanswered-request deadline. */
++let PRESUPUESTO_E5 = null;
++let SIMULAR_E5 = null;
++let PLAZO_E5_MS = 8000;
++let mapasE5 = 0;
++export function configurarE5({ presupuesto = null, bytes = 64 * 1024 * 1024, simular = null, plazoMs = 8000 } = {}) {
++  PRESUPUESTO_E5 = presupuesto ?? crearPresupuesto(bytes);
++  SIMULAR_E5 = simular;
++  PLAZO_E5_MS = plazoMs;
++  return PRESUPUESTO_E5;
++}
+ export function configurarPrototipo({ estrategia, presupuestoTrabajador }) {
+   ESTRATEGIA = estrategia;
+   PRESUPUESTO_TRABAJADOR = presupuestoTrabajador;
+@@ -72,7 +90,17 @@
+  * and touch paths use one value. */
+ const DOBLE_ACTIVACION_MS = 280;
+ /* PROTOTYPE (F3): E4 states where the outline layer is attached but not painted. */
+-const NO_PINTADO = new Set(["dibujando", "sin_memoria"]);
++const NO_PINTADO = new Set(["dibujando", "sin_memoria", "demasiado_grande", "sin_trabajador"]);
++/* E5: states where the outline is not available (explicit, never pending). */
++const NO_DISPONIBLE_E5 = new Set(["sin_memoria", "demasiado_grande", "sin_trabajador"]);
++const AVISOS_E5 = {
++  cargando: "Cargando contorno…",
++  preparando: "Cargando contorno…",
++  dibujando: "Cargando contorno…",
++  sin_memoria: "Contorno no disponible: no hay memoria para dibujarlo ahora",
++  demasiado_grande: "Contorno no disponible: la ventana es demasiado grande para dibujarlo",
++  sin_trabajador: "Contorno no disponible: falló el dibujo; se reintentará al actualizar el mapa",
++};
+ /* A second tap further than this from the first is a new gesture, not a double. */
+ const DOBLE_ACTIVACION_PX = 28;
+ 
+@@ -85,9 +113,23 @@
+   const raster = ESTRATEGIA === "e4"
+     ? crearClienteRaster({ presupuesto: PRESUPUESTO_TRABAJADOR }) : null;
+   // F3: an evicted body leaves the worker too, unless a layer still pins it.
+-  const cache = crearCache(undefined, { alExpulsar: (id) => raster?.expulsado(id) });
++  const E5 = ESTRATEGIA === "e5";
++  if (E5) Object.assign(AVISOS, AVISOS_E5);
++  const duenoE5 = E5 ? `mapa-${++mapasE5}` : null;
++  const presupuestoE5 = E5 ? (PRESUPUESTO_E5 ?? configurarE5()) : null;
++  const registro = E5 ? crearRegistro(presupuestoE5, duenoE5) : null;
++  const { CapaContornoE5, CapaBitmap } = crearClasesE5(L, CapaContorno);
++  // E5: the registry is the cache; the planner reserves before allocating.
++  const cache = E5
++    ? { obtener: (d) => registro.obtener(d), guardar() {}, vaciar: () => registro.vaciar(),
++        contiene: () => false, get bytes() { return registro.bytesReservados(); },
++        get tamano() { return registro.tamano; } }
++    : crearCache(undefined, { alExpulsar: (id) => raster?.expulsado(id) });
+   let reinicioTrabajador = null;                 // F3: resolves when the worker confirms
+-  const planificador = crearPlanificador();
++  const planificador = E5
++    ? crearPlanificadorE5({ registro, presupuesto: presupuestoE5,
++                            alPreparar: (d, r, reserva) => registro.guardar(d, r, reserva) })
++    : crearPlanificador();
+   let generacion = 0;
+   const map = L.map(container, {
+     zoomControl: false,
+@@ -99,6 +141,14 @@
+ 
+   map.fitBounds(MEXICO_BOUNDS);
+   L.control.zoom({ position: "topright" }).addTo(map);
++  const controlador = E5 ? crearControlador({
++    L, map, CapaBitmap, presupuesto: presupuestoE5, dueno: duenoE5,
++    crearCliente: (o) => crearCliente({ presupuesto: presupuestoE5, dueno: duenoE5, simular: SIMULAR_E5,
++                                       plazoMs: PLAZO_E5_MS, ...o }),
++    alEstado: (capa, estado) => capa._avisarE5?.(estado),
++  }) : null;
++  // A body that leaves the registry leaves the worker too: copies follow cache membership.
++  registro?.alQuitar((id) => controlador.expulsado(id));
+   map.attributionControl.setPrefix("");
+ 
+   // Outlines share the map's single canvas renderer with every circle and
+@@ -209,6 +259,15 @@
+   function render(terrenos, { colorFor, dashFor = null, geometrias = null,
+                              cargando = null } = {}) {
+     generacion += 1;
++    // E5: the old entries' layers stop pinning their prepared bodies; a failed worker is retried.
++    if (E5) {
++      for (const e of byId.values()) {
++        if (!e.contorno?._ctl) continue;
++        e.contorno.liberarMemoriaE5();               // R1: the layer's own array goes with it
++        registro.soltar(e.contorno._id);
++      }
++      controlador.reintentar();
++    }
+     contornoLayer.clearLayers();
+     markerLayer.clearLayers();
+     byId = new Map();
+@@ -276,7 +335,11 @@
+     // PROTOTYPE: preparation nobody needs any more is cancelled; an empty
+     // render is the session/scope reset, which also drops every cached body.
+     planificador.conservarSolo(new Set(contornos.map((t) => t.geometria.id)));
+-    if (!filas.length) { cache.vaciar(); if (raster) reinicioTrabajador = raster.olvidarTodo(); }
++    if (!filas.length) {
++      cache.vaciar();
++      if (raster) reinicioTrabajador = raster.olvidarTodo();
++      if (controlador) reinicioTrabajador = controlador.vaciar();
++    }
+     for (const terreno of contornos) {
+       if (byId.has(terreno.id)) continue;           // one logical mark per terrain
+       byId.set(terreno.id, crearContorno(
+@@ -320,6 +383,18 @@
+     }
+     if (estadoContorno === "no_disponible" && cargando?.has?.(descriptor.id)) {
+       estadoContorno = "cargando";
++    }
++    let reservaCapa = null;
++    let fijadaCapa = false;
++    if (E5 && estadoContorno === "listo") {
++      // R1a: pin the cached body first; the reservation may relieve pressure.
++      fijadaCapa = registro.fijar(descriptor.id);
++      if (fijadaCapa) reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);
++      if (!reservaCapa) {
++        if (fijadaCapa) registro.soltar(descriptor.id);
++        fijadaCapa = false;
++        estadoContorno = "sin_memoria";
++      }
+     }
+     const disponible = estadoContorno === "listo";
+     const fill = colorFor(terreno);
+@@ -358,6 +433,16 @@
+           enCache: () => cache.contiene(descriptor.id),
+           alCambiarEstado: (estado) => alDibujo(entrada, terreno, estado),
+         });
++      } else if (E5) {
++        // R1/R1a: the body is pinned for this entry's lifetime BEFORE the layer's
++        // own array is reserved, so that reservation's pressure relief can never
++        // evict the body this layer keeps; the pin is undone on refusal or failure.
++        capa = CapaContornoE5.crearFijada(c, opciones, { id: descriptor.id, controlador,
++                                                        presupuesto: presupuestoE5, dueno: duenoE5, registro,
++                                                        reserva: reservaCapa, yaFijada: fijadaCapa });
++        reservaCapa = null; fijadaCapa = false;     // owned by the layer now, or released
++        if (!capa) return null;                     // no room: the caller reports "sin_memoria"
++        capa._avisarE5 = (estado) => alDibujo(entrada, terreno, estado);
+       } else capa = new CapaContorno(c, opciones);
+       capa.bindTooltip(tooltipHtml(terreno), { sticky: true, opacity: 1,
+                                               className: "mark-tooltip" });
+@@ -390,8 +475,13 @@
+         entry.disponible = r.estado === "cargado";
+         if (entry.disponible) {
+           entry.contorno = crearCapa(r);
+-          entry.cajaEscala = r.cajaMayor;
+-          entry.posiciones = r.posiciones;
++          if (entry.contorno) {
++            entry.cajaEscala = r.cajaMayor;
++            entry.posiciones = r.posiciones;
++          } else {                                  // E5 (R1): no room for the layer's array
++            entry.disponible = false;
++            entry.estadoContorno = "sin_memoria";
++          }
+         }
+         entry.simbolo.setTooltipContent(tooltipHtml(terreno, {
+           aviso: AVISOS[entry.estadoContorno] ?? null }));
+@@ -453,7 +543,7 @@
+       entry.contorno.bringToBack();          // below every circle and symbol
+     } else {
+       if (entry.contorno) contornoLayer.removeLayer(entry.contorno);
+-      if (NO_PINTADO.has(entry.estadoContorno)) entry.estadoContorno = "listo";
++      if (NO_PINTADO.has(entry.estadoContorno) && (entry.contorno || !E5)) entry.estadoContorno = "listo";
+       entry.simbolo.addTo(markerLayer);
+     }
+     return true;
+@@ -651,9 +741,9 @@
+     }
+     const zoom = map.getZoom();
+     // PROTOTYPE: never report an outline that is still loading or being prepared.
+-    if (entry.estadoContorno === "sin_memoria") {
++    if (NO_DISPONIBLE_E5.has(entry.estadoContorno)) {
+       return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo,
+-               motivo: "sin_memoria" };
++               motivo: entry.estadoContorno };
+     }
+     if (entry.estadoContorno === "preparando" || entry.estadoContorno === "cargando"
+         || entry.estadoContorno === "dibujando") {
+@@ -705,11 +795,19 @@
+     destruir() {
+       planificador.detener();
+       cache.vaciar();
++      for (const e of byId.values()) e.contorno?.liberarMemoriaE5?.();
++      controlador?.cerrar();
++      registro?.cerrar();
+       raster?.cerrar();
+       byId = new Map();
+       map.remove();
+     },
+-    _diagnostico: { planificador, cache, raster,
++    _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,
++                    // R1/R1a audit: the live layers' own arrays and the prepared bodies
++                    // reachable through them, checked against the registry.
++                    capasE5() {
++                      return inventarioCapas([...byId.values()].map((e) => e.contorno), registro);
++                    },
+                     get reinicioTrabajador() { return reinicioTrabajador; },
+                     // Test hook: the symbol tooltip text (state wording) of a terrain.
+                     aviso: (id) => byId.get(id)?.simbolo?.getTooltip()?.getContent() ?? null },
+@@ -720,7 +818,7 @@
+ /** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
+ function simboloStyle({ fill, dash, disponible: cargado, estadoContorno = null, selected = false }) {
+   // F3: an outline refused by the worker budget looks "not available", never pending.
+-  const disponible = cargado && estadoContorno !== "sin_memoria";
++  const disponible = cargado && !NO_DISPONIBLE_E5.has(estadoContorno);
+   const pendiente = estadoContorno === "preparando" || estadoContorno === "cargando"
+     || estadoContorno === "dibujando";
+   if (selected) {

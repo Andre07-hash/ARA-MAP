@@ -1,0 +1,390 @@
+TAP version 13
+# Subtest: budget: reserve before allocation, refuse beyond the total, peak and categories
+ok 1 - budget: reserve before allocation, refuse beyond the total, peak and categories
+  ---
+  duration_ms: 3.905352
+  type: 'test'
+  ...
+# Subtest: budget: relievers run before refusing; release notifications are coalesced
+ok 2 - budget: relievers run before refusing; release notifications are coalesced
+  ---
+  duration_ms: 14.608937
+  type: 'test'
+  ...
+# Subtest: registry: one reservation per body, pinned bodies are never evicted and stay counted
+ok 3 - registry: one reservation per body, pinned bodies are never evicted and stay counted
+  ---
+  duration_ms: 1.371922
+  type: 'test'
+  ...
+# Subtest: planner: exact reservation before allocation, cap on jobs, release on cancel
+ok 4 - planner: exact reservation before allocation, cap on jobs, release on cancel
+  ---
+  duration_ms: 354.036006
+  type: 'test'
+  ...
+# Subtest: planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+ok 5 - planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+  ---
+  duration_ms: 101.548569
+  type: 'test'
+  ...
+# Subtest: client: copies reserved before posting and counted until the worker acknowledges
+ok 6 - client: copies reserved before posting and counted until the worker acknowledges
+  ---
+  duration_ms: 7.830764
+  type: 'test'
+  ...
+# Subtest: client: pinned copies are not evicted; a refused post posts nothing
+ok 7 - client: pinned copies are not evicted; a refused post posts nothing
+  ---
+  duration_ms: 7.483411
+  type: 'test'
+  ...
+# Subtest: registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+ok 8 - registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+  ---
+  duration_ms: 17.054925
+  type: 'test'
+  ...
+# Subtest: client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+ok 9 - client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+  ---
+  duration_ms: 6.469479
+  type: 'test'
+  ...
+# Subtest: client failure "error": explicit reason, worker gone, every reservation released
+ok 10 - client failure "error": explicit reason, worker gone, every reservation released
+  ---
+  duration_ms: 3.974365
+  type: 'test'
+  ...
+# Subtest: client failure "silencio": explicit reason, worker gone, every reservation released
+ok 11 - client failure "silencio": explicit reason, worker gone, every reservation released
+  ---
+  duration_ms: 201.111819
+  type: 'test'
+  ...
+# Subtest: client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+ok 12 - client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+  ---
+  duration_ms: 0.905205
+  type: 'test'
+  ...
+# Subtest: client failure "constructor": explicit reason, worker gone, every reservation released
+ok 13 - client failure "constructor": explicit reason, worker gone, every reservation released
+  ---
+  duration_ms: 0.546397
+  type: 'test'
+  ...
+# Subtest: controller: a refused raster reports only the final state and does not loop
+ok 14 - controller: a refused raster reports only the final state and does not loop
+  ---
+  duration_ms: 3.349986
+  type: 'test'
+  ...
+# Subtest: budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+ok 15 - budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+  ---
+  duration_ms: 0.512301
+  type: 'test'
+  ...
+# Subtest: controller: a refused map retries when held items become evictable, without any release
+ok 16 - controller: a refused map retries when held items become evictable, without any release
+  ---
+  duration_ms: 1.875699
+  type: 'test'
+  ...
+# Subtest: worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+ok 17 - worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+  ---
+  duration_ms: 4.065714
+  type: 'test'
+  ...
+# Subtest: R1: a layer's own array is admitted before it is allocated, or not built at all
+ok 18 - R1: a layer's own array is admitted before it is allocated, or not built at all
+  ---
+  duration_ms: 0.985916
+  type: 'test'
+  ...
+# Subtest: R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+ok 19 - R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+  ---
+  duration_ms: 0.32821
+  type: 'test'
+  ...
+# Subtest: R1-test: an allocation failure after admission releases the reservation (injected, small fixture)
+not ok 20 - R1-test: an allocation failure after admission releases the reservation (injected, small fixture)
+  ---
+  duration_ms: 2.111767
+  type: 'test'
+  location: '<scratch>:567:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The error is expected to be an instance of "RangeError". Received "TypeError"
+    
+    Error message:
+    
+    E5Falla.crearFijada is not a function
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:580:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+ok 21 - R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 3.85761
+  type: 'test'
+  ...
+# Subtest: R2: a synchronous olvidar post failure terminates, releases and answers through one path
+ok 22 - R2: a synchronous olvidar post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 0.739766
+  type: 'test'
+  ...
+# Subtest: R2: a synchronous raster post failure terminates, releases and answers through one path
+ok 23 - R2: a synchronous raster post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 0.760494
+  type: 'test'
+  ...
+# Subtest: R2: a synchronous cancelar post failure terminates, releases and answers through one path
+ok 24 - R2: a synchronous cancelar post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 0.848789
+  type: 'test'
+  ...
+# Subtest: R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+ok 25 - R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 0.835372
+  type: 'test'
+  ...
+# (node:445) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+ok 26 - R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+  ---
+  duration_ms: 6.142817
+  type: 'test'
+  ...
+# Subtest: R2: a worker that never says "listo" fails within its startup bound
+ok 27 - R2: a worker that never says "listo" fails within its startup bound
+  ---
+  duration_ms: 0.981502
+  type: 'test'
+  ...
+# Subtest: R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+ok 28 - R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+  ---
+  duration_ms: 3.457897
+  type: 'test'
+  ...
+# Subtest: R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+ok 29 - R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+  ---
+  duration_ms: 2.787815
+  type: 'test'
+  ...
+# Subtest: R3: an admitted job keeps only its own body reachable, not the caller's Map
+ok 30 - R3: an admitted job keeps only its own body reachable, not the caller's Map
+  ---
+  duration_ms: 28.645056
+  type: 'test'
+  ...
+# Subtest: R1a: the reviewed cache-hit order evicts the body the layer keeps, and the audit says so
+not ok 31 - R1a: the reviewed cache-hit order evicts the body the layer keeps, and the audit says so
+  ---
+  duration_ms: 0.978012
+  type: 'test'
+  location: '<scratch>:777:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    the body was evicted by the layer's own reservation
+    + actual - expected
+    
+    + undefined
+    - false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:786:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R1a: cache hit — the body is pinned before the layer reservation; refusal unwinds, nothing is evicted
+not ok 32 - R1a: cache hit — the body is pinned before the layer reservation; refusal unwinds, nothing is evicted
+  ---
+  duration_ms: 0.377848
+  type: 'test'
+  location: '<scratch>:794:1'
+  failureType: 'testCodeFailure'
+  error: 'CapaContornoE5.crearFijada is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:800:31)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R1a: preparation completion — the handed-over body survives its layer's refused admission
+not ok 33 - R1a: preparation completion — the handed-over body survives its layer's refused admission
+  ---
+  duration_ms: 25.377571
+  type: 'test'
+  location: '<scratch>:821:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   null
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: ~
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:843:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R1a: sharing, two maps, existing pinned rasters, replacement and teardown keep the inventory exact
+not ok 34 - R1a: sharing, two maps, existing pinned rasters, replacement and teardown keep the inventory exact
+  ---
+  duration_ms: 0.374978
+  type: 'test'
+  location: '<scratch>:851:1'
+  failureType: 'testCodeFailure'
+  error: 'CapaContornoE5.crearFijada is not a function'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    crear (file://<scratch>:860:56)
+    TestContext.<anonymous> (file://<scratch>:862:14)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R2a: a forget failing during a copy's pressure relief stops asegurar (post after termination returns)
+not ok 35 - R2a: a forget failing during a copy's pressure relief stops asegurar (post after termination returns)
+  ---
+  duration_ms: 0.924157
+  type: 'test'
+  location: '<scratch>:904:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    never "listo" after a terminal transition
+    
+    'listo' !== 'fallido'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'fallido'
+  actual: 'listo'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:912:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R2a: a forget failing during a copy's pressure relief stops asegurar (post after termination throws)
+not ok 36 - R2a: a forget failing during a copy's pressure relief stops asegurar (post after termination throws)
+  ---
+  duration_ms: 0.611057
+  type: 'test'
+  location: '<scratch>:904:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    nothing posted after termination
+    + actual - expected
+    
+    + [
+    +   {
+    +     tipo: 'cuerpo',
+    +     trasTerminar: true
+    +   }
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      tipo: 'cuerpo'
+      trasTerminar: true
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:916:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: R2a: the controller settles to "sin_trabajador" when copy relief fails the worker, then retries once
+not ok 37 - R2a: the controller settles to "sin_trabajador" when copy relief fails the worker, then retries once
+  ---
+  duration_ms: 4.06645
+  type: 'test'
+  location: '<scratch>:927:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    image, copies and pins all released
+    
+    208 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 208
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<scratch>:962:10)
+    runNextTicks (node:internal/process/task_queues:65:5)
+    process.processImmediate (node:internal/timers:453:9)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Error: A resource generated asynchronous activity after the test ended. This activity created the error "TypeError: CapaContornoE5.crearFijada is not a function" which triggered an uncaughtException event, caught by the test runner.
+1..37
+# tests 37
+# suites 0
+# pass 29
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 951.717688

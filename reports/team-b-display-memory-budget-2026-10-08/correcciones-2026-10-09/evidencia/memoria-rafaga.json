@@ -1,0 +1,113 @@
+{
+ "navegador": "141.0.7390.37",
+ "escenario": "rafaga",
+ "resultado": {
+  "capas": 10,
+  "enVuelo": false,
+  "vigente": true,
+  "metricas": {
+   "decisiones": 51,
+   "rasters": 13,
+   "obsoletos": 11,
+   "liberadasParaCaber": 0,
+   "sinMemoria": 0,
+   "demasiadoGrande": 0,
+   "esperas": 0,
+   "fallos": 0,
+   "ultimoFallo": null
+  },
+  "modos": {
+   "bitmap/listo": 10
+  },
+  "auditoria": {
+   "total": 67108864,
+   "usados": 28355880,
+   "pico": 28355880,
+   "ledger": {
+    "preparado": 6722576,
+    "copia": 3842544,
+    "raster": 17694720,
+    "capa": 96040
+   },
+   "picoPorCategoria": {
+    "preparado": 6722576,
+    "copia": 3842544,
+    "raster": 17694720,
+    "capa": 96040
+   },
+   "rechazos": 0,
+   "pendienteDeLiberar": 0,
+   "mapas": [
+    {
+     "i": 0,
+     "registro": {
+      "reservados": 6722576,
+      "reales": 6722576,
+      "entradas": 14,
+      "fijados": 14
+     },
+     "preparando": 0,
+     "cliente": {
+      "estado": "listo",
+      "motivo": null,
+      "reservados": 3842544,
+      "copias": 10
+     },
+     "trabajador": {
+      "bytes": 3842544,
+      "entradas": 10,
+      "lienzos": 0
+     },
+     "raster": {
+      "mostrada": 17694720,
+      "reservadaMostrada": 17694720,
+      "enVuelo": 0
+     },
+     "bitmap": [
+      2880,
+      1536
+     ],
+     "lienzo": [
+      2880,
+      1536
+     ],
+     "metricas": {
+      "decisiones": 51,
+      "rasters": 13,
+      "obsoletos": 11,
+      "liberadasParaCaber": 0,
+      "sinMemoria": 0,
+      "demasiadoGrande": 0,
+      "esperas": 0,
+      "fallos": 0,
+      "ultimoFallo": null
+     },
+     "capas": {
+      "reservado": 96040,
+      "real": 96040,
+      "n": 14
+     },
+     "planificador": {
+      "retenidos": 0,
+      "capacidad": 32,
+      "colaLlena": 0,
+      "maxRetenidos": 14
+     }
+    }
+   ],
+   "errores": [],
+   "muestreo": {
+    "violaciones": [],
+    "muestras": 86,
+    "maxReal": 24513336,
+    "nViolaciones": 0
+   },
+   "MiB": {
+    "total": 64,
+    "pico": 27,
+    "usados": 27
+   }
+  },
+  "errores": []
+ }
+}

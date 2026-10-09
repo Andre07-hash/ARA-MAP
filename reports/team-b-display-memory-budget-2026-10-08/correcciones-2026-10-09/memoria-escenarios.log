@@ -1,0 +1,34 @@
+
+== cambio
+OK    resize 1200x640 -> 1920x1080 -> 900x500 during work (DPR 2, 64 MiB): canvas [2160,1200], bitmap [2160,1200], states {"pintado":10,"listo":4}, peak 55.7 MiB, obsolete replies 3 
+
+== dos-mapas
+OK    two maps, 64 MiB, DPR 2, 1920x1080: map 0 {"pintado":10,"listo":4}, map 1 {"pintado":10,"listo":4}; peak 63.8 MiB (raster 45.6) 
+OK    two maps, 128 MiB, DPR 2, 1920x1080: map 0 {"pintado":10,"listo":4}, map 1 {"pintado":10,"listo":4}; peak 88.7 MiB (raster 68.3) 
+
+== visitas
+OK    45 visits + 10 revisits (60,000 positions each, 64 MiB): 55/55 drawn; registry evictions 23; worker copies sent 55, forgotten 23; peak 63.7 MiB; longest task 0 ms 
+
+== rafaga
+OK    burst of 20 real wheel/drag inputs with selection changes (DPR 2): settled, image for the current view; rasters 13, obsolete replies discarded 11; modes {"bitmap/listo":10}; peak 27 MiB 
+
+== pequeno
+OK    4 MiB, 1920x1080 DPR 1: states {"demasiado_grande":4,"listo":2,"pintado":2}; raster peak 0 B; worker canvases 0; zoomToScale "contorno_no_disponible"/demasiado_grande 
+OK    16 MiB, 1920x1080 DPR 2: states {"demasiado_grande":4,"listo":2,"pintado":2}; raster peak 0 B; worker canvases 0; zoomToScale "contorno_no_disponible"/demasiado_grande 
+OK    1 MiB, 1200x640 DPR 1: states {"demasiado_grande":2,"sin_memoria":4,"pintado":2}; raster peak 0 B; worker canvases 0; zoomToScale "contorno_no_disponible"/demasiado_grande 
+
+== fallos
+OK    worker failure "constructor": client fallido/constructor; states {"sin_trabajador":4,"listo":2,"pintado":2}; nothing pending after 107 ms; worker and raster reservations released 
+OK    worker failure "sinOffscreen": client fallido/sinOffscreen; states {"sin_trabajador":4,"listo":2,"pintado":2}; nothing pending after 123 ms; worker and raster reservations released 
+OK    worker failure "error": client fallido/error; states {"sin_trabajador":4,"listo":2,"pintado":2}; nothing pending after 117 ms; worker and raster reservations released 
+OK    worker failure "silencio": client fallido/sinRespuesta; states {"sin_trabajador":4,"listo":2,"pintado":2}; nothing pending after 1626 ms; worker and raster reservations released 
+OK    worker failure "sinInicio": client fallido/sinInicio; states {"sin_trabajador":4,"listo":2,"pintado":2}; nothing pending after 1587 ms; worker and raster reservations released 
+OK    R2 "envioCuerpo": first render settled {"sin_trabajador":4,"listo":2,"pintado":2}; explicit retry {"pintado":6,"listo":2} with client listo 
+OK    R2 "envioRaster": first render settled {"sin_trabajador":4,"listo":2,"pintado":2}; explicit retry {"pintado":6,"listo":2} with client listo 
+
+== cola
+OK    R3 burst: 100 outlines x 2 maps; jobs at request [[32,32],[32,32],[32,32],[4,4],[0,0]]; first-round states [{"pintado":21,"listo":11,"sin_memoria":68},{"pintado":21,"listo":11,"sin_memoria":68}]; after 5 explicit renders [{"pintado":67,"listo":33},{"pintado":67,"listo":33}]; peak 19.8 MiB 
+
+== reinicio
+OK    reset of map 0: image and prepared bodies released at once, its 1922344 B of worker copies counted until the worker acknowledged (true); map 1 untouched (3362360 B prepared, 1922344 B copies, 2211840 B image); teardown of map 1 releases all of it: ledger 0 B = map 0's remaining 0 B 
+Todas las comprobaciones pasaron

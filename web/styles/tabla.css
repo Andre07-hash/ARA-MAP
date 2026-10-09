@@ -47,7 +47,27 @@
 .tabla-pendiente.is-error { border-left-color: var(--status-error); }
 .tabla-tuyo { font-family: var(--font-mono); }
 
-.tabla-lienzo { flex: 1 1 auto; overflow: auto; min-height: 0; outline: none; }
+/* The grid and, when asked for, the map of the current page beside it. */
+.tabla-cuerpo { flex: 1 1 auto; display: flex; min-height: 0; }
+.tabla-lienzo { flex: 1 1 0; min-width: 0; overflow: auto; min-height: 0; outline: none; }
+.tabla-previa { flex: 0 0 min(38rem, 42%); min-width: 0; display: flex; border-left: 1px solid var(--rule-strong); }
+.previa { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--paper-raised); }
+.previa-cabecera { padding: var(--space-2) var(--space-4) 0; }
+.previa-titulo { margin: 0; font-size: var(--text-small); font-weight: 600; }
+.previa-cuenta, .previa-nota { margin: 0; color: var(--ink-muted); font-size: var(--text-micro); }
+.previa-nota { padding: var(--space-1) var(--space-4) var(--space-2); }
+.previa-mapa { flex: 1 1 auto; min-height: 12rem; }
+.previa-pie {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4); border-top: 1px solid var(--rule); font-size: var(--text-micro);
+}
+.previa-estado { flex: 1 1 12rem; margin: 0; }
+.tabla-fila.is-seleccionada th[scope="row"] { box-shadow: inset 4px 0 0 var(--ink); }
+.tabla-fila.is-seleccionada .tabla-celda { background: var(--paper-sunken); }
+@media (max-width: 60rem) {
+  .tabla-cuerpo.con-mapa { flex-direction: column; }
+  .tabla-previa { flex: 0 0 45%; border-left: 0; border-top: 1px solid var(--rule-strong); }
+}
 .tabla-barra, .tabla-aviso, .tabla-bandeja, .tabla-pie { flex: 0 0 auto; }
 .tabla-grid { border-collapse: separate; border-spacing: 0; font-size: var(--text-small); }
 .tabla-th, .tabla-grid th[scope="row"] {

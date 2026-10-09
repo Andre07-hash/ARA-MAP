@@ -61,6 +61,21 @@ test("inventory rows flatten the draft and classify location like the server", (
   assert.equal(estadoUbicacion(40.7, -74), "invalida");      // outside Mexico
 });
 
+test("an inventory row carries the record's active boundary descriptor and never copies it into X/Y", () => {
+  const { terreno } = fixture("internal-terrain-unplaced");
+  const geometria = { id: "g-ficticia", archivo_version_id: "v-ficticia", utilizable: true,
+    bbox: [-100.4, 20.6, -100.396, 20.603], punto_interior: { type: "Point", coordinates: [-100.398, 20.6015] } };
+  // A record from before `ubicacion` existed stays a plain XY row: no `geometria` key at all.
+  assert.equal("geometria" in itemDeInventario(terreno), false);
+  const sin = itemDeInventario({ ...terreno, ubicacion: { modo: "ninguna", xy: "sin_dato", geometria: null } });
+  assert.equal(sin.geometria, null);
+  const con = itemDeInventario({ ...terreno, ubicacion: { modo: "geometria", xy: "sin_dato", geometria } });
+  assert.deepEqual(con.geometria, geometria);
+  assert.equal(con.ubicacion, "sin_dato");                    // still the XY diagnostic string
+  assert.deepEqual([con.lat, con.lon], [terreno.draft.lat, terreno.draft.lon]);   // raw X/Y untouched
+  assert.equal(con.registro.ubicacion.geometria, geometria);
+});
+
 /* ---------------------------------------------------------------- queries */
 
 test("geography is repeated parameters; price only travels with its currency", () => {

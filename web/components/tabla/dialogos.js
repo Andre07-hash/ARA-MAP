@@ -28,13 +28,16 @@ function Aviso() {
 
 export function abrirDetalle({
   terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onArchivar, onTransferir,
+  onArchivos, onErrorDeArchivos,
 }) {
   const archivado = Boolean(terreno.archived_at);
+  const soloLectura = !puedeCambiar || archivado;
   const montadas = [];
   const ranura = (tipo) => {
     const container = el("dd", { class: "detalle-ranura" });
     montadas.push(montarRanura({
-      container, terrenoId: terreno.id, tipo, soloLectura: !puedeCambiar || archivado, resumen: undefined,
+      container, terrenoId: terreno.id, tipo, soloLectura, detalle: true,
+      resumen: terreno.archivos ?? undefined, onCambio: onArchivos, onError: onErrorDeArchivos,
     }));
     return container;
   };
@@ -69,9 +72,14 @@ export function abrirDetalle({
     acciones: [cerrar],
   });
   dialog.addEventListener("close", () => {
-    for (const m of montadas) m.destroy();
+    for (const m of montadas.splice(0)) m.destroy();
     onCerrar?.();
   });
+  return {
+    terrenoId: terreno.id,
+    /** A fresh summary for the same terrain; nothing else of the dialog changes. */
+    archivos(resumen) { for (const m of montadas) m.update({ soloLectura, resumen: resumen ?? undefined }); },
+  };
 }
 
 /* ---------------------------------------------------------------- transfer */

@@ -110,6 +110,12 @@ export function itemDeInventario(t) {
     publication_state: t.publication_state,
     estadoPublicacion: estadoPublicacion(t),
     ...ubicacion(d.lat, d.lon),
+    // The active boundary descriptor of the record's `ubicacion`, when the
+    // record carries one (null when it has none; absent on records that
+    // predate it, which stay plain XY rows). `ubicacion` above remains the XY
+    // diagnostic string and `lat`/`lon` the raw X/Y: nothing is copied from
+    // the boundary. Whether the row is located is geometria.js's ubicacionDe.
+    ...(t.ubicacion ? { geometria: t.ubicacion.geometria ?? null } : {}),
     registro: t,
   };
 }

@@ -14,6 +14,14 @@
  * silently: a conflict keeps what the person typed beside the row as it is
  * now, and an unanswered save is checked against the server before anything
  * is sent again.
+ *
+ * Files and location (Round 3). Each row carries the server's `archivos`
+ * summary and `ubicacion`; the file cells and the record detail hand the
+ * summary to Team B's widgets. Neither is part of the terrain's version: when
+ * a widget reports a change, one request refreshes that terrain and only
+ * those two fields of the row are replaced. No cell is repainted, so an open
+ * or unresolved editor is not touched. The optional map panel previews the
+ * current page only (vistaPrevia.js).
  */
 
 import { api } from "../../lib/api.js";
@@ -28,8 +36,10 @@ import {
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
 import { closeAllDialogs, confirmDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
+import { conectarArchivos } from "./archivosAnfitrion.js";
 import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
+import { createVistaPrevia } from "./vistaPrevia.js";
 
 const BUSCAR_MS = 300;
 const ESTADOS = {
@@ -62,6 +72,22 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   const enVuelo = new Set();
   const cola = crearCola();
   let ranuras = [];
+  let seleccion = null;           // terrain id shared with the map preview
+  let detalleAbierto = null;      // the open record detail, for file refreshes
+  let pintada = null;             // the page object the preview last drew
+  const refrescos = new Map();    // terrain id -> "pedido" | "repetir" (coalesced file refreshes)
+  // Team B's widgets and geometry loader, for this session only.
+  const archivos = conectarArchivos({
+    onListo: ({ faltan }) => {
+      if (!vivo) return;
+      remontarRanuras();
+      if (faltan.length) alerta.textContent = `No se pudo cargar el módulo de ${faltan.join(" ni el de ")}.`;
+    },
+  });
+  const previa = createVistaPrevia({
+    cargador: () => archivos.cargador,
+    onSeleccion: (id) => seleccionar(id, { desdeMapa: true }),
+  });
 
   /* ------------------------------------------------------------ skeleton */
 
@@ -98,6 +124,11 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     "Bases y accesos");
   const btnRecargar = el("button", { type: "button", class: "btn btn-quiet", onclick: () => recargar() },
     "Actualizar");
+  const btnMapa = el("button", {
+    type: "button", class: "btn btn-quiet", "aria-pressed": "false", "aria-controls": "tabla-previa",
+    title: "Muestra en un mapa las filas de la página actual",
+    onclick: () => alternarMapa(),
+  }, "Mapa de esta página");
 
   const campoDe = (control, etiqueta) => el("div", { class: "tabla-campo" },
     el("label", { class: "field-label", for: control.id }, etiqueta), control);
@@ -112,7 +143,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
     casilla(chkArchivados, "Incluir archivados"),
-    el("div", { class: "tabla-acciones" }, btnAgregar, btnColumnas, btnBases, btnRecargar),
+    el("div", { class: "tabla-acciones" }, btnAgregar, btnColumnas, btnBases, btnRecargar, btnMapa),
   );
 
   const aviso = el("p", { class: "tabla-aviso", hidden: true });
@@ -131,11 +162,19 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   const pie = el("div", { class: "tabla-pie" }, cuenta, campoDe(selLimite, "Filas por página"),
     btnAnterior, btnSiguiente, estado, alerta);
 
-  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, lienzo, vacio, pie);
+  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true }, previa.element);
+  const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
+  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, cuerpo, vacio, pie);
 
   tbody.addEventListener("focusin", (e) => {
     const celda = e.target.closest("td[data-col]");
-    if (celda) foco = { id: celda.parentNode.dataset.id, colId: celda.dataset.col };
+    if (!celda) return;
+    foco = { id: celda.parentNode.dataset.id, colId: celda.dataset.col };
+    seleccionar(foco.id);
+  });
+  tbody.addEventListener("click", (e) => {
+    const tr = e.target.closest("tr[data-id]");
+    if (tr) seleccionar(tr.dataset.id);
   });
   tbody.addEventListener("dblclick", (e) => {
     const celda = e.target.closest("td[data-col]");
@@ -175,6 +214,11 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     nuevos = new Set();
     for (const r of ranuras) r.destroy();
     ranuras = [];
+    refrescos.clear();
+    detalleAbierto = null;
+    seleccion = null;
+    pintada = null;
+    previa.pintar([]);            // drops the loaded boundary and any load in flight
     pagina = { filas: [], total: 0, facets: {}, siguiente: null };
     definiciones = [];
     cursor = null;
@@ -436,6 +480,119 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     if (errorDeCarga) alerta.textContent = errorDeCarga;
     pintarBandeja();
     if (tenia) enfocar(tenia.id, tenia.colId);
+    if (seleccion && !filaDe(seleccion)) seleccion = null;
+    marcarSeleccion();
+    pintarPrevia();
+  }
+
+  /* ------------------------------------------------ files, location, map */
+
+  /** Hand the preview the page as it is now. A page object it has not seen
+   * is a new page: its boundary body and framing start over. */
+  function pintarPrevia() {
+    previa.pintar(pagina.filas, { total: pagina.total, nuevaPagina: pintada !== pagina });
+    pintada = pagina;
+  }
+
+  function marcarSeleccion() {
+    for (const tr of tbody.querySelectorAll("tr.is-seleccionada")) {
+      tr.classList.remove("is-seleccionada");
+      tr.removeAttribute("aria-selected");
+    }
+    const tr = seleccion && tbody.querySelector(`tr[data-id="${CSS.escape(seleccion)}"]`);
+    if (tr) { tr.classList.add("is-seleccionada"); tr.setAttribute("aria-selected", "true"); }
+    return tr || null;
+  }
+
+  /** One selected terrain, by id, in the table and on the map. Choosing it on
+   * the map brings its row into view without moving the keyboard focus. */
+  function seleccionar(id, { desdeMapa = false } = {}) {
+    if (!vivo || !filaDe(id)) return;
+    const cambio = id !== seleccion;
+    seleccion = id;
+    const tr = marcarSeleccion();
+    if (desdeMapa) tr?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    else if (cambio && !panelMapa.hidden) previa.seleccionar(id);
+  }
+
+  function alternarMapa() {
+    panelMapa.hidden = !panelMapa.hidden;
+    btnMapa.setAttribute("aria-pressed", String(!panelMapa.hidden));
+    cuerpo.classList.toggle("con-mapa", !panelMapa.hidden);
+    if (panelMapa.hidden) return;
+    previa.mostrar();
+    if (seleccion) previa.seleccionar(seleccion);
+  }
+
+  /** The widgets arrived after rows were drawn: mount them where the
+   * placeholders are. Only file cells are touched. */
+  function remontarRanuras() {
+    for (const r of ranuras) r.destroy();
+    ranuras = [];
+    for (const t of pagina.filas) {
+      const tr = tbody.querySelector(`tr[data-id="${CSS.escape(t.id)}"]`);
+      for (const c of columnas) {
+        if (c.tipo !== "archivo" || !tr) continue;
+        tr.querySelector(`td[data-col="${CSS.escape(c.id)}"]`)?.replaceWith(Celda(t, c, filaEditable(t)));
+      }
+    }
+  }
+
+  /**
+   * A widget changed a terrain's files (upload, activation, retirement).
+   * Refresh that terrain once however many reports arrive while the request
+   * is out, and replace only its `archivos` and `ubicacion`. The row's
+   * version, draft and custom values stay as the table has them: this answer
+   * may be older than a cell save still in flight.
+   */
+  async function refrescarArchivos(id) {
+    if (!vivo || !filaDe(id)) return;
+    if (refrescos.has(id)) { refrescos.set(id, "repetir"); return; }
+    const gen = generacion;
+    try {
+      do {
+        refrescos.set(id, "pedido");
+        const { terreno } = await api.inventarioTerreno(id);
+        if (!vivo || gen !== generacion) return;
+        aplicarArchivos(terreno);
+      } while (refrescos.get(id) === "repetir");
+    } catch (error) {
+      if (!vivo || gen !== generacion) return;
+      if (error.status === 404) alcanceDeArchivoPerdido(id);
+      else alerta.textContent = `No se pudo actualizar los archivos del terreno: ${error.message}`;
+    } finally {
+      if (gen === generacion) refrescos.delete(id);
+    }
+  }
+
+  function aplicarArchivos(terreno) {
+    const actual = filaDe(terreno.id);
+    if (!actual) return;
+    const fila = { ...actual, archivos: terreno.archivos, ubicacion: terreno.ubicacion };
+    pagina.filas = pagina.filas.map((t) => (t.id === fila.id ? fila : t));
+    const editable = filaEditable(fila);
+    for (const r of ranuras) {
+      if (r.terrenoId === fila.id) r.update({ soloLectura: !editable, resumen: fila.archivos ?? undefined });
+    }
+    if (detalleAbierto?.terrenoId === fila.id) detalleAbierto.archivos(fila.archivos);
+    pintarPrevia();
+  }
+
+  /** The terrain a widget was working on is no longer in this account's
+   * scope: drop it and look at the bases again; do not just say so. */
+  function alcanceDeArchivoPerdido(id) {
+    quitarFila(id);
+    toastError("Ese terreno ya no está en esta vista.");
+    refrescarBases();
+  }
+
+  function errorDeArchivo(id, { codigo, mensaje }) {
+    if (!vivo) return;
+    if (codigo === "404" || codigo === "not_found" || codigo === "no_encontrado") {
+      alcanceDeArchivoPerdido(id);
+      return;
+    }
+    toastError(mensaje || "No se pudo completar la operación con el archivo.");
   }
 
   const clasesDeFila = (t) => ["tabla-fila", t.archived_at && "is-archivada", nuevos.has(t.id) && "is-nueva"]
@@ -464,7 +621,10 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     if (c.tipo === "archivo") {
       const td = el("td", { class: "tabla-celda tabla-celda-archivo", dataset: { col: c.id } });
       ranuras.push(montarRanura({
-        container: td, terrenoId: t.id, tipo: c.archivo, soloLectura: !editable, resumen: undefined,
+        container: td, terrenoId: t.id, tipo: c.archivo, soloLectura: !editable,
+        resumen: t.archivos ?? undefined,
+        onCambio: (e) => refrescarArchivos(e.terrenoId),
+        onError: (e) => errorDeArchivo(t.id, e),
       }));
       return td;
     }
@@ -523,10 +683,11 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     for (const c of columnas) {
       const previa = tr.querySelector(`td[data-col="${CSS.escape(c.id)}"]`);
       if (!previa || c.id === abierta) continue;
-      if (c.tipo === "archivo") mias.get(previa)?.update({ soloLectura: !editable });
+      if (c.tipo === "archivo") mias.get(previa)?.update({ soloLectura: !editable, resumen: t.archivos ?? undefined });
       else previa.replaceWith(Celda(t, c, editable));
     }
     if (tenia && tenia.id === id) enfocar(id, tenia.colId);
+    if (id === seleccion) marcarSeleccion();
   }
 
   function pintarBandeja() {
@@ -688,6 +849,8 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     pagina.filas = pagina.filas.map((t, n) => (n === i ? terreno : t));
     pintarFila(terreno.id);
     pintarBandeja();
+    if (detalleAbierto?.terrenoId === terreno.id) detalleAbierto.archivos(terreno.archivos);
+    pintarPrevia();
   }
 
   function quitarFila(id) {
@@ -695,8 +858,10 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     for (const k of [...celdas.keys()]) if (k.startsWith(`${id}|`)) celdas.delete(k);
     pagina.filas = pagina.filas.filter((t) => t.id !== id);
     pagina.total = Math.max(0, pagina.total - 1);
+    if (seleccion === id) seleccion = null;
     pintarFila(id);
     pintarBandeja();
+    pintarPrevia();
   }
 
   function fallo(error, id, col, enviado) {
@@ -876,10 +1041,12 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     const t = filaDe(id);
     if (!t) return;
     const regresar = volverA(id, foco?.id === id ? foco.colId : null);
-    abrirDetalle({
+    const abierto = abrirDetalle({
       terreno: t, columnas, base: t.base_id ? baseDe(t.base_id) : null, admin,
       puedeCambiar: !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada),
-      onCerrar: regresar,
+      onCerrar: () => { if (detalleAbierto === abierto) detalleAbierto = null; regresar(); },
+      onArchivos: (e) => refrescarArchivos(e.terrenoId),
+      onErrorDeArchivos: (e) => errorDeArchivo(id, e),
       onHistorial: () => openTerrainHistory({ id: t.id, nombre: t.draft?.terreno }),
       onArchivar: (restaurar) => archivar(id, restaurar),
       onTransferir: () => abrirTransferencia({
@@ -887,6 +1054,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
         onHecho: (movido) => transferido(movido), onConflicto: (actual) => reemplazar(actual),
       }),
     });
+    detalleAbierto = abierto;
   }
 
   async function archivar(id, restaurar) {
@@ -938,6 +1106,12 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     });
   }
 
+  // Opt-in hook for browser checks (only with ?test=1, as in app.js): what
+  // the preview holds and where a terrain is drawn. Never in normal use.
+  if (new URLSearchParams(location.search).has("test")) {
+    window.__araTabla = { previa: () => previa.estado, posicion: (id) => previa.posicionDe(id) };
+  }
+
   /* ------------------------------------------------------------ lifecycle */
 
   abrir(vistaInicial, { forzar: true });
@@ -955,6 +1129,9 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     destroy() {
       vivo = false;
       limpiarAlcance();
+      previa.destroy();
+      archivos.destroy();          // widgets, loader, their requests and object URLs
+      delete window.__araTabla;
       bases = [];
       element.remove();
     },

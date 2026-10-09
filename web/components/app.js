@@ -16,6 +16,7 @@ import { compareLayers } from "../lib/comparar.js";
 import { append, clear, el } from "../lib/dom.js";
 import { activeCount, applyFilters, EMPTY_FILTERS, sinFiltrosDePrecio } from "../lib/filters.js";
 import { fmtCount, monedasDe, plural } from "../lib/format.js";
+import { ubicacionDe } from "../lib/geometria.js";
 import {
   contarFiltros, FILTROS_VACIOS, itemDeInventario, itemPublico, opcionesDeFacetas,
 } from "../lib/inventario.js";
@@ -635,12 +636,19 @@ const FiltrosBoton = (modo, activos) => el("button", {
 
 /* ------------------------------------------------- catalog and inventory */
 
+/* An internal row is located by its active boundary or by valid X/Y
+ * (geometria.js ubicacionDe); `ubicacion` stays the X/Y diagnostic. */
+function filaInterna(registro) {
+  const fila = itemDeInventario(registro);
+  return { ...fila, ubicado: ubicacionDe(fila).ubicado };
+}
+
 /* Rows are derived once per assembled result, not on every render. */
 const itemsCache = new WeakMap();
 function itemsDe(tipo, datos) {
   if (!itemsCache.has(datos.registros)) {
     itemsCache.set(datos.registros,
-      datos.registros.map(tipo === "catalogo" ? itemPublico : itemDeInventario));
+      datos.registros.map(tipo === "catalogo" ? itemPublico : filaInterna));
   }
   return itemsCache.get(datos.registros);
 }

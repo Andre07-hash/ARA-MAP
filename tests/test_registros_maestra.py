@@ -970,7 +970,12 @@ class Registros(Escenario):
         status, body = self.call("GET", "/api/inventario/terrenos?limit=1", user="olga")
         self.assertEqual((status, body["detalle"]["capacidad"]), (403, "maestra.global"))
         registro = self.lista(self.b1)[1]["terrenos"][0]
-        self.assertFalse({"custom_json", "extra_json", "ubicacion", "archivos", "geometria"} & set(registro))
+        # Stored columns never leave; since packet 3A the record carries the
+        # `archivos` summary and `ubicacion` (tests/test_resumenes_terreno.py),
+        # and the boundary descriptor lives only inside `ubicacion`.
+        self.assertFalse({"custom_json", "extra_json", "geometria", "geojson"} & set(registro))
+        self.assertEqual(set(registro["ubicacion"]), {"modo", "xy", "geometria"})
+        self.assertEqual(set(registro["archivos"]), {"pdf_total", "pdf_recientes", "kmz"})
         self.assertFalse({"base_id", "custom", "custom_json"} & set(registro["draft"]))
         self.assertEqual(set(auth.CAPACIDADES["operador"]) & {"maestra.global", "bases.gestionar"}, set())
 

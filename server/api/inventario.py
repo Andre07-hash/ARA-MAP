@@ -17,7 +17,7 @@ import uuid
 from collections.abc import Mapping
 from typing import Any
 
-from .. import auth, columnas, db, inventario
+from .. import archivos, auth, columnas, db, inventario, validation
 from ..protocols import DatabaseConnection
 from ..repo import columnas as repo_columnas
 from ..repo import inventario as repo
@@ -44,6 +44,39 @@ def _not_found() -> ApiError:
     return ApiError(NO_EXISTE, 404, {"code": "not_found"})
 
 
+def _presentar(conn: DatabaseConnection, request: Request,
+               terrenos: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Add the private `archivos` and `ubicacion` siblings to current records.
+
+    `archivos` is the attachment service's own caller-aware summary of each
+    terrain ({pdf_total, pdf_recientes, kmz}), unchanged; that service
+    authorizes every id again. `ubicacion` is {modo, xy, geometria}: the active
+    usable boundary first, else valid X/Y, else none. Raw X/Y stay in `draft`
+    untouched. A terrain the caller may not read attachments of gets neither a
+    summary nor a descriptor. Neither is part of the terrain's version.
+    """
+    sesion = request.sesion
+    resumenes: dict[str, Any] = {}
+    if terrenos and sesion is not None and "archivos.ver" in auth.CAPACIDADES[sesion.rol]:
+        resumenes = archivos.resumenes_de_archivos(
+            conn, [t["id"] for t in terrenos], sesion)["resultados"]
+    activos = repo.descriptores_activos(
+        conn, [i for i, r in resumenes.items() if r["kmz"] and r["kmz"]["geometria_activa_id"]])
+    for t in terrenos:
+        geometria = activos.get(t["id"])
+        xy = validation.location_state(t["draft"]["lat"], t["draft"]["lon"])
+        t["archivos"] = resumenes.get(t["id"])
+        t["ubicacion"] = {
+            "modo": "geometria" if geometria else "punto" if xy == "valida" else "ninguna",
+            "xy": xy, "geometria": geometria}
+    return terrenos
+
+
+def _presentar_uno(conn: DatabaseConnection, request: Request,
+                   terreno: dict[str, Any] | None) -> dict[str, Any] | None:
+    return _presentar(conn, request, [terreno])[0] if terreno else None
+
+
 def listing(request: Request) -> Respuesta:
     """The administrators' master table: every base and the unassigned records."""
     return _listar(request, inventario.INTERNAL_QUERY, None)
@@ -64,6 +97,7 @@ def _listar(request: Request, permitidos: tuple[str, ...], base_id: str | None) 
         try:
             q = inventario.parse_query(request.query, permitidos)
             terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
+            _presentar(conn, request, terrenos)
         except inventario.QueryError as exc:
             raise _invalid(exc.errors, "Filtros inválidos.") from None
         except repo.CursorError:
@@ -76,7 +110,7 @@ def detail(request: Request) -> Respuesta:
     inventory_id = request.uuid_param("id")
     with db.session() as conn:
         auth.require_terreno(request, inventory_id, "maestra.ver", conn)
-        terreno = repo.get(conn, inventory_id)
+        terreno = _presentar_uno(conn, request, repo.get(conn, inventory_id))
     if terreno is None:
         raise _not_found()
     return {"terreno": terreno}
@@ -123,7 +157,7 @@ def _crear(request: Request, base_id: str | None) -> Respuesta:
             # The record may have been moved or archived since: answer from
             # what it is now, and only if this caller may still see it.
             auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.ver")
-        return {"terreno": repo.get(conn, inventory_id)}
+        return {"terreno": _presentar_uno(conn, request, repo.get(conn, inventory_id))}
 
 
 def _hash(cuerpo: Mapping[str, Any]) -> str:
@@ -168,16 +202,16 @@ def update(request: Request) -> Respuesta:
         if errors:
             raise _invalid(errors)
         try:
-            return {"terreno": repo.update(conn, inventory_id, expected, fields,
-                                           tuple(dict.fromkeys(confirm)), actor, custom)}
+            return {"terreno": _presentar_uno(conn, request, repo.update(
+                conn, inventory_id, expected, fields, tuple(dict.fromkeys(confirm)), actor, custom))}
         except repo.ConflictError:
-            raise _conflicto(conn, inventory_id) from None
+            raise _conflicto(conn, request, inventory_id) from None
 
 
-def _conflicto(conn: DatabaseConnection, inventory_id: str) -> ApiError:
+def _conflicto(conn: DatabaseConnection, request: Request, inventory_id: str) -> ApiError:
     """The 409 for a stale expected_version, with the record as it is now.
     Only ever built after the caller was authorized for that record."""
-    latest = repo.get(conn, inventory_id)
+    latest = _presentar_uno(conn, request, repo.get(conn, inventory_id))
     return ApiError(
         "Otra persona guardó cambios en este terreno. Revisa su versión antes de guardar"
         " la tuya; tus datos no se han perdido.", 409,
@@ -221,9 +255,10 @@ def _archivar(request: Request, restaurar: bool) -> Respuesta:
             raise ApiError("Este terreno está publicado; pide a un administrador que lo haga.",
                            403, {"code": "requiere_admin"})
         try:
-            return {"terreno": repo.archivar(conn, inventory_id, expected, alcance.actor, restaurar)}
+            return {"terreno": _presentar_uno(conn, request, repo.archivar(
+                conn, inventory_id, expected, alcance.actor, restaurar))}
         except repo.ConflictError:
-            raise _conflicto(conn, inventory_id) from None
+            raise _conflicto(conn, request, inventory_id) from None
         except repo.EstadoError as exc:
             raise ApiError("El terreno ya está archivado." if exc.code == "terreno_archivado"
                            else "El terreno no está archivado.", 409, {"code": exc.code}) from None
@@ -289,9 +324,10 @@ def transfer(request: Request) -> Respuesta:
         if destino != alcance.base_id:
             _destino_activo(conn, destino)
         try:
-            return {"terreno": repo.transferir(conn, inventory_id, expected, destino, alcance.actor)}
+            return {"terreno": _presentar_uno(conn, request, repo.transferir(
+                conn, inventory_id, expected, destino, alcance.actor))}
         except repo.ConflictError:
-            raise _conflicto(conn, inventory_id) from None
+            raise _conflicto(conn, request, inventory_id) from None
 
 
 def history(request: Request) -> Respuesta:

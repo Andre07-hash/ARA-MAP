@@ -39,9 +39,11 @@ CHUNK = archivos.GEOMETRY_CHUNK
 
 
 def kmz_de_kml(kml: bytes) -> bytes:
+    """Deterministic bytes: a fixed member timestamp, so equal input gives an equal KMZ."""
     salida = io.BytesIO()
     with zipfile.ZipFile(salida, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("doc.kml", kml)
+        zf.writestr(zipfile.ZipInfo("doc.kml", date_time=(2026, 10, 9, 0, 0, 0)), kml,
+                    compress_type=zipfile.ZIP_DEFLATED)
     return salida.getvalue()
 
 

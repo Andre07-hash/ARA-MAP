@@ -4,7 +4,7 @@ Date: 2026-10-08
 Repository: `Andre07-hash/ARA-MAP`  
 Branch: `claude/team-b/attachment-lifecycle`  
 Draft PR base: `claude/integration/round-1-baseline`  
-Status: implementation and local verification complete; draft PR/CI recorded in §12 after push
+Status: implementation, verification and stacked draft PR complete; CI links are in §12
 
 This packet implements the attachment domain core. It does not authorize or
 include a merge, deployment, provider, real account, real company data, HTTP
@@ -27,7 +27,8 @@ observed inputs did not move.
 | B-2 + E1 drawing | `eed9a4cb404406b8b261803c38947e8297a5edec` |
 | Published integration baseline | `1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb` |
 | Attachment implementation | `fe299bd55dce9bf30d865a1033c417a533561a9d` |
-| Final report/measurement head | recorded in the draft PR and §12 after publication |
+| Report/measurement commit before publication links | `62a2148601a387297e606c462cf0f2581a6b28f8` |
+| Final published branch head | authoritative `headRefOid` in draft PR #23; also recorded in its body |
 
 The branch was created directly from the published baseline. Team A's
 `claude/team-a/master-record-backend` was not consumed.
@@ -375,9 +376,15 @@ browser or published-environment test is claimed.
 
 ### GitHub evidence
 
-- Draft PR: recorded after publication.
-- Exact-head Actions run/checks: recorded after publication; local green is
-  not represented as CI until GitHub reports it.
+- Stacked draft PR: [#23](https://github.com/Andre07-hash/ARA-MAP/pull/23),
+  targeting `claude/integration/round-1-baseline`.
+- Current exact-head checks: [PR checks](https://github.com/Andre07-hash/ARA-MAP/pull/23/checks).
+- Repository-check runs for this branch: [Actions history](https://github.com/Andre07-hash/ARA-MAP/actions/workflows/checks.yml?query=branch%3Aclaude%2Fteam-b%2Fattachment-lifecycle).
+
+The commit containing a report cannot embed its own Git object ID. The PR's
+`headRefOid`, body and current checks page are the authoritative final-head and
+exact-head CI record. Local green is not represented as CI until GitHub reports
+the checks green.
 
 ## 13. Limitations and later requests
 

@@ -1,8 +1,12 @@
 /* Individual sign-in and the session's lifecycle.
  *
- * Every team member signs in as themselves; all of them can do the same
- * things. Ending a session (logout, or a 401 from the server) runs the app's
- * `onSignedOut`, which cancels private requests and clears private state.
+ * Every team member signs in as themselves. Whenever the identity behind this
+ * window stops being the one its private content was loaded for (logout, a
+ * 401 from the server, or the server now naming another account or another
+ * role), the app's `onSignedOut` runs FIRST: it cancels private requests and
+ * removes every private row, form, dialog and pending save. Nothing private
+ * is kept behind the sign-in dialog, saved or not; only then may a new
+ * identity be set.
  */
 
 import { api, onSessionExpired } from "../../lib/api.js";
@@ -27,9 +31,21 @@ export function createSession({ onSignedIn, onSignedOut, hasUnsavedWork }) {
       toastError(`No se pudo comprobar la sesión: ${error.message}`);
       return antes;
     }
+    if (antes && !usuario) {
+      expired({ silencioso: false });
+      return null;
+    }
+    // Another account, or another role for this one (a sign-in in another tab
+    // shares this cookie): what is on screen belongs to the previous identity.
+    const otra = Boolean(antes && usuario && (antes.id !== usuario.id || antes.rol !== usuario.rol));
+    const habia = otra && hasUnsavedWork();
+    if (otra) onSignedOut();
     setState({ sesion: usuario, sesionLista: true });
-    if (antes && !usuario) expired({ silencioso: false });
-    else if (!antes && usuario) onSignedIn(usuario, { returnTo: null, startup: true });
+    if (usuario && (!antes || otra)) onSignedIn(usuario, { returnTo: null, startup: !antes });
+    if (otra) {
+      toast(`Esta ventana ahora es de ${usuario.display_name}. Se retiró lo que mostraba la sesión anterior` +
+        (habia ? ", incluido lo que estaba sin guardar." : "."));
+    }
     return usuario;
   }
 
@@ -103,19 +119,15 @@ export function createSession({ onSignedIn, onSignedOut, hasUnsavedWork }) {
   /** The server says the session is gone (expired, revoked, signed out elsewhere). */
   function expired({ silencioso = false } = {}) {
     const returnTo = getState().ruta;
-    if (hasUnsavedWork()) {
-      // Keep the form: sign in again to save it. Giving up clears everything.
-      signIn({
-        returnTo,
-        motivo: "Tu sesión terminó. Vuelve a entrar para guardar; lo que escribiste sigue en pantalla.",
-        onCancel: () => { if (!getState().sesion) onSignedOut(); },
-      });
-      setState({ sesion: null });
-      return;
-    }
+    // Whoever signs in next may be someone else: nothing private waits behind
+    // the dialog, unsaved input included. The message says so without quoting it.
+    const habia = hasUnsavedWork();
     onSignedOut();
-    if (!silencioso) toastError("Tu sesión terminó. Inicia sesión de nuevo para ver el inventario.");
-    signIn({ returnTo });
+    if (!silencioso || habia) {
+      toastError("Tu sesión terminó. Inicia sesión de nuevo para continuar." +
+        (habia ? " Lo que estaba sin guardar se descartó." : ""));
+    }
+    signIn({ returnTo, motivo: habia ? "Tu sesión terminó. Lo que estaba sin guardar se descartó." : null });
   }
 
   async function signOut() {

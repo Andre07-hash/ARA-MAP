@@ -84,6 +84,7 @@ def main() -> None:
         from server import app, db
         db.connect().close()
         sembrar(args.registros)
+        print(f"BD {os.environ['ARA_MAP_DB']}", flush=True)   # for scripts/cuentas.py --sqlite in a journey
         print(f"LISTO http://localhost:{args.puerto}", flush=True)
         app.serve(args.puerto, open_browser=False)
 

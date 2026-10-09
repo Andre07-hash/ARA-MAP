@@ -26,7 +26,7 @@ import {
   VISTA_SIN_ASIGNAR,
 } from "../../lib/tabla.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
-import { confirmDialog } from "../ui/dialog.js";
+import { closeAllDialogs, confirmDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
 import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
@@ -185,6 +185,8 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     bandeja.hidden = true;
     alerta.textContent = "";
     if (deVista) {
+      // A detail, a history, the columns or the grants of the view being left.
+      closeAllDialogs();
       columnas = columnasDe(VISTA_MAESTRA);
       thead.replaceChildren();
       for (const control of [selEstado, selMunicipio, selTipo]) control.replaceChildren();
@@ -436,22 +438,24 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     if (tenia) enfocar(tenia.id, tenia.colId);
   }
 
+  const clasesDeFila = (t) => ["tabla-fila", t.archived_at && "is-archivada", nuevos.has(t.id) && "is-nueva"]
+    .filter(Boolean).join(" ");
+
+  function CabeceraDeFila(t, indice) {
+    const nombre = t.draft?.terreno || "sin nombre";
+    return el("th", { scope: "row", class: "tabla-th-fila" },
+      el("button", {
+        type: "button", class: "icon-btn tabla-abrir", "aria-label": `Abrir terreno ${nombre}, fila ${indice + 1}`,
+        title: "Detalle, historial, archivar y transferir", onclick: () => detalle(t.id),
+      }, "⋯"),
+      t.archived_at && el("span", { class: "chip tabla-chip" }, "Archivado"),
+      nuevos.has(t.id) && el("span", { class: "chip tabla-chip" }, "Nuevo"),
+    );
+  }
+
   function Fila(t, indice) {
     const editable = filaEditable(t);
-    const nombre = t.draft?.terreno || "sin nombre";
-    const tr = el("tr", {
-      class: ["tabla-fila", t.archived_at && "is-archivada", nuevos.has(t.id) && "is-nueva"],
-      dataset: { id: t.id },
-    },
-      el("th", { scope: "row", class: "tabla-th-fila" },
-        el("button", {
-          type: "button", class: "icon-btn tabla-abrir", "aria-label": `Abrir terreno ${nombre}, fila ${indice + 1}`,
-          title: "Detalle, historial, archivar y transferir", onclick: () => detalle(t.id),
-        }, "⋯"),
-        t.archived_at && el("span", { class: "chip tabla-chip" }, "Archivado"),
-        nuevos.has(t.id) && el("span", { class: "chip tabla-chip" }, "Nuevo"),
-      ),
-    );
+    const tr = el("tr", { class: clasesDeFila(t), dataset: { id: t.id } }, CabeceraDeFila(t, indice));
     for (const c of columnas) tr.append(Celda(t, c, editable));
     return tr;
   }
@@ -493,16 +497,35 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     return Boolean(nodo);
   }
 
-  /** Repaint one row, keeping the keyboard where it was. */
+  /**
+   * Repaint one row in place, cell by cell. The cell whose editor is open is
+   * left exactly as it is: another cell's save, conflict or error coming back
+   * must not take away what is being typed, its selection or its focus. The
+   * file mounts stay too; they are told about read-only changes.
+   */
   function pintarFila(id) {
-    const previa = tbody.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
+    const tr = tbody.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
     const t = filaDe(id);
-    if (!previa) return;
-    const tenia = previa.contains(document.activeElement) && !editando ? foco : null;
-    const mias = new Set([...previa.querySelectorAll("td.tabla-celda-archivo")]);
-    ranuras = ranuras.filter((r) => { if (mias.has(r.container)) { r.destroy(); return false; } return true; });
-    if (!t) { previa.remove(); return; }
-    previa.replaceWith(Fila(t, pagina.filas.indexOf(t)));
+    if (!tr) return;
+    const mias = new Map(ranuras.filter((r) => tr.contains(r.container)).map((r) => [r.container, r]));
+    if (!t) {
+      for (const r of mias.values()) r.destroy();
+      ranuras = ranuras.filter((r) => !mias.has(r.container));
+      if (editando?.id === id) editando = null;
+      tr.remove();
+      return;
+    }
+    const abierta = editando?.id === id ? editando.col.id : null;
+    const tenia = !abierta && tr.contains(document.activeElement) ? foco : null;
+    const editable = filaEditable(t);
+    tr.className = clasesDeFila(t);
+    tr.firstElementChild.replaceWith(CabeceraDeFila(t, pagina.filas.indexOf(t)));
+    for (const c of columnas) {
+      const previa = tr.querySelector(`td[data-col="${CSS.escape(c.id)}"]`);
+      if (!previa || c.id === abierta) continue;
+      if (c.tipo === "archivo") mias.get(previa)?.update({ soloLectura: !editable });
+      else previa.replaceWith(Celda(t, c, editable));
+    }
     if (tenia && tenia.id === id) enfocar(id, tenia.colId);
   }
 
@@ -606,7 +629,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   /** Close the editor and save what it holds, if it changed and is valid. */
   function confirmar() {
     if (!editando) return;
-    const { id, col, campo } = editando;
+    const { id, col, campo, inicial } = editando;
     editando = null;
     const texto = campo.value;
     const t = filaDe(id);
@@ -618,6 +641,12 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
       alerta.textContent = `${col.etiqueta}: ${leido.error}`;
     } else if ((leido.valor ?? null) === (valorDe(t, col) ?? null)) {
       celdas.delete(k);
+    } else if (textoDe(valorDe(t, col)) !== inicial) {
+      // The row was refreshed while this editor was open and THIS cell is no
+      // longer what the person started from. Saving at the row's new version
+      // would overwrite someone else's value unseen: show both and let them choose.
+      celdas.set(k, { estado: "conflicto", valor: leido.valor, texto: textoDe(leido.valor) });
+      alerta.textContent = `${col.etiqueta}: este valor cambió mientras lo editabas. El tuyo no se guardó ni se perdió.`;
     } else {
       guardar(id, col, leido.valor, textoDe(leido.valor));
       return;
@@ -662,6 +691,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   }
 
   function quitarFila(id) {
+    closeAllDialogs();   // its detail, history or transfer may be open
     for (const k of [...celdas.keys()]) if (k.startsWith(`${id}|`)) celdas.delete(k);
     pagina.filas = pagina.filas.filter((t) => t.id !== id);
     pagina.total = Math.max(0, pagina.total - 1);

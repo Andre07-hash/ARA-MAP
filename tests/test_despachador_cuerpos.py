@@ -98,7 +98,7 @@ class Cuerpos(TempDatabase):
         one connection are both answered, in order."""
         ada = b"Cookie: " + self.cookies["ada"].encode()
         crear = self.post("/api/maestra/bases", (ada, b"Content-Type: application/json"),
-                          cuerpo='{"nombre": "Base Ficticia"}'.encode())
+                          cuerpo=b'{"nombre": "Base Ficticia"}')
         invalida = self.post("/api/maestra/bases", (ada,), cuerpo=b'{"nombre": ""}')
         login_malo = self.post("/api/login", cuerpo=(
             '{"username": "ada", "password": "no-es-' + TEST_PASSWORD + '"}').encode())

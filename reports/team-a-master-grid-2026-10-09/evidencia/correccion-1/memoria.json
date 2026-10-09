@@ -1,0 +1,82 @@
+{
+  "url": "http://localhost:8434",
+  "chrome": "154.0.8037.99",
+  "fecha": "2026-10-09T18:44:09.036Z",
+  "que": "20 rondas por lote de: página siguiente, anterior, otra base, volver, abrir y cerrar el detalle",
+  "puntos": [
+    {
+      "tras": "carga inicial",
+      "heap_kb": 3213,
+      "nodos_dom": 4324,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    },
+    {
+      "tras": "calentamiento (100 transiciones)",
+      "heap_kb": 3919,
+      "nodos_dom": 4332,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    },
+    {
+      "tras": "lote 1 (100 transiciones)",
+      "heap_kb": 3969,
+      "nodos_dom": 4332,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    },
+    {
+      "tras": "lote 2 (100 transiciones)",
+      "heap_kb": 4034,
+      "nodos_dom": 4332,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    },
+    {
+      "tras": "lote 3 (100 transiciones)",
+      "heap_kb": 4054,
+      "nodos_dom": 4332,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    },
+    {
+      "tras": "lote 4 (100 transiciones)",
+      "heap_kb": 4077,
+      "nodos_dom": 4332,
+      "listeners": 225,
+      "filas": 100,
+      "dialogos": 0
+    }
+  ],
+  "deltas_por_lote_tras_el_calentamiento": [
+    {
+      "entre": "calentamiento (100 transiciones) -> lote 1 (100 transiciones)",
+      "heap_kb": 50,
+      "nodos_dom": 0,
+      "listeners": 0
+    },
+    {
+      "entre": "lote 1 (100 transiciones) -> lote 2 (100 transiciones)",
+      "heap_kb": 65,
+      "nodos_dom": 0,
+      "listeners": 0
+    },
+    {
+      "entre": "lote 2 (100 transiciones) -> lote 3 (100 transiciones)",
+      "heap_kb": 20,
+      "nodos_dom": 0,
+      "listeners": 0
+    },
+    {
+      "entre": "lote 3 (100 transiciones) -> lote 4 (100 transiciones)",
+      "heap_kb": 23,
+      "nodos_dom": 0,
+      "listeners": 0
+    }
+  ]
+}

@@ -647,10 +647,12 @@ await caso('session loss: logout clears the table; the next account on the same 
   await otra.page.keyboard.press('Enter');
   await otra.page.getByRole('dialog', { name: 'Iniciar sesión' }).waitFor();
   await otra.page.getByText(/Tu sesión terminó/).first().waitFor();
+  // Correction 1: nothing private waits behind the sign-in dialog, saved or not.
+  assert.equal(await otra.page.locator('.tabla-pantalla, tr[data-id]').count(), 0);
+  assert.ok(!(await otra.page.content()).includes('Sin sesión') && !(await otra.page.content()).includes(NOMBRE));
   await foto(otra.page, '18-sesion-terminada');
   await otra.page.getByRole('dialog', { name: 'Iniciar sesión' }).getByRole('button', { name: 'Cancelar' }).click();
-  await otra.page.waitForFunction(() => !document.querySelector('.tabla-pantalla'));
-  assert.ok(!(await otra.page.content()).includes('Sin sesión'), 'giving up clears the unsaved text too');
+  assert.equal(await otra.page.locator('.tabla-pantalla').count(), 0);
   assert.deepEqual([...errores, ...otra.errores], []);
   await otra.context.close();
   await context.close();

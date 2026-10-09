@@ -51,7 +51,7 @@ import { openFiltersDrawer } from "./terrain/FiltersDrawer.js";
 import { TerrainDetail } from "./terrain/TerrainDetail.js";
 import { TerrainTable } from "./terrain/TerrainTable.js";
 import { UnplacedList } from "./terrain/UnplacedList.js";
-import { confirmDialog, openDialog } from "./ui/dialog.js";
+import { closeAllDialogs, confirmDialog, openDialog } from "./ui/dialog.js";
 import { clearToasts, toast, toastError } from "./ui/toast.js";
 
 /* Operators get the table of their work bases and the public catalog. The
@@ -180,7 +180,7 @@ function limpiarPrivado() {
   editor?.destroy();
   editor = null;
   editorEstado = null;
-  for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
+  closeAllDialogs();   // removed, not only closed: a detail or a history holds private text
   clearToasts();
   if (workspace) {
     for (const modo of ["inventario", "local"]) {

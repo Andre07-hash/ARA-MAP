@@ -2,6 +2,15 @@
 
 Date: 2026-10-08. Status: **prototype research only; stop for supervisory review**.
 
+> **2026-10-09 correction notice.** Supervisory review `009a724` found that the
+> ledger omitted each layer's own array (R1), that synchronous sends and a silent
+> startup had no terminal path (R2), that queued jobs were uncapped (R3) and that
+> one cancellation test depended on machine speed (R4). The headline result and
+> the raw-body paragraph below are **superseded** by
+> [CORRECCIONES_2026-10-09.md](CORRECCIONES_2026-10-09.md); the measurements in
+> this file are kept unchanged as historical evidence of the reviewed head
+> `229d424`.
+
 This report answers the bounded-memory question from instruction commit
 `7a71c93c1c1be68dc5ac992ae6ae801cde1d9cd5`. It does not authorize E4/E5 in
 the application, select a production budget, merge, deploy, or change a public
@@ -29,6 +38,9 @@ Every changed file is under
 route, CI, dependency, deployment, or real-data file changed.
 
 ## Result
+
+*(Historical, superseded by the 2026-10-09 corrections: this audit did not
+count per-layer arrays.)*
 
 **Yes, the prototype enforces a shared 64 or 128 MiB admission limit across
 the managed allocations it owns, including transient replacement rasters,
@@ -71,7 +83,8 @@ image, the displayed image is released first and the request is retried. The
 recorded peak therefore includes both old and new images whenever both fit;
 at 64 MiB the 4608×2592 replacement deliberately uses the release-first path.
 
-The raw-body references not charged as prepared arrays are bounded by the two
+*(Historical, unsupported as written — see R3 in the corrections.)* The raw-body
+references not charged as prepared arrays are bounded by the two
 preparation jobs: each queued/running job holds its descriptor and the caller's
 `geometrias` map. The caller's GeoJSON itself is external and must have an
 upstream size/count contract. This prototype did not invent a production file

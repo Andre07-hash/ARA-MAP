@@ -1,0 +1,207 @@
+== run 1
+# Subtest: budget: reserve before allocation, refuse beyond the total, peak and categories
+ok 1 - budget: reserve before allocation, refuse beyond the total, peak and categories
+# Subtest: budget: relievers run before refusing; release notifications are coalesced
+ok 2 - budget: relievers run before refusing; release notifications are coalesced
+# Subtest: registry: one reservation per body, pinned bodies are never evicted and stay counted
+ok 3 - registry: one reservation per body, pinned bodies are never evicted and stay counted
+# Subtest: planner: exact reservation before allocation, cap on jobs, release on cancel
+ok 4 - planner: exact reservation before allocation, cap on jobs, release on cancel
+# Subtest: planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+ok 5 - planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+# Subtest: client: copies reserved before posting and counted until the worker acknowledges
+ok 6 - client: copies reserved before posting and counted until the worker acknowledges
+# Subtest: client: pinned copies are not evicted; a refused post posts nothing
+ok 7 - client: pinned copies are not evicted; a refused post posts nothing
+# Subtest: registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+ok 8 - registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+# Subtest: client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+ok 9 - client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+# Subtest: client failure "error": explicit reason, worker gone, every reservation released
+ok 10 - client failure "error": explicit reason, worker gone, every reservation released
+# Subtest: client failure "silencio": explicit reason, worker gone, every reservation released
+ok 11 - client failure "silencio": explicit reason, worker gone, every reservation released
+# Subtest: client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+ok 12 - client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+# Subtest: client failure "constructor": explicit reason, worker gone, every reservation released
+ok 13 - client failure "constructor": explicit reason, worker gone, every reservation released
+# Subtest: controller: a refused raster reports only the final state and does not loop
+ok 14 - controller: a refused raster reports only the final state and does not loop
+# Subtest: budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+ok 15 - budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+# Subtest: controller: a refused map retries when held items become evictable, without any release
+ok 16 - controller: a refused map retries when held items become evictable, without any release
+# Subtest: worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+ok 17 - worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+# Subtest: R1: a layer's own array is admitted before it is allocated, or not built at all
+ok 18 - R1: a layer's own array is admitted before it is allocated, or not built at all
+# Subtest: R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+ok 19 - R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+# Subtest: R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+ok 20 - R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidar post failure terminates, releases and answers through one path
+ok 21 - R2: a synchronous olvidar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous raster post failure terminates, releases and answers through one path
+ok 22 - R2: a synchronous raster post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous cancelar post failure terminates, releases and answers through one path
+ok 23 - R2: a synchronous cancelar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+ok 24 - R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+# (node:13630) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+ok 25 - R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+# Subtest: R2: a worker that never says "listo" fails within its startup bound
+ok 26 - R2: a worker that never says "listo" fails within its startup bound
+# Subtest: R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+ok 27 - R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+# Subtest: R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+ok 28 - R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+# Subtest: R3: an admitted job keeps only its own body reachable, not the caller's Map
+ok 29 - R3: an admitted job keeps only its own body reachable, not the caller's Map
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 828.036297
+== run 2
+# Subtest: budget: reserve before allocation, refuse beyond the total, peak and categories
+ok 1 - budget: reserve before allocation, refuse beyond the total, peak and categories
+# Subtest: budget: relievers run before refusing; release notifications are coalesced
+ok 2 - budget: relievers run before refusing; release notifications are coalesced
+# Subtest: registry: one reservation per body, pinned bodies are never evicted and stay counted
+ok 3 - registry: one reservation per body, pinned bodies are never evicted and stay counted
+# Subtest: planner: exact reservation before allocation, cap on jobs, release on cancel
+ok 4 - planner: exact reservation before allocation, cap on jobs, release on cancel
+# Subtest: planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+ok 5 - planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+# Subtest: client: copies reserved before posting and counted until the worker acknowledges
+ok 6 - client: copies reserved before posting and counted until the worker acknowledges
+# Subtest: client: pinned copies are not evicted; a refused post posts nothing
+ok 7 - client: pinned copies are not evicted; a refused post posts nothing
+# Subtest: registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+ok 8 - registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+# Subtest: client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+ok 9 - client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+# Subtest: client failure "error": explicit reason, worker gone, every reservation released
+ok 10 - client failure "error": explicit reason, worker gone, every reservation released
+# Subtest: client failure "silencio": explicit reason, worker gone, every reservation released
+ok 11 - client failure "silencio": explicit reason, worker gone, every reservation released
+# Subtest: client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+ok 12 - client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+# Subtest: client failure "constructor": explicit reason, worker gone, every reservation released
+ok 13 - client failure "constructor": explicit reason, worker gone, every reservation released
+# Subtest: controller: a refused raster reports only the final state and does not loop
+ok 14 - controller: a refused raster reports only the final state and does not loop
+# Subtest: budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+ok 15 - budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+# Subtest: controller: a refused map retries when held items become evictable, without any release
+ok 16 - controller: a refused map retries when held items become evictable, without any release
+# Subtest: worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+ok 17 - worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+# Subtest: R1: a layer's own array is admitted before it is allocated, or not built at all
+ok 18 - R1: a layer's own array is admitted before it is allocated, or not built at all
+# Subtest: R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+ok 19 - R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+# Subtest: R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+ok 20 - R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidar post failure terminates, releases and answers through one path
+ok 21 - R2: a synchronous olvidar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous raster post failure terminates, releases and answers through one path
+ok 22 - R2: a synchronous raster post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous cancelar post failure terminates, releases and answers through one path
+ok 23 - R2: a synchronous cancelar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+ok 24 - R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+# (node:13648) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+ok 25 - R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+# Subtest: R2: a worker that never says "listo" fails within its startup bound
+ok 26 - R2: a worker that never says "listo" fails within its startup bound
+# Subtest: R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+ok 27 - R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+# Subtest: R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+ok 28 - R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+# Subtest: R3: an admitted job keeps only its own body reachable, not the caller's Map
+ok 29 - R3: an admitted job keeps only its own body reachable, not the caller's Map
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 774.560256
+== run 3
+# Subtest: budget: reserve before allocation, refuse beyond the total, peak and categories
+ok 1 - budget: reserve before allocation, refuse beyond the total, peak and categories
+# Subtest: budget: relievers run before refusing; release notifications are coalesced
+ok 2 - budget: relievers run before refusing; release notifications are coalesced
+# Subtest: registry: one reservation per body, pinned bodies are never evicted and stay counted
+ok 3 - registry: one reservation per body, pinned bodies are never evicted and stay counted
+# Subtest: planner: exact reservation before allocation, cap on jobs, release on cancel
+ok 4 - planner: exact reservation before allocation, cap on jobs, release on cancel
+# Subtest: planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+ok 5 - planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending
+# Subtest: client: copies reserved before posting and counted until the worker acknowledges
+ok 6 - client: copies reserved before posting and counted until the worker acknowledges
+# Subtest: client: pinned copies are not evicted; a refused post posts nothing
+ok 7 - client: pinned copies are not evicted; a refused post posts nothing
+# Subtest: registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+ok 8 - registry eviction while the worker copy is posted, then while its forget awaits acknowledgement
+# Subtest: client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+ok 9 - client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed
+# Subtest: client failure "error": explicit reason, worker gone, every reservation released
+ok 10 - client failure "error": explicit reason, worker gone, every reservation released
+# Subtest: client failure "silencio": explicit reason, worker gone, every reservation released
+ok 11 - client failure "silencio": explicit reason, worker gone, every reservation released
+# Subtest: client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+ok 12 - client failure "sinOffscreen": explicit reason, worker gone, every reservation released
+# Subtest: client failure "constructor": explicit reason, worker gone, every reservation released
+ok 13 - client failure "constructor": explicit reason, worker gone, every reservation released
+# Subtest: controller: a refused raster reports only the final state and does not loop
+ok 14 - controller: a refused raster reports only the final state and does not loop
+# Subtest: budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+ok 15 - budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement
+# Subtest: controller: a refused map retries when held items become evictable, without any release
+ok 16 - controller: a refused map retries when held items become evictable, without any release
+# Subtest: worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+ok 17 - worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it
+# Subtest: R1: a layer's own array is admitted before it is allocated, or not built at all
+ok 18 - R1: a layer's own array is admitted before it is allocated, or not built at all
+# Subtest: R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+ok 19 - R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact
+# Subtest: R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+ok 20 - R2: a synchronous cuerpo post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidar post failure terminates, releases and answers through one path
+ok 21 - R2: a synchronous olvidar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous raster post failure terminates, releases and answers through one path
+ok 22 - R2: a synchronous raster post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous cancelar post failure terminates, releases and answers through one path
+ok 23 - R2: a synchronous cancelar post failure terminates, releases and answers through one path
+# Subtest: R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+ok 24 - R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path
+# (node:13662) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+ok 25 - R2: a synchronous estadisticas post failure terminates, releases and answers through one path
+# Subtest: R2: a worker that never says "listo" fails within its startup bound
+ok 26 - R2: a worker that never says "listo" fails within its startup bound
+# Subtest: R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+ok 27 - R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker
+# Subtest: R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+ok 28 - R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly
+# Subtest: R3: an admitted job keeps only its own body reachable, not the caller's Map
+ok 29 - R3: an admitted job keeps only its own body reachable, not the caller's Map
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 784.909962

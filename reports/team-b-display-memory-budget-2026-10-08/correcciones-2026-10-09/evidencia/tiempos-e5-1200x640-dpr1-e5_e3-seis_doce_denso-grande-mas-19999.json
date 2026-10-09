@@ -1,0 +1,1096 @@
+{
+ "navegador": "141.0.7390.37",
+ "dpr": 1,
+ "mib": 64,
+ "vista": "1200x640",
+ "repeticiones": 1,
+ "maquina": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "nucleos": 4,
+  "sistema": "Linux 6.18.44-fc-v80"
+ },
+ "controles": [
+  {
+   "control": "frío: 150 ms tras render()",
+   "tareaMaxMs": 161,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 0: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 1: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 2: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 3: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 4: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "arrastre 5: tarea de 150 ms durante la entrada",
+   "tareaMaxMs": 150,
+   "esperado": ">= 150",
+   "bien": true
+  },
+  {
+   "control": "tarea de 150 ms que termina antes del marcador",
+   "tareaMaxMs": 0,
+   "esperado": "0",
+   "bien": true
+  },
+  {
+   "control": "referencia: trabajo directo en page.evaluate (no se usa para medir)",
+   "tareaMaxMs": 0,
+   "esperado": "no reportado en Chromium 141",
+   "bien": true
+  }
+ ],
+ "corridas": [
+  {
+   "impl": "e5",
+   "escena": "seis",
+   "frio": {
+    "final": true,
+    "llamadaMs": 15.1,
+    "contornoFinalMs": 211,
+    "tareaMaxMs": 0,
+    "tareasLargas": 0,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 16.7,
+    "estados": [
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 139,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 682,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 122,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 649,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 117,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 646,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 667,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 122,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 666,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 649,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 384,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 400,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 384,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 416,
+     "tareaMaxHastaFinalMs": 0
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  },
+  {
+   "impl": "e3",
+   "escena": "seis",
+   "frio": {
+    "final": true,
+    "llamadaMs": 13.9,
+    "contornoFinalMs": 140,
+    "tareaMaxMs": 0,
+    "tareasLargas": 0,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 16.8,
+    "estados": [
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 141,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 716,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 636,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 667,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 636,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 121,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 633,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 615,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 401,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 400,
+     "tareaMaxHastaFinalMs": 0
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  },
+  {
+   "impl": "e5",
+   "escena": "doce",
+   "frio": {
+    "final": true,
+    "llamadaMs": 16,
+    "contornoFinalMs": 253,
+    "tareaMaxMs": 0,
+    "tareasLargas": 0,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 16.7,
+    "estados": [
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 138,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 716,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 123,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 717,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 682,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 682,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 667,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 121,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 682,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 384,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 433,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.6
+     },
+     "contornoFinalMs": 433,
+     "tareaMaxHastaFinalMs": 0
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  },
+  {
+   "impl": "e3",
+   "escena": "doce",
+   "frio": {
+    "final": true,
+    "llamadaMs": 12.4,
+    "contornoFinalMs": 298,
+    "tareaMaxMs": 59,
+    "tareasLargas": 1,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 50,
+    "estados": [
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo",
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 138,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 683,
+     "tareaMaxHastaFinalMs": 68
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 124,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 666,
+     "tareaMaxHastaFinalMs": 56
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 121,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 667,
+     "tareaMaxHastaFinalMs": 56
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 684,
+     "tareaMaxHastaFinalMs": 90
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 648,
+     "tareaMaxHastaFinalMs": 58
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 666,
+     "tareaMaxHastaFinalMs": 70
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 465,
+     "tareaMaxHastaFinalMs": 56
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 384,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 434,
+     "tareaMaxHastaFinalMs": 68
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  },
+  {
+   "impl": "e5",
+   "escena": "denso-grande-mas-19999",
+   "frio": {
+    "final": true,
+    "llamadaMs": 10.5,
+    "contornoFinalMs": 231,
+    "tareaMaxMs": 0,
+    "tareasLargas": 0,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 16.8,
+    "estados": [
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 139,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 783,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 783,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 783,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 765,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 751,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 767,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 484,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 48,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 482,
+     "tareaMaxHastaFinalMs": 0
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  },
+  {
+   "impl": "e3",
+   "escena": "denso-grande-mas-19999",
+   "frio": {
+    "final": true,
+    "llamadaMs": 8.4,
+    "contornoFinalMs": 196,
+    "tareaMaxMs": 148,
+    "tareasLargas": 1,
+    "eventoMaxMs": 0,
+    "cuadroMaxMs": 133.2,
+    "estados": [
+     "listo"
+    ]
+   },
+   "acciones": [
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 120,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 783,
+     "tareaMaxHastaFinalMs": 167
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 121,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 766,
+     "tareaMaxHastaFinalMs": 150
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.8
+     },
+     "contornoFinalMs": 768,
+     "tareaMaxHastaFinalMs": 165
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 118,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 733,
+     "tareaMaxHastaFinalMs": 147
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 119,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 24,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 748,
+     "tareaMaxHastaFinalMs": 151
+    },
+    {
+     "tipo": "arrastre",
+     "final": true,
+     "entradaMs": 121,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 16,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 716,
+     "tareaMaxHastaFinalMs": 110
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 383,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 49,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 466,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 47,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 381,
+     "tareaMaxHastaFinalMs": 0
+    },
+    {
+     "tipo": "rueda",
+     "final": true,
+     "entradaMs": 50,
+     "entrada": {
+      "tareaMaxMs": 0,
+      "tareasLargas": 0,
+      "eventoMaxMs": 0,
+      "cuadroMaxMs": 16.7
+     },
+     "contornoFinalMs": 498,
+     "tareaMaxHastaFinalMs": 0
+    }
+   ],
+   "errores": [],
+   "repeticion": 0
+  }
+ ],
+ "tabla": [
+  {
+   "escena": "seis",
+   "impl": "e5",
+   "frío contorno final ms (mediana)": 211,
+   "frío tarea máx ms (peor)": 0,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.8,
+   "tras entrada contorno final ms (mediana)": 646,
+   "tras entrada contorno final ms (peor)": 682,
+   "tras entrada tarea máx ms (peor)": 0,
+   "entradas con tarea >= 50 ms": "0/10"
+  },
+  {
+   "escena": "seis",
+   "impl": "e3",
+   "frío contorno final ms (mediana)": 140,
+   "frío tarea máx ms (peor)": 0,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.8,
+   "tras entrada contorno final ms (mediana)": 615,
+   "tras entrada contorno final ms (peor)": 716,
+   "tras entrada tarea máx ms (peor)": 0,
+   "entradas con tarea >= 50 ms": "0/10"
+  },
+  {
+   "escena": "doce",
+   "impl": "e5",
+   "frío contorno final ms (mediana)": 253,
+   "frío tarea máx ms (peor)": 0,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.7,
+   "tras entrada contorno final ms (mediana)": 667,
+   "tras entrada contorno final ms (peor)": 717,
+   "tras entrada tarea máx ms (peor)": 0,
+   "entradas con tarea >= 50 ms": "0/10"
+  },
+  {
+   "escena": "doce",
+   "impl": "e3",
+   "frío contorno final ms (mediana)": 298,
+   "frío tarea máx ms (peor)": 59,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.8,
+   "tras entrada contorno final ms (mediana)": 648,
+   "tras entrada contorno final ms (peor)": 684,
+   "tras entrada tarea máx ms (peor)": 90,
+   "entradas con tarea >= 50 ms": "0/10"
+  },
+  {
+   "escena": "denso-grande-mas-19999",
+   "impl": "e5",
+   "frío contorno final ms (mediana)": 231,
+   "frío tarea máx ms (peor)": 0,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.8,
+   "tras entrada contorno final ms (mediana)": 751,
+   "tras entrada contorno final ms (peor)": 783,
+   "tras entrada tarea máx ms (peor)": 0,
+   "entradas con tarea >= 50 ms": "0/10"
+  },
+  {
+   "escena": "denso-grande-mas-19999",
+   "impl": "e3",
+   "frío contorno final ms (mediana)": 196,
+   "frío tarea máx ms (peor)": 148,
+   "entrada tarea máx ms (mediana)": 0,
+   "entrada tarea máx ms (peor)": 0,
+   "entrada evento máx ms (peor)": 24,
+   "entrada cuadro máx ms (peor)": 16.8,
+   "tras entrada contorno final ms (mediana)": 716,
+   "tras entrada contorno final ms (peor)": 783,
+   "tras entrada tarea máx ms (peor)": 167,
+   "entradas con tarea >= 50 ms": "0/10"
+  }
+ ]
+}

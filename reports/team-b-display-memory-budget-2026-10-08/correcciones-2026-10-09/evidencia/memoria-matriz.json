@@ -1,0 +1,2654 @@
+{
+ "navegador": "141.0.7390.37",
+ "escenario": "matriz",
+ "resultado": [
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 96,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 21,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 5388084,
+    "pico": 9811764,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 4423680,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 8847360,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 16,
+     "maxReal": 4905888,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 9.4,
+     "usados": 5.1
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 207,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 32,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 9756408,
+    "pico": 14180088,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 4423680,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 8847360,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 11,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 23,
+     "maxReal": 7834064,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 13.5,
+     "usados": 9.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 275,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 62,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 15084840,
+    "pico": 19508520,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 4423680,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 8847360,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 15,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 29,
+     "maxReal": 11242296,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 18.6,
+     "usados": 14.4
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 112,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 21,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 12908340,
+    "pico": 24852276,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 11943936,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 23887872,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 17,
+     "maxReal": 12426144,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 23.7,
+     "usados": 12.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 223,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 42,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 17276664,
+    "pico": 29220600,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 11943936,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 23887872,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 11,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 25,
+     "maxReal": 15354320,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 27.9,
+     "usados": 16.5
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 322,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 93,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 22605096,
+    "pico": 34549032,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 11943936,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 23887872,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 16,
+       "rasters": 4,
+       "obsoletos": 2,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 34,
+     "maxReal": 18762552,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 32.9,
+     "usados": 21.6
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 128,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 41,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 18659124,
+    "pico": 36353844,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 17694720,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 35389440,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 19,
+     "maxReal": 18176928,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 34.7,
+     "usados": 17.8
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 240,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 42,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 23027448,
+    "pico": 40722168,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 17694720,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 35389440,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 11,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 25,
+     "maxReal": 21105104,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 38.8,
+     "usados": 22
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 357,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 63,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 28355880,
+    "pico": 46050600,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 17694720,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 35389440,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 17,
+       "rasters": 4,
+       "obsoletos": 2,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 31,
+     "maxReal": 24513336,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 43.9,
+     "usados": 27
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 258,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 59,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 48740148,
+    "pico": 48740148,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 47775744,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 47775744,
+     "capa": 12
+    },
+    "rechazos": 1,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 7,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 1,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 22,
+     "maxReal": 48257952,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 46.5,
+     "usados": 46.5
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 421,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 50,
+   "tareasLargas": 1,
+   "seleccionPintadaMs": 81,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 53108472,
+    "pico": 53108472,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 47775744,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 47775744,
+     "capa": 48024
+    },
+    "rechazos": 1,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 12,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 1,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 31,
+     "maxReal": 51186128,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 50.6,
+     "usados": 50.6
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 64,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 565,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 121,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 67108864,
+    "usados": 58436904,
+    "pico": 58436904,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 47775744,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 47775744,
+     "capa": 96040
+    },
+    "rechazos": 1,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 18,
+       "rasters": 4,
+       "obsoletos": 2,
+       "liberadasParaCaber": 1,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 42,
+     "maxReal": 54594360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 64,
+     "pico": 55.7,
+     "usados": 55.7
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 94,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 21,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 5388084,
+    "pico": 9811764,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 4423680,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 8847360,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 16,
+     "maxReal": 4905888,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 9.4,
+     "usados": 5.1
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 210,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 41,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 9756408,
+    "pico": 14180088,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 4423680,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 8847360,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 12,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 24,
+     "maxReal": 7834064,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 13.5,
+     "usados": 9.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1200x640",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 254,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 63,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 15084840,
+    "pico": 19508520,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 4423680,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 8847360,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 4423680,
+       "reservadaMostrada": 4423680,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       1440,
+       768
+      ],
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 16,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 28,
+     "maxReal": 11242296,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 18.6,
+     "usados": 14.4
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 124,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 22,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 12908340,
+    "pico": 24852276,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 11943936,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 23887872,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 18,
+     "maxReal": 12426144,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 23.7,
+     "usados": 12.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 270,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 57,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 17276664,
+    "pico": 29220600,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 11943936,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 23887872,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 12,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 29,
+     "maxReal": 15354320,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 27.9,
+     "usados": 16.5
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 334,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 72,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 22605096,
+    "pico": 34549032,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 11943936,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 23887872,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 11943936,
+       "reservadaMostrada": 11943936,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2304,
+       1296
+      ],
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 16,
+       "rasters": 4,
+       "obsoletos": 2,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 32,
+     "maxReal": 18762552,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 32.9,
+     "usados": 21.6
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 141,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 32,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 18659124,
+    "pico": 36353844,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 17694720,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 35389440,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 19,
+     "maxReal": 18176928,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 34.7,
+     "usados": 17.8
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 258,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 42,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 23027448,
+    "pico": 40722168,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 17694720,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 35389440,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 11,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 26,
+     "maxReal": 21105104,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 38.8,
+     "usados": 22
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1200x640",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 293,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 76,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 28355880,
+    "pico": 46050600,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 17694720,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 35389440,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 17694720,
+       "reservadaMostrada": 17694720,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       2880,
+       1536
+      ],
+      "lienzo": [
+       2880,
+       1536
+      ],
+      "metricas": {
+       "decisiones": 15,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 31,
+     "maxReal": 24513336,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 43.9,
+     "usados": 27
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 1,
+   "asentado": true,
+   "contornoFinalMs": 419,
+   "estados": [
+    {
+     "pintado": 3
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 326,
+   "estadosTrasSeleccion": {
+    "pintado": 3
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 48740148,
+    "pico": 96515892,
+    "ledger": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 47775744,
+     "capa": 12
+    },
+    "picoPorCategoria": {
+     "preparado": 482196,
+     "copia": 482196,
+     "raster": 95551488,
+     "capa": 12
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 482196,
+       "reales": 482196,
+       "entradas": 3,
+       "fijados": 3
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 482196,
+       "copias": 3
+      },
+      "trabajador": {
+       "bytes": 482196,
+       "entradas": 3,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 2,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 12,
+       "real": 12,
+       "n": 3
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 3
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 47,
+     "maxReal": 48257952,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 92,
+     "usados": 46.5
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 6,
+   "asentado": true,
+   "contornoFinalMs": 391,
+   "estados": [
+    {
+     "pintado": 6,
+     "listo": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "seleccionPintadaMs": 77,
+   "estadosTrasSeleccion": {
+    "pintado": 6,
+    "listo": 2
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 53108472,
+    "pico": 100884216,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 47775744,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 1922344,
+     "raster": 95551488,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 1922344,
+       "copias": 6
+      },
+      "trabajador": {
+       "bytes": 1922344,
+       "entradas": 6,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 11,
+       "rasters": 3,
+       "obsoletos": 1,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 30,
+     "maxReal": 51186128,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 96.2,
+     "usados": 50.6
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 128,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "n": 12,
+   "asentado": true,
+   "contornoFinalMs": 575,
+   "estados": [
+    {
+     "pintado": 10,
+     "listo": 4
+    }
+   ],
+   "tareaMaxMs": 55,
+   "tareasLargas": 1,
+   "seleccionPintadaMs": 99,
+   "estadosTrasSeleccion": {
+    "pintado": 10,
+    "listo": 4
+   },
+   "auditoria": {
+    "total": 134217728,
+    "usados": 58436904,
+    "pico": 106212648,
+    "ledger": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 47775744,
+     "capa": 96040
+    },
+    "picoPorCategoria": {
+     "preparado": 6722576,
+     "copia": 3842544,
+     "raster": 95551488,
+     "capa": 96040
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 6722576,
+       "reales": 6722576,
+       "entradas": 14,
+       "fijados": 14
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 3842544,
+       "copias": 10
+      },
+      "trabajador": {
+       "bytes": 3842544,
+       "entradas": 10,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 47775744,
+       "reservadaMostrada": 47775744,
+       "enVuelo": 0
+      },
+      "bitmap": [
+       4608,
+       2592
+      ],
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 15,
+       "rasters": 4,
+       "obsoletos": 2,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 0,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 96040,
+       "real": 96040,
+       "n": 14
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 14
+      }
+     }
+    ],
+    "errores": [],
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 41,
+     "maxReal": 54594360,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 128,
+     "pico": 101.3,
+     "usados": 55.7
+    }
+   },
+   "errores": []
+  }
+ ]
+}

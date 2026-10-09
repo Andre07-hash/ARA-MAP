@@ -184,3 +184,22 @@ passed; targeted probes reproduced the additional gaps. Baseline #20 remains
 `1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb`; B's instructions and acceptance
 status are unchanged by this A review. No later packet, merge or deployment is
 authorized. Refresh changed facts before claiming live status.
+
+### B corrections reviewed — 2026-10-09, 01:51 UTC
+
+**1B accepted** at #23 `a9dc8af8cc511bde0a67168da335398353b80aa6`; L1–L6
+closed. Independent 78 SQLite/Postgres tests, 39 Python-3.9 tests, original
+probes and eight actual finalization-boundary-first races per database support
+the local/fake lifecycle acceptance. The paged `listar` envelope, history clock/
+privacy flag and cleanup-status interfaces are now the accepted service handoff.
+
+#21 `68077cc366dd3e1885da36b8f5c7223093e4bd63` remains research-only and needs
+three narrow corrections: prepared-body ownership/audit under layer-admission
+pressure, worker failure during reentrant memory relief, and a deterministic
+allocation-failure test instead of a 16-GiB allocation assumption. R3/R4 closed.
+See [review/evidence](../team-b-corrections-review-2026-10-09/START_HERE.md) and
+[research-only instructions](../team-b-corrections-review-2026-10-09/TEAM_B.md).
+Both exact heads have green GitHub CI; the research-specific independent suite
+is 28/29, with the allocation-limit assumption failing. Browser matrices remain
+developer evidence. A's correction 2 and the baseline checkpoint are unchanged.
+No later packet, merge or deployment is released.

@@ -1,0 +1,55 @@
+✔ budget: reserve before allocation, refuse beyond the total, peak and categories (0.76075ms)
+✔ budget: relievers run before refusing; release notifications are coalesced (1.788292ms)
+✔ registry: one reservation per body, pinned bodies are never evicted and stay counted (0.334292ms)
+✔ planner: exact reservation before allocation, cap on jobs, release on cancel (59.694167ms)
+✔ planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending (23.275417ms)
+✔ client: copies reserved before posting and counted until the worker acknowledges (2.676625ms)
+✔ client: pinned copies are not evicted; a refused post posts nothing (0.479375ms)
+✔ registry eviction while the worker copy is posted, then while its forget awaits acknowledgement (2.274291ms)
+✔ client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed (2.195ms)
+✔ client failure "error": explicit reason, worker gone, every reservation released (2.8915ms)
+✔ client failure "silencio": explicit reason, worker gone, every reservation released (200.906083ms)
+✔ client failure "sinOffscreen": explicit reason, worker gone, every reservation released (0.592875ms)
+✔ client failure "constructor": explicit reason, worker gone, every reservation released (0.436833ms)
+✔ controller: a refused raster reports only the final state and does not loop (4.591167ms)
+✔ budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement (0.191125ms)
+✔ controller: a refused map retries when held items become evictable, without any release (2.508917ms)
+✔ worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it (3.672792ms)
+✔ R1: a layer's own array is admitted before it is allocated, or not built at all (0.484083ms)
+✖ R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact (6.666542ms)
+✔ R2: a synchronous cuerpo post failure terminates, releases and answers through one path (1.628541ms)
+✔ R2: a synchronous olvidar post failure terminates, releases and answers through one path (0.8035ms)
+✔ R2: a synchronous raster post failure terminates, releases and answers through one path (0.7955ms)
+✔ R2: a synchronous cancelar post failure terminates, releases and answers through one path (0.841625ms)
+✔ R2: a synchronous olvidarTodo post failure terminates, releases and answers through one path (0.748834ms)
+✔ R2: a synchronous estadisticas post failure terminates, releases and answers through one path (0.843541ms)
+✔ R2: a worker that never says "listo" fails within its startup bound (0.506584ms)
+✔ R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker (2.285542ms)
+✔ R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly (3.26825ms)
+✔ R3: an admitted job keeps only its own body reachable, not the caller's Map (9.143458ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 28
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 381.067708
+
+✖ failing tests:
+
+test at reports/team-b-display-memory-budget-2026-10-08/pruebas/memoria.test.mjs:547:1
+✖ R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact (6.666542ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception (RangeError).
+      at TestContext.<anonymous> (file:///private/tmp/ara-memory-correction-qEgOUh/reports/team-b-display-memory-budget-2026-10-08/pruebas/memoria.test.mjs:568:10)
+      at Test.runInAsyncScope (node:async_hooks:211:14)
+      at Test.run (node:internal/test_runner/test:980:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:678:18)
+      at Test.postRun (node:internal/test_runner/test:1091:19)
+      at Test.run (node:internal/test_runner/test:1019:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'throws'
+  }

@@ -54,8 +54,8 @@
   ],
   "update_rule": "Refresh snapshot and changed facts after review; preserve exact evidence/version links and open findings. Do not treat this timestamped snapshot as live status.",
   "latest_supervisor_review": {
-    "checked_at_utc": "2026-10-09T00:32:50Z",
-    "report": "reports/team-b-round-1-review-2026-10-08/START_HERE.md",
+    "checked_at_utc": "2026-10-09T01:51:44Z",
+    "report": "reports/team-b-corrections-review-2026-10-09/START_HERE.md",
     "baseline_published_head": "1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb",
     "baseline_pr": 20,
     "team_a_pr": 22,
@@ -70,19 +70,21 @@
     },
     "team_b_lifecycle": {
       "pr": 23,
-      "reviewed_head": "6f303e1d0672c0b0c0e9170a601f8ef388b0f3b7",
-      "verdict": "changes_requested",
-      "findings": ["L1", "L2", "L3", "L4", "L5", "L6"],
-      "independent_tests": "42 lifecycle tests passed on SQLite and disposable UTF-8 Postgres 17; eight additional probes reproduced gaps on both databases"
+      "reviewed_head": "a9dc8af8cc511bde0a67168da335398353b80aa6",
+      "verdict": "accepted_local_fake_1b_only",
+      "findings": [],
+      "closed_findings": ["L1", "L2", "L3", "L4", "L5", "L6"],
+      "independent_tests": "78 lifecycle tests passed on SQLite and disposable UTF-8 Postgres 17; 39 on Python 3.9; original probe groups plus eight actual completion-boundary-first races and paged traversal passed on both databases"
     },
     "team_b_research": {
       "pr": 21,
-      "reviewed_head": "229d424aab2aa7659f5572fce3be41821e435c56",
+      "reviewed_head": "68077cc366dd3e1885da36b8f5c7223093e4bd63",
       "verdict": "changes_requested_research_only",
-      "findings": ["R1", "R2", "R3", "R4"],
-      "independent_tests": "16 of 17 prototype tests passed twice; four additional Node probes reproduced accounting, failure and queue gaps; browser matrix not repeated"
+      "findings": ["R1a_prepared_body_eviction_and_audit", "R2a_failure_during_relief", "R1_test_giant_allocation_assumption"],
+      "closed_findings": ["R3", "R4"],
+      "independent_tests": "28 of 29 prototype tests passed twice; adapted original probes passed; new edge probes expose prepared-body undercount and failed-client reentrant admission; injected allocation failure releases correctly; browser matrix not repeated"
     },
-    "next_owner": "Owner relays bounded A correction-2 and B correction packets; teams preserve separate existing PRs and baseline; supervisor reviews changed heads and combined-baseline acceptance separately",
+    "next_owner": "Team A continues existing correction 2; owner relays B research-only correction 2; accepted B lifecycle stays unchanged; supervisor reviews changed A/research heads and combined baseline before later release",
     "later_packets_released": false
   }
 }

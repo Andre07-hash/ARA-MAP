@@ -8,6 +8,9 @@ application-mounted endpoint acceptance**: the routes are not registered in
 > [correccion-1/START_HERE.md](correccion-1/START_HERE.md). It adds code head
 > `4b59ad9` on top of the reviewed head `2ea602a`. The rest of this page
 > describes the original handback at `2ea602a` and is kept as it was.
+>
+> **Correction 2 (R2-B2, review `f2939ed`):** test-only. See
+> [correccion-2/START_HERE.md](correccion-2/START_HERE.md); code head `4dcf665`.
 
 ## Heads
 

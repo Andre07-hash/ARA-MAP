@@ -291,7 +291,7 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
       intento.completar();
       aviso(`${error.message} Revisa los datos y vuelve a guardar.`, "error");
     } else if (error.status === 401) {
-      aviso("Tu sesión terminó. Inicia sesión para guardar: lo que escribiste sigue aquí.", "error");
+      aviso("Tu sesión terminó. Inicia sesión de nuevo.", "error");
     } else if (error.red && eraNuevo) {
       aviso("No se pudo confirmar si el borrador se creó. Vuelve a guardar: se reutiliza la " +
         "misma solicitud, así que no se creará un duplicado.", "error");

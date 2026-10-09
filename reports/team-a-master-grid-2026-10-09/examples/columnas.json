@@ -1,0 +1,601 @@
+[
+ {
+  "titulo": "Crear una columna de texto",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "POST",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas",
+   "encabezados": {
+    "Idempotency-Key": "clave-ficticia-0001"
+   },
+   "cuerpo": {
+    "nombre": "Nota de visita",
+    "tipo": "texto"
+   }
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "columna": {
+     "id": "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406",
+     "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+     "nombre": "Nota de visita",
+     "tipo": "texto",
+     "opciones": [],
+     "orden": 1,
+     "version": 1,
+     "retirada": false,
+     "retired_at": null,
+     "created_at": "2026-10-09T10:31:29-06:00",
+     "updated_at": "2026-10-09T10:31:29-06:00"
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Crear una columna de opción",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "POST",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas",
+   "encabezados": {
+    "Idempotency-Key": "clave-ficticia-0002"
+   },
+   "cuerpo": {
+    "nombre": "Etapa",
+    "tipo": "opcion",
+    "opciones": [
+     "En curso",
+     "Cerrado"
+    ]
+   }
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "columna": {
+     "id": "custom:264c71a5-73fe-43a6-a333-000e4d289fa9",
+     "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+     "nombre": "Etapa",
+     "tipo": "opcion",
+     "opciones": [
+      "En curso",
+      "Cerrado"
+     ],
+     "orden": 2,
+     "version": 1,
+     "retirada": false,
+     "retired_at": null,
+     "created_at": "2026-10-09T10:31:29-06:00",
+     "updated_at": "2026-10-09T10:31:29-06:00"
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Renombrar, agregar una opción y mover al primer lugar",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas/264c71a5-73fe-43a6-a333-000e4d289fa9",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 1,
+    "nombre": "Etapa comercial",
+    "opciones": [
+     "En curso",
+     "Cerrado",
+     "En pausa"
+    ],
+    "posicion": 0
+   }
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "columna": {
+     "id": "custom:264c71a5-73fe-43a6-a333-000e4d289fa9",
+     "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+     "nombre": "Etapa comercial",
+     "tipo": "opcion",
+     "opciones": [
+      "En curso",
+      "Cerrado",
+      "En pausa"
+     ],
+     "orden": 1,
+     "version": 2,
+     "retirada": false,
+     "retired_at": null,
+     "created_at": "2026-10-09T10:31:29-06:00",
+     "updated_at": "2026-10-09T10:31:29-06:00"
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Versión vieja: conflicto con la definición actual",
+  "quien": "ada",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas/264c71a5-73fe-43a6-a333-000e4d289fa9",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 1,
+    "nombre": "Tarde"
+   }
+  },
+  "respuesta": {
+   "estado": 409,
+   "cuerpo": {
+    "error": "Otra persona cambió esta columna. Revisa su versión antes de repetir el cambio.",
+    "detalle": {
+     "code": "conflict",
+     "columna": {
+      "id": "custom:264c71a5-73fe-43a6-a333-000e4d289fa9",
+      "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+      "nombre": "Etapa comercial",
+      "tipo": "opcion",
+      "opciones": [
+       "En curso",
+       "Cerrado",
+       "En pausa"
+      ],
+      "orden": 1,
+      "version": 2,
+      "retirada": false,
+      "retired_at": null,
+      "created_at": "2026-10-09T10:31:29-06:00",
+      "updated_at": "2026-10-09T10:31:29-06:00"
+     }
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Quitar una opción no se ofrece",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas/264c71a5-73fe-43a6-a333-000e4d289fa9",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 2,
+    "opciones": [
+     "En curso"
+    ]
+   }
+  },
+  "respuesta": {
+   "estado": 409,
+   "cuerpo": {
+    "error": "Las opciones existentes no se quitan ni se renombran; agrega las nuevas al final.",
+    "detalle": {
+     "code": "opciones_solo_se_agregan"
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Listar las columnas de la base",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "GET",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas",
+   "encabezados": {},
+   "cuerpo": null
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "columnas": [
+     {
+      "id": "custom:264c71a5-73fe-43a6-a333-000e4d289fa9",
+      "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+      "nombre": "Etapa comercial",
+      "tipo": "opcion",
+      "opciones": [
+       "En curso",
+       "Cerrado",
+       "En pausa"
+      ],
+      "orden": 1,
+      "version": 2,
+      "retirada": false,
+      "retired_at": null,
+      "created_at": "2026-10-09T10:31:29-06:00",
+      "updated_at": "2026-10-09T10:31:29-06:00"
+     },
+     {
+      "id": "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406",
+      "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+      "nombre": "Nota de visita",
+      "tipo": "texto",
+      "opciones": [],
+      "orden": 2,
+      "version": 1,
+      "retirada": false,
+      "retired_at": null,
+      "created_at": "2026-10-09T10:31:29-06:00",
+      "updated_at": "2026-10-09T10:31:29-06:00"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "titulo": "Guardar celdas básicas y personalizadas en una sola versión",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/inventario/terrenos/0071063d-5770-43c0-888f-08f690282110",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 1,
+    "changes": {
+     "estado": "Jalisco"
+    },
+    "custom": {
+     "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406": "Junto al río",
+     "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": "En pausa"
+    }
+   }
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "terreno": {
+     "id": "0071063d-5770-43c0-888f-08f690282110",
+     "version": 2,
+     "draft_revision_id": "bf630fa2-fa21-4c06-9649-e75eceda2b44",
+     "published_revision_id": null,
+     "publication_state": "draft",
+     "public_visible": false,
+     "has_pending_changes": false,
+     "published_at": null,
+     "archived_at": null,
+     "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+     "draft": {
+      "terreno": "Lote 1",
+      "estado": "Jalisco",
+      "municipio": null,
+      "tipo_terreno": null,
+      "direccion": null,
+      "public_description": null,
+      "contacto": null,
+      "notas_internas": null,
+      "superficie_m2": null,
+      "superficie_ha": null,
+      "afectaciones_pct": null,
+      "afectaciones_m2": null,
+      "asking_price": null,
+      "asking_m2": null,
+      "lat": null,
+      "lon": null,
+      "moneda": null,
+      "price_on_request": false,
+      "availability": "unknown"
+     },
+     "custom": {
+      "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": "En pausa",
+      "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406": "Junto al río"
+     },
+     "confirmations": {
+      "price": null,
+      "availability": null
+     },
+     "source_extra": {},
+     "attention": [
+      {
+       "kind": "blocker",
+       "code": "location_invalid",
+       "field": "lat",
+       "message": "Faltan coordenadas válidas dentro de México."
+      },
+      {
+       "kind": "blocker",
+       "code": "area_required",
+       "field": "superficie_m2",
+       "message": "Falta una superficie positiva."
+      },
+      {
+       "kind": "blocker",
+       "code": "availability_unknown",
+       "field": "availability",
+       "message": "Indica la disponibilidad."
+      },
+      {
+       "kind": "blocker",
+       "code": "price_required",
+       "field": "asking_price",
+       "message": "Falta un precio positivo, o marca «Precio a consultar»."
+      },
+      {
+       "kind": "unconfirmed",
+       "code": "price_unconfirmed",
+       "field": "asking_price",
+       "message": "El precio nunca se ha confirmado."
+      },
+      {
+       "kind": "unconfirmed",
+       "code": "availability_unconfirmed",
+       "field": "availability",
+       "message": "La disponibilidad nunca se ha confirmado."
+      },
+      {
+       "kind": "warning",
+       "field": "",
+       "code": "CAMPO_FALTANTE",
+       "severity": "aviso",
+       "message": "Falta Municipio."
+      }
+     ],
+     "revision_number": 2,
+     "created_at": "2026-10-09T10:31:28-06:00",
+     "created_by": {
+      "id": "5bbc4a16-217c-421e-b5c0-4c73d3418633",
+      "display_name": "Ada Ficticia"
+     },
+     "updated_at": "2026-10-09T10:31:29-06:00",
+     "updated_by": {
+      "id": "c4b36ab1-34be-4c8b-894f-86aaa582eb40",
+      "display_name": "Olga Ficticia"
+     }
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Un valor que la columna no admite: nada se guarda",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/inventario/terrenos/0071063d-5770-43c0-888f-08f690282110",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 2,
+    "changes": {
+     "municipio": "Zapopan"
+    },
+    "custom": {
+     "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": "Otra"
+    }
+   }
+  },
+  "respuesta": {
+   "estado": 422,
+   "cuerpo": {
+    "error": "Revisa los campos marcados.",
+    "detalle": {
+     "code": "validation_failed",
+     "fields": {
+      "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": "Elige una de las opciones de la columna."
+     }
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Retirar una columna",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "POST",
+   "ruta": "/api/maestra/bases/0df7314c-fcc5-476f-9a9d-7e37a41c9a6f/columnas/ffb3f448-e7c0-4508-b31d-1844cf79f406/retirar",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 1
+   }
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "columna": {
+     "id": "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406",
+     "base_id": "0df7314c-fcc5-476f-9a9d-7e37a41c9a6f",
+     "nombre": "Nota de visita",
+     "tipo": "texto",
+     "opciones": [],
+     "orden": 2,
+     "version": 2,
+     "retirada": true,
+     "retired_at": "2026-10-09T10:31:29-06:00",
+     "created_at": "2026-10-09T10:31:29-06:00",
+     "updated_at": "2026-10-09T10:31:29-06:00"
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Columna retirada, desconocida o de otra base: una sola respuesta",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "PATCH",
+   "ruta": "/api/inventario/terrenos/0071063d-5770-43c0-888f-08f690282110",
+   "encabezados": {},
+   "cuerpo": {
+    "expected_version": 2,
+    "custom": {
+     "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406": "tarde"
+    }
+   }
+  },
+  "respuesta": {
+   "estado": 422,
+   "cuerpo": {
+    "error": "Revisa los campos marcados.",
+    "detalle": {
+     "code": "validation_failed",
+     "fields": {
+      "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406": "Columna desconocida o retirada."
+     }
+    }
+   }
+  }
+ },
+ {
+  "titulo": "Historial para una operadora: sólo columnas vivas de la base actual",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "GET",
+   "ruta": "/api/inventario/terrenos/0071063d-5770-43c0-888f-08f690282110/historial",
+   "encabezados": {},
+   "cuerpo": null
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "eventos": [
+     {
+      "id": "e423ee21-3dde-46d1-a18e-1a95fcf1c5e4",
+      "version": 2,
+      "action": "update",
+      "at": "2026-10-09T10:31:29-06:00",
+      "actor": {
+       "id": "c4b36ab1-34be-4c8b-894f-86aaa582eb40",
+       "display_name": "Olga Ficticia"
+      },
+      "before_revision_id": "8f9e7a06-b466-4a6f-93dd-b0da8fa75cd1",
+      "after_revision_id": "bf630fa2-fa21-4c06-9649-e75eceda2b44",
+      "changes": {
+       "estado": {
+        "before": null,
+        "after": "Jalisco"
+       },
+       "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": {
+        "before": null,
+        "after": "En pausa"
+       }
+      }
+     },
+     {
+      "id": "8a80a950-8cba-489e-aca3-dcd47fc6040c",
+      "version": 1,
+      "action": "create",
+      "at": "2026-10-09T10:31:28-06:00",
+      "actor": {
+       "id": "5bbc4a16-217c-421e-b5c0-4c73d3418633",
+       "display_name": "Ada Ficticia"
+      },
+      "before_revision_id": null,
+      "after_revision_id": "8f9e7a06-b466-4a6f-93dd-b0da8fa75cd1",
+      "changes": {
+       "terreno": {
+        "before": null,
+        "after": "Lote 1"
+       }
+      }
+     }
+    ],
+    "total": 2,
+    "next_cursor": null
+   }
+  }
+ },
+ {
+  "titulo": "Historial para una administradora: completo",
+  "quien": "ada",
+  "peticion": {
+   "metodo": "GET",
+   "ruta": "/api/inventario/terrenos/0071063d-5770-43c0-888f-08f690282110/historial",
+   "encabezados": {},
+   "cuerpo": null
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "eventos": [
+     {
+      "id": "e423ee21-3dde-46d1-a18e-1a95fcf1c5e4",
+      "version": 2,
+      "action": "update",
+      "at": "2026-10-09T10:31:29-06:00",
+      "actor": {
+       "id": "c4b36ab1-34be-4c8b-894f-86aaa582eb40",
+       "display_name": "Olga Ficticia"
+      },
+      "before_revision_id": "8f9e7a06-b466-4a6f-93dd-b0da8fa75cd1",
+      "after_revision_id": "bf630fa2-fa21-4c06-9649-e75eceda2b44",
+      "changes": {
+       "estado": {
+        "before": null,
+        "after": "Jalisco"
+       },
+       "custom:ffb3f448-e7c0-4508-b31d-1844cf79f406": {
+        "before": null,
+        "after": "Junto al río"
+       },
+       "custom:264c71a5-73fe-43a6-a333-000e4d289fa9": {
+        "before": null,
+        "after": "En pausa"
+       }
+      }
+     },
+     {
+      "id": "8a80a950-8cba-489e-aca3-dcd47fc6040c",
+      "version": 1,
+      "action": "create",
+      "at": "2026-10-09T10:31:28-06:00",
+      "actor": {
+       "id": "5bbc4a16-217c-421e-b5c0-4c73d3418633",
+       "display_name": "Ada Ficticia"
+      },
+      "before_revision_id": null,
+      "after_revision_id": "8f9e7a06-b466-4a6f-93dd-b0da8fa75cd1",
+      "changes": {
+       "terreno": {
+        "before": null,
+        "after": "Lote 1"
+       }
+      }
+     }
+    ],
+    "total": 2,
+    "next_cursor": null
+   }
+  }
+ },
+ {
+  "titulo": "Cuentas que pueden recibir acceso (sólo administradores)",
+  "quien": "ada",
+  "peticion": {
+   "metodo": "GET",
+   "ruta": "/api/maestra/operadores?q=ol&limit=5",
+   "encabezados": {},
+   "cuerpo": null
+  },
+  "respuesta": {
+   "estado": 200,
+   "cuerpo": {
+    "usuarios": [
+     {
+      "id": "c4b36ab1-34be-4c8b-894f-86aaa582eb40",
+      "login": "olga",
+      "display_name": "Olga Ficticia",
+      "active": true
+     }
+    ],
+    "total": 1
+   }
+  }
+ },
+ {
+  "titulo": "La misma consulta por una operadora",
+  "quien": "olga",
+  "peticion": {
+   "metodo": "GET",
+   "ruta": "/api/maestra/operadores",
+   "encabezados": {},
+   "cuerpo": null
+  },
+  "respuesta": {
+   "estado": 403,
+   "cuerpo": {
+    "error": "Tu cuenta no tiene permiso para esta acción.",
+    "detalle": {
+     "code": "forbidden",
+     "capacidad": "bases.gestionar"
+    }
+   }
+  }
+ }
+]

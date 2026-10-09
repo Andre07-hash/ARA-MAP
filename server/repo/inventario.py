@@ -427,8 +427,14 @@ def _create(conn: DatabaseConnection, fields: Mapping[str, Any], actor: Mapping[
 
 def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
            changes: Mapping[str, Any], confirm: tuple[str, ...],
-           actor: Mapping[str, Any]) -> dict[str, Any]:
+           actor: Mapping[str, Any], custom: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Save a new draft revision. Raises ConflictError if expected_version is stale.
+
+    ``custom`` holds already-validated values keyed "custom:<column id>"; None
+    clears one. They are merged into what the revision stores, never built
+    from what a caller was shown: values of other bases and of retired columns
+    ride along untouched. Each one that changes is an entry of the event's
+    ``changes`` beside the core fields, {"before", "after"}, both scalars.
 
     A change that alters nothing (and confirms nothing) returns the record as
     it is, without a new version.
@@ -442,6 +448,18 @@ def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
     draft = {**before, **changes}
     cambios = {n: {"before": before[n], "after": draft[n]} for n in REVISION_FIELDS
                if draft[n] != before[n]}
+    guardados = json.loads(conn.execute(
+        "SELECT custom_json FROM inventory_revision WHERE id = ?",
+        (current["draft_revision_id"],)).fetchone()["custom_json"] or "{}")
+    tocados = False
+    for clave, valor in (custom or {}).items():
+        if guardados.get(clave) != valor:
+            tocados = True
+            cambios[clave] = {"before": guardados.get(clave), "after": valor}
+            if valor is None:
+                del guardados[clave]
+            else:
+                guardados[clave] = valor
     if not cambios and not confirm:
         return current
 
@@ -454,7 +472,7 @@ def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
                 previous = current["confirmations"][name]
                 stamps[name] = {"at": previous["at"], "id": previous["by"]["id"]}
         revision_id = _siguiente_revision(conn, current, draft, stamps, actor, ahora,
-                                          current["base_id"])
+                                          current["base_id"], guardados if tocados else None)
         conn.execute("UPDATE inventory_terrain SET draft_revision_id = ? WHERE id = ?",
                      (revision_id, inventory_id))
         details: dict[str, Any] = {"changes": cambios}
@@ -570,15 +588,20 @@ def _existente(conn: DatabaseConnection, inventory_id: str) -> dict[str, Any]:
 
 def _siguiente_revision(conn: DatabaseConnection, current: Mapping[str, Any],
                         draft: Mapping[str, Any], stamps: Mapping[str, Mapping[str, str]],
-                        actor: Mapping[str, Any], ahora: str, base_id: str | None) -> str:
-    """The next revision of a record. What no route edits rides along
-    unchanged: the raw source extras and every custom value, whichever base
-    defined it. ``base_id`` is the base the terrain belongs to as of this
-    revision, which is what a revision records."""
+                        actor: Mapping[str, Any], ahora: str, base_id: str | None,
+                        custom: Mapping[str, Any] | None = None) -> str:
+    """The next revision of a record. What the caller does not edit rides
+    along unchanged: the raw source extras and every custom value, whichever
+    base defined it. ``custom`` is the complete stored map after a cell edit;
+    without it the previous one is copied byte for byte. ``base_id`` is the
+    base the terrain belongs to as of this revision, which is what a revision
+    records."""
     previa = conn.execute("SELECT extra_json, custom_json FROM inventory_revision WHERE id = ?",
                           (current["draft_revision_id"],)).fetchone()
+    custom_json = (previa["custom_json"] if custom is None
+                   else json.dumps(custom, ensure_ascii=False, sort_keys=True))
     return _insert_revision(conn, current["id"], current["revision_number"] + 1, draft, stamps,
-                            actor, ahora, previa["extra_json"], base_id, previa["custom_json"])
+                            actor, ahora, previa["extra_json"], base_id, custom_json)
 
 
 def _claim(conn: DatabaseConnection, inventory_id: str, expected_version: int,

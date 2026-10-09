@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import mimetypes
 import os
+import re
 import socket
 import sys
 import threading
@@ -22,6 +23,7 @@ from . import auth, db
 from .api import asistente as api_asistente
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
+from .api import columnas as api_columnas
 from .api import exportar as api_exportar
 from .api import importar as api_importar
 from .api import inventario as api_inventario
@@ -70,6 +72,16 @@ router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.tra
            "bases.gestionar")
 router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
 router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
+router.add("GET", "/api/maestra/operadores", api_maestra.operators, "bases.gestionar")
+# A base's custom columns. Their values are saved by the terrain PATCH above.
+router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "maestra.ver")
+router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")
+router.add("PATCH", "/api/maestra/bases/:bid/columnas/:cid", api_columnas.update,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/retirar", api_columnas.retire,
+           "columnas.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/restaurar", api_columnas.restore,
+           "columnas.gestionar")
 # The legacy workspace (imported bases, saved maps, folders, formats, import,
 # export) is the administrators': derivados.ver to read, .gestionar to change.
 router.add("GET", "/api/bases", api_bases.listing, "derivados.ver")
@@ -114,6 +126,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     # The cloud adapter (api/index.py) sets this: HTTPS, Secure cookies.
     CLOUD = False
+    _mantener = True  # close_connection as the request's own headers asked
 
     def do_GET(self) -> None:
         self._dispatch("GET")
@@ -136,6 +149,13 @@ class Handler(BaseHTTPRequestHandler):
             sys.stderr.write(f"  {fmt % args}\n")
 
     def _dispatch(self, method: str) -> None:
+        # Until the declared body has been read in full, every return below
+        # leaves its bytes on the socket, where the next read would parse them
+        # as a new request. So the connection closes after this response
+        # unless _read_body() gets that far and hands keep-alive back. A body
+        # is never read just to keep a refused connection open.
+        self._mantener = self.close_connection
+        self.close_connection = True
         if not self._host_is_local():
             return self._send(HTTPStatus.FORBIDDEN, b"Forbidden", "text/plain")
         if method != "GET" and not self._origin_is_local():
@@ -207,8 +227,6 @@ class Handler(BaseHTTPRequestHandler):
             )
             result = handler(request)
         except ApiError as exc:
-            if exc.status == HTTPStatus.REQUEST_ENTITY_TOO_LARGE:
-                self.close_connection = True  # the body was never read
             return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
         except db.OcupadoError:
             return self._busy()
@@ -271,10 +289,23 @@ class Handler(BaseHTTPRequestHandler):
         return (urlsplit(origin).hostname or "") in ALLOWED_ORIGIN_HOSTS
 
     def _read_body(self) -> bytes:
-        length = int(self.headers.get("Content-Length") or 0)
+        """The declared body, whole. Only a single Content-Length body is
+        understood; anything else is refused unread, and the connection then
+        closes. Every occurrence of the framing fields counts, an empty one
+        included: headers.get() would show only the first. A header block the
+        parser could not read whole (it drops every line from the first
+        malformed one on) may have hidden one, so it is refused too."""
+        largos = self.headers.get_all("Content-Length") or []
+        if (self.headers.defects or self.headers.get_all("Transfer-Encoding") or len(largos) > 1
+                or (largos and not re.fullmatch(r"[0-9]{1,12}", largos[0]))):
+            raise ApiError("La petición no declara bien su tamaño.", 400)
+        length = int(largos[0]) if largos else 0
         if length > MAX_BODY:
             raise ApiError("La petición es demasiado grande.", 413)
-        return self.rfile.read(length) if length else b""
+        body = self.rfile.read(length) if length else b""
+        if len(body) == length:
+            self.close_connection = self._mantener  # nothing of this request is left unread
+        return body
 
     def _serve_static(self) -> None:
         relative = unquote(self.path.split("?", 1)[0]).lstrip("/") or "index.html"

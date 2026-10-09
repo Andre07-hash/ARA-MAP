@@ -1,0 +1,4 @@
+{"probe":"expiry_with_unsaved_cell","session":null,"privateMarkerInDOM":false,"tableRows":0}
+{"probe":"account_switch_with_detail","account":"Otto Ficticia","openPrivateDialogs":0,"detailHasOldPrivateComment":false}
+{"probe":"new_account_backend_denial","status":404}
+{"probe":"first_save_response_during_second_cell_edit","editorsInDOM":1,"unsavedTextInDOM":true,"focusedTag":"TEXTAREA"}

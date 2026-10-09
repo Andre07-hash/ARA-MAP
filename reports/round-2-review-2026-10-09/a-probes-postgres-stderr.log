@@ -1,0 +1,94 @@
+Traceback (most recent call last):
+  File "/tmp/ara-r2-a-EghHP8/server/app.py", line 219, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-r2-a-EghHP8/server/api/columnas.py", line 111, in create
+    return {"columna": repo.crear(conn, base_id, nombre, tipo, opciones, alcance.actor,
+                       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                  key, request_hash)}
+                                  ^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-r2-a-EghHP8/server/repo/columnas.py", line 83, in crear
+    return _crear(conn, base_id, nombre, tipo, opciones, actor, operation, key,
+                  request_hash)
+  File "/tmp/ara-r2-a-EghHP8/server/repo/columnas.py", line 106, in _crear
+    conn.execute(
+    ~~~~~~~~~~~~^
+        "INSERT INTO inventory_column (id, base_id, nombre, tipo, opciones_json, orden, version,"
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        " created_at, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (column_id, base_id, nombre, tipo, json.dumps(opciones, ensure_ascii=False), ultimo + 1,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+         ahora, actor["id"], ahora, actor["id"]))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-r2-a-EghHP8/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.DataError: PostgreSQL text fields cannot contain NUL (0x00) bytes
+  "POST /api/maestra/bases/12859bc7-647b-4e15-9c71-69a7f7846f32/columnas HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-r2-a-EghHP8/server/app.py", line 219, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-r2-a-EghHP8/server/api/columnas.py", line 109, in create
+    json.dumps(cuerpo, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800' in position 20: surrogates not allowed
+  "POST /api/maestra/bases/12859bc7-647b-4e15-9c71-69a7f7846f32/columnas HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-r2-a-EghHP8/server/app.py", line 219, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-r2-a-EghHP8/server/api/inventario.py", line 171, in update
+    return {"terreno": repo.update(conn, inventory_id, expected, fields,
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   tuple(dict.fromkeys(confirm)), actor, custom)}
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 474, in update
+    revision_id = _siguiente_revision(conn, current, draft, stamps, actor, ahora,
+                                      current["base_id"], guardados if tocados else None)
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 603, in _siguiente_revision
+    return _insert_revision(conn, current["id"], current["revision_number"] + 1, draft, stamps,
+                            actor, ahora, previa["extra_json"], base_id, custom_json)
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 633, in _insert_revision
+    conn.execute(f"INSERT INTO inventory_revision ({', '.join(columns)})"
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 f" VALUES ({', '.join('?' for _ in columns)})", tuple(params))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-r2-a-EghHP8/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 302, in execute
+    return cur.execute(query, params, prepare=prepare)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/cursor.py", line 113, in execute
+    self._conn.wait(
+    ~~~~~~~~~~~~~~~^
+        self._execute_gen(query, params, prepare=prepare, binary=binary)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 495, in wait
+    return waiting.wait(
+           ~~~~~~~~~~~~^
+        gen, self.pgconn.socket, interval=interval, timeout=timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "psycopg_binary/_psycopg/waiting.pyx", line 227, in psycopg_binary._psycopg.wait_c
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/_cursor_base.py", line 205, in _execute_gen
+    pgq = self._convert_query(query, params)
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/_cursor_base.py", line 465, in _convert_query
+    pgq.convert(query, params)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/_queries.py", line 92, in convert
+    self.dump(vars)
+    ~~~~~~~~~^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/_queries.py", line 103, in dump
+    self.params = self._tx.dump_sequence(params, self._want_formats)
+                  ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "psycopg_binary/_psycopg/transform.pyx", line 355, in psycopg_binary._psycopg.Transformer.dump_sequence
+  File "psycopg_binary/_psycopg/transform.pyx", line 403, in psycopg_binary._psycopg.Transformer.dump_sequence
+  File "psycopg_binary/types/string.pyx", line 96, in psycopg_binary._psycopg._StrDumper.cdump
+  File "psycopg_binary/types/string.pyx", line 55, in psycopg_binary._psycopg._BaseStrDumper.cdump
+UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800' in position 57: surrogates not allowed
+  "PATCH /api/inventario/terrenos/c17b2267-08ef-4b40-8cc5-ac797fed2b78 HTTP/1.1" 500 -

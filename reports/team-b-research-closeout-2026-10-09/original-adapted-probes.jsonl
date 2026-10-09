@@ -1,0 +1,4 @@
+{"probe":"unaccounted_layer_array","observed":{"tightBudget":{"budget":2400008,"ledger":2400008,"layerBuilt":false},"roomyBudget":{"budget":2480008,"ledger":2480008,"ledgerCapa":80000,"visibleArrayBytes":80000,"actualTypedArrayBytes":2480008}}}
+{"probe":"synchronous_post_failure","observed":{"thrown":null,"returned":"fallido","state":"fallido","reason":"envio","failures":["envio"],"terminated":true,"retainedBytes":0,"copies":0}}
+{"probe":"silent_startup","observed":{"deadlineMs":10,"waitedMs":60,"state":"fallido","reason":"sinInicio"}}
+{"probe":"uncapped_waiting_jobs","observed":{"queued":32,"capacity":32,"retainedBodiesAtMost":32,"allocatedJobs":0,"refusedExplicitly":68,"refusalReason":"cola_llena","scheduledCallbacks":1}}

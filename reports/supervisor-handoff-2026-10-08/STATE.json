@@ -1,0 +1,169 @@
+{
+  "snapshot_utc": "2026-10-08T23:17:49Z",
+  "repository": "Andre07-hash/ARA-MAP",
+  "role": "Supervisor: plan, review, advise, publish instructions; no application coding",
+  "instruction_commit": "f3fd0f05c0ba9f28bd8b3e7321f374368027e784",
+  "instruction_folder": "reports/round-1-instructions-2026-10-08",
+  "main_sha": "09452fd26d38319567dce28a89db100ea61c739a",
+  "supervisor_branch": "codex/supervisor-completion-brief",
+  "supervisor_pr": 5,
+  "released_packets": [
+    "1A",
+    "1B",
+    "2A",
+    "2B",
+    "3A",
+    "3B"
+  ],
+  "future_packets_not_released": [
+    "4A",
+    "4B",
+    "5A",
+    "5B",
+    "6A",
+    "6B"
+  ],
+  "team_a": {
+    "assignment": "Publish tested prerequisite baseline early, then scoped master-record backend",
+    "accepted_p2_head": "5d0844cfd678c2f7ec55ddb4b364275482d1a801",
+    "baseline_branch": "claude/integration/round-1-baseline",
+    "feature_branch": "claude/team-a/master-record-backend",
+    "new_branches_observed": false
+  },
+  "team_b": {
+    "assignment": "Submit memory research handback, then attachment lifecycle core; no wait for research acceptance",
+    "research_branch": "claude/team-b/display-memory-budget",
+    "observed_research_head": "a9b6970da824a7b561b84bad6fc53f2d9e8ca30f",
+    "final_research_pr_observed": false,
+    "feature_branch": "claude/team-b/attachment-lifecycle",
+    "feature_branch_observed": false
+  },
+  "next_supervisor_action": "Round 3 released: review A's early mounted C1 checkpoint when published, then B widgets/loader and A's final combined local employee journey. Do not repeat closed Round 2 corrections.",
+  "do_not_infer": [
+    "Prompts were delivered to external sessions",
+    "Teams are currently running",
+    "Accepted components are merged",
+    "CI proves hosted readiness"
+  ],
+  "not_authorized": [
+    "Merge to main",
+    "Deployment",
+    "Provisioning or purchase",
+    "Real-account changes",
+    "New recurring monitors"
+  ],
+  "update_rule": "Refresh snapshot and changed facts after review; preserve exact evidence/version links and open findings. Do not treat this timestamped snapshot as live status.",
+  "round_1_accepted_review": {
+    "checked_at_utc": "2026-10-09T14:32:51Z",
+    "report": "reports/team-a-round-1-closeout-2026-10-09/START_HERE.md",
+    "baseline_published_head": "1407e7f7ed8d3e21fe53ec2f3cc98ef2f1f4f8eb",
+    "baseline_pr": 20,
+    "baseline_verdict": "accepted_prerequisite_integration_only_not_combined_1a_1b",
+    "baseline_independent_tests": "987 Python tests with disposable UTF-8 Postgres 17, no skips; 987 on Python 3.9 with 99 Postgres skips; 120 JavaScript tests; accepted component ancestry and scoped tree identity checked",
+    "team_a_pr": 22,
+    "team_a_review": {
+      "checked_at_utc": "2026-10-09T14:32:51Z",
+      "reviewed_head": "1ef2238766eae3e111c031b4fa24f9d849ef4753",
+      "report": "reports/team-a-round-1-closeout-2026-10-09/START_HERE.md",
+      "verdict": "accepted_1a_backend_only",
+      "numeric_warning": "approved_nonblocking_technical_guard_with_clearer_message",
+      "findings": [],
+      "closed_findings": ["A1_legacy_hash", "A2_embedded_history_projection", "A3_cursor_types"],
+      "independent_tests": "54 record HTTP tests passed on SQLite and disposable UTF-8 Postgres 17 without skips; 28 on Python 3.9; all three original probe groups passed on both databases"
+    },
+    "team_b_lifecycle": {
+      "pr": 23,
+      "reviewed_head": "a9dc8af8cc511bde0a67168da335398353b80aa6",
+      "verdict": "accepted_local_fake_1b_only",
+      "findings": [],
+      "closed_findings": ["L1", "L2", "L3", "L4", "L5", "L6"],
+      "independent_tests": "78 lifecycle tests passed on SQLite and disposable UTF-8 Postgres 17; 39 on Python 3.9; original probe groups plus eight actual completion-boundary-first races and paged traversal passed on both databases"
+    },
+    "team_b_research": {
+      "pr": 21,
+      "reviewed_head": "5e9ed42ef740fcee881c54e011172fae9c6f209b",
+      "verdict": "accepted_research_only_no_renderer_integration",
+      "findings": [],
+      "closed_findings": ["R1", "R2", "R3", "R4", "R1a", "R2a", "R1-test"],
+      "independent_tests": "37 of 37 prototype tests passed twice on Node 23.7; adapted original and edge probes passed; Chrome 154 pressure/resize/reset cases passed including audit negative control and zero-ledger teardown; full matrix, paint and timing not repeated",
+      "reserved_limits": ["RGBA difference not approved", "study ledger not total browser memory", "future resize harness must assert requested final sizing explicitly"]
+    },
+    "next_owner": "Round 2 released: A assembles the tested 1A/1B checkpoint then implements 2A; B begins 2B from accepted lifecycle immediately and consumes the exact checkpoint when available. Owner relays prompts; running/delivery not inferred.",
+    "later_packets_released": true
+  },
+  "latest_instruction_release": {
+    "date": "2026-10-09",
+    "folder": "reports/round-3-instructions-2026-10-09",
+    "packets": ["3A", "3B"],
+    "commit_rule": "Use the exact supervisor commit that adds this folder; never silently substitute a moving branch tip.",
+    "baseline_owner": "Team A",
+    "baseline_branch": "claude/integration/round-3-baseline",
+    "baseline_sources": ["32a2a55e4a7417499cc384109bd44666e7a568cb", "bf4c6a694ca95087368bb2d89325d7a240a7b676"],
+    "baseline_scope": "C1 includes recorded pure composition plus early 3A routes/binary/local-store/read-only/private-transport wiring and integration tests, then freezes. Not a baseline-only merge.",
+    "team_a_branch": "claude/team-a/application-integration",
+    "team_b_branch": "claude/team-b/file-ui-geometry-client",
+    "delivery_to_external_teams_confirmed": false,
+    "new_checkpoint_observed": false,
+    "final_composition_rule": "B supplies a named green-CI 3B candidate on C1; A merges that exact candidate into its new 3A feature branch and demonstrates the combined workflow. No circular feature merge and no GitHub PR/main merge authorization.",
+    "stop": "C1 plus separate 3A/3B draft handbacks for review; no 4A/4B, main merge or deployment"
+  },
+  "round_2_first_review": {
+    "checked_at_utc": "2026-10-09T18:21:00Z",
+    "report": "reports/round-2-review-2026-10-09/START_HERE.md",
+    "baseline": {
+      "pr": 24,
+      "reviewed_head": "7117f57f0c52c092d421e5d4bacbcf068f8a65d0",
+      "verdict": "composition_verified_inherited_dispatcher_defect_assigned_to_A",
+      "independent_tests": "1121 tests on SQLite and disposable UTF-8 Postgres 17, no skips; accepted source ancestry and scoped file identity verified"
+    },
+    "team_a": {
+      "pr": 26,
+      "reviewed_head": "517223668405c1d4feb2deffbd2d16a072395fd9",
+      "verdict": "changes_requested",
+      "findings": ["R2-A1_dispatcher_framing", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint"],
+      "instructions": "reports/round-2-review-2026-10-09/TEAM_A.md",
+      "independent_tests": "28 column/composition tests with SQLite/Postgres; 13 Python 3.9 column tests; 128 JS tests; additional HTTP, socket and Chrome browser probes reproduced findings",
+      "admin_default": "Inventario landing page retained; Tabla maestra remains accessible"
+    },
+    "team_b": {
+      "pr": 25,
+      "reviewed_head": "2ea602a940462fe8bb7d8f0208e0e1dbee19603e",
+      "verdict": "changes_requested_http_harness_only",
+      "findings": ["R2-B1_unicode_integer_query_parsing"],
+      "instructions": "reports/round-2-review-2026-10-09/TEAM_B.md",
+      "independent_tests": "53 HTTP tests with SQLite/Postgres; 28 Python 3.9 tests; additional Unicode query probes return 500 on both databases"
+    },
+    "next_owner": "A and B apply bounded corrections to their existing feature PRs, independently. Preserve frozen #24 and Round 1 accepted heads. Supervisor reviews corrected deltas; 3A/3B not released.",
+    "correction_prompts_delivered": false,
+    "round_3_released": false
+  },
+  "latest_supervisor_review": {
+    "checked_at_utc": "2026-10-09T20:32:39Z",
+    "report": "reports/round-3-instructions-2026-10-09/ACCEPTANCE_2A.md",
+    "baseline_pr": 24,
+    "frozen_baseline_head": "7117f57f0c52c092d421e5d4bacbcf068f8a65d0",
+    "team_a": {
+      "pr": 26,
+      "reviewed_head": "32a2a55e4a7417499cc384109bd44666e7a568cb",
+      "verdict": "accepted_2a_table_and_shared_dispatcher_not_combined_file_map_workflow",
+      "closed_findings": ["R2-A1_original_early_refusals", "R2-A2_private_scope_disposal", "R2-A3_custom_input_validation", "R2-A4_active_editor_repaint", "B_R7_negative_nonascii_content_length", "R2-A5_empty_duplicate_framing_headers"],
+      "findings": [],
+      "instructions": "reports/round-3-instructions-2026-10-09/TEAM_A.md",
+      "independent_tests": "39 dispatcher/API tests pass; 5 dispatcher tests on Python 3.9 pass; six framing-edge probes each return one controlled refusal and close; three original early-refusal probes pass; ruff clean. Prior unchanged SQL/frontend evidence reused.",
+      "ci_run": 37980805663
+    },
+    "team_b": {
+      "pr": 25,
+      "reviewed_head": "bf4c6a694ca95087368bb2d89325d7a240a7b676",
+      "verdict": "accepted_2b_http_harness_scope_not_app_mounted",
+      "closed_findings": ["R2-B1_unicode_integer_query_parsing", "R2-B2_public_uuid_substring_false_positive_in_privacy_test"],
+      "findings": [],
+      "instructions": "reports/round-3-instructions-2026-10-09/TEAM_B.md",
+      "report": "reports/team-b-2b-closeout-2026-10-09/START_HERE.md",
+      "independent_tests": "145 lifecycle/HTTP/composition tests with SQLite/Postgres, zero skips; 82 lifecycle tests on Python 3.9 with 41 PG skips; original deterministic collision passes on both backends; all six leaky-code mutations detected on both backends; changed-file ruff clean",
+      "ci_run": 37980122942
+    },
+    "next_owner": "Owner relays exact-commit Round 3 packet. A publishes C1 early then implements host integration; B begins widgets/geometry client immediately and consumes pinned C1. Supervisor reviews exact heads and final combined journey. Preserve old accepted PRs.",
+    "round_3_released": true
+  }
+}

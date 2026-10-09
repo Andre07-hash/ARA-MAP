@@ -1,0 +1,2 @@
+sqlite: all three original probe groups pass (legacy replay, hidden history, four controlled cursor rejections)
+postgres: all three original probe groups pass (legacy replay, hidden history, four controlled cursor rejections)

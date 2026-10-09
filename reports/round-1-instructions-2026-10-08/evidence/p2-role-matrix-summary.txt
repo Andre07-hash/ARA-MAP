@@ -1,0 +1,7 @@
+Command: python -m unittest tests.test_roles_y_bases
+Exact source: 5d0844cfd678c2f7ec55ddb4b364275482d1a801
+SQLite and fresh disposable UTF-8 Postgres 17, actual sessions and HTTP dispatcher.
+----------------------------------------------------------------------
+Ran 58 tests in 75.544s
+
+OK

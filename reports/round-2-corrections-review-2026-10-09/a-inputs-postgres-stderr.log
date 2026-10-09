@@ -1,0 +1,5 @@
+  "POST /api/maestra/bases/478102b7-ebf5-458d-bac8-272ae77eaf44/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/478102b7-ebf5-458d-bac8-272ae77eaf44/columnas HTTP/1.1" 422 -
+  "POST /api/maestra/bases/478102b7-ebf5-458d-bac8-272ae77eaf44/columnas HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/cbf46fce-4f11-4698-b1c9-f4bbda316b5d HTTP/1.1" 422 -
+  "PATCH /api/inventario/terrenos/cbf46fce-4f11-4698-b1c9-f4bbda316b5d HTTP/1.1" 422 -

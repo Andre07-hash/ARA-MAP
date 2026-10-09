@@ -1,19 +1,18 @@
 """Inventory rules shared by every route: editable fields, their validation,
-the publication gate, attention reasons and list filtering.
+the publication gate, attention reasons and list query parameters.
 
 Pure functions over plain dicts. The repository stores; this module decides.
-Stage 2 (preview, publish, public catalog) reuses publication_blockers and the
-list functions here rather than restating them.
+The list queries themselves run in SQL (server/repo/inventario.py).
 """
 
 from __future__ import annotations
 
 import math
-from collections.abc import Callable, Iterable, Mapping, Sequence
+import uuid
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 from .importer import TerrainRecord
-from .normalize import fold
 from .validation import UBICACION_VALIDA, location_state, validate_record
 
 AVAILABILITY = ("unknown", "available", "negotiation", "sold", "withdrawn")
@@ -22,7 +21,7 @@ MONEDAS = ("USD", "MXN")
 PUBLICATION_STATES = ("draft", "published", "unpublished", "archived")
 
 # Text fields and their length limits. Short ones are single-spaced.
-SHORT_TEXT = {"terreno": 200, "estado": 100, "municipio": 100}
+SHORT_TEXT = {"terreno": 200, "estado": 100, "municipio": 100, "tipo_terreno": 100}
 LONG_TEXT = {"direccion": 500, "public_description": 5000, "contacto": 2000,
              "notas_internas": 10000}
 NUMBERS = ("superficie_m2", "superficie_ha", "afectaciones_pct", "afectaciones_m2",
@@ -35,7 +34,8 @@ EDITABLE = (*SHORT_TEXT, *LONG_TEXT, *NUMBERS, "moneda", "price_on_request", "av
 CONFIRMABLE = ("price", "availability")
 
 DEFAULT_LIMIT = 100
-MAX_LIMIT = 250
+MAX_LIMIT = 250          # history pages
+MAX_LIST_LIMIT = 200     # terrain lists
 
 # Validation findings that a publication blocker already reports.
 _COVERED_BY_BLOCKERS = {"SIN_COORDENADAS", "COORD_INVERTIDA", "COORD_FUERA_MEXICO"}
@@ -111,18 +111,10 @@ def _number(name: str, value: Any) -> float | None:
     return number
 
 
-def check_merged(changes: Mapping[str, Any], merged: Mapping[str, Any]) -> dict[str, str]:
-    """Rules that span fields, applied only to what this change touches, so an
-    edit elsewhere never fails on an adopted record's old gaps."""
-    # A half or out-of-Mexico coordinate pair saves (INTEGRATION_DECISIONS §9);
-    # it only blocks publication. Impossible values fail in _number().
-    errors: dict[str, str] = {}
-    priced = any(changes.get(n) is not None for n in ("asking_price", "asking_m2"))
-    if priced and merged["moneda"] is None:
-        # A price typed by hand states its currency; it is never assumed.
-        errors["moneda"] = "Indica la moneda del precio: USD o MXN."
-    return errors
-
+# No rule spans fields when saving. Every business value is optional and
+# independent: a half coordinate pair saves, and so does an amount whose
+# currency is not known (moneda stays NULL, never assumed). Those gaps only
+# block publication, below.
 
 # -- publication gate and attention -------------------------------------------
 
@@ -188,9 +180,17 @@ class QueryError(ValueError):
 
 PUBLIC_QUERY = ("q", "estado", "municipio", "area_min_m2", "area_max_m2", "moneda",
                 "price_min", "price_max", "price_basis", "cursor", "limit")
-INTERNAL_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
-                  "include_archived")
-_MULTI = ("estado", "municipio", "publication_state", "availability")
+# One work base's list. "sort" names a key of SORTS, "-" in front for descending.
+SCOPED_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
+                "include_archived", "tipo_terreno", "sort")
+# The administrators' master table adds the base filter: base ids and/or
+# SIN_ASIGNAR for records that belong to no base.
+INTERNAL_QUERY = (*SCOPED_QUERY, "base")
+_MULTI = ("estado", "municipio", "publication_state", "availability", "tipo_terreno", "base")
+SIN_ASIGNAR = "sin_asignar"
+# Sort keys a client may name, and whether the column is text (sorted folded).
+SORTS = {"id": False, "terreno": True, "estado": True, "municipio": True, "tipo_terreno": True,
+         "superficie_m2": False, "asking_price": False, "updated_at": False}
 
 
 def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dict[str, Any]:
@@ -217,10 +217,20 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     q["cursor"] = single.get("cursor") or None
     try:
         q["limit"] = int(single.get("limit") or DEFAULT_LIMIT)
-        if not 1 <= q["limit"] <= MAX_LIMIT:
+        if not 1 <= q["limit"] <= MAX_LIST_LIMIT:
             raise ValueError
     except ValueError:
-        errors["limit"] = f"Usa un número entero de 1 a {MAX_LIMIT}."
+        errors["limit"] = f"Usa un número entero de 1 a {MAX_LIST_LIMIT}."
+    q["sort"] = single.get("sort") or "id"
+    if q["sort"].lstrip("-") not in SORTS or q["sort"].startswith("--"):
+        errors["sort"] = f"Valores admitidos: {', '.join(SORTS)} (con «-» delante para descendente)."
+    bases = []
+    for valor in q["base"]:
+        try:
+            bases.append(valor if valor == SIN_ASIGNAR else str(uuid.UUID(valor)))
+        except ValueError:
+            errors["base"] = f"Usa identificadores de base o «{SIN_ASIGNAR}»."
+    q["base"] = bases
     for name, choices in (("publication_state", PUBLICATION_STATES), ("availability", AVAILABILITY)):
         if any(v not in choices for v in q[name]):
             errors[name] = f"Valores admitidos: {', '.join(choices)}."
@@ -232,63 +242,3 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     if errors:
         raise QueryError(errors)
     return q
-
-
-Fields = Callable[[Mapping[str, Any]], Mapping[str, Any]]
-
-
-def matches(fields: Mapping[str, Any], q: Mapping[str, Any]) -> bool:
-    """Business-field filters, identical for the internal list and the public
-    catalog (which passes published-revision fields, never draft ones)."""
-    if q["estado"] and fields.get("estado") not in q["estado"]:
-        return False
-    if q["municipio"] and fields.get("municipio") not in q["municipio"]:
-        return False
-    if not _in_range(fields.get("superficie_m2"), q["area_min_m2"], q["area_max_m2"]):
-        return False
-    if q["moneda"] and (q["price_min"] is not None or q["price_max"] is not None):
-        # One explicit currency; other and unknown currencies are left out.
-        amount = fields.get("asking_price" if q["price_basis"] == "total" else "asking_m2")
-        if fields.get("moneda") != q["moneda"] or amount is None:
-            return False
-        if not _in_range(amount, q["price_min"], q["price_max"]):
-            return False
-    elif q["moneda"] and fields.get("moneda") != q["moneda"]:
-        return False
-    if q["q"]:
-        haystack = fold(" ".join(str(fields.get(n) or "") for n in
-                                 ("terreno", "municipio", "estado", "direccion")))
-        if fold(q["q"]) not in haystack:
-            return False
-    return True
-
-
-def _in_range(value: float | None, low: float | None, high: float | None) -> bool:
-    if low is not None and (value is None or value < low):
-        return False
-    return not (high is not None and (value is None or value > high))
-
-
-def facets(items: Iterable[Mapping[str, Any]], fields: Fields, q: Mapping[str, Any]) -> dict[str, list[str]]:
-    """Options over the whole candidate set, not one page. Municipalities
-    narrow to the selected states."""
-    rows = [fields(i) for i in items]
-
-    def distinct(values: Iterable[Any]) -> list[str]:
-        return sorted({v for v in values if v}, key=fold)
-
-    return {
-        "estados": distinct(r.get("estado") for r in rows),
-        "municipios": distinct(r.get("municipio") for r in rows
-                               if not q["estado"] or r.get("estado") in q["estado"]),
-        "monedas": distinct(r.get("moneda") for r in rows),
-    }
-
-
-def page(items: Sequence[Mapping[str, Any]], q: Mapping[str, Any]) -> tuple[list[Any], str | None]:
-    """Stable id order. The cursor is the last id already returned."""
-    ordered = sorted(items, key=lambda i: i["id"])
-    if q["cursor"]:
-        ordered = [i for i in ordered if i["id"] > q["cursor"]]
-    chunk = ordered[:q["limit"]]
-    return list(chunk), (chunk[-1]["id"] if len(ordered) > q["limit"] else None)

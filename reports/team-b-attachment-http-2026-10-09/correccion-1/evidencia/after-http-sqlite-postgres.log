@@ -1,0 +1,137 @@
+test_control_characters_never_reach_the_header (tests.test_archivos_http.Disposicion.test_control_characters_never_reach_the_header) ... ok
+test_quotes_backslashes_and_separators_are_replaced_in_the_fallback (tests.test_archivos_http.Disposicion.test_quotes_backslashes_and_separators_are_replaced_in_the_fallback) ... ok
+test_unicode_keeps_its_utf8_form_and_gets_an_ascii_fallback (tests.test_archivos_http.Disposicion.test_unicode_keeps_its_utf8_form_and_gets_an_ascii_fallback) ... ok
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPPostgres.test_ambiguous_completion_is_resolved_by_replay) ... ok
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPPostgres.test_busy_is_controlled_and_never_retried) ... ok
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPPostgres.test_cancel_retire_and_retired_content_stays_readable) ... ok
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPPostgres.test_cancellation_and_retirement_racing_slow_work) ... ok
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPPostgres.test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict) ... ok
+test_content_length_is_checked_as_ascii_decimal_too (tests.test_archivos_http.HTTPPostgres.test_content_length_is_checked_as_ascii_decimal_too) ... ok
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPPostgres.test_cross_resource_ids_retry_deadline_and_busy_lease) ... ok
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPPostgres.test_dead_sessions_get_401_before_any_resource_check) ... ok
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPPostgres.test_declared_and_actual_size_type_and_hash_boundaries) ... ok
+test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPPostgres.test_desde_accepts_only_bounded_ascii_aligned_offsets) ... ok
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPPostgres.test_finalization_boundary_first_then_revocation_then_denied_replay) ... ok
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPPostgres.test_geometry_metadata_batch_order_dedupe_and_validation) ... ok
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPPostgres.test_grants_bases_admins_and_archive_policy) ... ok
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPPostgres.test_kmz_multi_candidate_selection_and_explicit_activation) ... ok
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPPostgres.test_kmz_single_candidate_activates_and_geometry_reassembles_exactly) ... ok
+test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPPostgres.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) ... ok
+test_limite_pages_exactly_at_valid_ascii_bounds (tests.test_archivos_http.HTTPPostgres.test_limite_pages_exactly_at_valid_ascii_bounds) ... ok
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPPostgres.test_malformed_requests_are_controlled) ... ok
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPPostgres.test_metadata_post_needs_its_read_only_exemption) ... ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49518)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 429, in handle_one_request
+    if not self.parse_request():
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 340, in parse_request
+    self.send_error(
+    ~~~~~~~~~~~~~~~^
+        HTTPStatus.BAD_REQUEST,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+        "Bad HTTP/0.9 request type (%r)" % command)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/http/server.py", line 506, in send_error
+    self.wfile.write(body)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPPostgres.test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route) ... ok
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPPostgres.test_parser_limit_geometry_is_delivered_within_the_bounds) ... ok
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPPostgres.test_pdf_round_trip_download_identity_replay_and_terrain_independence) ... ok
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPPostgres.test_pending_upload_stays_private_over_http) ... ok
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPPostgres.test_replacement_retirement_and_revocation_between_chunks) ... ok
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPPostgres.test_retained_version_activation_and_failed_replacement_keep_layout) ... ok
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPPostgres.test_scope_loss_during_slow_completion_writes_nothing) ... ok
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPPostgres.test_serialization_ceiling_and_corrupt_bodies) ... ok
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPPostgres.test_store_not_configured_is_controlled) ... ok
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPPostgres.test_truncated_upload_stages_nothing) ... ok
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPSQLite.test_ambiguous_completion_is_resolved_by_replay) ... ok
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPSQLite.test_busy_is_controlled_and_never_retried) ... ok
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPSQLite.test_cancel_retire_and_retired_content_stays_readable) ... ok
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPSQLite.test_cancellation_and_retirement_racing_slow_work) ... ok
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPSQLite.test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict) ... ok
+test_content_length_is_checked_as_ascii_decimal_too (tests.test_archivos_http.HTTPSQLite.test_content_length_is_checked_as_ascii_decimal_too) ... ok
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPSQLite.test_cross_resource_ids_retry_deadline_and_busy_lease) ... ok
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPSQLite.test_dead_sessions_get_401_before_any_resource_check) ... ok
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPSQLite.test_declared_and_actual_size_type_and_hash_boundaries) ... ok
+test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPSQLite.test_desde_accepts_only_bounded_ascii_aligned_offsets) ... ok
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPSQLite.test_finalization_boundary_first_then_revocation_then_denied_replay) ... ok
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPSQLite.test_geometry_metadata_batch_order_dedupe_and_validation) ... ok
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPSQLite.test_grants_bases_admins_and_archive_policy) ... ok
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPSQLite.test_kmz_multi_candidate_selection_and_explicit_activation) ... ok
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPSQLite.test_kmz_single_candidate_activates_and_geometry_reassembles_exactly) ... ok
+test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) ... ok
+test_limite_pages_exactly_at_valid_ascii_bounds (tests.test_archivos_http.HTTPSQLite.test_limite_pages_exactly_at_valid_ascii_bounds) ... ok
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPSQLite.test_malformed_requests_are_controlled) ... ok
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPSQLite.test_metadata_post_needs_its_read_only_exemption) ... ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 55352)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 429, in handle_one_request
+    if not self.parse_request():
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 340, in parse_request
+    self.send_error(
+    ~~~~~~~~~~~~~~~^
+        HTTPStatus.BAD_REQUEST,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+        "Bad HTTP/0.9 request type (%r)" % command)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/http/server.py", line 506, in send_error
+    self.wfile.write(body)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPSQLite.test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route) ... ok
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPSQLite.test_parser_limit_geometry_is_delivered_within_the_bounds) ... ok
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPSQLite.test_pdf_round_trip_download_identity_replay_and_terrain_independence) ... ok
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPSQLite.test_pending_upload_stays_private_over_http) ... ok
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPSQLite.test_replacement_retirement_and_revocation_between_chunks) ... ok
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPSQLite.test_retained_version_activation_and_failed_replacement_keep_layout) ... ok
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPSQLite.test_scope_loss_during_slow_completion_writes_nothing) ... ok
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPSQLite.test_serialization_ceiling_and_corrupt_bodies) ... ok
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPSQLite.test_store_not_configured_is_controlled) ... ok
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPSQLite.test_truncated_upload_stages_nothing) ... ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionPostgres.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/0c712221-b2fc-4f07-9d6b-29d454e86871 HTTP/1.1" 404 -
+ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionSqlite.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/7958e121-85ac-4229-8516-1114e93a51c3 HTTP/1.1" 404 -
+ok
+
+----------------------------------------------------------------------
+Ran 63 tests in 81.438s
+
+OK
+exit 0

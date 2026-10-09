@@ -3,7 +3,8 @@
 None of these is applied in B's branch: `server/app.py`, `server/router.py`,
 auth, schema and shared configuration are unchanged. The 2B test harness
 (`tests/archivos_http_harness.py`) performs R-1, R-2 and R-4 temporarily per
-test and restores them. No request below is required to finish 2B.
+test and restores them. No request below is required to finish 2B; R-5 and
+R-7 are A-owned findings, not mounting steps.
 
 ## R-1 · Register the routes (ordinary 3A mounting)
 
@@ -90,6 +91,12 @@ writes still 403).
 
 ## R-5 · Finding: read-only and cross-origin refusals leave the body unread on a kept-alive connection
 
+> **Disposition (review 2026-10-09, `750164b`, `reports/round-2-review-2026-10-09/`):**
+> confirmed and assigned to A as **R2-A1**, to be repaired before more
+> handlers are mounted. The independent review also reproduced the
+> foreign-Origin case and a matching invalid-Host early exit. B does not
+> patch or bypass it; R-1–R-4 stay reserved for 3A.
+
 `Handler._dispatch` refuses (a) a non-GET request in read-only mode and (b) a
 non-GET request with a foreign `Origin` **without reading the body and without
 `self.close_connection = True`**. The next request on the same connection is
@@ -118,3 +125,29 @@ behavior depends on it. B did not patch it or bypass it.
 - A KMZ at the parser's 100,000-vertex limit takes 9–11 s of synchronous
   parser work inside the completion request (measured locally); the request
   holds no write transaction during it.
+
+## R-7 · Observation: the dispatcher's own Content-Length parsing (A-owned, correction 1)
+
+Found while inspecting analogous integer parsing for R2-B1. B's handler now
+checks the declared length as ASCII digits, but the shared dispatcher reads
+the body first with `int(self.headers.get("Content-Length") or 0)`
+(`Handler._read_body`), after authentication and capability checks, so it
+applies to every POST/PUT/PATCH including the public `POST /api/login`:
+
+- `Content-Length: ²` → `ValueError` → **500 internal** (same root cause as
+  R2-B1, in shared code).
+- `Content-Length: -1` → `-1 > MAX_BODY` is false, then `rfile.read(-1)`
+  reads until the client closes. An anonymous login POST carrying 26 MiB
+  (above `MAX_BODY`) and a half-close was fully buffered and answered by
+  login's own size check (`413` from `server/api/sesion.py`), not by the
+  dispatcher; with the connection kept open there was no answer within 5 s.
+  So `MAX_BODY` does not bound a negative declared length.
+
+Observed on the unmodified dispatcher (B's head `2ea602a`; `server/app.py`
+is identical to checkpoint `7117f57`), loopback only, synthetic bytes:
+`correccion-1/probe_content_length.py`, output
+`correccion-1/evidencia/dispatcher-content-length.jsonl`. Not reproduced
+against a hosted adapter. Suggested A-owned change, alongside R2-A1: accept
+only ASCII `0-9` for Content-Length, answer anything else with a controlled
+`400` and `close_connection = True`, and never call `read()` with a
+negative length. B did not patch it.

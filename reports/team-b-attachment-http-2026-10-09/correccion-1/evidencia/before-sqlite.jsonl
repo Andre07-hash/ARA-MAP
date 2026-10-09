@@ -1,0 +1,3 @@
+{"backend": "sqlite", "probe": "limite=%C2%B2", "status": 500, "result": {"error": "Ocurri\u00f3 un error inesperado. Int\u00e9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}}
+{"backend": "sqlite", "probe": "limite=%C2%B2", "status": 500, "result": {"error": "Ocurri\u00f3 un error inesperado. Int\u00e9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}}
+{"backend": "sqlite", "probe": "desde=%C2%B2", "status": 500, "result": {"error": "Ocurri\u00f3 un error inesperado. Int\u00e9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}}

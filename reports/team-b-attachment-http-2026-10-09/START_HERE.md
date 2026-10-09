@@ -4,6 +4,11 @@ Team B handback for supervisory review. **HTTP harness evidence, not
 application-mounted endpoint acceptance**: the routes are not registered in
 `server/app.py`. Mounting is 3A (see INTEGRATION_REQUESTS.md).
 
+> **Correction 1 (R2-B1, review `750164b`):** see
+> [correccion-1/START_HERE.md](correccion-1/START_HERE.md). It adds code head
+> `4b59ad9` on top of the reviewed head `2ea602a`. The rest of this page
+> describes the original handback at `2ea602a` and is kept as it was.
+
 ## Heads
 
 | What | Commit |

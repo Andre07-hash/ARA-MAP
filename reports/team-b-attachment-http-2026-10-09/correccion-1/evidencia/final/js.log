@@ -1,0 +1,731 @@
+TAP version 13
+# Subtest: a CSV preview sends the number convention and keeps base_id
+ok 1 - a CSV preview sends the number convention and keeps base_id
+  ---
+  duration_ms: 5.749713
+  type: 'test'
+  ...
+# Subtest: an Excel preview sends no query at all
+ok 2 - an Excel preview sends no query at all
+  ---
+  duration_ms: 1.248399
+  type: 'test'
+  ...
+# Subtest: the configured upload limit applies to CSV before anything is sent
+ok 3 - the configured upload limit applies to CSV before anything is sent
+  ---
+  duration_ms: 0.929232
+  type: 'test'
+  ...
+# Subtest: suggested answers are preselected, open ones are not
+ok 4 - suggested answers are preselected, open ones are not
+  ---
+  duration_ms: 2.352043
+  type: 'test'
+  ...
+# Subtest: answers survive a new response while their question is still open
+ok 5 - answers survive a new response while their question is still open
+  ---
+  duration_ms: 0.258316
+  type: 'test'
+  ...
+# Subtest: corrections merge like decisions: columns accumulate, the rest is replaced
+ok 6 - corrections merge like decisions: columns accumulate, the rest is replaced
+  ---
+  duration_ms: 4.348599
+  type: 'test'
+  ...
+# Subtest: the queue sends one request at a time and the newest edit wins
+ok 7 - the queue sends one request at a time and the newest edit wins
+  ---
+  duration_ms: 1.817687
+  type: 'test'
+  ...
+# Subtest: labels
+ok 8 - labels
+  ---
+  duration_ms: 0.334043
+  type: 'test'
+  ...
+# Subtest: a failed confirmation says whether the preview was used up
+ok 9 - a failed confirmation says whether the preview was used up
+  ---
+  duration_ms: 0.18172
+  type: 'test'
+  ...
+# Subtest: all, unfiled and a named folder filter without reordering
+ok 10 - all, unfiled and a named folder filter without reordering
+  ---
+  duration_ms: 2.89242
+  type: 'test'
+  ...
+# Subtest: filtering never replaces the full list
+ok 11 - filtering never replaces the full list
+  ---
+  duration_ms: 0.257598
+  type: 'test'
+  ...
+# Subtest: counts include empty folders and count items once
+ok 12 - counts include empty folders and count items once
+  ---
+  duration_ms: 0.33605
+  type: 'test'
+  ...
+# Subtest: a selection that no longer exists falls back to unfiled, not all
+ok 13 - a selection that no longer exists falls back to unfiled, not all
+  ---
+  duration_ms: 0.925929
+  type: 'test'
+  ...
+# Subtest: labels for views and items
+ok 14 - labels for views and items
+  ---
+  duration_ms: 1.398381
+  type: 'test'
+  ...
+# Subtest: creation defaults to the open folder, never to all/unfiled
+ok 15 - creation defaults to the open folder, never to all/unfiled
+  ---
+  duration_ms: 0.122934
+  type: 'test'
+  ...
+# Subtest: a move patches one item by id and leaves the rest alone
+ok 16 - a move patches one item by id and leaves the rest alone
+  ---
+  duration_ms: 1.153166
+  type: 'test'
+  ...
+# Subtest: the first layer is the reference
+ok 17 - the first layer is the reference
+  ---
+  duration_ms: 4.868288
+  type: 'test'
+  ...
+# Subtest: a terrain only in the later layer is new
+ok 18 - a terrain only in the later layer is new
+  ---
+  duration_ms: 0.89086
+  type: 'test'
+  ...
+# Subtest: a terrain only in the reference layer is removed
+ok 19 - a terrain only in the reference layer is removed
+  ---
+  duration_ms: 0.740263
+  type: 'test'
+  ...
+# Subtest: identical values report no change
+ok 20 - identical values report no change
+  ---
+  duration_ms: 2.083218
+  type: 'test'
+  ...
+# Subtest: a different price is reported with the field named
+ok 21 - a different price is reported with the field named
+  ---
+  duration_ms: 2.932438
+  type: 'test'
+  ...
+# Subtest: several changed fields are all listed
+ok 22 - several changed fields are all listed
+  ---
+  duration_ms: 0.828723
+  type: 'test'
+  ...
+# Subtest: rounding under half a percent is not a change
+ok 23 - rounding under half a percent is not a change
+  ---
+  duration_ms: 0.503592
+  type: 'test'
+  ...
+# Subtest: matching ignores accents and case
+ok 24 - matching ignores accents and case
+  ---
+  duration_ms: 0.902816
+  type: 'test'
+  ...
+# Subtest: two same-named parcels match one to one, not both to the first
+ok 25 - two same-named parcels match one to one, not both to the first
+  ---
+  duration_ms: 4.186375
+  type: 'test'
+  ...
+# Subtest: genuinely different areas stay separate parcels
+ok 26 - genuinely different areas stay separate parcels
+  ---
+  duration_ms: 3.613946
+  type: 'test'
+  ...
+# Subtest: a single layer produces no comparison at all
+ok 27 - a single layer produces no comparison at all
+  ---
+  duration_ms: 0.701354
+  type: 'test'
+  ...
+# Subtest: with three layers a removal names the layers it is missing from
+ok 28 - with three layers a removal names the layers it is missing from
+  ---
+  duration_ms: 2.833837
+  type: 'test'
+  ...
+# Subtest: the input array is not modified
+ok 29 - the input array is not modified
+  ---
+  duration_ms: 5.177275
+  type: 'test'
+  ...
+# Subtest: changedFields reports location and address, not only money
+ok 30 - changedFields reports location and address, not only money
+  ---
+  duration_ms: 0.891074
+  type: 'test'
+  ...
+# Subtest: changedFields ignores fields that are not part of the comparison
+ok 31 - changedFields ignores fields that are not part of the comparison
+  ---
+  duration_ms: 0.412293
+  type: 'test'
+  ...
+# Subtest: summarize counts each state
+ok 32 - summarize counts each state
+  ---
+  duration_ms: 0.952325
+  type: 'test'
+  ...
+# Subtest: \#3 three identical layers report no invented new terrain
+ok 33 - \#3 three identical layers report no invented new terrain
+  ---
+  duration_ms: 0.306415
+  type: 'test'
+  ...
+# Subtest: \#3 each layer matches the reference independently
+ok 34 - \#3 each layer matches the reference independently
+  ---
+  duration_ms: 0.308199
+  type: 'test'
+  ...
+# Subtest: \#7 a terrain that only moved is reported as changed
+ok 35 - \#7 a terrain that only moved is reported as changed
+  ---
+  duration_ms: 0.31285
+  type: 'test'
+  ...
+# Subtest: \#7 latitude and longitude are reported once, together
+ok 36 - \#7 latitude and longitude are reported once, together
+  ---
+  duration_ms: 0.24135
+  type: 'test'
+  ...
+# Subtest: \#7 a changed address is reported
+ok 37 - \#7 a changed address is reported
+  ---
+  duration_ms: 0.310003
+  type: 'test'
+  ...
+# Subtest: \#7 movement under a metre is not a change
+ok 38 - \#7 movement under a metre is not a change
+  ---
+  duration_ms: 0.517031
+  type: 'test'
+  ...
+# Subtest: removals name the layers a terrain is missing from
+ok 39 - removals name the layers a terrain is missing from
+  ---
+  duration_ms: 0.676482
+  type: 'test'
+  ...
+# Subtest: a terrain present in every layer is not reported as removed
+ok 40 - a terrain present in every layer is not reported as removed
+  ---
+  duration_ms: 0.221968
+  type: 'test'
+  ...
+# Subtest: the closest area is paired, not merely the first within tolerance
+ok 41 - the closest area is paired, not merely the first within tolerance
+  ---
+  duration_ms: 0.283935
+  type: 'test'
+  ...
+# Subtest: a hectare is a circle of about 56.4 m radius
+ok 42 - a hectare is a circle of about 56.4 m radius
+  ---
+  duration_ms: 6.496489
+  type: 'test'
+  ...
+# Subtest: the radius of the largest real terrain
+ok 43 - the radius of the largest real terrain
+  ---
+  duration_ms: 0.412066
+  type: 'test'
+  ...
+# Subtest: area four times larger doubles the radius
+ok 44 - area four times larger doubles the radius
+  ---
+  duration_ms: 0.51204
+  type: 'test'
+  ...
+# Subtest: missing or nonsense areas have no radius
+ok 45 - missing or nonsense areas have no radius
+  ---
+  duration_ms: 0.329614
+  type: 'test'
+  ...
+# Subtest: metres per pixel halves with each zoom step
+ok 46 - metres per pixel halves with each zoom step
+  ---
+  duration_ms: 0.22793
+  type: 'test'
+  ...
+# Subtest: metres per pixel shrinks away from the equator
+ok 47 - metres per pixel shrinks away from the equator
+  ---
+  duration_ms: 0.361595
+  type: 'test'
+  ...
+# Subtest: a known scale: zoom 16 near Mexico City
+ok 48 - a known scale: zoom 16 near Mexico City
+  ---
+  duration_ms: 1.179252
+  type: 'test'
+  ...
+# Subtest: zoomed out, the symbol wins and the mark is not to scale
+ok 49 - zoomed out, the symbol wins and the mark is not to scale
+  ---
+  duration_ms: 0.339446
+  type: 'test'
+  ...
+# Subtest: zoomed in, the true footprint wins and the mark is to scale
+ok 50 - zoomed in, the true footprint wins and the mark is to scale
+  ---
+  duration_ms: 0.665321
+  type: 'test'
+  ...
+# Subtest: the handover is continuous: radius never shrinks as you zoom in
+ok 51 - the handover is continuous: radius never shrinks as you zoom in
+  ---
+  duration_ms: 1.599839
+  type: 'test'
+  ...
+# Subtest: a bigger terrain reaches true scale sooner
+ok 52 - a bigger terrain reaches true scale sooner
+  ---
+  duration_ms: 0.490604
+  type: 'test'
+  ...
+# Subtest: at true scale the drawn radius really is the ground radius
+ok 53 - at true scale the drawn radius really is the ground radius
+  ---
+  duration_ms: 0.351182
+  type: 'test'
+  ...
+# Subtest: a terrain with no area keeps its symbol at every zoom
+ok 54 - a terrain with no area keeps its symbol at every zoom
+  ---
+  duration_ms: 0.311458
+  type: 'test'
+  ...
+# Subtest: trueScaleRadius grows by four when zooming in two steps
+ok 55 - trueScaleRadius grows by four when zooming in two steps
+  ---
+  duration_ms: 0.231208
+  type: 'test'
+  ...
+# Subtest: a terrain on its own gets no ring offset
+ok 56 - a terrain on its own gets no ring offset
+  ---
+  duration_ms: 0.357175
+  type: 'test'
+  ...
+# Subtest: terrains at the same point are nudged into concentric rings
+ok 57 - terrains at the same point are nudged into concentric rings
+  ---
+  duration_ms: 0.247576
+  type: 'test'
+  ...
+# Subtest: terrains at different points are not nudged
+ok 58 - terrains at different points are not nudged
+  ---
+  duration_ms: 0.240731
+  type: 'test'
+  ...
+# Subtest: a big pile at one coordinate stops growing instead of swallowing the map
+ok 59 - a big pile at one coordinate stops growing instead of swallowing the map
+  ---
+  duration_ms: 0.995884
+  type: 'test'
+  ...
+# Subtest: zoomed out, every terrain is the same clean circle
+ok 60 - zoomed out, every terrain is the same clean circle
+  ---
+  duration_ms: 5.59534
+  type: 'test'
+  ...
+# Subtest: zoomed in, size becomes the real footprint again
+ok 61 - zoomed in, size becomes the real footprint again
+  ---
+  duration_ms: 0.121734
+  type: 'test'
+  ...
+# Subtest: comparison layers are still separated at the same spot
+ok 62 - comparison layers are still separated at the same spot
+  ---
+  duration_ms: 0.148929
+  type: 'test'
+  ...
+# Subtest: fixture provenance: generated by the accepted B-1 parser
+ok 63 - fixture provenance: generated by the accepted B-1 parser
+  ---
+  duration_ms: 1.498224
+  type: 'test'
+  ...
+# Subtest: boundary-only terrain is located with blank X/Y
+ok 64 - boundary-only terrain is located with blank X/Y
+  ---
+  duration_ms: 1.794662
+  type: 'test'
+  ...
+# Subtest: XY-only terrain keeps the existing validator's verdict
+ok 65 - XY-only terrain keeps the existing validator's verdict
+  ---
+  duration_ms: 1.65484
+  type: 'test'
+  ...
+# Subtest: neither boundary nor X/Y: unplaced
+ok 66 - neither boundary nor X/Y: unplaced
+  ---
+  duration_ms: 0.294012
+  type: 'test'
+  ...
+# Subtest: boundary and X/Y disagree: boundary wins, X/Y is read but never written
+ok 67 - boundary and X/Y disagree: boundary wins, X/Y is read but never written
+  ---
+  duration_ms: 0.288763
+  type: 'test'
+  ...
+# Subtest: unusable or malformed descriptors are no descriptor at all
+ok 68 - unusable or malformed descriptors are no descriptor at all
+  ---
+  duration_ms: 0.944763
+  type: 'test'
+  ...
+# Subtest: legacy rows without a geometria key keep their caller's ubicado
+ok 69 - legacy rows without a geometria key keep their caller's ubicado
+  ---
+  duration_ms: 0.311719
+  type: 'test'
+  ...
+# Subtest: shared contract v1 example maps through the A adapter rule
+ok 70 - shared contract v1 example maps through the A adapter rule
+  ---
+  duration_ms: 0.511131
+  type: 'test'
+  ...
+# Subtest: bodies convert [lon, lat] to Leaflet [lat, lng] explicitly
+ok 71 - bodies convert [lon, lat] to Leaflet [lat, lng] explicitly
+  ---
+  duration_ms: 0.759396
+  type: 'test'
+  ...
+# Subtest: holes and every part are kept
+ok 72 - holes and every part are kept
+  ---
+  duration_ms: 0.92704
+  type: 'test'
+  ...
+# Subtest: cajaMayor is the largest part's shell box, which drives the handover
+ok 73 - cajaMayor is the largest part's shell box, which drives the handover
+  ---
+  duration_ms: 1.368571
+  type: 'test'
+  ...
+# Subtest: missing body: no_disponible, never a fabricated outline
+ok 74 - missing body: no_disponible, never a fabricated outline
+  ---
+  duration_ms: 0.347126
+  type: 'test'
+  ...
+# Subtest: failed replacement: the active descriptor's old body is used, never the pending one
+ok 75 - failed replacement: the active descriptor's old body is used, never the pending one
+  ---
+  duration_ms: 0.219108
+  type: 'test'
+  ...
+# Subtest: malformed bodies are invalid, never footprints
+ok 76 - malformed bodies are invalid, never footprints
+  ---
+  duration_ms: 0.415227
+  type: 'test'
+  ...
+# Subtest: a body shifted away from its declared bounds is invalid, not drawn elsewhere
+ok 77 - a body shifted away from its declared bounds is invalid, not drawn elsewhere
+  ---
+  duration_ms: 0.625051
+  type: 'test'
+  ...
+# Subtest: collapsed or shrunken bodies are invalid
+ok 78 - collapsed or shrunken bodies are invalid
+  ---
+  duration_ms: 0.438033
+  type: 'test'
+  ...
+# Subtest: holes and other parts must stay inside the declared bounds too
+ok 79 - holes and other parts must stay inside the declared bounds too
+  ---
+  duration_ms: 0.271683
+  type: 'test'
+  ...
+# Subtest: every parser-produced fixture body is consistent and loads
+ok 80 - every parser-produced fixture body is consistent and loads
+  ---
+  duration_ms: 0.298676
+  type: 'test'
+  ...
+# Subtest: bodies past the parser's vertex limit are refused, not drawn
+ok 81 - bodies past the parser's vertex limit are refused, not drawn
+  ---
+  duration_ms: 86.374273
+  type: 'test'
+  ...
+# Subtest: handover: symbol at distant zoom, outline once the short side reaches 24 px
+ok 82 - handover: symbol at distant zoom, outline once the short side reaches 24 px
+  ---
+  duration_ms: 0.373374
+  type: 'test'
+  ...
+# Subtest: mixed bounds cover every boundary part and every XY point, nothing else
+ok 83 - mixed bounds cover every boundary part and every XY point, nothing else
+  ---
+  duration_ms: 0.923818
+  type: 'test'
+  ...
+# Subtest: coincident boundary symbol and XY mark get distinct rings
+ok 84 - coincident boundary symbol and XY mark get distinct rings
+  ---
+  duration_ms: 0.857551
+  type: 'test'
+  ...
+# Subtest: the public projection keeps exactly the contract allowlist and no private text
+ok 85 - the public projection keeps exactly the contract allowlist and no private text
+  ---
+  duration_ms: 3.82186
+  type: 'test'
+  ...
+# Subtest: a public row drops any field outside the allowlist, even if the server sent one
+ok 86 - a public row drops any field outside the allowlist, even if the server sent one
+  ---
+  duration_ms: 0.727823
+  type: 'test'
+  ...
+# Subtest: publication status uses the agreed Spanish labels
+ok 87 - publication status uses the agreed Spanish labels
+  ---
+  duration_ms: 3.021541
+  type: 'test'
+  ...
+# Subtest: a saved 'sold' draft over a live publication is flagged as not yet public
+ok 88 - a saved 'sold' draft over a live publication is flagged as not yet public
+  ---
+  duration_ms: 2.357822
+  type: 'test'
+  ...
+# Subtest: inventory rows flatten the draft and classify location like the server
+ok 89 - inventory rows flatten the draft and classify location like the server
+  ---
+  duration_ms: 0.595477
+  type: 'test'
+  ...
+# Subtest: geography is repeated parameters; price only travels with its currency
+ok 90 - geography is repeated parameters; price only travels with its currency
+  ---
+  duration_ms: 0.988829
+  type: 'test'
+  ...
+# Subtest: internal-only filters never reach the public catalog query
+ok 91 - internal-only filters never reach the public catalog query
+  ---
+  duration_ms: 9.466099
+  type: 'test'
+  ...
+# Subtest: a page query keeps the filters and adds the cursor and the maximum limit
+ok 92 - a page query keeps the filters and adds the cursor and the maximum limit
+  ---
+  duration_ms: 0.500286
+  type: 'test'
+  ...
+# Subtest: 251 matching records assemble across the 250 page boundary with no gaps or repeats
+ok 93 - 251 matching records assemble across the 250 page boundary with no gaps or repeats
+  ---
+  duration_ms: 2.597432
+  type: 'test'
+  ...
+# Subtest: the default 100-row page also assembles completely
+ok 94 - the default 100-row page also assembles completely
+  ---
+  duration_ms: 1.938233
+  type: 'test'
+  ...
+# Subtest: facets come from the server's first page, for the whole candidate set
+ok 95 - facets come from the server's first page, for the whole candidate set
+  ---
+  duration_ms: 17.28659
+  type: 'test'
+  ...
+# Subtest: a server that repeats a cursor is reported, not looped on
+ok 96 - a server that repeats a cursor is reported, not looped on
+  ---
+  duration_ms: 0.783908
+  type: 'test'
+  ...
+# Subtest: numbers are read as typed in Mexico, and ambiguous commas are refused
+ok 97 - numbers are read as typed in Mexico, and ambiguous commas are refused
+  ---
+  duration_ms: 0.827534
+  type: 'test'
+  ...
+# Subtest: an untouched form sends nothing; cents and unknown currency survive byte for byte
+ok 98 - an untouched form sends nothing; cents and unknown currency survive byte for byte
+  ---
+  duration_ms: 0.985149
+  type: 'test'
+  ...
+# Subtest: only edited fields are parsed and sent, in the server's units
+ok 99 - only edited fields are parsed and sent, in the server's units
+  ---
+  duration_ms: 0.519885
+  type: 'test'
+  ...
+# Subtest: half a coordinate pair saves as a draft (§9.1); a decimal comma is still refused
+ok 100 - half a coordinate pair saves as a draft (§9.1); a decimal comma is still refused
+  ---
+  duration_ms: 0.170998
+  type: 'test'
+  ...
+# Subtest: server field errors map onto form fields
+ok 101 - server field errors map onto form fields
+  ---
+  duration_ms: 0.627899
+  type: 'test'
+  ...
+# Subtest: a conflict names what the other user changed and where both of us did
+ok 102 - a conflict names what the other user changed and where both of us did
+  ---
+  duration_ms: 0.495276
+  type: 'test'
+  ...
+# Subtest: one create attempt keeps its key across retries; a changed body gets a new key
+ok 103 - one create attempt keeps its key across retries; a changed body gets a new key
+  ---
+  duration_ms: 0.281222
+  type: 'test'
+  ...
+# Subtest: history events normalise action, actor, time, confirmations and field changes
+ok 104 - history events normalise action, actor, time, confirmations and field changes
+  ---
+  duration_ms: 0.519044
+  type: 'test'
+  ...
+# Subtest: the real workbook's prices show as dollars, cents kept
+ok 105 - the real workbook's prices show as dollars, cents kept
+  ---
+  duration_ms: 5.683839
+  type: 'test'
+  ...
+# Subtest: pesos show as pesos
+ok 106 - pesos show as pesos
+  ---
+  duration_ms: 0.741992
+  type: 'test'
+  ...
+# Subtest: a price with no recorded currency says so instead of borrowing one
+ok 107 - a price with no recorded currency says so instead of borrowing one
+  ---
+  duration_ms: 0.598647
+  type: 'test'
+  ...
+# Subtest: currencies in view: unknown counts as its own, unpriced rows do not count
+ok 108 - currencies in view: unknown counts as its own, unpriced rows do not count
+  ---
+  duration_ms: 3.680374
+  type: 'test'
+  ...
+# Subtest: price filters are dropped, not applied, across currencies
+ok 109 - price filters are dropped, not applied, across currencies
+  ---
+  duration_ms: 0.812674
+  type: 'test'
+  ...
+# Subtest: the same amount in another currency is a change
+ok 110 - the same amount in another currency is a change
+  ---
+  duration_ms: 0.817259
+  type: 'test'
+  ...
+# Subtest: every route round-trips through its hash
+ok 111 - every route round-trips through its hash
+  ---
+  duration_ms: 4.071895
+  type: 'test'
+  ...
+# Subtest: only the catalog is public; anonymous lands on it, signed-in on the inventory
+ok 112 - only the catalog is public; anonymous lands on it, signed-in on the inventory
+  ---
+  duration_ms: 0.480413
+  type: 'test'
+  ...
+# Subtest: unknown or malformed hashes are not routes
+ok 113 - unknown or malformed hashes are not routes
+  ---
+  duration_ms: 0.445076
+  type: 'test'
+  ...
+# Subtest: ending the session cancels private requests; their callers never see a response
+ok 114 - ending the session cancels private requests; their callers never see a response
+  ---
+  duration_ms: 61.338913
+  type: 'test'
+  ...
+# Subtest: a private response that lands after logout is dropped, not delivered
+ok 115 - a private response that lands after logout is dropped, not delivered
+  ---
+  duration_ms: 33.023232
+  type: 'test'
+  ...
+# Subtest: public requests are outside the private scope
+ok 116 - public requests are outside the private scope
+  ---
+  duration_ms: 2.13224
+  type: 'test'
+  ...
+# Subtest: a private 401 reports the expired session; a failed login does not
+ok 117 - a private 401 reports the expired session; a failed login does not
+  ---
+  duration_ms: 1.733516
+  type: 'test'
+  ...
+# Subtest: an unreachable server is a readable network error the editor can tell apart
+ok 118 - an unreachable server is a readable network error the editor can tell apart
+  ---
+  duration_ms: 0.467884
+  type: 'test'
+  ...
+# Subtest: create carries its Idempotency-Key; save carries the expected version
+ok 119 - create carries its Idempotency-Key; save carries the expected version
+  ---
+  duration_ms: 1.564595
+  type: 'test'
+  ...
+# Subtest: clearing private state forgets every team dataset but keeps the public catalog
+ok 120 - clearing private state forgets every team dataset but keeps the public catalog
+  ---
+  duration_ms: 1.044015
+  type: 'test'
+  ...
+1..120
+# tests 120
+# suites 0
+# pass 120
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 854.817725
+exit 0

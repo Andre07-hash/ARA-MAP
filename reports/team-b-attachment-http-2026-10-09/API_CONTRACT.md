@@ -41,6 +41,15 @@ until A applies INTEGRATION_REQUESTS.md (3A).
 - **Paging.** `limite` 1–100 (default 50), else `400 limite_invalido`;
   cursors are opaque strings returned as `cursor_siguiente` (`null` at the
   end), else `400 cursor_invalido`.
+- **Numeric parameters** (`limite`, `desde`, the upload's `Content-Length`;
+  correction 1, R2-B1). Only ASCII digits `0`–`9`, at most 9 (20 for
+  `Content-Length`); leading zeros are allowed. Signs, spaces, separators,
+  exponents, hexadecimal and non-ASCII numerals (`²`, `٣`, `５`, …) get the
+  parameter's controlled error, never a 500. An empty query value
+  (`?limite=`) is dropped by the shared router and means the default. Both
+  query values are validated before any resource lookup, so the error is
+  identical for authorized, out-of-scope and missing IDs; a dead session
+  still gets `401` first.
 - **Body parsing.** Malformed JSON is `400 cuerpo_invalido`. Bodies above the
   dispatcher's `MAX_BODY` (25 MiB) are refused with `413` from
   `Content-Length` alone (dispatcher message, no code) and the connection is
@@ -95,8 +104,8 @@ the attachment DTO plus `ultima_version` under the caller-aware pending rule
 `PUT` with the file's exact bytes as the body. `Content-Type` must be
 `application/pdf`, `application/vnd.google-earth.kmz` or
 `application/octet-stream` (else `415 tipo_contenido_invalido`: no multipart,
-JSON or base64). `Content-Length` is required and must equal the bytes
-received (else `400 cuerpo_incompleto`, nothing staged); chunked transfer is
+JSON or base64). `Content-Length` is required, plain ASCII digits, and must
+equal the bytes received (else `400 cuerpo_incompleto`, nothing staged); chunked transfer is
 `411 longitud_requerida`. Bytes reach the store in ≤ 1 MiB chunks; a repeat
 replaces earlier staging. Initiator only, before +15 min.
 Result `{"version_id", "bytes_recibidos", "estado": "subiendo"}`.
@@ -230,8 +239,8 @@ candidate lists, keys or credentials. Not a public endpoint.
 
 ### 15 · Geometry body chunk (binary)
 
-`GET /api/archivos/geometrias/:gid/contenido?desde=N`. `desde` is a decimal
-integer (default 0), a multiple of **524,288**, below the stored byte count
+`GET /api/archivos/geometrias/:gid/contenido?desde=N`. `desde` is an ASCII
+decimal integer (default 0; see Numeric parameters), a multiple of **524,288**, below the stored byte count
 and below 16 MiB, else `400 desplazamiento_invalido`. Response body = the
 exact stored UTF-8 GeoJSON bytes `[desde, desde + 524288)` (shorter only for
 the final chunk); a codepoint may straddle chunks — reassemble bytes, then

@@ -1,0 +1,813 @@
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+FFFFFTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+FFFFFTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 210, in versiones
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+FFFFFTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 215, in intentos
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+FFFFF.Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '³'
+FTraceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a+new-tests>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '¹⁰'
+F.
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='²')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='³')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='¹⁰')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='٣')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"archivos": [{"id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "columna_id": "core:kmz", "tipo": "kmz", "revision": 2, "version_actual_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "geometria_activa_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "retirado_en": null, "retirado_motivo": null, "ultima_version": {"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}}], "cursor_siguiente": null}')
+(404, b'{"error": "El terreno no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='５')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"archivos": [{"id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "columna_id": "core:kmz", "tipo": "kmz", "revision": 2, "version_actual_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "geometria_activa_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "retirado_en": null, "retirado_motivo": null, "ultima_version": {"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}}], "cursor_siguiente": null}')
+(404, b'{"error": "El terreno no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='߁')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"archivos": [{"id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "columna_id": "core:kmz", "tipo": "kmz", "revision": 2, "version_actual_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "geometria_activa_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "retirado_en": null, "retirado_motivo": null, "ultima_version": {"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}}], "cursor_siguiente": null}')
+(404, b'{"error": "El terreno no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='listar', limite='000000001')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 621, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(s, 200, r)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 400 != 200 : {'error': 'El límite debe estar entre 1 y 100.', 'detalle': {'code': 'limite_invalido'}}
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='²')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='³')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='¹⁰')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='٣')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"eventos": [{"id": "ef458fb5-8fe3-49e1-b474-cbdf58d1a1b5", "accion": "capa_activada", "revision": 2, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"geometria_anterior_id": null, "version_anterior_id": null}, "privado": false}, {"id": "72e6aebd-8453-4a0c-9d60-c4ce190080b9", "accion": "version_disponible", "revision": null, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"aplicada": true, "motivo_no_aplicada": null}, "privado": false}, {"id": "6f1ea216-e9b8-4845-b160-961b4d2ffc7c", "accion": "subida_iniciada", "revision": null, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": null, "geometria_id": null, "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"nombre": "ficticio.kmz", "numero": 1, "tamano_declarado": 357, "tipo": "kmz"}, "privado": false}], "cursor_siguiente": "2026-10-09T18:31:51+00:00|6f1ea216-e9b8-4845-b160-961b4d2ffc7c"}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='５')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"eventos": [{"id": "ef458fb5-8fe3-49e1-b474-cbdf58d1a1b5", "accion": "capa_activada", "revision": 2, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"geometria_anterior_id": null, "version_anterior_id": null}, "privado": false}, {"id": "72e6aebd-8453-4a0c-9d60-c4ce190080b9", "accion": "version_disponible", "revision": null, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"aplicada": true, "motivo_no_aplicada": null}, "privado": false}, {"id": "6f1ea216-e9b8-4845-b160-961b4d2ffc7c", "accion": "subida_iniciada", "revision": null, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": null, "geometria_id": null, "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"nombre": "ficticio.kmz", "numero": 1, "tamano_declarado": 357, "tipo": "kmz"}, "privado": false}, {"id": "56afcde5-7e07-4c49-9c6a-39f76ee181fb", "accion": "procesado", "revision": null, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"resultado": "listo"}, "privado": false}], "cursor_siguiente": null}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='߁')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"eventos": [{"id": "ef458fb5-8fe3-49e1-b474-cbdf58d1a1b5", "accion": "capa_activada", "revision": 2, "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "intento_id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "base_id": "2bce162e-8d68-4716-ace0-4383a9b162e5", "actor": {"id": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd", "display_name": "Olga Ficticia"}, "at": "2026-10-09T18:31:51+00:00", "details": {"geometria_anterior_id": null, "version_anterior_id": null}, "privado": false}], "cursor_siguiente": "2026-10-09T18:31:51+00:00|ef458fb5-8fe3-49e1-b474-cbdf58d1a1b5"}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='historial', limite='000000001')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 621, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(s, 200, r)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 400 != 200 : {'error': 'El límite debe estar entre 1 y 100.', 'detalle': {'code': 'limite_invalido'}}
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='²')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='³')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='¹⁰')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='٣')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"versiones": [{"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}], "cursor_siguiente": null}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='５')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"versiones": [{"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}], "cursor_siguiente": null}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='߁')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+(200, b'{"versiones": [{"id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "archivo_id": "579d4ed6-d267-41b0-aa5e-37c05ea3a1f3", "inventory_id": "d7d602d9-67e9-4a68-85d0-5f4edcbe72c5", "numero": 1, "estado": "disponible", "revision_base": 1, "nombre_original": "ficticio.kmz", "tamano_declarado": 357, "tamano": 357, "sha256": "12fec5aea69a518376089c55ed8ba114a796438d22653954c6233e9cec4d19a8", "tipo_detectado": "application/vnd.google-earth.kmz", "error": null, "aplicada": true, "motivo_no_aplicada": null, "iniciado_en": "2026-10-09T18:31:51+00:00", "finalizado_en": "2026-10-09T18:31:51+00:00", "terminado_en": "2026-10-09T18:31:51+00:00"}], "cursor_siguiente": null}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='versiones', limite='000000001')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 621, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(s, 200, r)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 400 != 200 : {'error': 'El límite debe estar entre 1 y 100.', 'detalle': {'code': 'limite_invalido'}}
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='²')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='³')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='¹⁰')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(500, b'{"error": "Ocurri\xc3\xb3 un error inesperado. Int\xc3\xa9ntalo de nuevo; si se repite, avisa al equipo.", "detalle": {"code": "internal"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='٣')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"intentos": [{"id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "numero": 1, "origen": "completar", "seleccion": [0], "resultado": "listo", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "candidatos": 1, "creado_en": "2026-10-09T18:31:51+00:00", "creado_por": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd"}], "cursor_siguiente": null}')
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='５')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"intentos": [{"id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "numero": 1, "origen": "completar", "seleccion": [0], "resultado": "listo", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "candidatos": 1, "creado_en": "2026-10-09T18:31:51+00:00", "creado_por": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd"}], "cursor_siguiente": null}')
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='߁')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 613, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(respuestas, {(400, rechazo)})
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+(200, b'{"intentos": [{"id": "b1b8f5a4-0a73-4430-a7f6-04a6a2d688c3", "archivo_version_id": "db4e7f8d-b8c8-4707-8663-8fcfca659d20", "numero": 1, "origen": "completar", "seleccion": [0], "resultado": "listo", "geometria_id": "12043294-fdcb-47e2-b681-4e92dfff88fa", "candidatos": 1, "creado_en": "2026-10-09T18:31:51+00:00", "creado_por": "d9306384-e4fb-43ed-ab0c-75dbc85a41bd"}], "cursor_siguiente": null}')
+(404, b'{"error": "El archivo no existe.", "detalle": {"code": "not_found"}}')
+Items in the second set but not the first:
+(400, b'{"error": "El l\xc3\xadmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}')
+
+======================================================================
+FAIL: test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) (ruta='intentos', limite='000000001')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 621, in test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route
+    self.assertEqual(s, 200, r)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 400 != 200 : {'error': 'El límite debe estar entre 1 y 100.', 'detalle': {'code': 'limite_invalido'}}
+
+======================================================================
+FAIL: test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPSQLite.test_desde_accepts_only_bounded_ascii_aligned_offsets) (desde='²')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 653, in test_desde_accepts_only_bounded_ascii_aligned_offsets
+    self.assertEqual((s, json.loads(b)["detalle"]["code"]), (400, "desplazamiento_invalido"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (500, 'internal') != (400, 'desplazamiento_invalido')
+
+First differing element 0:
+500
+400
+
+- (500, 'internal')
++ (400, 'desplazamiento_invalido')
+
+======================================================================
+FAIL: test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPSQLite.test_desde_accepts_only_bounded_ascii_aligned_offsets) (desde='³')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 653, in test_desde_accepts_only_bounded_ascii_aligned_offsets
+    self.assertEqual((s, json.loads(b)["detalle"]["code"]), (400, "desplazamiento_invalido"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (500, 'internal') != (400, 'desplazamiento_invalido')
+
+First differing element 0:
+500
+400
+
+- (500, 'internal')
++ (400, 'desplazamiento_invalido')
+
+======================================================================
+FAIL: test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPSQLite.test_desde_accepts_only_bounded_ascii_aligned_offsets) (desde='¹⁰')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<tree-2ea602a+new-tests>/tests/test_archivos_http.py", line 653, in test_desde_accepts_only_bounded_ascii_aligned_offsets
+    self.assertEqual((s, json.loads(b)["detalle"]["code"]), (400, "desplazamiento_invalido"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: (500, 'internal') != (400, 'desplazamiento_invalido')
+
+First differing element 0:
+500
+400
+
+- (500, 'internal')
++ (400, 'desplazamiento_invalido')
+
+----------------------------------------------------------------------
+Ran 4 tests in 4.453s
+
+FAILED (failures=31)
+exit 1

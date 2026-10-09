@@ -37,7 +37,7 @@ import { crearPresupuesto } from "./presupuesto.js";
 import { crearRegistro } from "./registro.js";
 import { crearPlanificador as crearPlanificadorE5 } from "./planificador.js";
 import { crearCliente } from "./cliente.js";
-import { crearClasesE5, crearControlador } from "./e5.js";
+import { crearClasesE5, crearControlador, bytesDeCapa } from "./e5.js";
 
 /* PROTOTYPE switch for the benchmark: "e1" closes rings without closePath;
  * "e2" draws cached prepared bodies with culling; "e3" = e2 + cooperative,
@@ -264,7 +264,11 @@ export function createMapCanvas(container, {
     generacion += 1;
     // E5: the old entries' layers stop pinning their prepared bodies; a failed worker is retried.
     if (E5) {
-      for (const e of byId.values()) if (e.contorno?._ctl) registro.soltar(e.contorno._id);
+      for (const e of byId.values()) {
+        if (!e.contorno?._ctl) continue;
+        e.contorno.liberarMemoriaE5();               // R1: the layer's own array goes with it
+        registro.soltar(e.contorno._id);
+      }
       controlador.reintentar();
     }
     contornoLayer.clearLayers();
@@ -383,6 +387,11 @@ export function createMapCanvas(container, {
     if (estadoContorno === "no_disponible" && cargando?.has?.(descriptor.id)) {
       estadoContorno = "cargando";
     }
+    let reservaCapa = null;
+    if (E5 && estadoContorno === "listo") {
+      reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);
+      if (!reservaCapa) estadoContorno = "sin_memoria";
+    }
     const disponible = estadoContorno === "listo";
     const fill = colorFor(terreno);
     const dash = dashFor?.(terreno) ?? null;
@@ -421,8 +430,12 @@ export function createMapCanvas(container, {
           alCambiarEstado: (estado) => alDibujo(entrada, terreno, estado),
         });
       } else if (E5) {
+        // R1: the layer's own array is admitted before the layer is built.
+        capa = CapaContornoE5.crear(c, opciones, { id: descriptor.id, controlador, presupuesto: presupuestoE5,
+                                                  dueno: duenoE5, reserva: reservaCapa });
+        reservaCapa = null;                         // owned by the layer now, or released
+        if (!capa) return null;                     // no room: the caller reports "sin_memoria"
         registro.fijar(descriptor.id);              // pinned for this entry's lifetime
-        capa = new CapaContornoE5(c, opciones, { id: descriptor.id, controlador });
         capa._avisarE5 = (estado) => alDibujo(entrada, terreno, estado);
       } else capa = new CapaContorno(c, opciones);
       capa.bindTooltip(tooltipHtml(terreno), { sticky: true, opacity: 1,
@@ -456,8 +469,13 @@ export function createMapCanvas(container, {
         entry.disponible = r.estado === "cargado";
         if (entry.disponible) {
           entry.contorno = crearCapa(r);
-          entry.cajaEscala = r.cajaMayor;
-          entry.posiciones = r.posiciones;
+          if (entry.contorno) {
+            entry.cajaEscala = r.cajaMayor;
+            entry.posiciones = r.posiciones;
+          } else {                                  // E5 (R1): no room for the layer's array
+            entry.disponible = false;
+            entry.estadoContorno = "sin_memoria";
+          }
         }
         entry.simbolo.setTooltipContent(tooltipHtml(terreno, {
           aviso: AVISOS[entry.estadoContorno] ?? null }));
@@ -771,6 +789,7 @@ export function createMapCanvas(container, {
     destruir() {
       planificador.detener();
       cache.vaciar();
+      for (const e of byId.values()) e.contorno?.liberarMemoriaE5?.();
       controlador?.cerrar();
       registro?.cerrar();
       raster?.cerrar();
@@ -778,6 +797,16 @@ export function createMapCanvas(container, {
       map.remove();
     },
     _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,
+                    // R1 audit: the layers' own arrays, reserved vs actually held.
+                    capasE5() {
+                      let reservado = 0; let real = 0; let n = 0;
+                      for (const e of byId.values()) {
+                        const c = e.contorno;
+                        if (!c?._reservaCapa) continue;
+                        n += 1; reservado += c._reservaCapa.bytes; real += c.bytesCapaE5();
+                      }
+                      return { reservado, real, n };
+                    },
                     get reinicioTrabajador() { return reinicioTrabajador; },
                     // Test hook: the symbol tooltip text (state wording) of a terrain.
                     aviso: (id) => byId.get(id)?.simbolo?.getTooltip()?.getContent() ?? null },

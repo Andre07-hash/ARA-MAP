@@ -13,12 +13,25 @@
  *   to `alPreparar` (the map's registry); any other ending (invalid,
  *   cancelled, stopped, no one waiting) releases it.
  * - Work runs in slices of at most SLICE_MS, yielding between slices.
+ * - R3 correction (2026-10-09): MAX_TRABAJOS bounds memory-holding jobs, not
+ *   the queue. Admission is now finite too: at most MAX_EN_ESPERA further jobs
+ *   wait. A request for a new body beyond that is refused at once, explicitly
+ *   ({estado: "sin_memoria", motivo: "cola_llena"}, delivered after the call
+ *   returns), and retains nothing; the caller's next render() asks again.
+ *   Supersession is unchanged: conservarSolo() cancels every job a newer view
+ *   no longer needs. Each admitted job keeps a reference to ONE caller body
+ *   (its own entry of the caller's Map, not the Map) until it ends, so the
+ *   caller GeoJSON this planner keeps reachable is at most
+ *   MAX_TRABAJOS + MAX_EN_ESPERA bodies, per map. Those bodies are caller-owned
+ *   and not charged to the byte budget; their size needs the upstream
+ *   file/body contract.
  */
 
 import { crearPreparacion } from "./preparar.js";
 
 export const SLICE_MS = 8;
 export const MAX_TRABAJOS = 2;
+export const MAX_EN_ESPERA = 30;
 
 const ceder = typeof globalThis.scheduler?.postTask === "function"
   ? (fn) => globalThis.scheduler.postTask(fn, { priority: "user-visible" })
@@ -30,12 +43,20 @@ const ceder = typeof globalThis.scheduler?.postTask === "function"
     return (fn) => { cola.push(fn); canal.port2.postMessage(null); };
   })();
 
+/** The one body a job needs, not the caller's whole Map (R3). */
+function soloSuCuerpo(descriptor, geometrias) {
+  if (!(geometrias instanceof Map)) return null;          // the preparation reports it unavailable
+  return geometrias.has(descriptor.id) ? new Map([[descriptor.id, geometrias.get(descriptor.id)]]) : new Map();
+}
+
 export function crearPlanificador({ registro, presupuesto, alPreparar, ahora = () => performance.now(),
-                                    maxTrabajos = MAX_TRABAJOS, ceder: cederSlice = ceder } = {}) {
+                                    maxTrabajos = MAX_TRABAJOS, maxEnEspera = MAX_EN_ESPERA,
+                                    ceder: cederSlice = ceder, avisarLuego = queueMicrotask } = {}) {
   const trabajos = new Map();          // id -> job, arrival order
   let programado = false;
   let detenido = false;
-  const metricas = { porciones: 0, porcionMaxMs: 0, completados: 0, cancelados: 0, sinMemoria: 0, esperas: 0 };
+  const metricas = { porciones: 0, porcionMaxMs: 0, completados: 0, cancelados: 0, sinMemoria: 0, esperas: 0,
+                     colaLlena: 0, maxRetenidos: 0 };
 
   function nuevoTrabajo(descriptor, geometrias) {
     const t = { descriptor, avisos: new Set(), reserva: null, preparacion: null };
@@ -97,7 +118,16 @@ export function crearPlanificador({ registro, presupuesto, alPreparar, ahora = (
   return {
     pedir(descriptor, geometrias, aviso) {
       let t = trabajos.get(descriptor.id);
-      if (!t) { t = nuevoTrabajo(descriptor, geometrias); trabajos.set(descriptor.id, t); }
+      if (!t) {
+        if (detenido || trabajos.size >= maxTrabajos + maxEnEspera) {
+          metricas.colaLlena += 1;
+          avisarLuego(() => aviso({ estado: "sin_memoria", motivo: "cola_llena" }));
+          return () => {};
+        }
+        t = nuevoTrabajo(descriptor, soloSuCuerpo(descriptor, geometrias));
+        trabajos.set(descriptor.id, t);
+        if (trabajos.size > metricas.maxRetenidos) metricas.maxRetenidos = trabajos.size;
+      }
       t.avisos.add(aviso);
       programar();
       return () => t.avisos.delete(aviso);
@@ -110,6 +140,9 @@ export function crearPlanificador({ registro, presupuesto, alPreparar, ahora = (
       detenido = true;
     },
     get pendientes() { return trabajos.size; },
+    /** Caller bodies kept reachable by admitted jobs (one each), for the audit. */
+    get cuerposRetenidos() { return trabajos.size; },
+    get capacidad() { return maxTrabajos + maxEnEspera; },
     get enMemoria() { let n = 0; for (const t of trabajos.values()) if (t.reserva) n += 1; return n; },
     /** Bytes reserved by preparations in progress (their typed arrays). */
     get bytesReservados() { let b = 0; for (const t of trabajos.values()) b += t.reserva?.bytes ?? 0; return b; },

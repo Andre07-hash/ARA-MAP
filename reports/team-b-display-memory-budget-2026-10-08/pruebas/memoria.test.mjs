@@ -103,7 +103,7 @@ test('budget: reserve before allocation, refuse beyond the total, peak and categ
   p.liberar(a); p.liberar(a);                       // idempotent
   assert.equal(p.usados, 4);
   assert.equal(p.pico, 10);
-  assert.deepEqual(p.porCategoria(), { preparado: 0, copia: 4, raster: 0 });
+  assert.deepEqual(p.porCategoria(), { preparado: 0, copia: 4, raster: 0, capa: 0 });
   p.liberar(b);
   assert.equal(p.vivas().length, 0);
 });
@@ -165,12 +165,18 @@ test('planner: exact reservation before allocation, cap on jobs, release on canc
   assert.equal(reg.bytesReales(), reg.bytesReservados());
   plan.detener();
   // Cancelled mid-preparation (slices stepped by hand): its reservation goes.
+  // R4: the slice deadline runs on an injected clock that advances one unit
+  // per reading, so a slice reads a fixed number of positions (a few thousand)
+  // whatever the machine's speed: one slice can never finish 90,000.
   const pasos = [];
+  let lecturas = 0;
   const plan2 = crearPlanificador({ registro: reg, presupuesto: p, alPreparar: (d, r, res) => reg.guardar(d, r, res),
-                                    ceder: (fn) => pasos.push(fn) });
+                                    ceder: (fn) => pasos.push(fn), ahora: () => { lecturas += 1; return lecturas; } });
   const { descriptor, cuerpo } = cuerpoValido('g9', 90_000);
   plan2.pedir(descriptor, new Map([[descriptor.id, cuerpo]]), () => assert.fail('cancelled job reported'));
   pasos.shift()();                                 // one slice: structure read, arrays reserved and allocated
+  assert.equal(plan2.pendientes, 1, 'still mid-work after one slice');
+  assert.equal(pasos.length, 1, 'another slice is scheduled');
   assert.equal(plan2.bytesReservados, bytesDe(preparado(90_000)));
   plan2.conservarSolo(new Set());
   assert.equal(plan2.bytesReservados, 0);
@@ -282,7 +288,7 @@ test('registry eviction while the worker copy is posted, then while its forget a
   assert.equal(c.asegurar('x', preparado(10_000)), 'listo');
   await drenar();
   assert.deepEqual([...t.manejar.cuerpos.keys()], ['x']);
-  assert.deepEqual(p.porCategoria(), { preparado: u, copia: u, raster: 0 });
+  assert.deepEqual(p.porCategoria(), { preparado: u, copia: u, raster: 0, capa: 0 });
   assert.equal(reg.bytesReales(), u);
   assert.equal(t.retenidos(), u);
   c.cerrar(); reg.soltar('x'); reg.cerrar();
@@ -473,4 +479,278 @@ test('worker copies follow registry membership: forgotten when the body leaves, 
   await drenar();
   assert.ok(t.manejar.cuerpos.has('z'));
   c.cerrar(); reg.cerrar();
+});
+
+// ------------------------------------------------- R1-R3 corrections (2026-10-09)
+
+import v8 from 'node:v8';
+import vm from 'node:vm';
+
+/* A minimal Leaflet class system, enough to construct the real CapaContorno /
+ * CapaContornoE5 classes (the supervisor's probe uses the same double). */
+function leafletMinimo() {
+  function Base() {}
+  Base.extend = function extend(metodos) {
+    const Padre = this;
+    function Hija(...args) { this.initialize?.(...args); }
+    Hija.prototype = Object.assign(Object.create(Padre.prototype), metodos);
+    Hija.extend = Padre.extend;
+    return Hija;
+  };
+  return { Polygon: Base, Path: Base, Util: { setOptions: (o, op) => { o.options = { ...o.options, ...op }; } } };
+}
+const { crearClases } = await import(pathToFileURL(path.join(aqui, '..', '..', 'team-b-display-strategy-2026-10-08',
+                                                             'prototipo', 'capa.js')));
+const { crearClasesE5, bytesDeCapa } = await imp('e5.js');
+const LM = leafletMinimo();
+const { CapaContornoE5 } = crearClasesE5(LM, crearClases(LM).CapaContorno);
+
+/** A prepared body with `partes` one-ring parts of five positions each. */
+function preparadoPartes(partes) {
+  return { estado: 'cargado', partes, x: new Float64Array(partes * 5), y: new Float64Array(partes * 5),
+           inicioAnillo: new Int32Array(partes + 1), inicioParte: new Int32Array(partes + 1),
+           cajasParte: new Float64Array(partes * 4) };
+}
+
+test('R1: a layer\'s own array is admitted before it is allocated, or not built at all', () => {
+  const q = preparadoPartes(20_000);
+  // The supervisor's case: the budget holds exactly the prepared body.
+  const justo = crearPresupuesto(bytesDe(q));
+  justo.reservar('preparado', bytesDe(q), 'probe');
+  assert.equal(CapaContornoE5.crear(q, {}, { id: 'g', controlador: {}, presupuesto: justo, dueno: 'probe' }), null);
+  assert.equal(justo.usados, bytesDe(q));
+  assert.equal(justo.porCategoria().capa, 0);
+  // Room for one layer: the ledger equals every typed array actually held.
+  const p = crearPresupuesto(bytesDe(q) + bytesDeCapa(q));
+  p.reservar('preparado', bytesDe(q), 'probe');
+  const capa = CapaContornoE5.crear(q, {}, { id: 'g', controlador: {}, presupuesto: p, dueno: 'probe' });
+  assert.ok(capa);
+  assert.equal(bytesDeCapa(q), 80_000);
+  assert.equal(capa._visibles.byteLength, bytesDeCapa(q));
+  assert.equal(p.usados, bytesDe(q) + capa._visibles.byteLength);
+  assert.equal(p.porCategoria().capa, capa.bytesCapaE5());
+  // A second layer of the SAME body needs its own array: refused here, nothing allocated.
+  assert.equal(CapaContornoE5.crear(q, {}, { id: 'g', controlador: {}, presupuesto: p, dueno: 'probe' }), null);
+  // Without a live 'capa' reservation the class refuses to build.
+  assert.throws(() => new CapaContornoE5(q, {}, { id: 'g', controlador: {}, presupuesto: p, reserva: null }));
+  capa.liberarMemoriaE5(); capa.liberarMemoriaE5();           // idempotent
+  // A reservation admitted earlier (MapCanvas's cache-hit path) is taken over, not doubled.
+  const previa = p.reservar('capa', bytesDeCapa(q), 'probe');
+  const otra = CapaContornoE5.crear(q, {}, { id: 'g', controlador: {}, presupuesto: p, dueno: 'probe', reserva: previa });
+  assert.equal(otra._reservaCapa, previa);
+  assert.equal(p.porCategoria().capa, bytesDeCapa(q));
+  otra.liberarMemoriaE5();
+  assert.equal(p.porCategoria().capa, 0);
+  assert.equal(capa.bytesCapaE5(), 0);
+});
+
+test('R1: multiplicity, replacement, teardown and allocation failure keep the ledger exact', () => {
+  const q = preparadoPartes(1000);
+  const p = crearPresupuesto(64 * MiB);
+  const crear = (dueno) => CapaContornoE5.crear(q, {}, { id: 'g', controlador: {}, presupuesto: p, dueno });
+  const mapaA = [crear('a'), crear('a')];                     // two layers of one body in one map
+  const mapaB = [crear('b')];                                  // and one in another map
+  const real = () => [...mapaA, ...mapaB].reduce((s, c) => s + c.bytesCapaE5(), 0);
+  assert.equal(p.porCategoria().capa, 3 * bytesDeCapa(q));
+  assert.equal(p.porCategoria().capa, real());
+  // Replacement (render): the old layer is released before its successor is built.
+  mapaA[0].liberarMemoriaE5(); mapaA[0] = crear('a');
+  assert.equal(p.porCategoria().capa, real());
+  assert.equal(p.picoPorCategoria().capa, 3 * bytesDeCapa(q));
+  // Teardown of map B, then of map A.
+  for (const c of mapaB) c.liberarMemoriaE5();
+  assert.equal(p.porCategoria().capa, 2 * bytesDeCapa(q));
+  for (const c of mapaA) c.liberarMemoriaE5();
+  assert.equal(p.porCategoria().capa, 0);
+  // The allocation itself fails after admission: the reservation is released.
+  const enorme = { ...preparadoPartes(1), partes: 2 ** 32 };
+  const grande = crearPresupuesto(Number.MAX_SAFE_INTEGER);
+  assert.throws(() => CapaContornoE5.crear(enorme, {}, { id: 'h', controlador: {}, presupuesto: grande, dueno: 'x' }),
+                RangeError);
+  assert.equal(grande.usados, 0);
+});
+
+// R2: one synchronous send failure at each stage of the client.
+function trabajadorQueFalla(tipo) {
+  const t = trabajadorFalso();
+  const real = t.postMessage;
+  t.postMessage = (m) => { if (m.tipo === tipo) throw new Error(`injected ${tipo} failure`); return real(m); };
+  return t;
+}
+
+for (const etapa of ['cuerpo', 'olvidar', 'raster', 'cancelar', 'olvidarTodo', 'estadisticas']) {
+  test(`R2: a synchronous ${etapa} post failure terminates, releases and answers through one path`, async () => {
+    const p = crearPresupuesto(4 * MiB);
+    const t = trabajadorQueFalla(etapa);
+    const fallos = [];
+    const c = crearCliente({ presupuesto: p, dueno: 'prueba', crearTrabajador: () => t, plazoMs: 5000,
+                             alFallar: (m) => fallos.push(m) });
+    await drenar(2);
+    assert.equal(c.estado, 'listo');
+    if (etapa !== 'cuerpo') { assert.equal(c.asegurar('a', preparado(1000)), 'listo'); await drenar(); }
+    const respuestas = [];
+    let resultado = null;
+    let esperado = 'listo';
+    if (etapa === 'cuerpo') resultado = c.asegurar('a', preparado(1000));
+    else if (etapa === 'olvidar') c.expulsado('a');
+    else if (etapa === 'raster' || etapa === 'cancelar') {
+      const area = { ancho: 10, alto: 10, m: 1, bmin: [0, 0], origen: [0, 0], escala: 1, capas: [{ id: 'a', estilo: {} }] };
+      resultado = c.raster(area, (r) => respuestas.push(r));
+      if (etapa === 'cancelar') c.descartar(resultado);
+    } else if (etapa === 'olvidarTodo') resultado = await c.olvidarTodo();
+    else resultado = await c.estadisticas();
+    if (etapa === 'cuerpo') esperado = 'fallido';
+    assert.equal(c.estado, 'fallido');
+    assert.equal(c.motivo, 'envio');
+    assert.ok(t.terminado, 'the worker was terminated');
+    assert.deepEqual(fallos, ['envio']);
+    assert.equal(p.usados, 0, 'no reservation stays owned');
+    assert.equal(p.pendienteDeLiberar, 0);
+    assert.equal(c.bytesReservados(), 0);
+    if (etapa === 'cuerpo') assert.equal(resultado, esperado);
+    if (etapa === 'raster') { assert.equal(resultado, null); assert.deepEqual(respuestas, [{ fallo: 'envio' }]); }
+    if (etapa === 'olvidarTodo') assert.equal(resultado, false);
+    if (etapa === 'estadisticas') assert.equal(resultado, null);
+    // Late traffic after the failure is ignored and changes nothing.
+    t.onmessage?.({ data: { tipo: 'listo', offscreen: true } });
+    assert.equal(c.estado, 'fallido');
+    assert.equal(c.asegurar('b', preparado(10)), 'fallido');
+    assert.equal(p.usados, 0);
+    c.cerrar();
+  });
+}
+
+test('R2: a worker that never says "listo" fails within its startup bound', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const p = crearPresupuesto(MiB);
+  const w = trabajadorFalso({ sinListo: true });
+  const fallos = [];
+  const c = crearCliente({ presupuesto: p, dueno: 'prueba', crearTrabajador: () => w, plazoMs: 10,
+                           alFallar: (m) => fallos.push(m) });
+  t.mock.timers.tick(9);
+  assert.equal(c.estado, 'iniciando');
+  t.mock.timers.tick(1);
+  assert.equal(c.estado, 'fallido');
+  assert.equal(c.motivo, 'sinInicio');
+  assert.ok(w.terminado);
+  assert.deepEqual(fallos, ['sinInicio']);
+  w.onmessage?.({ data: { tipo: 'listo', offscreen: true } });  // a late handshake
+  assert.equal(c.estado, 'fallido');
+  // A prompt handshake clears the bound.
+  const w2 = trabajadorFalso({ sinListo: true });
+  const c2 = crearCliente({ presupuesto: p, dueno: 'prueba', crearTrabajador: () => w2, plazoMs: 10 });
+  w2.onmessage({ data: { tipo: 'listo', offscreen: true } });
+  t.mock.timers.tick(100);
+  assert.equal(c2.estado, 'listo');
+  c.cerrar(); c2.cerrar();
+});
+
+test('R2: the controller settles to "sin_trabajador" on a failed send and retries with a fresh worker', async () => {
+  for (const etapa of ['cuerpo', 'raster']) {
+    const p = crearPresupuesto(4 * MiB);
+    const informados = [];
+    const creados = [];
+    const fabrica = (o) => {
+      const w = creados.length === 0 ? trabajadorQueFalla(etapa) : trabajadorFalso();
+      const c = crearCliente({ presupuesto: p, dueno: 'mapa', crearTrabajador: () => w, plazoMs: 5000, ...o });
+      creados.push({ w, c });
+      return c;
+    };
+    const renderer = { _bounds: { min: { x: 0, y: 0 }, max: { x: 100, y: 50 } }, _container: { width: 100, height: 50 },
+                       _layers: {}, _drawFirst: null, _redraw() {}, _updatePaths() {}, on() {}, off() {} };
+    const map = { getPixelOrigin: () => ({ x: 0, y: 0 }), getZoom: () => 10, options: { crs: { scale: (z) => 256 * 2 ** z } } };
+    class CapaBitmap { constructor() {} addTo() { return this; } bringToBack() {} redraw() {} get _map() { return map; } }
+    const ctl = crearControlador({ L: null, map, CapaBitmap, presupuesto: p, dueno: 'mapa', crearCliente: fabrica,
+                                   alEstado: (capa, estado) => informados.push([capa._id, estado]) });
+    const capa = { _id: 'g-0', _renderer: renderer, _map: map, _nVisibles: 1, _carga: { anillos: 5000, posiciones: 50000 },
+                   _prep: preparado(10), options: { color: '#123456', weight: 2 } };
+    renderer._drawFirst = { layer: capa, next: null };
+    ctl.agregar(capa);
+    await hasta(() => informados.some(([, e]) => e === 'sin_trabajador'));
+    assert.deepEqual(informados.at(-1), ['g-0', 'sin_trabajador'], etapa);
+    assert.equal(ctl.cliente.motivo, 'envio');
+    assert.equal(p.usados, 0, `${etapa}: nothing stays reserved after the failure`);
+    // Explicit retry (the next render()): one fresh worker, and the outline becomes final.
+    ctl.reintentar();
+    capa.options = { color: '#654321', weight: 2 };
+    ctl.cambioDeEstilo(capa);
+    await hasta(() => ctl.mostrada);
+    assert.equal(creados.length, 2);
+    assert.deepEqual(informados.at(-1), ['g-0', 'listo']);
+    ctl.cerrar();
+    assert.equal(p.usados, 0);
+  }
+});
+
+// R3: finite admission of waiting preparations and bounded retained input.
+function exponerGc() {
+  try { v8.setFlagsFromString('--expose_gc'); return vm.runInNewContext('gc'); } catch { return null; }
+}
+
+test('R3: a burst of distinct requests is admitted up to a finite bound; the rest are refused explicitly', async () => {
+  const p = crearPresupuesto(64 * MiB);
+  const reg = crearRegistro(p, 'm');
+  const pasos = [];
+  const plan = crearPlanificador({ registro: reg, presupuesto: p, alPreparar: (d, r, res) => reg.guardar(d, r, res),
+                                   ceder: (fn) => pasos.push(fn) });
+  const avisos = new Map();
+  const casos = Array.from({ length: 100 }, (_, i) => cuerpoValido(`g${i}`, 50));
+  for (const { descriptor, cuerpo } of casos) {
+    plan.pedir(descriptor, new Map([[descriptor.id, cuerpo]]), (r) => avisos.set(descriptor.id, r));
+  }
+  assert.equal(plan.capacidad, 32);
+  assert.equal(plan.pendientes, 32, 'only the bounded number of jobs is kept');
+  assert.equal(plan.cuerposRetenidos, 32);
+  assert.equal(avisos.size, 0, 'refusals are delivered after the call returns');
+  await tarea();
+  assert.equal(avisos.size, 68);
+  assert.ok([...avisos.values()].every((r) => r.estado === 'sin_memoria' && r.motivo === 'cola_llena'));
+  assert.equal(plan.metricas.colaLlena, 68);
+  assert.equal(p.usados, 0, 'waiting and refused jobs reserve nothing');
+  // Supersession: a newer view keeps only what it needs; the bound frees up.
+  plan.conservarSolo(new Set(['g0', 'g1']));
+  assert.equal(plan.pendientes, 2);
+  const nuevo = cuerpoValido('nuevo', 50);
+  plan.pedir(nuevo.descriptor, new Map([[nuevo.descriptor.id, nuevo.cuerpo]]), (r) => avisos.set('nuevo', r));
+  while (pasos.length) pasos.shift()();
+  assert.equal(avisos.get('nuevo').estado, 'cargado');
+  assert.equal(avisos.get('g0').estado, 'cargado');
+  assert.equal(plan.pendientes, 0);
+  // Two maps (two planners) are bounded independently; a stopped planner admits nothing.
+  const otro = crearPlanificador({ registro: crearRegistro(p, 'n'), presupuesto: p, alPreparar: () => {},
+                                   ceder: () => {}, maxEnEspera: 3 });
+  for (const { descriptor, cuerpo } of casos.slice(0, 10)) otro.pedir(descriptor, new Map([[descriptor.id, cuerpo]]), () => {});
+  assert.equal(otro.pendientes, 5);
+  otro.detener();
+  otro.pedir(casos[50].descriptor, new Map(), () => {});
+  assert.equal(otro.pendientes, 0);
+  plan.detener(); reg.cerrar();
+});
+
+test('R3: an admitted job keeps only its own body reachable, not the caller\'s Map', async () => {
+  const gc = exponerGc();
+  const p = crearPresupuesto(64 * MiB);
+  const reg = crearRegistro(p, 'm');
+  const plan = crearPlanificador({ registro: reg, presupuesto: p, alPreparar: (d, r, res) => reg.guardar(d, r, res),
+                                   ceder: () => {} });                // never runs: every job stays waiting
+  const mapas = []; const cuerpos = []; const ajenos = [];
+  (() => {
+    for (let i = 0; i < 20; i += 1) {
+      const { descriptor, cuerpo } = cuerpoValido(`g${i}`, 50);
+      const ajeno = { geojson: { relleno: new Float64Array(1000) } };  // another row's body in the same Map
+      const m = new Map([[descriptor.id, cuerpo], [`otro-${i}`, ajeno]]);
+      plan.pedir(descriptor, m, () => {});
+      mapas.push(new WeakRef(m)); cuerpos.push(new WeakRef(cuerpo)); ajenos.push(new WeakRef(ajeno));
+    }
+  })();
+  assert.equal(plan.cuerposRetenidos, 20);
+  if (!gc) return;                                   // no collector access: the counts above still hold
+  await tarea(); gc(); await tarea(); gc();
+  assert.equal(mapas.filter((r) => r.deref()).length, 0, 'no caller Map is retained');
+  assert.equal(ajenos.filter((r) => r.deref()).length, 0, 'no other body is retained');
+  assert.equal(cuerpos.filter((r) => r.deref()).length, 20, 'each waiting job keeps its own body (caller-owned)');
+  plan.conservarSolo(new Set());
+  await tarea(); gc(); await tarea(); gc();
+  assert.equal(cuerpos.filter((r) => r.deref()).length, 0, 'cancellation drops every retained body');
+  plan.detener(); reg.cerrar();
 });

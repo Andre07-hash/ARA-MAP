@@ -21,7 +21,7 @@
  * On start: {tipo: "listo", offscreen: boolean}.
  * Failure simulation for the prototype's tests (?simular=): "sinOffscreen"
  * reports no OffscreenCanvas; "error" throws on the first raster; "silencio"
- * never answers rasters.
+ * never answers rasters; "sinInicio" (R2) never sends "listo".
  */
 
 const CLAVES = ["x", "y", "inicioAnillo", "inicioParte", "cajasParte"];
@@ -86,6 +86,12 @@ export function crearManejador({ enviar, programar, crearLienzo, simular = null 
       pintar(ctx, estilo);
     }
     const bitmap = lienzo.transferToImageBitmap();   // the canvas's pixels move into the bitmap
+    // R1 inventory: after a transfer the specification gives the canvas a new
+    // blank bitmap of the SAME size, alive until the canvas is collected. It is
+    // never drawn, so shrink it now rather than leave an uncounted second
+    // width x height x 4 buffer to the garbage collector.
+    lienzo.width = 0;
+    lienzo.height = 0;
     lienzos -= 1; bytesLienzos -= d.ancho * d.alto * 4;
     return { bitmap, faltan };
   }
@@ -142,5 +148,5 @@ if (typeof WorkerGlobalScope !== "undefined" && globalThis instanceof WorkerGlob
     simular,
   });
   self.onmessage = ({ data }) => manejar(data);
-  self.postMessage({ tipo: "listo", offscreen });
+  if (simular !== "sinInicio") self.postMessage({ tipo: "listo", offscreen });
 }

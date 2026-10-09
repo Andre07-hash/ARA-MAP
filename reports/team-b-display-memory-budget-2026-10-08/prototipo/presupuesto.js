@@ -11,6 +11,10 @@
  *                scratch canvas becomes the bitmap by transfer, no copy)
  *                until the main thread closes it; the displayed image and
  *                its replacement overlap, and both are reserved.
+ *   "capa"       (R1 correction, 2026-10-09) each outline layer's own typed
+ *                array of visible part indexes (Int32Array(partes)), one per
+ *                layer however many layers share a prepared body, from just
+ *                before the layer is built until the layer is discarded.
  * A reservation that does not fit fails; nothing is allocated for it. Before
  * failing, registered relievers may free unpinned items (LRU caches). The
  * ledger keeps the peak and every live reservation, so tests can compare it
@@ -25,8 +29,8 @@ let siguienteId = 0;
 
 export function crearPresupuesto(total) {
   const vivas = new Map();                // id -> reservation
-  const porCategoria = { preparado: 0, copia: 0, raster: 0 };
-  const picoPorCategoria = { preparado: 0, copia: 0, raster: 0 };
+  const porCategoria = { preparado: 0, copia: 0, raster: 0, capa: 0 };
+  const picoPorCategoria = { preparado: 0, copia: 0, raster: 0, capa: 0 };
   const aliviadores = new Set();          // (bytesFaltantes) => void: free unpinned items
   const oyentes = new Set();              // () => void: something was released or became evictable
   let usados = 0;

@@ -16,7 +16,12 @@
  *   "constructor"   new Worker threw;
  *   "sinOffscreen"  the worker has no OffscreenCanvas;
  *   "error"         the worker raised an error or a message failed to clone;
+ *   "envio"         (R2) postMessage threw synchronously, at any send: copy,
+ *                   forget, raster, cancel, reset or statistics;
+ *   "sinInicio"     (R2) the worker never said "listo" within `plazoMs`;
  *   "sinRespuesta"  a raster was not answered within `plazoMs`.
+ * Every send goes through `enviar`, so a synchronous failure takes the same
+ * single path: terminate, release every reservation, answer every waiter.
  * On failure the worker is terminated and every reservation this client holds
  * is released (ownership ends with the worker; the browser frees its memory
  * on its own schedule).
@@ -25,9 +30,12 @@
 import { bytesDe } from "./preparar.js";
 
 const URL_TRABAJADOR = new URL("./trabajador.js", import.meta.url);
+// Test-only send-failure simulation fires once per page, so an explicit retry
+// (the next render's fresh worker) can be shown to recover.
+let envioSimulado = false;
 
-export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 8000, alFallar = null,
-                               alListo = null, crearTrabajador = null } = {}) {
+export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 8000, plazoInicioMs = plazoMs,
+                               alFallar = null, alListo = null, crearTrabajador = null } = {}) {
   const copias = new Map();          // id -> {copia, reserva, fijos}; order = LRU
   const porConfirmar = new Map();    // copia -> reserva (forget posted, ack pending)
   const esperas = new Map();         // pedido -> {aviso, reloj}
@@ -37,12 +45,14 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
   let estado = "iniciando";
   let motivo = null;
   let trabajador = null;
+  let relojInicio = null;
   const metricas = { copiasEnviadas: 0, olvidos: 0, sinMemoria: 0, rasters: 0, descartados: 0, cancelados: 0 };
 
   function fallar(razon) {
     if (estado === "fallido" || estado === "cerrado") return;
     estado = "fallido";
     motivo = razon;
+    clearTimeout(relojInicio);
     try { trabajador?.terminate(); } catch { /* already gone */ }
     soltarTodo();
     for (const [, e] of esperas) { clearTimeout(e.reloj); e.aviso({ fallo: razon }); }
@@ -59,6 +69,17 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     porConfirmar.clear();
   }
 
+  /** Every message to the worker. A synchronous throw fails the client. */
+  function enviar(mensaje) {
+    try {
+      trabajador.postMessage(mensaje);
+      return true;
+    } catch {
+      fallar("envio");
+      return false;
+    }
+  }
+
   function olvidar(id) {
     const c = copias.get(id);
     if (!c) return 0;
@@ -66,7 +87,8 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     porConfirmar.set(c.copia, c.reserva);
     presupuesto.anunciarPorConfirmar(c.reserva.bytes);
     metricas.olvidos += 1;
-    trabajador.postMessage({ tipo: "olvidar", id, copia: c.copia });
+    // On a failed send fallar() has released this copy with everything else.
+    enviar({ tipo: "olvidar", id, copia: c.copia });
     return c.reserva.bytes;
   }
 
@@ -84,18 +106,32 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     const url = new URL(URL_TRABAJADOR);
     if (simular) url.searchParams.set("simular", simular);
     trabajador = crearTrabajador ? crearTrabajador(url) : new Worker(url, { type: "module" });
+    // Test-only (R2): make one kind of send throw synchronously, as a clone
+    // or a dead port can. "envioCuerpo" fails the first body copy, "envioRaster"
+    // the first raster request.
+    const falla = { envioCuerpo: "cuerpo", envioRaster: "raster" }[simular];
+    if (falla) {
+      const real = trabajador.postMessage.bind(trabajador);
+      trabajador.postMessage = (m, t) => {
+        if (!envioSimulado && m?.tipo === falla) { envioSimulado = true; throw new Error(`simulated ${falla} post failure`); }
+        return real(m, t);
+      };
+    }
   } catch {
     estado = "fallido";
     motivo = "constructor";
   }
 
   if (trabajador) {
+    // R2: the handshake is bounded too; a worker that never says "listo" fails.
+    relojInicio = setTimeout(() => { if (estado === "iniciando") fallar("sinInicio"); }, plazoInicioMs);
     trabajador.onerror = (e) => { e.preventDefault?.(); fallar("error"); };
     trabajador.onmessageerror = () => fallar("error");
     trabajador.onmessage = ({ data }) => {
       if (estado === "fallido" || estado === "cerrado") return;
       switch (data.tipo) {
         case "listo":
+          clearTimeout(relojInicio);
           if (!data.offscreen) fallar("sinOffscreen");
           else if (estado === "iniciando") { estado = "listo"; alListo?.(); }
           return;
@@ -145,8 +181,9 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       numeroCopia += 1;
       copias.set(id, { copia: numeroCopia, reserva, fijos: 0 });
       metricas.copiasEnviadas += 1;
-      trabajador.postMessage({ tipo: "cuerpo", id, copia: numeroCopia, x: p.x, y: p.y, inicioAnillo: p.inicioAnillo,
-                               inicioParte: p.inicioParte, cajasParte: p.cajasParte, partes: p.partes });
+      // A failed post releases this reservation with the rest (fallar).
+      if (!enviar({ tipo: "cuerpo", id, copia: numeroCopia, x: p.x, y: p.y, inicioAnillo: p.inicioAnillo,
+                    inicioParte: p.inicioParte, cajasParte: p.cajasParte, partes: p.partes })) return "fallido";
       return "listo";
     },
     fijar(ids) { for (const id of ids) { const c = copias.get(id); if (c) c.fijos += 1; } },
@@ -175,7 +212,8 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       metricas.rasters += 1;
       const reloj = setTimeout(() => fallar("sinRespuesta"), plazoMs);
       esperas.set(numero, { aviso, reloj });
-      trabajador.postMessage({ tipo: "raster", pedido: numero, ...parametros });
+      // A failed post answers this request {fallo} through fallar().
+      if (!enviar({ tipo: "raster", pedido: numero, ...parametros })) return null;
       return numero;
     },
     /** Not wanted any more: cancelled in the worker if not started; a late reply is closed. */
@@ -184,7 +222,7 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       if (!e) return;
       clearTimeout(e.reloj);
       esperas.delete(n);
-      if (estado === "listo") trabajador.postMessage({ tipo: "cancelar", pedido: n });
+      if (estado === "listo") enviar({ tipo: "cancelar", pedido: n });
     },
     /** Reset: drop every copy; resolves true when the worker acknowledges. */
     olvidarTodo() {
@@ -192,13 +230,15 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
       for (const [, c] of copias) { porConfirmar.set(c.copia, c.reserva); presupuesto.anunciarPorConfirmar(c.reserva.bytes); }
       copias.clear();
       const hasta = numeroCopia;
-      trabajador.postMessage({ tipo: "olvidarTodo", hasta });
-      return new Promise((ok) => reinicios.push([hasta, ok]));
+      const hecho = new Promise((ok) => reinicios.push([hasta, ok]));
+      enviar({ tipo: "olvidarTodo", hasta });   // on failure fallar() resolves it false
+      return hecho;
     },
     cerrar() {
       if (estado === "cerrado") return;
       const antes = estado;
       estado = "cerrado";
+      clearTimeout(relojInicio);
       quitarAliviador();
       for (const [, e] of esperas) clearTimeout(e.reloj);
       esperas.clear();
@@ -209,7 +249,7 @@ export function crearCliente({ presupuesto, dueno, simular = null, plazoMs = 800
     },
     estadisticas() {
       if (estado !== "listo") return Promise.resolve(null);
-      return new Promise((ok) => { estadisticas.push(ok); trabajador.postMessage({ tipo: "estadisticas" }); });
+      return new Promise((ok) => { estadisticas.push(ok); enviar({ tipo: "estadisticas" }); });
     },
     /** Bytes this client holds in the ledger (copies held plus forgets awaiting acknowledgement). */
     bytesReservados() {

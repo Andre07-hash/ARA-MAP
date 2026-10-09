@@ -58,16 +58,41 @@ function estiloDe(o) {
   return e;
 }
 
+/** Bytes of a layer's own visible-part index (CapaContorno's Int32Array(partes)). */
+export function bytesDeCapa(preparado) { return Int32Array.BYTES_PER_ELEMENT * preparado.partes; }
+
 export function crearClasesE5(L, CapaContorno) {
-  /** An outline drawn directly, from the bitmap, or not at all, as its controller decides. */
+  /** An outline drawn directly, from the bitmap, or not at all, as its controller decides.
+   *  Build it with `crear`, never `new`: its own array is admitted first. */
   const CapaContornoE5 = CapaContorno.extend({
-    initialize(preparado, options, { id, controlador }) {
-      CapaContorno.prototype.initialize.call(this, preparado, options);
+    initialize(preparado, options, { id, controlador, presupuesto, reserva }) {
+      if (!reserva?.viva || reserva.categoria !== "capa" || reserva.bytes !== bytesDeCapa(preparado)) {
+        throw new Error("an E5 layer needs its own live 'capa' reservation");
+      }
+      this._presupuesto = presupuesto;
+      this._reservaCapa = reserva;
+      try {
+        CapaContorno.prototype.initialize.call(this, preparado, options);   // allocates _visibles
+      } catch (error) {
+        presupuesto.liberar(reserva);           // allocation failed: nothing is held
+        this._reservaCapa = null;
+        throw error;
+      }
       this._id = id;
       this._ctl = controlador;
       this._modo = "nada";                    // "directo" | "bitmap" | "nada"
       this._carga = { anillos: 0, posiciones: 0 };
     },
+    /** The layer is discarded (render, teardown): its array and reservation go together. */
+    liberarMemoriaE5() {
+      if (!this._reservaCapa) return;
+      this._visibles = new Int32Array(0);
+      this._nVisibles = 0;
+      this._presupuesto.liberar(this._reservaCapa);
+      this._reservaCapa = null;
+    },
+    /** Bytes this layer actually holds in its own array, for the audit. */
+    bytesCapaE5() { return this._reservaCapa ? this._visibles.byteLength : 0; },
     onAdd(map) {
       CapaContorno.prototype.onAdd.call(this, map);
       this._ctl.agregar(this);
@@ -133,6 +158,14 @@ export function crearClasesE5(L, CapaContorno) {
     _containsPoint() { return false; },
     _empty() { return !this._ctl.mostrada; },
   });
+
+  /** Admit the layer's own array (or take one already admitted), then build the
+   *  layer; null when it does not fit. */
+  CapaContornoE5.crear = (preparado, options, { id, controlador, presupuesto, dueno, reserva: previa = null }) => {
+    const reserva = previa ?? presupuesto.reservar("capa", bytesDeCapa(preparado), dueno);
+    if (!reserva) return null;
+    return new CapaContornoE5(preparado, options, { id, controlador, presupuesto, reserva });
+  };
 
   return { CapaContornoE5, CapaBitmap };
 }
@@ -335,6 +368,12 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
       const r = cl.asegurar(d.id, d.capa._prep);
       if (r === "listo") { cl.fijar([d.id]); incluidas.push(d); }
       else if (r === "esperar") { esperar = true; break; }
+      else if (r === "fallido") {
+        // R2: posting the copy failed and the client has already terminated
+        // and released everything; settle as a worker failure now.
+        if (mostrada) soltarMostrada();
+        return directosLigeros(lista, "sin_trabajador") || true;
+      }
       else sinMemoria.add(d.capa);
     }
     let fijadas = incluidas.map((d) => d.id);
@@ -395,6 +434,9 @@ export function crearControlador({ L, map, CapaBitmap, presupuesto, crearCliente
     vuelo.numero = cl.raster({ ancho: area.ancho, alto: area.alto, m: area.m, bmin: area.bmin, origen: area.origen,
                                escala: area.escala, capas: incluidas.map((d) => ({ id: d.id, estilo: d.estilo })) },
                              (respuesta) => recibir(vuelo, respuesta));
+    // R2: a request that could not be posted was answered {fallo} at once:
+    // its reservation and pins are already released; settle as a failure.
+    if (cl.estado === "fallido") return directosLigeros(lista, "sin_trabajador") || true;
     return cambio;
   }
 

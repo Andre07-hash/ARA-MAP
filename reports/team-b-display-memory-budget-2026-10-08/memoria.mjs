@@ -19,7 +19,10 @@
  *               held copies once quiet;
  *   raster    = displayed bitmap + in-flight reservations; the displayed
  *               bitmap's width x height x 4 equals its reservation and its size
- *               equals the canvas's real device size.
+ *               equals the canvas's real device size;
+ *   capa      = (R1, 2026-10-09) every live outline layer's own reservation,
+ *               and each equals that layer's actual _visibles byteLength;
+ *               a reservation whose layer is gone shows as a ledger excess.
  * A per-frame sampler checks, during work, that the bytes held on the main
  * thread (typed arrays + displayed bitmaps) never exceed the ledger's
  * preparado + raster, and records the ledger peak; the ledger itself can
@@ -38,7 +41,7 @@ const { chromium } = require('playwright-core');
 const servidor = await servir(entorno());
 const browser = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : { channel: 'chrome' });
 const EVIDENCIA = process.env.EVIDENCIA ?? null;
-const ELEGIDOS = (process.argv[2] ?? 'matriz,cambio,dos-mapas,visitas,rafaga,pequeno,fallos,reinicio').split(',');
+const ELEGIDOS = (process.argv[2] ?? 'matriz,cambio,dos-mapas,visitas,rafaga,pequeno,fallos,cola,reinicio').split(',');
 const salida = { navegador: browser.version(), escenarios: {} };
 let fallas = 0;
 const ok = (cond, que) => { console.log(`${cond ? 'OK   ' : 'FALLA'} ${que}`); if (!cond) fallas += 1; };
@@ -76,12 +79,13 @@ const AYUDAS = () => {
       for (const c of m.canvases) {
         const d = c._diagnostico;
         if (!d?.registro) continue;
-        real += d.registro.bytesReales() + d.planificador.bytesReservados + d.controlador.bytesRaster().mostrada;
+        real += d.registro.bytesReales() + d.planificador.bytesReservados + d.controlador.bytesRaster().mostrada
+          + d.capasE5().real;
       }
       const cat = m.presupuesto.porCategoria();
       window.__muestreo.muestras += 1;
       window.__muestreo.maxReal = Math.max(window.__muestreo.maxReal, real);
-      if (real > cat.preparado + cat.raster) window.__muestreo.violaciones.push({ real, cat });
+      if (real > cat.preparado + cat.raster + cat.capa) window.__muestreo.violaciones.push({ real, cat });
       if (m.presupuesto.usados > m.presupuesto.total) window.__muestreo.violaciones.push({ excede: m.presupuesto.usados });
     }
     requestAnimationFrame(muestrear);
@@ -92,7 +96,7 @@ const AYUDAS = () => {
     const m = window.__m5; const p = m.presupuesto;
     const r = { total: p.total, usados: p.usados, pico: p.pico, ledger: p.porCategoria(), picoPorCategoria: p.picoPorCategoria(),
                 rechazos: p.rechazos, pendienteDeLiberar: p.pendienteDeLiberar, mapas: [], errores: [] };
-    let prep = 0; let copia = 0; let raster = 0;
+    let prep = 0; let copia = 0; let raster = 0; let capa = 0;
     for (const [i, c] of m.canvases.entries()) {
       const d = c._diagnostico;
       const reg = d.registro.bytesReservados(); const regReal = d.registro.bytesReales(); const plan = d.planificador.bytesReservados;
@@ -102,11 +106,18 @@ const AYUDAS = () => {
       const lienzo = c.map.getContainer().querySelector('.leaflet-overlay-pane canvas');
       const mostrada = d.controlador.mostrada;
       prep += reg + plan; copia += cl?.bytesReservados() ?? 0; raster += br.reservadaMostrada + br.enVuelo;
+      const capas = d.capasE5();
+      capa += capas.reservado;
+      if (capas.reservado !== capas.real) r.errores.push(`map ${i}: layer arrays reserved ${capas.reservado} != byteLength ${capas.real}`);
       const mapa = { i, registro: { reservados: reg, reales: regReal, entradas: d.registro.tamano, fijados: d.registro.fijados() },
                      preparando: plan, cliente: cl ? { estado: cl.estado, motivo: cl.motivo, reservados: cl.bytesReservados(), copias: cl.copias } : null,
                      trabajador: w ? { bytes: w.bytes, entradas: w.entradas, lienzos: w.lienzos } : null,
                      raster: br, bitmap: mostrada ? [mostrada.bitmap.width, mostrada.bitmap.height] : null,
-                     lienzo: lienzo ? [lienzo.width, lienzo.height] : null, metricas: { ...d.controlador.metricas } };
+                     lienzo: lienzo ? [lienzo.width, lienzo.height] : null, metricas: { ...d.controlador.metricas },
+                     capas, planificador: { retenidos: d.planificador.cuerposRetenidos, capacidad: d.planificador.capacidad,
+                                            colaLlena: d.planificador.metricas.colaLlena,
+                                            maxRetenidos: d.planificador.metricas.maxRetenidos } };
+      if (d.planificador.cuerposRetenidos > d.planificador.capacidad) r.errores.push(`map ${i}: planner retains more than its bound`);
       if (reg !== regReal) r.errores.push(`map ${i}: registry reserved ${reg} != byteLength ${regReal}`);
       if (br.mostrada !== br.reservadaMostrada) r.errores.push(`map ${i}: bitmap ${br.mostrada} != reserved ${br.reservadaMostrada}`);
       if (mostrada && (mostrada.bitmap.width !== mostrada.area.ancho || mostrada.bitmap.height !== mostrada.area.alto)) {
@@ -128,6 +139,7 @@ const AYUDAS = () => {
     if (prep !== r.ledger.preparado) r.errores.push(`ledger preparado ${r.ledger.preparado} != owners ${prep}`);
     if (copia !== r.ledger.copia) r.errores.push(`ledger copia ${r.ledger.copia} != clients ${copia}`);
     if (raster !== r.ledger.raster) r.errores.push(`ledger raster ${r.ledger.raster} != maps ${raster}`);
+    if (capa !== r.ledger.capa) r.errores.push(`ledger capa ${r.ledger.capa} != live layers ${capa}`);
     if (r.pico > r.total) r.errores.push(`peak ${r.pico} > budget ${r.total}`);
     r.muestreo = { ...window.__muestreo, violaciones: window.__muestreo.violaciones.slice(0, 5), nViolaciones: window.__muestreo.violaciones.length };
     if (window.__muestreo.violaciones.length) r.errores.push(`sampler: ${window.__muestreo.violaciones.length} frames held more than reserved`);
@@ -370,10 +382,12 @@ await escenario('pequeno', async () => {
 // 7. Worker failures.
 await escenario('fallos', async () => {
   const filas = [];
-  for (const simular of ['constructor', 'sinOffscreen', 'error', 'silencio']) {
+  for (const simular of ['constructor', 'sinOffscreen', 'error', 'silencio', 'sinInicio', 'envioCuerpo', 'envioRaster']) {
     const { page, errores } = await pagina({ mib: 64, simular, plazo: 1500 });
     const t0 = Date.now();
     const r = await page.evaluate(PINTAR, { n: 6, seleccionar: false });
+    // R2: the one-shot send failures recover on the explicit retry (the next render).
+    if (simular.startsWith('envio')) r.reintento = await page.evaluate(PINTAR, { n: 6, seleccionar: false });
     const extra = await page.evaluate(() => {
       const c = window.__m5.canvas;
       const filas = window.__m5.sinteticos({ n: 6, ligeros: 2, xy: 3 }).filas;
@@ -384,12 +398,51 @@ await escenario('fallos', async () => {
     await page.close();
     const noPendiente = extra.avisos.every(([, e]) => !['preparando', 'dibujando', 'cargando'].includes(e));
     filas.push({ simular, ...r, ...extra, auditoria: a, errores, ms: Date.now() - t0 });
+    if (r.reintento) {
+      ok(r.reintento.asentado && r.reintento.estados[0].pintado === 6 && a.errores.length === 0 && errores.length === 0,
+         `R2 "${simular}": first render settled ${JSON.stringify(r.estados[0])}; explicit retry `
+         + `${JSON.stringify(r.reintento.estados[0])} with client ${extra.cliente.cliente} ${a.errores.join('; ')}`);
+      continue;
+    }
     ok(r.asentado && noPendiente && a.ledger.copia === 0 && a.ledger.raster === 0 && a.errores.length === 0,
        `worker failure "${simular}": client ${extra.cliente.cliente}/${extra.cliente.motivo}; states ${JSON.stringify(r.estados[0])}; `
        + `nothing pending after ${r.contornoFinalMs} ms; worker and raster reservations released `
        + `${a.errores.join('; ')}`);
   }
   return filas;
+});
+
+// R3. A burst of 100 distinct heavy outlines in each of two maps: each planner keeps at
+// most its bound of jobs (and caller bodies); the rest are refused explicitly and
+// prepared on later explicit renders, with the shared ledger audited throughout.
+await escenario('cola', async () => {
+  const { page, errores } = await pagina({ mib: 64, dpr: 1, mapas: 2 });
+  const rondas = await page.evaluate(async () => {
+    const m = window.__m5;
+    const d = m.sinteticos({ n: 100, posiciones: 2000, paso: 0.004, ligeros: 0, xy: 0 });
+    const salida = [];
+    for (let ronda = 0; ronda < 5; ronda += 1) {
+      for (const c of m.canvases) c.render(d.filas, { colorFor: m.colorFor, geometrias: d.geometrias });
+      if (ronda === 0) for (const c of m.canvases) c.fitTo(d.filas);
+      const maximos = m.canvases.map((c) => c._diagnostico.planificador.pendientes);
+      const asentado = await window.__asentar(d.filas, 60000);
+      salida.push({ ronda, asentado, retenidosAlPedir: maximos, estados: m.canvases.map((c, i) => window.__estados(d.filas, i)),
+                    auditoria: await window.__auditar() });
+      if (salida.at(-1).estados.every((e) => e.pintado === 100)) break;
+    }
+    return salida;
+  });
+  await page.close();
+  const errs = rondas.flatMap((x) => x.auditoria.errores);
+  const ultima = rondas.at(-1);
+  const primera = rondas[0];
+  ok(errs.length === 0 && errores.length === 0 && rondas.every((x) => x.asentado)
+     && rondas.every((x) => x.retenidosAlPedir.every((n) => n <= 32))
+     && primera.auditoria.mapas.every((mp) => mp.planificador.maxRetenidos <= 32 && mp.planificador.colaLlena > 0),
+     `R3 burst: 100 outlines x 2 maps; jobs at request ${JSON.stringify(rondas.map((x) => x.retenidosAlPedir))}; `
+     + `first-round states ${JSON.stringify(primera.estados)}; after ${rondas.length} explicit renders `
+     + `${JSON.stringify(ultima.estados)}; peak ${ultima.auditoria.MiB.pico} MiB ${errs.concat(errores).join('; ')}`);
+  return { rondas, errores };
 });
 
 // 8. Reset and teardown, audited per map (the other map keeps its own holdings).
@@ -408,7 +461,8 @@ await escenario('reinicio', async () => {
     const d0 = m.canvases[0]._diagnostico;
     const br0 = d0.controlador.bytesRaster();
     const resto0 = d0.registro.bytesReservados() + d0.planificador.bytesReservados
-      + (d0.controlador.cliente?.bytesReservados() ?? 0) + br0.reservadaMostrada + br0.enVuelo;
+      + (d0.controlador.cliente?.bytesReservados() ?? 0) + br0.reservadaMostrada + br0.enVuelo
+      + d0.capasE5().reservado;
     m.canvases[1].destruir();
     await new Promise((ok) => setTimeout(ok, 50));
     return { antes, contadoAntesDeConfirmar, confirmado, trasReinicio, resto0, trasDestruir: p.porCategoria(), usados: p.usados };

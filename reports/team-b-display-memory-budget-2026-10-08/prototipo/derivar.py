@@ -33,7 +33,7 @@ EDICIONES: list[tuple[str, str]] = [
      'import { crearRegistro } from "./registro.js";\n'
      'import { crearPlanificador as crearPlanificadorE5 } from "./planificador.js";\n'
      'import { crearCliente } from "./cliente.js";\n'
-     'import { crearClasesE5, crearControlador } from "./e5.js";\n'),
+     'import { crearClasesE5, crearControlador, bytesDeCapa } from "./e5.js";\n'),
     ('let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default\n',
      'let PRESUPUESTO_TRABAJADOR;                      // F3: undefined = raster.js default\n'
      '/* E5: ONE budget shared by every map created on the page (two maps compete),\n'
@@ -101,7 +101,11 @@ EDICIONES: list[tuple[str, str]] = [
      '    generacion += 1;\n'
      '    // E5: the old entries\' layers stop pinning their prepared bodies; a failed worker is retried.\n'
      '    if (E5) {\n'
-     '      for (const e of byId.values()) if (e.contorno?._ctl) registro.soltar(e.contorno._id);\n'
+     '      for (const e of byId.values()) {\n'
+     '        if (!e.contorno?._ctl) continue;\n'
+     '        e.contorno.liberarMemoriaE5();               // R1: the layer\'s own array goes with it\n'
+     '        registro.soltar(e.contorno._id);\n'
+     '      }\n'
      '      controlador.reintentar();\n'
      '    }\n'
      '    contornoLayer.clearLayers();\n'
@@ -115,10 +119,36 @@ EDICIONES: list[tuple[str, str]] = [
      '    }\n'),
     ('      } else capa = new CapaContorno(c, opciones);\n',
      '      } else if (E5) {\n'
+     '        // R1: the layer\'s own array is admitted before the layer is built.\n'
+     '        capa = CapaContornoE5.crear(c, opciones, { id: descriptor.id, controlador, presupuesto: presupuestoE5,\n'
+     '                                                  dueno: duenoE5, reserva: reservaCapa });\n'
+     '        reservaCapa = null;                         // owned by the layer now, or released\n'
+     '        if (!capa) return null;                     // no room: the caller reports "sin_memoria"\n'
      '        registro.fijar(descriptor.id);              // pinned for this entry\'s lifetime\n'
-     '        capa = new CapaContornoE5(c, opciones, { id: descriptor.id, controlador });\n'
      '        capa._avisarE5 = (estado) => alDibujo(entrada, terreno, estado);\n'
      '      } else capa = new CapaContorno(c, opciones);\n'),
+    # R1: a cached body's layer array is admitted before availability is decided,
+    # so a refusal is shown as "sin_memoria" from the first paint.
+    ('    const disponible = estadoContorno === "listo";\n'
+     '    const fill = colorFor(terreno);\n',
+     '    let reservaCapa = null;\n'
+     '    if (E5 && estadoContorno === "listo") {\n'
+     '      reservaCapa = presupuestoE5.reservar("capa", bytesDeCapa(cuerpo), duenoE5);\n'
+     '      if (!reservaCapa) estadoContorno = "sin_memoria";\n'
+     '    }\n'
+     '    const disponible = estadoContorno === "listo";\n'
+     '    const fill = colorFor(terreno);\n'),
+    ('          entry.contorno = crearCapa(r);\n'
+     '          entry.cajaEscala = r.cajaMayor;\n'
+     '          entry.posiciones = r.posiciones;\n',
+     '          entry.contorno = crearCapa(r);\n'
+     '          if (entry.contorno) {\n'
+     '            entry.cajaEscala = r.cajaMayor;\n'
+     '            entry.posiciones = r.posiciones;\n'
+     '          } else {                                  // E5 (R1): no room for the layer\'s array\n'
+     '            entry.disponible = false;\n'
+     '            entry.estadoContorno = "sin_memoria";\n'
+     '          }\n'),
     ('    if (entry.estadoContorno === "sin_memoria") {\n'
      '      return { estado: "contorno_no_disponible", contorno: true, zoom, requerido, maximo,\n'
      '               motivo: "sin_memoria" };\n',
@@ -131,10 +161,21 @@ EDICIONES: list[tuple[str, str]] = [
      '    destruir() {\n'
      '      planificador.detener();\n'
      '      cache.vaciar();\n'
+     '      for (const e of byId.values()) e.contorno?.liberarMemoriaE5?.();\n'
      '      controlador?.cerrar();\n'
      '      registro?.cerrar();\n'),
     ('    _diagnostico: { planificador, cache, raster,\n',
-     '    _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,\n'),
+     '    _diagnostico: { planificador, cache, raster, presupuesto: presupuestoE5, registro, controlador,\n'
+     '                    // R1 audit: the layers\' own arrays, reserved vs actually held.\n'
+     '                    capasE5() {\n'
+     '                      let reservado = 0; let real = 0; let n = 0;\n'
+     '                      for (const e of byId.values()) {\n'
+     '                        const c = e.contorno;\n'
+     '                        if (!c?._reservaCapa) continue;\n'
+     '                        n += 1; reservado += c._reservaCapa.bytes; real += c.bytesCapaE5();\n'
+     '                      }\n'
+     '                      return { reservado, real, n };\n'
+     '                    },\n'),
     ('  const disponible = cargado && estadoContorno !== "sin_memoria";\n',
      '  const disponible = cargado && !NO_DISPONIBLE_E5.has(estadoContorno);\n'),
 ]

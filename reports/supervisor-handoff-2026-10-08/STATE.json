@@ -9,11 +9,11 @@
   "supervisor_pr": 5,
   "released_packets": [
     "1A",
-    "1B"
+    "1B",
+    "2A",
+    "2B"
   ],
   "future_packets_not_released": [
-    "2A",
-    "2B",
     "3A",
     "3B",
     "4A",
@@ -88,7 +88,21 @@
       "independent_tests": "37 of 37 prototype tests passed twice on Node 23.7; adapted original and edge probes passed; Chrome 154 pressure/resize/reset cases passed including audit negative control and zero-ledger teardown; full matrix, paint and timing not repeated",
       "reserved_limits": ["RGBA difference not approved", "study ledger not total browser memory", "future resize harness must assert requested final sizing explicitly"]
     },
-    "next_owner": "Both teams preserve accepted draft heads; supervisor prepares next bounded instructions including tested 1A/1B integration dependencies; no further Round 1 corrections or later feature release yet",
-    "later_packets_released": false
+    "next_owner": "Round 2 released: A assembles the tested 1A/1B checkpoint then implements 2A; B begins 2B from accepted lifecycle immediately and consumes the exact checkpoint when available. Owner relays prompts; running/delivery not inferred.",
+    "later_packets_released": true
+  },
+  "latest_instruction_release": {
+    "date": "2026-10-09",
+    "folder": "reports/round-2-instructions-2026-10-09",
+    "packets": ["2A", "2B"],
+    "commit_rule": "Use the exact supervisor commit that adds this folder; never silently substitute a moving branch tip.",
+    "baseline_owner": "Team A",
+    "baseline_branch": "claude/integration/round-2-baseline",
+    "baseline_sources": ["1ef2238766eae3e111c031b4fa24f9d849ef4753", "a9dc8af8cc511bde0a67168da335398353b80aa6"],
+    "team_a_branch": "claude/team-a/master-grid",
+    "team_b_branch": "claude/team-b/attachment-http",
+    "delivery_to_external_teams_confirmed": false,
+    "new_checkpoint_observed": false,
+    "stop": "Separate draft handbacks for review; no 3A/3B, main merge or deployment"
   }
 }

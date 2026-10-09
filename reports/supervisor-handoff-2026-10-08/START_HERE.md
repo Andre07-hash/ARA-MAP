@@ -238,3 +238,19 @@ B's two accepted heads are unchanged. Neither team has further Round 1
 corrections; preserve draft branches while the supervisor prepares the next
 bounded instructions and the 1A/1B integration dependency. No 2A/2B, main merge,
 deployment or E5 integration is released by this closeout.
+
+### Round 2 instructions released — 2026-10-09
+
+The owner requested the next messages for both teams. The
+[Round 2 packet](../round-2-instructions-2026-10-09/START_HERE.md) now releases
+**2A and 2B**; it supersedes the earlier statements that only Round 1 is
+released. Accepted pins are unchanged and were refreshed before publication.
+
+A assembles accepted #22 + #23 into a new tested Round 2 checkpoint, preserving
+#20, then builds the editable table/custom columns/base-grant UI. B starts
+attachment HTTP/bounded geometry from its accepted lifecycle now, merging the
+exact checkpoint when published; it does not wait for A's grid. Production
+mounting of B handlers/widgets remains 3A/3B. The shared seam and geometry
+transport bounds are in INTERFACES.md. Preserve all old PRs and use separate
+drafts. No 3A/3B, main merge, deployment or E5 integration is released.
+Prompt delivery or active external sessions are not inferred from publication.

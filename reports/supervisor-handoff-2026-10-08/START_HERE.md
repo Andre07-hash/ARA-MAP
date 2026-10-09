@@ -156,3 +156,15 @@ Supervisor documents have been committed/pushed on existing PR #5. Continuing th
 If continuing on the same Mac: the working branch was `codex/supervisor-completion-brief`; unrelated untracked `reports/project-review-2026-10-06/` exists and must remain untouched. Development tools may exist in `.venv-dev` and local Postgres 17; inspect availability instead of reinstalling. Prior `/tmp` artifacts are conveniences, not dependencies or portable evidence. Never give desktop paths to the external teams. `gh pr edit` previously failed on a deprecated Projects query; `gh api --method PATCH repos/Andre07-hash/ARA-MAP/pulls/5 --input <JSON-file>` worked. Preserve real newlines and avoid shell interpolation of untrusted report text.
 
 **First response in the new session:** acknowledge the supervisory role, verify current GitHub deltas if access exists, identify what each team should currently be doing and the next concrete review. Do not restart planning, repeat the initial prompts or claim the project is already integrated.
+
+## Incremental update — October 8 evening / October 9 UTC
+
+The initial snapshot above remains historical. See
+[`reports/team-b-round-1-review-2026-10-08/START_HERE.md`](../team-b-round-1-review-2026-10-08/START_HERE.md)
+and `STATE.json.latest_supervisor_review` for the subsequent review:
+baseline #20 and A's #22 are published; B's #21 research and #23 lifecycle
+received scoped correction requests with independent reproduction evidence.
+Both B heads have green CI but are not accepted. Team B prioritizes lifecycle
+corrections, with research independent. A's newer #22 head `f6cd6b2` was observed
+but not reviewed in that packet. Later rounds remain unreleased. Verify any
+subsequent changes before presenting these facts as current.

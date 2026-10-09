@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import io
 import os
@@ -46,6 +47,37 @@ def kmz(name: str) -> bytes:
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("doc.kml", (FIXTURES / "kmz" / f"{name}.kml").read_bytes())
     return output.getvalue()
+
+
+def leaves(value, path="$"):
+    """Every scalar of a JSON-like value, with its path."""
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from leaves(item, f"{path}.{key}")
+    elif isinstance(value, (list, tuple)):
+        for index, item in enumerate(value):
+            yield from leaves(item, f"{path}[{index}]")
+    else:
+        yield path, value
+
+
+def leaked_paths(value, texts, numbers):
+    """Paths whose value carries hidden metadata.
+
+    Distinctive strings (file name, UUIDs, display name) are searched inside
+    every string. A number (a byte count) matches only a whole value, as a
+    number or as its decimal text: the same digits inside a public UUID or a
+    timestamp are not a leak.
+    """
+    as_text = {str(number) for number in numbers}
+    found = []
+    for path, leaf in leaves(value):
+        if isinstance(leaf, str):
+            if leaf in as_text or any(text in leaf for text in texts):
+                found.append(path)
+        elif isinstance(leaf, (int, float)) and not isinstance(leaf, bool) and leaf in numbers:
+            found.append(path)
+    return found
 
 
 class LifecycleChecks:
@@ -647,43 +679,69 @@ class LifecycleChecks:
         # The caller's own available version still activates.
         self.assertEqual(activate(own["version_id"])["archivo"]["revision"], 3)
 
+    # -- L2 pending privacy: the allowed projection, checked by structure --------------
+
+    def pending_surfaces(self, user, pending):
+        """(listing item, history events, summary row) as `user` reads them."""
+        session = self.sessions[user]
+        listing = archivos.listar(session, self.terrain, bd=self.database,
+                                  reloj=self.clock)["archivos"]
+        history = archivos.historial(session, pending["archivo_id"], bd=self.database,
+                                     reloj=self.clock)["eventos"]
+        with db.session(self.database) as conn:
+            summary = archivos.resumenes_de_archivos(conn, [self.terrain], session,
+                                                     reloj=self.clock)
+        item = next(i for i in listing if i["id"] == pending["archivo_id"])
+        cell = next(r for r in summary["resultados"][self.terrain]["pdf_recientes"]
+                    if r["id"] == pending["archivo_id"])
+        return item, history, cell
+
+    def hidden_metadata(self, pending, name, data=PDF):
+        """What another account must not learn about `pending` (texts, numbers)."""
+        uploader = self.users["ana"]
+        return ((name, pending["version_id"], uploader["id"], uploader["display_name"]),
+                (len(data),))
+
+    def assert_private_view(self, view, pending, state, hidden):
+        """The exact redacted projection, and no hidden value anywhere in the view.
+
+        History must equal the durable events projected field by field: only the
+        event id, action and time stay public. Listing and summary carry the
+        generic status alone. The leak search then covers every other field of
+        the item, events and summary row.
+        """
+        item, events, cell = view
+        generic = {"estado": state, "propia": False}
+        durable = sorted(self.rows("archivo_evento", "archivo_id = ?", (pending["archivo_id"],)),
+                         key=lambda row: (row["at"], row["id"]), reverse=True)
+        self.assertTrue(durable)
+        self.assertEqual({row["archivo_version_id"] for row in durable}, {pending["version_id"]})
+        self.assertEqual(item["ultima_version"], generic)
+        self.assertEqual(cell["ultima_version"], generic)
+        self.assertEqual(events, [
+            {"id": row["id"], "accion": row["accion"], "revision": None,
+             "archivo_version_id": None, "intento_id": None, "geometria_id": None,
+             "base_id": None, "actor": None, "at": row["at"], "details": {},
+             "privado": True, "version": generic} for row in durable])
+        self.assertEqual(leaked_paths(view, *hidden), [], "hidden metadata in the view")
+
     def test_l2_pending_privacy_is_one_rule_on_every_read_surface(self):
         secret = "privado-ficticio.pdf"
         pending = self.upload(PDF, name=secret)
-        hidden_values = (secret, pending["version_id"], self.users["ana"]["id"],
-                         str(len(PDF)))
-
-        def surfaces(user):
-            session = self.sessions[user]
-            listing = archivos.listar(session, self.terrain, bd=self.database,
-                                      reloj=self.clock)["archivos"]
-            history = archivos.historial(session, pending["archivo_id"], bd=self.database,
-                                         reloj=self.clock)["eventos"]
-            with db.session(self.database) as conn:
-                summary = archivos.resumenes_de_archivos(conn, [self.terrain], session,
-                                                         reloj=self.clock)
-            item = next(i for i in listing if i["id"] == pending["archivo_id"])
-            cell = next(r for r in summary["resultados"][self.terrain]["pdf_recientes"]
-                        if r["id"] == pending["archivo_id"])
-            return item["ultima_version"], history, cell["ultima_version"]
+        hidden = self.hidden_metadata(pending, secret)
 
         def assert_private(state):
             for user in ("olga", "beto"):  # another operator and another admin
-                listed, history, summarized = surfaces(user)
-                generic = {"estado": state, "propia": False}
-                self.assertEqual(listed, generic)
-                self.assertEqual(summarized, generic)
-                self.assertEqual(history[0]["version"], generic)
-                self.assertTrue(history[0]["privado"])
-                self.assertIsNone(history[0]["actor"])
-                serialized = repr((listed, history, summarized))
-                for value in hidden_values:
-                    self.assertNotIn(value, serialized)
-            listed, history, summarized = surfaces("ana")
+                self.assert_private_view(self.pending_surfaces(user, pending), pending, state,
+                                         hidden)
+            item, history, cell = self.pending_surfaces("ana", pending)
+            listed, summarized = item["ultima_version"], cell["ultima_version"]
             self.assertEqual(listed["estado"], state)
             self.assertEqual(listed["nombre_original"], secret)
+            self.assertEqual(listed["tamano_declarado"], len(PDF))
             self.assertEqual(summarized["nombre_original"], secret)
             self.assertEqual(history[0]["details"]["nombre"], secret)
+            self.assertEqual(history[0]["actor"]["id"], self.users["ana"]["id"])
             self.assertFalse(history[0]["privado"])
 
         assert_private("subiendo")
@@ -703,15 +761,8 @@ class LifecycleChecks:
 
         def during_lease(_version):
             self.clock.advance(5)
-            session = self.sessions["olga"]
-            item = next(i for i in archivos.listar(session, self.terrain, bd=self.database,
-                                                   reloj=self.clock)["archivos"]
-                        if i["id"] == live["archivo_id"])
-            self.assertEqual(item["ultima_version"], {"estado": "subiendo", "propia": False})
-            history = archivos.historial(session, live["archivo_id"], bd=self.database,
-                                         reloj=self.clock)["eventos"]
-            self.assertEqual(history[0]["version"], {"estado": "subiendo", "propia": False})
-            self.assertNotIn(secret, repr(history))
+            self.assert_private_view(self.pending_surfaces("olga", live), live, "subiendo",
+                                     self.hidden_metadata(live, secret))
 
         self.complete(live, ganchos=SimpleNamespace(despues_copia=during_lease))
 
@@ -745,6 +796,77 @@ class LifecycleChecks:
             conn.execute("UPDATE inventory_terrain SET base_id = ? WHERE id = ?",
                          (target, self.terrain))
         assert_private("expirado")
+
+    def test_l2_privacy_check_ignores_public_ids_that_contain_hidden_digits(self):
+        # Deterministic collision (review R2-B2): every UUID made during the upload,
+        # public event ids included, contains the hidden byte count.
+        counter = iter(range(1, 1000))
+
+        def collision():
+            return uuid.UUID(f"{len(PDF):08d}-0000-4000-8000-{next(counter):012x}")
+
+        secret = "privado-ficticio.pdf"
+        with patch("uuid.uuid4", side_effect=collision):
+            pending = self.upload(PDF, name=secret)
+        view = self.pending_surfaces("olga", pending)
+        public_ids = [event["id"] for event in view[1]]
+        self.assertTrue(public_ids)
+        self.assertTrue(all(str(len(PDF)) in event_id for event_id in public_ids))
+        self.assertIn(str(len(PDF)), repr(view))      # the old substring rule failed here
+        self.assert_private_view(view, pending, "subiendo", self.hidden_metadata(pending, secret))
+
+    def test_l2_privacy_check_still_detects_real_leaks(self):
+        """Negative controls: each injected leak fails, and for its own reason."""
+        secret = "privado-ficticio.pdf"
+        pending = self.upload(PDF, name=secret)
+        hidden = self.hidden_metadata(pending, secret)
+        clean = self.pending_surfaces("olga", pending)
+        self.assert_private_view(clean, pending, "subiendo", hidden)    # control: passes
+        ana = self.users["ana"]
+
+        def leak(item, events, cell, *, where):
+            if where == "version size":
+                item["ultima_version"]["tamano"] = len(PDF)
+            elif where == "item size text":
+                item["tamano"] = str(len(PDF))
+            elif where == "history name":
+                events[0]["details"] = {"nombre": secret}
+            elif where == "history actor":
+                events[0]["actor"] = {"id": ana["id"], "display_name": ana["display_name"]}
+            elif where == "history version id":
+                events[0]["archivo_version_id"] = pending["version_id"]
+            elif where == "summary version id":
+                cell["version_id"] = pending["version_id"]
+            elif where == "summary uploader text":
+                cell["nota"] = f"Subido por {ana['display_name']}"
+            elif where == "nested size":
+                cell["extra"] = {"bytes": len(PDF)}
+
+        expected = {
+            "version size": f"'tamano': {len(PDF)}",
+            "item size text": "'$[0].tamano'",
+            "history name": secret,
+            "history actor": ana["id"],
+            "history version id": pending["version_id"],
+            "summary version id": "'$[2].version_id'",
+            "summary uploader text": "'$[2].nota'",
+            "nested size": "'$[2].extra.bytes'",
+        }
+        for where, reason in expected.items():
+            with self.subTest(leak=where):
+                view = copy.deepcopy(clean)
+                leak(*view, where=where)
+                with self.assertRaises(AssertionError) as caught:
+                    self.assert_private_view(view, pending, "subiendo", hidden)
+                self.assertIn(reason, str(caught.exception))
+        # The finder itself: whole numbers only, distinctive strings anywhere.
+        texts, numbers = hidden
+        self.assertEqual(leaked_paths({"id": f"{len(PDF):08d}-0000-4000-8000-000000000001",
+                                       "at": f"2026-10-08T12:00:00.{len(PDF)}+00:00",
+                                       "revision": 1, "privado": True}, texts, numbers), [])
+        self.assertEqual(leaked_paths([{"n": float(len(PDF))}, {"s": str(len(PDF))},
+                                       {"t": f"x{secret}x"}],
+                                      texts, numbers), ["$[0].n", "$[1].s", "$[2].t"])
 
     def test_l3_completion_reads_the_clock_after_acquiring_its_boundary(self):
         pending = self.upload(PDF)

@@ -203,3 +203,20 @@ Both exact heads have green GitHub CI; the research-specific independent suite
 is 28/29, with the allocation-limit assumption failing. Browser matrices remain
 developer evidence. A's correction 2 and the baseline checkpoint are unchanged.
 No later packet, merge or deployment is released.
+
+### B research closed — 2026-10-09, 02:27 UTC
+
+**Research handback accepted**, not renderer integration, at #21
+`5e9ed42ef740fcee881c54e011172fae9c6f209b`. R1a/R2a/R1-test closed; R3/R4
+remain closed. Independent 37/37 Node tests passed twice, adapted probes passed,
+and Chrome 154 pressure/resize/reset checks passed, including detection of the
+injected missing-body audit defect and zero-ledger teardown. The full browser
+matrix/paint/timing results remain developer evidence; RGBA differences and
+the total-browser-memory limitation remain. Record a deterministic final-size
+assertion as a future resize-integration gate, not a new open research task.
+
+See [closeout and evidence](../team-b-research-closeout-2026-10-09/START_HERE.md).
+B's #23 stays accepted and unchanged at `a9dc8af…`. B preserves both draft
+branches; no further correction is requested now. A's correction 2 remains
+pending at the observed head `f6cd6b2…`; the supervisor next reviews A's new
+handback and the combined baseline. No 2A/2B, merge or deployment is released.

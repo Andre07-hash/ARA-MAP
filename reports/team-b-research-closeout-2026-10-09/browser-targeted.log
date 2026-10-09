@@ -1,0 +1,13 @@
+
+== cambio
+OK    resize 1200x640 -> 1920x1080 -> 900x500 during work (DPR 2, 64 MiB): canvas [2160,1200], bitmap [2160,1200], states {"pintado":10,"listo":4}, peak 55.7 MiB, obsolete replies 2 
+
+== presion
+OK    R1a cache hit, room one byte short of the layer array: sin_memoria, body kept in the registry (pins 0), audit {"reservado":0,"real":0,"n":0,"preparados":0,"nPreparados":0,"fueraDeRegistro":0,"idsFuera":[]}; after the filler goes: listo 
+OK    R1a new body, room for its 480052 B but one byte short of its 4 B layer array: sin_memoria, body kept cached (pins 0); after the filler goes: listo 
+OK    R2a forget failing under pressure (8 MiB): fallido/envio, states {"listo":1,"sin_trabajador":2}, copies reserved 0 B; explicit retry {"listo":1,"pintado":2} with client listo; peak 7.9 MiB 
+OK    R1a audit negative control: a live layer whose body was evicted is detected (map 0: live layers retain 480052 B of prepared bodies outside the registry (g-t-0))
+
+== reinicio
+OK    reset of map 0: image and prepared bodies released at once, its 1922344 B of worker copies counted until the worker acknowledged (true); map 1 untouched (3362360 B prepared, 1922344 B copies, 2211840 B image); teardown of map 1 releases all of it: ledger 0 B = map 0's remaining 0 B 
+Todas las comprobaciones pasaron

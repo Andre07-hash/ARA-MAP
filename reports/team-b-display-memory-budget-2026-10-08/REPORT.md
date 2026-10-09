@@ -10,6 +10,9 @@ Date: 2026-10-08. Status: **prototype research only; stop for supervisory review
 > [CORRECCIONES_2026-10-09.md](CORRECCIONES_2026-10-09.md); the measurements in
 > this file are kept unchanged as historical evidence of the reviewed head
 > `229d424`.
+>
+> **Correction 2 (2026-10-09):** the round-1 corrected claim is itself superseded by
+> [CORRECCIONES_2_2026-10-09.md](CORRECCIONES_2_2026-10-09.md) (R1a, R2a, R1-test).
 
 This report answers the bounded-memory question from instruction commit
 `7a71c93c1c1be68dc5ac992ae6ae801cde1d9cd5`. It does not authorize E4/E5 in

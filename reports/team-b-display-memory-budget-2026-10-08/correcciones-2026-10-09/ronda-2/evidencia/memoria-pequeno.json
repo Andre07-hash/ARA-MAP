@@ -1,0 +1,495 @@
+{
+ "navegador": "141.0.7390.37",
+ "escenario": "pequeno",
+ "resultado": [
+  {
+   "mib": 4,
+   "dpr": 1,
+   "vista": "1920x1080",
+   "asentado": true,
+   "contornoFinalMs": 149,
+   "estados": [
+    {
+     "demasiado_grande": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "demasiado_grande",
+     "Contorno ficticio 0  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "demasiado_grande",
+     "Contorno ficticio 2  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-3",
+     "demasiado_grande",
+     "Contorno ficticio 3  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "demasiado_grande",
+     "Contorno ficticio 5  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "zoom": {
+    "estado": "contorno_no_disponible",
+    "contorno": true,
+    "zoom": 15,
+    "requerido": 11,
+    "maximo": 20,
+    "motivo": "demasiado_grande"
+   },
+   "auditoria": {
+    "total": 4194304,
+    "usados": 3410384,
+    "pico": 3410384,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": {
+       "bytes": 0,
+       "entradas": 0,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       2304,
+       1296
+      ],
+      "metricas": {
+       "decisiones": 9,
+       "rasters": 0,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 9,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8,
+       "preparados": 3362360,
+       "nPreparados": 8,
+       "fueraDeRegistro": 0,
+       "idsFuera": []
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "relleno": {
+     "preparado": 0,
+     "copia": 0,
+     "raster": 0,
+     "capa": 0
+    },
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 16,
+     "maxReal": 3410384,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 4,
+     "pico": 3.3,
+     "usados": 3.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 16,
+   "dpr": 2,
+   "vista": "1920x1080",
+   "asentado": true,
+   "contornoFinalMs": 582,
+   "estados": [
+    {
+     "demasiado_grande": 4,
+     "listo": 2,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 263,
+   "tareasLargas": 2,
+   "avisos": [
+    [
+     "t-0",
+     "demasiado_grande",
+     "Contorno ficticio 0  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-1",
+     "listo",
+     "Contorno ficticio 1"
+    ],
+    [
+     "t-2",
+     "demasiado_grande",
+     "Contorno ficticio 2  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-3",
+     "demasiado_grande",
+     "Contorno ficticio 3  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-4",
+     "listo",
+     "Contorno ficticio 4"
+    ],
+    [
+     "t-5",
+     "demasiado_grande",
+     "Contorno ficticio 5  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "zoom": {
+    "estado": "contorno_no_disponible",
+    "contorno": true,
+    "zoom": 15,
+    "requerido": 11,
+    "maximo": 20,
+    "motivo": "demasiado_grande"
+   },
+   "auditoria": {
+    "total": 16777216,
+    "usados": 3410384,
+    "pico": 3410384,
+    "ledger": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0,
+     "capa": 48024
+    },
+    "picoPorCategoria": {
+     "preparado": 3362360,
+     "copia": 0,
+     "raster": 0,
+     "capa": 48024
+    },
+    "rechazos": 0,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 3362360,
+       "reales": 3362360,
+       "entradas": 8,
+       "fijados": 8
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": {
+       "bytes": 0,
+       "entradas": 0,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       4608,
+       2592
+      ],
+      "metricas": {
+       "decisiones": 8,
+       "rasters": 0,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 8,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 48024,
+       "real": 48024,
+       "n": 8,
+       "preparados": 3362360,
+       "nPreparados": 8,
+       "fueraDeRegistro": 0,
+       "idsFuera": []
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "relleno": {
+     "preparado": 0,
+     "copia": 0,
+     "raster": 0,
+     "capa": 0
+    },
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 17,
+     "maxReal": 3410384,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 16,
+     "pico": 3.3,
+     "usados": 3.3
+    }
+   },
+   "errores": []
+  },
+  {
+   "mib": 1,
+   "dpr": 1,
+   "vista": "1200x640",
+   "asentado": true,
+   "contornoFinalMs": 92,
+   "estados": [
+    {
+     "demasiado_grande": 2,
+     "sin_memoria": 4,
+     "pintado": 2
+    }
+   ],
+   "tareaMaxMs": 0,
+   "tareasLargas": 0,
+   "avisos": [
+    [
+     "t-0",
+     "demasiado_grande",
+     "Contorno ficticio 0  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-1",
+     "sin_memoria",
+     "Contorno ficticio 1  Contorno no disponible: no hay memoria para dibujarlo ahora"
+    ],
+    [
+     "t-2",
+     "demasiado_grande",
+     "Contorno ficticio 2  Contorno no disponible: la ventana es demasiado grande para dibujarlo"
+    ],
+    [
+     "t-3",
+     "sin_memoria",
+     "Contorno ficticio 3  Contorno no disponible: no hay memoria para dibujarlo ahora"
+    ],
+    [
+     "t-4",
+     "sin_memoria",
+     "Contorno ficticio 4  Contorno no disponible: no hay memoria para dibujarlo ahora"
+    ],
+    [
+     "t-5",
+     "sin_memoria",
+     "Contorno ficticio 5  Contorno no disponible: no hay memoria para dibujarlo ahora"
+    ],
+    [
+     "l-0",
+     "listo",
+     "Ligero ficticio 0"
+    ],
+    [
+     "l-1",
+     "listo",
+     "Ligero ficticio 1"
+    ]
+   ],
+   "zoom": {
+    "estado": "contorno_no_disponible",
+    "contorno": true,
+    "zoom": 14,
+    "requerido": 11,
+    "maximo": 20,
+    "motivo": "demasiado_grande"
+   },
+   "auditoria": {
+    "total": 1048576,
+    "usados": 962260,
+    "pico": 962260,
+    "ledger": {
+     "preparado": 962244,
+     "copia": 0,
+     "raster": 0,
+     "capa": 16
+    },
+    "picoPorCategoria": {
+     "preparado": 962244,
+     "copia": 0,
+     "raster": 0,
+     "capa": 16
+    },
+    "rechazos": 4,
+    "pendienteDeLiberar": 0,
+    "mapas": [
+     {
+      "i": 0,
+      "registro": {
+       "reservados": 962244,
+       "reales": 962244,
+       "entradas": 4,
+       "fijados": 4
+      },
+      "preparando": 0,
+      "cliente": {
+       "estado": "listo",
+       "motivo": null,
+       "reservados": 0,
+       "copias": 0
+      },
+      "trabajador": {
+       "bytes": 0,
+       "entradas": 0,
+       "lienzos": 0
+      },
+      "raster": {
+       "mostrada": 0,
+       "reservadaMostrada": 0,
+       "enVuelo": 0
+      },
+      "bitmap": null,
+      "lienzo": [
+       1440,
+       768
+      ],
+      "metricas": {
+       "decisiones": 6,
+       "rasters": 0,
+       "obsoletos": 0,
+       "liberadasParaCaber": 0,
+       "sinMemoria": 0,
+       "demasiadoGrande": 6,
+       "esperas": 0,
+       "fallos": 0,
+       "ultimoFallo": null
+      },
+      "capas": {
+       "reservado": 16,
+       "real": 16,
+       "n": 4,
+       "preparados": 962244,
+       "nPreparados": 4,
+       "fueraDeRegistro": 0,
+       "idsFuera": []
+      },
+      "planificador": {
+       "retenidos": 0,
+       "capacidad": 32,
+       "colaLlena": 0,
+       "maxRetenidos": 8
+      }
+     }
+    ],
+    "errores": [],
+    "relleno": {
+     "preparado": 0,
+     "copia": 0,
+     "raster": 0,
+     "capa": 0
+    },
+    "muestreo": {
+     "violaciones": [],
+     "muestras": 14,
+     "maxReal": 962260,
+     "nViolaciones": 0
+    },
+    "MiB": {
+     "total": 1,
+     "pico": 0.9,
+     "usados": 0.9
+    }
+   },
+   "errores": []
+  }
+ ]
+}

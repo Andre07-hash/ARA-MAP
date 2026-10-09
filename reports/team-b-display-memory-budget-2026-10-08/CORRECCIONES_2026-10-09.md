@@ -2,6 +2,12 @@
 
 Date: 2026-10-09. Status: **prototype research only; stopped for supervisory review.**
 
+> **Correction 2 notice.** Supervisory review `c39f8aa` closed R3/R4 and found that
+> R1 and R2 still failed in interacting pressure paths (R1a, R2a) and that one
+> R1 test assumed a platform array limit. §3's corrected-result claim below is
+> **superseded** by [CORRECCIONES_2_2026-10-09.md](CORRECCIONES_2_2026-10-09.md);
+> this file and its evidence are kept as history of `68077cc`.
+
 These are the corrections requested by supervisory review
 `009a724e4534e419e5703bd411425fd06776db62`
 (`reports/team-b-round-1-review-2026-10-08/`). They stay inside this research

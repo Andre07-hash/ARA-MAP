@@ -1,0 +1,3 @@
+{"probe":"prepared_body_evicted_during_layer_admission","observed":{"budget":2487,"ledger":80,"registryEntries":0,"registryBytes":0,"layerOwnBytes":80,"layerRetainsPreparedBytes":2408,"actualTypedArrayBytes":2488,"exceedsBudget":true,"currentAuditSum":80}}
+{"probe":"send_failure_during_budget_relief","observed":{"result":"fallido","clientState":"fallido","failures":["envio"],"terminated":true,"ledger":0,"clientCopies":0,"sent":[{"type":"cuerpo","afterTermination":false},{"type":"olvidar","afterTermination":false}]}}
+{"probe":"deterministic_layer_allocation_failure","observed":{"error":"RangeError","ledgerAfterFailure":0}}

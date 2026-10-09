@@ -1,0 +1,122 @@
+{
+ "navegador": "141.0.7390.37",
+ "escenario": "cambio",
+ "resultado": {
+  "antes": {
+   "preparando": 14
+  },
+  "enMedio": {
+   "dibujando": 1,
+   "preparando": 13
+  },
+  "asentado": true,
+  "despues": {
+   "pintado": 10,
+   "listo": 4
+  },
+  "final": {
+   "pintado": 10,
+   "listo": 4
+  },
+  "auditoria": {
+   "total": 67108864,
+   "usados": 58436904,
+   "pico": 58436904,
+   "ledger": {
+    "preparado": 6722576,
+    "copia": 3842544,
+    "raster": 47775744,
+    "capa": 96040
+   },
+   "picoPorCategoria": {
+    "preparado": 6722576,
+    "copia": 3842544,
+    "raster": 47775744,
+    "capa": 96040
+   },
+   "rechazos": 0,
+   "pendienteDeLiberar": 0,
+   "mapas": [
+    {
+     "i": 0,
+     "registro": {
+      "reservados": 6722576,
+      "reales": 6722576,
+      "entradas": 14,
+      "fijados": 14
+     },
+     "preparando": 0,
+     "cliente": {
+      "estado": "listo",
+      "motivo": null,
+      "reservados": 3842544,
+      "copias": 10
+     },
+     "trabajador": {
+      "bytes": 3842544,
+      "entradas": 10,
+      "lienzos": 0
+     },
+     "raster": {
+      "mostrada": 47775744,
+      "reservadaMostrada": 47775744,
+      "enVuelo": 0
+     },
+     "bitmap": [
+      4608,
+      2592
+     ],
+     "lienzo": [
+      4608,
+      2592
+     ],
+     "metricas": {
+      "decisiones": 17,
+      "rasters": 2,
+      "obsoletos": 1,
+      "liberadasParaCaber": 0,
+      "sinMemoria": 0,
+      "demasiadoGrande": 0,
+      "esperas": 0,
+      "fallos": 0,
+      "ultimoFallo": null
+     },
+     "capas": {
+      "reservado": 96040,
+      "real": 96040,
+      "n": 14,
+      "preparados": 6722576,
+      "nPreparados": 14,
+      "fueraDeRegistro": 0,
+      "idsFuera": []
+     },
+     "planificador": {
+      "retenidos": 0,
+      "capacidad": 32,
+      "colaLlena": 0,
+      "maxRetenidos": 14
+     }
+    }
+   ],
+   "errores": [],
+   "relleno": {
+    "preparado": 0,
+    "copia": 0,
+    "raster": 0,
+    "capa": 0
+   },
+   "muestreo": {
+    "violaciones": [],
+    "muestras": 47,
+    "maxReal": 54594360,
+    "nViolaciones": 0
+   },
+   "MiB": {
+    "total": 64,
+    "pico": 55.7,
+    "usados": 55.7
+   }
+  },
+  "errores": []
+ }
+}

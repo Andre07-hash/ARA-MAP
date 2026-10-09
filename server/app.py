@@ -292,9 +292,11 @@ class Handler(BaseHTTPRequestHandler):
         """The declared body, whole. Only a single Content-Length body is
         understood; anything else is refused unread, and the connection then
         closes. Every occurrence of the framing fields counts, an empty one
-        included: headers.get() would show only the first."""
+        included: headers.get() would show only the first. A header block the
+        parser could not read whole (it drops every line from the first
+        malformed one on) may have hidden one, so it is refused too."""
         largos = self.headers.get_all("Content-Length") or []
-        if (self.headers.get_all("Transfer-Encoding") or len(largos) > 1
+        if (self.headers.defects or self.headers.get_all("Transfer-Encoding") or len(largos) > 1
                 or (largos and not re.fullmatch(r"[0-9]{1,12}", largos[0]))):
             raise ApiError("La petición no declara bien su tamaño.", 400)
         length = int(largos[0]) if largos else 0

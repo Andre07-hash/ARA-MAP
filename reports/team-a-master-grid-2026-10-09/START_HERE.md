@@ -664,7 +664,7 @@ keep-alive after a read body) are unchanged and pass.
 | `antes-pruebas.log` | the new tests against the previous `server/app.py`: 10 subtests fail |
 | `despues-pruebas.log` | the same module after the fix: 5 tests OK |
 
-Of the 17 new cases, 7 already passed before the fix (those whose first
+Of the first 17 cases, 7 already passed before the fix (those whose first
 `Content-Length` was not numeric or whose first `Transfer-Encoding` was not
 empty); they are kept as regressions.
 
@@ -674,12 +674,23 @@ local Postgres 16: 1,154 OK, zero skipped. `ruff check server/ tests/` and
 `mypy server/` clean. Browser, memory and coverage evidence of §11 is reused,
 not rerun: no browser code changed.
 
-**Limits.** Only the three fields' occurrence and form are checked; header
-syntax the standard library's parser itself accepts or drops (a space before
-the colon, obsolete line folding) was not surveyed beyond confirming a folded
-length is refused as non-numeric. A legitimate client that sends
-`Transfer-Encoding` or two identical `Content-Length` fields is now refused;
-the application's own client and browsers send neither.
+**One more case found while checking the limits, same boundary, fixed in the
+follow-up commit.** `Content-Length : 64` (a space before the colon) still gave
+`[401, 200]` after the first commit: the standard library's parser stops at the
+first line that is not a header and drops it and every line after it, so the
+length was hidden rather than repeated. `_read_body` now also refuses a header
+block the parser reports as defective (`headers.defects`), which covers that
+line, a line with no colon and a header with no name. Five cases were added to
+the same test (22 in total); `extra-antes.log` / `extra-despues.log` hold the
+before/after of that probe (`[401, 200]` → `[400]`).
+
+**Limits.** Framing is judged from what the standard library's parser reports:
+the occurrences and form of the two fields, and its own defect list. Other
+parser leniencies it does not report were not surveyed. A legitimate client
+that sends `Transfer-Encoding`, two identical `Content-Length` fields or a
+malformed header line is now refused on any routed request; the application's
+own client and browsers send none of these. Requests that never reach
+`_read_body` (the earlier refusals, static pages) already close unread.
 
 Stop for supervisory review. Nothing was merged or deployed; no real account or
 data was used.

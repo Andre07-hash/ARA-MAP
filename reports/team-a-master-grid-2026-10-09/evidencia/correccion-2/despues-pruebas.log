@@ -11,6 +11,6 @@ The repair must not cost ordinary keep-alive: two real requests on ...   "POST /
 ok
 
 ----------------------------------------------------------------------
-Ran 5 tests in 2.636s
+Ran 5 tests in 2.685s
 
 OK

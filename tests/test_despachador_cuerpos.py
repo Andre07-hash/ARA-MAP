@@ -111,6 +111,11 @@ class Cuerpos(TempDatabase):
             "a length and chunked": (cl + n, te + b"chunked"),
             "identity encoding and a length": (te + b"identity", cl + n),
             "empty encoding alone": (te,),
+            "a space before the colon, which hides the length": (b"Content-Length : " + n,),
+            "a line that is not a header, then a length": (b"sin-dos-puntos", cl + n),
+            "a header with no name, then chunked": (b": x", te + b"chunked"),
+            "a folded length": (cl + b"0\r\n " + n,),
+            "lengths that differ only in case of the name": (b"content-length: 0", b"CONTENT-LENGTH: " + n),
         }
         for nombre, cabeceras in casos.items():
             with self.subTest(nombre):

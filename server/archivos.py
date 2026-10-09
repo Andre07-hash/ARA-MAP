@@ -83,25 +83,80 @@ def _valid_session(session: object) -> auth.Sesion:
 
 def _authorize_read(session: auth.Sesion, terrain_id: str, capability: str,
                     database: Path | str | None) -> auth.Alcance:
+    """Scope check for an operation addressed by terrain ID (start, list)."""
     with db.session(database) as conn:
         return auth.require_terreno(_request(session), terrain_id, capability, conn)
 
 
-def _resource_version(version_id: str, database: Path | str | None) -> dict[str, Any]:
+# A terrain ID that never exists. A missing file or version is authorized
+# against it so that it fails exactly where an out-of-scope one does: after
+# P2's session and capability checks, with the same 404.
+_NO_TERRAIN = "00000000-0000-0000-0000-000000000000"
+
+
+def _scoped(error: ApiError) -> ApiError:
+    """P2's 404 names the terrain; for a file or version it must read as absence."""
+    return _not_found() if error.status == 404 else error
+
+
+def _reverify(conn: DatabaseConnection, session: auth.Sesion, terrain_id: str,
+              capability: str) -> auth.Alcance:
+    try:
+        return auth.reverificar_terreno(conn, session, terrain_id, capability)
+    except ApiError as exc:
+        raise _scoped(exc) from None
+
+
+def _in_scope(session: auth.Sesion, lookup: Callable[[DatabaseConnection], dict[str, Any] | None],
+              capability: str, database: Path | str | None) -> dict[str, Any]:
+    """Resolve a file or version to its real terrain and authorize it there.
+
+    Missing and out-of-scope resources give one indistinguishable result.
+    """
     with db.session(database) as conn:
-        resource = repo.resource_for_version(conn, version_id)
+        resource = lookup(conn)
+        terrain_id = str(resource["inventory_id"]) if resource is not None else _NO_TERRAIN
+        try:
+            auth.require_terreno(_request(session), terrain_id, capability, conn)
+        except ApiError as exc:
+            raise _scoped(exc) from None
     if resource is None:
         raise _not_found()
     return resource
 
 
-def _resource_attachment(attachment_id: str,
-                         database: Path | str | None) -> dict[str, Any]:
-    with db.session(database) as conn:
-        resource = repo.resource_for_attachment(conn, attachment_id)
-    if resource is None:
-        raise _not_found()
-    return resource
+def _version(version_id: object) -> Callable[[DatabaseConnection], dict[str, Any] | None]:
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        if not isinstance(version_id, str):
+            return None
+        return repo.resource_for_version(conn, version_id)
+    return lookup
+
+
+def _attachment(attachment_id: object) -> Callable[[DatabaseConnection], dict[str, Any] | None]:
+    def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
+        if not isinstance(attachment_id, str):
+            return None
+        return repo.resource_for_attachment(conn, attachment_id)
+    return lookup
+
+
+def _limit(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= HISTORY_MAX:
+        raise _error("limite_invalido", f"El límite debe estar entre 1 y {HISTORY_MAX}.")
+    return value
+
+
+def _cursor(value: object) -> tuple[str, str] | None:
+    if value is None:
+        return None
+    try:
+        at, row_id = cast(str, value).split("|", 1)
+        datetime.fromisoformat(at)
+        uuid.UUID(row_id)
+    except (ValueError, AttributeError, TypeError):
+        raise _error("cursor_invalido", "El cursor no es válido.") from None
+    return at, row_id
 
 
 def _hash_payload(value: Mapping[str, Any]) -> str:
@@ -176,7 +231,6 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
     size = _size(tamano_declarado, maximum)
     digest = _digest(sha256_declarado)
     key = _key(idempotency_key)
-    now = _now(reloj)
     payload = {"tipo": kind, "nombre_original": name, "tamano_declarado": size,
                "sha256_declarado": digest}
     request_hash = _hash_payload(payload)
@@ -187,6 +241,7 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
         replay = _operation(conn, operation, key, request_hash)
         if replay is not None:
             return replay
+        now = _now(reloj)
         if repo.effective_pending_count(conn, sesion.user_id, now) >= PENDING_MAX:
             raise _conflict("limite_pendientes",
                             "Ya hay demasiadas subidas pendientes para esta cuenta.",
@@ -211,11 +266,10 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
                       reloj: Clock | None = None) -> dict[str, Any]:
     """Stream bytes into replaceable staging before its 15-minute deadline."""
     _valid_session(sesion)
-    now = _now(reloj)
-    resource = _resource_version(version_id, bd)
-    _authorize_read(sesion, str(resource["inventory_id"]), "archivos.subir", bd)
+    resource = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     if resource["iniciado_por"] != sesion.user_id:
         raise _not_found()
+    now = _now(reloj)
     if resource["estado"] != "subiendo":
         raise _conflict("subida_no_pendiente", "La subida ya no está pendiente.")
     if resource["subida_vence_en"] <= now:
@@ -231,8 +285,7 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
                      reintentar=True) from exc
     except (TypeError, ValueError) as exc:
         raise _error("bloque_invalido", "Los bloques de la subida no son válidos.") from exc
-    current = _resource_version(version_id, bd)
-    _authorize_read(sesion, str(current["inventory_id"]), "archivos.subir", bd)
+    current = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     if (current["iniciado_por"] != sesion.user_id or current["estado"] != "subiendo"
             or current["subida_vence_en"] <= _now(reloj)):
         raise _conflict("subida_no_pendiente",
@@ -242,23 +295,30 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
 
 
 def _acquire_completion(sesion: auth.Sesion, version_id: str,
-                        database: Path | str | None, now: str,
+                        database: Path | str | None, reloj: Clock | None,
                         work_id: str) -> dict[str, Any]:
     with db.escritura(database) as conn:
         resource = repo.resource_for_version(conn, version_id)
         if resource is None:
             raise _not_found()
-        scope = auth.reverificar_terreno(conn, sesion, str(resource["inventory_id"]),
-                                         "archivos.subir")
+        scope = _reverify(conn, sesion, str(resource["inventory_id"]), "archivos.subir")
         resource = repo.resource_for_version(conn, version_id, lock=True)
         assert resource is not None
         if resource["iniciado_por"] != sesion.user_id:
             raise _not_found()
         if resource["estado"] in ("disponible", "fallido"):
-            return {"replay": repo.completion_result(conn, version_id)}
+            return {"replay": repo.completion_result(conn, version_id), "resource": resource}
         if resource["estado"] != "subiendo":
             raise _conflict("subida_no_pendiente", "La subida ya no puede completarse.")
+        now = _now(reloj)
         if resource["completar_antes_de"] <= now:
+            # A lease taken before the deadline may still be finishing: that is
+            # in progress, not expired. Only with no live lease does it expire.
+            live = repo.live_lease_expiry(conn, version_id, now)
+            if live is not None:
+                raise _conflict("procesamiento_en_curso",
+                                "El archivo ya se está procesando.", reintentar=True,
+                                reintentar_despues_de=live)
             repo.expire_pending(conn, resource=resource, now=now, actor=scope.actor,
                                 base_id=scope.base_id)
             return {"expired": True}
@@ -338,19 +398,76 @@ def _attempt(result: Mapping[str, Any], selection: Sequence[int] | None = None
     return attempt, geometry
 
 
-def _delete_if_unreferenced(key: str, almacen: Almacen,
-                            database: Path | str | None) -> bool:
+def _final_prefix(version_id: str) -> str:
+    return f"final/{version_id.replace('-', '')[:64]}/"
+
+
+def _discard_final(key: str, almacen: Almacen, database: Path | str | None) -> bool:
+    """Delete this operation's own final nonce once proven unreferenced.
+
+    Returns True when an unreferenced object may remain (cleanup pending). If
+    the database cannot prove the key unreferenced the bytes are kept: an
+    ambiguous commit may reference them.
+    """
     try:
         with db.session(database) as conn:
             referenced = repo.final_key_referenced(conn, key)
     except Exception:
-        return False
+        return True
     if referenced:
         return False
     try:
-        return almacen.borrar(key)
+        almacen.borrar(key)
     except AlmacenError:
+        return True
+    return False
+
+
+def _discard_staging(keys: Sequence[str], almacen: Almacen | None) -> bool:
+    """Best-effort removal of staging no version can use; True if any may remain."""
+    if not keys:
         return False
+    if almacen is None:
+        return True
+    pending = False
+    for key in keys:
+        try:
+            almacen.borrar(key)
+        except AlmacenError:
+            pending = True
+    return pending
+
+
+def _staging_remains(keys: Sequence[str], almacen: Almacen | None) -> bool:
+    """Read-only replay check: does any of these staging objects still exist?"""
+    if not keys:
+        return False
+    if almacen is None:
+        return True
+    try:
+        return any(almacen.tamano_de(key) is not None for key in keys)
+    except AlmacenError:
+        return True
+
+
+def _version_leftovers(resource: Mapping[str, Any], almacen: Almacen) -> bool:
+    """Read-only replay check for a terminal version's unreferenced objects.
+
+    Its staging, and any final nonce under its prefix other than the one the
+    version references. Nothing is deleted: another holder may still own one.
+    """
+    if _staging_remains([str(resource["clave_temporal"])], almacen):
+        return True
+    try:
+        return any(item.clave != resource["clave_final"]
+                   for item in almacen.listar(_final_prefix(str(resource["id"]))))
+    except AlmacenError:
+        return True
+
+
+def _report_cleanup(error: BaseException, pending: bool) -> None:
+    if pending and isinstance(error, ApiError) and isinstance(error.detalle, dict):
+        error.detalle["limpieza_pendiente"] = True
 
 
 def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
@@ -359,23 +476,24 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
               ganchos: object | None = None) -> dict[str, Any]:
     """Finalize, verify and optionally parse one pending upload."""
     _valid_session(sesion)
-    resource = _resource_version(version_id, bd)
-    _authorize_read(sesion, str(resource["inventory_id"]), "archivos.subir", bd)
+    resource = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     if resource["iniciado_por"] != sesion.user_id:
         raise _not_found()
     work_id = str(uuid.uuid4())
-    acquired = _acquire_completion(sesion, version_id, bd, _now(reloj), work_id)
+    acquired = _acquire_completion(sesion, version_id, bd, reloj, work_id)
     if "expired" in acquired:
         raise _conflict("subida_expirada", "El plazo para completar la subida terminó.")
     if "replay" in acquired:
         result = cast(dict[str, Any], acquired["replay"])
         result["replay"] = True
+        result["limpieza_pendiente"] = _version_leftovers(acquired["resource"], almacen)
         return result
     resource = acquired["resource"]
     terrain_id = str(resource["inventory_id"])
+    staging = [str(resource["clave_temporal"])]
     _hook(ganchos, "despues_lease", version_id)
     maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
-    final_key = f"final/{version_id.replace('-', '')[:64]}/{uuid.uuid4().hex}"
+    final_key = _final_prefix(version_id) + uuid.uuid4().hex
     copied = False
     verification: ApiError | None
     try:
@@ -402,10 +520,10 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         verification = exc
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
-        if copied:
-            _delete_if_unreferenced(final_key, almacen, bd)
-        raise _error("almacen_no_disponible", "No fue posible verificar el archivo.", 503,
-                     reintentar=True) from exc
+        failure = _error("almacen_no_disponible", "No fue posible verificar el archivo.", 503,
+                         reintentar=True)
+        _report_cleanup(failure, copied and _discard_final(final_key, almacen, bd))
+        raise failure from exc
     else:
         verification = None
         if actual != int(resource["tamano_declarado"]):
@@ -417,23 +535,24 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
 
     if verification is not None:
         try:
-            now = _now(reloj)
             with db.escritura(bd) as conn:
-                scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.subir")
+                scope = _reverify(conn, sesion, terrain_id, "archivos.subir")
                 current = repo.resource_for_version(conn, version_id, lock=True)
+                now = _now(reloj)
                 if current is None or not repo.lease_owned(conn, version_id, work_id, now):
                     raise _conflict("lease_perdido", "El turno de procesamiento terminó.")
                 result = repo.finish_failed(conn, resource=current, work_id=work_id,
                                             error_code=verification.detalle["code"],
                                             error_message=verification.mensaje, now=now,
                                             actor=scope.actor, base_id=scope.base_id)
-        except Exception:
-            if copied:
-                _delete_if_unreferenced(final_key, almacen, bd)
+        except Exception as exc:
+            _report_cleanup(exc, copied and _discard_final(final_key, almacen, bd))
             raise
-        if copied:
-            _delete_if_unreferenced(final_key, almacen, bd)
+        # The failure is terminal: neither its nonce nor its staging is usable.
+        pending = copied and _discard_final(final_key, almacen, bd)
+        pending = _discard_staging(staging, almacen) or pending
         result["replay"] = False
+        result["limpieza_pendiente"] = pending
         return result
 
     attempt = geometry = None
@@ -451,10 +570,11 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         _hook(ganchos, "despues_parseo", version_id)
     _hook(ganchos, "antes_commit", version_id)
     try:
-        now = _now(reloj)
         with db.escritura(bd) as conn:
-            scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.subir")
+            scope = _reverify(conn, sesion, terrain_id, "archivos.subir")
             current = repo.resource_for_version(conn, version_id, lock=True)
+            # Read the clock only now: time spent reaching this boundary counts.
+            now = _now(reloj)
             if (current is None or current["estado"] != "subiendo"
                     or not repo.lease_owned(conn, version_id, work_id, now)):
                 raise _conflict("lease_perdido", "El turno de procesamiento terminó.")
@@ -463,48 +583,36 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
                 actual_size=actual, sha256=digest, detected_type=detected, now=now,
                 actor=scope.actor, base_id=scope.base_id, attempt=attempt,
                 geometry=geometry)
-    except Exception:
-        _delete_if_unreferenced(final_key, almacen, bd)
+    except Exception as exc:
+        _report_cleanup(exc, _discard_final(final_key, almacen, bd))
         raise
     _hook(ganchos, "despues_commit", version_id)
-    cleanup_pending = False
-    try:
-        almacen.borrar(str(resource["clave_temporal"]))
-    except AlmacenError:
-        cleanup_pending = True
     result["replay"] = False
-    result["limpieza_pendiente"] = cleanup_pending
+    result["limpieza_pendiente"] = _discard_staging(staging, almacen)
     return result
 
 
 def cancelar(sesion: auth.Sesion, version_id: str, almacen: Almacen | None = None, *,
              bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
     _valid_session(sesion)
-    resource = _resource_version(version_id, bd)
-    _authorize_read(sesion, str(resource["inventory_id"]), "archivos.subir", bd)
-    now = _now(reloj)
+    _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     with db.escritura(bd) as conn:
         current = repo.resource_for_version(conn, version_id)
         if current is None:
             raise _not_found()
-        scope = auth.reverificar_terreno(conn, sesion, str(current["inventory_id"]),
-                                         "archivos.subir")
+        scope = _reverify(conn, sesion, str(current["inventory_id"]), "archivos.subir")
         current = repo.resource_for_version(conn, version_id, lock=True)
         assert current is not None
         if current["iniciado_por"] != sesion.user_id and scope.rol != "admin":
             raise _not_found()
+        now = _now(reloj)
         if not repo.cancel_pending(conn, resource=current, now=now, actor=scope.actor,
                                    base_id=scope.base_id):
             raise _conflict("subida_no_pendiente", "La subida ya no está pendiente.")
         result: dict[str, Any] = {"version_id": version_id, "estado": "cancelado"}
         temporary_key = str(current["clave_temporal"])
-    cleanup_pending = False
-    if almacen is not None:
-        try:
-            almacen.borrar(temporary_key)
-        except AlmacenError:
-            cleanup_pending = True
-    result["limpieza_pendiente"] = cleanup_pending
+    # Without a store nothing was removed, so the staging may remain.
+    result["limpieza_pendiente"] = _discard_staging([temporary_key], almacen)
     return result
 
 
@@ -517,14 +625,12 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
     key = _key(idempotency_key)
     normalized = list(seleccion) if seleccion is not None else None
     request_hash = _hash_payload({"seleccion": normalized})
-    resource = _resource_version(version_id, bd)
+    resource = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     terrain_id = str(resource["inventory_id"])
-    _authorize_read(sesion, terrain_id, "archivos.subir", bd)
     operation = f"archivos.procesar:{sesion.user_id}:{version_id}"
     work_id = str(uuid.uuid4())
-    now = _now(reloj)
     with db.escritura(bd) as conn:
-        scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.subir")
+        _reverify(conn, sesion, terrain_id, "archivos.subir")
         current = repo.resource_for_version(conn, version_id, lock=True)
         if current is None:
             raise _not_found()
@@ -534,6 +640,7 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
             return replay
         if current["archivo_tipo"] != "kmz" or current["estado"] != "disponible":
             raise _conflict("version_no_procesable", "La versión no se puede procesar.")
+        now = _now(reloj)
         leased = repo.lease(conn, version_id=version_id, work_id=work_id,
                             actor_id=sesion.user_id, operation="procesar", started_at=now,
                             expires_at=_after(now, LEASE_SECONDS), now=now)
@@ -567,17 +674,24 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         attempt, geometry = _attempt({"estado": "error_interno", "error": {
             "codigo": "ANALIZADOR_FALLO", "mensaje": "No fue posible analizar el KMZ."}},
             normalized)
-    now = _now(reloj)
     with db.escritura(bd) as conn:
-        scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.subir")
+        scope = _reverify(conn, sesion, terrain_id, "archivos.subir")
         current = repo.resource_for_version(conn, version_id, lock=True)
         if current is None or current["estado"] != "disponible":
             raise _conflict("version_no_procesable", "La versión ya no se puede procesar.")
-        attempt_dto = repo.insert_processing_attempt(
-            conn, resource=current, work_id=work_id,
-            origin="seleccion" if normalized is not None else "reintento",
-            attempt=attempt, geometry=geometry, now=now, actor=scope.actor,
-            base_id=scope.base_id)
+        now = _now(reloj)
+        # An expired or taken-over lease ends this run: no attempt, geometry,
+        # event or idempotency record is written, and the caller may retry.
+        if not repo.lease_owned(conn, version_id, work_id, now):
+            raise _conflict("lease_perdido", "El turno de procesamiento terminó.")
+        try:
+            attempt_dto = repo.insert_processing_attempt(
+                conn, resource=current, work_id=work_id,
+                origin="seleccion" if normalized is not None else "reintento",
+                attempt=attempt, geometry=geometry, now=now, actor=scope.actor,
+                base_id=scope.base_id)
+        except repo.ConflictError as exc:
+            raise _conflict("lease_perdido", "El turno de procesamiento terminó.") from exc
         result = {"version_id": version_id, "intento": attempt_dto,
                   "geometria_id": geometry["id"] if geometry else None,
                   "archivo": repo.attachment_dto(current), "replay": False}
@@ -597,13 +711,11 @@ def activar(sesion: auth.Sesion, archivo_id: str, *, version_id: str,
     payload = {"version_id": version_id, "geometria_id": geometria_id,
                "expected_revision": expected_revision}
     request_hash = _hash_payload(payload)
-    attachment = _resource_attachment(archivo_id, bd)
+    attachment = _in_scope(sesion, _attachment(archivo_id), "archivos.subir", bd)
     terrain_id = str(attachment["inventory_id"])
-    _authorize_read(sesion, terrain_id, "archivos.subir", bd)
     operation = f"archivos.activar:{sesion.user_id}:{archivo_id}"
-    now = _now(reloj)
     with db.escritura(bd) as conn:
-        scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.subir")
+        scope = _reverify(conn, sesion, terrain_id, "archivos.subir")
         current = repo.resource_for_attachment(conn, archivo_id, lock=True)
         if current is None:
             raise _not_found()
@@ -611,6 +723,21 @@ def activar(sesion: auth.Sesion, archivo_id: str, *, version_id: str,
         if replay is not None:
             replay["replay"] = True
             return replay
+        # Resolve the target against this attachment before its lease is read:
+        # a version of any other attachment, in scope or not, is simply absent.
+        if (not isinstance(version_id, str)
+                or repo.version_of_attachment(conn, archivo_id, version_id) is None):
+            raise _not_found()
+        if geometria_id is not None and not isinstance(geometria_id, str):
+            raise _conflict("version_no_activable",
+                            "La versión o geometría no se puede activar.")
+        try:
+            repo.check_activation(conn, attachment=current, version_id=version_id,
+                                  geometry_id=geometria_id)
+        except ValueError as exc:
+            raise _conflict("version_no_activable",
+                            "La versión o geometría no se puede activar.") from exc
+        now = _now(reloj)
         work_id = str(uuid.uuid4())
         leased = repo.lease(conn, version_id=version_id, work_id=work_id,
                             actor_id=sesion.user_id, operation="activar", started_at=now,
@@ -645,70 +772,71 @@ def retirar(sesion: auth.Sesion, archivo_id: str, *, expected_revision: int,
     if isinstance(expected_revision, bool) or not isinstance(expected_revision, int):
         raise _error("revision_invalida", "La revisión esperada no es válida.")
     request_hash = _hash_payload({"expected_revision": expected_revision})
-    attachment = _resource_attachment(archivo_id, bd)
+    attachment = _in_scope(sesion, _attachment(archivo_id), "archivos.retirar", bd)
     terrain_id = str(attachment["inventory_id"])
-    _authorize_read(sesion, terrain_id, "archivos.retirar", bd)
     operation = f"archivos.retirar:{sesion.user_id}:{archivo_id}"
-    now = _now(reloj)
     with db.escritura(bd) as conn:
-        scope = auth.reverificar_terreno(conn, sesion, terrain_id, "archivos.retirar")
+        scope = _reverify(conn, sesion, terrain_id, "archivos.retirar")
         current = repo.resource_for_attachment(conn, archivo_id, lock=True)
         if current is None:
             raise _not_found()
         replay = _operation(conn, operation, key, request_hash)
         if replay is not None:
-            replay["replay"] = True
-            return replay
-        try:
-            updated, temporary_keys = repo.retire(
-                conn, attachment=current, expected_revision=expected_revision, now=now,
-                actor=scope.actor, base_id=scope.base_id)
-        except repo.ConflictError as exc:
-            raise _conflict("revision_conflictiva",
-                            "La decisión cambió; vuelve a cargar el archivo.") from exc
-        result = {"archivo": updated, "replay": False, "limpieza_pendiente": False}
-        repo.save_operation_result(conn, operation, key, request_hash,
-                                   sesion.user_id, now, result)
-    if almacen is not None:
-        for temporary_key in temporary_keys:
+            staging = (repo.retirement_staging_keys(conn, current)
+                       if replay.get("limpieza_pendiente") else [])
+        else:
+            now = _now(reloj)
             try:
-                almacen.borrar(temporary_key)
-            except AlmacenError:
-                result["limpieza_pendiente"] = True
+                updated, staging = repo.retire(
+                    conn, attachment=current, expected_revision=expected_revision, now=now,
+                    actor=scope.actor, base_id=scope.base_id)
+            except repo.ConflictError as exc:
+                raise _conflict("revision_conflictiva",
+                                "La decisión cambió; vuelve a cargar el archivo.") from exc
+            # Stored before external cleanup, so the durable record says
+            # pending until a replay proves the staging gone.
+            result = {"archivo": updated, "replay": False,
+                      "limpieza_pendiente": bool(staging)}
+            repo.save_operation_result(conn, operation, key, request_hash,
+                                       sesion.user_id, now, result)
+    if replay is not None:
+        replay["replay"] = True
+        replay["limpieza_pendiente"] = _staging_remains(staging, almacen)
+        return replay
+    result["limpieza_pendiente"] = _discard_staging(staging, almacen)
     return result
 
 
-def listar(sesion: auth.Sesion, terreno_id: str, *, bd: Path | str | None = None,
-           reloj: Clock | None = None) -> list[dict[str, Any]]:
+def listar(sesion: auth.Sesion, terreno_id: str, *, cursor: str | None = None,
+           limite: int = HISTORY_DEFAULT, bd: Path | str | None = None,
+           reloj: Clock | None = None) -> dict[str, Any]:
+    """One bounded page of a terrain's attachments, newest first."""
     _valid_session(sesion)
-    _authorize_read(sesion, terreno_id, "archivos.ver", bd)
+    limit = _limit(limite)
+    parsed = _cursor(cursor)
     with db.session(bd) as conn:
         auth.require_terreno(_request(sesion), terreno_id, "archivos.ver", conn)
-        return repo.list_for_terrain(conn, terreno_id, sesion.user_id, _now(reloj))
+        items, following = repo.list_for_terrain(conn, terreno_id, sesion.user_id,
+                                                 _now(reloj), parsed, limit)
+    return {"archivos": items, "cursor_siguiente": following}
 
 
 def historial(sesion: auth.Sesion, archivo_id: str, *, cursor: str | None = None,
-              limite: int = HISTORY_DEFAULT,
-              bd: Path | str | None = None) -> dict[str, Any]:
+              limite: int = HISTORY_DEFAULT, bd: Path | str | None = None,
+              reloj: Clock | None = None) -> dict[str, Any]:
     _valid_session(sesion)
-    if isinstance(limite, bool) or not isinstance(limite, int) or not 1 <= limite <= HISTORY_MAX:
-        raise _error("limite_invalido", f"El límite debe estar entre 1 y {HISTORY_MAX}.")
-    attachment = _resource_attachment(archivo_id, bd)
+    limit = _limit(limite)
+    parsed = _cursor(cursor)
+    attachment = _in_scope(sesion, _attachment(archivo_id), "archivos.ver", bd)
     terrain_id = str(attachment["inventory_id"])
-    _authorize_read(sesion, terrain_id, "archivos.ver", bd)
-    parsed = None
-    if cursor is not None:
-        try:
-            at, event_id = cursor.split("|", 1)
-            datetime.fromisoformat(at)
-            uuid.UUID(event_id)
-            parsed = (at, event_id)
-        except (ValueError, AttributeError):
-            raise _error("cursor_invalido", "El cursor no es válido.") from None
     with db.session(bd) as conn:
-        auth.require_terreno(_request(sesion), terrain_id, "archivos.ver", conn)
-        events, following = repo.history(conn, archivo_id, parsed, limite)
-        return {"eventos": events, "cursor_siguiente": following}
+        try:
+            auth.require_terreno(_request(sesion), terrain_id, "archivos.ver", conn)
+        except ApiError as exc:
+            raise _scoped(exc) from None
+        events, following = repo.history(conn, archivo_id, parsed, limit,
+                                         sesion.user_id, _now(reloj))
+    return {"eventos": events, "cursor_siguiente": following}
 
 
 def resumenes_de_archivos(conn: DatabaseConnection, inventory_ids: Sequence[str],

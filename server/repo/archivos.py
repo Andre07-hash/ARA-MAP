@@ -54,6 +54,19 @@ def resource_for_attachment(conn: DatabaseConnection, attachment_id: str,
                               (attachment_id,)).fetchone())
 
 
+def version_of_attachment(conn: DatabaseConnection, attachment_id: str,
+                          version_id: str) -> dict[str, Any] | None:
+    """The version only when it belongs to that attachment; never another's."""
+    return _dict(conn.execute("SELECT * FROM archivo_version WHERE id = ? AND archivo_id = ?",
+                              (version_id, attachment_id)).fetchone())
+
+
+def live_lease_expiry(conn: DatabaseConnection, version_id: str, now: str) -> str | None:
+    row = conn.execute("SELECT vence_en FROM archivo_trabajo WHERE archivo_version_id = ?"
+                       " AND vence_en > ?", (version_id, now)).fetchone()
+    return str(row["vence_en"]) if row is not None else None
+
+
 def operation_result(conn: DatabaseConnection, operation: str, key: str) -> dict[str, Any] | None:
     row = conn.execute(
         "SELECT request_hash, result_json, actor_id FROM inventory_operation_result"
@@ -395,6 +408,19 @@ def retire(conn: DatabaseConnection, *, attachment: Mapping[str, Any], expected_
     return attachment_dto(current), [str(r["clave_temporal"]) for r in pending]
 
 
+def retirement_staging_keys(conn: DatabaseConnection, attachment: Mapping[str, Any]) -> list[str]:
+    """Staging keys of the uploads that the attachment's retirement cancelled.
+
+    The retirement transaction stamps those versions with its own timestamp.
+    """
+    if attachment["retirado_en"] is None:
+        return []
+    rows = conn.execute("SELECT clave_temporal FROM archivo_version WHERE archivo_id = ?"
+                        " AND estado = 'cancelado' AND terminado_en = ?",
+                        (attachment["id"], attachment["retirado_en"])).fetchall()
+    return [str(r["clave_temporal"]) for r in rows]
+
+
 def geometry_for_activation(conn: DatabaseConnection, attachment_id: str, version_id: str,
                             geometry_id: str) -> dict[str, Any] | None:
     return _dict(conn.execute(
@@ -405,13 +431,13 @@ def geometry_for_activation(conn: DatabaseConnection, attachment_id: str, versio
         """, (geometry_id, attachment_id, version_id)).fetchone())
 
 
-def activate(conn: DatabaseConnection, *, attachment: Mapping[str, Any], version_id: str,
-             geometry_id: str | None, expected_revision: int, now: str,
-             actor: Mapping[str, str], base_id: str | None) -> dict[str, Any]:
-    if attachment["retirado_en"] is not None or int(attachment["revision"]) != expected_revision:
-        raise ConflictError()
-    version = conn.execute("SELECT * FROM archivo_version WHERE id = ? AND archivo_id = ?",
-                           (version_id, attachment["id"])).fetchone()
+def check_activation(conn: DatabaseConnection, *, attachment: Mapping[str, Any],
+                     version_id: str, geometry_id: str | None) -> dict[str, Any] | None:
+    """Validate an activation target of this attachment; ValueError if not activable.
+
+    Returns the KMZ geometry row, or None for a PDF.
+    """
+    version = version_of_attachment(conn, str(attachment["id"]), version_id)
     if version is None or version["estado"] != "disponible":
         raise ValueError("version")
     geometry = None
@@ -423,6 +449,16 @@ def activate(conn: DatabaseConnection, *, attachment: Mapping[str, Any], version
             raise ValueError("geometry")
     elif geometry_id is not None:
         raise ValueError("geometry")
+    return geometry
+
+
+def activate(conn: DatabaseConnection, *, attachment: Mapping[str, Any], version_id: str,
+             geometry_id: str | None, expected_revision: int, now: str,
+             actor: Mapping[str, str], base_id: str | None) -> dict[str, Any]:
+    if attachment["retirado_en"] is not None or int(attachment["revision"]) != expected_revision:
+        raise ConflictError()
+    geometry = check_activation(conn, attachment=attachment, version_id=version_id,
+                                geometry_id=geometry_id)
     revision = expected_revision + 1
     changed = conn.execute(
         "UPDATE archivo SET revision = ?, version_actual_id = ?, geometria_activa_id = ?,"
@@ -475,79 +511,127 @@ def insert_processing_attempt(conn: DatabaseConnection, *, resource: Mapping[str
     return dto
 
 
-def versions_for_attachment(conn: DatabaseConnection, attachment_id: str, limit: int = 100) -> list[dict[str, Any]]:
-    rows = conn.execute("SELECT * FROM archivo_version WHERE archivo_id = ?"
-                        " ORDER BY numero DESC LIMIT ?", (attachment_id, limit)).fetchall()
-    return [version_dto(r, own_pending=True) for r in rows]
+# Version columns a read projection needs, selected under a ``v_`` prefix so a
+# single joined row carries the attachment and its latest version.
+_VERSION_COLUMNS = (
+    "id", "archivo_id", "inventory_id", "numero", "estado", "revision_base",
+    "nombre_original", "tamano_declarado", "tamano", "sha256", "tipo_detectado",
+    "error_codigo", "error_mensaje", "aplicada", "motivo_no_aplicada", "iniciado_en",
+    "iniciado_por", "finalizado_en", "terminado_en", "subida_vence_en", "completar_antes_de")
+_LATEST_VERSION = (
+    ", ".join(f"v.{name} AS v_{name}" for name in _VERSION_COLUMNS)
+    + ", EXISTS (SELECT 1 FROM archivo_trabajo t WHERE t.archivo_version_id = v.id"
+    " AND t.vence_en > ?) AS v_lease_live"
+    " FROM archivo a LEFT JOIN archivo_version v ON v.id = (SELECT vv.id FROM archivo_version vv"
+    " WHERE vv.archivo_id = a.id ORDER BY vv.numero DESC LIMIT 1)")
 
 
-def list_for_terrain(conn: DatabaseConnection, terrain_id: str, actor_id: str,
-                     now: str) -> list[dict[str, Any]]:
-    rows = conn.execute("SELECT * FROM archivo WHERE inventory_id = ?"
-                        " ORDER BY creado_en DESC, id DESC", (terrain_id,)).fetchall()
-    result = []
-    for row in rows:
+def _latest_version(row: Mapping[str, Any]) -> dict[str, Any] | None:
+    if row["v_id"] is None:
+        return None
+    return {name: row[f"v_{name}"] for name in _VERSION_COLUMNS}
+
+
+def pending_view(version: Mapping[str, Any], lease_live: bool, actor_id: str,
+                 now: str) -> tuple[str, bool]:
+    """The one caller-aware rule for every read surface.
+
+    Returns the projected state (an overdue upload with no live lease reads as
+    ``expirado`` without being written) and whether the caller may see only
+    the generic status. Privacy follows the durable row: while it is still
+    ``subiendo`` it belongs to its initiator, whether or not it is overdue.
+    """
+    state = str(version["estado"])
+    if state == "subiendo" and version["completar_antes_de"] <= now and not lease_live:
+        state = "expirado"
+    private = version["estado"] == "subiendo" and version["iniciado_por"] != actor_id
+    return state, private
+
+
+def _generic_pending(state: str) -> dict[str, Any]:
+    return {"estado": state, "propia": False}
+
+
+def projected_version(version: Mapping[str, Any], lease_live: bool, actor_id: str,
+                      now: str) -> dict[str, Any]:
+    state, private = pending_view(version, lease_live, actor_id, now)
+    if private:
+        return _generic_pending(state)
+    dto = version_dto(version, own_pending=True)
+    dto["estado"] = state
+    if version["estado"] == "subiendo":
+        dto["propia"] = True
+    return dto
+
+
+def list_for_terrain(conn: DatabaseConnection, terrain_id: str, actor_id: str, now: str,
+                     cursor: tuple[str, str] | None,
+                     limit: int) -> tuple[list[dict[str, Any]], str | None]:
+    """One bounded page of a terrain's attachments, retired ones included.
+
+    Ordered by ``(creado_en, id)`` descending; one query hydrates every row.
+    """
+    where = "a.inventory_id = ?"
+    params: list[Any] = [now, terrain_id]
+    if cursor:
+        where += " AND (a.creado_en < ? OR (a.creado_en = ? AND a.id < ?))"
+        params.extend((cursor[0], cursor[0], cursor[1]))
+    params.append(limit + 1)
+    rows = conn.execute(
+        "SELECT a.*, " + _LATEST_VERSION + " WHERE " + where
+        + " ORDER BY a.creado_en DESC, a.id DESC LIMIT ?", tuple(params)).fetchall()
+    items = []
+    for row in rows[:limit]:
         item = attachment_dto(row)
-        latest = conn.execute("SELECT * FROM archivo_version WHERE archivo_id = ?"
-                              " ORDER BY numero DESC LIMIT 1", (row["id"],)).fetchone()
-        item["ultima_version"] = projected_version(conn, latest, actor_id, now) if latest else None
-        result.append(item)
-    return result
+        latest = _latest_version(row)
+        item["ultima_version"] = (projected_version(latest, bool(row["v_lease_live"]),
+                                                    actor_id, now) if latest else None)
+        items.append(item)
+    next_cursor = None
+    if len(rows) > limit:
+        last = rows[limit - 1]
+        next_cursor = f"{last['creado_en']}|{last['id']}"
+    return items, next_cursor
 
 
 def summaries(conn: DatabaseConnection, terrain_ids: Sequence[str], actor_id: str,
               now: str) -> dict[str, dict[str, Any]]:
+    """Current cell projection: live PDFs and the live KMZ only.
+
+    Retired attachments stay in bounded listing and history, not here.
+    """
     output: dict[str, dict[str, Any]] = {}
     for terrain_id in terrain_ids:
         pdf_rows = conn.execute(
-            "SELECT a.*, v.id AS v_id, v.numero AS v_numero, v.estado AS v_estado,"
-            " v.nombre_original, v.tamano, v.tamano_declarado, v.completar_antes_de,"
-            " v.iniciado_por FROM archivo a LEFT JOIN archivo_version v"
-            " ON v.id = (SELECT vv.id FROM archivo_version vv WHERE vv.archivo_id = a.id"
-            " ORDER BY vv.numero DESC LIMIT 1) WHERE a.inventory_id = ?"
-            " AND a.tipo = 'pdf' ORDER BY a.creado_en DESC, a.id DESC LIMIT 5",
-            (terrain_id,)).fetchall()
+            "SELECT a.*, " + _LATEST_VERSION + " WHERE a.inventory_id = ? AND a.tipo = 'pdf'"
+            " AND a.retirado_en IS NULL ORDER BY a.creado_en DESC, a.id DESC LIMIT 5",
+            (now, terrain_id)).fetchall()
         kmz = conn.execute(
-            "SELECT a.*, v.id AS v_id, v.numero AS v_numero, v.estado AS v_estado,"
-            " v.nombre_original, v.tamano, v.tamano_declarado, v.completar_antes_de,"
-            " v.iniciado_por FROM archivo a LEFT JOIN archivo_version v"
-            " ON v.id = (SELECT vv.id FROM archivo_version vv WHERE vv.archivo_id = a.id"
-            " ORDER BY vv.numero DESC LIMIT 1) WHERE a.inventory_id = ? AND a.tipo = 'kmz'"
-            " AND a.retirado_en IS NULL LIMIT 1", (terrain_id,)).fetchone()
+            "SELECT a.*, " + _LATEST_VERSION + " WHERE a.inventory_id = ? AND a.tipo = 'kmz'"
+            " AND a.retirado_en IS NULL LIMIT 1", (now, terrain_id)).fetchone()
         output[terrain_id] = {
             "pdf_total": int(conn.execute("SELECT COUNT(*) AS n FROM archivo WHERE inventory_id = ?"
                                           " AND tipo = 'pdf' AND retirado_en IS NULL",
                                           (terrain_id,)).fetchone()["n"]),
-            "pdf_recientes": [_summary_row(conn, r, actor_id, now) for r in pdf_rows],
-            "kmz": _summary_row(conn, kmz, actor_id, now) if kmz else None,
+            "pdf_recientes": [_summary_row(r, actor_id, now) for r in pdf_rows],
+            "kmz": _summary_row(kmz, actor_id, now) if kmz else None,
         }
     return output
 
 
-def _summary_row(conn: DatabaseConnection, row: Any, actor_id: str, now: str) -> dict[str, Any]:
-    state = row["v_estado"]
-    if state == "subiendo" and row["completar_antes_de"] <= now:
-        live = conn.execute("SELECT 1 FROM archivo_trabajo WHERE archivo_version_id = ?"
-                            " AND vence_en > ?", (row["v_id"], now)).fetchone()
-        if live is None:
-            state = "expirado"
-    own = row["iniciado_por"] == actor_id
-    if state == "subiendo" and not own:
-        private_version = {"estado": "subiendo", "propia": False}
-        return {"id": row["id"], "tipo": row["tipo"], "revision": row["revision"],
-                "retirado": row["retirado_en"] is not None,
-                "version_actual_id": row["version_actual_id"],
-                "geometria_activa_id": row["geometria_activa_id"],
-                "ultima_version": private_version}
+def _summary_row(row: Mapping[str, Any], actor_id: str, now: str) -> dict[str, Any]:
+    latest = _latest_version(row)
     version: dict[str, Any] | None = None
-    if row["v_id"]:
-        version = {"id": row["v_id"], "numero": row["v_numero"], "estado": state,
-                   "nombre_original": row["nombre_original"]}
-        if own or state != "subiendo":
-            version["tamano"] = row["tamano"]
-            version["tamano_declarado"] = row["tamano_declarado"]
-        if state == "subiendo":
-            version["propia"] = own
+    if latest is not None:
+        state, private = pending_view(latest, bool(row["v_lease_live"]), actor_id, now)
+        if private:
+            version = _generic_pending(state)
+        else:
+            version = {"id": latest["id"], "numero": latest["numero"], "estado": state,
+                       "nombre_original": latest["nombre_original"], "tamano": latest["tamano"],
+                       "tamano_declarado": latest["tamano_declarado"]}
+            if latest["estado"] == "subiendo":
+                version["propia"] = True
     return {"id": row["id"], "tipo": row["tipo"], "revision": row["revision"],
             "retirado": row["retirado_en"] is not None,
             "version_actual_id": row["version_actual_id"],
@@ -555,36 +639,45 @@ def _summary_row(conn: DatabaseConnection, row: Any, actor_id: str, now: str) ->
 
 
 def history(conn: DatabaseConnection, attachment_id: str, cursor: tuple[str, str] | None,
-            limit: int) -> tuple[list[dict[str, Any]], str | None]:
-    where = "archivo_id = ?"
-    params: list[Any] = [attachment_id]
+            limit: int, actor_id: str, now: str) -> tuple[list[dict[str, Any]], str | None]:
+    """One bounded page of audit events, projected for this caller.
+
+    Durable rows are never rewritten: an event about another account's still
+    pending upload is returned redacted, with its position kept for the cursor.
+    """
+    where = "e.archivo_id = ?"
+    params: list[Any] = [now, attachment_id]
     if cursor:
-        where += " AND (at < ? OR (at = ? AND id < ?))"
+        where += " AND (e.at < ? OR (e.at = ? AND e.id < ?))"
         params.extend((cursor[0], cursor[0], cursor[1]))
     params.append(limit + 1)
     rows = conn.execute(
-        "SELECT * FROM archivo_evento WHERE " + where + " ORDER BY at DESC, id DESC LIMIT ?",
-        tuple(params)).fetchall()
-    events = [event_dto(r) for r in rows[:limit]]
+        "SELECT e.*, v.estado AS v_estado, v.iniciado_por AS v_iniciado_por,"
+        " v.completar_antes_de AS v_completar_antes_de,"
+        " EXISTS (SELECT 1 FROM archivo_trabajo t WHERE t.archivo_version_id = v.id"
+        " AND t.vence_en > ?) AS v_lease_live"
+        " FROM archivo_evento e LEFT JOIN archivo_version v ON v.id = e.archivo_version_id"
+        " WHERE " + where + " ORDER BY e.at DESC, e.id DESC LIMIT ?", tuple(params)).fetchall()
+    events = []
+    for row in rows[:limit]:
+        state, private = "", False
+        if row["v_estado"] is not None:
+            state, private = pending_view(
+                {"estado": row["v_estado"], "iniciado_por": row["v_iniciado_por"],
+                 "completar_antes_de": row["v_completar_antes_de"]},
+                bool(row["v_lease_live"]), actor_id, now)
+        events.append(_private_event(row, state) if private else event_dto(row))
     next_cursor = None
     if len(rows) > limit and events:
         next_cursor = f"{events[-1]['at']}|{events[-1]['id']}"
     return events, next_cursor
 
 
-def projected_version(conn: DatabaseConnection, row: Any, actor_id: str, now: str) -> dict[str, Any]:
-    if row is None:
-        raise LookupError
-    own = row["iniciado_por"] == actor_id
-    if row["estado"] == "subiendo" and not own:
-        return {"estado": "subiendo", "propia": False}
-    dto = version_dto(row, own_pending=own)
-    if row["estado"] == "subiendo" and row["completar_antes_de"] <= now:
-        live = conn.execute("SELECT 1 FROM archivo_trabajo WHERE archivo_version_id = ?"
-                            " AND vence_en > ?", (row["id"], now)).fetchone()
-        if live is None:
-            dto["estado"] = "expirado"
-    return dto
+def _private_event(row: Mapping[str, Any], state: str) -> dict[str, Any]:
+    return {"id": row["id"], "accion": row["accion"], "revision": None,
+            "archivo_version_id": None, "intento_id": None, "geometria_id": None,
+            "base_id": None, "actor": None, "at": row["at"], "details": {},
+            "privado": True, "version": _generic_pending(state)}
 
 
 def attachment_dto(row: Mapping[str, Any]) -> dict[str, Any]:
@@ -621,7 +714,8 @@ def event_dto(row: Mapping[str, Any]) -> dict[str, Any]:
             "archivo_version_id": row["archivo_version_id"], "intento_id": row["intento_id"],
             "geometria_id": row["geometria_id"], "base_id": row["base_id"],
             "actor": {"id": row["actor_id"], "display_name": row["actor_name"]},
-            "at": row["at"], "details": json.loads(row["details_json"] or "{}")}
+            "at": row["at"], "details": json.loads(row["details_json"] or "{}"),
+            "privado": False}
 
 
 def _event(conn: DatabaseConnection, *, attachment_id: str, terrain_id: str, action: str,

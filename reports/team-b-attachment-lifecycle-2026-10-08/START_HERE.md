@@ -1,5 +1,9 @@
 # Team B packet 1B — local/fake attachment lifecycle handback
 
+> **2026-10-09:** supervisory corrections L1–L6 are in
+> [CORRECTIONS_2026-10-09.md](CORRECTIONS_2026-10-09.md), which supersedes this
+> file where they differ (notably the `listar`/`historial` signatures).
+
 Date: 2026-10-08  
 Repository: `Andre07-hash/ARA-MAP`  
 Branch: `claude/team-b/attachment-lifecycle`  

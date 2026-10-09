@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "<tree-2ea602a>/server/app.py", line 205, in _dispatch
+    params=context["params"], body=self._read_body(), headers=self.headers,
+                                   ~~~~~~~~~~~~~~~^^
+  File "<tree-2ea602a>/server/app.py", line 274, in _read_body
+    length = int(self.headers.get("Content-Length") or 0)
+ValueError: invalid literal for int() with base 10: '²'

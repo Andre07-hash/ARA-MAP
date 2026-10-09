@@ -1,0 +1,59 @@
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPPostgres) ... skipped 'No Postgres test connection configured'
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPSQLite) ... ok
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPSQLite) ... ok
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPSQLite) ... ok
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPSQLite) ... ok
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPSQLite) ... ok
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPSQLite) ... ok
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPSQLite) ... ok
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPSQLite) ... ok
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPSQLite) ... ok
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPSQLite) ... ok
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPSQLite) ... ok
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPSQLite) ... ok
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPSQLite) ... ok
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPSQLite) ... ok
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPSQLite) ... ok
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPSQLite) ... ok
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPSQLite) ... ok
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPSQLite) ... ok
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPSQLite) ... ok
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPSQLite) ... ok
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPSQLite) ... ok
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPSQLite) ... ok
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPSQLite) ... ok
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPSQLite) ... ok
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPSQLite) ... ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionPostgres) ... skipped 'No Postgres test connection configured'
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionSqlite) ...   "GET /api/inventario/terrenos/05c0e1b6-4795-4dc1-a109-dadb55d9fdf8 HTTP/1.1" 404 -
+ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 36.352s
+
+OK (skipped=26)
+exit 0

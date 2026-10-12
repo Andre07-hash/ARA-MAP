@@ -542,6 +542,232 @@ await revisar('reinicio del servidor sobre la misma base y el mismo almacén: by
 // they are in the database, so they still work. Reload them on the new process.
 for (const s of [olga, omar]) await irATabla(s.page);
 
+/* ---------------------------------------------- Round 3 review: R3-B1..R3-B5
+ * The corrected widgets inside the real host (supervisor packet 341c830,
+ * TEAM_A.md step 2-3). Their own base and operators, so the journeys above
+ * and below are not disturbed. Requests are held with a route that then
+ * continues them UNCHANGED: every status here is the real server's. */
+
+const ada2 = await abrir('ada');
+const admin = (metodo, ruta, cuerpo) => llamar(ada2.page, metodo, ruta, cuerpo, cuerpo ? randomBytes(12).toString('hex') : null);
+const baseR3 = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Alcance Ficticia' })).datos.base;
+async function conceder(logins) {
+  const actual = (await admin('GET', `/api/maestra/bases/${baseR3.id}/acceso`)).datos;
+  const r = await admin('PUT', `/api/maestra/bases/${baseR3.id}/acceso`, { expected_version: actual.base.version, usuarios: logins.map((l) => ids[l]) });
+  igual(r.status, 200, `acceso ${JSON.stringify(r.datos)}`);
+}
+async function nuevoTerreno(nombre) {
+  const r = await admin('POST', `/api/maestra/bases/${baseR3.id}/terrenos`, { terreno: nombre });
+  igual(r.status, 200, JSON.stringify(r.datos));
+  return r.datos.terreno.id;
+}
+/** Hold every request matching `patron` (and `metodo`) until soltar(); then continue it unchanged. */
+async function retener(page, patron, metodo) {
+  let soltar;
+  const suelto = new Promise((r) => { soltar = r; });
+  const estado = { vistas: 0 };
+  const manejador = async (r) => {
+    if (metodo && r.request().method() !== metodo) return r.continue();
+    estado.vistas += 1;
+    await suelto;
+    await r.continue().catch(() => {});      // the page may have aborted it meanwhile
+  };
+  await page.route(patron, manejador);
+  return { estado, soltar, quitar: () => page.unroute(patron, manejador) };
+}
+/** Attachment writes the page sends from now on (method + path). */
+function escrituras(page) {
+  const vistas = [];
+  const oir = (q) => {
+    const ruta = new URL(q.url()).pathname;
+    if (q.method() !== 'GET' && /^\/api\/(archivos\/|inventario\/terrenos\/[^/]+\/archivos)/.test(ruta) && !ruta.endsWith('/metadatos')) vistas.push(`${q.method()} ${ruta}`);
+  };
+  page.on('request', oir);
+  return { vistas, dejar: () => page.off('request', oir) };
+}
+const privadoDe = (page, nombres) => page.evaluate((ns) => ({
+  detalles: document.querySelectorAll('.archivos-detalle, dialog[open]').length,
+  subidas: document.querySelectorAll('.archivos-subida').length,
+  nombres: ns.filter((n) => document.body.innerText.includes(n)),
+  cuerpos: window.__araTabla?.previa()?.cuerpos ?? 0,
+}), nombres);
+const LIMPIO = { detalles: 0, subidas: 0, nombres: [], cuerpos: 0 };
+/** A full reload: a table that lost its scope does not look again by itself. */
+async function recargarTabla(page) {
+  await page.goto(`${URLBASE}/?test=1#/tabla`);
+  await page.reload();
+  await page.locator('.tabla-pantalla').waitFor();
+  await listo(page);
+}
+const PRIVADO = 'Privado ficticio R3.pdf';
+const archivoPrivado = { name: PRIVADO, mimeType: 'application/pdf', buffer: readFileSync(F.pdf2) };
+const zonaPdf = (d) => d.locator('.archivos-detalle[data-tipo="pdf"] .archivos-zona input[type=file]');
+
+await conceder(['oscar', 'olivia']);
+const oscar = await abrir('oscar');
+
+await revisar('R3-B2: se revoca el acceso mientras una subida se completa: fila, detalle, mapa y nombre privado se van y nada vuelve', async () => {
+  const [t, otro] = [await nuevoTerreno('Lote Revocado Ficticio'), await nuevoTerreno('Lote Testigo Ficticio')];
+  await recargarTabla(oscar.page);
+  await fila(oscar.page, t).waitFor();
+  await abrirMapa(oscar.page);
+  const d = await abrirDetalle(oscar.page, t, 'Lote Revocado Ficticio');
+  const paso = await retener(oscar.page, '**/api/archivos/versiones/*/completar');
+  await zonaPdf(d).setInputFiles(archivoPrivado);
+  await hasta(() => paso.estado.vistas > 0, 'no se pidió completar');
+  cierto((await privadoDe(oscar.page, [PRIVADO])).nombres.length === 1, 'el nombre privado debía estar a la vista antes');
+  await conceder(['olivia']);                                   // oscar loses the base
+  paso.soltar();
+  await hasta(async () => (await oscar.page.locator('tr[data-id]').count()) === 0, 'las filas siguen');
+  await hasta(async () => (await oscar.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
+  cierto(oscar.api.some((l) => /POST \/api\/archivos\/versiones\/[^/]+\/completar 404/.test(l)), 'completar no respondió 404 real');
+  const tras = escrituras(oscar.page);
+  await esperar(2000);
+  igual(await privadoDe(oscar.page, [PRIVADO, 'Lote Revocado Ficticio', 'Lote Testigo Ficticio']), LIMPIO, 'contenido privado tras perder el acceso');
+  igual(await oscar.page.locator('tr[data-id]').count(), 0, 'filas repobladas');
+  igual(tras.vistas, [], 'escrituras posteriores');
+  tras.dejar();
+  await paso.quitar();
+  await foto(oscar.page, '07-r3-b2-revocado-durante-completar');
+  return { otro };
+});
+
+if (!FOCALIZADO) {
+  await revisar('R3-B2: se transfiere el terreno mientras se envía el contenido: esa fila y su detalle se van, el resto de la base sigue', async () => {
+    await conceder(['oscar', 'olivia']);
+    const [t, testigo] = [await nuevoTerreno('Lote Transferido Ficticio'), await nuevoTerreno('Lote Que Se Queda Ficticio')];
+    await recargarTabla(oscar.page);
+    await fila(oscar.page, t).waitFor();
+    const d = await abrirDetalle(oscar.page, t, 'Lote Transferido Ficticio');
+    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+    await zonaPdf(d).setInputFiles(archivoPrivado);
+    await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
+    const actual = (await admin('GET', `/api/inventario/terrenos/${t}`)).datos.terreno;
+    igual((await admin('POST', `/api/inventario/terrenos/${t}/transferir`, { expected_version: actual.version, base_id: ajena.id })).status, 200, 'transferir');
+    paso.soltar();
+    await hasta(async () => (await fila(oscar.page, t).count()) === 0, 'la fila transferida sigue');
+    await hasta(async () => (await oscar.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
+    const tras = escrituras(oscar.page);
+    await esperar(2000);
+    igual(await privadoDe(oscar.page, [PRIVADO, 'Lote Transferido Ficticio']), LIMPIO, 'contenido privado del terreno transferido');
+    igual(await fila(oscar.page, testigo).count(), 1, 'la otra fila de la base debía seguir');
+    igual(tras.vistas, [], 'escrituras posteriores');
+    tras.dejar();
+    await paso.quitar();
+  });
+
+  /* Explicit cancellation that is still waiting for its upload step when the
+   * account leaves. Nothing of it may be sent once another identity (or the
+   * same account again) is on the page. */
+  for (const [quien, etiqueta] of [['otto', 'otra cuenta'], ['oscar', 'la misma cuenta']]) {
+    await revisar(`R3-B1: cancelación explícita pendiente y reingreso de ${etiqueta}: ninguna escritura vieja sale bajo la sesión nueva`, async () => {
+      const t = await nuevoTerreno(`Lote Cancelado Ficticio (${etiqueta})`);
+      await recargarTabla(oscar.page);
+      await fila(oscar.page, t).waitFor();
+      const d = await abrirDetalle(oscar.page, t, `Lote Cancelado Ficticio (${etiqueta})`);
+      const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+      await zonaPdf(d).setInputFiles(archivoPrivado);
+      await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
+      const tras = escrituras(oscar.page);
+      // Cancel (it now waits for the held PUT) and sign out in the same task.
+      await oscar.page.evaluate(() => {
+        [...document.querySelectorAll('.archivos-detalle[data-tipo="pdf"] .archivos-subida button')].find((b) => b.textContent === 'Cancelar subida').click();
+        [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Cerrar sesión').click();
+      });
+      await oscar.page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
+      await entrar(oscar.page, quien);
+      paso.soltar();                                             // the old step may now "finish"
+      await esperar(2500);
+      igual(tras.vistas, [], `escrituras de la sesión anterior bajo ${quien}`);
+      igual((await privadoDe(oscar.page, [PRIVADO])).nombres, [], 'nombre privado visible');
+      igual(await oscar.page.locator('.archivos-subida').count(), 0, 'fila de subida visible');
+      tras.dejar();
+      await paso.quitar();
+      if (quien !== 'oscar') {                                   // back to oscar for what follows
+        await oscar.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+        await entrar(oscar.page, 'oscar');
+      }
+      // The server never received a cancel from the abandoned mount: the version is still the owner's pending one.
+      const lista = (await llamar(oscar.page, 'GET', `/api/inventario/terrenos/${t}/archivos`)).datos;
+      return { archivos_del_terreno: lista.archivos.length };
+    });
+  }
+
+  await revisar('R3-B1: cancelar una subida mientras se cierra y se reabre el detalle: a lo más una cancelación, nada tardío, y el detalle nuevo funciona', async () => {
+    const t = await nuevoTerreno('Lote Reabierto Ficticio');
+    await recargarTabla(oscar.page);
+    await fila(oscar.page, t).waitFor();
+    let d = await abrirDetalle(oscar.page, t, 'Lote Reabierto Ficticio');
+    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+    await zonaPdf(d).setInputFiles(archivoPrivado);
+    await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
+    const tras = escrituras(oscar.page);
+    await oscar.page.evaluate(() => {
+      [...document.querySelectorAll('.archivos-detalle[data-tipo="pdf"] .archivos-subida button')].find((b) => b.textContent === 'Cancelar subida').click();
+      document.querySelector('dialog[open]').close();
+    });
+    await hasta(async () => (await oscar.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
+    // The explicit cancel was asked for while that detail was open and this
+    // account's scope is still the current one: it may be sent, once. Nothing
+    // else may leave the closed detail, and nothing at all once it is reopened.
+    cierto(tras.vistas.length <= 1 && tras.vistas.every((v) => /^POST \/api\/archivos\/versiones\/[^/]+\/cancelar$/.test(v)),
+      `escrituras del detalle cerrado: ${JSON.stringify(tras.vistas)}`);
+    tras.dejar();
+    d = await abrirDetalle(oscar.page, t, 'Lote Reabierto Ficticio');
+    const reabierto = escrituras(oscar.page);
+    paso.soltar();
+    await esperar(2000);
+    igual(reabierto.vistas, [], 'escrituras tardías del detalle cerrado, ya reabierto');
+    reabierto.dejar();
+    await paso.quitar();
+    igual(await d.locator('.archivos-detalle[data-tipo="pdf"] .archivos-subida').count(), 0, 'la subida del detalle cerrado reapareció');
+    // The reopened detail is a working one: a new upload goes through.
+    await subirEnDetalle(d, 'pdf', F.pdf);
+    igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'subida en el detalle reabierto');
+    await cerrarDetalle(oscar.page, d);
+    await hasta(async () => /PDF/.test(await textoCelda(oscar.page, t, 'core:archivos')), 'la celda no refleja el PDF');
+  });
+
+  await revisar('R3-B5: la sesión termina durante el resumen final del contorno: no se instala y nada queda', async () => {
+    const t = await nuevoTerreno('Lote Resumen Ficticio');
+    await recargarTabla(oscar.page);
+    await fila(oscar.page, t).waitFor();
+    const d = await abrirDetalle(oscar.page, t, 'Lote Resumen Ficticio');
+    await subirEnDetalle(d, 'kmz', F.kmz_simple);
+    igual(await faseFinal(d, 'kmz', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'KMZ');
+    await cerrarDetalle(oscar.page, d);
+    await hasta(async () => (await terreno(oscar.page, t)).ubicacion.modo === 'geometria', 'contorno activo');
+    await abrirMapa(oscar.page);
+    // A controlled digest: the browser's own SHA-256, answered 1.2 s later. Only this page, only from here on.
+    await oscar.page.evaluate(() => {
+      const real = crypto.subtle.digest.bind(crypto.subtle);
+      window.__resumenes = 0;
+      crypto.subtle.digest = async (...a) => { window.__resumenes += 1; const r = await real(...a); await new Promise((ok) => setTimeout(ok, 1200)); return r; };
+    });
+    await seleccionarEnTabla(oscar.page, t);
+    await hasta(() => oscar.page.evaluate(() => window.__resumenes > 0), 'no se llegó al resumen final');
+    cierto(oscar.api.some((l) => /GET \/api\/archivos\/geometrias\/[^/]+\/contenido 200/.test(l)), 'el cuerpo no se leyó completo antes');
+    await oscar.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+    await oscar.page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
+    await oscar.page.evaluate(() => {
+      window.__mutaciones = 0;
+      new MutationObserver((m) => { window.__mutaciones += m.filter((x) => x.target.closest?.('.previa, .tabla-pantalla, .archivos-detalle')).length; })
+        .observe(document.body, { subtree: true, childList: true, characterData: true });
+    });
+    await esperar(2500);                                         // the delayed digest has resolved by now
+    const r = await oscar.page.evaluate(() => ({ mutaciones: window.__mutaciones,
+      privado: document.querySelectorAll('.previa, .previa-mapa, tr[data-id], .archivos-detalle').length }));
+    igual(r, { mutaciones: 0, privado: 0 }, 'instalación tardía tras terminar la sesión');
+    igual((await privadoDe(oscar.page, ['Lote Resumen Ficticio'])).nombres, [], 'nombre visible');
+    await entrar(oscar.page, 'oscar');                           // a new session starts clean and can load it
+    await recargarTabla(oscar.page);
+    await abrirMapa(oscar.page);
+    await seleccionarEnTabla(oscar.page, t);
+    await hasta(async () => /Contorno cargado/.test(await estadoMapa(oscar.page)), 'la sesión nueva no pudo cargar el contorno');
+  });
+}
+await ada2.contexto.close();
+
 if (!FOCALIZADO) {
   await revisar('se revoca el acceso mientras se leen los fragmentos del contorno: nada se instala y la fila se va', async () => {
     await abrirMapa(omar.page);

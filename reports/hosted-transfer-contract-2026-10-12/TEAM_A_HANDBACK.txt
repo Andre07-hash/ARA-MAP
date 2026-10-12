@@ -1,0 +1,174 @@
+TEAM A — VD1-A CONSOLIDATED CONTRACT (design only; supersedes my previous VD1-A handback)
+
+Reference: 4670df7348265af66c640069e5ece2a274830fa3. Instructions: 26a3d85. No file changed,
+no commit/push, no test/probe, no dependency installed, no cloud or account operation.
+#29, #28, #30 and C1 untouched.
+B's correction addendum is not on any ref I can read (fetch shows no new B commit or PR).
+I consolidated against the supervisor's summary of it; items tagged [B-TEXT] must match B's
+wording. Working design: private S3 + cloud-only boto3, bytes through authorized handlers.
+Verified today in Vercel's primary docs: runtime token header, issuer/audience/subject formats.
+Not verified: boto3 refresh behaviour, bundle size, hosted time/memory/cost, project settings.
+
+1. ROUTES (all existing paths; no new route, no schema change, 4 MiB request cap kept)
+PARTE_BYTES = TROZO_DESCARGA = 3 MiB. partes = ceil(tamano_declarado / PARTE_BYTES), max 9.
+Operation      Route                                               Capability       Impl owner
+Start          POST /api/inventario/terrenos/:id/archivos          archivos.subir   B
+Content part   PUT  /api/archivos/versiones/:vid/contenido?parte=N  archivos.subir   B
+Complete       POST /api/archivos/versiones/:vid/completar         archivos.subir   B
+Cancel         POST /api/archivos/versiones/:vid/cancelar          archivos.subir   B
+Download       GET  /api/archivos/versiones/:vid/descarga?desde=O   archivos.ver     B
+Process/select, activate, retire, list/history, geometry           unchanged        —
+Authorization order, unchanged on every route: Host -> same-host Origin on non-GET ->
+read-only gate -> session (401) -> role capability (403) -> 4 MiB body cap (413) -> handler
+-> service scope / pending-upload ownership (indistinguishable not-found) -> state -> deadline.
+A reviews every B change to server/api/archivos.py and server/archivos.py for this order
+before it is accepted.
+
+Start: field validation -> scope -> in-transaction reverify -> idempotent replay -> store
+configured? -> pending limit (5) -> insert. Response adds
+"transferencia":{"parte_bytes":3145728,"partes":P}.
+  400 archivo_vacio when tamano_declarado == 0, raised with the other field checks, before
+  any database access. NOTE: the reference currently accepts 0; this is a new rule.
+Part PUT: 415 tipo_contenido_invalido -> 411 longitud_requerida -> 400 cuerpo_incompleto ->
+  400 parte_invalida (not 1-2 ASCII digits) -> not-found -> 409 subida_no_pendiente ->
+  409 subida_expirada -> 400 parte_invalida {partes} -> 400 tamano_de_parte_invalido
+  {esperado} -> atomic whole-part replace -> existing post-write recheck.
+  200 {"version_id","parte","partes","bytes_recibidos","estado":"subiendo"}
+  Staging keys derived server-side: <clave_temporal>-NN (valid under the accepted key grammar).
+
+2. COMPLETION AND RETRIES
+Sequence unchanged: scope -> lease 180 s -> new final/<version>/<nonce> -> build final ->
+verify the FINAL object (size, SHA-256, signature) -> bounded KMZ parse -> one write
+transaction (reverify, lease owned, pointer/history/outcome). Store and parser I/O stay
+outside write transactions. Only "build final" differs: compose parts 0..P-1 into the nonce
+with a no-overwrite write [B-TEXT: Almacen method name and uncertain-write signalling].
+Lost part response: resend. Missing part: 409 contenido_temporal_ausente, retry in deadline.
+Lost completion response: replay. Two completions: one lease. Killed function: lease expires.
+Uncertain final write or uncertain commit: the object is kept and reported
+(limpieza_pendiente); deletion only of this attempt's own nonce after the database proves it
+unreferenced. No sweep.
+Upload deadline passed (409 subida_expirada): the version still counts as pending until the
+60-minute limit, so the client cancels it and starts again with a FRESH Idempotency-Key
+(the old key would replay the expired version). New version, new staging key.
+Deadlines 15/60 min, lease 180 s, 5 pending: unchanged.
+
+3. DOWNLOAD (supervisor's recommendation adopted; no alternative proposed)
+Each GET …/descarga?desde=O: full reauthorization (session, archivos.ver, current scope,
+version disponible) -> read the whole final object -> verify size and SHA-256 against the
+database row -> return bytes [O, O+3 MiB) of that verified buffer. No lectura value, no
+registry, no token, no ranged store read.
+Headers: application/octet-stream, "private, no-store", CSP sandbox, nosniff,
+X-Archivo-Version-Id, X-Archivo-Sha256, X-Archivo-Tamano, X-Archivo-Desde,
+X-Archivo-Longitud, X-Archivo-Siguiente (offset or "fin").
+Errors: 400 desplazamiento_invalido (malformed or O >= size); 503 contenido_no_disponible;
+503 objeto_final_inconsistente; 503 almacen_no_disponible.
+Browser keeps complete-file size/SHA-256 verification before offering the file.
+Disclosed cost: every slice reads the full object. 25 MiB PDF = 9 reads = 225 MiB from the
+store per download; 20 MiB KMZ = 7 reads = 140 MiB; about 25 MiB buffered per invocation.
+Goes into the hosted timing/cost check.
+Cloud adapter guard (A): a binary response above 4 MiB is refused and logged, never sent.
+
+4. OIDC HANDOFF
+Verified format (team issuer mode):
+  header   x-vercel-oidc-token (runtime, per request)
+  iss      https://oidc.vercel.com/<TEAM_SLUG>
+  aud      https://vercel.com/<TEAM_SLUG>
+  sub      owner:<TEAM_SLUG>:project:<PROJECT_NAME>:environment:preview   (pilot)
+Trust policy: exact StringEquals on aud and sub, one role per environment. Preview and
+Production use different roles, different buckets, different variable scopes; the pilot
+creates only the Preview role.
+Handoff (A, in api/index.py; the variable lives in B's backend module, which must import
+boto3 lazily so this import stays stdlib-only):
+    def _dispatch(self, method):
+        marca = almacen_s3.fijar_token_oidc(self.headers.get("x-vercel-oidc-token"))
+        try:
+            <existing origin check and super()._dispatch(method)>
+        finally:
+            almacen_s3.restablecer_token_oidc(marca)
+A contextvars.ContextVar (default None), set before any routing and reset in finally on
+every path including exceptions. The token is never logged, stored, echoed or placed on the
+Request object beyond the headers already there. The local server never sets it.
+B owns and must confirm: the STS exchange; that the cached client's credentials refresh by
+reading the CURRENT request's token at refresh time; behaviour under concurrent requests and
+warm-instance reuse; exact pinned boto3/botocore versions and supported Python.
+Preview check to add: a client-supplied x-vercel-oidc-token is replaced by the platform.
+
+5. ERROR CLASSIFICATION (existing two codes; provider failures never become 401/403/404)
+Condition                                                   Response
+ARA_MAP_ALMACEN unset, or bucket/region/role missing/bad     503 almacen_no_configurado
+OIDC header absent on the cloud entry point                  503 almacen_no_configurado
+STS/S3 timeout, throttling, 5xx, connection failure          503 almacen_no_disponible, reintentar:true
+OIDC token rejected as expired by STS                        503 almacen_no_disponible, reintentar:true
+Credentials expired mid-request                              one forced refresh + one retry of a
+                                                             safe operation, then as above
+Access denied by STS or S3 (trust/bucket policy)             503 almacen_no_disponible, reintentar:false
+Object missing                                               existing: contenido_temporal_ausente /
+                                                             contenido_no_disponible
+Final key already exists                                     existing collision path
+Write outcome unknown                                        503 almacen_no_disponible, reintentar:true,
+                                                             limpieza_pendiente; object kept
+Factory raises anything else                                 503 almacen_no_disponible; not cached
+Logs: condition class, exception type, variable NAMES. Never messages, tokens, ARNs with
+account ids, keys or URLs. All of these occur after application authorization, so they
+cannot reveal a resource to someone without access.
+Variables (names for B to confirm): ARA_MAP_ALMACEN=s3, ARA_MAP_S3_BUCKET, ARA_MAP_S3_REGION,
+ARA_MAP_S3_PREFIJO, ARA_MAP_S3_ROLE_ARN. No long-lived access keys.
+
+6. RESTORE POLICY (agreed position for B's verifier)
+- Database and bucket restored to one point into a fresh isolated target.
+- Every referenced final key must exist with the recorded size and SHA-256; any missing or
+  inconsistent object fails acceptance. Active geometry links are checked the same way.
+- Sessions: team_session and team_login_failure are emptied; everyone signs in again.
+- Leases: archivo_trabajo is not restored (already excluded from backups by design).
+  Versions restored in "subiendo" are left to end by their existing deadlines; their staging
+  is not restored and they are reported, not repaired.
+- Unreferenced objects are reported only.
+
+7. FILES AND OWNERS
+A: api/index.py (factory injection, OIDC handoff, response guard), tests/test_cloud.py,
+   pyproject.toml dependency line and vercel.json only if needed (dedicated deployment PR),
+   runbook, Spanish onboarding.
+   Not expected to change: server/app.py, auth.py, router.py, db.py, postgres.py,
+   api/sesion.py, web/lib/api.js, scripts/esquema.py, scripts/cuentas.py.
+B: server/almacen.py, S3 backend module, server/archivos.py, server/api/archivos.py,
+   server/repo/archivos.py if needed, web/lib/archivos.js, web/components/archivos/*,
+   recovery verifier, their tests.
+Dependencies: boto3 + botocore, exact pins from B, cloud-only (python_version >= '3.10'
+marker like psycopg), imported lazily; local startup and the 3.9 floor stay dependency-free.
+
+8. FOCUSED VERIFICATION
+Local, in-memory store, cloud handler, disposable Postgres:
+ a. 3-part upload -> complete -> sliced download reassembles to the recorded hash.
+ b. archivo_vacio and unconfigured start: no pending row.
+ c. Wrong part length / out-of-range part / missing part at completion.
+ d. Second account: not-found on part PUT and on every download slice.
+ e. Access revoked between slices: next slice refused.
+ f. Corrupted final object: slice answers objeto_final_inconsistente.
+ g. Token handoff: set during the request, None afterwards, also after a raised error and
+    under two concurrent requests with different tokens.
+ h. Each row of the error table with a fake that raises that condition; logs contain no
+    secret-shaped text.
+ i. Expired upload -> cancel -> fresh key start succeeds; old key replays the old version.
+ j. Binary response above 4 MiB refused by the adapter.
+B: backend contract tests, credential refresh, uncertain write, verifier.
+Requires a real Preview: 20 MiB KMZ and 25 MiB PDF end to end, selection/activation, boundary
+with null X/Y, invalid replacement keeps the boundary, second session, cross-account denial,
+redeploy persistence, restore into a fresh target, slice timing and store-read cost, forged
+OIDC header replaced.
+
+9. SEQUENCE (A-only effort, rough, unmeasured)
+ 1. Supervisor freezes this contract with B's names (compose method, variables, pins).
+ 2. B implements backend/lifecycle/client; A in parallel: adapter, guard, handoff, cloud
+    tests against the in-memory store — about 1 day.
+ 3. A authorization review of B's shared-file changes — about 0.5 day.
+ 4. A runbook and Spanish guide — about 1 day.
+ 5. Preview proof with the operator — about 0.5-1 day.
+
+OPEN FOR THE SUPERVISOR
+ - Confirm archivo_vacio as a new rule (the reference accepts size 0 today).
+ - Access denied by the provider as almacen_no_disponible with reintentar:false.
+ - B's addendum is not readable from the repository; please publish it or confirm the
+   [B-TEXT] items.
+
+Stopped at contract review. No implementation, dependency, provisioning, credentials,
+accounts, deployment, PR/main merge or real data.

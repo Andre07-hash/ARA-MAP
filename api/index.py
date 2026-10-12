@@ -3,10 +3,12 @@
 Authentication and the public/private route policy are NOT decided here: they
 live in server.app.Handler (server/auth.py), shared with the local server. This
 adapter only states what differs in the cloud: any Host, same-host Origin for
-writes, HTTPS (Secure cookies), a 4 MB body limit and Postgres being required.
+writes, HTTPS (Secure cookies), a 4 MB limit on each body, in and out, and
+Postgres being required.
 """
 
 import os
+import sys
 from urllib.parse import urlsplit
 
 if os.environ.get("DATABASE_URL"):
@@ -17,6 +19,8 @@ from server.app import Handler
 from server.web_util import ApiError
 
 MAX_BODY = 4 * 1024 * 1024
+# The platform drops a Function answer above about 4.5 MB with its own error.
+MAX_RESPONSE = 4 * 1024 * 1024
 
 
 class handler(Handler):
@@ -45,5 +49,12 @@ class handler(Handler):
         return super()._read_body()
 
     def _send(self, status, payload, content_type, extra=None):
+        if len(payload) > MAX_RESPONSE:
+            # Refused here, where it is logged and answered, never half-sent.
+            sys.stderr.write(f"  respuesta rechazada: {len(payload)} bytes superan el límite\n")
+            self.close_connection = True
+            return self._send_json(
+                {"error": "La respuesta es demasiado grande para la versión web.",
+                 "detalle": {"code": "respuesta_demasiado_grande", "limite": MAX_RESPONSE}}, 500)
         return super()._send(status, payload, content_type,
                              {"Cache-Control": "no-store", **(extra or {})})

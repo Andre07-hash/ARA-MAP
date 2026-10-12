@@ -6,6 +6,7 @@ sessions are checked here through the real cloud handler. Without Postgres the
 adapter refuses to touch any database (503); the signed-in cases run it on a
 throwaway SQLite file by patching only that readiness check.
 """
+import contextvars
 import importlib.util
 import json
 import os
@@ -17,6 +18,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from server import auth, db
+from server.api.binario import RespuestaBinaria
 from tests.support import TEST_PASSWORD, TempDatabase, create_user
 
 
@@ -185,6 +187,29 @@ class SignedIn(CloudServer, TempDatabase):
         self.assertEqual(status, 413)
         self.assertIn("4 MB", json.loads(body)["error"])
 
+    def binary_answer(self, size):
+        """What the adapter sends when a handler returns `size` private bytes."""
+        privado = {"Cache-Control": "private, no-store", "X-Archivo-Sha256": "f" * 64}
+        ruta = (lambda request: RespuestaBinaria(bytes(size), "application/octet-stream", privado),
+                {"path": "/api/config", "query": {}, "params": {}, "capacidad": None})
+        with patch("server.app.router.resolve", return_value=ruta), patch("sys.stderr"):
+            return self.request("GET", "/api/config")
+
+    def test_binary_answer_keeps_its_private_headers(self):
+        status, body, headers = self.binary_answer(4 * 1024 * 1024)
+        self.assertEqual((status, len(body)), (200, 4 * 1024 * 1024))
+        self.assertEqual(headers["Cache-Control"], "private, no-store")
+        self.assertEqual(headers["X-Archivo-Sha256"], "f" * 64)
+        self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
+
+    def test_answer_above_the_platform_limit_is_refused_not_sent(self):
+        status, body, headers = self.binary_answer(4 * 1024 * 1024 + 1)
+        self.assertEqual(status, 500)
+        self.assertEqual(json.loads(body)["detalle"],
+                         {"code": "respuesta_demasiado_grande", "limite": 4 * 1024 * 1024})
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        self.assertNotIn("X-Archivo-Sha256", headers)
+
     def test_oversized_login_body_is_refused(self):
         self.assertEqual(self.request("POST", "/api/login", "x" * 5000)[0], 413)
 
@@ -200,6 +225,84 @@ class SignedIn(CloudServer, TempDatabase):
         self.assertNotIn(b"SECRET-DB-DETAIL", body)
         self.assertEqual(headers["Cache-Control"], "no-store")
         logged.assert_called_once_with()
+
+
+@unittest.skipUnless(importlib.util.find_spec("server.almacen_s3"),
+                     "server/almacen_s3.py (Team B, M1) is not in this tree yet")
+class OidcHandoff(CloudServer, unittest.TestCase):
+    """The adapter hands each request's own platform token to the store module
+    and takes it back on every way out, so a warm instance never keeps one."""
+
+    def setUp(self):
+        self.token = contextvars.ContextVar("token_de_prueba", default=None)
+        self.despues = []  # what the variable holds right after each reset
+
+        def restablecer(marca):
+            self.token.reset(marca)
+            self.despues.append(self.token.get())
+
+        self.env = patch.dict(os.environ, {"ARA_MAP_DATABASE_URL": ""})
+        self.env.start()
+        self.spies = [patch("server.almacen_s3.fijar_token_oidc", self.token.set),
+                      patch("server.almacen_s3.restablecer_token_oidc", restablecer)]
+        for spy in self.spies:
+            spy.start()
+        self.start(load_adapter().handler)
+
+    def tearDown(self):
+        self.stop()
+        for spy in self.spies:
+            spy.stop()
+        self.env.stop()
+
+    def answering(self, handler):
+        ruta = (handler, {"path": "/api/config", "query": {}, "params": {}, "capacidad": None})
+        return patch("server.app.router.resolve", return_value=ruta)
+
+    def test_the_request_sees_its_token_and_none_remains(self):
+        with self.answering(lambda request: {"visto": self.token.get()}):
+            _, body, _ = self.request("GET", "/api/config", headers={"x-vercel-oidc-token": "uno"})
+        self.assertEqual(json.loads(body), {"visto": "uno"})
+        self.assertEqual(self.despues, [None])
+
+    def test_reset_on_refusals_and_on_errors(self):
+        def falla(request):
+            raise RuntimeError("fallo sintético")
+
+        token = {"x-vercel-oidc-token": "uno"}
+        self.assertEqual(self.request("GET", "/api/bases", headers=token)[0], 401)
+        self.assertEqual(self.request("POST", "/api/login", "{}",
+                                      {**token, "Origin": "https://otro.example"})[0], 403)
+        with self.answering(falla), patch("traceback.print_exc"):
+            self.assertEqual(self.request("GET", "/api/config", headers=token)[0], 500)
+        self.assertEqual(self.despues, [None, None, None])
+
+    def test_a_request_without_the_header_sees_none(self):
+        with self.answering(lambda request: {"visto": self.token.get()}):
+            _, body, _ = self.request("GET", "/api/config")
+        self.assertEqual(json.loads(body), {"visto": None})
+
+    def test_simultaneous_requests_each_see_their_own(self):
+        juntos = threading.Barrier(2, timeout=10)
+
+        def handler(request):
+            juntos.wait()  # both requests are inside before either answers
+            return {"visto": self.token.get()}
+
+        vistos = {}
+
+        def pedir(valor):
+            _, body, _ = self.request("GET", "/api/config", headers={"x-vercel-oidc-token": valor})
+            vistos[valor] = json.loads(body)["visto"]
+
+        with self.answering(handler):
+            hilos = [threading.Thread(target=pedir, args=(v,)) for v in ("uno", "dos")]
+            for hilo in hilos:
+                hilo.start()
+            for hilo in hilos:
+                hilo.join()
+        self.assertEqual(vistos, {"uno": "uno", "dos": "dos"})
+        self.assertEqual(self.despues, [None, None])
 
 
 if __name__ == "__main__":

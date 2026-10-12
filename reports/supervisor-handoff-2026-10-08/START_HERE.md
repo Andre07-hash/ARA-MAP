@@ -1,5 +1,7 @@
 # ARA MAP — supervisor session handoff
 
+**Latest owner direction and design instructions — 2026-10-12:** [ASAP private MVP on Vercel with full-size KMZ/PDF transfers](../hosted-readiness-decision-2026-10-12/START_HERE.md). Fresh empty isolated portal and operator-managed accounts are confirmed. A's R3-A2 residual at `4670df7` and B's R3-A1 at `bc7e421` are independently accepted; #28/C1 and team branches are preserved. VD1-A/VD1-B are bounded design assignments, not deployment/implementation authorization. This update supersedes conflicting historical waiting, roadmap and pending-review labels below.
+
 **Latest correction closeout — 2026-10-12:** [B accepted; A integration/R3-A2 pending](../round-3-corrections-review-2026-10-12/START_HERE.md).
 B's R3-B1–B5 are independently closed at `b2ac9bd176043fc4b1625b13993f8f21407dc978`.
 A consumes that exact candidate on #29 and corrects archive/read-only host

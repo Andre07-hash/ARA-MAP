@@ -1,0 +1,132 @@
+TEAM A — HOSTED-INTEGRATION / ONBOARDING READINESS HANDBACK (read-only)
+
+Inspected tree: PR #29 head 4670df7348265af66c640069e5ece2a274830fa3. No file changed, no commit,
+no push, no branch, no test run, nothing provisioned. #29, #27 (C1) and #28 untouched; #30 not read
+into this work or integrated.
+
+BLOCKER ON INPUT
+reports/client-mvp-plan-2026-10-12/TEAM_A.md is not published: after git fetch, no remote ref
+contains a client-mvp-plan path, and origin/codex/supervisor-completion-brief is still 63b363a.
+This handback follows the deliverables listed in the assignment message only. Please publish the
+plan commit; I will reconcile against it.
+
+NOT VERIFIED IN THIS PASS
+- Vercel's platform body limits (stated from general knowledge, ~4.5 MB request and response per
+  function; not measured here).
+- The production database schema version (not queried; no production access used).
+- KMZ analysis time and memory on a hosted runtime (never measured off a local Mac).
+
+1. CURRENT HOSTED STATE (from code)
+- api/index.py subclasses server.app.Handler: CLOUD=True, any Host, same-host Origin for writes,
+  Secure cookie, Postgres required, MAX_BODY = 4 MiB, no-store on every response.
+- It never calls api_archivos.configurar_almacen(). Hosted upload, download, complete and
+  reprocess therefore answer 503 almacen_no_configurado. Metadata and listing routes work.
+- configurar_archivos() runs only in serve() (local) and deliberately wires nothing for Postgres.
+- vercel.json: git deployments disabled, static output "web", one function, maxDuration 120.
+  Routing is hash-based, so no SPA rewrite is needed.
+- Sessions, login throttling, upload leases and the 5-pending limit are all database rows; nothing
+  depends on process memory except the lazily built store object, which is safe per instance.
+
+2. MINIMAL ADAPTER / CONFIGURATION GAPS (A-owned unless noted)
+G1 Store injection in the hosted entry point: one configurar_almacen(factory) call at import,
+   fail-closed (no factory -> existing 503). No route or handler change.
+G2 Configuration names for the store (B proposes, A reads them in the entry point). Today only
+   ARA_MAP_ARCHIVOS exists and it means a local directory.
+G3 Size limits are inconsistent in the cloud: adapter 4 MiB; /api/config maxUploadBytes 4 MiB
+   (used only by Excel import); web/lib/archivos.js LIMITE_BYTES hard-codes 25/20 MiB and the
+   detail text says "Máximo 25 MB". A hosted user would be invited to upload 25 MB and get 413.
+   Fixing the client side touches B-owned files.
+G4 If the route is a long-running host: a hosted entry point is missing. serve() binds 127.0.0.1,
+   opens a browser, and Handler rejects non-loopback Host. The cloud subclass already has the
+   right policy; it needs a server loop bound for a TLS reverse proxy. Small, A-owned.
+G5 No hosted test covers attachments: tests/test_cloud.py (11 tests) has no store case.
+G6 Every database session takes one workspace advisory lock (30 s wait, then "busy"). Store I/O
+   and KMZ parsing run outside sessions, so large transfers do not hold it, but all requests
+   still serialize on it. Acceptable for a small private portal; should be measured, not assumed.
+
+3. ATTACHMENT TRANSFER COMPATIBILITY
+- Upload: one PUT of the raw file, Content-Length required, no chunking or resume; body fully
+  buffered. Limits PDF 25 MiB, KMZ 20 MiB.
+- Download: one response with the whole file, buffered and SHA-256 verified server-side first,
+  then verified again in the browser.
+- Geometry: 512 KiB slices, metadata responses capped at 128 KiB. Fits any route.
+- Table/detail JSON: paged. Fits any route.
+Consequence by route:
+  Route V (Vercel function + Neon + object store): uploads and downloads above ~4 MiB cannot pass
+    through the function. Either (a) cap attachments at 4 MiB for the portal — needs G1-G3 only —
+    or (b) add a direct browser-to-store transfer protocol, which is new design for both teams
+    (authorization, hash verification, expiry) and conflicts with the current "bytes only through
+    authorized handlers" model. (b) is not minimal.
+  Route H (one private long-running host + persistent volume, Postgres local or Neon): the
+    existing 25/20 MiB flow works unchanged. The accepted AlmacenLocal is sufficient as the byte
+    layer; B adds backup/recovery of the volume. Needs G1/G4 only.
+Peak memory per large transfer is roughly 2x file size (body plus verification buffer).
+
+4. PRIVATE-STORE INJECTION BOUNDARY (to agree with B)
+- B delivers: an object satisfying server.almacen.Almacen (guardar_temporal, copiar, leer,
+  tamano_de, borrar, listar; optional close) with the documented semantics — atomic staging
+  replace, write-once final keys with ColisionError, bounded reads, exact-key delete — plus a
+  zero-argument factory, its configuration names, and its recovery/backup procedure.
+- A delivers: the single configurar_almacen(factory) call in the hosted entry point, reading B's
+  configuration names; failure to build stays 503, never a fallback store.
+- Open with B: whether copiar can be atomic-no-overwrite on the chosen backend; credentials scope
+  (one private bucket/volume per environment); who runs orphan cleanup, since listar exists but
+  nothing schedules it in a hosted runtime.
+
+5. MIGRATION AND ACCOUNT BOOTSTRAP (operator steps, isolated target only)
+1. Create an empty Postgres database for the portal, separate from production.
+2. scripts/esquema.py --url-env <VAR> (creates schema 10; idempotent; --check reports only).
+   Do not use setup_cloud.py or migrate_cloud.py without --url-env: both default to .env.local,
+   i.e. production.
+3. scripts/cuentas.py --url-env <VAR> crear <login> "<Nombre>" --rol admin (hidden prompt,
+   12-character minimum). The command refuses a target not at the current schema.
+4. Admin signs in, creates work bases, then operator accounts are created by CLI and granted
+   bases in the app.
+5. Data enters through the existing import assistant (4 MiB file cap on Vercel) — not in scope now.
+Gaps: account creation, password reset and deactivation are CLI-only; there is no self-service
+password change. Upgrading the existing production workspace instead of a fresh database is a
+separate release step with an unknown starting version.
+
+6. ISOLATED ENVIRONMENT REQUIREMENTS
+- Own database, own private byte store, own deployment and URL; nothing shared with production
+  or with the existing preview.
+- HTTPS only (Secure, HttpOnly, SameSite=Strict cookie; same-host Origin on writes).
+- Secrets only in the host's environment: database URL (DATABASE_URL or ARA_MAP_DATABASE_URL),
+  store settings (names pending B). ARA_MAP_IA_* left unset; ARA_MAP_READ_ONLY unset.
+- Manual deployment from a reviewed commit by whoever holds hosting access.
+- Backups for both database and byte store, with a restore that keeps them consistent (B).
+- Optional outer access gate (platform protection or allow-list) in front of the login.
+
+7. SPANISH ONBOARDING OUTLINE (draft headings only)
+1. Qué es el portal y quién tiene acceso
+2. Entrar y salir; qué hacer si se bloquea el acceso (5 intentos, 15 minutos)
+3. Roles: administrador y operador
+4. Bases de trabajo y permisos (solo administrador)
+5. La tabla maestra: buscar, filtrar, editar, columnas propias
+6. Archivar, restaurar y transferir terrenos
+7. Archivos: subir PDF y KMZ, versiones, descargar, retirar; tamaños permitidos
+8. El mapa y los contornos
+9. Importar desde Excel o CSV
+10. Mensajes frecuentes y qué significan (solo lectura, sin permiso, ocupado, sesión vencida)
+11. A quién pedir una cuenta o un cambio de contraseña
+12. Qué no hace todavía el portal
+
+8. REMAINING EFFORT (A's side, rough, after the route is approved)
+- Route H: hosted entry point + store wiring + hosted tests + operator runbook: about 2 days.
+- Route V with a 4 MiB cap: store wiring + limit alignment + hosted tests + runbook: about
+  1-2 days, plus B's client-limit change and B's object-store backend.
+- Route V with full-size files: new transfer protocol, not estimable before a design; days to
+  weeks across both teams.
+- Onboarding guide in Spanish: about 1 day once the route and limits are fixed.
+- Self-service password change, if required for launch: about 1-2 days (new behaviour).
+
+9. DECISIONS NEEDED
+Owner: hosting route (V or H); attachment size the client actually needs; who the first admin
+  is and who operates accounts; whether CLI-only password resets are acceptable at launch;
+  fresh empty portal versus carrying existing workspace data.
+Operator: database and store provisioning, secrets, backups, access gate, deployment.
+Supervisor: publish TEAM_A.md; the store configuration contract between A and B; whether G3
+  (client limits) is assigned to B.
+
+Stopped. No 4A, no implementation, no PR/main merge, no deployment, no provisioning, no real
+accounts or data.

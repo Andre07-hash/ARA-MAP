@@ -1,0 +1,17 @@
+test_a_blank_terrain_has_empty_summary_and_no_location_on_every_surface (tests.test_archivos_http.ResumenesPostgres.test_a_blank_terrain_has_empty_summary_and_no_location_on_every_surface) ... ok
+test_a_conflict_answer_carries_the_current_siblings (tests.test_archivos_http.ResumenesPostgres.test_a_conflict_answer_carries_the_current_siblings) ... ok
+test_a_page_is_bounded_and_counted_by_the_server (tests.test_archivos_http.ResumenesPostgres.test_a_page_is_bounded_and_counted_by_the_server) ... ok
+test_a_pending_unusable_or_rejected_replacement_keeps_the_previous_boundary (tests.test_archivos_http.ResumenesPostgres.test_a_pending_unusable_or_rejected_replacement_keeps_the_previous_boundary) ... ok
+test_an_active_boundary_locates_a_terrain_without_xy_and_changes_no_cell (tests.test_archivos_http.ResumenesPostgres.test_an_active_boundary_locates_a_terrain_without_xy_and_changes_no_cell) ... ok
+test_another_accounts_pending_upload_shows_no_metadata_in_a_row (tests.test_archivos_http.ResumenesPostgres.test_another_accounts_pending_upload_shows_no_metadata_in_a_row) ... ok
+test_no_schema_change (tests.test_archivos_http.ResumenesPostgres.test_no_schema_change) ... ok
+test_retiring_the_kmz_falls_back_to_valid_xy_or_to_nothing (tests.test_archivos_http.ResumenesPostgres.test_retiring_the_kmz_falls_back_to_valid_xy_or_to_nothing) ... ok
+test_rows_carry_no_body_key_or_candidate_and_stay_small (tests.test_archivos_http.ResumenesPostgres.test_rows_carry_no_body_key_or_candidate_and_stay_small) ... ok
+test_scope_decides_every_summary_and_descriptor (tests.test_archivos_http.ResumenesPostgres.test_scope_decides_every_summary_and_descriptor) ... ok
+test_the_public_catalog_gains_nothing (tests.test_archivos_http.ResumenesPostgres.test_the_public_catalog_gains_nothing) ... ok
+test_xy_alone_locates_as_a_point_and_bad_xy_does_not (tests.test_archivos_http.ResumenesPostgres.test_xy_alone_locates_as_a_point_and_bad_xy_does_not) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 7.765s
+
+OK

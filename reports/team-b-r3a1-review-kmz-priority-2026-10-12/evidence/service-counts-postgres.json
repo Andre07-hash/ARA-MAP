@@ -1,0 +1,41 @@
+{
+  "backend": "postgres",
+  "service_counts": {
+    "admin": {
+      "1": {
+        "before": 7,
+        "after": 6
+      },
+      "50": {
+        "before": 350,
+        "after": 6
+      },
+      "100": {
+        "before": 700,
+        "after": 6
+      },
+      "200": {
+        "before": 1400,
+        "after": 6
+      }
+    },
+    "operator": {
+      "1": {
+        "before": 8,
+        "after": 7
+      },
+      "50": {
+        "before": 400,
+        "after": 7
+      },
+      "100": {
+        "before": 800,
+        "after": 7
+      },
+      "200": {
+        "before": 1600,
+        "after": 7
+      }
+    }
+  }
+}

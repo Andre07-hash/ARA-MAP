@@ -1,0 +1,59 @@
+{
+  "bd": "sqlite",
+  "focalizado": false,
+  "arranques": 1,
+  "total": 9,
+  "fallos": 0,
+  "omitidos": 27,
+  "medidas": {},
+  "resultados": [
+    {
+      "nombre": "R3-A2 residual: en la tabla maestra se archiva la base de un terreno durante su subida: sus filas quedan en sólo lectura, las de otras bases activas y las sin asignar siguen editables, y el texto pendiente se conserva",
+      "ok": true,
+      "ms": 2219,
+      "detalle": {
+        "servidor_niega": 409
+      }
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (olga)",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (otto)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (oscar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (oriol)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (alan)",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

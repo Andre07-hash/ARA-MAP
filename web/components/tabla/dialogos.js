@@ -30,8 +30,10 @@ export function abrirDetalle({
   terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onArchivar, onTransferir,
   onArchivos, onErrorDeArchivos,
 }) {
-  const archivado = Boolean(terreno.archived_at);
-  const soloLectura = !puedeCambiar || archivado;
+  // What may be changed can move while the dialog is open (the terrain or its
+  // base archived or restored by someone else): permisos() below updates it.
+  let archivado = Boolean(terreno.archived_at);
+  let soloLectura = !puedeCambiar || archivado;
   const montadas = [];
   const ranura = (tipo) => {
     const container = el("dd", { class: "detalle-ranura" });
@@ -50,27 +52,34 @@ export function abrirDetalle({
     el("dt", {}, "Última edición"),
     el("dd", {}, `${terreno.updated_by?.display_name ?? "—"} · versión ${terreno.version}`),
   );
-  const acciones = el("div", { class: "detalle-acciones" },
-    boton("Historial", () => onHistorial()),
-    puedeCambiar && boton(archivado ? "Restaurar terreno" : "Archivar terreno", async () => {
-      if (!archivado && !(await confirmDialog({
-        titulo: "¿Archivar este terreno?",
-        mensaje: "Sale de la tabla y deja de poder editarse. Sus datos, archivos e historial se " +
-          "conservan y se puede restaurar.",
-        confirmar: "Archivar",
-      }))) return;
-      close();
-      onArchivar(archivado);
-    }),
-    admin && puedeCambiar && !archivado && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
-  );
+  const nota = el("p", { class: "detalle-nota", role: "status" });
+  const acciones = el("div", { class: "detalle-acciones" });
+  function pintarEstado() {
+    nota.textContent = archivado ? "Archivado: se puede consultar y restaurar." : "";
+    nota.hidden = !archivado;
+    acciones.replaceChildren(...[
+      boton("Historial", () => onHistorial()),
+      puedeCambiar && boton(archivado ? "Restaurar terreno" : "Archivar terreno", async () => {
+        const estaba = archivado;
+        if (!estaba && !(await confirmDialog({
+          titulo: "¿Archivar este terreno?",
+          mensaje: "Sale de la tabla y deja de poder editarse. Sus datos, archivos e historial se " +
+            "conservan y se puede restaurar.",
+          confirmar: "Archivar",
+        }))) return;
+        close();
+        onArchivar(estaba);
+      }),
+      admin && puedeCambiar && !archivado && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
+    ].filter(Boolean));
+  }
   const { dialog, close } = openDialog({
     titulo: terreno.draft?.terreno || "Terreno sin nombre",
-    descripcion: archivado ? "Archivado: se puede consultar y restaurar." : null,
     ancho: "38rem",
-    contenido: el("div", {}, datos, acciones),
+    contenido: el("div", {}, nota, datos, acciones),
     acciones: [cerrar],
   });
+  pintarEstado();
   dialog.addEventListener("close", () => {
     for (const m of montadas.splice(0)) m.destroy();
     onCerrar?.();
@@ -79,6 +88,17 @@ export function abrirDetalle({
     terrenoId: terreno.id,
     /** A fresh summary for the same terrain; nothing else of the dialog changes. */
     archivos(resumen) { for (const m of montadas) m.update({ soloLectura, resumen: resumen ?? undefined }); },
+    /**
+     * What this account may do with the terrain now. The file mounts and the
+     * actions follow; what is being read (lists, an open history) stays.
+     */
+    permisos({ archivado: ahora, puedeCambiar: puede, resumen }) {
+      archivado = Boolean(ahora);
+      puedeCambiar = Boolean(puede);
+      soloLectura = !puedeCambiar || archivado;
+      pintarEstado();
+      for (const m of montadas) m.update({ soloLectura, resumen: resumen ?? undefined });
+    },
   };
 }
 

@@ -317,6 +317,16 @@ function abrirTabla(ruta) {
     onVista: (vista) => {
       if (getState().ruta.nombre === "tabla") navigate({ nombre: "tabla", id: vista }, { replace: true });
     },
+    // A write was refused for lack of permission while reading still works:
+    // ask again who this is and whether the application is read-only. A
+    // changed account or role goes through the session's own teardown; an
+    // unchanged one keeps its table, which only repaints what may be written.
+    onRevalidar: async () => {
+      await session.refresh();
+      if (!getState().sesion) return;
+      try { readOnly = (await api.config()).readOnly === true; } catch { /* keep what was known */ }
+      tabla?.permisos();
+    },
     // The server refused something the role allowed a moment ago: ask who we are now.
     onPermisos: async () => {
       cerrarTabla();

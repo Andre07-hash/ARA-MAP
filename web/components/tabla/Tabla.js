@@ -46,7 +46,13 @@ const ESTADOS = {
   pendiente: "guardando", error: "sin guardar", conflicto: "en conflicto", incierto: "sin confirmar",
 };
 
-export function createTabla({ sesion, soloConsulta = () => false, vistaInicial = null, onVista, onPermisos }) {
+/* What Team B's widgets report when a write was refused although the content
+ * may still be read (server codes): not a scope loss, a permission change. */
+const SIN_ESCRITURA = new Set(["forbidden", "terreno_archivado", "base_archivada"]);
+
+export function createTabla({
+  sesion, soloConsulta = () => false, vistaInicial = null, onVista, onPermisos, onRevalidar,
+}) {
   const admin = sesion.rol === "admin";
 
   let vivo = true;
@@ -195,6 +201,8 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   const colDe = (colId) => columnas.find((c) => c.id === colId) ?? null;
   const clave = (id, colId) => `${id}|${colId}`;
   const filaEditable = (t) => !vistaSoloLectura() && !t.archived_at;
+  /** Whether the record's detail offers changes at all (archive, restore, files). */
+  const puedeCambiarFila = (t) => !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada);
 
   const sinResolver = () => [...celdas.values()].filter((c) => c.estado !== "pendiente").length
     + (creacion?.estado === "incierto" ? 1 : 0);
@@ -543,11 +551,11 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   }
 
   /**
-   * A widget changed a terrain's files (upload, activation, retirement).
-   * Refresh that terrain once however many reports arrive while the request
-   * is out, and replace only its `archivos` and `ubicacion`. The row's
-   * version, draft and custom values stay as the table has them: this answer
-   * may be older than a cell save still in flight.
+   * A widget changed a terrain's files (upload, activation, retirement), or
+   * was refused a write. Refresh that terrain once however many reports arrive
+   * while the request is out. The row's version, draft and custom values stay
+   * as the table has them: this answer may be older than a cell save still in
+   * flight. Only what the files and the permissions depend on is taken.
    */
   async function refrescarArchivos(id) {
     if (!vivo || !filaDe(id)) return;
@@ -569,17 +577,72 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     }
   }
 
+  /** Whether the row has work of the person's that removing it would lose. */
+  const conTrabajo = (id) => editando?.id === id || [...celdas.keys()].some((k) => k.startsWith(`${id}|`));
+
+  /**
+   * Take from a fresh record its files, its location and its permission
+   * metadata: whether it is archived and which base it is in. Those two decide
+   * what may be written and whether the row belongs in this view; they are
+   * taken only from an answer at least as new as the row (an older one could
+   * undo an archive or a transfer this table already knows about). Nothing
+   * else of the row is replaced and no cell with an editor or an unresolved
+   * change is repainted.
+   */
   function aplicarArchivos(terreno) {
     const actual = filaDe(terreno.id);
     if (!actual) return;
-    const fila = { ...actual, archivos: terreno.archivos, ubicacion: terreno.ubicacion };
+    const vigente = terreno.version >= actual.version;
+    const fila = {
+      ...actual, archivos: terreno.archivos, ubicacion: terreno.ubicacion,
+      ...(vigente ? { archived_at: terreno.archived_at ?? null, base_id: terreno.base_id ?? null } : {}),
+    };
+    const cambioDeEstado = Boolean(fila.archived_at) !== Boolean(actual.archived_at) || fila.base_id !== actual.base_id;
     pagina.filas = pagina.filas.map((t) => (t.id === fila.id ? fila : t));
-    const editable = filaEditable(fila);
-    for (const r of ranuras) {
-      if (r.terrenoId === fila.id) r.update({ soloLectura: !editable, resumen: fila.archivos ?? undefined });
+    if (cambioDeEstado && !conTrabajo(fila.id)) {
+      // As when this person archives or transfers it: it leaves a view it no longer belongs to.
+      const fuera = vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
+      if (fuera) {
+        quitarFila(fila.id);
+        toast("Ese terreno se movió a otra base y ya no está en esta vista.");
+        return;
+      }
+      if (fila.archived_at && !consulta.incluirArchivados) {
+        quitarFila(fila.id);
+        toast("Ese terreno fue archivado. Puedes verlo con «Incluir archivados».");
+        return;
+      }
     }
-    if (detalleAbierto?.terrenoId === fila.id) detalleAbierto.archivos(fila.archivos);
+    if (cambioDeEstado) pintarFila(fila.id);     // cell by cell; an open editor stays as it is
+    else {
+      const editable = filaEditable(fila);
+      for (const r of ranuras) {
+        if (r.terrenoId === fila.id) r.update({ soloLectura: !editable, resumen: fila.archivos ?? undefined });
+      }
+    }
+    permisosDelDetalle(fila);
     pintarPrevia();
+  }
+
+  /** The open detail, if it is this terrain's, learns what may be changed now. */
+  function permisosDelDetalle(t) {
+    if (detalleAbierto?.terrenoId !== t.id) return;
+    detalleAbierto.permisos({
+      archivado: Boolean(t.archived_at), puedeCambiar: puedeCambiarFila(t), resumen: t.archivos,
+    });
+  }
+
+  /**
+   * The view's own write permission moved (its base archived or restored, the
+   * application's read-only mode): every row, file mount and the open detail
+   * follow. Rows are repainted cell by cell, so an open editor and what is
+   * unresolved in the tray stay exactly as they are.
+   */
+  function aplicarPermisos() {
+    pintarPermisos();
+    for (const t of pagina.filas) pintarFila(t.id);
+    const abierto = detalleAbierto && filaDe(detalleAbierto.terrenoId);
+    if (abierto) permisosDelDetalle(abierto);
   }
 
   /** The terrain a widget was working on is no longer in this account's
@@ -590,10 +653,26 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     refrescarBases();
   }
 
+  /**
+   * A write was refused but reading is still allowed. Ask the server for
+   * exactly what the refusal names and apply it; nothing is assumed about the
+   * session and no row is dropped on the widget's word alone.
+   */
+  function sinPermisoDeEscritura(id, codigo, mensaje) {
+    toastError(mensaje || "Ya no se puede cambiar este terreno.");
+    refrescarArchivos(id);                                  // the record: archived, base
+    if (codigo === "base_archivada") refrescarBases();      // the base, then every row of the view
+    if (codigo === "forbidden") onRevalidar?.();            // the role and the read-only mode
+  }
+
   function errorDeArchivo(id, { codigo, mensaje }) {
     if (!vivo) return;
     if (codigo === "404" || codigo === "not_found" || codigo === "no_encontrado") {
       alcanceDeArchivoPerdido(id);
+      return;
+    }
+    if (SIN_ESCRITURA.has(codigo)) {
+      sinPermisoDeEscritura(id, codigo, mensaje);
       return;
     }
     toastError(mensaje || "No se pudo completar la operación con el archivo.");
@@ -853,7 +932,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     pagina.filas = pagina.filas.map((t, n) => (n === i ? terreno : t));
     pintarFila(terreno.id);
     pintarBandeja();
-    if (detalleAbierto?.terrenoId === terreno.id) detalleAbierto.archivos(terreno.archivos);
+    permisosDelDetalle(terreno);
     pintarPrevia();
   }
 
@@ -1036,10 +1115,19 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   /* -------------------------------------------------------------- dialogs */
 
   async function refrescarBases() {
-    if (await cargarBases()) { pintarMarco(); if (vista && !vistaValida(vista)) alcancePerdido("Esa base ya no está disponible."); }
+    if (!(await cargarBases())) return;
+    pintarMarco();
+    if (vista && !vistaValida(vista)) alcancePerdido("Esa base ya no está disponible.");
+    else if (vista) aplicarPermisos();     // the base may have been archived or restored
   }
 
-  const volverA = (id, colId) => () => { if (vivo) enfocar(id, colId ?? columnas[1].id); };
+  // Focus goes back to the row a dialog was opened from only if nothing else
+  // has it: a dialog's `close` event arrives a task after it closes, and by
+  // then the person may already be in another cell or typing in an editor.
+  const volverA = (id, colId) => () => {
+    const libre = !document.activeElement || document.activeElement === document.body;
+    if (vivo && libre) enfocar(id, colId ?? columnas[1].id);
+  };
 
   function detalle(id) {
     const t = filaDe(id);
@@ -1047,7 +1135,7 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     const regresar = volverA(id, foco?.id === id ? foco.colId : null);
     const abierto = abrirDetalle({
       terreno: t, columnas, base: t.base_id ? baseDe(t.base_id) : null, admin,
-      puedeCambiar: !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada),
+      puedeCambiar: puedeCambiarFila(t),
       onCerrar: () => { if (detalleAbierto === abierto) detalleAbierto = null; regresar(); },
       onArchivos: (e) => refrescarArchivos(e.terrenoId),
       onErrorDeArchivos: (e) => errorDeArchivo(id, e),
@@ -1126,7 +1214,11 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
     get vista() { return vista; },
     abrir,
     /** The application's read-only mode became known or changed. */
-    permisos() { if (vivo && vista && !editando) pintarTodo(); },
+    permisos() {
+      if (!vivo || !vista) return;
+      if (editando) aplicarPermisos();     // an open editor is not rebuilt under the person
+      else { pintarTodo(); const t = detalleAbierto && filaDe(detalleAbierto.terrenoId); if (t) permisosDelDetalle(t); }
+    },
     /** Look again when the window regains attention, unless work is open. */
     revalidar() { if (vivo && vista && !sucio() && !editando && !document.querySelector("dialog[open]")) recargar(); },
     /** The account is leaving (logout, expiry, another user): forget it all. */

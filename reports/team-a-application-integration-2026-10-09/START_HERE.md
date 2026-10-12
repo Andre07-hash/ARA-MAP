@@ -504,3 +504,108 @@ archive of `84a3656` with `RECORRIDO_SOLO=R3-A2`
 
 Stop for supervisory review. No 4A, no GitHub PR or main merge, no
 deployment, no real account or data.
+
+## 9. R3-A2 residual: write permission per row in global views (2026-10-12)
+
+Owner-relayed supervisor instruction, on top of `41d029c54848a7aebb1d46dfd053848ccf265afc`.
+Only this residual case. Team B's candidate was not merged again.
+
+### Heads
+
+| What | Exact commit |
+|---|---|
+| Reviewed #29 head (start) | `41d029c54848a7aebb1d46dfd053848ccf265afc` |
+| Code head (fix + journey) | `191491e387709ef21b0ee81437abe1768b0dbd76` |
+| Final head (this section and its evidence) | the head of draft PR #29, in its description |
+| Team B candidate consumed earlier / frozen C1 | `b2ac9bd176043fc4b1625b13993f8f21407dc978` / `49b782d147591236cc7f311c7e0de1948ad5258e` |
+
+### Reproduction, on `41d029c`
+
+Administrator in `#/tabla/maestra` opens a terrain and uploads a PDF; the
+completion is held; another administrator session archives that terrain's
+base; the completion is released and answers a real 409. The detail turns
+read-only (§8), but once it is closed a new editor still opened on the row.
+The new journey fails there with "la fila de la base archivada sigue editable"
+(`correccion-r3-a2-residual/residual-antes-41d029c.log`).
+
+### Cause and fix
+
+`web/components/tabla/Tabla.js`: `filaEditable()` asked whether the **view's**
+base was archived. The master table and the unassigned view have no base
+(`baseActual()` is null), so a row there was writable whatever had happened to
+its own base. The rule is now one expression used everywhere a row's cells or
+file cells are decided (painting, repainting, opening an editor, mounting and
+updating the file slots):
+
+```js
+filaEditable = (t) => !vistaSoloLectura() && puedeCambiarFila(t) && !t.archived_at
+puedeCambiarFila = (t) => !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada)
+```
+
+So a row is writable only if the view, **the row's own base** and the row
+itself allow it. In a base view the two base checks coincide, so nothing
+changes there. `puedeCambiarFila` already governed the detail; the table and
+the detail now agree. No other file changed.
+
+A base the table does not know about (not in the list the server gave this
+account) does not make a row read-only by guesswork: the server still decides
+each write.
+
+### Regression and controls (one real-application journey, master table)
+
+Two bases and four terrains: the uploading terrain and a sibling in the base
+that gets archived, one terrain in another active base, one unassigned.
+
+- Before the archive all four rows are editable.
+- The sibling holds an unresolved change (a rejected value kept in the tray).
+- Real 409 on completion; the detail becomes read-only with no write control.
+- **Permitted read:** the PDF stored earlier is still listed in that detail and
+  downloads byte-identical.
+- After closing the detail: both rows of the archived base are read-only
+  (`aria-readonly`), and neither Enter, a double click nor typing opens an
+  editor on them.
+- **Pending text kept:** the sibling's unresolved text is still in its cell
+  and in the tray.
+- **Controls:** the terrain of the other active base and the unassigned one
+  still open an editor, save, and move to version +1; "Agregar terreno" is
+  still offered in the master table.
+- The server agrees: a direct write to the archived base's terrain is refused
+  (409).
+- After the base is restored and the page reloaded, the same row is editable
+  again.
+
+The by-base views keep their own journeys from §8 (administrator: whole view
+read-only; operator: view cleared), unchanged and passing.
+
+### Verification
+
+Owner's Mac (macOS, Google Chrome, loopback, synthetic data), at the code head.
+Files in `evidencia/correccion-r3-a2-residual/`.
+
+| Check | Result |
+|---|---|
+| The new journey on `41d029c` | fails on the defect |
+| The new journey on the fix | ok, three runs in a row |
+| Real combined journey, SQLite | **41/41** (the 39 of §8, the new journey and its session), true restart on the same database and store, 100,000-vertex body (upload 8.5 s, selection → drawn 163 ms, heap 4.5 → 26 → 4.6 MiB) |
+| Focused disposable Postgres 16 | 18/18, with restart on the same schema and store |
+| Team B scope / widget journeys, mounted | 8/8, 19/19 |
+| Host / 2A table / identity journeys | 6/6, 13/13, 16/16 |
+| `./verificar.sh --todo` | all OK: Python suite 1,254 (223 skipped need Postgres); full suite on Python 3.9.6; JavaScript 211/211; ruff; mypy (54 files); coverage **95%** (gate 80%) |
+| Full suite, disposable local Postgres 16 | 1,254 OK, zero skipped |
+| Exact-head CI | on the final head of #29; see the PR |
+
+### Limits
+
+- The new journey ran on SQLite; the Postgres smoke is unchanged and does not
+  include it. The rule is client-side and has no SQL of its own.
+- Row permissions follow the bases as the table last loaded them: a base
+  archived or restored elsewhere is learned on a file refusal, a refresh or a
+  reload, not by itself. Until then the server refuses the write and the text
+  stays in the tray, as before.
+- An editor already open on a row at the moment its base is archived is left
+  open, as in §8.
+- Reused, not rerun: 25,000-record timings, renderer and research evidence.
+  Still open as reserved: R3-A1 batching and the heap slope.
+
+Stop for supervisory review. No 4A, no GitHub PR or main merge, no
+deployment, no real account or data.

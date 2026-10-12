@@ -1,0 +1,16 @@
+Archivos: <carpeta-temporal>/almacen
+servidor en modo montado, almacén local-disk
+FALLO revocar el acceso mientras se completa: 404 limpia el detalle y llega al host
+     page.waitForFunction: Timeout 15000ms exceeded.
+FALLO revocar el acceso durante el PUT: 404 del contenido limpia y llega al host
+     page.waitForFunction: Timeout 15000ms exceeded.
+FALLO transferir el terreno a otra base mientras se completa: 404 limpia y llega al host
+     page.waitForFunction: Timeout 15000ms exceeded.
+FALLO cancelar después de perder el acceso: el 404 de la cancelación también limpia
+     page.waitForFunction: Timeout 15000ms exceeded.
+FALLO archivar el terreno mientras se completa: permiso perdido, el host revalida y la lista se conserva
+     page.waitForFunction: Timeout 15000ms exceeded.
+FALLO cerrar el detalle mientras la cancelación espera: no sale ninguna petición después
+     escrituras tras cerrar: ["POST /api/archivos/versiones/c999c117-468f-4d3a-a5d3-ffd10bda3a08/cancelar"] != []
+ok   control: con el acceso intacto una subida termina y una cancelación viva llega al servidor
+ok   sin errores de página

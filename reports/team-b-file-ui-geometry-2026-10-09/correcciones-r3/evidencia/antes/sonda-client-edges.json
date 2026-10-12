@@ -1,0 +1,38 @@
+[
+  {
+    "probe": "cancel_after_destroy",
+    "cancelCalls": [
+      {
+        "identity": "new",
+        "hasSignal": false
+      }
+    ]
+  },
+  {
+    "probe": "retryable_failure_cannot_cancel",
+    "phase": "fallido",
+    "retryable": true,
+    "cancelable": true,
+    "cancels": 0
+  },
+  {
+    "probe": "uncertain_completion_replay",
+    "phase": "incierto",
+    "retryable": true,
+    "completions": 1
+  },
+  {
+    "probe": "one_hash_pipeline",
+    "maxConcurrentReads": 2
+  },
+  {
+    "probe": "private_scope_ends_during_digest",
+    "result": "resolved",
+    "state": {
+      "enCurso": 0,
+      "enEspera": 0,
+      "listos": 1,
+      "destruido": false
+    }
+  }
+]

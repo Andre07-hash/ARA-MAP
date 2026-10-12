@@ -25,6 +25,7 @@ import { el } from "../../lib/dom.js";
 import { crearClienteArchivos } from "../../lib/archivos.js";
 import { describirResumen } from "./resumen.js";
 import { montarDetalle } from "./detalle.js";
+import { crearTurno } from "./subida.js";
 
 export const MAX_SUBIDAS_PENDIENTES = 5;
 
@@ -52,14 +53,14 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
   const cliente = crearClienteArchivos({ peticionPrivada });
   const montajes = new Set();
   const subidas = new Set();          // unfinished uploads across this factory's mounts
-  let enTurno = false;
+  const pipeline = crearTurno();       // one read/hash/upload at a time, across this factory's mounts
   let destruido = false;
 
   const contexto = {
     cliente,
     turno: {
-      intentar() { if (enTurno || destruido) return false; enTurno = true; return true; },
-      liberar() { enTurno = false; },
+      intentar: () => (destruido ? null : pipeline.intentar()),
+      liberar: (permiso) => pipeline.liberar(permiso),
     },
     subidas: {
       hayLugar: () => subidas.size < MAX_SUBIDAS_PENDIENTES,
@@ -106,8 +107,9 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
       if (destruido) return;
       destruido = true;
       for (const m of [...montajes]) m.destroy();
+      // A read or digest still running keeps its permit until it settles;
+      // this factory accepts no new work anyway.
       subidas.clear();
-      enTurno = false;
     },
   };
 }

@@ -6,6 +6,14 @@
  * requests and local uploads, closes its dialogs, revokes object URLs and
  * empties its container. Results that arrive afterwards are dropped.
  *
+ * A 404 from any request of this mount (lists, downloads, uploads, their
+ * retries and cancellations) means the terrain left this account's scope:
+ * the mount stops everything it has in flight, clears every private thing it
+ * shows and becomes inert, then asks the host to revalidate (onError
+ * "no_encontrado" and onCambio). Losing only the right to write (403, an
+ * archived terrain or base) ends the upload and asks the host to revalidate
+ * the record's read-only state; readable content stays.
+ *
  * Nothing here decides authorization: read-only state only disables controls,
  * and every action is checked by the server again. Text from the server or a
  * file (names, folders, parser messages) is set as text, never as HTML.
@@ -15,7 +23,7 @@ import { el } from "../../lib/dom.js";
 import { fmtDate } from "../../lib/format.js";
 import { openDialog } from "../ui/dialog.js";
 import { ErrorArchivos, LIMITE_BYTES, TIPO_CONTENIDO, nuevaClave } from "../../lib/archivos.js";
-import { crearSubida, FASE, esTerminal } from "./subida.js";
+import { crearSubida, FASE, esTerminal, pierdeAcceso } from "./subida.js";
 import { describirResumen, nombreSeguro, tamanoLegible } from "./resumen.js";
 
 const PAGINA_ARCHIVOS = 20;
@@ -47,7 +55,7 @@ const FASE_TEXTO = {
   [FASE.LEYENDO]: "Calculando huella", [FASE.INICIANDO]: "Registrando", [FASE.SUBIENDO]: "Enviando",
   [FASE.COMPLETANDO]: "Verificando", [FASE.LISTO]: "Listo", [FASE.REQUIERE_SELECCION]: "Elige contornos",
   [FASE.NO_APLICADA]: "Guardado sin activar", [FASE.RECHAZADO]: "Sin contorno utilizable",
-  [FASE.FALLIDO]: "Falló", [FASE.INCIERTO]: "Sin confirmar", [FASE.EN_CURSO]: "En proceso",
+  [FASE.FALLIDO]: "Falló", [FASE.INTERRUMPIDO]: "Interrumpida", [FASE.INCIERTO]: "Sin confirmar", [FASE.EN_CURSO]: "En proceso",
   [FASE.EXPIRADO]: "Vencida", [FASE.REQUIERE_ARCHIVO]: "Falta el archivo", [FASE.CANCELANDO]: "Cancelando",
   [FASE.CANCELADO]: "Cancelada",
 };
@@ -58,6 +66,7 @@ const esAbort = (e) => e?.name === "AbortError";
 export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen, onCambio, onError }, ctx) {
   const vida = new AbortController();
   let vivo = true;
+  let fuera = false;                 // the terrain left this account's scope: inert until destroyed
   let solo = Boolean(soloLectura);
   let ultimoResumen = resumen;
   const urls = new Set();            // object URLs to revoke
@@ -94,7 +103,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   /* ------------------------------------------------------------ helpers */
 
   function avisar(texto, tipoMensaje = "info") {
-    if (!vivo) return;
+    if (!vivo || fuera) return;      // out of scope: only alcancePerdido's own message stays
     estado.textContent = texto;
     estado.dataset.tipo = tipoMensaje;
   }
@@ -108,18 +117,48 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     });
   }
 
-  /* A failure the person should read. 404 means the resource left this scope:
-   * clear what was shown and ask the host to revalidate. */
+  /* The terrain left this account's scope (a 404 from anywhere). Stop all
+   * work, drop every private thing this mount shows or holds, and hand the
+   * decision to the host. Only the host's summary line remains. */
+  function alcancePerdido() {
+    if (!vivo || fuera) return;
+    fuera = true;
+    vida.abort();                                  // lists, panels, downloads, actions
+    for (const s of subidas.keys()) { s.abortar(); ctx.subidas.quitar(s); }
+    subidas.clear();
+    listaSubidas.replaceChildren();
+    for (const close of [...dialogos]) close();
+    dialogos.clear();
+    for (const url of urls) URL.revokeObjectURL(url);
+    urls.clear();
+    claves.clear();
+    lista.replaceChildren();
+    masArchivos.hidden = true;
+    avisoLista.hidden = true;
+    entrada.value = "";
+    pintarModo();
+    estado.textContent = "Este terreno ya no está disponible para tu cuenta. Se actualizará la información.";
+    estado.dataset.tipo = "error";
+    onError?.({ codigo: "no_encontrado", mensaje: "El archivo ya no está disponible." });
+    notificarCambio();
+  }
+
+  /* An upload was refused because this account lost its scope or the right
+   * to write: 404 tears the mount down; 403 or an archive keeps what is
+   * readable and asks the host to revalidate the record's state. */
+  function accesoPerdido(error) {
+    if (!vivo || fuera) return;
+    if (error.status === 404) return alcancePerdido();
+    avisar(error.message, "error");
+    onError?.({ codigo: error.codigo, mensaje: error.message });
+    notificarCambio();
+  }
+
+  /* A failure the person should read. */
   function fallo(error, contexto) {
-    if (!vivo || esAbort(error)) return;
-    if (error instanceof ErrorArchivos && error.status === 404) {
-      lista.replaceChildren();
-      masArchivos.hidden = true;
-      avisar("Este archivo ya no está disponible. Se actualizará la información del terreno.", "error");
-      onError?.({ codigo: "no_encontrado", mensaje: "El archivo ya no está disponible." });
-      notificarCambio();
-      return;
-    }
+    if (!vivo || fuera || esAbort(error)) return;
+    if (error instanceof ErrorArchivos && error.status === 404) return alcancePerdido();
+    if (pierdeAcceso(error)) return accesoPerdido(error);
     const mensaje = error instanceof ErrorArchivos ? error.message : "No se pudo completar la operación.";
     avisar(contexto ? `${contexto}: ${mensaje}` : mensaje, "error");
     onError?.({ codigo: error?.codigo ?? "error", mensaje });
@@ -207,7 +246,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   }
 
   function nuevaSubida({ archivo = null, pendiente = null }) {
-    if (!ctx.vivo() || !vivo) return null;
+    if (!ctx.vivo() || !vivo || fuera) return null;
     if (!ctx.subidas.hayLugar()) {
       avisar("Ya hay cinco subidas sin terminar. Termina o cancela alguna antes de empezar otra.", "error");
       return null;
@@ -217,6 +256,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       cliente: ctx.cliente, terrenoId, tipo, archivo, pendiente, turno: ctx.turno,
       alCambiar: () => pintarSubida(s),
       alServidor: () => { notificarCambio(); refrescarLista(); },
+      alPerderAcceso: (error) => accesoPerdido(error),
     });
     subidas.set(s, li);
     ctx.subidas.agregar(s);
@@ -226,7 +266,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   }
 
   function empezar(archivo) {
-    if (solo || !vivo) return;
+    if (solo || !vivo || fuera) return;
     const s = nuevaSubida({ archivo });
     s?.ejecutar();
   }
@@ -240,7 +280,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   entrada.addEventListener("change", () => {
     const archivo = entrada.files?.[0] ?? null;
     entrada.value = "";
-    if (!archivo || !vivo) return;
+    if (!archivo || !vivo || fuera) return;
     const destino = elegirDestino;
     elegirDestino = null;
     if (destino) destino.elegirArchivo(archivo);
@@ -249,7 +289,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   botonElegir.addEventListener("click", () => { elegirDestino = null; entrada.click(); });
 
   function arrastre(evento) {
-    if (solo) return;
+    if (solo || fuera) return;
     evento.preventDefault();
     zona.classList.toggle("archivos-zona-activa", evento.type === "dragover" || evento.type === "dragenter");
   }
@@ -258,7 +298,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   zona.addEventListener("dragleave", arrastre);
   zona.addEventListener("drop", (evento) => {
     arrastre(evento);
-    if (solo || !vivo) return;
+    if (solo || !vivo || fuera) return;
     const archivos = evento.dataTransfer?.files ?? [];
     if (archivos.length !== 1) {
       avisar(archivos.length > 1 ? "Suelta un solo archivo a la vez." : "No se recibió ningún archivo.", "error");
@@ -581,7 +621,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
    * open: offer to refresh instead. Actions taken here reload the list. */
   const enUso = () => Boolean(lista.querySelector(".archivos-panel:not([hidden]), .archivos-candidatos"));
   function refrescarLista() {
-    if (!vivo) return;
+    if (!vivo || fuera) return;
     if (enUso()) { avisoLista.hidden = false; return; }
     cargarLista();
   }
@@ -592,13 +632,13 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
    * only offers the refresh. */
   let cursorLista = null;
   async function cargarLista({ siguiente = false, forzar = false } = {}) {
-    if (!vivo) return;
+    if (!vivo || fuera) return;
     if (!siguiente) avisoLista.hidden = true;
     const mia = siguiente ? listaGen : ++listaGen;
     if (!siguiente) cursorLista = null;
     try {
       const r = await ctx.cliente.listar(terrenoId, { cursor: siguiente ? cursorLista : null, limite: PAGINA_ARCHIVOS, signal: senal() });
-      if (!vivo || mia !== listaGen) return;
+      if (!vivo || fuera || mia !== listaGen) return;
       if (!siguiente && !forzar && enUso()) { avisoLista.hidden = false; return; }
       const propios = (r.archivos ?? []).filter((a) => a.tipo === tipo);
       if (!siguiente) lista.replaceChildren();
@@ -623,10 +663,11 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   }
 
   function pintarModo() {
-    raiz.dataset.soloLectura = solo ? "1" : "0";
-    zona.hidden = solo;
-    botonElegir.disabled = solo;
-    for (const b of raiz.querySelectorAll("[data-escritura]")) b.hidden = solo;
+    const sinEscritura = solo || fuera;
+    raiz.dataset.soloLectura = sinEscritura ? "1" : "0";
+    zona.hidden = sinEscritura;
+    botonElegir.disabled = sinEscritura;
+    for (const b of raiz.querySelectorAll("[data-escritura]")) b.hidden = sinEscritura;
     for (const s of subidas.keys()) pintarSubida(s);
   }
 

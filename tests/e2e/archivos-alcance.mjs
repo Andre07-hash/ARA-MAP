@@ -118,7 +118,12 @@ async function subirPdf(nombre) {
 async function retener(patron, metodo) {
   let soltar, entro;
   const barrera = new Promise((r) => { soltar = r; });
-  const entrada = new Promise((r) => { entro = r; });
+  const llegada = new Promise((r) => { entro = r; });
+  // A request that never comes fails the journey (with what the widget shows) instead of hanging it.
+  const entrada = Promise.race([llegada, page.waitForTimeout(20000).then(async () => {
+    const subidas = await page.evaluate(() => [...document.querySelectorAll(".archivos-subida")].map((li) => `${li.dataset.fase}: ${li.textContent}`));
+    throw new Error(`no llegó ${metodo} ${patron}: ${JSON.stringify(subidas)}`);
+  })]);
   let usada = false;
   const manejador = async (route) => {
     if (usada || route.request().method() !== metodo) return route.fallback();
@@ -175,11 +180,28 @@ async function comprobarAlcancePerdido(nombre, terreno, erroresAntes, cambiosAnt
   igual(tardias, [], "peticiones del widget después de perder el alcance");
   return { mensaje: v.mensaje };
 }
+/* Held uploads stay pending on the server, and the server limits pending
+ * uploads per account: each journey cancels olga's own leftovers at its end. */
+async function cancelarPendientesPropias() {
+  await page.evaluate(async (terrenos) => {
+    for (const t of terrenos) {
+      const r = await fetch(`/api/inventario/terrenos/${t}/archivos?limite=100`);
+      if (!r.ok) continue;
+      for (const a of (await r.json()).archivos) {
+        const v = await (await fetch(`/api/archivos/${a.id}/versiones?limite=100`)).json();
+        for (const x of v.versiones ?? []) {
+          if (x.estado === "subiendo" && x.propia) await fetch(`/api/archivos/versiones/${x.id}/cancelar`, { method: "POST" });
+        }
+      }
+    }
+  }, Object.values(T).map((t) => t.id));
+}
 const contadores = () => page.evaluate(() => [window.__arnes.errores.length, window.__arnes.cambios.length]);
 
 /* ------------------------------------------------------------ journeys */
 
 await revisar("revocar el acceso mientras se completa: 404 limpia el detalle y llega al host", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   const completar = await retener("**/api/archivos/versiones/*/completar", "POST");
   const [e0, c0] = await contadores();
@@ -196,6 +218,7 @@ await revisar("revocar el acceso mientras se completa: 404 limpia el detalle y l
 });
 
 await revisar("revocar el acceso durante el PUT: 404 del contenido limpia y llega al host", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
   const [e0, c0] = await contadores();
@@ -212,6 +235,7 @@ await revisar("revocar el acceso durante el PUT: 404 del contenido limpia y lleg
 });
 
 await revisar("transferir el terreno a otra base mientras se completa: 404 limpia y llega al host", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.dos.id);
   const completar = await retener("**/api/archivos/versiones/*/completar", "POST");
   const [e0, c0] = await contadores();
@@ -234,6 +258,7 @@ await revisar("transferir el terreno a otra base mientras se completa: 404 limpi
 });
 
 await revisar("cancelar después de perder el acceso: el 404 de la cancelación también limpia", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
   const [e0, c0] = await contadores();
@@ -251,6 +276,7 @@ await revisar("cancelar después de perder el acceso: el 404 de la cancelación 
 });
 
 await revisar("archivar el terreno mientras se completa: permiso perdido, el host revalida y la lista se conserva", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   const completar = await retener("**/api/archivos/versiones/*/completar", "POST");
   const [e0, c0] = await contadores();
@@ -277,6 +303,7 @@ await revisar("archivar el terreno mientras se completa: permiso perdido, el hos
 });
 
 await revisar("cerrar el detalle mientras la cancelación espera: no sale ninguna petición después", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
   await subirPdf("Privado cerrado.pdf");
@@ -298,6 +325,7 @@ await revisar("cerrar el detalle mientras la cancelación espera: no sale ningun
 });
 
 await revisar("control: con el acceso intacto una subida termina y una cancelación viva llega al servidor", async () => {
+  alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
   await subirPdf("Ficticio control.pdf");
   await page.waitForFunction(() => [...document.querySelectorAll('[data-detalle="pdf"] .archivos-subida')].at(-1)?.dataset.fase === "listo", null, { timeout: 30000 });

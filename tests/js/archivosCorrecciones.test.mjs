@@ -144,12 +144,13 @@ test("R3-B1: destroyed while the cancel request is in flight: it is aborted and 
   const cancel = llamadas.find((l) => l.metodo === "cancelar");
   assert.equal(cancel.conSenal, true);
   const n = vistas.length;
+  const nServidor = servidor.length;          // the start's own notification came before teardown
   s.abortar();
   ambito.actual = "otra-cuenta";
   respuesta.resolve({ estado: "cancelado" });
   await cancela;
   assert.equal(vistas.length, n);
-  assert.equal(servidor.length, 0);
+  assert.equal(servidor.length, nServidor);
   assert.deepEqual(llamadas.filter((l) => l.ambito === "otra-cuenta"), []);
 });
 
@@ -327,6 +328,18 @@ test("R3-B3: a completion reply without an outcome stays at completion replay, w
   assert.equal(s.estado().fase, FASE.LISTO);
   assert.equal(llamadas.filter((l) => l.metodo === "iniciar").length, 1, "never a new version");
   assert.equal(llamadas.filter((l) => l.metodo === "subir").length, 1, "content is not re-sent");
+});
+
+test("R3-B3: an oversized completion reply is unreadable: completion replay, never terminal", async () => {
+  let completa = 0;
+  const { cliente } = clienteGuionado({ iniciar: async () => inicio, subir: async () => ({}),
+    completar: async () => { completa += 1; if (completa === 1) throw error("respuesta_excesiva", 0); return terminal("disponible"); } });
+  const { s } = subida(cliente);
+  await s.ejecutar();
+  assert.equal(s.estado().fase, FASE.INCIERTO);
+  await s.reintentar();
+  assert.equal(completa, 2);
+  assert.equal(s.estado().fase, FASE.LISTO);
 });
 
 test("R3-B3: an unknown version state and a KMZ outcome without its attempt are unresolved, not terminal", async () => {

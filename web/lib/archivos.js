@@ -233,7 +233,9 @@ export function crearClienteArchivos({ peticionPrivada }) {
       try {
         comprobar(alcance, signal);
         if (!response.ok) throw await errorDeRespuesta(response);
-        return jsonDeBytes(await leerBytes(response, JSON_MAX_BYTES));
+        const bytes = await leerBytes(response, JSON_MAX_BYTES);
+        comprobar(alcance, signal);      // the scope may end while the reply is read
+        return jsonDeBytes(bytes);
       } catch (error) {
         if (esAbort(error) || alcance?.aborted || signal?.aborted) throw abortError();
         if (error instanceof ErrorArchivos) throw error;

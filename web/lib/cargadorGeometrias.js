@@ -189,7 +189,7 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
   let destruido = false;
   let enCurso = null;     // {clave, control, promesa}
   let espera = null;      // {clave, control, resolve, reject, peticion}
-  let listo = null;       // {clave, cuerpo}
+  let listo = null;       // {clave, cuerpo, alcances, suelta}
 
   const claveDe = (terrenoId, geometria) => `${terrenoId}|${geometria.id}|${geometria.archivo_version_id}`;
 
@@ -205,12 +205,17 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
     return resultado;
   }
 
-  /* One verified load. Throws AbortError as soon as it becomes obsolete. */
-  async function descargar(terrenoId, geometria, control, signalExterna) {
+  /* One verified load. Throws AbortError as soon as it becomes obsolete.
+   * `alcances` collects the private scope the bridge captured for every
+   * request of this load: the body is only valid while all of them are, from
+   * the last chunk through the digest, the parse, the install and every later
+   * reuse (Round 3 review R3-B5). */
+  async function descargar(terrenoId, geometria, control, signalExterna, alcances) {
     const senales = [control.signal, signalExterna];
     const vigente = (alcance) => {
+      if (alcance && !alcances.includes(alcance)) alcances.push(alcance);
       if (destruido || control.signal.aborted || signalExterna?.aborted
-          || alcance?.aborted) {
+          || alcances.some((a) => a.aborted)) {
         throw abortError();
       }
     };
@@ -267,14 +272,38 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
     }
   }
 
+  /* Drop the ready body (and the listeners that watch its scope). */
+  function soltarListo() {
+    listo?.suelta.abort();
+    listo = null;
+  }
+
+  function instalar(clave, cuerpo, alcances) {
+    soltarListo();                                   // replaces (releases) the previous one
+    const entrada = { clave, cuerpo, alcances, suelta: new AbortController() };
+    // The scope ending later drops the body at once, not only on the next request.
+    for (const a of alcances) {
+      a.addEventListener("abort", () => { if (listo === entrada) soltarListo(); },
+        { once: true, signal: entrada.suelta.signal });
+    }
+    listo = entrada;
+  }
+
+  const listoVigente = (clave) => {
+    if (listo && listo.alcances.some((a) => a.aborted)) soltarListo();
+    return listo?.clave === clave;
+  };
+
   function iniciar(peticion) {
     const control = new AbortController();
     const actual = { clave: peticion.clave, control, promesa: null };
     actual.promesa = (async () => {
       try {
-        const cuerpo = await descargar(peticion.terrenoId, peticion.geometria, control, peticion.signal);
-        if (enCurso !== actual || destruido) throw abortError();
-        listo = { clave: peticion.clave, cuerpo };      // replaces (releases) the previous one
+        const alcances = [];
+        const cuerpo = await descargar(peticion.terrenoId, peticion.geometria, control, peticion.signal, alcances);
+        if (enCurso !== actual || destruido || control.signal.aborted
+            || alcances.some((a) => a.aborted)) throw abortError();
+        instalar(peticion.clave, cuerpo, alcances);
         return cuerpo;
       } catch (error) {
         if (esAbort(error) || control.signal.aborted) throw abortError();
@@ -306,13 +335,13 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
     }
     if (signal?.aborted) return Promise.reject(abortError());
     const clave = claveDe(terrenoId, geometria);
-    if (listo?.clave === clave) return Promise.resolve(listo.cuerpo);
+    if (listoVigente(clave)) return Promise.resolve(listo.cuerpo);
     // The same body already in flight is shared, unless it was cancelled as obsolete.
     if (enCurso?.clave === clave && !enCurso.control.signal.aborted) return enCurso.promesa;
     if (espera?.clave === clave) return espera.promesa;
 
     // A different body is wanted: what is ready or in flight is obsolete.
-    listo = null;
+    soltarListo();
     if (espera) { espera.reject(abortError()); espera = null; }
     if (!enCurso) return iniciar({ clave, terrenoId, geometria, signal });
     enCurso.control.abort();
@@ -328,7 +357,7 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
   /* Aborting what is in flight is what forbids a late install: every await in
    * a load re-checks its own controller. */
   function reset() {
-    listo = null;
+    soltarListo();
     if (espera) { espera.reject(abortError()); espera = null; }
     if (enCurso) enCurso.control.abort();
   }
@@ -342,7 +371,9 @@ export function crearCargadorGeometrias({ peticionPrivada }) {
       destruido = true;
     },
     /** For tests and the host's diagnostics: counts only, never bodies. */
-    estado: () => ({ enCurso: enCurso ? 1 : 0, enEspera: espera ? 1 : 0, listos: listo ? 1 : 0,
-      destruido }),
+    estado: () => {
+      listoVigente(null);
+      return { enCurso: enCurso ? 1 : 0, enEspera: espera ? 1 : 0, listos: listo ? 1 : 0, destruido };
+    },
   };
 }

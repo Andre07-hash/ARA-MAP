@@ -1,0 +1,9 @@
+✔ routes: the table has an address; operators have the table and the catalog only (0.141042ms)
+ℹ tests 210
+ℹ suites 0
+ℹ pass 210
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 393.364708

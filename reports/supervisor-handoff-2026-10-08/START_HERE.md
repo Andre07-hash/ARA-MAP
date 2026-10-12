@@ -1,5 +1,11 @@
 # ARA MAP — supervisor session handoff
 
+**Latest correction closeout — 2026-10-12:** [B accepted; A integration/R3-A2 pending](../round-3-corrections-review-2026-10-12/START_HERE.md).
+B's R3-B1–B5 are independently closed at `b2ac9bd176043fc4b1625b13993f8f21407dc978`.
+A consumes that exact candidate on #29 and corrects archive/read-only host
+revalidation (R3-A2). The combined Round 3 remains unaccepted; no Round 4.
+This supersedes the open-B-finding status in the preceding review below.
+
 **Latest review — 2026-10-12:** [Round 3 review and bounded corrections](../round-3-review-2026-10-12/START_HERE.md)
 supersedes the historical current-status paragraphs below. C1/#27, B/#28 and
 A/#29 are delivered, exact-head green CI checked, combined browser journey

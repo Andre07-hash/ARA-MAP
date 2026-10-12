@@ -648,7 +648,7 @@ if (!FOCALIZADO) {
     await recargarTabla(oscar.page);
     await fila(oscar.page, t).waitFor();
     const d = await abrirDetalle(oscar.page, t, 'Lote Transferido Ficticio');
-    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido?parte=*', 'PUT');
     await zonaPdf(d).setInputFiles(archivoPrivado);
     await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
     const actual = (await admin('GET', `/api/inventario/terrenos/${t}`)).datos.terreno;
@@ -674,7 +674,7 @@ if (!FOCALIZADO) {
       await recargarTabla(oscar.page);
       await fila(oscar.page, t).waitFor();
       const d = await abrirDetalle(oscar.page, t, `Lote Cancelado Ficticio (${etiqueta})`);
-      const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+      const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido?parte=*', 'PUT');
       await zonaPdf(d).setInputFiles(archivoPrivado);
       await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
       const tras = escrituras(oscar.page);
@@ -707,7 +707,7 @@ if (!FOCALIZADO) {
     await recargarTabla(oscar.page);
     await fila(oscar.page, t).waitFor();
     let d = await abrirDetalle(oscar.page, t, 'Lote Reabierto Ficticio');
-    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
+    const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido?parte=*', 'PUT');
     await zonaPdf(d).setInputFiles(archivoPrivado);
     await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
     const tras = escrituras(oscar.page);

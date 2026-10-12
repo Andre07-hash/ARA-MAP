@@ -32,7 +32,7 @@ function lifecycle({ kmzResultado = "listo" } = {}) {
   const fallos = [];                  // [{coincide(metodo, ruta), modo: "perder" | "antes" | Response}]
   let resultado = kmzResultado;
 
-  function actuar(metodo, ruta, headers, body) {
+  function actuar(metodo, ruta, headers, body, consulta = "") {
     let m;
     if (metodo === "POST" && (m = ruta.match(/^\/api\/inventario\/terrenos\/([^/]+)\/archivos$/))) {
       const clave = headers["Idempotency-Key"];
@@ -43,7 +43,8 @@ function lifecycle({ kmzResultado = "listo" } = {}) {
       const dto = { archivo_id: randomUUID(), version_id: randomUUID(), tipo: datos.tipo, numero: 1, estado: "subiendo",
         revision_base: 1, nombre_original: datos.nombre_original, tamano_declarado: datos.tamano_declarado,
         sha256_declarado: datos.sha256_declarado, subida_vence_en: "2026-10-09T12:15:00+00:00",
-        completar_antes_de: "2026-10-09T13:00:00+00:00" };
+        completar_antes_de: "2026-10-09T13:00:00+00:00",
+        transferencia: { parte_bytes: A.PARTE_BYTES, partes: Math.ceil(datos.tamano_declarado / A.PARTE_BYTES) } };
       porClave.set(clave, { hash, dto });
       versiones.set(dto.version_id, { ...dto, staged: null, final: null, puts: 0 });
       return json(200, dto);
@@ -53,8 +54,12 @@ function lifecycle({ kmzResultado = "listo" } = {}) {
       if (!v) return error(404, "not_found");
       if (m[2] === "contenido") {
         if (v.final) return error(409, "subida_no_pendiente");
-        v.staged = body; v.puts += 1;
-        return json(200, { version_id: v.version_id, bytes_recibidos: body.byteLength, estado: "subiendo" });
+        const parte = Number(new URLSearchParams(consulta).get("parte"));
+        const partes = Math.ceil(v.tamano_declarado / A.PARTE_BYTES);
+        const esperada = Math.min(A.PARTE_BYTES, v.tamano_declarado - parte * A.PARTE_BYTES);
+        if (!(parte >= 0 && parte < partes) || body.byteLength !== esperada) return error(400, "parte_invalida");
+        (v.staged ??= new Map()).set(parte, body); v.puts += 1;
+        return json(200, { version_id: v.version_id, parte, partes, bytes_recibidos: body.byteLength, estado: "subiendo" });
       }
       if (m[2] === "cancelar") {
         if (v.final) return error(409, "subida_no_pendiente");
@@ -62,8 +67,10 @@ function lifecycle({ kmzResultado = "listo" } = {}) {
         return json(200, { version_id: v.version_id, estado: "cancelado", limpieza_pendiente: false });
       }
       if (v.final) return json(200, { ...v.final, replay: true });
-      if (!v.staged) return error(409, "contenido_temporal_ausente");
-      const ok = sha(Buffer.from(v.staged)) === v.sha256_declarado;
+      const partes = Math.ceil(v.tamano_declarado / A.PARTE_BYTES);
+      const faltan = [...Array(partes).keys()].filter((i) => !v.staged?.has(i));
+      if (faltan.length) return error(409, "contenido_temporal_ausente", { partes_faltantes: faltan, reintentar: !v.vencida });
+      const ok = sha(Buffer.concat(faltan.length ? [] : [...Array(partes).keys()].map((i) => Buffer.from(v.staged.get(i))))) === v.sha256_declarado;
       const version = { id: v.version_id, archivo_id: v.archivo_id, numero: 1,
         estado: ok ? "disponible" : "fallido", error: ok ? null : { codigo: "sha256_no_coincide", mensaje: "No coincide." } };
       const intento = v.tipo === "kmz" && ok ? { id: randomUUID(), resultado } : null;
@@ -84,7 +91,7 @@ function lifecycle({ kmzResultado = "listo" } = {}) {
     const fallo = i >= 0 ? fallos.splice(i, 1)[0] : null;
     if (fallo?.modo === "antes") throw new TypeError("Failed to fetch");     // never reached the server
     if (fallo?.modo instanceof Response) return { response: fallo.modo, signal };
-    const response = actuar(method, ruta.split("?")[0], headers, bytes ?? new Uint8Array());
+    const response = actuar(method, ruta.split("?")[0], headers, bytes ?? new Uint8Array(), ruta.split("?")[1] ?? "");
     if (fallo?.modo === "perder") throw new TypeError("network dropped");  // acted, reply lost
     return { response, signal };
   }
@@ -149,23 +156,101 @@ test("client: requests carry exact paths, bodies and keys; PUT never sets Conten
   assert.deepEqual(JSON.parse(vistas[1].body), { expected_revision: 5 });
   assert.deepEqual(JSON.parse(vistas[2].body), { seleccion: [0, 2] });
   assert.equal(vistas[3].method, "PUT");
+  assert.equal(vistas[3].ruta, `/api/archivos/versiones/${vid}/contenido?parte=0`);
   assert.deepEqual(vistas[3].headers, { "Content-Type": "application/vnd.google-earth.kmz" });
   assert.ok(vistas[3].body instanceof Blob);
   assert.equal(vistas[4].ruta, `/api/archivos/${aid}/versiones?limite=5&cursor=7`);
 });
 
-test("client: a download must match its version id, type and SHA-256", async () => {
+/* A sliced download server (route 9, M1): `?desde=O`, at most 3 MiB per reply.
+ * `alterar(desde, headers, cuerpo)` may change one reply. */
+function servidorDescarga(contenido, vid, { alterar = () => {}, vistas = [] } = {}) {
+  const firma = sha(contenido);
+  return async (ruta, { signal } = {}) => {
+    vistas.push(ruta);
+    if (signal?.aborted) throw new DOMException("x", "AbortError");
+    const desde = Number(new URLSearchParams(ruta.split("?")[1] ?? "").get("desde") ?? 0);
+    const fin = Math.min(contenido.length, desde + A.PARTE_BYTES);
+    let cuerpo = contenido.subarray(desde, fin);
+    const headers = { "Content-Type": "application/octet-stream", "X-Archivo-Version-Id": vid,
+      "X-Archivo-Sha256": firma, "X-Archivo-Bytes": String(contenido.length), "X-Archivo-Desde": String(desde),
+      "X-Archivo-Longitud": String(fin - desde), "X-Archivo-Siguiente": fin === contenido.length ? "fin" : String(fin) };
+    cuerpo = alterar(desde, headers, cuerpo) ?? cuerpo;
+    return { response: new Response(cuerpo, { status: 200, headers }), signal };
+  };
+}
+
+const grande = (n) => { const b = Buffer.alloc(n); for (let i = 0; i < n; i += 1) b[i] = (i * 31 + 7) & 0xff; return b; };
+
+test("client: a single-slice download must match its version id, type, size and SHA-256", async () => {
   const vid = randomUUID();
-  const ok = { "Content-Type": "application/pdf", "X-Archivo-Version-Id": vid, "X-Archivo-Sha256": sha(PDF) };
-  const con = (headers, cuerpo = PDF) => A.crearClienteArchivos({ peticionPrivada: async () => ({ response: new Response(cuerpo, { status: 200, headers }) }) });
-  const r = await con(ok).descargar(vid, "pdf");
+  const con = (alterar) => A.crearClienteArchivos({ peticionPrivada: servidorDescarga(PDF, vid, { alterar }) });
+  const r = await con().descargar(vid, "pdf");
   assert.equal(Buffer.from(r.bytes).toString(), PDF.toString());
-  for (const malo of [{ ...ok, "X-Archivo-Version-Id": randomUUID() }, { ...ok, "Content-Type": "text/html" },
-    { ...ok, "X-Archivo-Sha256": "0".repeat(64) }]) {
-    await assert.rejects(con(malo).descargar(vid, "pdf"), (e) => e.codigo === "descarga_inconsistente");
+  assert.equal(r.tipoContenido, "application/pdf");
+  for (const alterar of [
+    (d, h) => { h["X-Archivo-Version-Id"] = randomUUID(); },
+    (d, h) => { h["Content-Type"] = "text/html"; },
+    (d, h) => { h["Content-Type"] = "application/pdf"; },          // the slice type is octet-stream only
+    (d, h) => { h["X-Archivo-Sha256"] = "0".repeat(64); },
+    (d, h) => { h["X-Archivo-Sha256"] = "ABC"; },
+    (d, h) => { h["X-Archivo-Bytes"] = String(PDF.length + 1); },
+    (d, h) => { h["X-Archivo-Bytes"] = "0x10"; },
+    (d, h) => { h["X-Archivo-Longitud"] = String(PDF.length - 1); },
+    (d, h) => { h["X-Archivo-Desde"] = "3145728"; },
+    (d, h) => { h["X-Archivo-Siguiente"] = String(PDF.length); },
+    (d, h) => { delete h["X-Archivo-Siguiente"]; },
+    (d, h, c) => c.subarray(1),                                      // shorter than announced
+    (d, h, c) => { const x = Buffer.from(c); x[0] ^= 1; return x; },  // corrupt bytes
+  ]) {
+    await assert.rejects(con(alterar).descargar(vid, "pdf"), (e) => e.codigo === "descarga_inconsistente", String(alterar));
   }
-  await assert.rejects(con({ ...ok, "Content-Length": String(26 * 1024 * 1024) }).descargar(vid, "pdf"),
-    (e) => e.codigo === "respuesta_excesiva");
+  await assert.rejects(con((d, h) => { h["X-Archivo-Bytes"] = String(26 * 1024 * 1024); }).descargar(vid, "pdf"),
+    (e) => e.codigo === "descarga_inconsistente");                   // above the kind's limit: nothing allocated
+  await assert.rejects(con((d, h, c) => Buffer.concat([c, Buffer.from("x")])).descargar(vid, "pdf"),
+    (e) => e.codigo === "respuesta_excesiva");                       // more than announced
+});
+
+test("client: a 7 MiB download is assembled from three bounded slices and verified whole", async () => {
+  const vid = randomUUID();
+  const contenido = grande(7 * 1024 * 1024 + 5);
+  const vistas = [];
+  const progreso = [];
+  const cliente = A.crearClienteArchivos({ peticionPrivada: servidorDescarga(contenido, vid, { vistas }) });
+  const r = await cliente.descargar(vid, "kmz", { alProgreso: (a, b) => progreso.push([a, b]) });
+  assert.ok(Buffer.from(r.bytes).equals(contenido));
+  assert.equal(r.sha256, sha(contenido));
+  const base = `/api/archivos/versiones/${vid}/descarga`;
+  assert.deepEqual(vistas, [base, `${base}?desde=3145728`, `${base}?desde=6291456`]);
+  assert.deepEqual(progreso.map(([a]) => a), [3145728, 6291456, contenido.length]);
+
+  const falla = async (alterar) => assert.rejects(
+    A.crearClienteArchivos({ peticionPrivada: servidorDescarga(contenido, vid, { alterar }) }).descargar(vid, "kmz"),
+    (e) => e.codigo === "descarga_inconsistente");
+  await falla((d, h) => { if (d) h["X-Archivo-Sha256"] = "1".repeat(64); });   // the object changed between slices
+  await falla((d, h) => { if (d) h["X-Archivo-Bytes"] = String(contenido.length + 1); });
+  await falla((d, h) => { if (d === 3145728) h["X-Archivo-Siguiente"] = "fin"; });
+  await falla((d, h, c) => { if (d === 6291456) { const x = Buffer.from(c); x[3] ^= 1; return x; } });
+  await falla((d, h) => { if (d) h["X-Archivo-Desde"] = "0"; });             // replayed first slice
+  // A server that never says "fin" stops after the bounded number of requests.
+  const nunca = [];
+  await falla((d, h) => { nunca.push(d); h["X-Archivo-Siguiente"] = String(d + Number(h["X-Archivo-Longitud"])); });
+  assert.ok(nunca.length <= A.MAX_PARTES);
+});
+
+test("client: cancelling a sliced download stops it and keeps nothing", async () => {
+  const vid = randomUUID();
+  const contenido = grande(7 * 1024 * 1024);
+  const control = new AbortController();
+  const vistas = [];
+  const base = servidorDescarga(contenido, vid, { vistas });
+  const cliente = A.crearClienteArchivos({ peticionPrivada: async (ruta, o) => {
+    const r = await base(ruta, o);
+    if (vistas.length === 2) control.abort();
+    return r;
+  } });
+  await assert.rejects(cliente.descargar(vid, "kmz", { signal: control.signal }), (e) => e.name === "AbortError");
+  assert.equal(vistas.length, 2);
 });
 
 test("client: local validation happens before any byte is read", () => {
@@ -231,7 +316,7 @@ test("upload: a lost completion reply is resolved by terminal replay", async () 
 
 test("upload: a PUT that never arrived is re-staged for the same version only", async () => {
   const srv = lifecycle();
-  srv.fallos.push(falla("PUT", /contenido$/, "antes"));
+  srv.fallos.push(falla("PUT", /contenido(\?|$)/, "antes"));
   const { s } = subidaCon(srv);
   await s.ejecutar();
   assert.equal(s.estado().fase, FASE.INCIERTO);
@@ -262,7 +347,7 @@ test("upload: lease in progress waits for the server's hint; nothing retries by 
 
 test("upload: expiry, a known failure and a verification failure are terminal and distinct", async () => {
   const srv = lifecycle();
-  srv.fallos.push(falla("PUT", /contenido$/, error(409, "subida_expirada")));
+  srv.fallos.push(falla("PUT", /contenido(\?|$)/, error(409, "subida_expirada")));
   const exp = subidaCon(srv).s;
   await exp.ejecutar();
   assert.equal(exp.estado().fase, FASE.EXPIRADO);
@@ -287,6 +372,161 @@ test("upload: expiry, a known failure and a verification failure are terminal an
   assert.equal(mal.estado().codigo, "sha256_no_coincide");
 });
 
+/* ------------------------------------------------- bounded transfer (M1) */
+
+const SIETE = grande(7 * 1024 * 1024 + 11);          // three parts: 3 MiB, 3 MiB, 1 MiB + 11
+const rutasPut = (srv) => srv.registro.filter((r) => r.startsWith("PUT"));
+
+function subidaGrande(srv, opciones = {}) {
+  const vistas = [];
+  const cliente = A.crearClienteArchivos({ peticionPrivada: async (ruta, o) => {
+    if (o?.method === "PUT") vistas.push(ruta.split("parte=")[1]);
+    return srv.peticionPrivada(ruta, o);
+  } });
+  const estados = [];
+  const s = crearSubida({ cliente, terrenoId: TERRENO, tipo: "pdf", archivo: archivoDe(SIETE),
+    alCambiar: (e) => estados.push(e), ...opciones });
+  return { s, partesPut: vistas, estados };
+}
+
+test("upload M1: a 7 MiB file travels as three sequential parts with part progress", async () => {
+  const srv = lifecycle();
+  const { s, partesPut, estados } = subidaGrande(srv);
+  await s.ejecutar();
+  assert.equal(s.estado().fase, FASE.LISTO);
+  assert.deepEqual(partesPut, ["0", "1", "2"]);
+  const v = [...srv.versiones.values()][0];
+  assert.deepEqual([...v.staged.keys()].sort(), [0, 1, 2]);
+  assert.deepEqual([...v.staged.values()].map((b) => b.byteLength), [3145728, 3145728, SIETE.length - 6291456]);
+  const mensajes = estados.filter((e) => e.fase === FASE.SUBIENDO).map((e) => e.mensaje);
+  assert.ok(mensajes.includes("Enviando el archivo (parte 1 de 3)…"));
+  assert.ok(mensajes.includes("Enviando el archivo (parte 3 de 3)…"));
+  assert.equal(estados.at(-1).partes, 3);
+});
+
+test("upload M1: a part that failed is sent again with the parts after it, never the confirmed ones", async () => {
+  const srv = lifecycle();
+  srv.fallos.push(falla("PUT", /parte=1$/, "antes"));
+  const { s, partesPut } = subidaGrande(srv);
+  await s.ejecutar();
+  assert.equal(s.estado().fase, FASE.INCIERTO);
+  await s.reintentar();
+  assert.equal(s.estado().fase, FASE.LISTO);
+  assert.deepEqual(partesPut, ["0", "1", "1", "2"]);
+  assert.equal(srv.versiones.size, 1);
+});
+
+test("upload M1: missing parts named by completion are the only ones re-sent before the deadline", async () => {
+  const srv = lifecycle();
+  srv.fallos.push(falla("POST", /completar$/, error(409, "contenido_temporal_ausente",
+    { partes_faltantes: [1], reintentar: true })));
+  const { s, partesPut } = subidaGrande(srv);
+  await s.ejecutar();
+  assert.equal(s.estado().fase, FASE.INTERRUMPIDO);
+  assert.equal(s.estado().reintentable, true);
+  assert.equal(s.estado().reiniciable, false);
+  await s.reintentar();
+  assert.equal(s.estado().fase, FASE.LISTO);
+  assert.deepEqual(partesPut, ["0", "1", "2", "1"]);
+});
+
+test("upload M1: after the upload window, the user cancels and starts fresh under a new key", async () => {
+  const srv = lifecycle();
+  srv.fallos.push(falla("POST", /completar$/, error(409, "contenido_temporal_ausente",
+    { partes_faltantes: [0, 2], reintentar: false })));
+  const { s, partesPut } = subidaGrande(srv);
+  await s.ejecutar();
+  const vieja = s.estado().versionId;
+  const claveVieja = s.clave;
+  assert.equal(s.estado().fase, FASE.INTERRUMPIDO);
+  assert.equal(s.estado().reintentable, false);         // the old version can no longer be fed
+  assert.equal(s.estado().reiniciable, true);
+  assert.equal(s.estado().cancelable, true);
+  await s.reintentar();
+  assert.deepEqual(partesPut, ["0", "1", "2"]);          // nothing re-sent
+  await s.reiniciar();
+  assert.equal(s.estado().fase, FASE.LISTO);
+  assert.notEqual(s.estado().versionId, vieja);
+  assert.notEqual(s.clave, claveVieja);
+  assert.equal(srv.porClave.size, 2);
+  assert.equal(srv.versiones.get(vieja).final.version.estado, "cancelado");
+  const orden = srv.registro.map((r) => r.split("/").at(-1));
+  assert.deepEqual(orden.slice(-6), ["cancelar", "archivos", "contenido", "contenido", "contenido", "completar"]);
+});
+
+test("upload M1: a fresh start is not sent when the old version cannot be cancelled", async () => {
+  const srv = lifecycle();
+  srv.fallos.push(falla("POST", /completar$/, error(409, "contenido_temporal_ausente",
+    { partes_faltantes: [1], reintentar: false })));
+  srv.fallos.push(falla("POST", /cancelar$/, error(503, "almacen_no_disponible", { reintentar: true })));
+  const { s } = subidaGrande(srv);
+  await s.ejecutar();
+  await s.reiniciar();
+  assert.notEqual(s.estado().fase, FASE.CANCELADO);
+  assert.match(s.estado().mensaje, /No se pudo cancelar/);
+  assert.equal(srv.porClave.size, 1);                    // no second start
+});
+
+test("upload M1: an expired upload can be started fresh without a cancel call", async () => {
+  const srv = lifecycle();
+  srv.fallos.push(falla("PUT", /parte=0$/, error(410, "subida_expirada")));
+  const { s } = subidaGrande(srv);
+  await s.ejecutar();
+  assert.equal(s.estado().fase, FASE.EXPIRADO);
+  assert.equal(s.estado().reiniciable, true);
+  await s.reiniciar();
+  assert.equal(s.estado().fase, FASE.LISTO);
+  assert.equal(srv.porClave.size, 2);
+  assert.ok(!srv.registro.some((r) => r.endsWith("/cancelar")));
+});
+
+test("upload M1: a transfer plan that does not match the file sends no part", async () => {
+  const srv = lifecycle();
+  const original = srv.peticionPrivada;
+  const cliente = A.crearClienteArchivos({ peticionPrivada: async (ruta, o) => {
+    const r = await original(ruta, o);
+    if (o?.method === "POST" && /\/archivos$/.test(ruta) && r.response.ok) {
+      const dto = await r.response.json();
+      return { ...r, response: json(200, { ...dto, transferencia: { parte_bytes: 1024, partes: 2 } }) };
+    }
+    return r;
+  } });
+  const s = crearSubida({ cliente, terrenoId: TERRENO, tipo: "pdf", archivo: archivoDe(SIETE) });
+  await s.ejecutar();
+  assert.equal(s.estado().codigo, "transferencia_inconsistente");
+  assert.equal(s.estado().cancelable, true);
+  assert.equal(rutasPut(srv).length, 0);
+});
+
+test("upload M1: store answers keep their retry and cleanup meaning", async () => {
+  const noConf = lifecycle();
+  noConf.fallos.push(falla("POST", /\/terrenos\/.+\/archivos$/, error(503, "almacen_no_configurado", { reintentar: false })));
+  const a = subidaCon(noConf).s;
+  await a.ejecutar();
+  assert.equal(a.estado().fase, FASE.FALLIDO);
+  assert.equal(a.estado().reintentable, false);
+  assert.equal(noConf.versiones.size, 0);
+
+  const denegado = lifecycle();
+  denegado.fallos.push(falla("POST", /completar$/, error(503, "almacen_no_disponible", { reintentar: false })));
+  const b = subidaCon(denegado).s;
+  await b.ejecutar();
+  assert.equal(b.estado().fase, FASE.INTERRUMPIDO);
+  assert.equal(b.estado().reintentable, false);
+  assert.equal(b.estado().cancelable, true);
+
+  const incierto = lifecycle();
+  incierto.fallos.push(falla("POST", /completar$/, error(503, "almacen_no_disponible",
+    { reintentar: true, limpieza_pendiente: true })));
+  const c = subidaCon(incierto).s;
+  await c.ejecutar();
+  assert.equal(c.estado().fase, FASE.INTERRUMPIDO);
+  assert.equal(c.estado().reintentable, true);
+  assert.equal(c.estado().limpiezaPendiente, true);
+  await c.reintentar();                                  // a fresh completion with a fresh nonce
+  assert.equal(c.estado().fase, FASE.LISTO);
+});
+
 test("upload: KMZ outcomes are reported separately from the upload", async () => {
   for (const [resultado, fase] of [["listo", FASE.LISTO], ["requiere_seleccion", FASE.REQUIERE_SELECCION], ["rechazado", FASE.RECHAZADO]]) {
     const srv = lifecycle({ kmzResultado: resultado });
@@ -299,7 +539,7 @@ test("upload: KMZ outcomes are reported separately from the upload", async () =>
 
 test("upload: explicit cancellation calls the server and reports its answer", async () => {
   const srv = lifecycle();
-  srv.fallos.push(falla("PUT", /contenido$/, "antes"));
+  srv.fallos.push(falla("PUT", /contenido(\?|$)/, "antes"));
   const { s } = subidaCon(srv);
   await s.ejecutar();
   assert.equal(s.estado().cancelable, true);
@@ -323,7 +563,7 @@ test("upload: cancelling after the server finished says so and shows the real ou
 
 test("upload: a failed cancellation is never shown as success", async () => {
   const srv = lifecycle();
-  srv.fallos.push(falla("PUT", /contenido$/, "antes"));
+  srv.fallos.push(falla("PUT", /contenido(\?|$)/, "antes"));
   srv.fallos.push(falla("POST", /cancelar$/, error(503, "almacen_no_disponible")));
   const { s } = subidaCon(srv);
   await s.ejecutar();

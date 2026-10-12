@@ -218,6 +218,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       if (espera > 0) setTimeout(() => pintarSubida(s), Math.min(espera, 1) * 1000);
       controles.push(b);
     }
+    if (e.reiniciable && !solo) {
+      // The upload window closed: cancel this version and start a new one.
+      controles.push(boton("Empezar de nuevo", () => reiniciarSubida(s)));
+    }
     if (e.cancelable && !solo && !esTerminal(e.fase)) {
       controles.push(boton("Cancelar subida", () => s.cancelar(), { peligro: true }));
     }
@@ -235,6 +239,15 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       el("span", { class: "archivos-acciones" }, controles),
     ].filter(Boolean));       // native replaceChildren would print "null"
     if (esTerminal(e.fase)) ctx.subidas.quitar(s);
+  }
+
+  /* A fresh start counts as an unfinished upload again, within the same limit. */
+  function reiniciarSubida(s) {
+    if (esTerminal(s.estado().fase)) {
+      if (!ctx.subidas.hayLugar()) return avisar("Hay demasiadas subidas pendientes. Termina o cancela alguna.", "error");
+      ctx.subidas.agregar(s);
+    }
+    return s.reiniciar();
   }
 
   function quitarSubida(s) {
@@ -312,7 +325,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   async function descargar(version, abrir = false) {
     try {
       avisar("Descargando…");
-      const r = await ctx.cliente.descargar(version.id, tipo, { signal: senal() });
+      const r = await ctx.cliente.descargar(version.id, tipo, { signal: senal(),
+        alProgreso: (recibidos, total) => {
+          if (vivo && recibidos < total) avisar(`Descargando… ${Math.floor((recibidos * 100) / total)} %`);
+        } });
       if (!vivo) return;
       const url = URL.createObjectURL(new Blob([r.bytes], { type: TIPO_CONTENIDO[tipo] }));
       urls.add(url);

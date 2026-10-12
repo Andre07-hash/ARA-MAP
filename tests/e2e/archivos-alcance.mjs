@@ -220,14 +220,14 @@ await revisar("revocar el acceso mientras se completa: 404 limpia el detalle y l
 await revisar("revocar el acceso durante el PUT: 404 del contenido limpia y llega al host", async () => {
   alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
-  const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
+  const put = await retener("**/api/archivos/versiones/*/contenido?parte=*", "PUT");
   const [e0, c0] = await contadores();
   await subirPdf("Privado alcance dos.pdf");
   await put.entrada;
   await esperarRefrescosDelInicio();
   alTerminar.push(restaurarOlga);
   await revocarOlga();
-  const respuesta = page.waitForResponse((r) => r.url().endsWith("/contenido"));
+  const respuesta = page.waitForResponse((r) => /\/contenido(\?|$)/.test(r.url()));
   put.soltar();
   igual((await respuesta).status(), 404, "PUT");
   const r = await comprobarAlcancePerdido("Privado alcance dos.pdf", T.uno.id, e0, c0);
@@ -260,7 +260,7 @@ await revisar("transferir el terreno a otra base mientras se completa: 404 limpi
 await revisar("cancelar después de perder el acceso: el 404 de la cancelación también limpia", async () => {
   alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
-  const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
+  const put = await retener("**/api/archivos/versiones/*/contenido?parte=*", "PUT");
   const [e0, c0] = await contadores();
   await subirPdf("Privado cancelado.pdf");
   await put.entrada;
@@ -305,7 +305,7 @@ await revisar("archivar el terreno mientras se completa: permiso perdido, el hos
 await revisar("cerrar el detalle mientras la cancelación espera: no sale ninguna petición después", async () => {
   alTerminar.push(cancelarPendientesPropias);
   await seleccionar(T.uno.id);
-  const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
+  const put = await retener("**/api/archivos/versiones/*/contenido?parte=*", "PUT");
   await subirPdf("Privado cerrado.pdf");
   await put.entrada;
   await esperarRefrescosDelInicio();
@@ -329,7 +329,7 @@ await revisar("control: con el acceso intacto una subida termina y una cancelaci
   await seleccionar(T.uno.id);
   await subirPdf("Ficticio control.pdf");
   await page.waitForFunction(() => [...document.querySelectorAll('[data-detalle="pdf"] .archivos-subida')].at(-1)?.dataset.fase === "listo", null, { timeout: 30000 });
-  const put = await retener("**/api/archivos/versiones/*/contenido", "PUT");
+  const put = await retener("**/api/archivos/versiones/*/contenido?parte=*", "PUT");
   await subirPdf("Ficticio cancelado.pdf");
   await put.entrada;
   const respuesta = page.waitForResponse((r) => r.url().endsWith("/cancelar"));

@@ -1,4 +1,4 @@
-/* One logical upload: hash → start → raw PUT → complete, as a state machine.
+/* One logical upload: hash → start → parts → complete, as a state machine.
  *
  * No DOM. The widget renders `estado()` and calls the methods. The rules this
  * encodes are the accepted lifecycle's (Round 1 contract, 2B routes):
@@ -8,8 +8,13 @@
  *   starting another version.
  * - An ambiguous completion is resolved by calling completion again: a
  *   terminal version replays its stored outcome.
- * - Content is re-staged only for the same version, from the same File,
- *   while the server still accepts it.
+ * - Content travels in 3 MiB parts, one request at a time (M1 contract).
+ *   Parts are re-staged only for the same version, from the same File, while
+ *   the server still accepts them; after a missing-parts answer only the
+ *   parts it names are sent again.
+ * - Once the upload window has closed, a version cannot get its parts back:
+ *   the user may cancel it and start a fresh upload with a new key
+ *   (`reiniciar`). The old version is never reused.
  * - Nothing retries by itself. Every retry is a user action, and a server
  *   "retry after" hint holds the retry back until then.
  * - Cancelling local work proves nothing about the server: an explicit
@@ -26,13 +31,13 @@
  *   (R3-B2).
  */
 
-import { ErrorArchivos, LIMITE_BYTES, comprobar, mensajeDe, nuevaClave, sha256Hex,
+import { ErrorArchivos, LIMITE_BYTES, comprobar, mensajeDe, nuevaClave, partesDe, sha256Hex,
   validarArchivoLocal } from "../../lib/archivos.js";
 
 export const FASE = Object.freeze({
   LEYENDO: "leyendo",            // reading the file and computing its SHA-256
   INICIANDO: "iniciando",
-  SUBIENDO: "subiendo",          // the PUT is in flight (no byte progress available)
+  SUBIENDO: "subiendo",          // parts are being sent (progress by part)
   COMPLETANDO: "completando",    // verification and, for KMZ, the parser (may take seconds)
   LISTO: "listo",                // stored; PDF current, or KMZ boundary active
   REQUIERE_SELECCION: "requiere_seleccion",
@@ -99,12 +104,13 @@ export function crearTurno() {
 export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendiente = null,
   alCambiar = () => {}, alServidor = () => {}, alPerderAcceso = () => {}, turno = null,
   ahora = () => Date.now() }) {
-  const clave = nuevaClave();
+  let clave = nuevaClave();      // one per logical upload; a fresh start gets a new one
   let datos = null;            // the exact start body sent with `clave`
   let inicio = pendiente ? { version_id: pendiente.id, archivo_id: pendiente.archivo_id,
     tamano_declarado: pendiente.tamano_declarado, subida_vence_en: pendiente.subida_vence_en ?? null,
     completar_antes_de: pendiente.completar_antes_de ?? null, nombre_original: pendiente.nombre_original } : null;
   let paso = pendiente ? "contenido" : "leer";
+  const confirmadas = new Set(); // parts the server confirmed for this version
   let actual = null;           // AbortController of the step in flight
   let corriendo = null;        // the running ejecutar(), until its step has settled
   let cancelando = false;
@@ -118,6 +124,7 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
     versionId: inicio?.version_id ?? null, archivoId: inicio?.archivo_id ?? null,
     reintentable: false, cancelable: Boolean(pendiente), reintentarDesde: null,
     limpiezaPendiente: false, resultado: null, venceEn: inicio?.subida_vence_en ?? null,
+    reiniciable: false, parte: 0, partes: 0,
   };
 
   function poner(cambios) {
@@ -214,21 +221,39 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
         return poner({ ...base, fase: FASE.EN_CURSO, reintentable: true, reintentarDesde: ahora() + s * 1000,
           mensaje: `Otro proceso está trabajando con este archivo. Podrás reintentar en ${s} s.` });
       }
-      case "contenido_temporal_ausente":
-        // The version is pending without its bytes: send them again, or cancel it.
+      case "contenido_temporal_ausente": {
+        // The version is pending without some of its parts.
+        const faltan = error.detalle?.partes_faltantes;
+        if (Array.isArray(faltan) && faltan.every(Number.isInteger)) for (const i of faltan) confirmadas.delete(i);
+        else confirmadas.clear();
         paso = "contenido";
+        if (error.detalle?.reintentar === false) {
+          // The upload window has closed: these parts can no longer be sent.
+          return poner({ ...base, fase: FASE.INTERRUMPIDO, reintentable: false, cancelable: true,
+            reiniciable: Boolean(archivo),
+            mensaje: archivo ? "El plazo para enviar esta subida venció. Cancélala y empieza una nueva con el mismo archivo."
+              : "El plazo para enviar esta subida venció. Cancélala y vuelve a subir el archivo." });
+        }
         return poner({ ...base, fase: FASE.INTERRUMPIDO, reintentable: Boolean(archivo), cancelable: true,
-          mensaje: archivo ? "El servidor no tiene el contenido de esta subida. Reintenta para volver a enviarlo."
-            : "El servidor no tiene el contenido de esta subida. Elige de nuevo el archivo o cancélala." });
+          mensaje: archivo ? "Al servidor le faltan partes de esta subida. Reintenta para volver a enviarlas."
+            : "Al servidor le faltan partes de esta subida. Elige de nuevo el archivo o cancélala." });
+      }
       case "almacen_no_disponible": {
         const s = error.reintentarDespuesDe;
-        return poner({ ...base, fase: FASE.INTERRUMPIDO, reintentable: true,
-          reintentarDesde: s ? ahora() + s * 1000 : null,
+        const puede = error.detalle?.reintentar !== false;
+        if (!puede && !pendienteEnServidor) {
+          // A start refused by the store: nothing was registered.
+          paso = "hecho";
+          return poner({ ...base, fase: FASE.FALLIDO, reintentable: false, cancelable: false });
+        }
+        return poner({ ...base, fase: FASE.INTERRUMPIDO, reintentable: puede,
+          reintentarDesde: puede && s ? ahora() + s * 1000 : null,
           limpiezaPendiente: Boolean(error.detalle?.limpieza_pendiente) });
       }
       case "subida_expirada":
         paso = "hecho";
-        return poner({ ...base, fase: FASE.EXPIRADO, reintentable: false, cancelable: false });
+        return poner({ ...base, fase: FASE.EXPIRADO, reintentable: false, cancelable: false,
+          reiniciable: Boolean(archivo) });
       case "subida_no_pendiente":
         // The version is no longer accepting content: learn its real outcome.
         paso = "completar";
@@ -273,8 +298,21 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
   }
 
   async function paso_contenido(senal) {
-    poner({ fase: FASE.SUBIENDO, mensaje: "Enviando el archivo…", reintentable: false, cancelable: true });
-    await cliente.subir(inicio.version_id, tipo, archivo, { signal: senal });
+    const total = partesDe(archivo.size);
+    const faltan = [...Array(total).keys()].filter((i) => !confirmadas.has(i));
+    const aviso = (hechas) => (total > 1 ? `Enviando el archivo (parte ${Math.min(hechas + 1, total)} de ${total})…`
+      : "Enviando el archivo…");
+    poner({ fase: FASE.SUBIENDO, mensaje: aviso(confirmadas.size), reintentable: false, cancelable: true,
+      reiniciable: false, parte: confirmadas.size, partes: total });
+    await cliente.subir(inicio.version_id, tipo, archivo, {
+      signal: senal, transferencia: inicio.transferencia ?? null,
+      partes: faltan.length === total ? null : faltan,
+      alParte: (i) => {
+        if (senal.aborted) return;
+        confirmadas.add(i);
+        poner({ mensaje: aviso(confirmadas.size), parte: confirmadas.size });
+      },
+    });
     comprobar(senal);
     paso = "completar";
   }
@@ -346,9 +384,9 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
     return !muerta();
   }
 
-  return {
+  const subida = {
     estado: () => estado,
-    clave,
+    get clave() { return clave; },
     ejecutar,
     async reintentar() {
       if (!estado.reintentable || muerta()) return;
@@ -423,6 +461,25 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
         cancelando = false;
       }
     },
+    /** A fresh upload of the same File after this version's window closed:
+     * the old version is cancelled through the server first (unless it has
+     * already expired), then a new start is sent under a new key. If the
+     * cancellation fails or finds an outcome, that is what stays reported. */
+    async reiniciar() {
+      if (muerta() || cancelando || !estado.reiniciable || !archivo) return;
+      if (estado.fase !== FASE.EXPIRADO && estado.fase !== FASE.CANCELADO) {
+        await subida.cancelar();
+        if (muerta() || estado.fase !== FASE.CANCELADO) return;
+      }
+      clave = nuevaClave();
+      inicio = null;
+      confirmadas.clear();
+      paso = datos ? "iniciar" : "leer";
+      poner({ versionId: null, archivoId: null, venceEn: null, resultado: null, codigo: null,
+        limpiezaPendiente: false, reiniciable: false, reintentable: false, cancelable: false,
+        reintentarDesde: null, parte: 0, partes: 0 });
+      await ejecutar();
+    },
     /** Local teardown (destroy/reset). The server is not asked to do anything,
      * nothing more is sent or reported, and the pipeline permit is released
      * as soon as the step in flight has settled. */
@@ -434,4 +491,5 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
       datos = null;
     },
   };
+  return subida;
 }

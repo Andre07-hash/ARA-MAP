@@ -74,6 +74,8 @@ def escribir_fixtures(carpeta: Path) -> dict[str, str]:
     archivos = {
         "pdf": ("Avalúo ficticio.pdf", pdf_ficticio("ficticio uno")),
         "pdf2": ("Escritura ficticia.pdf", pdf_ficticio("ficticio dos", 4000)),
+        # Three parts and three download slices (M1: 3 MiB each).
+        "pdf_grande": ("Plano ficticio grande.pdf", pdf_ficticio("ficticio grande", 7 * 1024 * 1024)),
         "kmz_simple": ("Contorno ficticio.kmz", kmz_de((KML / "poligono_simple.kml").read_bytes())),
         "kmz_varios": ("Tres lotes ficticios.kmz", kmz_de((KML / "ambiguo_tres_lotes.kml").read_bytes())),
         "kmz_reemplazo": ("Forma U ficticia.kmz", kmz_de((KML / "forma_u.kml").read_bytes())),

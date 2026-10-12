@@ -62,6 +62,11 @@ const MENSAJES = {
   archivo_vacio: "El archivo está vacío.",
   archivo_grande: "El archivo supera el tamaño permitido.",
   descarga_inconsistente: "El archivo descargado no coincide con el registrado. No se abrió.",
+  parte_invalida: "Una parte del archivo no es válida. Vuelve a intentarlo.",
+  transferencia_inconsistente: "El servidor propuso un envío que no corresponde a este archivo.",
+  contenido_temporal_ausente: "Al servidor le faltan partes de esta subida.",
+  almacen_no_configurado: "El almacenamiento de archivos no está disponible en este entorno.",
+  almacen_no_disponible: "El almacenamiento de archivos no respondió. Vuelve a intentarlo.",
   not_found: "Este archivo ya no está disponible.",
   unauthenticated: "Tu sesión terminó. Vuelve a entrar.",
 };
@@ -163,6 +168,36 @@ async function errorDeRespuesta(response) {
   });
 }
 
+/* The bounded transfer (M1 contract): 3 MiB parts, at most 9 per file. */
+export const PARTE_BYTES = 3 * 1024 * 1024;
+export const MAX_PARTES = 9;
+
+/** The number of parts a file of `tamano` bytes travels in. */
+export const partesDe = (tamano) => Math.ceil(tamano / PARTE_BYTES);
+
+const DECIMAL = /^(0|[1-9][0-9]{0,8})$/;
+const decimal = (texto) => (texto !== null && DECIMAL.test(texto) ? Number(texto) : null);
+const inconsistente = () => new ErrorArchivos("descarga_inconsistente", mensajeDe("descarga_inconsistente"));
+
+/* One download slice's headers, checked against each other: null when any is
+ * missing, malformed or contradictory. */
+function cabecerasDeTramo(response, versionId, tipo) {
+  const tipoContenido = (response.headers.get("Content-Type") ?? "").split(";")[0].trim().toLowerCase();
+  const sha256 = response.headers.get("X-Archivo-Sha256") ?? "";
+  const vid = (response.headers.get("X-Archivo-Version-Id") ?? "").toLowerCase();
+  const bytes = decimal(response.headers.get("X-Archivo-Bytes"));
+  const desde = decimal(response.headers.get("X-Archivo-Desde"));
+  const longitud = decimal(response.headers.get("X-Archivo-Longitud"));
+  const siguiente = response.headers.get("X-Archivo-Siguiente");
+  if (tipoContenido !== "application/octet-stream" || !HEX64.test(sha256) || vid !== versionId.toLowerCase()
+      || bytes === null || desde === null || longitud === null) return null;
+  if (bytes < 1 || bytes > LIMITE_BYTES[tipo] || desde % PARTE_BYTES !== 0 || desde >= bytes
+      || longitud !== Math.min(PARTE_BYTES, bytes - desde)) return null;
+  const fin = desde + longitud;
+  if (fin === bytes ? siguiente !== "fin" : siguiente !== String(fin)) return null;
+  return { sha256, bytes, desde, longitud };
+}
+
 /**
  * The attachment client over the injected private bridge.
  *
@@ -220,16 +255,21 @@ export function crearClienteArchivos({ peticionPrivada }) {
     return `?${q}`;
   };
 
-  return {
+  const cliente = {
     /* Route 1. `datos` = {tipo, nombre_original, tamano_declarado, sha256_declarado}. */
     iniciar: async (terrenoId, datos, clave, { signal } = {}) =>
       json(`/api/inventario/terrenos/${id(terrenoId)}/archivos`, { method: "POST", datos, clave, signal }),
 
-    /* Route 3: the exact bytes as the body. The browser sets Content-Length. */
-    async subir(versionId, tipo, blob, { signal } = {}) {
-      const { response, signal: alcance } = await llamar(`/api/archivos/versiones/${id(versionId)}/contenido`, {
-        method: "PUT", headers: { "Content-Type": TIPO_CONTENIDO[tipo] }, body: blob, signal,
-      });
+    /* Route 3, one part: PUT ?parte=N with exactly that part's bytes. The
+     * browser sets Content-Length. Returns the server's part receipt. */
+    async subirParte(versionId, tipo, parte, blob, { signal } = {}) {
+      if (!Number.isInteger(parte) || parte < 0 || parte >= MAX_PARTES) {
+        throw new ErrorArchivos("parte_invalida", mensajeDe("parte_invalida"));
+      }
+      const { response, signal: alcance } = await llamar(
+        `/api/archivos/versiones/${id(versionId)}/contenido?parte=${parte}`, {
+          method: "PUT", headers: { "Content-Type": TIPO_CONTENIDO[tipo] }, body: blob, signal,
+        });
       try {
         comprobar(alcance, signal);
         if (!response.ok) throw await errorDeRespuesta(response);
@@ -241,6 +281,35 @@ export function crearClienteArchivos({ peticionPrivada }) {
         if (error instanceof ErrorArchivos) throw error;
         throw new ErrorArchivos("red", mensajeDe("red"), { incierto: true });
       }
+    },
+
+    /**
+     * Route 3, the whole file: its parts in order, one request at a time.
+     * `transferencia` is the start reply's {parte_bytes, partes}; it must match
+     * this file's size, or nothing is sent. `partes` limits the indices sent
+     * (the ones still missing); `alParte(i)` reports each confirmed part. The
+     * first failure stops the sequence and is thrown as is.
+     */
+    async subir(versionId, tipo, blob, { signal, transferencia = null, partes = null, alParte } = {}) {
+      const total = partesDe(blob.size);
+      if (transferencia && (transferencia.parte_bytes !== PARTE_BYTES || transferencia.partes !== total)) {
+        throw new ErrorArchivos("transferencia_inconsistente", mensajeDe("transferencia_inconsistente"));
+      }
+      const indices = partes ? [...new Set(partes)].sort((a, b) => a - b) : [...Array(total).keys()];
+      for (const i of indices) {
+        if (!Number.isInteger(i) || i < 0 || i >= total) {
+          throw new ErrorArchivos("parte_invalida", mensajeDe("parte_invalida"));
+        }
+      }
+      let ultimo = {};
+      for (const i of indices) {
+        comprobar(signal);
+        const inicio = i * PARTE_BYTES;
+        ultimo = await cliente.subirParte(versionId, tipo, i,
+          blob.slice(inicio, Math.min(blob.size, inicio + PARTE_BYTES)), { signal });
+        alParte?.(i, total);
+      }
+      return ultimo;
     },
 
     /* Route 4. Repeating it on a terminal version replays the stored outcome. */
@@ -277,38 +346,63 @@ export function crearClienteArchivos({ peticionPrivada }) {
     intento: async (intentoId, { signal } = {}) => json(`/api/archivos/intentos/${id(intentoId)}`, { signal }),
 
     /**
-     * Route 9: the exact bytes of one finalized version, bounded by its kind's
-     * limit and checked against the version id and SHA-256 the server sends.
-     * Returns {bytes, tipoContenido, sha256}. Nothing is cached.
+     * Route 9: the exact bytes of one finalized version, read in slices of at
+     * most 3 MiB (`?desde=O`). Every slice must name the same version, total
+     * size and SHA-256, start where the previous one ended and carry exactly
+     * the length announced; the whole file is then hashed before it is
+     * returned. Nothing is kept on failure or cancellation, and nothing is
+     * cached. The total is bounded by the kind's limit before a byte is kept.
+     * Returns {bytes, tipoContenido, sha256}; `alProgreso(recibidos, total)`.
      */
-    async descargar(versionId, tipo, { signal } = {}) {
-      const { response, signal: alcance } = await llamar(
-        `/api/archivos/versiones/${id(versionId)}/descarga`, { signal });
+    async descargar(versionId, tipo, { signal, alProgreso } = {}) {
+      const ruta = `/api/archivos/versiones/${id(versionId)}/descarga`;
+      let salida = null;
+      let firma = null;
+      let total = null;
+      let desde = 0;
       try {
-        comprobar(alcance, signal);
-        if (!response.ok) throw await errorDeRespuesta(response);
-        const tipoContenido = (response.headers.get("Content-Type") ?? "").split(";")[0].trim();
-        const firma = response.headers.get("X-Archivo-Sha256") ?? "";
-        if (tipoContenido !== TIPO_CONTENIDO[tipo] || !HEX64.test(firma)
-            || (response.headers.get("X-Archivo-Version-Id") ?? "").toLowerCase() !== versionId.toLowerCase()) {
-          await cancelarCuerpo(response);
-          throw new ErrorArchivos("descarga_inconsistente", mensajeDe("descarga_inconsistente"));
+        for (let vuelta = 0; vuelta < MAX_PARTES; vuelta += 1) {
+          const { response, signal: alcance } = await llamar(desde ? `${ruta}?desde=${desde}` : ruta, { signal });
+          try {
+            comprobar(alcance, signal);
+            if (!response.ok) throw await errorDeRespuesta(response);
+            const tramo = cabecerasDeTramo(response, versionId, tipo);
+            if (!tramo || tramo.desde !== desde || (firma !== null && (tramo.sha256 !== firma || tramo.bytes !== total))) {
+              await cancelarCuerpo(response);
+              throw inconsistente();
+            }
+            firma = tramo.sha256;
+            total = tramo.bytes;
+            salida ??= new Uint8Array(total);
+            const bytes = await leerBytes(response, tramo.longitud);
+            comprobar(alcance, signal);
+            if (bytes.byteLength !== tramo.longitud) throw inconsistente();
+            salida.set(bytes, desde);
+            desde += tramo.longitud;
+            alProgreso?.(desde, total);
+          } catch (error) {
+            if (esAbort(error) || alcance?.aborted || signal?.aborted) throw abortError();
+            throw error;
+          }
+          if (desde === total) {
+            const calculado = await sha256Hex(salida);
+            comprobar(signal);
+            if (calculado !== firma) throw inconsistente();
+            const resultado = { bytes: salida, tipoContenido: TIPO_CONTENIDO[tipo], sha256: calculado };
+            salida = null;
+            return resultado;
+          }
         }
-        const bytes = await leerBytes(response, LIMITE_BYTES[tipo]);
-        comprobar(alcance, signal);
-        const calculado = await sha256Hex(bytes);
-        comprobar(alcance, signal);
-        if (calculado !== firma) {
-          throw new ErrorArchivos("descarga_inconsistente", mensajeDe("descarga_inconsistente"));
-        }
-        return { bytes, tipoContenido, sha256: calculado };
+        throw inconsistente();
       } catch (error) {
-        if (esAbort(error) || alcance?.aborted || signal?.aborted) throw abortError();
+        salida = null;                  // a partial or unverified file is never handed out
+        if (esAbort(error) || signal?.aborted) throw abortError();
         if (error instanceof ErrorArchivos) throw error;
         throw new ErrorArchivos("red", mensajeDe("red"));
       }
     },
   };
+  return cliente;
 }
 
 /**

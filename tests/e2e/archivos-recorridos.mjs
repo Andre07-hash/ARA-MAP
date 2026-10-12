@@ -38,6 +38,7 @@ async function revisar(nombre, fn) {
       mensajes: [...document.querySelectorAll(".archivos-mensaje")].map((p) => p.textContent).filter(Boolean),
       errores: window.__arnes?.errores?.slice(-5),
       kmz: (document.querySelector('[data-detalle="kmz"]')?.innerText ?? "").slice(0, 1200),
+      pdf: (document.querySelector('[data-detalle="pdf"]')?.innerText ?? "").slice(0, 1200),
       expandidos: [...document.querySelectorAll("[aria-expanded]")].map((b) => `${b.textContent}=${b.getAttribute("aria-expanded")}`),
     })).catch(() => null);
     resultados.push({ nombre, ok: false, error: String(error?.stack ?? error), vista });
@@ -127,7 +128,7 @@ await revisar("los widgets montan con el resumen real: sin archivos no es 'carga
   return { modo: await olga.page.evaluate(() => window.__arnes.modo), puente: await olga.page.evaluate(() => window.__arnes.puente) };
 });
 
-await revisar("un PDF sube (huella → inicio → PUT → completar) y la celda se actualiza por onCambio", async () => {
+await revisar("un PDF sube (huella → inicio → partes → completar) y la celda se actualiza por onCambio", async () => {
   await seleccionar(olga.page, T.uno.id);
   await subir(olga.page, "pdf", F.pdf);
   igual(await faseFinal(olga.page, "pdf", ["listo", "fallido", "incierto"]), "listo", "fase");
@@ -342,6 +343,29 @@ await revisar("retirar exige confirmación y es definitivo", async () => {
   const [descarga] = await Promise.all([olga.page.waitForEvent("download"),
     d.getByRole("button", { name: /Descargar versión 1/ }).click()]);
   igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf)), "sha256 retenido");
+});
+
+await revisar("un PDF de 7 MiB viaja en 3 partes secuenciales y se descarga en 3 tramos verificados", async () => {
+  const vistas = [];
+  const mirar = (r) => { if (/\/contenido|\/descarga/.test(r.url())) vistas.push(`${r.method()} ${r.url().split("/").at(-1)}`); };
+  olga.page.on("request", mirar);
+  try {
+    await subir(olga.page, "pdf", F.pdf_grande);
+    igual(await faseFinal(olga.page, "pdf", ["listo", "fallido", "incierto", "interrumpido"]), "listo", "fase");
+    await textoCelda(olga.page, T.uno.id, "pdf", "1 PDF");
+    // The previous journey left a version list open, so the list offers a refresh instead of redrawing.
+    const actualizar = detalle(olga.page, "pdf").getByRole("button", { name: /actualizar/ });
+    if (await actualizar.isVisible()) await actualizar.click();
+    const item = detalle(olga.page, "pdf").locator(".archivos-item", { hasText: "Plano ficticio grande.pdf" });
+    await item.waitFor();
+    const [descarga] = await Promise.all([olga.page.waitForEvent("download"), item.getByRole("button", { name: /^Descargar/ }).click()]);
+    igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf_grande)), "sha256");
+  } finally {
+    olga.page.off("request", mirar);
+  }
+  igual(vistas, ["PUT contenido?parte=0", "PUT contenido?parte=1", "PUT contenido?parte=2",
+    "GET descarga", "GET descarga?desde=3145728", "GET descarga?desde=6291456"], "peticiones");
+  return { peticiones: vistas, bytes: readFileSync(F.pdf_grande).length };
 });
 
 await revisar("al expirar la sesión durante trabajo activo todo se desmonta y nada se instala después", async () => {

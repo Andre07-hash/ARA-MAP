@@ -339,6 +339,8 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
     except (TypeError, ValueError) as exc:
         raise _error("bloque_invalido", "Los bloques de la subida no son válidos.") from exc
     if written != expected:
+        # A short part must not stay staged as if it were usable.
+        _discard_staging([clave_de_parte(str(resource["clave_temporal"]), parte)], store)
         raise _error("parte_invalida", "La parte no tiene la longitud esperada.",
                      parte=parte, bytes_esperados=expected)
     current = _in_scope(sesion, _version(version_id), "archivos.subir", bd)

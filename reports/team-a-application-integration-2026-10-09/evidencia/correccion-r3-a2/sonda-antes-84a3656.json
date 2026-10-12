@@ -1,0 +1,11 @@
+{
+  "probe": "real_upload_archived_readonly",
+  "completionStatus": 409,
+  "pickerVisibleAfterArchive": true,
+  "pickerEnabledAfterArchive": true,
+  "detailReadonly": "0",
+  "rowStillPresent": 1,
+  "detailStillOpen": 1,
+  "privateFilenameStillPresent": true,
+  "uploadPhase": "fallido"
+}

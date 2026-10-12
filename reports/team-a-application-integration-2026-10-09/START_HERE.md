@@ -378,3 +378,129 @@ screenshot: `correccion-r3/capturas/07-r3-b2-revocado-durante-completar.png`.
 
 Stop for supervisory review. No 4A, no GitHub PR or main merge, no
 deployment, no real account or data.
+
+## 8. R3-A2: write permission is revalidated when a file write is refused (2026-10-12)
+
+Supervisor packet `63b363a6e2553121d0db43d9e9981ea397905887`,
+`reports/round-3-corrections-review-2026-10-12/` (START_HERE, TEAM_A). Only
+R3-A2 and its verification. Team B's candidate was **not** merged again; R3-A1
+batching was not started.
+
+### Heads
+
+| What | Exact commit |
+|---|---|
+| #29 head with B's corrections consumed (start) | `84a3656429ea4cb3eda05e741794d11efb39b4c8` |
+| Team B candidate already consumed, merge `e795935…` (parents `0e9e2c1…`, `b2ac9bd…`) | `b2ac9bd176043fc4b1625b13993f8f21407dc978` |
+| Code head (the fix and its journeys) | `3f77c537b1d2ade93cb88c686dea9a4e5b4dcda1` |
+| Final head (this section and its evidence) | the head of draft PR #29, in its description |
+| Frozen C1 (#27), unchanged | `49b782d147591236cc7f311c7e0de1948ad5258e` |
+
+### Reproduced first
+
+The supervisor's unmodified `probe_archive_readonly.mjs` on an exact copy of
+`84a3656`: completion 409, upload control visible and enabled, detail
+`data-solo-lectura="0"`, row present (`correccion-r3-a2/sonda-antes-84a3656.json`).
+
+### Fix (A-owned host files only)
+
+`web/components/tabla/Tabla.js`, `web/components/tabla/dialogos.js`,
+`web/components/app.js`, one style rule. No server, schema, bridge or Team B
+file changed; no new dependency.
+
+- **A distinct path.** The widget codes `terreno_archivado`, `base_archivada`
+  and `forbidden` no longer end in a toast. They start a revalidation of
+  exactly what the refusal names. 404 keeps its own path (row, detail and
+  private names removed, bases looked at again); 401 keeps the session's.
+- **The record.** The one-terrain refresh that already existed now also takes
+  `archived_at` and `base_id` — permission metadata — and still nothing else:
+  not the version, the draft or the custom values. They are taken only from
+  an answer **at least as new as the row** (`version >=`), so an older answer
+  cannot undo an archive, a restore or a transfer the table already has.
+- **Visibility by view.** A terrain now archived leaves a view that does not
+  include archived records, and a terrain moved to another base leaves a base
+  view — the same thing that happens when this person archives or transfers
+  it — **unless the row holds an open editor or an unresolved change**: then
+  it stays, marked archived and read-only, with that work intact. With
+  "Incluir archivados" it always stays, read-only.
+- **Live read-only.** Rows, cell file mounts and the open detail get the
+  current `soloLectura`. The detail no longer captures it once: a new
+  `permisos({archivado, puedeCambiar, resumen})` updates B's mounts, the
+  "Archivado" note and the actions (archive ↔ restore, transfer) while what is
+  being read — lists, history, a download — stays.
+- **The base.** `base_archivada` reloads the bases. An operator loses an
+  archived base (the existing scope-loss path clears the view); an
+  administrator keeps it and every row, mount and the open detail become
+  read-only, with the existing notice and without "Agregar terreno".
+- **The role and the mode.** `forbidden` asks the server again who this is and
+  whether the application is read-only (`onRevalidar`). A changed account or
+  role goes through the session's existing teardown; an unchanged one keeps
+  its table and only repaints what may be written.
+- **Editors.** Permission changes repaint rows cell by cell: a cell with an
+  open editor is not touched, and unresolved changes stay in the tray.
+  `tabla.permisos()` no longer skips its work while an editor is open.
+- **One related defect found by the journeys and fixed.** A dialog's `close`
+  event arrives a task after it closes; the focus it hands back to the table
+  could land on top of a cell or editor focused in between. Focus is now
+  returned only if nothing else has it.
+
+### Evidence
+
+Owner's Mac (macOS, Google Chrome, loopback, synthetic accounts and data), at
+the code head. Files in `evidencia/correccion-r3-a2/`.
+
+| Check | Before (`84a3656`) | After |
+|---|---|---|
+| Supervisor `probe_archive_readonly.mjs`, unmodified | control visible and enabled, `soloLectura=0`, row 1, detail 1 | **no upload control, row 0, detail 0** in the default active-only view (`sonda-despues.json`) |
+| Terrain archived while an upload completes, active-only view: real 409; row and detail leave, no write control anywhere; the other row of the base still edits and saves | fails: the archived row stays | ok (SQLite and Postgres) |
+| The same with "Incluir archivados": the row stays with its "Archivado" mark and read-only cells; the open detail turns read-only (`data-solo-lectura="1"`, no picker), says it is archived and offers "Restaurar", not "Archivar"; **the stored PDF is still listed and downloads byte-identical**; then, with an editor open in another row holding unsaved text and a 2-character selection, a second terrain is archived during its upload: text, selection and focus are intact and the cell then saves at version +1 | fails: the detail stays editable | ok |
+| A row with an unresolved change (a rejected value kept in the tray) is archived during its upload, active-only view: the row is **not** removed, it shows archived and read-only, the typed text is still there | fails: the detail stays editable | ok |
+| Base archived while an **administrator** uploads: real 409; the detail and every cell become read-only, the notice appears, "Agregar terreno" is gone, both rows remain readable | fails: the detail stays editable | ok |
+| Base archived while an **operator** uploads: the base is no longer theirs; row, detail and names are gone, no write control | ok (already the scope-loss path) | ok |
+| `forbidden` — **simulated** answer (the test fulfils the completion with 403 `forbidden`; with the two existing roles the real policy cannot produce it for a file write): `/api/session` and `/api/config` are asked again, the table is not rebuilt, the row and the detail stay, another row still edits | fails: nothing is asked | ok |
+
+404 still clears private state: the four R3-B2/B1 scope-loss journeys of §7
+pass unchanged on this head. The live writable control is the unchanged PDF
+and KMZ journeys.
+
+| Combined rerun | Result |
+|---|---|
+| Real combined journey, SQLite | **39/39** (the 30 of §7, six R3-A2 journeys, three more no-page-error sessions), with the true restart on the same database and store (2 server starts) and the 100,000-vertex body (upload 8.4 s, selection → drawn 163 ms, heap 4.5 → 26 → 4.6 MiB) |
+| Focused disposable Postgres 16 | **18/18**: the §7 smoke, restart on the same schema and store, upload denial by revocation, and the archived-during-upload journey |
+| Team B scope / widget journeys, mounted | 8/8, 19/19 |
+| Host / 2A table / identity journeys | 6/6, 13/13, 16/16 |
+| `./verificar.sh --todo` | all OK: Python suite 1,254 (223 skipped need Postgres); full suite on Python 3.9.6; JavaScript 211/211; ruff; mypy (54 files); coverage **95%** (gate 80%) |
+| Full suite, disposable local Postgres 16 | 1,254 OK, zero skipped |
+| Exact-head CI | on the final head of #29; see the PR |
+
+The before column of the six journeys is the same script run on an exact
+archive of `84a3656` with `RECORRIDO_SOLO=R3-A2`
+(`recorridos-a2-antes-84a3656.log`).
+
+### Decisions made here, for review
+
+1. In an active-only view an archived terrain **leaves**, with its detail, and
+   a message says where to find it — unless it holds unsaved work. Keeping the
+   detail open read-only there was the alternative the packet also allowed.
+2. `archived_at` and `base_id` are applied only from an answer whose version is
+   not older than the row's.
+3. Focus is handed back from a closed dialog only when nothing else has it.
+
+### Limits
+
+- `forbidden` is exercised with a simulated answer only. The application's
+  read-only mode answers file writes with a 403 that carries no code; the
+  widget reports that as an ordinary error and the host does not revalidate on
+  it. Not changed: it is not one of the three codes of the contract.
+- After an administrator restores a terrain or a base, an open table learns it
+  on its next refresh ("Actualizar", a save, or a file event), not by itself.
+- An editor that is open on a row at the moment that row becomes read-only is
+  left open on purpose; its save is then refused by the server and the text
+  stays in the tray.
+- The journeys ran on SQLite, with one of them also on Postgres. No screen
+  reader. The 25,000-record timings, renderer and research evidence are
+  reused, not rerun.
+- Still open, as reserved: R3-A1 summary batching and the heap slope.
+
+Stop for supervisory review. No 4A, no GitHub PR or main merge, no
+deployment, no real account or data.

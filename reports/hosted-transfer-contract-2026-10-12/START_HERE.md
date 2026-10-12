@@ -1,5 +1,7 @@
 # M1 — private hosted file transfer implementation contract
 
+**Later owner decision:** the no-payment-method, 50–100-terrain pilot is now described in [F0](../free-private-pilot-2026-10-12/START_HERE.md). When the owner relays F0, its Render Free / Supabase Free instructions supersede this Vercel/AWS implementation packet. Preserve this document and any existing work as historical evidence.
+
 Supervisor review, 12 October 2026. This reconciles A's consolidated VD1-A and B's final VD1-B delta. It supersedes the design-only status of the earlier VD1 packets **when the owner relays the implementation instructions**. The supervisor has authored no application code.
 
 **Decision:** the designs are sufficient for bounded implementation with the requirements below. No further provider survey or general readiness/design handback is requested. S3 plus cloud-only boto3 is the working implementation choice; provider resources, access, cost and actual deployment remain separate owner/operator decisions.

@@ -38,7 +38,31 @@
     "feature_branch": "claude/team-b/attachment-lifecycle",
     "feature_branch_observed": false
   },
-  "next_supervisor_action": "Round 3 released: review A's early mounted C1 checkpoint when published, then B widgets/loader and A's final combined local employee journey. Do not repeat closed Round 2 corrections.",
+  "next_supervisor_action": "Round 3 corrections: independently review B's five bounded client fixes on #28, then A's exact-head correction merge and combined evidence on #29. Preserve C1 and all earlier accepted decisions; no Round 4 release.",
+  "round_3_first_review": {
+    "checked_at_utc": "2026-10-12T13:33:32Z",
+    "report": "reports/round-3-review-2026-10-12/START_HERE.md",
+    "original_instructions": "4682793f290718cfd49fd661ef16f2af4448fafb",
+    "checkpoint": {"pr": 27, "head": "49b782d147591236cc7f311c7e0de1948ad5258e", "ci_run": 37992169820, "ci": "success", "frozen": true},
+    "team_b": {
+      "pr": 28, "head": "01d64541e929009ea2d149e3c6f5980805c76c73", "ci_run": 37996070565, "ci": "success",
+      "verdict": "changes_requested",
+      "findings": ["R3-B1_late_cancel_after_destroy", "R3-B2_upload_scope_loss_teardown", "R3-B3_recovery_state", "R3-B4_pipeline_permit_lifetime", "R3-B5_geometry_private_scope"],
+      "instructions": "reports/round-3-review-2026-10-12/TEAM_B.md"
+    },
+    "team_a": {
+      "pr": 29, "head": "0e9e2c1f6a1ee3c75ffed40734c825e78e0f38db", "ci_run": 38204396420, "ci": "success",
+      "consumed_b": "01d64541e929009ea2d149e3c6f5980805c76c73",
+      "verdict": "combined_acceptance_pending_b_corrections_and_reintegration",
+      "new_a_owned_blockers_established": [],
+      "instructions": "reports/round-3-review-2026-10-12/TEAM_A.md"
+    },
+    "independent_evidence": "macOS Chrome 154 real combined browser 22/22; JS 181/181; selected mount/summary/dispatcher Python 38 run, 12 PG skips; five deterministic client edge observations plus real browser upload revoke 404 retaining stale private UI",
+    "not_rerun": ["full feature Python/Postgres/coverage matrix after blockers", "Postgres browser smoke", "research/render/performance matrices"],
+    "correction_prompts_delivered": false,
+    "round_3_accepted": false,
+    "round_4_released": false
+  },
   "do_not_infer": [
     "Prompts were delivered to external sessions",
     "Teams are currently running",

@@ -1,5 +1,13 @@
 # ARA MAP — supervisor session handoff
 
+**Latest review — 2026-10-12:** [Round 3 review and bounded corrections](../round-3-review-2026-10-12/START_HERE.md)
+supersedes the historical current-status paragraphs below. C1/#27, B/#28 and
+A/#29 are delivered, exact-head green CI checked, combined browser journey
+22/22 independently reproduced. Round 3 is **not accepted**: B owns five
+client correction groups; A preserves its branch and then integrates B's named
+green candidate and verifies the combined tree. No Round 4, PR/main merge or
+deployment. Earlier accepted heads/decisions remain preserved.
+
 **Snapshot: 2026-10-08, 23:17 UTC.** Compact machine-readable checkpoint: [STATE.json](STATE.json). Repository: https://github.com/Andre07-hash/ARA-MAP. This packet transfers project context; it does not change either team's assignment. Verify later GitHub changes before reporting current status. It is self-contained for orientation; linked source packets govern implementation details.
 
 ## 1. Read this first: role, current position and next action

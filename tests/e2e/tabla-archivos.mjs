@@ -3,9 +3,10 @@
  * real sessions, a real Chrome.
  *
  * Team B's widgets (web/components/archivos/) and geometry loader
- * (web/lib/cargadorGeometrias.js) are NOT part of this file's subject. Two
- * situations are exercised:
- *   1. those modules absent  -> the table still works and says so;
+ * (web/lib/cargadorGeometrias.js) are NOT part of this file's subject; the
+ * real ones are exercised by recorrido-completo.mjs. Two situations here:
+ *   1. those modules failing to load (answered 404 by the test)
+ *      -> the table still works and says so;
  *   2. STAND-INS served in their place by the test (DOBLE_* below) -> the
  *      host's side of the seam: real summaries handed over, coalesced
  *      refresh, selected-boundary loading from the real server, teardown.
@@ -94,7 +95,7 @@ async function caso(nombre, fn) {
   catch (error) { fallos += 1; resultados.push(`FAIL ${nombre}\n     ${String(error.stack ?? error).split('\n').slice(0, 7).join('\n     ')}`); }
 }
 
-async function abrir(usuario, { dobles = true } = {}) {
+async function abrir(usuario, { dobles = true, sinModulos = false } = {}) {
   const context = await browser.newContext({ viewport: { width: 1500, height: 900 }, locale: 'es-MX' });
   context.setDefaultTimeout(Number(process.env.E2E_TIMEOUT ?? 10000));
   const page = await context.newPage();
@@ -103,7 +104,10 @@ async function abrir(usuario, { dobles = true } = {}) {
   page.on('response', (r) => { if (r.url().includes('/api/')) api.push(`${r.request().method()} ${new URL(r.url()).pathname} ${r.status()}`); });
   page.on('pageerror', (e) => errores.push(e.message));
   await page.route(/arcgisonline|tile\.openstreetmap\.org|cartocdn/, (r) => r.fulfill({ status: 204, body: '' }));
-  if (dobles) {
+  if (sinModulos) {     // B's modules are in the tree since 3B: make them fail to load
+    await page.route('**/components/archivos/index.js', (r) => r.fulfill({ status: 404, body: '' }));
+    await page.route('**/lib/cargadorGeometrias.js', (r) => r.fulfill({ status: 404, body: '' }));
+  } else if (dobles) {
     const js = (body) => (r) => r.fulfill({ status: 200, contentType: 'text/javascript', body });
     await page.route('**/components/archivos/index.js', js(DOBLE_WIDGETS));
     await page.route('**/lib/cargadorGeometrias.js', js(DOBLE_CARGADOR));
@@ -179,7 +183,7 @@ let base, conXY, soloKmz, enBlanco;
 /* --------------------------------------------------------------- journeys */
 
 await caso('without Team B\'s modules the table works, says the files are unavailable, and the page map is honest', async () => {
-  const { context, page, errores } = await abrir('olga', { dobles: false });
+  const { context, page, errores } = await abrir('olga', { sinModulos: true });
   await fila(page, soloKmz).waitFor();
   assert.equal((await celda(page, soloKmz, 'core:kmz').innerText()).trim(), 'No disponible');
   assert.equal((await celda(page, soloKmz, 'core:archivos').innerText()).trim(), 'No disponible');

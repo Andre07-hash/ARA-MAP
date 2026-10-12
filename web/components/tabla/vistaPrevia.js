@@ -31,6 +31,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
   let carga = null;               // { id, control } of the load in flight
   let pedido = 0;
   let encuadrar = false;
+  let fallida = null;             // geometry id whose last load failed: not retried on a repaint
 
   const titulo = el("h2", { class: "previa-titulo" }, "Mapa de esta página");
   const cuenta = el("p", { class: "previa-cuenta" });
@@ -127,7 +128,11 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
       : "Esta página no tiene filas.";
     escala.disabled = !seleccion;
     dibujar();
-    if (seleccion && actual?.geometria && !geometrias.size && !carga) cargarContorno(seleccion);
+    if (seleccion && actual?.geometria && !geometrias.size && !carga && actual.geometria.id !== fallida) {
+      cargarContorno(seleccion);
+    } else if (seleccion && actual?.geometria && actual.geometria.id === fallida && !geometrias.size) {
+      decir("No se pudo cargar el contorno; el terreno se muestra en su punto interior.", true);
+    }
     else if (!seleccion) decir("");
   }
 
@@ -139,6 +144,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
       return;
     }
     seleccion = fila ? id : null;
+    fallida = null;
     soltarCuerpo();
     escala.disabled = !seleccion;
     if (desdeMapa && seleccion) onSeleccion?.(seleccion);
@@ -167,6 +173,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     const control = new AbortController();
     const mio = ++pedido;
     carga = { id, control };
+    fallida = null;
     decir("Cargando el contorno del terreno seleccionado…");
     try {
       const cuerpo = await origen.cargar({ terrenoId: id, geometria: fila.geometria }, { signal: control.signal });
@@ -180,7 +187,11 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
       if (!vivo || mio !== pedido) return;        // superseded, or the scope ended
       carga = null;
       if (error?.name === "AbortError") return;
-      decir("No se pudo cargar el contorno; el terreno se muestra en su punto interior.", true);
+      // Not retried by the next repaint: only by "Reintentar", another
+      // selection, or a different active boundary after the host revalidates.
+      fallida = fila.geometria.id;
+      decir("No se pudo cargar el contorno; el terreno se muestra en su punto interior." +
+        (error?.message ? ` ${error.message}` : ""), true);
       onError?.({ id, codigo: String(error?.codigo ?? error?.status ?? ""), mensaje: String(error?.message ?? "") });
     }
   }
@@ -207,10 +218,15 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
         canvas.render([], { colorFor: () => COLOR });   // every row and outline goes now
         canvas = null;
         // Leaflet finishes a zoom animation on a timer that map.remove() does
-        // not cancel and that then reads panes it has deleted. The map is
-        // already empty and off the page; it is removed when that step ends.
+        // not cancel and that then reads panes it has deleted. And a
+        // synchronous canvas redraw (a fitBounds, for instance) forgets the
+        // handle of a redraw already queued for the next frame, so
+        // map.remove() cannot cancel that one either: it would then draw on a
+        // removed canvas. The map is already empty and off the page; it is
+        // removed after the next frame, and after the zoom step if one runs.
         const quitar = () => { try { map.remove(); } catch { /* already gone */ } };
-        if (map._animatingZoom) map.once("moveend", quitar); else quitar();
+        const trasElCuadro = () => requestAnimationFrame(quitar);
+        if (map._animatingZoom) map.once("moveend", trasElCuadro); else trasElCuadro();
       }
     },
   };

@@ -229,9 +229,10 @@ await caso('operator: only her bases; blank create; every core and custom type e
   });   // X is latitude, Y longitude; no currency assumed; 1.3 ha and 99.5 $/m2 stay as typed, not derived
   assert.deepEqual(t.custom, { [COL.Nota]: 'Junto al río', [COL.Avance]: 42.5, [COL.Etapa]: 'Cerrado', [COL.Visita]: '2026-03-15' });
   assert.equal(t.version, 17);   // one version per saved cell: 16 cells after the create
-  // The file columns are honest placeholders: no count, no control.
-  for (const col of ['core:archivos', 'core:kmz']) {
-    assert.equal(await textoDe(page, lote, col), 'No disponible');
+  // The file columns show Team B's compact cells with the real summary: no
+  // files yet, said as such (not a placeholder, not a zero), and no control.
+  for (const [col, texto] of [['core:archivos', 'Sin PDF'], ['core:kmz', 'Sin KMZ']]) {
+    assert.equal(await textoDe(page, lote, col), texto);
     assert.equal(await celda(page, lote, col).locator('button, input, a').count(), 0);
   }
   await foto(page, '05-todas-las-celdas-editadas');
@@ -412,7 +413,7 @@ await caso('archive and restore a terrain; an archived row is read-only', async 
   const fila = page.locator(`tr[data-id="${lote}"]`);
   await fila.getByRole('button', { name: /^Abrir terreno/ }).click();
   const detalle = page.getByRole('dialog', { name: NOMBRE });
-  await detalle.getByText('No disponible').first().waitFor();      // the detail mount of the file slots
+  await detalle.locator('.archivos-detalle[data-tipo="pdf"]').waitFor();   // Team B's detail controls, mounted
   assert.equal(await detalle.getByRole('button', { name: /Transferir/ }).count(), 0, 'operators do not transfer');
   await foto(page, '09-detalle-del-terreno');
   await detalle.getByRole('button', { name: 'Archivar terreno' }).click();

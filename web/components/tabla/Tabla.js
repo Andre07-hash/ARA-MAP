@@ -87,6 +87,10 @@ export function createTabla({ sesion, soloConsulta = () => false, vistaInicial =
   const previa = createVistaPrevia({
     cargador: () => archivos.cargador,
     onSeleccion: (id) => seleccionar(id, { desdeMapa: true }),
+    // A boundary that is no longer available (retired, replaced, or out of
+    // scope) means this row may be stale: ask for the terrain again, which
+    // either updates its location or removes it from the view.
+    onError: ({ id, codigo }) => { if (codigo === "no_disponible" || codigo === "404") refrescarArchivos(id); },
   });
 
   /* ------------------------------------------------------------ skeleton */

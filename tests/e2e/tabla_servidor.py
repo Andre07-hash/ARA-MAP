@@ -9,6 +9,17 @@ fictional accounts whose password is the test fixture's
 olga, omar, oscar, olivia, oriol and otto. Nothing here reads the
 application's configured database or any real account.
 
+With --carpeta DIR the database and the attachment store live in DIR and are
+kept on exit, so a second start with the same DIR is a restart of the same
+local installation (accounts are seeded only the first time). With
+--postgres-esquema NAME the database is that schema of the disposable Postgres
+named by ARA_MAP_TEST_DATABASE_URL (created if absent), and the store is
+DIR/archivos; it requires --carpeta. Never point it at a real database.
+
+    python3 tests/e2e/tabla_servidor.py --puerto 8436 --carpeta /tmp/ara-3a
+    ARA_MAP_TEST_DATABASE_URL=postgresql://.../desechable \
+      python3 tests/e2e/tabla_servidor.py --puerto 8437 --carpeta /tmp/ara-3a-pg --postgres-esquema e2e_3a
+
 With --registros N it also writes N synthetic terrains straight to the tables:
 3,000 in "Base Grande" (granted to olga, omar, oscar, olivia and oriol), 1,000
 unassigned and the rest spread over ten other bases. otto never has a grant.
@@ -72,21 +83,56 @@ def sembrar(registros: int) -> None:
                          " ?, 'Ada Ficticia', ?, ?, '{}')", (str(uuid.uuid4()), tid, ada, ahora, rid))
 
 
+def preparar_postgres(esquema: str) -> None:
+    """Point the application at one schema of the disposable test Postgres."""
+    import psycopg
+    from psycopg.conninfo import make_conninfo
+    url = os.environ.get("ARA_MAP_TEST_DATABASE_URL")
+    if not url:
+        raise SystemExit("--postgres-esquema necesita ARA_MAP_TEST_DATABASE_URL (una base desechable).")
+    if not esquema.replace("_", "").isalnum():
+        raise SystemExit("Nombre de esquema no válido.")
+    with psycopg.connect(url) as conn:
+        conn.execute(f'CREATE SCHEMA IF NOT EXISTS "{esquema}"')
+    os.environ["ARA_MAP_DATABASE_URL"] = make_conninfo(url, options=f"-c search_path={esquema}")
+    from server import postgres
+    with postgres.session() as conn:
+        conn.raw.execute(postgres.schema_sql(), prepare=False)
+        postgres.migrate(conn)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--puerto", type=int, default=8433)
     parser.add_argument("--registros", type=int, default=0)
+    parser.add_argument("--carpeta", help="keep the database and the store here (restartable)")
+    parser.add_argument("--postgres-esquema", help="disposable Postgres schema (needs --carpeta)")
     args = parser.parse_args()
-    with tempfile.TemporaryDirectory() as carpeta:
-        os.environ["ARA_MAP_DB"] = str(Path(carpeta) / "desechable.db")
-        for variable in ("ARA_MAP_DATABASE_URL", "DATABASE_URL", "ARA_MAP_READ_ONLY"):
+    if args.postgres_esquema and not args.carpeta:
+        raise SystemExit("--postgres-esquema requiere --carpeta para el almacén de archivos.")
+    temporal = None if args.carpeta else tempfile.TemporaryDirectory()
+    carpeta = Path(args.carpeta) if args.carpeta else Path(temporal.name)  # type: ignore[union-attr]
+    carpeta.mkdir(mode=0o700, parents=True, exist_ok=True)
+    try:
+        for variable in ("ARA_MAP_DATABASE_URL", "DATABASE_URL", "ARA_MAP_READ_ONLY", "ARA_MAP_ARCHIVOS"):
             os.environ.pop(variable, None)
+        os.environ["ARA_MAP_DB"] = str(carpeta / "desechable.db")
+        if args.postgres_esquema:
+            os.environ["ARA_MAP_ARCHIVOS"] = str(carpeta / "archivos")
+            preparar_postgres(args.postgres_esquema)
         from server import app, db
         db.connect().close()
-        sembrar(args.registros)
-        print(f"BD {os.environ['ARA_MAP_DB']}", flush=True)   # for scripts/cuentas.py --sqlite in a journey
+        marca = carpeta / "sembrado"
+        if not marca.exists():
+            sembrar(args.registros)
+            marca.write_text("1")
+        print(f"BD {os.environ.get('ARA_MAP_DATABASE_URL') and 'postgres' or os.environ['ARA_MAP_DB']}",
+              flush=True)   # for scripts/cuentas.py --sqlite in a journey
         print(f"LISTO http://localhost:{args.puerto}", flush=True)
         app.serve(args.puerto, open_browser=False)
+    finally:
+        if temporal is not None:
+            temporal.cleanup()
 
 
 if __name__ == "__main__":

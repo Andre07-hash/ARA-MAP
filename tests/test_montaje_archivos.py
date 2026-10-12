@@ -118,14 +118,12 @@ class Montaje(TempDatabase):
             self.assertIn("NO DISPONIBLES", app_module.configurar_archivos())
         self.assertFalse(falta.parent.exists())
         self.assertIsNone(api._fabrica)
+        # Hosted transfer contract M1: a new start is refused before any row is
+        # written when no store is configured (it was accepted, then 503 at PUT).
         s, inicio = self.j("POST", f"/api/inventario/terrenos/{self.terreno}/archivos", "olga",
                            {"tipo": "pdf", "nombre_original": "a.pdf", "tamano_declarado": len(PDF),
                             "sha256_declarado": hashlib.sha256(PDF).hexdigest()}, str(uuid.uuid4()))
-        self.assertEqual(s, 200, inicio)
-        s, r = self.c.json("PUT", f"/api/archivos/versiones/{inicio['version_id']}/contenido",
-                           cookie=self.cookies["olga"], cuerpo=PDF,
-                           cabeceras={"Content-Type": "application/pdf"})
-        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual((s, inicio["detalle"]["code"]), (503, "almacen_no_configurado"), inicio)
 
     # -- binary answers ----------------------------------------------------------------
 
@@ -136,7 +134,8 @@ class Montaje(TempDatabase):
         s, h, cuerpo = self.c.pedir("GET", f"/api/archivos/versiones/{vid}/descarga",
                                     cookie=self.cookies["olga"])
         self.assertEqual((s, cuerpo), (200, PDF))
-        self.assertEqual(h["Content-Type"], "application/pdf")
+        # M1: raw octets of one verified slice (here the whole small file).
+        self.assertEqual(h["Content-Type"], "application/octet-stream")
         self.assertEqual(h["Content-Length"], str(len(PDF)))
         self.assertEqual(h["Cache-Control"], "private, no-store")
         self.assertEqual(h["X-Content-Type-Options"], "nosniff")

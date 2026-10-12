@@ -33,6 +33,16 @@ signatures):
   Exact keys only: there is no prefix or recursive deletion.
 - listar(prefijo) -> lazy iterator of Metadato. Prefix is one of "temporal/",
   "final/" or "final/<id>/". Order is unspecified. Listing never deletes.
+- componer(origenes, destino, limite) -> bytes composed. Concatenates several
+  staging objects, in order, into one final key that must not exist (hosted
+  transfer contract M1). Every source is pinned first: a staging write that
+  lands later never reaches the composed object. A missing source raises
+  ObjetoAusenteError naming the missing keys; more than `limite` bytes in
+  total raises LimiteExcedidoError before anything is written.
+
+Errors a provider-backed store adds (M1): FalloAlmacenError carries
+`reintentar`; ResultadoInciertoError means a write may or may not have taken
+effect; AlmacenNoConfiguradoError means the store cannot be used as configured.
 """
 
 from __future__ import annotations
@@ -43,7 +53,7 @@ import secrets
 import stat
 import threading
 import time
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from contextlib import suppress
 from dataclasses import dataclass
 from typing import Protocol, Union
@@ -54,6 +64,8 @@ FINAL = "final"
 # Largest chunk a caller may hand to guardar_temporal, and largest chunk a
 # Lectura may be asked to return. Keeps every operation's buffers bounded.
 MAX_BLOQUE = 1024 * 1024
+# Most staging objects one componer may join (the transfer contract uses at most 9).
+MAX_ORIGENES = 64
 BLOQUE_LECTURA = 64 * 1024
 
 _SEGMENTO = re.compile(r"[0-9a-z][0-9a-z_-]{0,99}")
@@ -82,10 +94,14 @@ class ClaveInvalidaError(AlmacenError):
 
 
 class ObjetoAusenteError(AlmacenError):
-    """The object does not exist."""
+    """The object does not exist. `claves` names the missing sources of a componer."""
 
     codigo = "objeto_ausente"
     mensaje = "El archivo no existe en el almacenamiento."
+
+    def __init__(self, mensaje: str | None = None, *, claves: Sequence[str] = ()) -> None:
+        super().__init__(mensaje)
+        self.claves = tuple(claves)
 
 
 class ColisionError(AlmacenError):
@@ -107,9 +123,31 @@ class LimiteExcedidoError(AlmacenError):
 
 
 class FalloAlmacenError(AlmacenError):
-    """The storage itself failed, or its contents are not what this module wrote."""
+    """The storage itself failed, or its contents are not what this module wrote.
+
+    `reintentar` says whether the same call may succeed later (an outage) or
+    not without an operator (access denied)."""
 
     codigo = "fallo_almacen"
+    reintentar = True
+
+    def __init__(self, mensaje: str | None = None, *, reintentar: bool | None = None) -> None:
+        super().__init__(mensaje)
+        if reintentar is not None:
+            self.reintentar = reintentar
+
+
+class ResultadoInciertoError(FalloAlmacenError):
+    """A write was sent but its outcome is unknown: it may or may not exist now."""
+
+    codigo = "resultado_incierto"
+
+
+class AlmacenNoConfiguradoError(AlmacenError):
+    """The store cannot be used as configured (settings, identity or SDK missing)."""
+
+    codigo = "almacen_no_configurado"
+    mensaje = "El almacenamiento de archivos no está configurado."
 
 
 # ----------------------------------------------------------------- validation
@@ -171,6 +209,17 @@ def _como_bytes(bloque: object) -> bytes:
     return bytes(bloque)            # no copy for bytes; at most MAX_BLOQUE for a bytearray
 
 
+def _origenes_validos(origenes: object) -> tuple[str, ...]:
+    if isinstance(origenes, (str, bytes)) or not isinstance(origenes, Sequence):
+        raise TypeError("origenes must be a sequence of staging keys")
+    claves = tuple(origenes)
+    if not 0 < len(claves) <= MAX_ORIGENES:
+        raise ValueError(f"componer takes 1 to {MAX_ORIGENES} sources")
+    for clave in claves:
+        partes_de_clave(clave, TEMPORAL)
+    return claves
+
+
 def _bloques_validos(bloques: Iterable[Bloque]) -> Iterable[Bloque]:
     if isinstance(bloques, (bytes, bytearray, memoryview, str)):
         raise TypeError("bloques must be an iterable of chunks, not a single value")
@@ -218,6 +267,8 @@ class Almacen(Protocol):
     def guardar_temporal(self, clave: str, bloques: Iterable[Bloque], limite: int) -> int: ...
 
     def copiar(self, origen: str, destino: str, limite: int) -> int: ...
+
+    def componer(self, origenes: Sequence[str], destino: str, limite: int) -> int: ...
 
     def leer(self, clave: str, limite: int, bloque: int = BLOQUE_LECTURA) -> Lectura: ...
 
@@ -423,13 +474,45 @@ class AlmacenLocal:
             directorio = self._abrir_directorio(destino_partes[:-1], crear=True)
             assert directorio is not None
             try:
-                return self._copiar_en(fuente, directorio, destino_partes[-1], limite)
+                return self._copiar_en([fuente], directorio, destino_partes[-1], limite)
             finally:
                 os.close(directorio)
         finally:
             os.close(fuente)
 
-    def _copiar_en(self, fuente: int, directorio: int, nombre: str, limite: int) -> int:
+    def componer(self, origenes: Sequence[str], destino: str, limite: int) -> int:
+        claves = _origenes_validos(origenes)
+        destino_partes = partes_de_clave(destino, FINAL)
+        _validar_limite(limite)
+        # Pin every source first: an open descriptor keeps reading the object it
+        # opened, because staging is replaced by renaming a new file over it.
+        fuentes: list[int] = []
+        ausentes: list[str] = []
+        try:
+            total = 0
+            for clave in claves:
+                try:
+                    fd, info = self._abrir_objeto(partes_de_clave(clave, TEMPORAL))
+                except ObjetoAusenteError:
+                    ausentes.append(clave)
+                    continue
+                fuentes.append(fd)
+                total += info.st_size
+            if ausentes:
+                raise ObjetoAusenteError(claves=ausentes)
+            if total > limite:
+                raise LimiteExcedidoError(limite)
+            directorio = self._abrir_directorio(destino_partes[:-1], crear=True)
+            assert directorio is not None
+            try:
+                return self._copiar_en(fuentes, directorio, destino_partes[-1], limite)
+            finally:
+                os.close(directorio)
+        finally:
+            for fd in fuentes:
+                os.close(fd)
+
+    def _copiar_en(self, fuentes: Sequence[int], directorio: int, nombre: str, limite: int) -> int:
         try:
             os.stat(nombre, dir_fd=directorio, follow_symlinks=False)
         except FileNotFoundError:
@@ -443,14 +526,15 @@ class AlmacenLocal:
             fd = os.open(parcial, _CREAR_PARCIAL, 0o600, dir_fd=directorio)
             try:
                 total = 0
-                while True:
-                    datos = os.read(fuente, BLOQUE_LECTURA)
-                    if not datos:
-                        break
-                    total += len(datos)
-                    if total > limite:
-                        raise LimiteExcedidoError(limite)
-                    _escribir_todo(fd, datos)
+                for fuente in fuentes:
+                    while True:
+                        datos = os.read(fuente, BLOQUE_LECTURA)
+                        if not datos:
+                            break
+                        total += len(datos)
+                        if total > limite:
+                            raise LimiteExcedidoError(limite)
+                        _escribir_todo(fd, datos)
                 os.fsync(fd)
             finally:
                 os.close(fd)
@@ -571,7 +655,11 @@ def _fsync_directorio(directorio: int) -> None:
 
 # ---------------------------------------------------------------- fake backend
 
-_OPERACIONES_CON_FALLA = ("guardar_temporal", "copiar", "leer")
+_OPERACIONES_CON_FALLA = ("guardar_temporal", "copiar", "leer", "componer")
+_OPERACIONES_CON_ERROR = _OPERACIONES_CON_FALLA + ("tamano_de", "borrar", "listar")
+
+
+_ESCRIBIR_Y_FALLAR = -1      # fault mode: the write happens, then the reply is "lost"
 
 
 class _LecturaMemoria(Lectura):
@@ -618,6 +706,7 @@ class AlmacenEnMemoria:
         self._objetos: dict[str, tuple[bytes, float]] = {}
         self._candado = threading.Lock()
         self._fallas: dict[str, list[int]] = {op: [] for op in _OPERACIONES_CON_FALLA}
+        self._errores: dict[str, list[AlmacenError]] = {}
 
     # -- test surface
 
@@ -626,12 +715,35 @@ class AlmacenEnMemoria:
 
         guardar_temporal fails after consuming `tras_bloques` chunks; leer
         returns a Lectura that fails after yielding `tras_bloques` chunks;
-        copiar fails before writing anything. One-shot, first in first out.
+        copiar and componer fail before writing anything. One-shot, first in
+        first out.
         """
         if operacion not in self._fallas:
             raise ValueError(f"no fault injection for {operacion!r}")
         with self._candado:
             self._fallas[operacion].append(tras_bloques)
+
+    def inyectar_incierto(self, operacion: str) -> None:
+        """Make the next copiar/componer WRITE its object and then raise
+        ResultadoInciertoError, as a provider whose reply was lost would."""
+        if operacion not in ("copiar", "componer"):
+            raise ValueError(f"no uncertain-write injection for {operacion!r}")
+        with self._candado:
+            self._fallas[operacion].append(_ESCRIBIR_Y_FALLAR)
+
+    def inyectar_error(self, operacion: str, error: AlmacenError) -> None:
+        """Make the next call of `operacion` raise exactly `error`, before any effect."""
+        if operacion not in _OPERACIONES_CON_ERROR:
+            raise ValueError(f"no error injection for {operacion!r}")
+        with self._candado:
+            self._errores.setdefault(operacion, []).append(error)
+
+    def _tomar_error(self, operacion: str) -> None:
+        with self._candado:
+            cola = self._errores.get(operacion)
+            error = cola.pop(0) if cola else None
+        if error is not None:
+            raise error
 
     def perder(self, clave: str) -> None:
         """Make an object vanish without borrar, as a provider might lose it."""
@@ -650,6 +762,7 @@ class AlmacenEnMemoria:
         partes_de_clave(clave, TEMPORAL)
         _validar_limite(limite)
         bloques = _bloques_validos(bloques)
+        self._tomar_error("guardar_temporal")
         falla = self._tomar_falla("guardar_temporal")
         recibidos: list[bytes] = []
         total = 0
@@ -671,24 +784,41 @@ class AlmacenEnMemoria:
         partes_de_clave(origen, TEMPORAL)
         partes_de_clave(destino, FINAL)
         _validar_limite(limite)
+        self._tomar_error("copiar")
         falla = self._tomar_falla("copiar")
-        with self._candado:
-            if origen not in self._objetos:
-                raise ObjetoAusenteError()
-            datos = self._objetos[origen][0]
+        return self._escribir_final([origen], destino, limite, falla, uno=True)
+
+    def componer(self, origenes: Sequence[str], destino: str, limite: int) -> int:
+        claves = _origenes_validos(origenes)
+        partes_de_clave(destino, FINAL)
+        _validar_limite(limite)
+        self._tomar_error("componer")
+        falla = self._tomar_falla("componer")
+        return self._escribir_final(list(claves), destino, limite, falla, uno=False)
+
+    def _escribir_final(self, origenes: list[str], destino: str, limite: int,
+                        falla: int | None, uno: bool) -> int:
+        with self._candado:         # one snapshot of every source under the lock
+            ausentes = [c for c in origenes if c not in self._objetos]
+            if ausentes:
+                raise ObjetoAusenteError() if uno else ObjetoAusenteError(claves=ausentes)
+            datos = b"".join(self._objetos[c][0] for c in origenes)
             if len(datos) > limite:
                 raise LimiteExcedidoError(limite)
             if destino in self._objetos:
                 raise ColisionError()
-            if falla is not None:
+            if falla is not None and falla != _ESCRIBIR_Y_FALLAR:
                 raise FalloAlmacenError()
             self._objetos[destino] = (datos, time.time())
+        if falla == _ESCRIBIR_Y_FALLAR:
+            raise ResultadoInciertoError()
         return len(datos)
 
     def leer(self, clave: str, limite: int, bloque: int = BLOQUE_LECTURA) -> Lectura:
         partes_de_clave(clave)
         _validar_limite(limite)
         _validar_tamano_bloque(bloque)
+        self._tomar_error("leer")
         falla = self._tomar_falla("leer")
         with self._candado:
             if clave not in self._objetos:
@@ -700,17 +830,20 @@ class AlmacenEnMemoria:
 
     def tamano_de(self, clave: str) -> int | None:
         partes_de_clave(clave)
+        self._tomar_error("tamano_de")
         with self._candado:
             objeto = self._objetos.get(clave)
         return None if objeto is None else len(objeto[0])
 
     def borrar(self, clave: str) -> bool:
         partes_de_clave(clave)
+        self._tomar_error("borrar")
         with self._candado:
             return self._objetos.pop(clave, None) is not None
 
     def listar(self, prefijo: str) -> Iterator[Metadato]:
         partes = _partes_de_prefijo(prefijo)
+        self._tomar_error("listar")
         return self._listar(prefijo, partes)
 
     def _listar(self, prefijo: str, partes: tuple[str, ...]) -> Iterator[Metadato]:

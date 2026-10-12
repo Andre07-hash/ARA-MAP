@@ -16,6 +16,7 @@ A-owned and listed in the 2B report's INTEGRATION_REQUESTS.md.
 
 from __future__ import annotations
 
+import logging
 import re
 import threading
 import unicodedata
@@ -24,7 +25,7 @@ from typing import Any
 from urllib.parse import quote
 
 from .. import archivos
-from ..almacen import MAX_BLOQUE, Almacen, AlmacenLocal
+from ..almacen import MAX_BLOQUE, Almacen, AlmacenError, AlmacenLocal, AlmacenNoConfiguradoError
 from ..router import Request
 from ..web_util import ApiError, parse_json
 from .binario import RespuestaBinaria
@@ -38,6 +39,7 @@ TIPOS_CONTENIDO = {"application/pdf", "application/vnd.google-earth.kmz",
                    "application/octet-stream"}
 METADATOS_MAX_BYTES = 16 * 1024
 _SIN_CACHE = "private, no-store"
+_LOG = logging.getLogger("ara_map.archivos")
 _AISLADO = "default-src 'none'; sandbox"
 
 _candado = threading.Lock()
@@ -66,13 +68,28 @@ def almacen_local(raiz: str) -> FabricaAlmacen:
 
 
 def _almacen_actual() -> Almacen:
+    """The store, built on first use. Handlers pass this function (not its
+    result) to the service, which calls it only after authorizing the
+    resource. A failed build is never cached."""
     global _almacen
     with _candado:
         if _almacen is None:
             if _fabrica is None:
                 raise ApiError("El almacenamiento de archivos no está configurado.", 503,
-                               {"code": "almacen_no_configurado"})
-            _almacen = _fabrica()
+                               {"code": "almacen_no_configurado", "reintentar": False})
+            try:
+                _almacen = _fabrica()
+            except AlmacenNoConfiguradoError:
+                raise ApiError("El almacenamiento de archivos no está configurado.", 503,
+                               {"code": "almacen_no_configurado", "reintentar": False}) from None
+            except AlmacenError as exc:
+                raise ApiError("El almacenamiento de archivos no está disponible.", 503,
+                               {"code": "almacen_no_disponible",
+                                "reintentar": bool(getattr(exc, "reintentar", True))}) from None
+            except Exception as exc:
+                _LOG.error("No se pudo construir el almacén de archivos (%s).", type(exc).__name__)
+                raise ApiError("El almacenamiento de archivos no está disponible.", 503,
+                               {"code": "almacen_no_disponible", "reintentar": True}) from None
         return _almacen
 
 
@@ -152,7 +169,8 @@ def iniciar(request: Request) -> Respuesta:
         request.sesion, _parametro(request, "id"), tipo=_campo(datos, "tipo"),
         nombre_original=_campo(datos, "nombre_original"),
         tamano_declarado=_campo(datos, "tamano_declarado"),
-        sha256_declarado=_campo(datos, "sha256_declarado"), idempotency_key=_clave(request))
+        sha256_declarado=_campo(datos, "sha256_declarado"), idempotency_key=_clave(request),
+        almacen=_almacen_actual)
 
 
 def listar(request: Request) -> Respuesta:
@@ -161,7 +179,8 @@ def listar(request: Request) -> Respuesta:
 
 
 def contenido(request: Request) -> Respuesta:
-    """PUT the raw file bytes of a pending upload (replaces earlier staging)."""
+    """PUT one part (?parte=N, 0-based) of a pending upload: exactly that part's
+    bytes, at most 3 MiB. It replaces that part as a whole."""
     tipo = (request.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
     if tipo not in TIPOS_CONTENIDO:
         raise ApiError("Envía el archivo tal cual, sin multipart ni JSON.", 415,
@@ -172,18 +191,22 @@ def contenido(request: Request) -> Respuesta:
     declarada = _decimal(request.headers.get("Content-Length"), 20)
     if declarada is None or declarada != len(request.body):
         raise ApiError("El contenido llegó incompleto.", 400, {"code": "cuerpo_incompleto"})
+    texto = request.q("parte")
+    parte: Any = None if texto is None else _decimal(texto, 2)
+    if texto is not None and parte is None:
+        parte = -1                                  # the service answers parte_invalida
     vista = memoryview(request.body)
     bloques = (vista[i:i + MAX_BLOQUE] for i in range(0, len(vista), MAX_BLOQUE))
     return archivos.escribir_temporal(request.sesion, _parametro(request, "vid"), bloques,
-                                      _almacen_actual())
+                                      _almacen_actual, parte=parte, longitud=len(request.body))
 
 
 def completar(request: Request) -> Respuesta:
-    return archivos.completar(request.sesion, _parametro(request, "vid"), _almacen_actual())
+    return archivos.completar(request.sesion, _parametro(request, "vid"), _almacen_actual)
 
 
 def cancelar(request: Request) -> Respuesta:
-    return archivos.cancelar(request.sesion, _parametro(request, "vid"), _almacen_actual())
+    return archivos.cancelar(request.sesion, _parametro(request, "vid"), _almacen_actual)
 
 
 def procesar(request: Request) -> Respuesta:
@@ -193,7 +216,7 @@ def procesar(request: Request) -> Respuesta:
             isinstance(i, int) and not isinstance(i, bool) for i in seleccion)):
         raise ApiError("La selección debe ser una lista de índices.", 400,
                        {"code": "seleccion_invalida"})
-    return archivos.reprocesar(request.sesion, _parametro(request, "vid"), _almacen_actual(),
+    return archivos.reprocesar(request.sesion, _parametro(request, "vid"), _almacen_actual,
                                seleccion=seleccion, idempotency_key=_clave(request))
 
 
@@ -209,7 +232,7 @@ def retirar(request: Request) -> Respuesta:
     datos = _cuerpo(request)
     return archivos.retirar(request.sesion, _parametro(request, "aid"),
                             expected_revision=_campo(datos, "expected_revision"),
-                            idempotency_key=_clave(request), almacen=_almacen_actual())
+                            idempotency_key=_clave(request), almacen=_almacen_actual)
 
 
 # -- reads -------------------------------------------------------------------------
@@ -234,12 +257,22 @@ def intento(request: Request) -> Respuesta:
 
 
 def descarga(request: Request) -> RespuestaBinaria:
-    """The finalized version's exact bytes, as a download (never inline)."""
-    r = archivos.descargar(request.sesion, _parametro(request, "vid"), _almacen_actual())
-    return RespuestaBinaria(r["contenido"], r["tipo_contenido"], {
+    """GET ?desde=O: at most 3 MiB of a finalized version, from a buffer the
+    server verified whole against the version's size and SHA-256 in this same
+    request. Raw octets, never inline; the browser joins and re-verifies."""
+    texto = request.q("desde")
+    desde: Any = 0 if texto is None else _decimal(texto, 9)
+    if desde is None:
+        desde = -1                                  # the service answers desplazamiento_invalido
+    r = archivos.descargar(request.sesion, _parametro(request, "vid"), _almacen_actual,
+                           desde=desde)
+    return RespuestaBinaria(r["contenido"], "application/octet-stream", {
         "Content-Disposition": disposicion(r["nombre_original"], r["tipo"]),
         "Cache-Control": _SIN_CACHE, "Content-Security-Policy": _AISLADO,
         "X-Archivo-Version-Id": r["version_id"], "X-Archivo-Sha256": r["sha256"],
+        "X-Archivo-Bytes": str(r["tamano"]), "X-Archivo-Desde": str(r["desde"]),
+        "X-Archivo-Longitud": str(r["longitud"]),
+        "X-Archivo-Siguiente": "fin" if r["siguiente"] is None else str(r["siguiente"]),
     })
 
 

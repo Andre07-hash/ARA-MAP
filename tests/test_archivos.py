@@ -233,14 +233,23 @@ class LifecycleChecks:
 
     def test_verification_failure_is_terminal_and_storage_failure_is_retryable(self):
         bad = self.start(PDF)
-        altered = PDF + b"x"
+        # M1: a part of the wrong length never reaches staging.
+        self.assert_code("parte_invalida", lambda: archivos.escribir_temporal(
+            self.sessions["ana"], bad["version_id"], [PDF + b"x"], self.store,
+            bd=self.database, reloj=self.clock))
+        altered = PDF[:-1] + bytes([PDF[-1] ^ 1])
         archivos.escribir_temporal(self.sessions["ana"], bad["version_id"], [altered],
                                    self.store, bd=self.database, reloj=self.clock)
         failed = self.complete(bad)
         self.assertEqual(failed["version"]["estado"], "fallido")
-        self.assertEqual(failed["version"]["error"]["codigo"], "tamano_no_coincide")
+        self.assertEqual(failed["version"]["error"]["codigo"], "sha256_no_coincide")
+        # A pre-M1 single staging object of the wrong size still fails as before.
+        legacy = self.start(PDF)
+        key = self.rows("archivo_version", "id = ?", (legacy["version_id"],))[0]["clave_temporal"]
+        self.store.guardar_temporal(key, [PDF + b"x"], archivos.PDF_MAX)
+        self.assertEqual(self.complete(legacy)["version"]["error"]["codigo"], "tamano_no_coincide")
         retry = self.upload(PDF)
-        self.store.inyectar_falla("copiar")
+        self.store.inyectar_falla("componer")
         self.assert_code("almacen_no_disponible", lambda: self.complete(retry))
         self.assertEqual(self.rows("archivo_version", "id = ?", (retry["version_id"],))[0]["estado"],
                          "subiendo")
@@ -1199,7 +1208,7 @@ class LifecycleChecks:
                                                   store, bd=self.database, reloj=self.clock)
                 self.assertEqual(cancelled["limpieza_pendiente"], pending)
                 staged = self.rows("archivo_version", "id = ?",
-                                   (started["version_id"],))[0]["clave_temporal"]
+                                   (started["version_id"],))[0]["clave_temporal"] + "-00"
                 self.assertEqual(self.store.tamano_de(staged) is not None, pending)
                 self.assert_code("subida_no_pendiente", lambda started=started: archivos.cancelar(
                     self.sessions["ana"], started["version_id"], self.store,
@@ -1211,7 +1220,7 @@ class LifecycleChecks:
         self.complete(live)
         pending = self.upload(kmz("poligono_simple"), "kmz", user="olga", key="pendiente")
         staged = self.rows("archivo_version", "id = ?",
-                           (pending["version_id"],))[0]["clave_temporal"]
+                           (pending["version_id"],))[0]["clave_temporal"] + "-00"
 
         def retire(store):
             return archivos.retirar(self.sessions["ana"], live["archivo_id"], expected_revision=2,

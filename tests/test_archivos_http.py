@@ -226,7 +226,7 @@ class HTTPChecks:
         s, h, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga")
         self.assertEqual(s, 200)
         self.assertEqual(cuerpo, PDF)
-        self.assertEqual(h["Content-Type"], "application/pdf")
+        self.assertEqual(h["Content-Type"], "application/octet-stream")      # M1
         self.assertEqual(h["X-Content-Type-Options"], "nosniff")
         self.assertEqual(h["Cache-Control"], "private, no-store")
         self.assertEqual(h["X-Archivo-Sha256"], hashlib.sha256(PDF).hexdigest())
@@ -300,7 +300,8 @@ class HTTPChecks:
         self.assertFalse(r2["aplicada"])
         self.assertEqual(r2["archivo"]["geometria_activa_id"], g1)
         s, inicio3 = self.iniciar(kmz("multiparte"), "kmz")
-        self.subir(inicio3["version_id"], b"PK\x03\x04 no es un kmz completo")
+        roto = b"PK\x03\x04 no es un kmz completo"
+        self.subir(inicio3["version_id"], roto + b"\0" * (len(kmz("multiparte")) - len(roto)))
         s, fallo = self.completar(inicio3["version_id"])
         self.assertEqual(fallo["version"]["estado"], "fallido")
         self.assertEqual(fallo["archivo"]["geometria_activa_id"], g1)
@@ -488,7 +489,7 @@ class HTTPChecks:
         # Actual KMZ body one byte over its type limit (inside the global body limit).
         s, inicio = self.iniciar(b"x", "kmz", tamano=1)
         s, err = self.subir(inicio["version_id"], b"P" * (archivos.KMZ_MAX + 1))
-        self.assertEqual((s, err["detalle"]["code"]), (413, "tamano_excedido"))
+        self.assertEqual((s, err["detalle"]["code"]), (400, "parte_invalida"))   # M1: exact part length
         # Above the dispatcher's MAX_BODY: refused before the handler, body unread.
         s, inicio_pdf = self.iniciar(b"x", "pdf", tamano=1)
         with socket.create_connection(("127.0.0.1", self.json_srv.port), timeout=10) as sock:
@@ -497,9 +498,13 @@ class HTTPChecks:
                           f"Content-Length: {app_module.MAX_BODY + 1}\r\n\r\n").encode())
             primera = sock.recv(65536).split(b"\r\n", 1)[0]
         self.assertIn(b" 413 ", primera)       # refused from Content-Length alone; body never read
-        # Declared size +1 versus actual, wrong hash, wrong signature: terminal "fallido".
+        # M1: a part one byte short of the declared size is refused before staging.
+        s, inicio = self.iniciar(PDF, tamano=len(PDF) + 1)
+        s, err = self.subir(inicio["version_id"], PDF)
+        self.assertEqual((s, err["detalle"]["code"]), (400, "parte_invalida"))
+        self.j("POST", f"/api/archivos/versiones/{inicio['version_id']}/cancelar")   # frees its slot
+        # Wrong hash, wrong signature: terminal "fallido".
         for nombre, contenido, declarado, sha, codigo in (
-                ("mas-uno", PDF, len(PDF) + 1, None, "tamano_no_coincide"),
                 ("hash", PDF, None, hashlib.sha256(b"otro").hexdigest(), "sha256_no_coincide"),
                 ("firma", b"no es un pdf", None, None, "firma_invalida")):
             with self.subTest(caso=nombre):
@@ -556,7 +561,7 @@ class HTTPChecks:
 
     def test_truncated_upload_stages_nothing(self):
         s, inicio = self.iniciar(PDF)
-        clave_temporal = self.filas("archivo_version", "id = ?", (inicio["version_id"],))[0]["clave_temporal"]
+        clave_temporal = self.filas("archivo_version", "id = ?", (inicio["version_id"],))[0]["clave_temporal"] + "-00"
         with socket.create_connection(("127.0.0.1", self.json_srv.port), timeout=10) as sock:
             cabecera = (f"PUT /api/archivos/versiones/{inicio['version_id']}/contenido HTTP/1.1\r\n"
                         f"Host: 127.0.0.1\r\nCookie: {self.cookie('ana')}\r\n"
@@ -686,7 +691,7 @@ class HTTPChecks:
         Handler alone: the same value must be plain digits, up to 20 of them."""
         s, inicio = self.iniciar(PDF)
         vid = inicio["version_id"]
-        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"]
+        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"] + "-00"
         for longitud in (f"+{len(PDF)}", f"{len(PDF):020d}"):       # a sign; more than 12 digits
             s, r = self._put_crudo(vid, longitud, PDF)
             self.assertEqual((s, r["detalle"]), (400, None), longitud)   # the dispatcher's refusal
@@ -711,7 +716,7 @@ class HTTPChecks:
     def test_handler_alone_validates_the_declared_length_and_encoding(self):
         s, inicio = self.iniciar(PDF)
         vid = inicio["version_id"]
-        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"]
+        clave_temporal = self.filas("archivo_version", "id = ?", (vid,))[0]["clave_temporal"] + "-00"
         for cabeceras, estado, codigo in (
                 ({"Content-Length": f"+{len(PDF)}"}, 400, "cuerpo_incompleto"),
                 ({"Content-Length": "²"}, 400, "cuerpo_incompleto"),
@@ -1015,11 +1020,18 @@ class HTTPChecks:
         self.assertEqual(cuerpo, PDF)
 
     def test_store_not_configured_is_controlled(self):
+        s, pendiente = self.iniciar(PDF)              # started while a store exists
         api.configurar_almacen(None)
-        s, inicio = self.iniciar(PDF)
-        s, r = self.subir(inicio["version_id"], PDF)
-        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
-        api.configurar_almacen(lambda: self.store)
+        try:
+            antes = len(self.filas("archivo_version"))
+            s, r = self.iniciar(PDF)                  # M1: refused before any row is written
+            self.assertEqual((s, r["detalle"]["code"], r["detalle"]["reintentar"]),
+                             (503, "almacen_no_configurado", False))
+            self.assertEqual(len(self.filas("archivo_version")), antes)
+            s, r = self.subir(pendiente["version_id"], PDF)
+            self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        finally:
+            api.configurar_almacen(lambda: self.store)
 
     def test_cross_resource_ids_retry_deadline_and_busy_lease(self):
         uno, r1 = self.archivo_completo(kmz("ambiguo_tres_lotes"), "kmz")
@@ -1048,11 +1060,11 @@ class HTTPChecks:
         # KMZ download identity.
         s, h, b = self.bajar(f"/api/archivos/versiones/{uno['version_id']}/descarga")
         self.assertEqual((s, b, h["Content-Type"]), (200, kmz("ambiguo_tres_lotes"),
-                                                     "application/vnd.google-earth.kmz"))
+                                                     "application/octet-stream"))      # M1
         # Storage outage during completion: retryable, then a full retry succeeds.
         s, inicio = self.iniciar(PDF)
         self.subir(inicio["version_id"], PDF)
-        self.store.inyectar_falla("copiar")
+        self.store.inyectar_falla("componer")
         s, r = self.completar(inicio["version_id"])
         self.assertEqual((s, r["detalle"]["code"], r["detalle"]["reintentar"]), (503, "almacen_no_disponible", True))
         s, r = self.completar(inicio["version_id"])

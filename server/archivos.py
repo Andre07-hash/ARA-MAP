@@ -19,7 +19,15 @@ from types import SimpleNamespace
 from typing import Any, Callable, Union, cast
 
 from . import auth, db
-from .almacen import Almacen, AlmacenError, LimiteExcedidoError, ObjetoAusenteError
+from .almacen import (
+    Almacen,
+    AlmacenError,
+    AlmacenNoConfiguradoError,
+    ColisionError,
+    FalloAlmacenError,
+    LimiteExcedidoError,
+    ObjetoAusenteError,
+)
 from .errors import ApiError
 from .kmz import procesar_kmz
 from .protocols import DatabaseConnection
@@ -31,6 +39,10 @@ UPLOAD_SECONDS = 15 * 60
 COMPLETE_SECONDS = 60 * 60
 LEASE_SECONDS = 180
 PENDING_MAX = 5
+# Hosted transfer contract M1: bytes travel in parts of at most 3 MiB, so every
+# request and response stays below the hosting platform's payload cap.
+PARTE_BYTES = 3 * 1024 * 1024
+MAX_PARTES = -(-max(PDF_MAX, KMZ_MAX) // PARTE_BYTES)        # 9
 HISTORY_DEFAULT = 50
 HISTORY_MAX = 100
 ANALYZER = "server.kmz/v1"
@@ -39,6 +51,10 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 Clock = Callable[[], Union[datetime, str]]
 Processor = Callable[[bytes, object], dict[str, Any]]
+# A store, or a factory that builds one. Factories are called only after the
+# resource has been authorized, so an unavailable store never decides a
+# request that the application would refuse anyway.
+AlmacenOFabrica = Union[Almacen, Callable[[], Almacen]]
 
 
 def _error(code: str, message: str, status: int = 400,
@@ -196,6 +212,8 @@ def _size(value: object, maximum: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0 or value > maximum:
         raise _error("tamano_invalido", "El tamaño declarado no es válido.",
                      limite=maximum)
+    if value == 0:
+        raise _error("archivo_vacio", "El archivo está vacío.")
     return value
 
 
@@ -223,8 +241,14 @@ def _hook(hooks: object | None, name: str, *args: Any) -> None:
 def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
             nombre_original: str, tamano_declarado: int,
             sha256_declarado: str, idempotency_key: str,
-            bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
-    """Authorize an upload and create its immutable pending version."""
+            bd: Path | str | None = None, reloj: Clock | None = None,
+            almacen: AlmacenOFabrica | None = None) -> dict[str, Any]:
+    """Authorize an upload and create its immutable pending version.
+
+    With `almacen`, a NEW start first checks that the store can be built (pure:
+    no provider call) and refuses before inserting anything; a replay still
+    returns its original result.
+    """
     _valid_session(sesion)
     kind, maximum = _kind(tipo)
     name = _safe_name(nombre_original)
@@ -235,12 +259,21 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
                "sha256_declarado": digest}
     request_hash = _hash_payload(payload)
     _authorize_read(sesion, terreno_id, "archivos.subir", bd)
+    store_problem: ApiError | None = None
+    if almacen is not None:
+        try:
+            _resolve(almacen)       # built outside the write transaction
+        except ApiError as exc:
+            store_problem = exc
     operation = f"archivos.iniciar:{sesion.user_id}:{terreno_id}"
     with db.escritura(bd) as conn:
         scope = auth.reverificar_terreno(conn, sesion, terreno_id, "archivos.subir")
         replay = _operation(conn, operation, key, request_hash)
         if replay is not None:
+            replay.setdefault("transferencia", _transferencia(int(replay["tamano_declarado"])))
             return replay
+        if store_problem is not None:
+            raise store_problem
         now = _now(reloj)
         if repo.effective_pending_count(conn, sesion.user_id, now) >= PENDING_MAX:
             raise _conflict("limite_pendientes",
@@ -255,6 +288,7 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
             upload_expires_at=_after(now, UPLOAD_SECONDS),
             complete_before=_after(now, COMPLETE_SECONDS), now=now,
             actor=scope.actor, base_id=scope.base_id)
+        result["transferencia"] = _transferencia(size)
         repo.save_operation_result(conn, operation, key, request_hash,
                                    sesion.user_id, now, result)
         return result
@@ -262,9 +296,16 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
 
 def escribir_temporal(sesion: auth.Sesion, version_id: str,
                       bloques: Iterable[bytes | bytearray | memoryview],
-                      almacen: Almacen, *, bd: Path | str | None = None,
+                      almacen: AlmacenOFabrica, *, parte: int | None = None,
+                      longitud: int | None = None, bd: Path | str | None = None,
                       reloj: Clock | None = None) -> dict[str, Any]:
-    """Stream bytes into replaceable staging before its 15-minute deadline."""
+    """Stage one part of a pending upload before its 15-minute deadline.
+
+    Part `parte` (0-based; it may be omitted only for a single-part upload) must
+    carry exactly its contracted length. It replaces that part as a whole.
+    Refused while a completion lease is live. State, actor, scope, deadline and
+    lease are checked before and after the write.
+    """
     _valid_session(sesion)
     resource = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     if resource["iniciado_por"] != sesion.user_id:
@@ -274,24 +315,50 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
         raise _conflict("subida_no_pendiente", "La subida ya no está pendiente.")
     if resource["subida_vence_en"] <= now:
         raise _conflict("subida_expirada", "El plazo para subir contenido terminó.")
-    maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    size = int(resource["tamano_declarado"])
+    parts = partes_de(size)
+    if parte is None and parts == 1:
+        parte = 0
+    if isinstance(parte, bool) or not isinstance(parte, int) or not 0 <= parte < parts:
+        raise _error("parte_invalida", "La parte indicada no existe para esta subida.",
+                     partes=parts)
+    expected = longitud_de_parte(size, parte)
+    if longitud is not None and longitud != expected:
+        raise _error("parte_invalida", "La parte no tiene la longitud esperada.",
+                     parte=parte, bytes_esperados=expected)
+    _check_no_completion(version_id, now, bd)
+    store = _resolve(almacen)
     try:
-        written = almacen.guardar_temporal(str(resource["clave_temporal"]), bloques, maximum)
+        written = store.guardar_temporal(
+            clave_de_parte(str(resource["clave_temporal"]), parte), bloques, expected)
     except LimiteExcedidoError as exc:
-        raise _error("tamano_excedido", "El archivo supera el tamaño permitido.",
-                     413, limite=maximum) from exc
+        raise _error("parte_invalida", "La parte no tiene la longitud esperada.",
+                     parte=parte, bytes_esperados=expected) from exc
     except AlmacenError as exc:
-        raise _error("almacen_no_disponible", "No fue posible guardar el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_error(exc, "No fue posible guardar el archivo.") from exc
     except (TypeError, ValueError) as exc:
         raise _error("bloque_invalido", "Los bloques de la subida no son válidos.") from exc
+    if written != expected:
+        raise _error("parte_invalida", "La parte no tiene la longitud esperada.",
+                     parte=parte, bytes_esperados=expected)
     current = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
+    after = _now(reloj)
     if (current["iniciado_por"] != sesion.user_id or current["estado"] != "subiendo"
-            or current["subida_vence_en"] <= _now(reloj)):
+            or current["subida_vence_en"] <= after):
         raise _conflict("subida_no_pendiente",
                         "La subida cambió mientras se guardaba el contenido.")
-    return {"version_id": version_id, "bytes_recibidos": written,
-            "estado": "subiendo"}
+    _check_no_completion(version_id, after, bd)
+    return {"version_id": version_id, "parte": parte, "partes": parts,
+            "bytes_recibidos": written, "estado": "subiendo"}
+
+
+def _check_no_completion(version_id: str, now: str, database: Path | str | None) -> None:
+    """A part may not change while a completion (or any) lease is live."""
+    with db.session(database) as conn:
+        live = repo.live_lease_expiry(conn, version_id, now)
+    if live is not None:
+        raise _conflict("procesamiento_en_curso", "El archivo ya se está procesando.",
+                        reintentar=True, reintentar_despues_de=live)
 
 
 def _acquire_completion(sesion: auth.Sesion, version_id: str,
@@ -456,7 +523,7 @@ def _version_leftovers(resource: Mapping[str, Any], almacen: Almacen) -> bool:
     Its staging, and any final nonce under its prefix other than the one the
     version references. Nothing is deleted: another holder may still own one.
     """
-    if _staging_remains([str(resource["clave_temporal"])], almacen):
+    if _staging_remains(_staging_keys(resource), almacen):
         return True
     try:
         return any(item.clave != resource["clave_final"]
@@ -470,11 +537,108 @@ def _report_cleanup(error: BaseException, pending: bool) -> None:
         error.detalle["limpieza_pendiente"] = True
 
 
-def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
+# -- hosted transfer (M1): parts, store resolution, store errors -------------------
+
+def partes_de(tamano: int) -> int:
+    """How many parts a declared size travels in (at least one)."""
+    return max(1, -(-int(tamano) // PARTE_BYTES))
+
+
+def longitud_de_parte(tamano: int, indice: int) -> int:
+    return min(PARTE_BYTES, int(tamano) - indice * PARTE_BYTES)
+
+
+def clave_de_parte(clave_temporal: str, indice: int) -> str:
+    """`<clave_temporal>-NN`: server-generated, one key segment, never from a client."""
+    return f"{clave_temporal}-{indice:02d}"
+
+
+def _transferencia(tamano: int) -> dict[str, int]:
+    return {"parte_bytes": PARTE_BYTES, "partes": partes_de(tamano)}
+
+
+def _staging_keys(resource: Mapping[str, Any]) -> list[str]:
+    """Every staging key a version may have: its parts, and the pre-M1 single object."""
+    base = str(resource["clave_temporal"])
+    return [base] + [clave_de_parte(base, i)
+                     for i in range(partes_de(int(resource["tamano_declarado"])))]
+
+
+def _all_staging_keys(base: str) -> list[str]:
+    """When the declared size is not at hand: every part index the contract allows."""
+    return [base] + [clave_de_parte(base, i) for i in range(MAX_PARTES)]
+
+
+def _store_error(error: AlmacenError, message: str) -> ApiError:
+    """The client-safe answer for a store failure: never provider details."""
+    if isinstance(error, AlmacenNoConfiguradoError):
+        return _error("almacen_no_configurado",
+                      "El almacenamiento de archivos no está configurado.", 503, reintentar=False)
+    retry = error.reintentar if isinstance(error, FalloAlmacenError) else True
+    return _error("almacen_no_disponible", message, 503, reintentar=retry)
+
+
+def _resolve(almacen: AlmacenOFabrica) -> Almacen:
+    """The store itself; a factory is built now (after authorization)."""
+    if hasattr(almacen, "leer"):
+        return cast(Almacen, almacen)
+    try:
+        return almacen()
+    except AlmacenError as exc:
+        raise _store_error(exc, "El almacenamiento de archivos no está disponible.") from None
+
+
+def _resolve_optional(almacen: AlmacenOFabrica | None) -> Almacen | None:
+    """For cleanup that may be reported as pending instead of failing the request."""
+    if almacen is None:
+        return None
+    try:
+        return _resolve(almacen)
+    except ApiError:
+        return None
+
+
+def _uncertain_write(error: AlmacenError) -> bool:
+    """Whether a failed final write may nevertheless have created its object."""
+    if isinstance(error, (AlmacenNoConfiguradoError, ColisionError, ObjetoAusenteError,
+                          LimiteExcedidoError)):
+        return False
+    return not (isinstance(error, FalloAlmacenError) and not error.reintentar)
+
+
+def _missing_parts(almacen: Almacen, resource: Mapping[str, Any]) -> list[int]:
+    """Indexes of parts absent or not exactly their contracted length."""
+    base = str(resource["clave_temporal"])
+    size = int(resource["tamano_declarado"])
+    return [i for i in range(partes_de(size))
+            if almacen.tamano_de(clave_de_parte(base, i)) != longitud_de_parte(size, i)]
+
+
+def _missing_parts_error(resource: Mapping[str, Any], missing: Sequence[int],
+                         now: str) -> ApiError:
+    """Missing parts may be sent again only while the upload deadline is open."""
+    open_ = resource["subida_vence_en"] > now
+    return _conflict(
+        "contenido_temporal_ausente",
+        "Faltan partes del archivo; vuelve a enviarlas." if open_ else
+        "Faltan partes del archivo y el plazo para enviarlas terminó. Cancela la subida"
+        " e inicia una nueva.",
+        partes_faltantes=sorted(set(missing))[:MAX_PARTES], reintentar=open_)
+
+
+def completar(sesion: auth.Sesion, version_id: str, almacen: AlmacenOFabrica, *,
               bd: Path | str | None = None, reloj: Clock | None = None,
               procesador: Processor = procesar_kmz,
               ganchos: object | None = None) -> dict[str, Any]:
-    """Finalize, verify and optionally parse one pending upload."""
+    """Finalize, verify and optionally parse one pending upload.
+
+    Under the completion lease and outside any database write transaction:
+    check every part, compose the pinned parts into a fresh create-only final
+    nonce, verify that object's actual size, SHA-256 and signature, parse a
+    KMZ, then reauthorize and commit. A final write whose outcome is unknown is
+    never reported as clean: only this attempt's nonce may be deleted, and only
+    after the database proves it unreferenced. A collision winner is kept.
+    """
     _valid_session(sesion)
     resource = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
     if resource["iniciado_por"] != sesion.user_id:
@@ -486,29 +650,54 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
     if "replay" in acquired:
         result = cast(dict[str, Any], acquired["replay"])
         result["replay"] = True
-        result["limpieza_pendiente"] = _version_leftovers(acquired["resource"], almacen)
+        store_or_none = _resolve_optional(almacen)
+        result["limpieza_pendiente"] = (True if store_or_none is None else
+                                        _version_leftovers(acquired["resource"], store_or_none))
         return result
     resource = acquired["resource"]
     terrain_id = str(resource["inventory_id"])
-    staging = [str(resource["clave_temporal"])]
+    staging = _staging_keys(resource)
     _hook(ganchos, "despues_lease", version_id)
     maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    try:
+        store = _resolve(almacen)
+        sources = _sources(store, resource, _now(reloj))
+    except ApiError:
+        _release_lease(sesion, version_id, terrain_id, work_id, bd)
+        raise
+    except AlmacenError as exc:
+        _release_lease(sesion, version_id, terrain_id, work_id, bd)
+        raise _store_error(exc, "No fue posible leer las partes del archivo.") from exc
     final_key = _final_prefix(version_id) + uuid.uuid4().hex
-    copied = False
+    attempted = copied = False
     verification: ApiError | None
     try:
-        almacen.copiar(str(resource["clave_temporal"]), final_key, maximum)
+        attempted = True                    # recorded before the write is sent
+        store.componer(sources, final_key, maximum)
         copied = True
         _hook(ganchos, "despues_copia", version_id)
         actual, digest, detected, body = _verify_final(
-            almacen, final_key, maximum, str(resource["archivo_tipo"]))
+            store, final_key, maximum, str(resource["archivo_tipo"]))
     except ObjetoAusenteError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
         if copied:
-            raise _error("almacen_no_disponible", "El archivo final desapareció.", 503,
-                         reintentar=True) from exc
-        raise _conflict("contenido_temporal_ausente",
-                        "No se encontró el contenido temporal; vuelve a subirlo.") from exc
+            failure = _error("almacen_no_disponible", "El archivo final desapareció.", 503,
+                             reintentar=True)
+            _report_cleanup(failure, _discard_final(final_key, store, bd))
+            raise failure from exc
+        names = set(exc.claves)
+        base = str(resource["clave_temporal"])
+        missing = [i for i in range(partes_de(int(resource["tamano_declarado"])))
+                   if clave_de_parte(base, i) in names] or [0]
+        raise _missing_parts_error(resource, missing, _now(reloj)) from exc
+    except ColisionError as exc:
+        # The nonce is new to this attempt, so a winner can only be an earlier
+        # send of this same write. It is never deleted; this nonce is not reused.
+        _release_lease(sesion, version_id, terrain_id, work_id, bd)
+        failure = _error("almacen_no_disponible", "No fue posible guardar el archivo.", 503,
+                         reintentar=True)
+        _report_cleanup(failure, True)
+        raise failure from exc
     except LimiteExcedidoError:
         verification = _error("tamano_excedido", "El archivo supera el tamaño permitido.",
                               413, limite=maximum)
@@ -520,9 +709,14 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         verification = exc
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
-        failure = _error("almacen_no_disponible", "No fue posible verificar el archivo.", 503,
-                         reintentar=True)
-        _report_cleanup(failure, copied and _discard_final(final_key, almacen, bd))
+        if copied or (attempted and _uncertain_write(exc)):
+            failure = _error("almacen_no_disponible", "No fue posible guardar el archivo.", 503,
+                             reintentar=True)
+            removed_pending = _discard_final(final_key, store, bd)
+            # An unknown outcome is always reported: the write may still land.
+            _report_cleanup(failure, removed_pending or not copied)
+        else:
+            failure = _store_error(exc, "No fue posible guardar el archivo.")
         raise failure from exc
     else:
         verification = None
@@ -546,11 +740,11 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
                                             error_message=verification.mensaje, now=now,
                                             actor=scope.actor, base_id=scope.base_id)
         except Exception as exc:
-            _report_cleanup(exc, copied and _discard_final(final_key, almacen, bd))
+            _report_cleanup(exc, copied and _discard_final(final_key, store, bd))
             raise
         # The failure is terminal: neither its nonce nor its staging is usable.
-        pending = copied and _discard_final(final_key, almacen, bd)
-        pending = _discard_staging(staging, almacen) or pending
+        pending = copied and _discard_final(final_key, store, bd)
+        pending = _discard_staging(staging, store) or pending
         result["replay"] = False
         result["limpieza_pendiente"] = pending
         return result
@@ -584,15 +778,33 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
                 actor=scope.actor, base_id=scope.base_id, attempt=attempt,
                 geometry=geometry)
     except Exception as exc:
-        _report_cleanup(exc, _discard_final(final_key, almacen, bd))
+        _report_cleanup(exc, _discard_final(final_key, store, bd))
         raise
     _hook(ganchos, "despues_commit", version_id)
     result["replay"] = False
-    result["limpieza_pendiente"] = _discard_staging(staging, almacen)
+    result["limpieza_pendiente"] = _discard_staging(staging, store)
     return result
 
 
-def cancelar(sesion: auth.Sesion, version_id: str, almacen: Almacen | None = None, *,
+def _sources(store: Almacen, resource: Mapping[str, Any], now: str) -> list[str]:
+    """The staging keys to compose, or the missing-parts error.
+
+    A single-part upload staged before M1 (one object at `clave_temporal`) is
+    still accepted when no part was sent.
+    """
+    base = str(resource["clave_temporal"])
+    size = int(resource["tamano_declarado"])
+    missing = _missing_parts(store, resource)
+    if missing:
+        # A pre-M1 single staging object is composed as is: verification then
+        # judges its size and hash exactly as before.
+        if partes_de(size) == 1 and len(missing) == 1 and store.tamano_de(base) is not None:
+            return [base]
+        raise _missing_parts_error(resource, missing, now)
+    return [clave_de_parte(base, i) for i in range(partes_de(size))]
+
+
+def cancelar(sesion: auth.Sesion, version_id: str, almacen: AlmacenOFabrica | None = None, *,
              bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
     _valid_session(sesion)
     _in_scope(sesion, _version(version_id), "archivos.subir", bd)
@@ -610,13 +822,13 @@ def cancelar(sesion: auth.Sesion, version_id: str, almacen: Almacen | None = Non
                                    base_id=scope.base_id):
             raise _conflict("subida_no_pendiente", "La subida ya no está pendiente.")
         result: dict[str, Any] = {"version_id": version_id, "estado": "cancelado"}
-        temporary_key = str(current["clave_temporal"])
+        staging = _staging_keys(current)
     # Without a store nothing was removed, so the staging may remain.
-    result["limpieza_pendiente"] = _discard_staging([temporary_key], almacen)
+    result["limpieza_pendiente"] = _discard_staging(staging, _resolve_optional(almacen))
     return result
 
 
-def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
+def reprocesar(sesion: auth.Sesion, version_id: str, almacen: AlmacenOFabrica, *,
                seleccion: Sequence[int] | None = None, idempotency_key: str,
                bd: Path | str | None = None, reloj: Clock | None = None,
                procesador: Processor = procesar_kmz,
@@ -650,12 +862,11 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         final_key = str(current["clave_final"])
     _hook(ganchos, "despues_lease", version_id)
     try:
-        actual, digest, _, body = _verify_final(almacen, final_key, KMZ_MAX, "kmz")
+        actual, digest, _, body = _verify_final(_resolve(almacen), final_key, KMZ_MAX, "kmz")
         assert body is not None
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
-        raise _error("almacen_no_disponible", "No fue posible leer el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_error(exc, "No fue posible leer el archivo.") from exc
     except ApiError:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
         raise
@@ -765,7 +976,7 @@ def activar(sesion: auth.Sesion, archivo_id: str, *, version_id: str,
 
 
 def retirar(sesion: auth.Sesion, archivo_id: str, *, expected_revision: int,
-            idempotency_key: str, almacen: Almacen | None = None,
+            idempotency_key: str, almacen: AlmacenOFabrica | None = None,
             bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
     _valid_session(sesion)
     key = _key(idempotency_key)
@@ -799,11 +1010,13 @@ def retirar(sesion: auth.Sesion, archivo_id: str, *, expected_revision: int,
                       "limpieza_pendiente": bool(staging)}
             repo.save_operation_result(conn, operation, key, request_hash,
                                        sesion.user_id, now, result)
+    keys = [k for base in staging for k in _all_staging_keys(base)]
+    store = _resolve_optional(almacen) if keys else None
     if replay is not None:
         replay["replay"] = True
-        replay["limpieza_pendiente"] = _staging_remains(staging, almacen)
+        replay["limpieza_pendiente"] = _staging_remains(keys, store)
         return replay
-    result["limpieza_pendiente"] = _discard_staging(staging, almacen)
+    result["limpieza_pendiente"] = _discard_staging(keys, store)
     return result
 
 
@@ -955,16 +1168,21 @@ def intento(sesion: auth.Sesion, intento_id: str, *,
     return cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd, read))
 
 
-def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
-              bd: Path | str | None = None) -> dict[str, Any]:
-    """The verified bytes of one finalized immutable version.
+def descargar(sesion: auth.Sesion, version_id: str, almacen: AlmacenOFabrica, *,
+              desde: int = 0, bd: Path | str | None = None) -> dict[str, Any]:
+    """One verified slice of one finalized immutable version (M1).
 
     Only a `disponible` version is downloadable; any other version (pending,
-    failed, cancelled, expired) is reported exactly like a missing one. The
-    bytes are read in bounded chunks from the version's own final key and
-    checked against its recorded size and SHA-256 before anything is returned.
+    failed, cancelled, expired) is reported exactly like a missing one. Every
+    request reads the WHOLE final object in bounded chunks, checks it against
+    the version's recorded size and SHA-256, and only then returns at most
+    PARTE_BYTES from that same verified buffer, starting at `desde` (a
+    multiple of PARTE_BYTES inside the file).
     """
     _valid_session(sesion)
+    if (isinstance(desde, bool) or not isinstance(desde, int) or desde < 0
+            or desde % PARTE_BYTES):
+        raise _error("desplazamiento_invalido", "El desplazamiento no es válido.")
 
     def lookup(conn: DatabaseConnection) -> dict[str, Any] | None:
         resource = _version(version_id)(conn)
@@ -972,27 +1190,35 @@ def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
 
     resource = cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd,
                                                    lambda _c, r: r))
+    if desde >= int(resource["tamano"]):
+        raise _error("desplazamiento_invalido", "El desplazamiento no es válido.")
     maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    store = _resolve(almacen)
     content = bytearray()
     digest = hashlib.sha256()
     try:
-        with almacen.leer(str(resource["clave_final"]), maximum) as reading:
+        with store.leer(str(resource["clave_final"]), maximum) as reading:
             for chunk in reading:
                 digest.update(chunk)
                 content.extend(chunk)
     except ObjetoAusenteError as exc:
         raise _error("contenido_no_disponible", "El contenido del archivo no está disponible.",
                      503) from exc
+    except LimiteExcedidoError as exc:
+        raise _error("objeto_final_inconsistente",
+                     "El archivo guardado no coincide con la versión registrada.", 503) from exc
     except AlmacenError as exc:
-        raise _error("almacen_no_disponible", "No fue posible leer el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_error(exc, "No fue posible leer el archivo.") from exc
     if len(content) != int(resource["tamano"]) or digest.hexdigest() != resource["sha256"]:
         raise _error("objeto_final_inconsistente",
                      "El archivo guardado no coincide con la versión registrada.", 503)
+    end = min(desde + PARTE_BYTES, len(content))
     return {"version_id": str(resource["id"]), "archivo_id": str(resource["archivo_id"]),
             "tipo": str(resource["archivo_tipo"]), "tipo_contenido": str(resource["tipo_detectado"]),
             "nombre_original": str(resource["nombre_original"]), "tamano": len(content),
-            "sha256": digest.hexdigest(), "contenido": content}
+            "sha256": digest.hexdigest(), "desde": desde, "longitud": end - desde,
+            "siguiente": end if end < len(content) else None,
+            "contenido": bytes(memoryview(content)[desde:end])}
 
 
 def _geometry_meta(row: Mapping[str, Any]) -> dict[str, Any]:

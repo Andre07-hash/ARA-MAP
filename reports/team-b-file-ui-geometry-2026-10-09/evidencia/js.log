@@ -1,0 +1,1091 @@
+TAP version 13
+# Subtest: a CSV preview sends the number convention and keeps base_id
+ok 1 - a CSV preview sends the number convention and keeps base_id
+  ---
+  duration_ms: 1.254606
+  type: 'test'
+  ...
+# Subtest: an Excel preview sends no query at all
+ok 2 - an Excel preview sends no query at all
+  ---
+  duration_ms: 0.272129
+  type: 'test'
+  ...
+# Subtest: the configured upload limit applies to CSV before anything is sent
+ok 3 - the configured upload limit applies to CSV before anything is sent
+  ---
+  duration_ms: 0.573569
+  type: 'test'
+  ...
+# Subtest: client: bounded reads refuse declared and actual excess
+ok 4 - client: bounded reads refuse declared and actual excess
+  ---
+  duration_ms: 52.784081
+  type: 'test'
+  ...
+# Subtest: client: the error envelope becomes a readable ErrorArchivos; a lost reply is uncertain
+ok 5 - client: the error envelope becomes a readable ErrorArchivos; a lost reply is uncertain
+  ---
+  duration_ms: 2.442898
+  type: 'test'
+  ...
+# Subtest: client: cancellation stays an AbortError and malformed ids never reach the bridge
+ok 6 - client: cancellation stays an AbortError and malformed ids never reach the bridge
+  ---
+  duration_ms: 2.275931
+  type: 'test'
+  ...
+# Subtest: client: requests carry exact paths, bodies and keys; PUT never sets Content-Length
+ok 7 - client: requests carry exact paths, bodies and keys; PUT never sets Content-Length
+  ---
+  duration_ms: 2.869348
+  type: 'test'
+  ...
+# Subtest: client: a download must match its version id, type and SHA-256
+ok 8 - client: a download must match its version id, type and SHA-256
+  ---
+  duration_ms: 21.945763
+  type: 'test'
+  ...
+# Subtest: client: local validation happens before any byte is read
+ok 9 - client: local validation happens before any byte is read
+  ---
+  duration_ms: 0.739678
+  type: 'test'
+  ...
+# Subtest: upload: hash → start → PUT → complete in order, with honest phases
+ok 10 - upload: hash → start → PUT → complete in order, with honest phases
+  ---
+  duration_ms: 5.889465
+  type: 'test'
+  ...
+# Subtest: upload: a lost start reply is resolved by replaying the same key, not a second version
+ok 11 - upload: a lost start reply is resolved by replaying the same key, not a second version
+  ---
+  duration_ms: 2.326683
+  type: 'test'
+  ...
+# Subtest: upload: a lost completion reply is resolved by terminal replay
+ok 12 - upload: a lost completion reply is resolved by terminal replay
+  ---
+  duration_ms: 5.401445
+  type: 'test'
+  ...
+# Subtest: upload: a PUT that never arrived is re-staged for the same version only
+ok 13 - upload: a PUT that never arrived is re-staged for the same version only
+  ---
+  duration_ms: 2.733309
+  type: 'test'
+  ...
+# Subtest: upload: lease in progress waits for the server's hint; nothing retries by itself
+ok 14 - upload: lease in progress waits for the server's hint; nothing retries by itself
+  ---
+  duration_ms: 5.45237
+  type: 'test'
+  ...
+# Subtest: upload: expiry, a known failure and a verification failure are terminal and distinct
+ok 15 - upload: expiry, a known failure and a verification failure are terminal and distinct
+  ---
+  duration_ms: 10.524876
+  type: 'test'
+  ...
+# Subtest: upload: KMZ outcomes are reported separately from the upload
+ok 16 - upload: KMZ outcomes are reported separately from the upload
+  ---
+  duration_ms: 7.018112
+  type: 'test'
+  ...
+# Subtest: upload: explicit cancellation calls the server and reports its answer
+ok 17 - upload: explicit cancellation calls the server and reports its answer
+  ---
+  duration_ms: 1.30497
+  type: 'test'
+  ...
+# Subtest: upload: cancelling after the server finished says so and shows the real outcome
+ok 18 - upload: cancelling after the server finished says so and shows the real outcome
+  ---
+  duration_ms: 6.752973
+  type: 'test'
+  ...
+# Subtest: upload: a failed cancellation is never shown as success
+ok 19 - upload: a failed cancellation is never shown as success
+  ---
+  duration_ms: 1.358944
+  type: 'test'
+  ...
+# Subtest: upload: cancelling an uncertain start resolves the key first, then cancels that version
+ok 20 - upload: cancelling an uncertain start resolves the key first, then cancels that version
+  ---
+  duration_ms: 8.039852
+  type: 'test'
+  ...
+# Subtest: upload: one pipeline per factory turn; a second file is refused, not queued
+ok 21 - upload: one pipeline per factory turn; a second file is refused, not queued
+  ---
+  duration_ms: 9.691427
+  type: 'test'
+  ...
+# Subtest: upload: local teardown aborts, sends nothing more and installs no late state
+ok 22 - upload: local teardown aborts, sends nothing more and installs no late state
+  ---
+  duration_ms: 3.426321
+  type: 'test'
+  ...
+# Subtest: upload: a reloaded own pending upload needs the same file again
+ok 23 - upload: a reloaded own pending upload needs the same file again
+  ---
+  duration_ms: 1.192104
+  type: 'test'
+  ...
+# Subtest: summary: undefined is loading, not zero; zero is said as such
+ok 24 - summary: undefined is loading, not zero; zero is said as such
+  ---
+  duration_ms: 0.311675
+  type: 'test'
+  ...
+# Subtest: summary: another account's pending upload stays generic; own states are named
+ok 25 - summary: another account's pending upload stays generic; own states are named
+  ---
+  duration_ms: 0.211724
+  type: 'test'
+  ...
+# Subtest: summary: KMZ keeps the active boundary while a replacement is pending or failed
+ok 26 - summary: KMZ keeps the active boundary while a replacement is pending or failed
+  ---
+  duration_ms: 0.245188
+  type: 'test'
+  ...
+# Subtest: summary: download names lose separators and control characters
+ok 27 - summary: download names lose separators and control characters
+  ---
+  duration_ms: 15.221598
+  type: 'test'
+  ...
+# Subtest: client: a 401 the bridge reports (after its teardown) is a session error, not uncertainty
+ok 28 - client: a 401 the bridge reports (after its teardown) is a session error, not uncertainty
+  ---
+  duration_ms: 0.3495
+  type: 'test'
+  ...
+# Subtest: suggested answers are preselected, open ones are not
+ok 29 - suggested answers are preselected, open ones are not
+  ---
+  duration_ms: 2.331148
+  type: 'test'
+  ...
+# Subtest: answers survive a new response while their question is still open
+ok 30 - answers survive a new response while their question is still open
+  ---
+  duration_ms: 0.307987
+  type: 'test'
+  ...
+# Subtest: corrections merge like decisions: columns accumulate, the rest is replaced
+ok 31 - corrections merge like decisions: columns accumulate, the rest is replaced
+  ---
+  duration_ms: 0.235113
+  type: 'test'
+  ...
+# Subtest: the queue sends one request at a time and the newest edit wins
+ok 32 - the queue sends one request at a time and the newest edit wins
+  ---
+  duration_ms: 2.385875
+  type: 'test'
+  ...
+# Subtest: labels
+ok 33 - labels
+  ---
+  duration_ms: 0.435385
+  type: 'test'
+  ...
+# Subtest: a failed confirmation says whether the preview was used up
+ok 34 - a failed confirmation says whether the preview was used up
+  ---
+  duration_ms: 0.17597
+  type: 'test'
+  ...
+# Subtest: a multichunk body with a codepoint split across chunks is reassembled and verified
+ok 35 - a multichunk body with a codepoint split across chunks is reassembled and verified
+  ---
+  duration_ms: 68.634342
+  type: 'test'
+  ...
+# Subtest: an exact multiple of the chunk size ends on a full final chunk
+ok 36 - an exact multiple of the chunk size ends on a full final chunk
+  ---
+  duration_ms: 15.91161
+  type: 'test'
+  ...
+# Subtest: a malformed or inactive descriptor is refused before any request
+ok 37 - a malformed or inactive descriptor is refused before any request
+  ---
+  duration_ms: 1.294454
+  type: 'test'
+  ...
+# Subtest: metadata must describe exactly the requested active geometry
+ok 38 - metadata must describe exactly the requested active geometry
+  ---
+  duration_ms: 8.332487
+  type: 'test'
+  ...
+# Subtest: missing, oversized or unreadable metadata is an explicit error
+ok 39 - missing, oversized or unreadable metadata is an explicit error
+  ---
+  duration_ms: 2.271379
+  type: 'test'
+  ...
+# Subtest: every chunk header is checked against the sequence
+ok 40 - every chunk header is checked against the sequence
+  ---
+  duration_ms: 66.102844
+  type: 'test'
+  ...
+# Subtest: repeated, out-of-order, truncated or oversized chunks are refused
+ok 41 - repeated, out-of-order, truncated or oversized chunks are refused
+  ---
+  duration_ms: 28.903869
+  type: 'test'
+  ...
+# Subtest: a body whose bytes do not match the recorded hash is never parsed
+ok 42 - a body whose bytes do not match the recorded hash is never parsed
+  ---
+  duration_ms: 8.845446
+  type: 'test'
+  ...
+# Subtest: invalid UTF-8, invalid JSON or a non-MultiPolygon with a matching hash are refused
+ok 43 - invalid UTF-8, invalid JSON or a non-MultiPolygon with a matching hash are refused
+  ---
+  duration_ms: 8.674855
+  type: 'test'
+  ...
+# Subtest: revocation or transfer between chunks stops the load and installs nothing
+ok 44 - revocation or transfer between chunks stops the load and installs nothing
+  ---
+  duration_ms: 3.686499
+  type: 'test'
+  ...
+# Subtest: a network failure is explicit and a later retry succeeds
+ok 45 - a network failure is explicit and a later retry succeeds
+  ---
+  duration_ms: 24.676325
+  type: 'test'
+  ...
+# Subtest: rapid selections keep one load in flight and one replaceable request waiting
+ok 46 - rapid selections keep one load in flight and one replaceable request waiting
+  ---
+  duration_ms: 8.083786
+  type: 'test'
+  ...
+# Subtest: a new selection releases the previous ready body
+ok 47 - a new selection releases the previous ready body
+  ---
+  duration_ms: 2.504274
+  type: 'test'
+  ...
+# Subtest: reset after the network finished but before the digest installs nothing
+ok 48 - reset after the network finished but before the digest installs nothing
+  ---
+  duration_ms: 3.62071
+  type: 'test'
+  ...
+# Subtest: reset and destroy cancel work, drop the ready body and refuse later loads
+ok 49 - reset and destroy cancel work, drop the ready body and refuse later loads
+  ---
+  duration_ms: 1.673724
+  type: 'test'
+  ...
+# Subtest: the caller's own signal cancels only its request
+ok 50 - the caller's own signal cancels only its request
+  ---
+  duration_ms: 8.090009
+  type: 'test'
+  ...
+# Subtest: a session-ended bridge (AbortError) is a cancellation, not an error
+ok 51 - a session-ended bridge (AbortError) is a cancellation, not an error
+  ---
+  duration_ms: 0.713449
+  type: 'test'
+  ...
+# Subtest: a 401 reported by the bridge is a session error, never a drawn body
+ok 52 - a 401 reported by the bridge is a session error, never a drawn body
+  ---
+  duration_ms: 0.414561
+  type: 'test'
+  ...
+# Subtest: selecting back a body whose obsolete load was just cancelled loads it again
+ok 53 - selecting back a body whose obsolete load was just cancelled loads it again
+  ---
+  duration_ms: 5.562199
+  type: 'test'
+  ...
+# Subtest: all, unfiled and a named folder filter without reordering
+ok 54 - all, unfiled and a named folder filter without reordering
+  ---
+  duration_ms: 2.387288
+  type: 'test'
+  ...
+# Subtest: filtering never replaces the full list
+ok 55 - filtering never replaces the full list
+  ---
+  duration_ms: 0.2428
+  type: 'test'
+  ...
+# Subtest: counts include empty folders and count items once
+ok 56 - counts include empty folders and count items once
+  ---
+  duration_ms: 0.296608
+  type: 'test'
+  ...
+# Subtest: a selection that no longer exists falls back to unfiled, not all
+ok 57 - a selection that no longer exists falls back to unfiled, not all
+  ---
+  duration_ms: 0.298729
+  type: 'test'
+  ...
+# Subtest: labels for views and items
+ok 58 - labels for views and items
+  ---
+  duration_ms: 0.414442
+  type: 'test'
+  ...
+# Subtest: creation defaults to the open folder, never to all/unfiled
+ok 59 - creation defaults to the open folder, never to all/unfiled
+  ---
+  duration_ms: 0.124776
+  type: 'test'
+  ...
+# Subtest: a move patches one item by id and leaves the rest alone
+ok 60 - a move patches one item by id and leaves the rest alone
+  ---
+  duration_ms: 0.226288
+  type: 'test'
+  ...
+# Subtest: the first layer is the reference
+ok 61 - the first layer is the reference
+  ---
+  duration_ms: 4.756774
+  type: 'test'
+  ...
+# Subtest: a terrain only in the later layer is new
+ok 62 - a terrain only in the later layer is new
+  ---
+  duration_ms: 0.400602
+  type: 'test'
+  ...
+# Subtest: a terrain only in the reference layer is removed
+ok 63 - a terrain only in the reference layer is removed
+  ---
+  duration_ms: 0.199525
+  type: 'test'
+  ...
+# Subtest: identical values report no change
+ok 64 - identical values report no change
+  ---
+  duration_ms: 0.263425
+  type: 'test'
+  ...
+# Subtest: a different price is reported with the field named
+ok 65 - a different price is reported with the field named
+  ---
+  duration_ms: 5.717834
+  type: 'test'
+  ...
+# Subtest: several changed fields are all listed
+ok 66 - several changed fields are all listed
+  ---
+  duration_ms: 0.360396
+  type: 'test'
+  ...
+# Subtest: rounding under half a percent is not a change
+ok 67 - rounding under half a percent is not a change
+  ---
+  duration_ms: 0.191813
+  type: 'test'
+  ...
+# Subtest: matching ignores accents and case
+ok 68 - matching ignores accents and case
+  ---
+  duration_ms: 0.171794
+  type: 'test'
+  ...
+# Subtest: two same-named parcels match one to one, not both to the first
+ok 69 - two same-named parcels match one to one, not both to the first
+  ---
+  duration_ms: 0.451709
+  type: 'test'
+  ...
+# Subtest: genuinely different areas stay separate parcels
+ok 70 - genuinely different areas stay separate parcels
+  ---
+  duration_ms: 0.442205
+  type: 'test'
+  ...
+# Subtest: a single layer produces no comparison at all
+ok 71 - a single layer produces no comparison at all
+  ---
+  duration_ms: 0.19515
+  type: 'test'
+  ...
+# Subtest: with three layers a removal names the layers it is missing from
+ok 72 - with three layers a removal names the layers it is missing from
+  ---
+  duration_ms: 0.207415
+  type: 'test'
+  ...
+# Subtest: the input array is not modified
+ok 73 - the input array is not modified
+  ---
+  duration_ms: 5.149243
+  type: 'test'
+  ...
+# Subtest: changedFields reports location and address, not only money
+ok 74 - changedFields reports location and address, not only money
+  ---
+  duration_ms: 0.192073
+  type: 'test'
+  ...
+# Subtest: changedFields ignores fields that are not part of the comparison
+ok 75 - changedFields ignores fields that are not part of the comparison
+  ---
+  duration_ms: 0.121315
+  type: 'test'
+  ...
+# Subtest: summarize counts each state
+ok 76 - summarize counts each state
+  ---
+  duration_ms: 0.248789
+  type: 'test'
+  ...
+# Subtest: \#3 three identical layers report no invented new terrain
+ok 77 - \#3 three identical layers report no invented new terrain
+  ---
+  duration_ms: 0.170452
+  type: 'test'
+  ...
+# Subtest: \#3 each layer matches the reference independently
+ok 78 - \#3 each layer matches the reference independently
+  ---
+  duration_ms: 0.170998
+  type: 'test'
+  ...
+# Subtest: \#7 a terrain that only moved is reported as changed
+ok 79 - \#7 a terrain that only moved is reported as changed
+  ---
+  duration_ms: 0.125104
+  type: 'test'
+  ...
+# Subtest: \#7 latitude and longitude are reported once, together
+ok 80 - \#7 latitude and longitude are reported once, together
+  ---
+  duration_ms: 0.113631
+  type: 'test'
+  ...
+# Subtest: \#7 a changed address is reported
+ok 81 - \#7 a changed address is reported
+  ---
+  duration_ms: 0.17561
+  type: 'test'
+  ...
+# Subtest: \#7 movement under a metre is not a change
+ok 82 - \#7 movement under a metre is not a change
+  ---
+  duration_ms: 0.128788
+  type: 'test'
+  ...
+# Subtest: removals name the layers a terrain is missing from
+ok 83 - removals name the layers a terrain is missing from
+  ---
+  duration_ms: 0.097124
+  type: 'test'
+  ...
+# Subtest: a terrain present in every layer is not reported as removed
+ok 84 - a terrain present in every layer is not reported as removed
+  ---
+  duration_ms: 0.135603
+  type: 'test'
+  ...
+# Subtest: the closest area is paired, not merely the first within tolerance
+ok 85 - the closest area is paired, not merely the first within tolerance
+  ---
+  duration_ms: 0.132305
+  type: 'test'
+  ...
+# Subtest: a hectare is a circle of about 56.4 m radius
+ok 86 - a hectare is a circle of about 56.4 m radius
+  ---
+  duration_ms: 2.503159
+  type: 'test'
+  ...
+# Subtest: the radius of the largest real terrain
+ok 87 - the radius of the largest real terrain
+  ---
+  duration_ms: 0.276081
+  type: 'test'
+  ...
+# Subtest: area four times larger doubles the radius
+ok 88 - area four times larger doubles the radius
+  ---
+  duration_ms: 0.35071
+  type: 'test'
+  ...
+# Subtest: missing or nonsense areas have no radius
+ok 89 - missing or nonsense areas have no radius
+  ---
+  duration_ms: 0.272363
+  type: 'test'
+  ...
+# Subtest: metres per pixel halves with each zoom step
+ok 90 - metres per pixel halves with each zoom step
+  ---
+  duration_ms: 0.164889
+  type: 'test'
+  ...
+# Subtest: metres per pixel shrinks away from the equator
+ok 91 - metres per pixel shrinks away from the equator
+  ---
+  duration_ms: 0.167505
+  type: 'test'
+  ...
+# Subtest: a known scale: zoom 16 near Mexico City
+ok 92 - a known scale: zoom 16 near Mexico City
+  ---
+  duration_ms: 0.105645
+  type: 'test'
+  ...
+# Subtest: zoomed out, the symbol wins and the mark is not to scale
+ok 93 - zoomed out, the symbol wins and the mark is not to scale
+  ---
+  duration_ms: 0.16946
+  type: 'test'
+  ...
+# Subtest: zoomed in, the true footprint wins and the mark is to scale
+ok 94 - zoomed in, the true footprint wins and the mark is to scale
+  ---
+  duration_ms: 0.405518
+  type: 'test'
+  ...
+# Subtest: the handover is continuous: radius never shrinks as you zoom in
+ok 95 - the handover is continuous: radius never shrinks as you zoom in
+  ---
+  duration_ms: 4.620704
+  type: 'test'
+  ...
+# Subtest: a bigger terrain reaches true scale sooner
+ok 96 - a bigger terrain reaches true scale sooner
+  ---
+  duration_ms: 0.388686
+  type: 'test'
+  ...
+# Subtest: at true scale the drawn radius really is the ground radius
+ok 97 - at true scale the drawn radius really is the ground radius
+  ---
+  duration_ms: 0.211732
+  type: 'test'
+  ...
+# Subtest: a terrain with no area keeps its symbol at every zoom
+ok 98 - a terrain with no area keeps its symbol at every zoom
+  ---
+  duration_ms: 0.164745
+  type: 'test'
+  ...
+# Subtest: trueScaleRadius grows by four when zooming in two steps
+ok 99 - trueScaleRadius grows by four when zooming in two steps
+  ---
+  duration_ms: 0.092386
+  type: 'test'
+  ...
+# Subtest: a terrain on its own gets no ring offset
+ok 100 - a terrain on its own gets no ring offset
+  ---
+  duration_ms: 0.273679
+  type: 'test'
+  ...
+# Subtest: terrains at the same point are nudged into concentric rings
+ok 101 - terrains at the same point are nudged into concentric rings
+  ---
+  duration_ms: 0.24084
+  type: 'test'
+  ...
+# Subtest: terrains at different points are not nudged
+ok 102 - terrains at different points are not nudged
+  ---
+  duration_ms: 0.131163
+  type: 'test'
+  ...
+# Subtest: a big pile at one coordinate stops growing instead of swallowing the map
+ok 103 - a big pile at one coordinate stops growing instead of swallowing the map
+  ---
+  duration_ms: 2.935379
+  type: 'test'
+  ...
+# Subtest: zoomed out, every terrain is the same clean circle
+ok 104 - zoomed out, every terrain is the same clean circle
+  ---
+  duration_ms: 0.176543
+  type: 'test'
+  ...
+# Subtest: zoomed in, size becomes the real footprint again
+ok 105 - zoomed in, size becomes the real footprint again
+  ---
+  duration_ms: 0.06774
+  type: 'test'
+  ...
+# Subtest: comparison layers are still separated at the same spot
+ok 106 - comparison layers are still separated at the same spot
+  ---
+  duration_ms: 0.072961
+  type: 'test'
+  ...
+# Subtest: fixture provenance: generated by the accepted B-1 parser
+ok 107 - fixture provenance: generated by the accepted B-1 parser
+  ---
+  duration_ms: 1.416864
+  type: 'test'
+  ...
+# Subtest: boundary-only terrain is located with blank X/Y
+ok 108 - boundary-only terrain is located with blank X/Y
+  ---
+  duration_ms: 1.677522
+  type: 'test'
+  ...
+# Subtest: XY-only terrain keeps the existing validator's verdict
+ok 109 - XY-only terrain keeps the existing validator's verdict
+  ---
+  duration_ms: 1.283153
+  type: 'test'
+  ...
+# Subtest: neither boundary nor X/Y: unplaced
+ok 110 - neither boundary nor X/Y: unplaced
+  ---
+  duration_ms: 0.284167
+  type: 'test'
+  ...
+# Subtest: boundary and X/Y disagree: boundary wins, X/Y is read but never written
+ok 111 - boundary and X/Y disagree: boundary wins, X/Y is read but never written
+  ---
+  duration_ms: 0.48267
+  type: 'test'
+  ...
+# Subtest: unusable or malformed descriptors are no descriptor at all
+ok 112 - unusable or malformed descriptors are no descriptor at all
+  ---
+  duration_ms: 0.726957
+  type: 'test'
+  ...
+# Subtest: legacy rows without a geometria key keep their caller's ubicado
+ok 113 - legacy rows without a geometria key keep their caller's ubicado
+  ---
+  duration_ms: 0.363443
+  type: 'test'
+  ...
+# Subtest: shared contract v1 example maps through the A adapter rule
+ok 114 - shared contract v1 example maps through the A adapter rule
+  ---
+  duration_ms: 0.628542
+  type: 'test'
+  ...
+# Subtest: bodies convert [lon, lat] to Leaflet [lat, lng] explicitly
+ok 115 - bodies convert [lon, lat] to Leaflet [lat, lng] explicitly
+  ---
+  duration_ms: 1.811214
+  type: 'test'
+  ...
+# Subtest: holes and every part are kept
+ok 116 - holes and every part are kept
+  ---
+  duration_ms: 3.244014
+  type: 'test'
+  ...
+# Subtest: cajaMayor is the largest part's shell box, which drives the handover
+ok 117 - cajaMayor is the largest part's shell box, which drives the handover
+  ---
+  duration_ms: 1.432495
+  type: 'test'
+  ...
+# Subtest: missing body: no_disponible, never a fabricated outline
+ok 118 - missing body: no_disponible, never a fabricated outline
+  ---
+  duration_ms: 0.244048
+  type: 'test'
+  ...
+# Subtest: failed replacement: the active descriptor's old body is used, never the pending one
+ok 119 - failed replacement: the active descriptor's old body is used, never the pending one
+  ---
+  duration_ms: 0.287872
+  type: 'test'
+  ...
+# Subtest: malformed bodies are invalid, never footprints
+ok 120 - malformed bodies are invalid, never footprints
+  ---
+  duration_ms: 0.494643
+  type: 'test'
+  ...
+# Subtest: a body shifted away from its declared bounds is invalid, not drawn elsewhere
+ok 121 - a body shifted away from its declared bounds is invalid, not drawn elsewhere
+  ---
+  duration_ms: 0.530306
+  type: 'test'
+  ...
+# Subtest: collapsed or shrunken bodies are invalid
+ok 122 - collapsed or shrunken bodies are invalid
+  ---
+  duration_ms: 0.410547
+  type: 'test'
+  ...
+# Subtest: holes and other parts must stay inside the declared bounds too
+ok 123 - holes and other parts must stay inside the declared bounds too
+  ---
+  duration_ms: 0.273647
+  type: 'test'
+  ...
+# Subtest: every parser-produced fixture body is consistent and loads
+ok 124 - every parser-produced fixture body is consistent and loads
+  ---
+  duration_ms: 0.322386
+  type: 'test'
+  ...
+# Subtest: bodies past the parser's vertex limit are refused, not drawn
+ok 125 - bodies past the parser's vertex limit are refused, not drawn
+  ---
+  duration_ms: 34.494654
+  type: 'test'
+  ...
+# Subtest: handover: symbol at distant zoom, outline once the short side reaches 24 px
+ok 126 - handover: symbol at distant zoom, outline once the short side reaches 24 px
+  ---
+  duration_ms: 0.685746
+  type: 'test'
+  ...
+# Subtest: mixed bounds cover every boundary part and every XY point, nothing else
+ok 127 - mixed bounds cover every boundary part and every XY point, nothing else
+  ---
+  duration_ms: 1.386408
+  type: 'test'
+  ...
+# Subtest: coincident boundary symbol and XY mark get distinct rings
+ok 128 - coincident boundary symbol and XY mark get distinct rings
+  ---
+  duration_ms: 0.721836
+  type: 'test'
+  ...
+# Subtest: the public projection keeps exactly the contract allowlist and no private text
+ok 129 - the public projection keeps exactly the contract allowlist and no private text
+  ---
+  duration_ms: 2.927928
+  type: 'test'
+  ...
+# Subtest: a public row drops any field outside the allowlist, even if the server sent one
+ok 130 - a public row drops any field outside the allowlist, even if the server sent one
+  ---
+  duration_ms: 0.532634
+  type: 'test'
+  ...
+# Subtest: publication status uses the agreed Spanish labels
+ok 131 - publication status uses the agreed Spanish labels
+  ---
+  duration_ms: 0.423805
+  type: 'test'
+  ...
+# Subtest: a saved 'sold' draft over a live publication is flagged as not yet public
+ok 132 - a saved 'sold' draft over a live publication is flagged as not yet public
+  ---
+  duration_ms: 0.726552
+  type: 'test'
+  ...
+# Subtest: inventory rows flatten the draft and classify location like the server
+ok 133 - inventory rows flatten the draft and classify location like the server
+  ---
+  duration_ms: 0.287552
+  type: 'test'
+  ...
+# Subtest: geography is repeated parameters; price only travels with its currency
+ok 134 - geography is repeated parameters; price only travels with its currency
+  ---
+  duration_ms: 0.477
+  type: 'test'
+  ...
+# Subtest: internal-only filters never reach the public catalog query
+ok 135 - internal-only filters never reach the public catalog query
+  ---
+  duration_ms: 0.343253
+  type: 'test'
+  ...
+# Subtest: a page query keeps the filters and adds the cursor and the maximum limit
+ok 136 - a page query keeps the filters and adds the cursor and the maximum limit
+  ---
+  duration_ms: 0.724221
+  type: 'test'
+  ...
+# Subtest: 251 matching records assemble across the 250 page boundary with no gaps or repeats
+ok 137 - 251 matching records assemble across the 250 page boundary with no gaps or repeats
+  ---
+  duration_ms: 2.375854
+  type: 'test'
+  ...
+# Subtest: the default 100-row page also assembles completely
+ok 138 - the default 100-row page also assembles completely
+  ---
+  duration_ms: 1.187752
+  type: 'test'
+  ...
+# Subtest: facets come from the server's first page, for the whole candidate set
+ok 139 - facets come from the server's first page, for the whole candidate set
+  ---
+  duration_ms: 8.77453
+  type: 'test'
+  ...
+# Subtest: a server that repeats a cursor is reported, not looped on
+ok 140 - a server that repeats a cursor is reported, not looped on
+  ---
+  duration_ms: 0.551181
+  type: 'test'
+  ...
+# Subtest: numbers are read as typed in Mexico, and ambiguous commas are refused
+ok 141 - numbers are read as typed in Mexico, and ambiguous commas are refused
+  ---
+  duration_ms: 0.634839
+  type: 'test'
+  ...
+# Subtest: an untouched form sends nothing; cents and unknown currency survive byte for byte
+ok 142 - an untouched form sends nothing; cents and unknown currency survive byte for byte
+  ---
+  duration_ms: 0.792276
+  type: 'test'
+  ...
+# Subtest: only edited fields are parsed and sent, in the server's units
+ok 143 - only edited fields are parsed and sent, in the server's units
+  ---
+  duration_ms: 0.307927
+  type: 'test'
+  ...
+# Subtest: half a coordinate pair saves as a draft (§9.1); a decimal comma is still refused
+ok 144 - half a coordinate pair saves as a draft (§9.1); a decimal comma is still refused
+  ---
+  duration_ms: 0.135717
+  type: 'test'
+  ...
+# Subtest: server field errors map onto form fields
+ok 145 - server field errors map onto form fields
+  ---
+  duration_ms: 5.231976
+  type: 'test'
+  ...
+# Subtest: a conflict names what the other user changed and where both of us did
+ok 146 - a conflict names what the other user changed and where both of us did
+  ---
+  duration_ms: 0.4207
+  type: 'test'
+  ...
+# Subtest: one create attempt keeps its key across retries; a changed body gets a new key
+ok 147 - one create attempt keeps its key across retries; a changed body gets a new key
+  ---
+  duration_ms: 0.213321
+  type: 'test'
+  ...
+# Subtest: history events normalise action, actor, time, confirmations and field changes
+ok 148 - history events normalise action, actor, time, confirmations and field changes
+  ---
+  duration_ms: 0.46247
+  type: 'test'
+  ...
+# Subtest: the real workbook's prices show as dollars, cents kept
+ok 149 - the real workbook's prices show as dollars, cents kept
+  ---
+  duration_ms: 3.39061
+  type: 'test'
+  ...
+# Subtest: pesos show as pesos
+ok 150 - pesos show as pesos
+  ---
+  duration_ms: 0.814566
+  type: 'test'
+  ...
+# Subtest: a price with no recorded currency says so instead of borrowing one
+ok 151 - a price with no recorded currency says so instead of borrowing one
+  ---
+  duration_ms: 0.295598
+  type: 'test'
+  ...
+# Subtest: currencies in view: unknown counts as its own, unpriced rows do not count
+ok 152 - currencies in view: unknown counts as its own, unpriced rows do not count
+  ---
+  duration_ms: 1.935096
+  type: 'test'
+  ...
+# Subtest: price filters are dropped, not applied, across currencies
+ok 153 - price filters are dropped, not applied, across currencies
+  ---
+  duration_ms: 0.234398
+  type: 'test'
+  ...
+# Subtest: the same amount in another currency is a change
+ok 154 - the same amount in another currency is a change
+  ---
+  duration_ms: 0.508551
+  type: 'test'
+  ...
+# Subtest: a successful response is returned undecoded, same-origin and uncached
+ok 155 - a successful response is returned undecoded, same-origin and uncached
+  ---
+  duration_ms: 32.009262
+  type: 'test'
+  ...
+# Subtest: only same-origin /api/ paths are accepted, before anything is sent
+ok 156 - only same-origin /api/ paths are accepted, before anything is sent
+  ---
+  duration_ms: 1.175775
+  type: 'test'
+  ...
+# Subtest: a non-2xx answer other than 401 is the caller's to decode
+ok 157 - a non-2xx answer other than 401 is the caller's to decode
+  ---
+  duration_ms: 5.274023
+  type: 'test'
+  ...
+# Subtest: a 401 runs the expiry teardown first and never resolves
+ok 158 - a 401 runs the expiry teardown first and never resolves
+  ---
+  duration_ms: 14.324411
+  type: 'test'
+  ...
+# Subtest: the caller's own signal cancels with an AbortError, before and during the request
+ok 159 - the caller's own signal cancels with an AbortError, before and during the request
+  ---
+  duration_ms: 6.715987
+  type: 'test'
+  ...
+# Subtest: ending the session cancels a body read in flight; the bytes never arrive
+ok 160 - ending the session cancels a body read in flight; the bytes never arrive
+  ---
+  duration_ms: 52.467832
+  type: 'test'
+  ...
+# Subtest: a signal stays bound to the session that made the request, across a new login
+ok 161 - a signal stays bound to the session that made the request, across a new login
+  ---
+  duration_ms: 8.188341
+  type: 'test'
+  ...
+# Subtest: legacy API calls keep their convention: a cancelled private call never settles
+ok 162 - legacy API calls keep their convention: a cancelled private call never settles
+  ---
+  duration_ms: 82.05699
+  type: 'test'
+  ...
+# Subtest: every route round-trips through its hash
+ok 163 - every route round-trips through its hash
+  ---
+  duration_ms: 2.634621
+  type: 'test'
+  ...
+# Subtest: only the catalog is public; anonymous lands on it, signed-in on the inventory
+ok 164 - only the catalog is public; anonymous lands on it, signed-in on the inventory
+  ---
+  duration_ms: 0.307064
+  type: 'test'
+  ...
+# Subtest: unknown or malformed hashes are not routes
+ok 165 - unknown or malformed hashes are not routes
+  ---
+  duration_ms: 0.290736
+  type: 'test'
+  ...
+# Subtest: ending the session cancels private requests; their callers never see a response
+ok 166 - ending the session cancels private requests; their callers never see a response
+  ---
+  duration_ms: 61.747793
+  type: 'test'
+  ...
+# Subtest: a private response that lands after logout is dropped, not delivered
+ok 167 - a private response that lands after logout is dropped, not delivered
+  ---
+  duration_ms: 30.654844
+  type: 'test'
+  ...
+# Subtest: public requests are outside the private scope
+ok 168 - public requests are outside the private scope
+  ---
+  duration_ms: 1.003148
+  type: 'test'
+  ...
+# Subtest: a private 401 reports the expired session; a failed login does not
+ok 169 - a private 401 reports the expired session; a failed login does not
+  ---
+  duration_ms: 1.023731
+  type: 'test'
+  ...
+# Subtest: an unreachable server is a readable network error the editor can tell apart
+ok 170 - an unreachable server is a readable network error the editor can tell apart
+  ---
+  duration_ms: 0.388935
+  type: 'test'
+  ...
+# Subtest: create carries its Idempotency-Key; save carries the expected version
+ok 171 - create carries its Idempotency-Key; save carries the expected version
+  ---
+  duration_ms: 2.761936
+  type: 'test'
+  ...
+# Subtest: clearing private state forgets every team dataset but keeps the public catalog
+ok 172 - clearing private state forgets every team dataset but keeps the public catalog
+  ---
+  duration_ms: 2.125418
+  type: 'test'
+  ...
+# Subtest: the fourteen core columns, in order; X is latitude and Y is longitude
+ok 173 - the fourteen core columns, in order; X is latitude and Y is longitude
+  ---
+  duration_ms: 2.663794
+  type: 'test'
+  ...
+# Subtest: the global table shows Base and no custom column; a base shows its live ones
+ok 174 - the global table shows Base and no custom column; a base shows its live ones
+  ---
+  duration_ms: 0.399423
+  type: 'test'
+  ...
+# Subtest: a cell reads what was typed and converts nothing
+ok 175 - a cell reads what was typed and converts nothing
+  ---
+  duration_ms: 1.014934
+  type: 'test'
+  ...
+# Subtest: a cell's body names one field and the version it was edited at
+ok 176 - a cell's body names one field and the version it was edited at
+  ---
+  duration_ms: 0.19522
+  type: 'test'
+  ...
+# Subtest: a list query is one bounded page; filters and order are the server's
+ok 177 - a list query is one bounded page; filters and order are the server's
+  ---
+  duration_ms: 0.434833
+  type: 'test'
+  ...
+# Subtest: saves of one row run in order; other rows do not wait; a failure does not block the row
+ok 178 - saves of one row run in order; other rows do not wait; a failure does not block the row
+  ---
+  duration_ms: 0.89902
+  type: 'test'
+  ...
+# Subtest: an unanswered save is resolved from the row, never replayed blindly
+ok 179 - an unanswered save is resolved from the row, never replayed blindly
+  ---
+  duration_ms: 0.378557
+  type: 'test'
+  ...
+# Subtest: routes: the table has an address; operators have the table and the catalog only
+ok 180 - routes: the table has an address; operators have the table and the catalog only
+  ---
+  duration_ms: 0.396513
+  type: 'test'
+  ...
+1..180
+# tests 180
+# suites 0
+# pass 180
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1306.36656
+exit 0

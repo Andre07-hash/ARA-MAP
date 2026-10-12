@@ -1,0 +1,32 @@
+# Render Blueprint for the private pilot. Reviewed configuration only: nothing
+# is created or deployed by this file being in the repository. The operator
+# creates the service by hand from a reviewed commit (see the operator
+# checklist in reports/team-a-free-pilot-2026-10-12/).
+#
+# Free plan on purpose: no disk, no add-on, no paid instance. The service
+# sleeps when idle and keeps nothing on its own disk; all data lives in the
+# database and the private byte store named by the secrets below.
+services:
+  - type: web
+    name: ara-map-piloto
+    runtime: python
+    plan: free
+    autoDeployTrigger: "off"   # deploys are manual, from a reviewed commit
+    buildCommand: pip install -r requirements-hosted.txt
+    startCommand: python -m server.hosted
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      # Secrets: typed into the dashboard by the operator, never stored here.
+      - key: ARA_MAP_DATABASE_URL
+        sync: false
+      # The service's own hostname only, without https:// or a path.
+      - key: ARA_MAP_HOST_PUBLICO
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_URL
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_KEY
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_BUCKET
+        sync: false

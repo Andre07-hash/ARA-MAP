@@ -1,0 +1,3 @@
+# Exact pins for the hosted service only (python -m server.hosted).
+# The local app installs nothing: it runs on the standard library plus vendor/python.
+psycopg[binary]==3.3.6

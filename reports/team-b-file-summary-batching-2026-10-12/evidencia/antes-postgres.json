@@ -1,0 +1,58 @@
+{
+  "backend": "postgres",
+  "arbol": "lote-base",
+  "paginas": [
+    {
+      "terrenos": 1,
+      "servicio": {
+        "sentencias": 8,
+        "ms_mediana": 9.0,
+        "con_archivos": 1
+      },
+      "handler": {
+        "sentencias": 19,
+        "ms_mediana": 76.05,
+        "bytes": 3133
+      }
+    },
+    {
+      "terrenos": 50,
+      "servicio": {
+        "sentencias": 400,
+        "ms_mediana": 67.2,
+        "con_archivos": 50
+      },
+      "handler": {
+        "sentencias": 411,
+        "ms_mediana": 131.59,
+        "bytes": 110427
+      }
+    },
+    {
+      "terrenos": 100,
+      "servicio": {
+        "sentencias": 800,
+        "ms_mediana": 118.6,
+        "con_archivos": 60
+      },
+      "handler": {
+        "sentencias": 811,
+        "ms_mediana": 199.52,
+        "bytes": 206350
+      }
+    },
+    {
+      "terrenos": 200,
+      "servicio": {
+        "sentencias": 1600,
+        "ms_mediana": 222.19,
+        "con_archivos": 60
+      },
+      "handler": {
+        "sentencias": 1611,
+        "ms_mediana": 285.37,
+        "bytes": 391299
+      }
+    }
+  ]
+}

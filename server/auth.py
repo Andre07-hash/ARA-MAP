@@ -24,6 +24,7 @@ import re
 import secrets
 import time
 import uuid
+from collections.abc import Sequence
 from http.cookies import CookieError, SimpleCookie
 from typing import Any
 
@@ -399,6 +400,63 @@ def require_terreno(request: Any, terreno_id: str, capacidad: str,
         return _verificar(conn, sesion, capacidad, terreno_id=terreno_id)
     with db.session() as propia:
         return _verificar(propia, sesion, capacidad, terreno_id=terreno_id)
+
+
+# Ids per IN (...) list in terrenos_legibles: far below every driver's parameter limit.
+LOTE_LECTURA = 500
+
+
+def terrenos_legibles(conn: DatabaseConnection, sesion: Sesion, terreno_ids: Sequence[str],
+                      capacidad: str) -> tuple[list[str], list[str]]:
+    """require_terreno for a bounded page of terrains, for a READ capability.
+
+    Returns (readable, unavailable), each in first-seen order, duplicates
+    dropped. The decision per id is require_terreno's: the session and the
+    capability are checked once, first, with the same errors (401, 403) the
+    first per-id call would raise; then a terrain that is missing, unassigned
+    (for an operator), in a missing base, or in a base the operator has no
+    grant on or that is archived, is unavailable (require_terreno's 404). Read
+    capabilities never raise 409. Statements: two for the session, then three
+    per LOTE_LECTURA ids (terrains, bases, grants; administrators skip grants),
+    none at all for an empty list. It takes no locks: it is not a write check.
+    """
+    if capacidad not in _LECTURA:
+        raise ValueError(f"terrenos_legibles es sólo para lectura, no {capacidad!r}")
+    ids = list(dict.fromkeys(terreno_ids))
+    if not ids:
+        return [], []
+    alcance = _verificar(conn, sesion, capacidad)          # 401 / 403, exactly as the first id would
+    admin = alcance.rol == "admin"
+    legibles: set[str] = set()
+    for inicio in range(0, len(ids), LOTE_LECTURA):
+        lote = ids[inicio:inicio + LOTE_LECTURA]
+        marcas = ", ".join("?" for _ in lote)
+        terrenos = {str(r["id"]): r["base_id"] for r in conn.execute(
+            f"SELECT id, base_id FROM inventory_terrain WHERE id IN ({marcas})", tuple(lote)).fetchall()}
+        base_ids = sorted({str(b) for b in terrenos.values() if b is not None})
+        bases: dict[str, bool] = {}
+        concedidas: set[str] = set()
+        if base_ids:
+            marcas_b = ", ".join("?" for _ in base_ids)
+            bases = {str(r["id"]): r["archived_at"] is not None for r in conn.execute(
+                f"SELECT id, archived_at FROM maestra_base WHERE id IN ({marcas_b})",
+                tuple(base_ids)).fetchall()}
+            if not admin:
+                concedidas = {str(r["base_id"]) for r in conn.execute(
+                    "SELECT base_id FROM maestra_base_acceso WHERE user_id = ?"
+                    f" AND base_id IN ({marcas_b})", (sesion.user_id, *base_ids)).fetchall()}
+        for terreno_id, base_id in terrenos.items():
+            if base_id is None:
+                if admin:
+                    legibles.add(terreno_id)
+                continue
+            base = str(base_id)
+            if base not in bases:
+                continue
+            if admin or (base in concedidas and not bases[base]):
+                legibles.add(terreno_id)
+    disponibles = [i for i in ids if i in legibles]
+    return disponibles, [i for i in ids if i not in legibles]
 
 
 def reverificar(conn: DatabaseConnection, sesion: Sesion, capacidad: str) -> Alcance:

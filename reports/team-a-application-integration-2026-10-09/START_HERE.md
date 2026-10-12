@@ -250,3 +250,131 @@ storage provider; R3-A1 batching if B takes it.
 
 Stop for supervisory review: no 4A, no PR or main merge, no deployment, no
 real account or data.
+
+## 7. Round 3 review: Team B's corrections consumed and verified (2026-10-12)
+
+Supervisor packet `341c83036d7a861e88a1b3d28f6e3359ada057a2`,
+`reports/round-3-review-2026-10-12/` (START_HERE, TEAM_A). **Integration
+evidence, not final acceptance.** Sections 1–6 above are the earlier handback
+and are unchanged.
+
+### Heads
+
+| What | Exact commit |
+|---|---|
+| #29 head reviewed by the supervisor (start) | `0e9e2c1f6a1ee3c75ffed40734c825e78e0f38db` |
+| Team B corrected candidate consumed (#28, green CI run 38268732577) | `b2ac9bd176043fc4b1625b13993f8f21407dc978` |
+| Ordinary `--no-ff` merge (parents `0e9e2c1…` and `b2ac9bd…`), no conflict | `e795935c7aebedce8b1e58a6ba87cf8ef396fafe` |
+| Code head (the merge plus the new journeys) | `0fdf1908a3466393f49741e1304633134c8e467a` |
+| Final head (this section and its evidence) | the head of draft PR #29, in its description |
+| Frozen C1 (#27), unchanged | `49b782d147591236cc7f311c7e0de1948ad5258e` |
+
+Pins were checked on GitHub before merging: #28 at `b2ac9bd…` with both
+exact-head checks successful, descending from the previously consumed
+`01d6454…` and containing C1. Nothing was pushed to B's branch; #20–#27
+untouched; no force push.
+
+### Additive diff over `0e9e2c1`
+
+- From the merge: only Team B's files (`web/components/archivos/{subida,detalle,index}.js`,
+  `web/lib/archivos.js`, `web/lib/cargadorGeometrias.js`, their two test files
+  and their report folder).
+- From A: `tests/e2e/recorrido-completo.mjs` (six journeys added) and this
+  section with `evidencia/correccion-r3/`.
+- **No host, server, DTO or shared-file change was needed.** B's new contract
+  (`onError({codigo: "no_encontrado"})` + `onCambio` on an upload 404; a
+  write-right loss reported with `onCambio`) lands on callbacks the host
+  already had: the row is removed, dialogs close and the bases are
+  revalidated. B requested no host change and none was made speculatively.
+
+### The supervisor's two probes, unmodified, on an exact archive of the merge
+
+| Probe | Reviewed `0e9e2c1` | Merged tree |
+|---|---|---|
+| `probe_upload_scope.mjs` (real app, real revoke; completion is a real 404) | row 1, open detail 1, private filename visible, phase `fallido` | **row 0, open detail 0, filename not visible** (`sonda-upload-scope.json`) |
+| `probe_client_edges.mjs` — cancel after destroy | one cancel call under the new identity | `cancelCalls: []` |
+| — retryable failure | `fallido`, 0 cancels | `interrumpido`, retryable, cancellable, 1 cancel |
+| — uncertain completion | 1 completion call | 2 (it replays) |
+| — hash pipeline | 2 concurrent reads | 1 |
+| — scope ends during digest | resolved, 1 ready body | `AbortError`, 0 ready (`sonda-client-edges.json`) |
+
+### New journeys in the real application (`recorrido-completo.mjs`)
+
+Real host, B's real widgets, mounted server and disk store; a Playwright route
+only holds one request and then continues it unchanged. Their own base and
+operators, so the earlier journeys are undisturbed.
+
+| Journey | Merged tree | Same script on `0e9e2c1` |
+|---|---|---|
+| R3-B2 grant revoked while an upload **completes** (map panel open): real `completar` 404 → rows gone, detail closed, private filename and terrain names off the page, 0 boundary bodies; 2 s later nothing repopulated and no attachment write sent | ok (SQLite and Postgres) | **fails**: the rows stay |
+| R3-B2 terrain **transferred** while its content is being sent: that row and its detail go, the other row of the base stays, no later write | ok | **fails**: the transferred row stays |
+| R3-B1 "Cancelar subida" still waiting for its held upload step, sign-out in the same task, **another account** (no grant) signs in, the step is then released: 2.5 s with no attachment write, no upload row, no private name | ok | **fails**: `POST /api/archivos/versiones/…/cancelar` left the page under the new account |
+| R3-B1 the same with **the same account** signing in again | ok | not reached (the previous failure left that page signed in as the other account) |
+| R3-B1 cancel while the detail is **closed and reopened**: at most the one explicit cancel (sent while that detail was open and this scope current), nothing late once reopened, no stale upload row, and a new upload in the reopened detail reaches `listo` and shows in the cell | ok | not reached |
+| R3-B5 the session ends **during the final digest** of a selected boundary (the browser's own SHA-256, answered 1.2 s later, after the whole body was read): no install, no private node, no DOM mutation in the next 2.5 s; a new session then loads the same boundary | ok | not reached |
+
+"Not reached" rows are a cascade of the third failure on the old tree, not
+evidence either way; B's node regressions cover those cases against
+`01d6454`. On the old tree the cancel was sent with the new account's
+session; this run does not show what the server answered and no data change
+was looked for.
+
+One expectation was corrected while writing them: closing the detail in the
+same task as the click does **not** suppress the explicit cancel — the dialog's
+`close` event, which destroys the mount, is a later task, so the cancel is
+sent first, under the same account and scope. That is the permitted
+"explicit cancellation while the same authorized scope is current"; the
+journey asserts it is at most that one request and that nothing follows.
+
+### Combined workflow rerun
+
+Run on the owner's Mac (macOS, Google Chrome, loopback, synthetic accounts and
+data), at the code head.
+
+| Check | Result | Evidence |
+|---|---|---|
+| Real combined journey, SQLite | **30/30** (the earlier 22 + 6 new + 2 more no-page-error sessions), including the true restart on the same database and store (2 server starts), 100,000 vertices, second session, denial, chunk revocation, download transfer, upload expiry | `recorrido-sqlite.{log,json}` |
+| Real combined journey, focused disposable Postgres 16 | **16/16**: create → edit → PDF → KMZ candidates/activation → rejected replacement → second session → no-grant denial → restart on the same schema and store → upload denial by revocation | `recorrido-postgres.{log,json}` |
+| Team B scope-loss journeys, mounted | 8/8 | `b-alcance.log` |
+| Team B widget journeys, mounted | 19/19 | `b-recorridos.log` |
+| Host journeys (stand-ins) | 6/6 | `anfitrion.log` |
+| 2A table / identity journeys (4,200 records) | 13/13, 16/16 | `tabla-integrada.log`, `tabla-identidad.log` |
+| Near-limit body, as part of the SQLite journey | upload 8.5 s; selection → drawn 161 ms; 8 chunks, 4.1 MB; zoom 13 → 19 at scale; heap 4.5 → 25.8 (peak) → 4.6 MiB after leaving and collecting | `recorrido-sqlite.json` (`medidas.limite`) |
+
+### Repository checks at this boundary
+
+| Check | Result |
+|---|---|
+| `./verificar.sh --todo` | all OK: Python suite 1,254 (223 skipped need Postgres); full suite on Python 3.9.6; JavaScript 211/211; ruff; mypy (54 files); coverage **95%** (gate 80%) |
+| Full suite, disposable local Postgres 16 (UTF-8) | 1,254 OK, zero skipped |
+| Exact-head CI | on the final head of #29; see the PR |
+
+The test the Linux container reported as environmental
+(`test_the_system_python_has_no_openpyxl_of_its_own`) passes on this Mac, as
+it does in CI.
+
+### Reused, not rerun
+
+The 25,000-record timings, the summary-cost table, the renderer/research
+evidence, the earlier screenshots and the multi-round memory runs. One new
+screenshot: `correccion-r3/capturas/07-r3-b2-revocado-durante-completar.png`.
+
+### Limits of this step
+
+- The final-digest journey delays the page's `crypto.subtle.digest` to make
+  the window observable; the digest itself is the browser's. The other
+  journeys change nothing in the page.
+- Write-right loss during upload (archived terrain or base) is covered by B's
+  mounted journey with its passive host, not repeated in the real host here.
+- R3-B3 (recovery phases) and R3-B4 (pipeline permit) have no integration
+  boundary of their own; they are covered by the supervisor's probe above, B's
+  node regressions and B's 19 + 8 browser journeys, all rerun on this tree.
+- A table that has lost its whole scope does not look again by itself: after
+  the grant is given back the page has to be reloaded (or "Actualizar"). Not
+  changed here.
+- Browser runs on Postgres remain the one focused smoke. No screen reader.
+- Still open, as the packet reserves them: R3-A1 summary batching (8
+  statements per terrain) and the unexplained ~15 kB/round heap slope.
+
+Stop for supervisory review. No 4A, no GitHub PR or main merge, no
+deployment, no real account or data.

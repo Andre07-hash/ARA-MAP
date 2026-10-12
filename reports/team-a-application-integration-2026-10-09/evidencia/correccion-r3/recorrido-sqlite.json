@@ -1,0 +1,215 @@
+{
+  "bd": "sqlite",
+  "focalizado": false,
+  "arranques": 2,
+  "total": 30,
+  "fallos": 0,
+  "medidas": {
+    "limite": {
+      "subida_ms": 8541,
+      "seleccion_a_dibujado_ms": 161,
+      "zoom": {
+        "encuadre": 13,
+        "a_escala": 19
+      },
+      "fragmentos": 8,
+      "bytes_de_fragmentos": 4117139,
+      "heap_mib": {
+        "antes": 4.5,
+        "pico": 25.8,
+        "despues": 4.6
+      }
+    }
+  },
+  "resultados": [
+    {
+      "nombre": "el operador crea un terreno en blanco: los campos de negocio quedan vacíos, no en cero",
+      "ok": true,
+      "ms": 78
+    },
+    {
+      "nombre": "el operador edita el terreno en la tabla",
+      "ok": true,
+      "ms": 70
+    },
+    {
+      "nombre": "sube un PDF desde el detalle y lo descarga byte por byte idéntico",
+      "ok": true,
+      "ms": 261
+    },
+    {
+      "nombre": "sube un KMZ con X/Y en blanco, elige entre candidatos, activa y ve el contorno real",
+      "ok": true,
+      "ms": 1405,
+      "detalle": {
+        "candidatos": 3,
+        "zoom": 18
+      }
+    },
+    {
+      "nombre": "un reemplazo fallido conserva el último contorno utilizable",
+      "ok": true,
+      "ms": 177
+    },
+    {
+      "nombre": "selecciones rápidas en la página: sólo el último contorno se instala, un cuerpo retenido",
+      "ok": true,
+      "ms": 289,
+      "detalle": {
+        "selecciones": 10,
+        "maximo_en_vuelo": 1,
+        "fragmentos_respondidos": 1,
+        "fragmentos_cancelados": 0
+      }
+    },
+    {
+      "nombre": "un archivo que termina mientras se edita una celda no toca el editor ni la versión",
+      "ok": true,
+      "ms": 584
+    },
+    {
+      "nombre": "retirar el KMZ de un terreno con X/Y lo deja en su punto; el mapa lo dice",
+      "ok": true,
+      "ms": 280
+    },
+    {
+      "nombre": "un cuerpo cerca del límite (100,000 vértices) se sube, se carga y se dibuja sin recortes",
+      "ok": true,
+      "ms": 9439,
+      "detalle": {
+        "subida_ms": 8541,
+        "seleccion_a_dibujado_ms": 161,
+        "zoom": {
+          "encuadre": 13,
+          "a_escala": 19
+        },
+        "fragmentos": 8,
+        "bytes_de_fragmentos": 4117139,
+        "heap_mib": {
+          "antes": 4.5,
+          "pico": 25.8,
+          "despues": 4.6
+        }
+      }
+    },
+    {
+      "nombre": "otra sesión autorizada lee los mismos archivos guardados y el mismo contorno",
+      "ok": true,
+      "ms": 211
+    },
+    {
+      "nombre": "una cuenta sin permiso es rechazada y no recibe contenido",
+      "ok": true,
+      "ms": 1562
+    },
+    {
+      "nombre": "reinicio del servidor sobre la misma base y el mismo almacén: bytes, hash e historial siguen",
+      "ok": true,
+      "ms": 1160,
+      "detalle": {
+        "arranques": 2,
+        "archivos": 3,
+        "versiones_pdf": 1
+      }
+    },
+    {
+      "nombre": "R3-B2: se revoca el acceso mientras una subida se completa: fila, detalle, mapa y nombre privado se van y nada vuelve",
+      "ok": true,
+      "ms": 2454,
+      "detalle": {
+        "otro": "6f462f01-44a8-426d-ad2f-b4afdba07775"
+      }
+    },
+    {
+      "nombre": "R3-B2: se transfiere el terreno mientras se envía el contenido: esa fila y su detalle se van, el resto de la base sigue",
+      "ok": true,
+      "ms": 2361
+    },
+    {
+      "nombre": "R3-B1: cancelación explícita pendiente y reingreso de otra cuenta: ninguna escritura vieja sale bajo la sesión nueva",
+      "ok": true,
+      "ms": 3001,
+      "detalle": {
+        "archivos_del_terreno": 1
+      }
+    },
+    {
+      "nombre": "R3-B1: cancelación explícita pendiente y reingreso de la misma cuenta: ninguna escritura vieja sale bajo la sesión nueva",
+      "ok": true,
+      "ms": 2854,
+      "detalle": {
+        "archivos_del_terreno": 1
+      }
+    },
+    {
+      "nombre": "R3-B1: cancelar una subida mientras se cierra y se reabre el detalle: a lo más una cancelación, nada tardío, y el detalle nuevo funciona",
+      "ok": true,
+      "ms": 2472
+    },
+    {
+      "nombre": "R3-B5: la sesión termina durante el resumen final del contorno: no se instala y nada queda",
+      "ok": true,
+      "ms": 3261
+    },
+    {
+      "nombre": "se revoca el acceso mientras se leen los fragmentos del contorno: nada se instala y la fila se va",
+      "ok": true,
+      "ms": 1530
+    },
+    {
+      "nombre": "se transfiere el terreno mientras se descarga: no llega el archivo y el detalle se cierra",
+      "ok": true,
+      "ms": 2118
+    },
+    {
+      "nombre": "la sesión expira durante una subida: todo se desmonta y nada se repuebla después",
+      "ok": true,
+      "ms": 12185
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (olga)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (otto)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (oscar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

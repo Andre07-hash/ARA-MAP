@@ -1,0 +1,102 @@
+{
+  "bd": "postgres",
+  "focalizado": true,
+  "arranques": 2,
+  "total": 16,
+  "fallos": 0,
+  "medidas": {},
+  "resultados": [
+    {
+      "nombre": "el operador crea un terreno en blanco: los campos de negocio quedan vacíos, no en cero",
+      "ok": true,
+      "ms": 80
+    },
+    {
+      "nombre": "el operador edita el terreno en la tabla",
+      "ok": true,
+      "ms": 74
+    },
+    {
+      "nombre": "sube un PDF desde el detalle y lo descarga byte por byte idéntico",
+      "ok": true,
+      "ms": 266
+    },
+    {
+      "nombre": "sube un KMZ con X/Y en blanco, elige entre candidatos, activa y ve el contorno real",
+      "ok": true,
+      "ms": 1355,
+      "detalle": {
+        "candidatos": 3,
+        "zoom": 18
+      }
+    },
+    {
+      "nombre": "un reemplazo fallido conserva el último contorno utilizable",
+      "ok": true,
+      "ms": 215
+    },
+    {
+      "nombre": "otra sesión autorizada lee los mismos archivos guardados y el mismo contorno",
+      "ok": true,
+      "ms": 223
+    },
+    {
+      "nombre": "una cuenta sin permiso es rechazada y no recibe contenido",
+      "ok": true,
+      "ms": 1576
+    },
+    {
+      "nombre": "reinicio del servidor sobre la misma base y el mismo almacén: bytes, hash e historial siguen",
+      "ok": true,
+      "ms": 1385,
+      "detalle": {
+        "arranques": 2,
+        "archivos": 2,
+        "versiones_pdf": 1
+      }
+    },
+    {
+      "nombre": "R3-B2: se revoca el acceso mientras una subida se completa: fila, detalle, mapa y nombre privado se van y nada vuelve",
+      "ok": true,
+      "ms": 2422,
+      "detalle": {
+        "otro": "536a14ca-9181-4a3e-9dac-a0034077ac11"
+      }
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (olga)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (otto)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (oscar)",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

@@ -33,6 +33,12 @@ signatures):
   Exact keys only: there is no prefix or recursive deletion.
 - listar(prefijo) -> lazy iterator of Metadato. Prefix is one of "temporal/",
   "final/" or "final/<id>/". Order is unspecified. Listing never deletes.
+
+Errors a provider-backed store adds: FalloAlmacenError carries `reintentar`
+(may the same call succeed later without an operator?) and `proveedor` (a
+sanitized status/code pair for operator logs, never a key or a credential);
+ResultadoInciertoError means a write was sent and may or may not exist now;
+AlmacenNoConfiguradoError means the store cannot be built as configured.
 """
 
 from __future__ import annotations
@@ -107,9 +113,34 @@ class LimiteExcedidoError(AlmacenError):
 
 
 class FalloAlmacenError(AlmacenError):
-    """The storage itself failed, or its contents are not what this module wrote."""
+    """The storage itself failed, or its contents are not what this module wrote.
+
+    `reintentar` says whether the same call may succeed later (an outage) or
+    not without an operator (access denied, bad bucket, quota).
+    """
 
     codigo = "fallo_almacen"
+    reintentar = True
+
+    def __init__(self, mensaje: str | None = None, *, reintentar: bool | None = None,
+                 proveedor: str | None = None) -> None:
+        super().__init__(mensaje)
+        if reintentar is not None:
+            self.reintentar = reintentar
+        self.proveedor = proveedor
+
+
+class ResultadoInciertoError(FalloAlmacenError):
+    """A write was sent but its outcome is unknown: the object may or may not exist now."""
+
+    codigo = "resultado_incierto"
+
+
+class AlmacenNoConfiguradoError(AlmacenError):
+    """The store cannot be built as configured (settings or SDK missing)."""
+
+    codigo = "almacen_no_configurado"
+    mensaje = "El almacenamiento de archivos no está configurado."
 
 
 # ----------------------------------------------------------------- validation

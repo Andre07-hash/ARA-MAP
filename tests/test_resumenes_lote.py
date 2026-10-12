@@ -270,8 +270,8 @@ class ResumenesLote:
         with db.session(self.database) as conn:
             for valor in (None, "token", {"user_id": self.u["ana"]}):
                 with self.subTest(sesion=repr(valor)):
-                    self.assertEqual(resultado(lambda: self.nuevo(conn, [self.t["a1"]], valor)),
-                                     resultado(lambda: self.anterior(conn, [self.t["a1"]], valor)))
+                    self.assertEqual(resultado(lambda v=valor: self.nuevo(conn, [self.t["a1"]], v)),
+                                     resultado(lambda v=valor: self.anterior(conn, [self.t["a1"]], v)))
 
     def test_a_role_without_the_read_capability_is_refused_the_same_way(self):
         sin = {**auth.CAPACIDADES, "operador": tuple(c for c in auth.CAPACIDADES["operador"]
@@ -299,6 +299,33 @@ class ResumenesLote:
                 for nombre, ids in self.entradas().items():
                     with self.subTest(cuenta=login, entrada=nombre):
                         self.assert_equivalente(ids, self.s[login])
+
+    def test_the_auth_helper_decides_like_require_terreno_for_each_read_capability(self):
+        for capacidad in ("archivos.ver", "maestra.ver"):
+            for login, sesion in self.s.items():
+                for nombre, ids in self.entradas().items():
+                    with self.subTest(capacidad=capacidad, cuenta=login, entrada=nombre), \
+                            db.session(self.database) as conn:
+                        esperado_ok, esperado_no, vistos = [], [], set()
+                        for i in ids:
+                            if i in vistos:
+                                continue
+                            vistos.add(i)
+                            try:
+                                auth.require_terreno(SimpleNamespace(sesion=sesion), i, capacidad, conn)
+                                esperado_ok.append(i)
+                            except ApiError as exc:
+                                if exc.status != 404:
+                                    raise
+                                esperado_no.append(i)
+                        self.assertEqual(auth.terrenos_legibles(conn, sesion, ids, capacidad),
+                                         (esperado_ok, esperado_no))
+
+    def test_the_auth_helper_refuses_write_capabilities(self):
+        with db.session(self.database) as conn:
+            for capacidad in ("archivos.subir", "archivos.retirar", "maestra.editar", "bases.gestionar"):
+                with self.subTest(capacidad=capacidad), self.assertRaises(ValueError):
+                    auth.terrenos_legibles(conn, self.s["ana"], [self.t["a1"]], capacidad)
 
     # -- explicit projections (not only "same as before") ----------------------------
 

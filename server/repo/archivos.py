@@ -594,28 +594,43 @@ def list_for_terrain(conn: DatabaseConnection, terrain_id: str, actor_id: str, n
     return items, next_cursor
 
 
+# Terrains per IN (...) list in summaries: far below every driver's parameter limit.
+LOTE_RESUMENES = 500
+RECIENTES_PDF = 5
+
+
 def summaries(conn: DatabaseConnection, terrain_ids: Sequence[str], actor_id: str,
               now: str) -> dict[str, dict[str, Any]]:
     """Current cell projection: live PDFs and the live KMZ only.
 
     Retired attachments stay in bounded listing and history, not here.
+    Batched for a page: per LOTE_RESUMENES terrains, one statement counts the
+    live PDFs and one reads the rows shown (each terrain's five most recent
+    live PDFs, chosen in SQL, and its one live KMZ, with their latest
+    versions). Nothing beyond those rows is loaded.
     """
-    output: dict[str, dict[str, Any]] = {}
-    for terrain_id in terrain_ids:
-        pdf_rows = conn.execute(
-            "SELECT a.*, " + _LATEST_VERSION + " WHERE a.inventory_id = ? AND a.tipo = 'pdf'"
-            " AND a.retirado_en IS NULL ORDER BY a.creado_en DESC, a.id DESC LIMIT 5",
-            (now, terrain_id)).fetchall()
-        kmz = conn.execute(
-            "SELECT a.*, " + _LATEST_VERSION + " WHERE a.inventory_id = ? AND a.tipo = 'kmz'"
-            " AND a.retirado_en IS NULL LIMIT 1", (now, terrain_id)).fetchone()
-        output[terrain_id] = {
-            "pdf_total": int(conn.execute("SELECT COUNT(*) AS n FROM archivo WHERE inventory_id = ?"
-                                          " AND tipo = 'pdf' AND retirado_en IS NULL",
-                                          (terrain_id,)).fetchone()["n"]),
-            "pdf_recientes": [_summary_row(r, actor_id, now) for r in pdf_rows],
-            "kmz": _summary_row(kmz, actor_id, now) if kmz else None,
-        }
+    output: dict[str, dict[str, Any]] = {
+        terrain_id: {"pdf_total": 0, "pdf_recientes": [], "kmz": None} for terrain_id in terrain_ids}
+    ids = list(output)
+    for start in range(0, len(ids), LOTE_RESUMENES):
+        batch = ids[start:start + LOTE_RESUMENES]
+        marks = ", ".join("?" for _ in batch)
+        for row in conn.execute(
+                "SELECT inventory_id, COUNT(*) AS n FROM archivo WHERE inventory_id IN (" + marks + ")"
+                " AND tipo = 'pdf' AND retirado_en IS NULL GROUP BY inventory_id", tuple(batch)).fetchall():
+            output[str(row["inventory_id"])]["pdf_total"] = int(row["n"])
+        rows = conn.execute(
+            "SELECT a.*, " + _LATEST_VERSION + " WHERE a.inventory_id IN (" + marks + ")"
+            " AND a.retirado_en IS NULL AND (a.tipo = 'kmz' OR a.id IN ("
+            "SELECT r.id FROM archivo r WHERE r.inventory_id = a.inventory_id AND r.tipo = 'pdf'"
+            " AND r.retirado_en IS NULL ORDER BY r.creado_en DESC, r.id DESC LIMIT " + str(RECIENTES_PDF)
+            + ")) ORDER BY a.inventory_id, a.creado_en DESC, a.id DESC", (now, *batch)).fetchall()
+        for row in rows:
+            summary = output[str(row["inventory_id"])]
+            if row["tipo"] == "pdf":
+                summary["pdf_recientes"].append(_summary_row(row, actor_id, now))
+            elif summary["kmz"] is None:      # at most one live KMZ (idx_archivo_kmz_vivo)
+                summary["kmz"] = _summary_row(row, actor_id, now)
     return output
 
 

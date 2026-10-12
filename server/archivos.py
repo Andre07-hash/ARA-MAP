@@ -843,22 +843,10 @@ def resumenes_de_archivos(conn: DatabaseConnection, inventory_ids: Sequence[str]
                           sesion: auth.Sesion, *,
                           reloj: Clock | None = None) -> dict[str, Any]:
     """Reserved bounded batch hook for a later terrain-list handler."""
-    _valid_session(sesion)
-    authorized: list[str] = []
-    unavailable: list[str] = []
-    seen: set[str] = set()
-    for terrain_id in inventory_ids:
-        if terrain_id in seen:
-            continue
-        seen.add(terrain_id)
-        try:
-            auth.require_terreno(_request(sesion), terrain_id, "archivos.ver", conn)
-        except ApiError as exc:
-            if exc.status == 404:
-                unavailable.append(terrain_id)
-                continue
-            raise
-        authorized.append(terrain_id)
+    # Batched for one page (R3-A1): the session and every id are authorized
+    # again here, with require_terreno's decisions, whatever the caller checked.
+    sesion = _valid_session(sesion)
+    authorized, unavailable = auth.terrenos_legibles(conn, sesion, inventory_ids, "archivos.ver")
     return {"resultados": repo.summaries(conn, authorized, sesion.user_id, _now(reloj)),
             "no_disponibles": unavailable}
 

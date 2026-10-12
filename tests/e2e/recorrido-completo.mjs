@@ -936,6 +936,78 @@ if (!FOCALIZADO) {
     await alan.contexto.close();
   });
 
+  await revisar('R3-A2 residual: en la tabla maestra se archiva la base de un terreno durante su subida: sus filas quedan en sólo lectura, las de otras bases activas y las sin asignar siguen editables, y el texto pendiente se conserva', async () => {
+    const crearBase = async (nombre) => (await admin('POST', '/api/maestra/bases', { nombre })).datos.base;
+    const crearEn = async (base, nombre) => (await admin('POST', base ? `/api/maestra/bases/${base.id}/terrenos` : '/api/inventario/terrenos', { terreno: nombre })).datos.terreno.id;
+    const [baseX, baseY] = [await crearBase('Base Maestra Que Se Archiva Ficticia'), await crearBase('Base Maestra Activa Ficticia')];
+    const [t, hermano] = [await crearEn(baseX, 'Lote Maestro Subiendo Ficticio'), await crearEn(baseX, 'Lote Maestro Hermano Ficticio')];
+    const [activo, suelto] = [await crearEn(baseY, 'Lote Maestro De Base Activa Ficticio'), await crearEn(null, 'Lote Maestro Sin Asignar Ficticio')];
+    const alan = await abrir('alan');
+    await alan.page.goto(`${URLBASE}/?test=1#/tabla/maestra`);
+    await alan.page.locator('.tabla-pantalla').waitFor();
+    await listo(alan.page);
+    for (const id of [t, hermano, activo, suelto]) await fila(alan.page, id).waitFor();
+    const editable = async (id) => (await celda(alan.page, id, 'core:municipio').getAttribute('aria-readonly')) !== 'true';
+    igual(await Promise.all([t, hermano, activo, suelto].map(editable)), [true, true, true, true], 'antes de archivar todo es editable');
+    // An unresolved change on a row of the base that will be archived.
+    await celda(alan.page, hermano, 'core:superficie_m2').focus();
+    await alan.page.keyboard.press('Enter');
+    await celda(alan.page, hermano, 'core:superficie_m2').locator('.tabla-editor').fill('texto pendiente');
+    await alan.page.keyboard.press('Enter');
+    await alan.page.locator(`tr[data-id="${hermano}"] td[data-col="core:superficie_m2"].is-error`).waitFor();
+    const d = await abrirDetalle(alan.page, t, 'Lote Maestro Subiendo Ficticio');
+    await subirEnDetalle(d, 'pdf', F.pdf);                                   // stays readable afterwards
+    igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'PDF previo');
+    const estado = await subirYPerderEscritura(alan, d, async () => {
+      const b = (await admin('GET', `/api/maestra/bases/${baseX.id}/acceso`)).datos.base;
+      igual((await admin('POST', `/api/maestra/bases/${baseX.id}/archivar`, { expected_version: b.version })).status, 200, 'archivar base');
+    });
+    igual(estado, 409, 'completar');
+    await hasta(async () => (await detallePdf(d).getAttribute('data-solo-lectura')) === '1', 'el detalle sigue editable');
+    igual(await escrituraOfrecida(alan.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
+    // Permitted read: the stored PDF is still listed and downloads byte for byte.
+    const item = detallePdf(d).locator('.archivos-item', { hasText: 'Avalúo ficticio.pdf' });
+    const [descarga] = await Promise.all([alan.page.waitForEvent('download'), item.getByRole('button', { name: /^Descargar/ }).click()]);
+    igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf)), 'descarga tras archivar la base');
+    await cerrarDetalle(alan.page, d);
+    // Per row: the archived base's rows are read-only, the others are not.
+    await hasta(async () => !(await editable(t)), 'la fila de la base archivada sigue editable');
+    igual(await Promise.all([t, hermano, activo, suelto].map(editable)), [false, false, true, true], 'permisos por fila');
+    for (const id of [t, hermano]) {                      // no new editor opens there, by key or by double click
+      await celda(alan.page, id, 'core:municipio').focus();
+      await alan.page.keyboard.press('Enter');
+      await celda(alan.page, id, 'core:municipio').dblclick();
+      await alan.page.keyboard.type('x');
+      await esperar(150);
+      igual(await alan.page.locator(`tr[data-id="${id}"] .tabla-editor`).count(), 0, 'se abrió un editor en una fila de base archivada');
+    }
+    cierto(/texto pendiente/.test(await celda(alan.page, hermano, 'core:superficie_m2').innerText()), 'el texto pendiente se perdió');
+    cierto(/texto pendiente/.test(await alan.page.locator('.tabla-bandeja').innerText()), 'el texto pendiente salió de la bandeja');
+    igual(await alan.page.getByRole('button', { name: 'Agregar terreno' }).isVisible(), true, 'la vista maestra debía seguir permitiendo agregar');
+    // Other active bases and unassigned records still edit and save.
+    for (const id of [activo, suelto]) {
+      const antes = (await terreno(alan.page, id)).version;
+      await escribir(alan.page, id, 'core:municipio', 'Municipio Editable');
+      igual(await textoCelda(alan.page, id, 'core:municipio'), 'Municipio Editable', 'la fila de otra base no guardó');
+      igual((await terreno(alan.page, id)).version, antes + 1, 'versión');
+    }
+    // The server agrees about the archived base's row: the write is refused there.
+    const v = (await terreno(alan.page, t)).version;
+    const negado = await llamar(alan.page, 'PATCH', `/api/inventario/terrenos/${t}`, { expected_version: v, changes: { municipio: 'No debe guardarse' } });
+    cierto(negado.status >= 400, `el servidor aceptó la escritura (${negado.status})`);
+    // Restored base: the same rows edit again after a refresh.
+    const b2 = (await admin('GET', `/api/maestra/bases/${baseX.id}/acceso`)).datos.base;
+    igual((await admin('POST', `/api/maestra/bases/${baseX.id}/restaurar`, { expected_version: b2.version })).status, 200, 'restaurar base');
+    await alan.page.reload();
+    await alan.page.locator('.tabla-pantalla').waitFor();
+    await listo(alan.page);
+    await fila(alan.page, t).waitFor();
+    igual(await editable(t), true, 'la base restaurada debía volver a ser editable');
+    await foto(alan.page, '09-r3-a2-maestra-permisos-por-fila');
+    await alan.contexto.close();
+    return { servidor_niega: negado.status };
+  });
+
   await revisar('R3-A2: se archiva la base mientras un operador sube: la base deja de estar a su alcance y la vista se limpia', async () => {
     const baseC = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Cerrada Al Operador Ficticia' })).datos.base;
     igual((await admin('PUT', `/api/maestra/bases/${baseC.id}/acceso`, { expected_version: baseC.version, usuarios: [ids.olivia] })).status, 200, 'acceso');

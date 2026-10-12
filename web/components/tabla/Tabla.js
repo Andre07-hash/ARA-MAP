@@ -200,9 +200,13 @@ export function createTabla({
   const filaDe = (id) => pagina.filas.find((t) => t.id === id) ?? null;
   const colDe = (colId) => columnas.find((c) => c.id === colId) ?? null;
   const clave = (id, colId) => `${id}|${colId}`;
-  const filaEditable = (t) => !vistaSoloLectura() && !t.archived_at;
-  /** Whether the record's detail offers changes at all (archive, restore, files). */
+  /** Whether the record's detail offers changes at all (archive, restore, files):
+   * not in read-only mode, and not while the terrain's OWN base is archived. In
+   * the master table the view has no base, so the row's is what counts. */
   const puedeCambiarFila = (t) => !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada);
+  /** Whether this row's cells and file cells may be written: the view, the
+   * row's own base and the row itself all have to allow it. */
+  const filaEditable = (t) => !vistaSoloLectura() && puedeCambiarFila(t) && !t.archived_at;
 
   const sinResolver = () => [...celdas.values()].filter((c) => c.estado !== "pendiente").length
     + (creacion?.estado === "incierto" ? 1 : 0);

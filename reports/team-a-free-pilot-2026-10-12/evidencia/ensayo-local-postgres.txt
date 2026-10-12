@@ -1,0 +1,24 @@
+OK  esquema creado y comprobado con scripts/esquema.py
+OK  cuentas ficticias creadas con scripts/cuentas.py (1 administradora, 2 operadoras)
+OK  otro Host es rechazado; /healthz responde a la sonda
+OK  un origen ajeno no puede escribir
+OK  la administradora crea la base de trabajo en el portal
+OK  la administradora da acceso a una operadora
+OK  simulación: informa 100 filas y no escribe ninguna
+OK  carga real: 100 terrenos en la tabla maestra, en la base indicada
+OK  repetir la carga no duplica: 100 omitidas
+OK  cada terreno cargado tiene su evento de historial
+OK  la operadora con acceso pagina los 100 terrenos
+OK  14 terrenos quedan sin X/Y, como venían
+OK  la operadora filtra por estado
+OK  la operadora edita un terreno
+OK  la operadora sin acceso no ve la base ni el terreno (404)
+OK  sin almacén configurado, la lista de archivos sigue respondiendo
+OK  tras reiniciar el proceso: misma sesión, mismo dato editado
+OK  el respaldo lógico completo SÍ trae sesiones: hay que limpiarlas
+OK  sesiones, bloqueos de acceso y turnos de proceso vaciados en el destino restaurado
+OK  todas las tablas de contenido coinciden fila por fila en número: team_user=3, maestra_base=1, maestra_base_acceso=1, inventory_terrain=100, inventory_revision=101, inventory_event=101, inventory_operation_result=100, team_user_event=4, maestra_base_event=2, archivo=0, archivo_version=0, archivo_intento=0, geometria=0, archivo_evento=0
+OK  mismos terrenos y versiones en el destino restaurado
+OK  el servicio restaurado rechaza la sesión anterior
+OK  tras restaurar: la operadora entra de nuevo y ve el dato y su historial
+ENSAYO COMPLETO

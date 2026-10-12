@@ -101,38 +101,45 @@ async function hastaOtraPagina(page, accion) {
 
   /* ---- 2. typing and focus feedback ------------------------------------- */
   const id = await primera(page);
-  const medirTecla = (selector, tecla) => page.evaluate(([sel, key]) => new Promise((resolve) => {
+  /* Each measurement is armed in the page and the arming is awaited BEFORE the
+   * key is pressed: Playwright does not order a still-running evaluate against
+   * input, and under load the key could arrive first and the wait never end. */
+  const armar = (fn, arg) => page.evaluate(fn, arg).then(() => () => page.evaluate(() => window.__medida));
+  const medirTecla = (selector) => armar((sel) => {
     const objetivo = document.querySelector(sel);
     objetivo.focus();
-    let t0 = 0;
-    document.addEventListener('keydown', () => { t0 = performance.now(); }, { capture: true, once: true });
-    const listo = () => requestAnimationFrame(() => requestAnimationFrame(() => resolve(performance.now() - t0)));
-    document.addEventListener('keydown', listo, { once: true });
-    window.__tecla = key;
-  }), [selector, tecla]);
+    window.__medida = new Promise((resolve) => {
+      let t0 = 0;
+      document.addEventListener('keydown', () => { t0 = performance.now(); }, { capture: true, once: true });
+      const listo = () => requestAnimationFrame(() => requestAnimationFrame(() => resolve(performance.now() - t0)));
+      document.addEventListener('keydown', listo, { once: true });
+    });
+  }, selector);
   const abrirEditor = [];
   const teclear = [];
   const mover = [];
   for (let i = 0; i < 15; i += 1) {
     const celda = `tr[data-id="${id}"] td[data-col="core:municipio"]`;
     // typing on a focused cell opens its editor with that character
-    let espera = medirTecla(celda, 'M');
+    let espera = await medirTecla(celda);
     await page.keyboard.press('M');
-    abrirEditor.push(await espera);
+    abrirEditor.push(await espera());
     assert.equal(await page.locator('.tabla-editor').inputValue(), 'M');
-    espera = page.evaluate(() => new Promise((resolve) => {
+    espera = await armar(() => {
       const campo = document.querySelector('.tabla-editor');
-      campo.addEventListener('input', () => {
-        const t0 = performance.now();
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve(performance.now() - t0)));
-      }, { once: true });
-    }));
+      window.__medida = new Promise((resolve) => {
+        campo.addEventListener('input', () => {
+          const t0 = performance.now();
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(performance.now() - t0)));
+        }, { once: true });
+      });
+    });
     await page.keyboard.press('u');
-    teclear.push(await espera);
+    teclear.push(await espera());
     await page.keyboard.press('Escape');
-    espera = medirTecla(celda, 'ArrowDown');
+    espera = await medirTecla(celda);
     await page.keyboard.press('ArrowDown');
-    mover.push(await espera);
+    mover.push(await espera());
   }
   informe.respuesta_al_teclado = {
     que: 'de la tecla a dos cuadros pintados después (página de 100 filas); incluye ~2 cuadros de espera por diseño de la medida',

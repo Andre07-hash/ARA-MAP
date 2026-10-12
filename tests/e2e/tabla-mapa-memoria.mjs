@@ -35,7 +35,7 @@ await page.route(/arcgisonline|tile\.openstreetmap\.org|cartocdn/, (r) => r.fulf
 const pedidas = { cuerpo: 0 };
 page.on('request', (q) => { if (/\/api\/archivos\/geometrias\/.*\/contenido/.test(q.url())) pedidas.cuerpo += 1; });
 await context.request.post(`${URL_BASE}/api/login`, { data: { username: 'ada', password: CLAVE } });
-await page.goto(`${URL_BASE}/#/tabla`);
+await page.goto(`${URL_BASE}/?test=1#/tabla`);   // ?test=1: the read-only __araTabla hook
 const lista = () => page.waitForFunction(() => document.querySelector('tr.tabla-fila') && !document.querySelector('.tabla-lienzo[aria-busy]'));
 await lista();
 const bases = await page.locator('#tabla-vista optgroup option').evaluateAll((os) => os.map((o) => [o.value, o.textContent]));

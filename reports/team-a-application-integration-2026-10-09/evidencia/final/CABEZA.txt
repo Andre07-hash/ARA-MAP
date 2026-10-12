@@ -1,0 +1,14 @@
+Which tree produced each file here (branch claude/team-a/application-integration):
+
+aa9a3ed  recorrido-sqlite.*, recorrido-postgres.*, capturas/, verificar.log (ruff, mypy, coverage 95%,
+         SQLite suite on python3), ruff.log, mypy.log, js.log, medicion-*.json, mapa-memoria.json,
+         memoria-2a-en-3a.json, resumenes-sqlite.json
+         (medicion-2a-misma-maquina.json: 2A's server and pages at 32a2a55, same client script)
+e6266f4  e2e-host.log, e2e-integrada.log, e2e-identidad.log, e2e-b.log, b-recorridos.json
+         (working tree identical to that commit when they ran)
+368428d  suite-full-pg.log (disposable Postgres 16), suite-py39.log (Python 3.9.25, SQLite):
+         the merge of 01d6454 plus the stylesheet link. No Python file outside tests/e2e changed after it.
+
+The final head only adds the report, this folder, and the Content-Length byte counter in
+recorrido-completo.mjs (the recorded bytes_de_fragmentos in recorrido-sqlite.json came from
+Playwright's buffered body and undercount the streamed chunks).

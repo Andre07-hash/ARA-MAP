@@ -1,0 +1,10 @@
+FAIL: test_the_system_python_has_no_openpyxl_of_its_own (tests.test_packaging.CleanMachine.test_the_system_python_has_no_openpyxl_of_its_own)
+----------------------------------------------------------------------
+AssertionError: 'True' != 'False'
+- True
++ False
+ : this test only means something without a system openpyxl
+----------------------------------------------------------------------
+Ran 1254 tests in 549.728s
+FAILED (failures=1)
+EXIT 1

@@ -445,10 +445,12 @@ if (!FOCALIZADO) {
     let pico = antes;
     const vigia = setInterval(async () => { try { pico = Math.max(pico, await heap()); } catch { /* closed */ } }, 25);
     let bytes = 0, fragmentos = 0;
-    const contar = async (r) => {
+    // Content-Length of each chunk: the loader reads the body as a stream,
+    // which Playwright's buffered response.body() undercounts.
+    const contar = (r) => {
       if (!/\/api\/archivos\/geometrias\/.*\/contenido/.test(r.url())) return;
       fragmentos += 1;
-      bytes += (await r.body().catch(() => Buffer.alloc(0))).length;
+      bytes += Number(r.headers()['content-length'] ?? 0);
     };
     olga.page.on('response', contar);
     const t1 = Date.now();

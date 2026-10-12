@@ -1,0 +1,166 @@
+{
+  "bd": "sqlite",
+  "focalizado": false,
+  "arranques": 2,
+  "total": 22,
+  "fallos": 0,
+  "medidas": {
+    "limite": {
+      "subida_ms": 10801,
+      "seleccion_a_dibujado_ms": 495,
+      "zoom": {
+        "encuadre": 13,
+        "a_escala": 19
+      },
+      "fragmentos": 8,
+      "bytes_de_fragmentos": 2097152,
+      "heap_mib": {
+        "antes": 4.4,
+        "pico": 30.9,
+        "despues": 4.5
+      }
+    }
+  },
+  "resultados": [
+    {
+      "nombre": "el operador crea un terreno en blanco: los campos de negocio quedan vacíos, no en cero",
+      "ok": true,
+      "ms": 204
+    },
+    {
+      "nombre": "el operador edita el terreno en la tabla",
+      "ok": true,
+      "ms": 217
+    },
+    {
+      "nombre": "sube un PDF desde el detalle y lo descarga byte por byte idéntico",
+      "ok": true,
+      "ms": 991
+    },
+    {
+      "nombre": "sube un KMZ con X/Y en blanco, elige entre candidatos, activa y ve el contorno real",
+      "ok": true,
+      "ms": 3391,
+      "detalle": {
+        "candidatos": 3,
+        "zoom": 18
+      }
+    },
+    {
+      "nombre": "un reemplazo fallido conserva el último contorno utilizable",
+      "ok": true,
+      "ms": 662
+    },
+    {
+      "nombre": "selecciones rápidas en la página: sólo el último contorno se instala, un cuerpo retenido",
+      "ok": true,
+      "ms": 965,
+      "detalle": {
+        "selecciones": 10,
+        "maximo_en_vuelo": 1,
+        "fragmentos_respondidos": 0,
+        "fragmentos_cancelados": 1
+      }
+    },
+    {
+      "nombre": "un archivo que termina mientras se edita una celda no toca el editor ni la versión",
+      "ok": true,
+      "ms": 1287
+    },
+    {
+      "nombre": "retirar el KMZ de un terreno con X/Y lo deja en su punto; el mapa lo dice",
+      "ok": true,
+      "ms": 930
+    },
+    {
+      "nombre": "un cuerpo cerca del límite (100,000 vértices) se sube, se carga y se dibuja sin recortes",
+      "ok": true,
+      "ms": 12874,
+      "detalle": {
+        "subida_ms": 10801,
+        "seleccion_a_dibujado_ms": 495,
+        "zoom": {
+          "encuadre": 13,
+          "a_escala": 19
+        },
+        "fragmentos": 8,
+        "bytes_de_fragmentos": 2097152,
+        "heap_mib": {
+          "antes": 4.4,
+          "pico": 30.9,
+          "despues": 4.5
+        }
+      }
+    },
+    {
+      "nombre": "otra sesión autorizada lee los mismos archivos guardados y el mismo contorno",
+      "ok": true,
+      "ms": 935
+    },
+    {
+      "nombre": "una cuenta sin permiso es rechazada y no recibe contenido",
+      "ok": true,
+      "ms": 1604
+    },
+    {
+      "nombre": "reinicio del servidor sobre la misma base y el mismo almacén: bytes, hash e historial siguen",
+      "ok": true,
+      "ms": 2837,
+      "detalle": {
+        "arranques": 2,
+        "archivos": 3,
+        "versiones_pdf": 1
+      }
+    },
+    {
+      "nombre": "se revoca el acceso mientras se leen los fragmentos del contorno: nada se instala y la fila se va",
+      "ok": true,
+      "ms": 2621
+    },
+    {
+      "nombre": "se transfiere el terreno mientras se descarga: no llega el archivo y el detalle se cierra",
+      "ok": true,
+      "ms": 2973
+    },
+    {
+      "nombre": "la sesión expira durante una subida: todo se desmonta y nada se repuebla después",
+      "ok": true,
+      "ms": 12508
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (olga)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (otto)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (ada)",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

@@ -125,6 +125,15 @@ for the analogous gap (notably the successful PUT body-read return).
 
 ## Evidence and handback
 
+- Reproduction trees: run `probe_client_edges.mjs` against your own reviewed
+  `01d64541e929009ea2d149e3c6f5980805c76c73`. The real-app
+  `probe_upload_scope.mjs` needs A's completed host, so reproduce that one in a
+  **separate disposable archive** of
+  `0e9e2c1f6a1ee3c75ffed40734c825e78e0f38db`. Its B production modules are
+  byte-identical to your reviewed head (supervisor verified). This is diagnostic
+  use only: do not merge A's feature into your branch. Verify your B2 correction
+  in your mounted widget harness and host-callback tests; A owns the subsequent
+  corrected combined-application run.
 - Reproduce these probes on the reviewed head first. Commit regressions that
   fail there, then show corrected behavior; keep the original evidence.
 - Run all relevant JS tests, real mounted widget/browser cases affected by

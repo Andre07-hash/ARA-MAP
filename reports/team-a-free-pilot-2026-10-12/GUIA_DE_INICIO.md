@@ -66,11 +66,22 @@ Subir un KMZ, desde la tabla o desde el detalle, da uno de estos resultados:
 
 El contorno se dibuja aunque el terreno no tenga X e Y.
 
-## 6. El mapa
+## 6. Tabla / Mapa
 
-**Mapa de esta página** dibuja los terrenos de la página de la tabla que estás
-viendo, con sus contornos. Un terreno sin coordenadas válidas y sin contorno
-no aparece: nunca se coloca a la adivina.
+Arriba a la derecha, **Tabla / Mapa** cambia la misma vista entre la tabla y un
+mapa que ocupa toda la pantalla de trabajo. El administrador entra a la **Tabla
+maestra** (ya no hay botón «Inventario»); el operador, a su base de trabajo.
+
+- El mapa muestra **todos** los terrenos de la base y los filtros elegidos, no
+  sólo la página de la tabla. Al volver a **Tabla** sigues en la misma página,
+  con los mismos filtros y el mismo terreno seleccionado.
+- Al tocar el círculo de un terreno se carga su **contorno activo**. Un KMZ
+  subido sin activar no cambia el mapa.
+- Un terreno con contorno activo aparece aunque no tenga X e Y. Uno con X e Y y
+  sin contorno se muestra como punto. Uno sin ninguna de las dos se cuenta como
+  **sin ubicación** y no se dibuja: nunca se coloca a la adivina.
+- **Actualizar** vuelve a traer los terrenos (en el mapa, el mapa; en la tabla,
+  la página). Si algo falla, el mapa lo dice y ofrece **Volver a intentar**.
 
 ## 7. Mensajes que puedes ver
 

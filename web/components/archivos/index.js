@@ -5,9 +5,10 @@
  *   mount / mountDetalle({container, terrenoId, tipo, soloLectura, resumen, onCambio, onError})
  *     -> {update({soloLectura, resumen}), destroy()}
  *
- * `mount` is the compact cell: it only renders the caller-aware summary and
- * never fetches. `mountDetalle` holds the full controls: upload (picker and
- * drag & drop), pending uploads with retry/cancel, paged files, versions,
+ * `mount` is the compact cell: the caller-aware summary and, when the row may
+ * be changed, a button that picks a file and runs the same upload (celda.js);
+ * it never fetches on its own. `mountDetalle` holds the full controls: upload
+ * (picker and drag & drop), pending uploads with retry/cancel, paged files, versions,
  * history and KMZ attempts, candidate selection, explicit activation,
  * downloads and retirement.
  *
@@ -21,33 +22,12 @@
  * every mount down; after it nothing is sent and nothing is shown.
  */
 
-import { el } from "../../lib/dom.js";
 import { crearClienteArchivos } from "../../lib/archivos.js";
-import { describirResumen } from "./resumen.js";
+import { montarCelda } from "./celda.js";
 import { montarDetalle } from "./detalle.js";
 import { crearTurno } from "./subida.js";
 
 export const MAX_SUBIDAS_PENDIENTES = 5;
-
-const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ" };
-
-function montarCelda({ container, tipo, resumen }) {
-  const nodo = el("span", { class: "archivos-celda", dataset: { tipo } });
-  container.replaceChildren(nodo);
-  function pintar(r) {
-    const d = describirResumen(r, tipo);
-    nodo.dataset.estado = d.estado;
-    nodo.textContent = d.texto;
-    const titulo = d.nota ? `${ETIQUETA[tipo]}: ${d.texto}. ${d.nota}.` : `${ETIQUETA[tipo]}: ${d.texto}`;
-    nodo.title = titulo;
-    nodo.setAttribute("aria-label", titulo);
-  }
-  pintar(resumen);
-  return {
-    update({ resumen: nuevo } = {}) { pintar(nuevo); },
-    destroy() { nodo.remove(); },
-  };
-}
 
 export function crearWidgetsArchivos({ peticionPrivada } = {}) {
   const cliente = crearClienteArchivos({ peticionPrivada });
@@ -96,7 +76,7 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
     mount(args) {
       if (destruido) throw new Error("Los widgets de archivos ya se destruyeron.");
       validar(args);
-      return registrar(montarCelda(args), args);
+      return registrar(montarCelda(args, contexto), args);
     },
     mountDetalle(args) {
       if (destruido) throw new Error("Los widgets de archivos ya se destruyeron.");

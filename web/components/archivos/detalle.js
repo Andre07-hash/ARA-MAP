@@ -51,7 +51,7 @@ const RESULTADO_INTENTO = {
   rechazado: "Sin contorno utilizable", error_interno: "Error al procesar",
 };
 
-const FASE_TEXTO = {
+export const FASE_TEXTO = {
   [FASE.LEYENDO]: "Calculando huella", [FASE.INICIANDO]: "Registrando", [FASE.SUBIENDO]: "Enviando",
   [FASE.COMPLETANDO]: "Verificando", [FASE.LISTO]: "Listo", [FASE.REQUIERE_SELECCION]: "Elige contornos",
   [FASE.NO_APLICADA]: "Guardado sin activar", [FASE.RECHAZADO]: "Sin contorno utilizable",
@@ -59,7 +59,7 @@ const FASE_TEXTO = {
   [FASE.EXPIRADO]: "Vencida", [FASE.REQUIERE_ARCHIVO]: "Falta el archivo", [FASE.CANCELANDO]: "Cancelando",
   [FASE.CANCELADO]: "Cancelada",
 };
-const EN_PROGRESO = new Set([FASE.LEYENDO, FASE.INICIANDO, FASE.SUBIENDO, FASE.COMPLETANDO, FASE.CANCELANDO]);
+export const EN_PROGRESO = new Set([FASE.LEYENDO, FASE.INICIANDO, FASE.SUBIENDO, FASE.COMPLETANDO, FASE.CANCELANDO]);
 
 const esAbort = (e) => e?.name === "AbortError";
 

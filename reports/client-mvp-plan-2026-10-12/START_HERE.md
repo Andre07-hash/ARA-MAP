@@ -1,5 +1,7 @@
 # ARA MAP — ASAP private client MVP
 
+**Superseded planning snapshot:** the current [delivery agreement and backlog](../../PLAN_DE_ENTREGA.md) and [F0 technical packet](../free-private-pilot-2026-10-12/START_HERE.md) take precedence. The Vercel hosting choice and pending component reviews recorded below are historical; do not restart those assignments from this document.
+
 Planning update, 12 October 2026. Owner confirms **ASAP** and **private portal first**.
 Supervisor: planning and independent review; external Claude Code teams implement.
 This report changes priorities, preserves accepted work, and does not release an implementation packet or authorize external operations.

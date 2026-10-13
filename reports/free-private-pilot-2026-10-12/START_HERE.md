@@ -1,5 +1,7 @@
 # F0 — accelerated private pilot with no payment method
 
+**Current delivery agreement:** read [PLAN_DE_ENTREGA.md](../../PLAN_DE_ENTREGA.md) first for the owner's essential release gates, latest recorded A/B slices and deferred backlog. This F0 packet remains the technical implementation contract. Its initial status snapshot below predates draft PRs #31 and #32; neither an early slice nor green CI establishes combined hosted acceptance.
+
 Supervisor decision, 12 October 2026. The owner now requires no payment method, no billing exposure, an initial 50–100 terrains, and concurrent work by the two external Claude teams. This packet supersedes the Vercel/AWS M1 implementation instructions at `718f4b76807f745fe5b1088a7950b0fbe090a660` when relayed. Preserve any implementation already made; reuse relevant pieces, but do not finish the superseded transfer design merely because it was assigned.
 
 ## Delivery decision

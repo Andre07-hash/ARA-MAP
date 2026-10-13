@@ -1,5 +1,7 @@
 # ARA Map
 
+**Plan vigente de entrega (12 de octubre de 2026): [acuerdo de MVP y backlog](PLAN_DE_ENTREGA.md).** Leerlo antes de retomar trabajo: portal privado de 50–100 terrenos, prioridad al almacenamiento duradero de KMZ/PDF y entrega mínima. La ruta actual del piloto es Render + Neon + Supabase gratuitos; las instrucciones de Vercel que siguen son antecedentes.
+
 Mapa interactivo de los terrenos en análisis. Toma los archivos de Excel del
 registro (`Base Terrenos MM.AA.xlsx`), los dibuja sobre un mapa de México y
 permite guardarlos, compararlos entre meses y filtrarlos para descartar rápido
@@ -10,7 +12,7 @@ compartida en Neon Postgres, accesible desde otras computadoras.
 
 ## Desarrollo desde GitHub — prioridad actual
 
-**Nueva dirección del propietario:** la [tabla maestra interactiva, archivos PDF, KMZ y roles](reports/master-table-plan/MASTER_PLAN.md) es el plan vigente. ARA Map será el lugar de captura y edición. Se pausa la conexión automática con Excel/OneDrive, conservando su código e historial para el futuro. BigQuery sigue aplazado. El plan es general; se detallará por fases antes de implementar.
+El alcance original de la [tabla maestra interactiva, archivos PDF, KMZ y roles](reports/master-table-plan/MASTER_PLAN.md) se conserva como referencia funcional. El [acuerdo de entrega y backlog](PLAN_DE_ENTREGA.md) determina qué cerrar ahora y qué aplazar: no esperar todas las fases para entregar el portal privado. La conexión automática con Excel/OneDrive y BigQuery siguen aplazados.
 
 Repositorio privado: [Andre07-hash/ARA-MAP](https://github.com/Andre07-hash/ARA-MAP).
 El código de `main` incluye trabajo de inventario y autenticación que todavía

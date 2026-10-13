@@ -450,7 +450,7 @@ class VerificacionChecks(unittest.TestCase):
             ["--manifiesto", str(self.carpeta / "no-existe.json"), "--almacen-local", str(raiz)],
             ["--url-env", "ARA_MAP_VARIABLE_QUE_NO_EXISTE", "--almacen-local", str(raiz)],
             local_ok + ["--restauracion", "--exportar", str(exportado)],
-            base, base + ["--almacen-entorno"],          # the remote module is not in this tree
+            base,
         ):
             with self.subTest(argumentos=argumentos):
                 codigo, salida, errores = ejecutar(argumentos)
@@ -479,6 +479,63 @@ class VerificacionChecks(unittest.TestCase):
             codigo, _, errores = ejecutar(base + ["--almacen-entorno"])
         self.assertEqual(codigo, 2)
         self.assertIn("no está configurado", errores)
+
+    def test_remote_store_through_the_real_factory_contract(self):
+        """Regression: fabrica_desde_entorno returns a FACTORY; the command must call it.
+
+        Uses the real server.almacen_supabase, with only its SDK-backed build
+        step (_construir) replaced, so a fake of the wrong shape cannot hide
+        the bug again.
+        """
+        from server import almacen_supabase
+        from server.almacen import AlmacenNoConfiguradoError
+
+        raiz = self.carpeta / "remoto"
+        raiz.mkdir()
+        with AlmacenLocal(raiz) as local:
+            for clave, datos in self.datos.items():
+                poner(local, clave, datos)
+        archivo = self.carpeta / "m.json"
+        archivo.write_text(json.dumps(self.manifiesto), encoding="utf-8")
+        base = ["--manifiesto", str(archivo), "--almacen-entorno"]
+        entorno = {almacen_supabase.ENV_URL: "https://ficticio.supabase.co",
+                   almacen_supabase.ENV_KEY: "clave-ficticia-de-prueba",
+                   almacen_supabase.ENV_BUCKET: "adjuntos-ficticios"}
+        sin_variables = {nombre: "" for nombre in entorno}
+
+        fabrica = almacen_supabase.fabrica_desde_entorno(entorno)
+        self.assertTrue(callable(fabrica))
+        self.assertFalse(hasattr(fabrica, "leer"))          # the contract: not a store
+
+        construidos = []
+
+        def construir(url_api, clave, bucket, transporte=None):
+            construidos.append((url_api, bucket))
+            return SoloLectura(AlmacenLocal(raiz))          # still read-only
+
+        with patch.dict(os.environ, entorno), \
+                patch.object(almacen_supabase, "_construir", construir):
+            codigo, salida, errores = ejecutar(base + ["--json"])
+        self.assertEqual(codigo, 0, errores)
+        self.assertEqual(json.loads(salida)["conteos"]["ok"], len(self.claves))
+        self.assertEqual(construidos, [("https://ficticio.supabase.co/storage/v1",
+                                        "adjuntos-ficticios")])
+
+        # Not configured (None): a usage error, no store built.
+        with patch.dict(os.environ, sin_variables), \
+                patch.object(almacen_supabase, "_construir", construir):
+            codigo, salida, errores = ejecutar(base)
+        self.assertEqual((codigo, salida, len(construidos)), (2, "", 1))
+        self.assertIn("no está configurado", errores)
+
+        # The factory fails (SDK missing): a usage error that names no secret.
+        with patch.dict(os.environ, entorno), patch.object(
+                almacen_supabase, "_construir", side_effect=AlmacenNoConfiguradoError()):
+            codigo, salida, errores = ejecutar(base)
+        self.assertEqual((codigo, salida), (2, ""))
+        self.assertIn("almacen_no_configurado", errores)
+        self.assertNotIn("clave-ficticia-de-prueba", errores)
+        self.assertNotIn("ficticio.supabase.co", errores)
 
     def test_script_help_runs_with_the_standard_library_only(self):
         hecho = subprocess.run(

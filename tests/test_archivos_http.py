@@ -1065,6 +1065,14 @@ class HTTPChecks:
         s, r = self.subir(vid, PDF, "olga")
         self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
         self.assertEqual(construcciones, [1])
+        # A start is refused too, before any row, once authorized: the factory
+        # runs for the authorized caller only (omar is out of scope).
+        versiones = len(self.filas("archivo_version"))
+        self.assertEqual(self.iniciar(PDF, login="omar")[0], 404)
+        self.assertEqual(construcciones, [1])
+        s, r = self.iniciar(PDF, login="olga")
+        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual((construcciones, len(self.filas("archivo_version"))), ([1, 1], versiones))
         # A provider that rejects the server credential is a storage 503, not a 401/403.
         api.configurar_almacen(lambda: self.store)
         self.store.inyectar_error("guardar_temporal", FalloAlmacenError(

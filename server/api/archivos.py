@@ -28,6 +28,7 @@ from ..almacen import (
     BLOQUE_LECTURA,
     MAX_BLOQUE,
     Almacen,
+    AlmacenError,
     AlmacenLocal,
     AlmacenNoConfiguradoError,
     Bloque,
@@ -82,6 +83,20 @@ def _almacen_actual() -> Almacen:
                 raise AlmacenNoConfiguradoError()
             _almacen = _fabrica()
         return _almacen
+
+
+def _almacen_utilizable() -> bool:
+    """Whether the store can be built (settings present, SDK importable).
+
+    No provider call: building only validates settings and makes a client.
+    A store that builds but whose provider is down is not detected here;
+    the content route reports that as a retryable 503.
+    """
+    try:
+        _almacen_actual()
+    except AlmacenError:
+        return False
+    return True
 
 
 class _AlmacenDiferido:
@@ -193,7 +208,7 @@ def iniciar(request: Request) -> Respuesta:
         nombre_original=_campo(datos, "nombre_original"),
         tamano_declarado=_campo(datos, "tamano_declarado"),
         sha256_declarado=_campo(datos, "sha256_declarado"), idempotency_key=_clave(request),
-        almacen_configurado=_fabrica is not None)
+        almacen_configurado=_almacen_utilizable)
 
 
 def listar(request: Request) -> Respuesta:

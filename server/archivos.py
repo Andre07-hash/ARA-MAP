@@ -249,12 +249,14 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
             nombre_original: str, tamano_declarado: int,
             sha256_declarado: str, idempotency_key: str,
             bd: Path | str | None = None, reloj: Clock | None = None,
-            almacen_configurado: bool = True) -> dict[str, Any]:
+            almacen_configurado: bool | Callable[[], bool] = True) -> dict[str, Any]:
     """Authorize an upload and create its immutable pending version.
 
     `almacen_configurado` is a pure configuration fact, never a provider
     call: without a store no new pending version is created, but only after
-    the request was authorized, and an earlier answer is still replayed.
+    the request was authorized, and an earlier answer is still replayed. A
+    callable is asked only after authorization and outside the write lock
+    (building a store may import its SDK).
     """
     _valid_session(sesion)
     kind, maximum = _kind(tipo)
@@ -266,6 +268,8 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
                "sha256_declarado": digest}
     request_hash = _hash_payload(payload)
     _authorize_read(sesion, terreno_id, "archivos.subir", bd)
+    if callable(almacen_configurado):
+        almacen_configurado = almacen_configurado()
     operation = f"archivos.iniciar:{sesion.user_id}:{terreno_id}"
     with db.escritura(bd) as conn:
         scope = auth.reverificar_terreno(conn, sesion, terreno_id, "archivos.subir")

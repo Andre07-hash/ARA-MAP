@@ -5,7 +5,7 @@ the database references; optionally export the verified bytes.
     python3 scripts/verificar_archivos.py --url-env VARIABLE --almacen-entorno --json
     python3 scripts/verificar_archivos.py --url-env VARIABLE --almacen-entorno --exportar CARPETA
     python3 scripts/verificar_archivos.py --manifiesto CARPETA/manifiesto.json \
-        --almacen-local DESTINO --restauracion
+        --almacen-local DESTINO --restauracion [--cargar-exportacion CARPETA]
 
 --url-env names an environment variable holding a Postgres URL (the URL itself
 never goes on the command line and is never printed). Exit codes: 0 everything

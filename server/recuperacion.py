@@ -55,6 +55,12 @@ keys it does not know. Original file names are never in a manifest.
 An export directory holds `manifiesto.json` and each object at the path of its
 key (`final/<id>/<nonce>`).
 
+Restore drill: `--restauracion --cargar-exportacion CARPETA` loads an export
+into the (empty, disposable) target store named by --almacen-local or
+--almacen-entorno, re-hashing every local copy first and creating each final
+key create-only, then verifies the target against the manifest. That is the
+one mode that writes, and only to the target store.
+
 Exit codes of the command (scripts/verificar_archivos.py): 0 every referenced
 object verified; 1 integrity problems (or the store could not be listed);
 2 usage or configuration error.
@@ -68,6 +74,7 @@ import importlib
 import json
 import os
 import re
+import secrets
 import sys
 import tempfile
 from collections.abc import Generator, Iterator, Mapping, Sequence
@@ -83,6 +90,7 @@ from .almacen import (
     AlmacenError,
     AlmacenLocal,
     ClaveInvalidaError,
+    ColisionError,
     LimiteExcedidoError,
     Metadato,
     ObjetoAusenteError,
@@ -345,6 +353,49 @@ def _guardar_manifiesto(manifiesto: Mapping[str, Any], destino: Path) -> None:
             os.unlink(parcial)
 
 
+# ---------------------------------------------------------------- restore load
+
+def cargar_exportacion(exportacion: Path, manifiesto: Mapping[str, Any],
+                       almacen: Almacen) -> dict[str, Any]:
+    """Load an export's verified copies into a restore target store.
+
+    Every local copy is re-hashed against the manifest first; a bad or
+    missing copy is reported and not loaded. Final keys are created through
+    the store's create-only `copiar` from a scratch staging key: an object
+    already at the key is never replaced. If it holds the manifest's exact
+    bytes it counts as present; otherwise it is reported as a conflict for
+    the operator. Only this call's own scratch staging keys are deleted.
+    """
+    manifiesto = validar_manifiesto(manifiesto)
+    cargados = presentes = 0
+    problemas: list[dict[str, Any]] = []
+    for entrada in manifiesto["finales"]:
+        clave = entrada["clave"]
+        ruta = exportacion.joinpath(*partes_de_clave(clave, FINAL))
+        if not _copia_local(ruta, entrada):
+            problemas.append({"clave": clave, "estado": "copia_local_invalida"})
+            continue
+        if _leer_verificando(almacen, entrada)[0] == "ok":
+            presentes += 1
+            continue
+        limite = max(1, int(entrada["tamano"]))
+        temporal = "temporal/restaurar-" + secrets.token_hex(16)
+        try:
+            with open(ruta, "rb") as archivo:
+                almacen.guardar_temporal(
+                    temporal, iter(lambda: archivo.read(_BLOQUE_LOCAL), b""), limite)
+            almacen.copiar(temporal, clave, limite)
+            cargados += 1
+        except ColisionError:
+            problemas.append({"clave": clave, "estado": "conflicto_en_destino"})
+        except (AlmacenError, OSError) as exc:
+            problemas.append({"clave": clave, "estado": getattr(exc, "codigo", "ilegible")})
+        finally:
+            with suppress(AlmacenError, OSError):
+                almacen.borrar(temporal)
+    return {"cargados": cargados, "ya_presentes": presentes, "problemas": problemas}
+
+
 # -------------------------------------------------------------------- report
 
 def verificar(manifiesto: Mapping[str, Any], almacen: Almacen, *,
@@ -459,6 +510,11 @@ def resumen(reporte: Mapping[str, Any]) -> str:
                   f" {b['retenidos']} de un presupuesto de {b['presupuesto']}"
                   + (" (EXCEDE el presupuesto)" if b["excede_presupuesto"] else " (dentro)"))
     lineas.append(f"Bytes leídos del almacén: {b['leidos_del_almacen']}")
+    carga = reporte.get("carga")
+    if carga is not None:
+        lineas.append(f"Carga en el destino: {carga['cargados']} cargados,"
+                      f" {carga['ya_presentes']} ya presentes, {len(carga['problemas'])} con problemas")
+        lineas += [f"  {p['estado']}: {p['clave']}" for p in carga["problemas"]]
     exportacion = reporte.get("exportacion")
     if exportacion is not None:
         lineas.append(f"Exportación: {exportacion['copias_locales_reutilizadas']} copias locales"
@@ -492,6 +548,10 @@ def _parser() -> argparse.ArgumentParser:
                         help="copia ahí cada objeto verificado y el manifiesto (incremental)")
     parser.add_argument("--restauracion", action="store_true",
                         help="el almacén es el destino de una restauración")
+    parser.add_argument("--cargar-exportacion", metavar="CARPETA",
+                        help="con --restauracion: antes de verificar, carga en el almacén"
+                             " destino las copias verificadas de esa exportación (nunca"
+                             " reemplaza un objeto existente)")
     parser.add_argument("--presupuesto", metavar="BYTES", type=int, default=PRESUPUESTO,
                         help=f"bytes que se planea retener (por omisión {PRESUPUESTO})")
     parser.add_argument("--json", action="store_true", help="reporte en JSON")
@@ -531,9 +591,13 @@ def _almacen_de(args: argparse.Namespace) -> Almacen:
     except ImportError:
         raise UsoError("Esta versión no incluye el almacén remoto"
                        " (server.almacen_supabase).") from None
-    almacen: Almacen | None = modulo.fabrica_desde_entorno(os.environ)
-    if almacen is None:
+    fabrica = modulo.fabrica_desde_entorno(os.environ)
+    if fabrica is None:
         raise UsoError("El almacén remoto no está configurado en las variables de entorno.")
+    try:
+        almacen: Almacen = fabrica()         # the factory, not the store, came back
+    except AlmacenError as exc:              # e.g. the SDK is not installed
+        raise UsoError(f"No se pudo preparar el almacén remoto ({exc.codigo}).") from None
     return almacen
 
 
@@ -542,13 +606,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.restauracion and args.exportar:
         parser.error("--restauracion no se combina con --exportar")
+    if args.cargar_exportacion and not args.restauracion:
+        parser.error("--cargar-exportacion requiere --restauracion")
     if args.presupuesto < 0:
         parser.error("--presupuesto no puede ser negativo")
     try:
         manifiesto = _manifiesto_de(args)
         almacen = _almacen_de(args)
         if args.restauracion:
+            carga = None
+            if args.cargar_exportacion:
+                carga = cargar_exportacion(Path(args.cargar_exportacion).expanduser(),
+                                           manifiesto, almacen)
             reporte = verificar_restauracion(manifiesto, almacen, presupuesto=args.presupuesto)
+            if carga is not None:
+                reporte["carga"] = carga
+                reporte["correcto"] = reporte["correcto"] and not carga["problemas"]
         else:
             reporte = verificar(
                 manifiesto, almacen, presupuesto=args.presupuesto,

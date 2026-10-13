@@ -176,7 +176,7 @@ class RecoveryChecks:
         self.assertEqual(en_disco(), contenido)
 
     def test_command_reads_the_database_and_never_prints_the_url(self):
-        modulo = SimpleNamespace(fabrica_desde_entorno=lambda entorno: self.almacen)
+        modulo = SimpleNamespace(fabrica_desde_entorno=lambda entorno: lambda: self.almacen)  # a factory
         with patch.dict(sys.modules, {"server.almacen_supabase": modulo}):
             codigo, salida, errores = ejecutar(self.origen() + ["--almacen-entorno", "--json"])
             self.assertEqual((codigo, errores), (0, ""))
@@ -235,6 +235,45 @@ class RecoveryChecks:
             sorted([("ausente", perdido["clave"], perdido["version_id"]),
                     ("sha_distinto", alterado["clave"], alterado["version_id"])]))
         self.assertEqual(len(reporte["pendientes"]), 1)
+
+
+    def test_restore_drill_through_the_command_loads_without_overwriting(self):
+        exportado = self.carpeta / "exportacion"
+        self.assertTrue(recuperacion.verificar(self.construir(), SoloLectura(self.almacen),
+                                               exportar_a=exportado)["correcto"])
+        manifiesto = exportado / recuperacion.NOMBRE_MANIFIESTO
+        del_respaldo = recuperacion.cargar_manifiesto(manifiesto)
+        raiz = self.carpeta / "destino"
+        raiz.mkdir()
+        restaurar = ["--manifiesto", str(manifiesto), "--almacen-local", str(raiz),
+                     "--restauracion", "--cargar-exportacion", str(exportado), "--json"]
+
+        codigo, salida, _ = ejecutar(restaurar)
+        reporte = json.loads(salida)
+        self.assertEqual(codigo, 0, salida)
+        self.assertEqual((reporte["carga"]["cargados"], reporte["carga"]["problemas"]), (4, []))
+        self.assertEqual(reporte["conteos"]["ok"], 4)
+        self.assertEqual(reporte["staging"], [])            # scratch keys were removed
+        codigo, salida, _ = ejecutar(restaurar)               # repeatable: nothing re-sent
+        self.assertEqual((codigo, json.loads(salida)["carga"]["ya_presentes"]), (0, 4))
+
+        # A foreign object at a referenced key is reported, never replaced; a
+        # corrupt exported copy is never loaded.
+        ajeno, corrupto = del_respaldo["finales"][0], del_respaldo["finales"][1]
+        with AlmacenLocal(raiz) as destino:
+            destino.borrar(ajeno["clave"])
+            poner(destino, ajeno["clave"], b"ajeno")
+            destino.borrar(corrupto["clave"])
+        (exportado / corrupto["clave"]).write_bytes(b"x")
+        codigo, salida, _ = ejecutar(restaurar)
+        reporte = json.loads(salida)
+        self.assertEqual(codigo, 1)
+        self.assertEqual(sorted((p["estado"], p["clave"]) for p in reporte["carga"]["problemas"]),
+                         sorted([("conflicto_en_destino", ajeno["clave"]),
+                                 ("copia_local_invalida", corrupto["clave"])]))
+        self.assertEqual((raiz / ajeno["clave"]).read_bytes(), b"ajeno")
+        self.assertFalse((raiz / corrupto["clave"]).exists())
+        self.assertIn("Carga en el destino", recuperacion.resumen(reporte))
 
 
 class RecuperacionSQLite(RecoveryChecks, unittest.TestCase):
@@ -417,6 +456,24 @@ class VerificacionChecks(unittest.TestCase):
                 codigo, salida, errores = ejecutar(argumentos)
                 self.assertEqual((codigo, salida), (2, ""))
                 self.assertTrue(errores)
+        codigo, _, errores = ejecutar(base + ["--almacen-local", str(raiz),
+                                              "--cargar-exportacion", str(exportado)])
+        self.assertEqual(codigo, 2)                      # loading only into a restore target
+        # The environment gives a factory; the command must build the store from it.
+        con_fabrica = SimpleNamespace(fabrica_desde_entorno=lambda entorno: (
+            lambda: AlmacenLocal(raiz)))
+        with patch.dict(sys.modules, {"server.almacen_supabase": con_fabrica}):
+            self.assertEqual(ejecutar(base + ["--almacen-entorno"])[0], 1)   # one key removed
+        from server.almacen import AlmacenNoConfiguradoError
+
+        def sin_sdk():
+            raise AlmacenNoConfiguradoError()
+
+        sin_sdk_mod = SimpleNamespace(fabrica_desde_entorno=lambda entorno: sin_sdk)
+        with patch.dict(sys.modules, {"server.almacen_supabase": sin_sdk_mod}):
+            codigo, salida, errores = ejecutar(base + ["--almacen-entorno"])
+        self.assertEqual((codigo, salida), (2, ""))
+        self.assertIn("almacen_no_configurado", errores)
         sin_configurar = SimpleNamespace(fabrica_desde_entorno=lambda entorno: None)
         with patch.dict(sys.modules, {"server.almacen_supabase": sin_configurar}):
             codigo, _, errores = ejecutar(base + ["--almacen-entorno"])

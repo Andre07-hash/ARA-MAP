@@ -16,10 +16,25 @@ OK  acceso revocado antes de completar: la subida no se vuelve archivo y la desc
 OK  terreno archivado antes de completar: no se completa; lo ya guardado se sigue leyendo
 OK  tras reiniciar el proceso: mismo PDF, mismo contorno activo, misma sesión
 OK  sin almacén: la descarga responde 503; tabla, contorno y su geometría siguen funcionando
-PENDIENTE DE B  iniciar sin almacén responde 200 y SÍ crea una subida pendiente
-PENDIENTE DE B  sin almacén, la cuenta sin acceso recibe 503 (debe ser 404: la negativa va antes que el almacén)
+OK  sin almacén: iniciar una subida autorizada responde 503 y no crea ninguna subida pendiente
+OK  sin almacén: la cuenta sin acceso sigue recibiendo 404 (la negativa va antes que el almacén)
 OK  con el adaptador de B conectado por server.hosted y el proveedor inalcanzable: 503 reintentable en archivos; la tabla sigue funcionando
-OK  respaldo: volcado de la base y 4 archivos finales referidos, cada uno con tamaño y SHA-256 verificados
+OK  respaldo, paso 1: volcado lógico de la base (una sola instantánea)
+OK  restauración, paso 1: volcado restaurado en una base nueva; sesiones, bloqueos y turnos vaciados
+OK  respaldo, paso 2: scripts/verificar_archivos.py verifica y exporta los 4 archivos finales que la base respaldada refiere, y anota la subida pendiente
+    Verificación de archivos adjuntos
+    Manifiesto creado: 2026-10-13T01:46:30+00:00
+    Resultado: CORRECTO
+      correctos: 4 · ausentes: 0 · tamaño distinto: 0 · SHA-256 distinto: 0 · ilegibles: 0
+    Objetos finales sin referencia: 0 (0 bytes)
+    Objetos temporales: 1 (17 bytes)
+    Subidas pendientes: 1 (no son error; tras restaurar hay que cancelarlas o reiniciarlas)
+      versión 91c8c195-cdf2-408f-ad3c-67bc2f6f97a2 (pdf), completar antes de 2026-10-13T02:46:25+00:00, con temporal
+    Bytes referenciados: 47185064; retenidos en total: 47185081 de un presupuesto de 700000000 (dentro)
+    Bytes leídos del almacén: 47185064
+    Exportación: 0 copias locales reutilizadas, 0 corruptas
+OK  restauración, paso 2: scripts/restaurar_archivos.py sube la exportación a un almacén nuevo
+OK  restauración, paso 3: el verificador acepta el almacén restaurado (salida 0)
 OK  destino restaurado: la sesión anterior ya no sirve
 OK  destino restaurado: el PDF de 25 MiB baja idéntico
 OK  destino restaurado: contorno activo, fila ubicada por contorno e historial del archivo completos

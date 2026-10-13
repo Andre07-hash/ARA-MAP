@@ -178,7 +178,7 @@ Pass/fail lines for the hosted report, with times and sizes:
 
 A provider's database backup never contains the file bytes. The pilot's
 backup is two things kept **together, outside the host and outside the live
-bucket**:
+bucket**: a database dump and the export folder made for that dump.
 
 1. **Database first.** One consistent snapshot:
    ```sh
@@ -186,32 +186,44 @@ bucket**:
    ```
    A dump is a single transaction's view; no write freeze is needed for it.
 2. **Files second, for exactly that dump.** Final files are written before the
-   database refers to them and are never changed afterwards, so every file the
-   dump refers to still exists when step 2 runs. Restore the dump into a
-   scratch local database and give that to Team B's exporter, so the list of
-   files is the dump's own:
+   database refers to them and never change, so every file the dump refers to
+   still exists when this step runs. Restore the dump into a scratch local
+   database, so the list of files is the dump's own, and let Team B's tool
+   verify and export them:
    ```sh
-   createdb ara_respaldo_tmp && pg_restore --no-owner --no-privileges --dbname ara_respaldo_tmp piloto-<fecha>.dump
+   createdb ara_respaldo_tmp
+   pg_restore --no-owner --no-privileges --exit-on-error --dbname ara_respaldo_tmp piloto-<fecha>.dump
+   export RESPALDO_DB=postgresql://<usuario>@127.0.0.1:5432/ara_respaldo_tmp
+   # ARA_MAP_ARCHIVOS_SUPABASE_URL / _KEY / _BUCKET of the LIVE pilot, in this shell only:
+   python scripts/verificar_archivos.py --url-env RESPALDO_DB --almacen-entorno --exportar <carpeta-de-respaldo>
+   dropdb ara_respaldo_tmp
    ```
-   then run B's verifier/exporter against `ara_respaldo_tmp` and the live
-   bucket, into the backup folder. It checks every referenced file's size and
-   SHA-256 and reuses files already exported on earlier days, so a daily
-   backup does not re-download everything.
-3. A backup counts only when the exporter reports **zero** missing or
-   inconsistent files. Note the date, the dump's size and the files' total.
+   The same `<carpeta-de-respaldo>` every day: files already exported and
+   still correct are reused, not downloaded again. It holds `manifiesto.json`
+   and each file at `final/<id>/<nonce>`.
+3. A backup counts only when the tool exits **0** ("Resultado: CORRECTO").
+   Exit 1 means a referenced file is missing or different: stop and report.
+   Write down the date, the dump's size and the tool's "Bytes referenciados"
+   and "retenidos en total" against the 700 MB budget.
 4. If a moment with no activity is preferred, set `ARA_MAP_READ_ONLY=1` on the
-   service for the duration: people already signed in keep reading; signing in and every
-   write answer 403.
+   service for the duration: people already signed in keep reading; signing
+   in and every write answer 403.
 
-Also on each backup day: read the storage usage (against 700 MB) and the
-database usage in the provider dashboards and write them down.
+**Known defect at this commit (Team B is fixing it):** `--almacen-entorno`
+fails in `scripts/verificar_archivos.py` because it is handed the store's
+factory instead of the store. Until B's corrected SHA is merged, step 2 works
+only with `--almacen-local`, which is what the local rehearsal uses. The
+commands above are the intended ones and are **not yet runnable against the
+real bucket**.
 
 ## 8. Restore drill (once before real use; into fresh targets only)
 
-Never restore over the running pilot.
+Never restore over the running pilot. Needs: one dump and its export folder.
 
-1. New empty database. `pg_restore --no-owner --no-privileges --exit-on-error
-   --dbname "$RESTAURADA_DB" piloto-<fecha>.dump`.
+1. New empty database. Export its direct URL as `RESTAURADA_DB`, then:
+   ```sh
+   pg_restore --no-owner --no-privileges --exit-on-error --dbname "$RESTAURADA_DB" piloto-<fecha>.dump
+   ```
 2. **Before anyone can reach it**, clear the operational tables. A full dump
    contains them:
    ```sql
@@ -222,19 +234,33 @@ Never restore over the running pilot.
    COMMIT;
    ```
    Confirm which database the variable points at before running it.
-3. New private bucket; upload the exported files with B's tool.
-4. B's verifier against the restored database and the new bucket: every
-   referenced final file present with its recorded size and SHA-256; history,
-   attempts, geometry and active boundaries linked. Unreferenced objects are
-   reported, never deleted.
+3. **Upload the files into a new private bucket.** B's tool verifies and
+   exports; it never uploads. The upload is this repository's
+   `scripts/restaurar_archivos.py`. With the storage variables of the
+   **restore** bucket (never the live one) in this shell:
+   ```sh
+   python scripts/restaurar_archivos.py <carpeta-de-respaldo> --almacen-entorno
+   ```
+   It checks every local file against the manifest's size and SHA-256 first
+   and sends nothing if one is missing or different. It creates each object
+   at its original key and never overwrites: a second run reports
+   "ya estaban". Exit 0 means every object is in the bucket.
+   Do not upload by hand through the provider's dashboard: the keys, not the
+   file names, are what the database refers to.
+4. Verify the restored bucket against the same manifest:
+   ```sh
+   python scripts/verificar_archivos.py --manifiesto <carpeta-de-respaldo>/manifiesto.json --almacen-entorno --restauracion
+   ```
+   Exit 0 is required. (Same `--almacen-entorno` defect as in section 7
+   until B's fix; `--almacen-local` works today.)
 5. Uploads that were pending at backup time come back pending, with their
-   original deadlines and without their staged bytes: they are reported; the
-   person cancels and starts again, or they expire.
+   original deadlines and without their staged bytes. The tool lists them;
+   the person cancels and starts again, or they expire.
 6. Point a **separate** service at the restored pair and repeat checks 2, 3
    and 7 of section 6.
 
-The database half of this drill was rehearsed locally (see START_HERE); the
-file half needs B's tool and the real providers.
+Rehearsed locally end to end with these exact commands and `--almacen-local`
+(see START_HERE). Against the real providers it is still to be done.
 
 ## 9. Identities to record
 

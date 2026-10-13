@@ -5,9 +5,10 @@
 `reports/free-private-pilot-2026-10-12/` at supervisor commit
 `cbd0788ec2c1d44b9ed65fabdbb7990ddd432dcf`.
 
-**Combined local candidate, provisional: Team B's first slice
-(`9380ecc34af8a6b4fccdf387c066163c1dcdda59`, PR #32) is merged and its
-Supabase adapter is wired into the hosted entry point.** Nothing was
+**Combined local candidate, provisional: Team B's adapter
+(`9380ecc34af8a6b4fccdf387c066163c1dcdda59`) and its lifecycle and recovery
+slice (`770cc8358ee42a3e71336517932ce7136c607e65`), both from PR #32, are
+merged; the Supabase adapter is wired into the hosted entry point.** Nothing was
 provisioned or deployed; no account, secret, payment method or real data.
 **No result here comes from Supabase, Render or Neon, and none is a browser
 run.** #29, #28, #30, #32, C1 and the M1 checkpoint branch are unchanged.
@@ -20,24 +21,58 @@ run.** #29, #28, #30, #32, C1 and the M1 checkpoint branch are unchanged.
 | Adapter with a simulated provider (`tests/test_hosted_archivos.py`, B's `tests/test_almacen_supabase.py`) | Hosted handler + B's `AlmacenSupabase` + the real `storage3` SDK over B's in-memory fake of the provider | Real collision, freshness, quota, 20/25 MiB through the provider |
 | Adapter wired by the entry point (one rehearsal line) | `server.hosted` with provider-shaped settings pointing at a closed local port: SDK imported, client built, unreachable provider answered as retryable 503 | A reachable provider |
 | Real Supabase / Render / Neon | **Not run.** Prepared: [`humo_hospedado.py`](humo_hospedado.py), checked only against the local hosted process | — |
-| Employee journey in a browser | **Not run on this candidate.** The frontend is byte-identical to `4670df7`, whose browser journeys were accepted on the local server | The hosted entry point in a browser |
+| Employee journey in a browser | `tests/e2e/recorrido-completo.mjs` with real Chrome on this combined tree: **41/41 journeys pass (SQLite)**. It starts the **local launcher** (`server.app`) with the local disk store | The hosted entry point, Postgres or the Supabase adapter in a browser. That run needs a deployed target or a release to do it |
 
-## Open items that are not A's to implement
+## Closed by B's `770cc83`, now mandatory in the rehearsal
 
-- **B, lifecycle slice (in progress on B's branch):** with no store, an
-  authorized upload start still returns 200 and inserts a pending row; an
-  account without access gets 503 instead of 404 on a download. The rehearsal
-  prints both as `PENDIENTE DE B`; they become mandatory assertions when B's
-  next SHA is merged. Also from that slice: a factory that raises (SDK not
-  installed) is not yet mapped to a storage 503 by `_almacen_actual()`.
-- **B, verifier/exporter and manifest:** the rehearsal's backup step still
-  copies files by hand after checking size and SHA-256; it will be replaced by
-  B's tool, not by another exporter.
+- With no store, an authorized upload start answers `503
+  almacen_no_configurado` and creates no pending row.
+- With no store, an account without access still gets 404 on a start and on
+  a download: the denial comes before the store.
+- A factory that cannot build the store is a storage 503, not a 500.
+
+Both `PENDIENTE DE B` lines are gone: they are `exigir` assertions and fail
+the rehearsal if they regress.
+
+## Backup and restore now use the real tools
+
+The rehearsal no longer copies files by hand. With the dump restored into a
+second database: `scripts/verificar_archivos.py --url-env … --almacen-local …
+--exportar …` (B) verifies and exports the 4 referenced final files and lists
+the 1 pending upload; `scripts/restaurar_archivos.py` (A, new) uploads the
+export into a fresh store; `scripts/verificar_archivos.py --manifiesto …
+--restauracion` accepts the restored store; then the restored service serves
+the identical 25 MiB PDF, the active boundary and the file history.
+
+**How files reach the restore bucket:** B's tool only verifies and exports.
+`scripts/restaurar_archivos.py` reads the export folder and creates each final
+object at its original key through the store's own contract (stage, then
+create-only copy), after checking every local file against the manifest's
+size and SHA-256. It never overwrites, is safe to run twice, and uses the same
+three storage variables, set to the restore bucket. 5 tests
+(`tests/test_restaurar_archivos.py`). Against a real bucket it is untested.
+
+## Open items
+
+- **B, exporter defect (being fixed):** on `--almacen-entorno`,
+  `recuperacion._almacen_de` returns the store's factory instead of the store,
+  so B's tool cannot read a real bucket at this commit. Not patched here.
+  `--almacen-local` is unaffected and is what the rehearsal exercises. The
+  checklist's backup and restore commands for the real bucket are therefore
+  not runnable until B's corrected SHA is merged.
+- **CI skips the SDK-backed tests.** The workflow installs only psycopg, so
+  B's SDK door in `tests/test_almacen_supabase.py` and all of
+  `tests/test_hosted_archivos.py` are skipped in CI. They were run locally
+  with the lock installed (results below). Installing the lock in CI is a
+  one-line workflow edit this session's credential may not push; credentials
+  were not widened.
 - **Owner's KMZ failure on localhost:** not reproduced here. This session has
   neither the file nor the error text or the commit it was seen on, and the
   synthetic KMZ journeys passing does not show it is fixed. Needed to act: the
   file (or a synthetic one with the same structure), the message shown, and
   which build was running.
+- **Not run:** anything on real Supabase/Render/Neon, and the browser
+  journey against the hosted entry point (it ran against the local launcher).
 
 ## What is in this slice
 
@@ -115,7 +150,7 @@ memory use on the 512 MB instance, cold-wake time, and everything about files.
 real hosted process and disposable Postgres, with the accepted local store in
 a folder outside the "host" standing in for the external store (rehearsal
 scaffolding only; `server/hosted.py` wires no disk store).
-[Output](evidencia/ensayo-archivos-postgres.txt): 24 checks pass.
+[Output](evidencia/ensayo-archivos-postgres.txt): 30 checks pass, none pending.
 
 - Existing loaded row → edit a field → attach a three-contour KMZ → nothing
   activates by itself → choose one → activate → the row without X/Y is now
@@ -130,17 +165,9 @@ scaffolding only; `server/hosted.py` wires no disk store).
 - Process restart with the same database and store: same PDF, same boundary.
 - No store configured: download answers 503 while the table, the boundary
   metadata and the geometry keep working.
-- Recovery: `pg_dump`, the dump's referenced final files copied out after
-  checking each one's size and SHA-256 (stand-in for B's exporter), restore
-  into a second database and a second store, operational tables cleared: old
-  session refused, PDF identical, boundary active, file history complete, the
-  upload left pending can be cancelled.
-
-**Two requirements on B's lifecycle slice are visibly not met by this tree**
-(printed as `PENDIENTE DE B`, as the contract anticipated): with no store, a
-new upload start still creates a pending row (200), and an account without
-access gets 503 instead of 404 on a download. The rehearsal will turn both
-into failures once B's candidate is merged.
+- Recovery with the real tools (see above): old session refused, PDF
+  identical, boundary active, file history complete, the upload left pending
+  can be cancelled.
 
 The load command is an initial-setup operation: the checklist says to run it
 before employees work in the base, and records that it does not lock the base
@@ -148,10 +175,10 @@ against a concurrent administrator change.
 
 ## Next, in order
 
-1. On B's next exact SHA (lifecycle fixes): focused review, ordinary merge,
-   turn the two `PENDIENTE DE B` lines into mandatory assertions.
-2. On B's verifier/exporter and manifest: replace the rehearsal's manual copy
-   and fill in sections 7 and 8 of the checklist with its exact commands.
+1. On B's corrected exporter SHA: ordinary merge, run the rehearsal's backup
+   and restore once through `--almacen-entorno` against B's simulated
+   provider if B offers one, and drop the defect note from the checklist.
+2. Employee journey in a browser against the deployed pilot.
 3. On the owner's release: the operator runs the checklist and
    `humo_hospedado.py` on the free providers; results go in a hosted report.
 

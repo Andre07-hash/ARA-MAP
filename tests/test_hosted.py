@@ -17,8 +17,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from server import hosted
+from server.almacen import AlmacenNoConfiguradoError
 from server.api import archivos as api_archivos
-from server.web_util import ApiError
 from tests.support import TEST_PASSWORD, TempDatabase, create_user
 
 HOST = "piloto.example.test"
@@ -77,9 +77,8 @@ class Configuracion(unittest.TestCase):
 
     def test_no_byte_store_is_wired_from_the_host_disk(self):
         self.configurado()
-        with self.assertRaises(ApiError) as error:
+        with self.assertRaises(AlmacenNoConfiguradoError):
             api_archivos._almacen_actual()
-        self.assertEqual(error.exception.detalle, {"code": "almacen_no_configurado"})
 
     def test_incomplete_or_malformed_storage_settings_defer_to_a_file_error(self):
         # Starting never fails on them, and nothing but file content is affected.
@@ -92,9 +91,8 @@ class Configuracion(unittest.TestCase):
                          "ARA_MAP_ARCHIVOS_SUPABASE_BUCKET": "Piloto Con Espacios"}):
             with self.subTest(almacen=sorted(almacen)), patch("server.almacen_supabase._registro"):
                 self.configurado(**almacen)
-                with self.assertRaises(ApiError) as error:
+                with self.assertRaises(AlmacenNoConfiguradoError):
                     api_archivos._almacen_actual()
-                self.assertEqual(error.exception.detalle, {"code": "almacen_no_configurado"})
 
     def test_complete_settings_wire_the_private_store_without_any_provider_call(self):
         completo = {"ARA_MAP_ARCHIVOS_SUPABASE_URL": "https://ficticio.example.test",

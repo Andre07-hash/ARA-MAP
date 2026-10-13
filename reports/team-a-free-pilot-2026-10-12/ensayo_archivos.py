@@ -8,6 +8,8 @@ disposable Postgres and fictional accounts.
 
 The byte store is a stand-in: the accepted local store in a folder outside
 the "host", injected by rehearsal scaffolding (see ensayo_local.Servicio).
+Backup and restore use the real tools: scripts/verificar_archivos.py (Team B)
+to verify and export, scripts/restaurar_archivos.py to upload the export.
 Nothing here exercises a real provider; collision behaviour, quotas and
 full-size reliability through the real host remain hosted gates.
 
@@ -20,6 +22,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import json
 import os
 import secrets
 import shutil
@@ -230,18 +233,18 @@ def main() -> int:
                                          cookie=p.cookies["olga"])[1]["bytes"] == geometria,
                    "sin almacén: la descarga responde 503; tabla, contorno y su geometría siguen funcionando")
             antes = sql(piloto, "SELECT count(*) FROM archivo_version")
-            estado = sin_almacen.pedir("POST", f"/api/inventario/terrenos/{dos['id']}/archivos",
-                                       {"tipo": "pdf", "nombre_original": "x.pdf", "tamano_declarado": len(mini),
-                                        "sha256_declarado": hashlib.sha256(mini).hexdigest()}, p.cookies["olga"],
-                                       extra={"Idempotency-Key": str(uuid.uuid4())})[0]
-            creo = sql(piloto, "SELECT count(*) FROM archivo_version") != antes
-            ajeno = sin_almacen.pedir("GET", f"/api/archivos/versiones/{ipdf['version_id']}/descarga",
-                                      cookie=p.cookies["otto"])[0]
-            # Both are requirements on Team B's lifecycle slice, not yet in this tree.
-            print(f"{'OK ' if not creo else 'PENDIENTE DE B'}  iniciar sin almacén responde {estado} y "
-                  f"{'no crea' if not creo else 'SÍ crea'} una subida pendiente")
-            print(f"{'OK ' if ajeno == 404 else 'PENDIENTE DE B'}  sin almacén, la cuenta sin acceso recibe {ajeno} "
-                  "(debe ser 404: la negativa va antes que el almacén)")
+            pedido = {"tipo": "pdf", "nombre_original": "x.pdf", "tamano_declarado": len(mini),
+                      "sha256_declarado": hashlib.sha256(mini).hexdigest()}
+            estado, error, _ = sin_almacen.pedir("POST", f"/api/inventario/terrenos/{dos['id']}/archivos", pedido,
+                                                 p.cookies["olga"], extra={"Idempotency-Key": str(uuid.uuid4())})
+            exigir(estado == 503 and error["detalle"]["code"] == "almacen_no_configurado"
+                   and sql(piloto, "SELECT count(*) FROM archivo_version") == antes,
+                   "sin almacén: iniciar una subida autorizada responde 503 y no crea ninguna subida pendiente")
+            exigir(sin_almacen.pedir("POST", f"/api/inventario/terrenos/{dos['id']}/archivos", pedido,
+                                     p.cookies["otto"], extra={"Idempotency-Key": str(uuid.uuid4())})[0] == 404
+                   and sin_almacen.pedir("GET", f"/api/archivos/versiones/{ipdf['version_id']}/descarga",
+                                         cookie=p.cookies["otto"])[0] == 404,
+                   "sin almacén: la cuenta sin acceso sigue recibiendo 404 (la negativa va antes que el almacén)")
         finally:
             sin_almacen.parar()
 
@@ -267,24 +270,33 @@ def main() -> int:
         # -- database-plus-file recovery ------------------------------------------------
         respaldo = carpeta / "piloto.dump"
         correr("pg_dump", "--format=custom", "--no-owner", "--no-privileges", "--file", str(respaldo), piloto)
-        # Stand-in for Team B's exporter: every final object the dump refers to,
-        # checked against its recorded size and SHA-256, copied out of the store.
-        referidos = [fila.split("|") for fila in sql(
-            piloto, "SELECT clave_final, tamano, sha256 FROM archivo_version WHERE estado = 'disponible'").splitlines()]
-        for clave, tamano, sha in referidos:
-            origen, copia = almacen / clave, almacen_restaurado / clave
-            datos = origen.read_bytes()
-            if len(datos) != int(tamano) or hashlib.sha256(datos).hexdigest() != sha:
-                raise SystemExit(f"FALLA  un archivo referido no coincide con su registro ({len(referidos)} revisados)")
-            copia.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(origen, copia)
-        paso(f"respaldo: volcado de la base y {len(referidos)} archivos finales referidos, cada uno con tamaño y SHA-256 verificados")
+        paso("respaldo, paso 1: volcado lógico de la base (una sola instantánea)")
     finally:
         servicio.parar()
 
+    exportado = carpeta / "exportado"
+    verificador = (sys.executable, "scripts/verificar_archivos.py")
     try:
+        # The file list comes from the dump itself: restore it, then let Team B's
+        # tool read the references there and the bytes from the store.
         correr("pg_restore", "--no-owner", "--no-privileges", "--exit-on-error", "--dbname", restaurada, str(respaldo))
         sql(restaurada, "BEGIN; " + " ".join(f"DELETE FROM {t};" for t in OPERATIVAS) + " COMMIT;")
+        paso("restauración, paso 1: volcado restaurado en una base nueva; sesiones, bloqueos y turnos vaciados")
+        informe = correr(*verificador, "--url-env", "ENSAYO_RESTAURADA", "--almacen-local", str(almacen),
+                         "--exportar", str(exportado), entorno={"ENSAYO_RESTAURADA": restaurada})
+        manifiesto = json.loads((exportado / "manifiesto.json").read_text(encoding="utf-8"))
+        exigir(len(manifiesto["finales"]) == 4 and len(manifiesto["pendientes"]) == 1
+               and all((exportado / e["clave"]).stat().st_size == e["tamano"] for e in manifiesto["finales"]),
+               "respaldo, paso 2: scripts/verificar_archivos.py verifica y exporta los 4 archivos finales que la "
+               "base respaldada refiere, y anota la subida pendiente")
+        print("    " + informe.strip().replace("\n", "\n    "))
+        subida = correr(sys.executable, "scripts/restaurar_archivos.py", str(exportado),
+                        "--almacen-local", str(almacen_restaurado))
+        exigir("Subidos: 4" in subida and "con problemas: 0" in subida,
+               "restauración, paso 2: scripts/restaurar_archivos.py sube la exportación a un almacén nuevo")
+        correr(*verificador, "--manifiesto", str(exportado / "manifiesto.json"),
+               "--almacen-local", str(almacen_restaurado), "--restauracion")
+        paso("restauración, paso 3: el verificador acepta el almacén restaurado (salida 0)")
         restaurado = Servicio(restaurada, almacen_sustituto=almacen_restaurado)
         restaurado.arrancar()
         try:

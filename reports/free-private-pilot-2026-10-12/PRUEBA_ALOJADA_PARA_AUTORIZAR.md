@@ -1,6 +1,6 @@
-# Candidato listo y alcance de prueba alojada para autorización
+# Prueba alojada autorizada — candidato y alcance
 
-12 de octubre de 2026, hora de México. **Propuesta preparada; no autoriza por sí misma operaciones externas.** Continúa el [acuerdo de entrega](../../PLAN_DE_ENTREGA.md).
+12 de octubre de 2026, hora de México. **AUTORIZADA por el propietario mediante respuesta explícita «si» a este alcance.** A ejecuta y B da soporte. Se conserva el nombre del archivo para no romper enlaces de la propuesta anterior. Continúa el [acuerdo de entrega](../../PLAN_DE_ENTREGA.md). Este registro acredita autorización, no ejecución.
 
 ## Cierre del hito local
 
@@ -20,9 +20,9 @@ El [checklist de A fijado al candidato](https://github.com/Andre07-hash/ARA-MAP/
 
 El reporte antiguo de B aún muestra su opción `--cargar-exportacion`. Es una diferencia documental conocida, fuera de la secuencia elegida. No exige un nuevo commit antes del ensayo ni reintegrar B. Se puede alinear después; el cuerpo actual de #32 y el checklist de A ya aclaran la decisión. B queda disponible para fallos concretos, sin nuevas tareas de desarrollo.
 
-## Operaciones que se proponen al propietario
+## Operaciones autorizadas por el propietario
 
-Responsable propuesto: equipo A u operador designado por el propietario, con B como soporte de archivos. Las cuentas quedan bajo control del propietario; el acceso se concede de forma segura, sin copiar claves o contraseñas al chat ni al repositorio. No se presume que A y B comparten acceso.
+Responsable: equipo A u operador designado por el propietario, con B como soporte de archivos. Las cuentas quedan bajo control del propietario; el acceso se concede de forma segura, sin copiar claves o contraseñas al chat ni al repositorio. No se presume que A y B comparten acceso.
 
 1. Comprobar acceso y cupo en cuentas **Free sin tarjeta** de Render, Neon y Supabase. Si falta cuenta, crearla sólo bajo esta autorización y control del propietario. Si se exige pago/tarjeta o no hay capacidad gratuita, parar esa operación e informar el impedimento concreto; no cambiar de plan automáticamente.
 2. Preparar recursos nuevos y aislados de prueba: un servicio web Render Free, un proyecto Neon con base vacía y destino separado de restauración, un proyecto Supabase Storage con bucket privado de prueba y bucket privado separado para restauración. Pueden necesitarse nombres únicos; registrar los identificadores efectivos. No reutilizar bases ni archivos reales.
@@ -44,4 +44,23 @@ Después se decide la entrega al empleado, sus cuentas y la carga real. El fallo
 
 ## Estado de autorización
 
-**Pendiente.** Se presenta al propietario este alcance concreto porque las instrucciones vigentes reservan expresamente creación de recursos, cuentas, secretos, despliegue y datos reales. Guardar esta propuesta y aprobar técnicamente el candidato no ejecuta ni autoriza esas acciones. La respuesta del propietario debe registrarse antes de transmitir instrucciones de ejecución a los equipos.
+**AUTORIZADA.** El propietario respondió «si» a: autorizar al equipo A, con B como soporte, a preparar recursos gratuitos de prueba en cuentas bajo su control, configurar secretos, crear cuentas ficticias, desplegar `31b6a1d` y ejecutar las pruebas; sin tarjeta, cobros, datos reales ni merge a main. Fecha local: 12 de octubre de 2026.
+
+Esta autorización sustituye las retenciones anteriores de operaciones externas sólo dentro de ese alcance. No volver a pedir permiso por cada paso ya aprobado. Si falta acceso, solicitar únicamente la intervención concreta del propietario (por ejemplo, iniciar sesión o completar MFA), sin pedir secretos por chat. Si una operación exige tarjeta/cargos o afecta recursos reales, detener esa operación y comunicar el impedimento. La entrega al empleado y la carga real siguen fuera de esta autorización.
+
+## Instrucciones de ejecución para A
+
+El propietario autorizó expresamente la prueba alojada. Continúa en tu sesión; no necesitas otra aprobación para ejecutar los pasos 1–7 de este documento dentro de sus límites. Consulta el checklist fijado al candidato. Las notas antiguas «awaiting operator release» ya quedan superadas para este ensayo.
+
+1. Comprueba acceso a las cuentas del propietario y capacidad Free sin tarjeta. Prepara recursos nuevos de prueba y destinos separados de restauración. Si necesitas una sesión del propietario o MFA, identifica exactamente dónde; continúa entretanto los pasos independientes.
+2. Configura esquema, variables privadas y tres cuentas ficticias; despliega manualmente `31b6a1dba827b57d448a2aeb62ad10c05db09afc`, con auto-deploy desactivado. Comprueba el SHA realmente desplegado y comparte URL/deploy id en cuanto estén disponibles, indicando que son de prueba.
+3. Ejecuta `humo_hospedado.py`, carga sintética de 50–100 filas y recorrido del empleado en navegador. Comprueba KMZ de 20 MiB, PDF de 25 MiB, selección/activación, permisos, reemplazo inválido, persistencia al redesplegar y límites reales del host.
+4. Puedes ejecutar tú el guion `prueba_proveedor.py` preparado por B contra el bucket de prueba, usando el entorno seguro disponible. Comparte con B sólo resultados saneados; no es necesario darle claves por chat ni crear otro entorno para él.
+5. Ejecuta respaldo/restauración en destinos separados y verificación final de tamaño/SHA, siguiendo exportador B → cargador A → verificador B. No aceptar «ya estaban» como prueba de integridad.
+6. Registra resultados reales, consumo de cuotas, URL, SHA, limitaciones y fallos concretos. No ampliar alcance, tocar frontend por pulido, comprar servicios ni cargar datos reales. Mantén la aplicación privada.
+
+## Instrucciones de soporte para B
+
+La prueba alojada está autorizada y A la coordina. Mantén el head `071d7d0` como referencia integrada; no abras nuevas funcionalidades ni retrases el ensayo por el documento antiguo.
+
+Apoya a A con el guion de proveedor, interpretación de resultados saneados y correcciones mínimas si aparece una incompatibilidad real. A puede ejecutar tu guion dentro de su entorno seguro. Si operas tú, coordina antes el destino exacto y usa únicamente los recursos ficticios autorizados, sin duplicar provisión ni asumir acceso a cuentas de A. Sigue fuera de alcance cualquier recurso real, pago, secreto en chat, cambio a la rama de A o merge de PR/main.

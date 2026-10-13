@@ -2,7 +2,7 @@
 
 Actualizado: **12 de octubre de 2026**. Responsable del acuerdo: propietario y supervisor; equipos A y B implementan. Este es el punto de entrada para retomar el proyecto sin reconstruir las conversaciones.
 
-**Hito actual: candidato `31b6a1d` listo para prueba alojada, CI exacto verde.** La integración local de A/B está cerrada para este hito. El [alcance de la prueba alojada](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md) está preparado; su ejecución externa sigue pendiente de autorización del propietario. No es todavía entrega ni aceptación del proveedor real.
+**Hito actual: prueba alojada AUTORIZADA por el propietario el 12 de octubre de 2026.** Candidato `31b6a1d`, CI exacto verde; integración local cerrada. A ejecuta con B como soporte, dentro del [alcance autorizado](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md): recursos gratuitos bajo control del propietario, configuración, cuentas ficticias, despliegue y pruebas. Sin tarjeta, cobros, datos reales ni merge de PR/main. Autorización registrada; todavía no se ha acreditado ejecución ni aceptación alojada.
 
 **Prioridad: entregar ASAP un portal privado donde un empleado pueda editar terrenos existentes, adjuntar su KMZ, activar su polígono y conservar sus datos y archivos.** Terminar la conexión y comprobación del almacenamiento es el camino crítico. No abrir nuevas funcionalidades ni repetir fases aceptadas para alcanzar una perfección que no requiere este piloto.
 
@@ -45,7 +45,7 @@ Referencias para no perder ni duplicar trabajo:
 
 Los avances nuevos deben actualizar este registro con su SHA y evidencia. Preservar también C1 y las ramas anteriores. La rama del supervisor contiene planificación; no confundir sus pruebas con las del código integrado de A/B.
 
-**Siguiente acción:** autorización y ejecución de la [prueba alojada del candidato exacto](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md). No asignar otra integración ni pedir más desarrollo sin un fallo concreto. Secuencia de recuperación: exportar/verificar con B, cargar mediante `scripts/restaurar_archivos.py` de A y verificar tamaño/SHA. B atiende fallos del proveedor; A coordina el ensayo. Las casillas de entrega siguen abiertas hasta contar con evidencia alojada.
+**Siguiente acción:** ejecutar la [prueba alojada autorizada del candidato exacto](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md). No volver a pedir autorización para las mismas operaciones de prueba dentro de ese alcance. No asignar otra integración ni pedir más desarrollo sin un fallo concreto. Secuencia de recuperación: exportar/verificar con B, cargar mediante `scripts/restaurar_archivos.py` de A y verificar tamaño/SHA. B atiende fallos del proveedor; A coordina el ensayo. Las casillas de entrega siguen abiertas hasta contar con evidencia alojada.
 
 ## 3. Por qué PDF funciona localmente y el almacenamiento sigue pendiente
 
@@ -93,7 +93,7 @@ No se exige automatizar operaciones ni realizar una campaña nueva de rendimient
 
 A y B son sesiones externas en computadoras y cuentas distintas. El propietario transmite los SHA, enlaces y entregas; no presuponer carpetas locales compartidas ni acceso al chat del otro. Cada equipo puede usar hasta tres agentes dentro de su capacidad existente, con archivos separados y un integrador; no comprar capacidad ni duplicar trabajo sobre el mismo archivo.
 
-No es necesario detener a todos mientras llega una parte. A prepara e integra; B termina almacenamiento y recuperación. No hacer merges duplicados ni modificar la rama del otro equipo. Este documento no autoriza por sí mismo merges de PR/main, crear recursos/cuentas, cambiar secretos, desplegar ni cargar datos reales.
+No es necesario detener a todos mientras llega una parte. No hacer merges duplicados ni modificar la rama del otro equipo. La autorización del 12 de octubre permite a A y al operador crear/configurar recursos y cuentas de prueba y desplegar dentro del alcance enlazado. Siguen excluidos merge de PR/main, pagos, modificación de producción y carga de datos reales.
 
 ## 7. Backlog: después de la entrega
 

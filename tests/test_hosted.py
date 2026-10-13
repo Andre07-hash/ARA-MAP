@@ -68,14 +68,44 @@ class Configuracion(unittest.TestCase):
                 patch("server.hosted.postgres.schema_version", return_value=hosted.db.SCHEMA_VERSION):
             hosted.comprobar_esquema()
 
-    def test_no_byte_store_is_wired_from_the_host_disk(self):
+    def configurado(self, **almacen):
         entorno = {"ARA_MAP_DATABASE_URL": "postgresql://ficticio", "ARA_MAP_HOST_PUBLICO": HOST,
-                   "ARA_MAP_ARCHIVOS": "/tmp/no-se-usa"}
+                   "ARA_MAP_ARCHIVOS": "/tmp/no-se-usa", **almacen}
+        self.addCleanup(api_archivos.configurar_almacen, None)
         with patch.object(hosted.HostedHandler, "HOST_PUBLICO", ""):
             hosted.configurar(entorno)
-            with self.assertRaises(ApiError) as error:
-                api_archivos._almacen_actual()
-        self.assertEqual(getattr(error.exception, "detalle", None), {"code": "almacen_no_configurado"})
+
+    def test_no_byte_store_is_wired_from_the_host_disk(self):
+        self.configurado()
+        with self.assertRaises(ApiError) as error:
+            api_archivos._almacen_actual()
+        self.assertEqual(error.exception.detalle, {"code": "almacen_no_configurado"})
+
+    def test_incomplete_or_malformed_storage_settings_defer_to_a_file_error(self):
+        # Starting never fails on them, and nothing but file content is affected.
+        for almacen in ({"ARA_MAP_ARCHIVOS_SUPABASE_URL": "https://ficticio.example.test"},
+                        {"ARA_MAP_ARCHIVOS_SUPABASE_URL": "http://ficticio.example.test",
+                         "ARA_MAP_ARCHIVOS_SUPABASE_KEY": "clave-ficticia",
+                         "ARA_MAP_ARCHIVOS_SUPABASE_BUCKET": "piloto"},
+                        {"ARA_MAP_ARCHIVOS_SUPABASE_URL": "https://ficticio.example.test",
+                         "ARA_MAP_ARCHIVOS_SUPABASE_KEY": "clave ficticia",
+                         "ARA_MAP_ARCHIVOS_SUPABASE_BUCKET": "Piloto Con Espacios"}):
+            with self.subTest(almacen=sorted(almacen)), patch("server.almacen_supabase._registro"):
+                self.configurado(**almacen)
+                with self.assertRaises(ApiError) as error:
+                    api_archivos._almacen_actual()
+                self.assertEqual(error.exception.detalle, {"code": "almacen_no_configurado"})
+
+    def test_complete_settings_wire_the_private_store_without_any_provider_call(self):
+        completo = {"ARA_MAP_ARCHIVOS_SUPABASE_URL": "https://ficticio.example.test",
+                    "ARA_MAP_ARCHIVOS_SUPABASE_KEY": "clave-ficticia",
+                    "ARA_MAP_ARCHIVOS_SUPABASE_BUCKET": "piloto-ficticio"}
+        with patch("server.almacen_supabase._construir", return_value="el almacén") as construir:
+            self.configurado(**completo)
+            construir.assert_not_called()  # nothing is built at start
+            self.assertEqual(api_archivos._almacen_actual(), "el almacén")
+        construir.assert_called_once_with("https://ficticio.example.test/storage/v1", "clave-ficticia",
+                                          "piloto-ficticio")
 
 
 class Despliegue(unittest.TestCase):
@@ -97,8 +127,9 @@ class Despliegue(unittest.TestCase):
 
     def test_hosted_requirements_are_exact_pins(self):
         lineas = [linea for linea in (self.raiz / "requirements-hosted.txt").read_text().splitlines()
-                  if linea and not linea.startswith("#")]
-        self.assertTrue(lineas)
+                  if linea and not linea.lstrip().startswith("#")]
+        for directa in ("psycopg==3.3.6", "storage3==2.32.0", "httpx==0.28.1"):
+            self.assertIn(directa, lineas)
         for linea in lineas:
             self.assertRegex(linea, r"^[A-Za-z0-9_.\[\]-]+==[0-9][0-9A-Za-z.]*$")
 

@@ -1,24 +1,52 @@
-# Team A — F0-A: free private pilot, first hosting slice
+# Team A — F0-A: free private pilot, combined candidate (provisional)
 
 12 October 2026. Branch `codex/team-a-free-pilot-v1`, from
 `4670df7348265af66c640069e5ece2a274830fa3`, under
 `reports/free-private-pilot-2026-10-12/` at supervisor commit
 `cbd0788ec2c1d44b9ed65fabdbb7990ddd432dcf`.
 
-**This is the first usable slice, not the combined candidate.** Team B's
-Supabase adapter has not been relayed, so no byte store is wired: on the
-hosted entry point, file content routes answer `503 almacen_no_configurado`
-and everything else works. **Nothing was provisioned or deployed; no account,
-secret, payment method or real data was involved. Local results are not
-hosted acceptance.** #29, #28, #30, C1 and the M1 checkpoint branch are
-unchanged.
+**Combined local candidate, provisional: Team B's first slice
+(`9380ecc34af8a6b4fccdf387c066163c1dcdda59`, PR #32) is merged and its
+Supabase adapter is wired into the hosted entry point.** Nothing was
+provisioned or deployed; no account, secret, payment method or real data.
+**No result here comes from Supabase, Render or Neon, and none is a browser
+run.** #29, #28, #30, #32, C1 and the M1 checkpoint branch are unchanged.
+
+## What each kind of evidence is
+
+| Evidence | What ran | What it does not show |
+|---|---|---|
+| API journey with a local store ([`ensayo_archivos.py`](ensayo_archivos.py), [output](evidencia/ensayo-archivos-postgres.txt)) | Real `server.hosted` process started with the deploy Python (3.12.15) and the exact lock, disposable Postgres 16, HTTP calls; bytes in the accepted local store, injected by scaffolding | Anything about the provider or the adapter |
+| Adapter with a simulated provider (`tests/test_hosted_archivos.py`, B's `tests/test_almacen_supabase.py`) | Hosted handler + B's `AlmacenSupabase` + the real `storage3` SDK over B's in-memory fake of the provider | Real collision, freshness, quota, 20/25 MiB through the provider |
+| Adapter wired by the entry point (one rehearsal line) | `server.hosted` with provider-shaped settings pointing at a closed local port: SDK imported, client built, unreachable provider answered as retryable 503 | A reachable provider |
+| Real Supabase / Render / Neon | **Not run.** Prepared: [`humo_hospedado.py`](humo_hospedado.py), checked only against the local hosted process | — |
+| Employee journey in a browser | **Not run on this candidate.** The frontend is byte-identical to `4670df7`, whose browser journeys were accepted on the local server | The hosted entry point in a browser |
+
+## Open items that are not A's to implement
+
+- **B, lifecycle slice (in progress on B's branch):** with no store, an
+  authorized upload start still returns 200 and inserts a pending row; an
+  account without access gets 503 instead of 404 on a download. The rehearsal
+  prints both as `PENDIENTE DE B`; they become mandatory assertions when B's
+  next SHA is merged. Also from that slice: a factory that raises (SDK not
+  installed) is not yet mapped to a storage 503 by `_almacen_actual()`.
+- **B, verifier/exporter and manifest:** the rehearsal's backup step still
+  copies files by hand after checking size and SHA-256; it will be replaced by
+  B's tool, not by another exporter.
+- **Owner's KMZ failure on localhost:** not reproduced here. This session has
+  neither the file nor the error text or the commit it was seen on, and the
+  synthetic KMZ journeys passing does not show it is fixed. Needed to act: the
+  file (or a synthetic one with the same structure), the message shown, and
+  which build was running.
 
 ## What is in this slice
 
 | Piece | Where | State |
 |---|---|---|
 | Hosted entry point: `python -m server.hosted`, same origin for app and API, `0.0.0.0:$PORT`, Postgres required, never SQLite | `server/hosted.py` | Implemented; 18 tests in `tests/test_hosted.py` |
-| Reviewed Render configuration: Free plan, manual deploys, health check, secret placeholders, Python 3.12.15 | `render.yaml`, `requirements-hosted.txt` | Not activated; checked by tests |
+| Reviewed Render configuration: Free plan, manual deploys, health check, secret placeholders, Python 3.12.15 | `render.yaml` | Not activated; checked by tests |
+| Hosted dependencies: `requirements-hosted.in` (psycopg 3.3.6 and B's tested `storage3==2.32.0`, `httpx==0.28.1`) compiled to the exact lock `requirements-hosted.txt` (23 packages). **CI still installs only psycopg, so the SDK-backed tests (B's and `tests/test_hosted_archivos.py`) are skipped there and were run locally:** the one-line workflow change (`pip install -r requirements-hosted.txt`) could not be pushed because this session's GitHub credential lacks the `workflow` scope. The local app and Python 3.9 still need none of it | repository root | Startup checked with Python 3.12.15 and the lock |
+| Store wiring: `configurar_almacen(almacen_supabase.fabrica_desde_entorno(environ))`; missing or malformed settings defer to a file-only 503 | `server/hosted.py` | 20 tests in `tests/test_hosted.py`, 3 in `tests/test_hosted_archivos.py` |
 | Operator load of a CSV into one work base of the editable master table, with dry run and duplicate report | `scripts/cargar_maestra.py` | Implemented; 11 tests in `tests/test_piloto_carga.py` |
 | Accepted batching #30 (`bc7e421`) | merge `f81bc27` | Integrated once (was not an ancestor) |
 | Local rehearsal on disposable Postgres | [`ensayo_local.py`](ensayo_local.py), [output](evidencia/ensayo-local-postgres.txt) | Passes |
@@ -81,13 +109,13 @@ memory use on the 512 MB instance, cold-wake time, and everything about files.
   cleared → content tables equal → old session refused, new sign-in sees the
   edited row and its history.
 
-## Integration journey prepared (store stand-in, awaiting B's adapter)
+## API journey with a local store, in detail
 
 [`ensayo_archivos.py`](ensayo_archivos.py) runs the employee workflow on the
 real hosted process and disposable Postgres, with the accepted local store in
 a folder outside the "host" standing in for the external store (rehearsal
 scaffolding only; `server/hosted.py` wires no disk store).
-[Output](evidencia/ensayo-archivos-postgres.txt): 23 checks pass.
+[Output](evidencia/ensayo-archivos-postgres.txt): 24 checks pass.
 
 - Existing loaded row → edit a field → attach a three-contour KMZ → nothing
   activates by itself → choose one → activate → the row without X/Y is now
@@ -120,14 +148,12 @@ against a concurrent administrator change.
 
 ## Next, in order
 
-1. On the owner's relay of B's exact adapter SHA: focused review
-   (authorization before store resolution; no provider I/O under a database
-   write lock), ordinary local merge, wire
-   `almacen_supabase.fabrica_desde_entorno(os.environ)` in `server/hosted.py`,
-   add B's pinned SDK to `requirements-hosted.txt`.
-2. Combined journey with files on SQLite and disposable Postgres: full-size
-   upload/download, revoked and archived scope, unavailable storage, restart.
-3. Extend the rehearsal and the checklist with B's verifier/exporter.
+1. On B's next exact SHA (lifecycle fixes): focused review, ordinary merge,
+   turn the two `PENDIENTE DE B` lines into mandatory assertions.
+2. On B's verifier/exporter and manifest: replace the rehearsal's manual copy
+   and fill in sections 7 and 8 of the checklist with its exact commands.
+3. On the owner's release: the operator runs the checklist and
+   `humo_hospedado.py` on the free providers; results go in a hosted report.
 
 ## M1 work (superseded Vercel/AWS packet)
 

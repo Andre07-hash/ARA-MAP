@@ -1,3 +1,56 @@
-# Exact pins for the hosted service only (python -m server.hosted).
-# The local app installs nothing: it runs on the standard library plus vendor/python.
-psycopg[binary]==3.3.6
+annotated-types==0.8.0
+    # via pydantic
+anyio==4.15.1
+    # via httpx
+certifi==2026.7.22
+    # via
+    #   httpcore
+    #   httpx
+deprecation==2.1.0
+    # via storage3
+h11==0.16.0
+    # via httpcore
+h2==4.4.1
+    # via httpx
+hpack==4.2.0
+    # via h2
+httpcore==1.0.9
+    # via httpx
+httpx==0.28.1
+    # via
+    #   -r requirements-hosted.in
+    #   storage3
+hyperframe==6.1.0
+    # via h2
+idna==3.20
+    # via
+    #   anyio
+    #   httpx
+    #   yarl
+multidict==7.1.0
+    # via yarl
+packaging==26.3
+    # via deprecation
+propcache==0.5.4
+    # via yarl
+psycopg==3.3.6
+    # via -r requirements-hosted.in
+psycopg-binary==3.3.6
+    # via psycopg
+pydantic==2.14.1
+    # via storage3
+pydantic-core==2.50.1
+    # via pydantic
+storage3==2.32.0
+    # via -r requirements-hosted.in
+typing-extensions==4.16.0
+    # via
+    #   anyio
+    #   psycopg
+    #   pydantic
+    #   pydantic-core
+    #   typing-inspection
+typing-inspection==0.4.4
+    # via pydantic
+yarl==1.25.1
+    # via storage3

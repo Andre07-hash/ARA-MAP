@@ -245,6 +245,25 @@ def main() -> int:
         finally:
             sin_almacen.parar()
 
+        # -- the real adapter and SDK, wired by the hosted entry point itself ------------
+        # Settings shaped like the provider's, pointing at a closed local port: the
+        # service starts, builds the SDK client on first use, and the unreachable
+        # provider is a retryable storage error. Not a test of the provider.
+        con_adaptador = Servicio(piloto, entorno={
+            "ARA_MAP_ARCHIVOS_SUPABASE_URL": "http://127.0.0.1:9", "ARA_MAP_ARCHIVOS_SUPABASE_KEY": "clave-ficticia",
+            "ARA_MAP_ARCHIVOS_SUPABASE_BUCKET": "piloto-ficticio"})
+        con_adaptador.arrancar()
+        try:
+            estado, error, _ = con_adaptador.pedir("GET", f"/api/archivos/versiones/{ipdf['version_id']}/descarga",
+                                                   cookie=p.cookies["olga"])
+            exigir(estado == 503 and error["detalle"]["code"] == "almacen_no_disponible"
+                   and error["detalle"].get("reintentar") is True
+                   and con_adaptador.pedir("GET", lista, cookie=p.cookies["olga"])[0] == 200,
+                   "con el adaptador de B conectado por server.hosted y el proveedor inalcanzable: "
+                   "503 reintentable en archivos; la tabla sigue funcionando")
+        finally:
+            con_adaptador.parar()
+
         # -- database-plus-file recovery ------------------------------------------------
         respaldo = carpeta / "piloto.dump"
         correr("pg_dump", "--format=custom", "--no-owner", "--no-privileges", "--file", str(respaldo), piloto)

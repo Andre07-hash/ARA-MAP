@@ -138,6 +138,22 @@ duplicate. Run it while nobody else is working in the base:
 
 ## 6. First-day checks (the hosted gate; synthetic files and fictional accounts)
 
+Most of these lines are one command. With three fictional accounts created
+as in section 4 (an administrator, an operator, and an operator who gets no
+grant), and their logins and passwords exported in the shell as
+`HUMO_ADMIN`/`HUMO_ADMIN_CLAVE`, `HUMO_OPERADOR`/`HUMO_OPERADOR_CLAVE`,
+`HUMO_AJENO`/`HUMO_AJENO_CLAVE`:
+
+```sh
+python reports/team-a-free-pilot-2026-10-12/humo_hospedado.py https://<nombre>.onrender.com
+```
+
+It covers lines 1 (first-response time), 2, 4, 5, 6 and 7 below against the
+real service, database and store, prints the timings, and uploads about
+45 MiB of synthetic files into a base named "Humo …" (count them against the
+quota; nothing is deleted). Lines 3, 8, 9, 10, 11 and 12 are separate steps.
+Keep its last line: it names the file to download again after a redeploy.
+
 Pass/fail lines for the hosted report, with times and sizes:
 
 1. After 20 idle minutes: time from first request to a usable login page.

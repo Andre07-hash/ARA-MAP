@@ -91,8 +91,10 @@ def csv_sintetico(n: int = 100) -> str:
 class Servicio:
     """The hosted entry point as its own process, like the platform runs it."""
 
-    def __init__(self, url: str, almacen_sustituto: Path | None = None) -> None:
-        self.entorno = {"ARA_MAP_DATABASE_URL": url, "ARA_MAP_HOST_PUBLICO": HOST, "PORT": str(PUERTO)}
+    def __init__(self, url: str, almacen_sustituto: Path | None = None,
+                 entorno: dict[str, str] | None = None) -> None:
+        self.entorno = {"ARA_MAP_DATABASE_URL": url, "ARA_MAP_HOST_PUBLICO": HOST, "PORT": str(PUERTO),
+                        **(entorno or {})}
         self.proceso: subprocess.Popen[bytes] | None = None
         # Rehearsal scaffolding only: the accepted local store standing in for
         # the external byte store, in a folder outside the "host". The hosted

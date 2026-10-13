@@ -26,7 +26,7 @@ from http.server import ThreadingHTTPServer
 from typing import Any
 from urllib.parse import urlsplit
 
-from . import db, postgres
+from . import almacen_supabase, db, postgres
 from .api import archivos as api_archivos
 from .app import Handler
 
@@ -118,10 +118,13 @@ def comprobar_esquema() -> None:
 def configurar(environ: Mapping[str, str]) -> int:
     """Apply the environment to the handler and the byte store; returns the port."""
     HostedHandler.HOST_PUBLICO, puerto = configuracion(environ)
-    # No store is wired by this module alone: file content routes answer 503
-    # almacen_no_configurado while every other route keeps working. There is
-    # no local-disk store here: the host's disk does not survive a restart.
-    api_archivos.configurar_almacen(None)
+    # The private byte store, or none: with the storage settings missing or
+    # malformed the factory is None and file content routes answer 503
+    # almacen_no_configurado while every other route keeps working. Building
+    # the factory reads settings only; the SDK is imported and the client made
+    # on the first file operation. There is no local-disk store here: the
+    # host's disk does not survive a restart.
+    api_archivos.configurar_almacen(almacen_supabase.fabrica_desde_entorno(environ))
     return puerto
 
 

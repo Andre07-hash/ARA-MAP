@@ -27,6 +27,28 @@
 }
 .archivos-celda[data-estado="fallido"]::after { background: var(--status-error); }
 
+/* Summary and "Elegir…" on one line (the summary shortens first); an upload's
+   state wraps below them without widening the column. */
+.archivos-celda-caja [hidden] { display: none !important; }
+.archivos-celda-caja { display: flex; flex-direction: column; gap: var(--space-1); }
+.archivos-celda-linea { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.archivos-celda-linea .archivos-celda { flex: 0 1 auto; min-width: 0; }
+.archivos-celda-elegir { flex: none; }
+.archivos-celda-subida {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  width: 0;
+  min-width: 100%;
+  font-size: var(--text-micro);
+  white-space: normal;
+}
+.archivos-celda-subida .archivos-progreso { width: 4rem; }
+.archivos-celda-nota { color: var(--ink-secondary); }
+.archivos-celda-subida[data-fase="fallido"] .archivos-celda-nota,
+.archivos-celda-subida[data-fase="rechazado"] .archivos-celda-nota { color: var(--status-error); }
+
 /* ---------------------------------------------------------------- detail */
 
 /* Every rule below sets `display`; the hidden attribute must still win. */

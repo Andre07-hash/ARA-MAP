@@ -230,10 +230,11 @@ await caso('operator: only her bases; blank create; every core and custom type e
   assert.deepEqual(t.custom, { [COL.Nota]: 'Junto al río', [COL.Avance]: 42.5, [COL.Etapa]: 'Cerrado', [COL.Visita]: '2026-03-15' });
   assert.equal(t.version, 17);   // one version per saved cell: 16 cells after the create
   // The file columns show Team B's compact cells with the real summary: no
-  // files yet, said as such (not a placeholder, not a zero), and no control.
-  for (const [col, texto] of [['core:archivos', 'Sin PDF'], ['core:kmz', 'Sin KMZ']]) {
-    assert.equal(await textoDe(page, lote, col), texto);
-    assert.equal(await celda(page, lote, col).locator('button, input, a').count(), 0);
+  // files yet, said as such (not a placeholder, not a zero), and, on a row she
+  // may change, one "Elegir…" button that picks a file for this row.
+  for (const [col, texto, boton] of [['core:archivos', 'Sin PDF', 'Elegir PDF…'], ['core:kmz', 'Sin KMZ', 'Elegir KMZ…']]) {
+    assert.equal((await celda(page, lote, col).locator('.archivos-celda').innerText()).trim(), texto);
+    assert.deepEqual(await celda(page, lote, col).locator('button:visible, a').allInnerTexts(), [boton]);
   }
   await foto(page, '05-todas-las-celdas-editadas');
 

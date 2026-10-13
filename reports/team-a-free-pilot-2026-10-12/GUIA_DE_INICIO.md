@@ -38,7 +38,11 @@ administrador. Los accesos se manejan en **Bases de trabajo y accesos**.
 
 ## 4. Archivos de un terreno: PDF y KMZ
 
-Abre el detalle del terreno y usa **Elegir PDF…** o **Elegir KMZ…**.
+En la tabla, las columnas **Archivos** y **KMZ** tienen los botones
+**Elegir PDF…** y **Elegir KMZ…** de cada renglón: el archivo queda en ese
+terreno. Aparecen solo en los renglones que puedes cambiar. El detalle del
+terreno (⋯) tiene los mismos botones, además de descargas, versiones,
+historial y retiro.
 
 - Tamaño máximo: **PDF 25 MB, KMZ 20 MB**. Un archivo vacío no se acepta.
 - **No cierres ni recargues la pestaña** hasta que termine la subida.
@@ -52,12 +56,15 @@ Abre el detalle del terreno y usa **Elegir PDF…** o **Elegir KMZ…**.
 
 ## 5. El contorno del terreno (KMZ)
 
-1. Sube el KMZ.
-2. Si trae más de un contorno, usa **Elegir contornos…** y marca el correcto.
-3. **Activar este contorno** lo deja como el contorno del terreno.
+Subir un KMZ, desde la tabla o desde el detalle, da uno de estos resultados:
 
-El contorno se dibuja aunque el terreno no tenga X e Y. Si subes un KMZ que no
-sirve, el contorno anterior se conserva.
+| El KMZ trae… | Qué pasa al terminar la subida | Qué haces tú |
+|---|---|---|
+| **Un solo contorno válido** | Queda como el contorno activo del terreno (si había otro, lo sustituye). La celda dice **Contorno activo**. | Nada más. |
+| **Varios contornos** | No se activa nada; el contorno anterior, si había, sigue. La celda dice **KMZ sin contorno activo** y «Varios contornos: elige en el detalle (⋯)». | Abre el detalle (⋯) → **Versiones** → **Contornos** → **Elegir contornos…**, marca el correcto, **Procesar selección** y luego **Activar este contorno**. |
+| **Ningún contorno utilizable** | El archivo se guarda, pero el contorno anterior se conserva. | Revisa el KMZ y súbelo de nuevo. |
+
+El contorno se dibuja aunque el terreno no tenga X e Y.
 
 ## 6. El mapa
 

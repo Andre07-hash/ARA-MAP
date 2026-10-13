@@ -113,7 +113,7 @@
 }
 textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap; resize: vertical; position: relative; z-index: 4; }
 
-.tabla-celda-archivo { cursor: default; min-width: 8rem; }
+.tabla-celda-archivo { cursor: default; min-width: 12rem; max-width: 20rem; height: auto; }
 .ranura-pendiente { color: var(--ink-muted); font-size: var(--text-micro); }
 
 .tabla-vacio { padding: var(--space-7) var(--space-5); max-width: 36rem; }

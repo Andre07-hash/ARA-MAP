@@ -162,7 +162,10 @@ const terreno = async (page, id) => (await llamar(page, 'GET', `/api/inventario/
 
 const fila = (page, id) => page.locator(`tr[data-id="${id}"]`);
 const celda = (page, id, col) => page.locator(`tr[data-id="${id}"] td[data-col="${col}"]`);
-const textoCelda = async (page, id, col) => (await celda(page, id, col).innerText().catch(() => '')).trim();
+// A file cell also holds its "Elegir…" button: its text is the summary alone.
+const textoCelda = async (page, id, col) => (await (/^core:(archivos|kmz)$/.test(col)
+  ? celda(page, id, col).locator('.archivos-celda, .ranura-pendiente').first() : celda(page, id, col))
+  .innerText().catch(() => '')).trim();
 const listo = (page) => page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
 const estadoMapa = async (page) => (await page.locator('.previa-estado').innerText().catch(() => '')).trim();
 const foto = async (page, nombre) => { if (SHOTS) await page.screenshot({ path: join(SHOTS, `${nombre}.png`) }); };

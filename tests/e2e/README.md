@@ -39,6 +39,18 @@ node contornos-medicion.mjs     # tiempos y memoria (opcional: archivos de lími
 `CHROMIUM=/ruta/a/chrome` usa ese binario en lugar del canal `chrome`.
 `CONTORNOS_EVIDENCIA=/ruta` guarda capturas y un resumen JSON.
 
+## Elegir PDF/KMZ desde las celdas de la tabla
+
+Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:
+administrador y operador, asociación a la fila, selección y activación
+explícitas del KMZ, reemplazo inválido, selector cancelado, teclado y filas
+sin permiso. Levanta y borra su propio servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-elegir.mjs                       # ELEGIR_CAPTURAS=carpeta para capturas
+```
+
 ## Tabla de empleados (2A)
 
 Recorridos integrados: servidor real, sesiones reales, Chrome real. Cada

@@ -1,0 +1,11 @@
+{"mutacion":"ninguna","resultado":"control: pasa","pruebas_que_fallan":[]}
+{"mutacion":"R3-B1 la cancelación no lleva la vida de la subida","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B1 la cancelación no revisa la vida tras esperar","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B2 no avisa la pérdida de acceso","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B3 contenido ausente vuelve a ser terminal","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B3 una completación sin resultado se da por terminada","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B4 abortar suelta el permiso de inmediato","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B4 un permiso viejo suelta el de otro","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B5 ni el digest ni la instalación revisan el alcance","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B5 el cuerpo listo sobrevive a su alcance","resultado":"detectada","pruebas_que_fallan":[]}
+{"mutacion":"R3-B5 el PUT no revisa el alcance tras leer","resultado":"detectada","pruebas_que_fallan":[]}

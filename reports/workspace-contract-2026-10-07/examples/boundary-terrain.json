@@ -1,0 +1,33 @@
+{
+  "_note": "Fictional contract example. record.ubicacion.geometria descriptor is mapped to rendererRow.geometria by A; full bodies go separately in options.geometrias as a Map. No storage URL, credentials or real terrain data.",
+  "record": {
+    "id": "fictional-terrain-1",
+    "base_id": "fictional-work-base-1",
+    "version": 1,
+    "draft": {"terreno": null, "lat": null, "lon": null, "superficie_m2": null, "notas_internas": null},
+    "ubicacion": {
+      "modo": "geometria",
+      "xy": "sin_dato",
+      "geometria": {
+        "id": "fictional-geometry-1",
+        "archivo_version_id": "fictional-file-version-1",
+        "utilizable": true,
+        "bbox": [-100.4, 20.6, -100.396, 20.603],
+        "punto_interior": {"type": "Point", "coordinates": [-100.398, 20.6015]}
+      }
+    }
+  },
+  "geometryBodiesById": {
+    "fictional-geometry-1": {
+      "geojson": {
+        "type": "MultiPolygon",
+        "coordinates": [[[[-100.4, 20.6], [-100.396, 20.6], [-100.396, 20.603], [-100.4, 20.603], [-100.4, 20.6]]]]
+      },
+      "bbox": [-100.4, 20.6, -100.396, 20.603],
+      "punto_interior": {"type": "Point", "coordinates": [-100.398, 20.6015]},
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5
+    }
+  }
+}

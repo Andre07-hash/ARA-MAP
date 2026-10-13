@@ -1,5 +1,7 @@
 # ARA Map
 
+**Plan vigente de entrega (12 de octubre de 2026): [acuerdo de MVP y backlog](PLAN_DE_ENTREGA.md).** Leerlo antes de retomar trabajo: portal privado de 50–100 terrenos, prioridad al almacenamiento duradero de KMZ/PDF y entrega mínima. La ruta actual del piloto es Render + Neon + Supabase gratuitos; las instrucciones de Vercel que siguen son antecedentes.
+
 Mapa interactivo de los terrenos en análisis. Toma los archivos de Excel del
 registro (`Base Terrenos MM.AA.xlsx`), los dibuja sobre un mapa de México y
 permite guardarlos, compararlos entre meses y filtrarlos para descartar rápido
@@ -10,13 +12,15 @@ compartida en Neon Postgres, accesible desde otras computadoras.
 
 ## Desarrollo desde GitHub — prioridad actual
 
+El alcance original de la [tabla maestra interactiva, archivos PDF, KMZ y roles](reports/master-table-plan/MASTER_PLAN.md) se conserva como referencia funcional. El [acuerdo de entrega y backlog](PLAN_DE_ENTREGA.md) determina qué cerrar ahora y qué aplazar: no esperar todas las fases para entregar el portal privado. La conexión automática con Excel/OneDrive y BigQuery siguen aplazados.
+
 Repositorio privado: [Andre07-hash/ARA-MAP](https://github.com/Andre07-hash/ARA-MAP).
 El código de `main` incluye trabajo de inventario y autenticación que todavía
 no corresponde a la versión publicada el 1 de octubre. La descripción del
 sitio publicado que sigue es histórica; no demuestra que `main` pueda
 desplegarse directamente sobre la base de producción.
 
-Antes de continuar Excel + BigQuery, completar la
+Para preparar el entorno de desarrollo, conservar la
 [preparación de GitHub y Vercel](reports/github-vercel-readiness-2026-10-05/START_HERE.md).
 Trabajar con ramas y pull requests; ejecutar los checks contra datos de prueba.
 Los despliegues automáticos están deshabilitados en `vercel.json` hasta separar
@@ -24,7 +28,7 @@ Preview de Production y verificar esquema, cuentas y arranque de una copia limpi
 Esta opción no impide un despliegue manual por CLI.
 
 Las instrucciones de [Excel + BigQuery](reports/excel-bigquery-developer-handoff-2026-10-05/START_HERE.md)
-son el siguiente hito después de esa preparación. No reanudar el catálogo público.
+se conservan como referencia histórica; ya no son el siguiente hito. No reanudar ese trabajo ni ampliar el catálogo público por seguir un paquete anterior.
 
 ## Publicar en Vercel
 

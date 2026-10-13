@@ -1,0 +1,5 @@
+{"backend": "sqlite", "probe": "nul_name", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"nombre": "Contiene caracteres no admitidos."}}}}
+{"backend": "sqlite", "probe": "surrogate_name", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"nombre": "Contiene caracteres no admitidos."}}}}
+{"backend": "sqlite", "probe": "nul_option", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"opciones": "Contiene caracteres no admitidos."}}}}
+{"backend": "sqlite", "probe": "date_trailing_newline", "status": 422, "stored": {}}
+{"backend": "sqlite", "probe": "surrogate_value", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"custom:55f2eee5-8ced-4206-9208-5a67aa54dac9": "Contiene caracteres no admitidos."}}}}

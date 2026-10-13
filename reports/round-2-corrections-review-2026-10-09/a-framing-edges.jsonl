@@ -1,0 +1,6 @@
+{"case": "superscript_header_only", "statuses": [400], "closed": true, "sent_body_bytes": 0}
+{"case": "negative_header_only", "statuses": [400], "closed": true, "sent_body_bytes": 0}
+{"case": "over_limit_header_only", "statuses": [413], "closed": true, "sent_body_bytes": 0}
+{"case": "conflicting_lengths", "statuses": [401, 200], "closed": true, "sent_body_bytes": 64}
+{"case": "empty_length", "statuses": [401, 200], "closed": true, "sent_body_bytes": 64}
+{"case": "empty_then_chunked_encoding", "statuses": [401, 200], "closed": true, "sent_body_bytes": 64}

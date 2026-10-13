@@ -1,0 +1,80 @@
+  "POST /api/inventario/terrenos HTTP/1.1" 409 -
+Traceback (most recent call last):
+  File "/tmp/ara-a-review-mWCBZa/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 54, in base_listing
+    return _listar(request, inventario.SCOPED_QUERY, base_id)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 65, in _listar
+    terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
+                                      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/repo/inventario.py", line 99, in listar
+    rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.InvalidTextRepresentation: invalid input syntax for type double precision: "not-a-number"
+CONTEXT:  unnamed portal parameter $2 = '...'
+  "GET /api/maestra/bases/451b1e5d-9b48-41ed-9754-ec79973b1625/terrenos?sort=asking_price&cursor=WyJhc2tpbmdfcHJpY2UiLCAibm90LWEtbnVtYmVyIiwgIjFkNDc3NmQyLTI5NTMtNGQxYS1iNDI0LTczMDIxODBmMzYyMSJd HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-a-review-mWCBZa/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 54, in base_listing
+    return _listar(request, inventario.SCOPED_QUERY, base_id)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 65, in _listar
+    terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
+                                      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/repo/inventario.py", line 99, in listar
+    rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.NumericValueOutOfRange: "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" is out of range for type double precision
+  "GET /api/maestra/bases/451b1e5d-9b48-41ed-9754-ec79973b1625/terrenos?sort=asking_price&cursor=WyJhc2tpbmdfcHJpY2UiLCAxMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMCwgImRlZjNmOGY1LWQzZTItNDg1Ny04OTdiLWNlNWU2NzhjZDNjOSJd HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-a-review-mWCBZa/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 54, in base_listing
+    return _listar(request, inventario.SCOPED_QUERY, base_id)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 65, in _listar
+    terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
+                                      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/repo/inventario.py", line 99, in listar
+    rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedFunction: operator does not exist: text > smallint
+LINE 18: ...eeeeeiiiiiiiioooooooooouuuuuuuunncc') COLLATE "C" > $2 OR (t...
+                                                              ^
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+  "GET /api/maestra/bases/451b1e5d-9b48-41ed-9754-ec79973b1625/terrenos?sort=terreno&cursor=WyJ0ZXJyZW5vIiwgNSwgIjNkMTBkNjZhLWU3NjAtNDE3Mi1hMDE3LWVhYjJhM2FhY2E0NCJd HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-a-review-mWCBZa/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 54, in base_listing
+    return _listar(request, inventario.SCOPED_QUERY, base_id)
+  File "/tmp/ara-a-review-mWCBZa/server/api/inventario.py", line 65, in _listar
+    terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
+                                      ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/repo/inventario.py", line 99, in listar
+    rows = conn.execute(pagina_sql + " LIMIT ?", (*params, *p_tras, q["limit"] + 1)).fetchall()
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-a-review-mWCBZa/server/postgres.py", line 96, in execute
+    return Cursor(self.raw.execute(statement, params), generated)
+                  ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrejasso/Desktop/ARA Map/.venv-dev/lib/python3.14/site-packages/psycopg/connection.py", line 304, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.UndefinedFunction: operator does not exist: text > double precision
+LINE 18: ...eeeeeiiiiiiiioooooooooouuuuuuuunncc') COLLATE "C" > $2 OR (t...
+                                                              ^
+HINT:  No operator matches the given name and argument types. You might need to add explicit type casts.
+  "GET /api/maestra/bases/451b1e5d-9b48-41ed-9754-ec79973b1625/terrenos?sort=terreno&cursor=WyJ0ZXJyZW5vIiwgTmFOLCAiZjJjZjYxYWMtMGZhMi00NjFlLTlhMDctOTVmN2MxZjNhZGJjIl0= HTTP/1.1" 500 -

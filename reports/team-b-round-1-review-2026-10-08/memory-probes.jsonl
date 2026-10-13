@@ -1,0 +1,4 @@
+{"probe":"unaccounted_layer_array","observed":{"budget":2400008,"ledger":2400008,"visibleArrayBytes":80000,"actualTypedArrayBytes":2480008}}
+{"probe":"synchronous_post_failure","observed":{"thrown":"injected synchronous post failure","state":"listo","failures":[],"terminated":false,"retainedBytes":128,"copies":1}}
+{"probe":"silent_startup","observed":{"deadlineMs":10,"waitedMs":60,"state":"iniciando","reason":null}}
+{"probe":"uncapped_waiting_jobs","observed":{"queued":100,"allocatedJobs":0,"scheduledCallbacks":1}}

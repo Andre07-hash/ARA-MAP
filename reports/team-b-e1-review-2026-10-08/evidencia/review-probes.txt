@@ -1,0 +1,4 @@
+BROWSER 154.0.8037.98
+CANVAS_DIMENSIONS {"width":1440,"height":768,"maskPixels":1105920,"coverageLoopPixels":768000}
+LONG_TASK_NEGATIVE_CONTROL {"t0":138,"t1":288,"entries":[{"start":132.90000000596046,"duration":155}],"reportedByStartFilter":[],"overlapping":[{"start":132.90000000596046,"duration":155}]}
+WORKER_MEMORY {"before":{"mainBytes":32641632,"mainEntries":34,"worker":{"reviewStats":true,"entries":34,"bytes":32641632}},"reset":{"reviewStats":true,"entries":0,"bytes":0}}

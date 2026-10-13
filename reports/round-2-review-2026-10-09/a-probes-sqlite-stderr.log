@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/tmp/ara-r2-a-EghHP8/server/app.py", line 219, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-r2-a-EghHP8/server/api/columnas.py", line 109, in create
+    json.dumps(cuerpo, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800' in position 20: surrogates not allowed
+  "POST /api/maestra/bases/28b01f7e-a5ea-4196-999f-5c94cea0ddf8/columnas HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/tmp/ara-r2-a-EghHP8/server/app.py", line 219, in _dispatch
+    result = handler(request)
+  File "/tmp/ara-r2-a-EghHP8/server/api/inventario.py", line 171, in update
+    return {"terreno": repo.update(conn, inventory_id, expected, fields,
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                   tuple(dict.fromkeys(confirm)), actor, custom)}
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 474, in update
+    revision_id = _siguiente_revision(conn, current, draft, stamps, actor, ahora,
+                                      current["base_id"], guardados if tocados else None)
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 603, in _siguiente_revision
+    return _insert_revision(conn, current["id"], current["revision_number"] + 1, draft, stamps,
+                            actor, ahora, previa["extra_json"], base_id, custom_json)
+  File "/tmp/ara-r2-a-EghHP8/server/repo/inventario.py", line 633, in _insert_revision
+    conn.execute(f"INSERT INTO inventory_revision ({', '.join(columns)})"
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 f" VALUES ({', '.join('?' for _ in columns)})", tuple(params))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'utf-8' codec can't encode character '\ud800' in position 120: surrogates not allowed
+  "PATCH /api/inventario/terrenos/b4ef35c8-783e-458c-8045-4a98af397276 HTTP/1.1" 500 -

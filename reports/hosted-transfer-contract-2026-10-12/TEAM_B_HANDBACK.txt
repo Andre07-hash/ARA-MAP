@@ -1,0 +1,59 @@
+This works from A’s 4670df7, read-only. #28, #30 and A’s branch are unchanged.
+Request. GET /api/archivos/versiones/:vid/descarga?desde=k·3 MiB.
+What the server does on every request:
+1. Re-authorize the request: session, scope (archivos.ver), version visible to this account and disponible.
+2. Read the complete final object into one buffer (at most 25 MiB) with the existing leer.
+3. Check its size and SHA-256 against the version row. A mismatch returns 503 objeto_final_inconsistente and no bytes.
+4. Return bytes [desde, desde + 3 MiB) from that same buffer.
+Reply. It is 3 MiB or less, with these headers:
+- X-Archivo-Version-Id, X-Archivo-Sha256, X-Archivo-Bytes;
+- X-Archivo-Desde, X-Archivo-Longitud, X-Archivo-Siguiente;
+- the existing no-store and CSP headers.
+Errors. A desde that is not a 3 MiB boundary, or lies outside the file, returns 400 desplazamiento_invalido.
+Browser. It checks that the headers and lengths are the same on every slice. It hashes the whole file before showing anything.
+Removed:
+- the lectura value and any verification token;
+- the ranged leer (it was needed only for this);
+- the new registry.
+componer stays: it is needed for uploads.
+Cost to disclose. A 25 MiB PDF takes 9 requests and about 225 MiB of storage reads. The hosted proof will record the number of requests, the bytes read from storage and the time taken for a full 25 MiB PDF download.
+Never exposed: no reply or log contains credentials, tokens, bucket names, object keys or paths. Responses carry only the codes above.
+Dependency. boto3>=1.38.38,<1.44; python_version >= '3.10', cloud only, imported lazily inside the S3 factory. The exact version is pinned in the cloud lock at implementation; the current release is 1.43.112.
+Basis (botocore changelog and PyPI metadata):
+- S3 conditional writes (If-None-Match) arrived in 1.35.2.
+- From 1.36.0, the client calculates checksums by default. We pass SHA-256 explicitly.
+- From 1.38.38, AssumeRoleWithWebIdentity can be called without pre-configured credentials, so there are no long-lived keys.
+- 1.43.0 dropped Python 3.9, and boto3 1.43.112 requires Python 3.10 or later and botocore below 1.44.0. That fits a cloud runtime of 3.10 or later; A confirms the runtime.
+- Local startup and the Python 3.9 floor never import boto3.
+Credential flow:
+- A sets the request’s OIDC token in a context variable in api/index.py and resets it in finally.
+- B’s provider calls sts.assume_role_with_web_identity(RoleArn, RoleSessionName, WebIdentityToken, DurationSeconds=3600) and wraps the result in botocore RefreshableCredentials.create_from_metadata(…, refresh_using=…). That is SDK code; there is no custom signing.
+- The refresh function reads the current request’s token. Refreshes start about 15 minutes before expiry, and become mandatory from about 10 minutes before.
+Warm instances and simultaneous requests:
+- One botocore session and one S3 client are created per warm instance, under a lock, and reused. boto3 clients are thread-safe; sessions are not shared outside that lock.
+- RefreshableCredentials serializes refresh with its own lock, so simultaneous requests trigger only one STS call.
+- The role identity covers the project and environment, not the end user; user authorization stays in the app. Credentials obtained during one request may therefore serve others in the same instance.
+- Attempt tracking and cleanup reporting for uncertain final writes.
+- No deletion of a collision winner.
+- The database-reference check before deleting this attempt’s nonce.
+- 400 archivo_vacio before a pending row is created (for A to review).
+- Missing-chunk recovery only within the 15-minute upload window; after it, cancel and then a fresh start with a fresh idempotency key.
+- Restore picks the object version matching the recorded size and SHA-256, then re-hashes it in full. Missing or inconsistent referenced bytes fail restore acceptance.
+B:
+- server/almacen.py: adds componer only;
+- server/almacen_s3.py: new adapter plus the STS credential provider;
+- server/archivos.py: chunk staging, completion by composition with attempt tracking, start store check and archivo_vacio;
+- server/api/archivos.py: ?parte, sliced descarga, factory error mapping;
+- web/lib/archivos.js and web/components/archivos/subida.js: chunked upload, sliced download, the expired-chunk flow;
+- tests;
+- scripts/verificar_archivos.py: new, a read-only restore verifier (placement for A to confirm).
+Estimate: B about 5 days. Dropping ranged reads saves about half a day; the credential provider and its tests add about half a day. A: about half a day to a day.
+1. The OIDC context variable’s name, the header it is read from, and its reset.
+2. The pyproject.toml entry and the confirmed cloud Python version (3.10 or later).
+3. The configuration names ARA_MAP_ARCHIVOS_S3_BUCKET, ARA_MAP_ARCHIVOS_S3_REGION and ARA_MAP_ARCHIVOS_S3_ROLE_ARN, and one role and one bucket per environment.
+4. Injecting fabrica_desde_entorno into the cloud entry, with the error mapping above.
+5. The archivo_vacio validation.
+6. The route 3 ?parte and route 9 slice contracts.
+7. The restore session and lease policy (A consolidates it).
+8. Where the verifier lives (scripts/).
+Stopped before implementation, dependency installation, provisioning, credentials, deployment or merge.

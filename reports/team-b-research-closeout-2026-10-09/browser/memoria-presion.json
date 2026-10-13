@@ -1,0 +1,122 @@
+{
+ "navegador": "154.0.8037.99",
+ "escenario": "presion",
+ "resultado": {
+  "cacheHit": {
+   "capa": 4,
+   "antes": {
+    "fijos": 0,
+    "libres": 3
+   },
+   "rechazado": {
+    "estado": "sin_memoria",
+    "cuerpoEnRegistro": true,
+    "fijos": 0,
+    "errores": [],
+    "capas": {
+     "reservado": 0,
+     "real": 0,
+     "n": 0,
+     "preparados": 0,
+     "nPreparados": 0,
+     "fueraDeRegistro": 0,
+     "idsFuera": []
+    }
+   },
+   "final": {
+    "estado": "listo",
+    "errores": [],
+    "capas": {
+     "reservado": 4,
+     "real": 4,
+     "n": 1,
+     "preparados": 480052,
+     "nPreparados": 1,
+     "fueraDeRegistro": 0,
+     "idsFuera": []
+    }
+   },
+   "erroresPagina": []
+  },
+  "cuerpoNuevo": {
+   "prep": 480052,
+   "capa": 4,
+   "rechazado": {
+    "estado": "sin_memoria",
+    "cuerpoEnRegistro": true,
+    "fijos": 0,
+    "errores": [],
+    "ledger": {
+     "preparado": 480052,
+     "copia": 0,
+     "raster": 66628809,
+     "capa": 0
+    }
+   },
+   "final": {
+    "estado": "listo",
+    "errores": [],
+    "capas": {
+     "reservado": 4,
+     "real": 4,
+     "n": 1,
+     "preparados": 480052,
+     "nPreparados": 1,
+     "fueraDeRegistro": 0,
+     "idsFuera": []
+    }
+   },
+   "erroresPagina": []
+  },
+  "olvidoBajoPresion": {
+   "trasA": {
+    "pintado": 2,
+    "listo": 1
+   },
+   "fallo": {
+    "estados": {
+     "listo": 1,
+     "sin_trabajador": 2
+    },
+    "cliente": "fallido",
+    "motivo": "envio",
+    "ledger": {
+     "preparado": 2880164,
+     "copia": 0,
+     "raster": 0,
+     "capa": 24008
+    },
+    "errores": []
+   },
+   "reintento": {
+    "estados": {
+     "listo": 1,
+     "pintado": 2
+    },
+    "cliente": "listo",
+    "errores": [],
+    "pico": 7.9
+   },
+   "erroresPagina": []
+  },
+  "controlNegativo": {
+   "antes": [],
+   "evictado": true,
+   "reservaConcedida": true,
+   "errores": [
+    "map 0: live layers retain 480052 B of prepared bodies outside the registry (g-t-0)"
+   ],
+   "capas": {
+    "reservado": 4,
+    "real": 4,
+    "n": 1,
+    "preparados": 480052,
+    "nPreparados": 1,
+    "fueraDeRegistro": 480052,
+    "idsFuera": [
+     "g-t-0"
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,23 @@
+P2 accepted pin is ancestor; scoped trees byte-identical: 5d0844cfd678c2f7ec55ddb4b364275482d1a801
+parser accepted pin is ancestor; scoped trees byte-identical: efc362818ba64618dbfc23556db8678cde525336
+storage accepted pin is ancestor; scoped trees byte-identical: c375a1dda404cc2bc5689fe0c0e5c6d5ad545d53
+E1 accepted pin is ancestor; scoped trees byte-identical: eed9a4cb404406b8b261803c38947e8297a5edec
+All baseline changes from P2 confined to accepted parser/storage/renderer trees, reports, and reviewed parser test repair.
+diff --git a/tests/test_kmz.py b/tests/test_kmz.py
+index b1906e6..998af61 100644
+--- a/tests/test_kmz.py
++++ b/tests/test_kmz.py
+@@ -116,7 +116,12 @@ class Forma(unittest.TestCase):
+             if ruta.name == "kmz.py":
+                 continue
+             with self.subTest(str(ruta)):
+-                self.assertIsNone(re.search(r"\bkmz\b", ruta.read_text(encoding="utf-8")))
++                # Round 1 baseline (integration repair, Team A): the attachment schema in
++                # server/db.py stores 'kmz' as a file type, so the bare word is no longer
++                # evidence of a connection. What this test guards is that nothing imports
++                # the parser yet.
++                self.assertIsNone(re.search(
++                    r"^\s*(?:import|from)\b[^\n#]*\bkmz\b", ruta.read_text(encoding="utf-8"), re.M))
+ 
+ 
+ class Aceptados(unittest.TestCase):

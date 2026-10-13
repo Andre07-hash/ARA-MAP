@@ -1,0 +1,39 @@
+test_a_role_without_the_read_capability_is_refused_the_same_way (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_batches_larger_than_one_chunk_split_without_changing_anything (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_invalid_sessions_fail_the_same_way_and_empty_input_stays_empty (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_operator_scope_hides_other_bases_archived_bases_and_unassigned (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_projections_counts_order_and_privacy (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_same_output_and_order_for_every_account_and_input (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_scope_changes_between_calls_are_seen_at_once (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_statement_count_is_bounded_by_batches_not_by_terrains (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_the_auth_helper_decides_like_require_terreno_for_each_read_capability (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_the_auth_helper_refuses_write_capabilities (tests.test_resumenes_lote.ResumenesLoteSQLite) ... ok
+test_a_blank_terrain_has_empty_summary_and_no_location_on_every_surface (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_a_conflict_answer_carries_the_current_siblings (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_a_page_is_bounded_and_counted_by_the_server (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_a_pending_unusable_or_rejected_replacement_keeps_the_previous_boundary (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_an_active_boundary_locates_a_terrain_without_xy_and_changes_no_cell (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_another_accounts_pending_upload_shows_no_metadata_in_a_row (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_no_schema_change (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_retiring_the_kmz_falls_back_to_valid_xy_or_to_nothing (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_rows_carry_no_body_key_or_candidate_and_stay_small (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_scope_decides_every_summary_and_descriptor (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_the_public_catalog_gains_nothing (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_xy_alone_locates_as_a_point_and_bad_xy_does_not (tests.test_archivos_http.ResumenesPostgres) ... skipped 'No Postgres test connection configured'
+test_a_blank_terrain_has_empty_summary_and_no_location_on_every_surface (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_a_conflict_answer_carries_the_current_siblings (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_a_page_is_bounded_and_counted_by_the_server (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_a_pending_unusable_or_rejected_replacement_keeps_the_previous_boundary (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_an_active_boundary_locates_a_terrain_without_xy_and_changes_no_cell (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_another_accounts_pending_upload_shows_no_metadata_in_a_row (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_no_schema_change (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_retiring_the_kmz_falls_back_to_valid_xy_or_to_nothing (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_rows_carry_no_body_key_or_candidate_and_stay_small (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_scope_decides_every_summary_and_descriptor (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_the_public_catalog_gains_nothing (tests.test_archivos_http.ResumenesSQLite) ... ok
+test_xy_alone_locates_as_a_point_and_bad_xy_does_not (tests.test_archivos_http.ResumenesSQLite) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 7.497s
+
+OK (skipped=12)

@@ -1,0 +1,43 @@
+✔ budget: reserve before allocation, refuse beyond the total, peak and categories (0.854667ms)
+✔ budget: relievers run before refusing; release notifications are coalesced (2.261084ms)
+✔ registry: one reservation per body, pinned bodies are never evicted and stay counted (0.367208ms)
+✖ planner: exact reservation before allocation, cap on jobs, release on cancel (69.508458ms)
+✔ planner: refused memory is "sin_memoria" with nothing allocated; waits while releases are pending (23.007083ms)
+✔ client: copies reserved before posting and counted until the worker acknowledges (2.902583ms)
+✔ client: pinned copies are not evicted; a refused post posts nothing (0.540792ms)
+✔ registry eviction while the worker copy is posted, then while its forget awaits acknowledgement (2.584917ms)
+✔ client: a request cancelled before it starts is not run; one cancelled late has its bitmap closed (2.256459ms)
+✔ client failure "error": explicit reason, worker gone, every reservation released (2.878417ms)
+✔ client failure "silencio": explicit reason, worker gone, every reservation released (202.570042ms)
+✔ client failure "sinOffscreen": explicit reason, worker gone, every reservation released (0.256625ms)
+✔ client failure "constructor": explicit reason, worker gone, every reservation released (0.711167ms)
+✔ controller: a refused raster reports only the final state and does not loop (2.751625ms)
+✔ budget: relievers free only the remaining shortage, counting releases still awaiting acknowledgement (0.087958ms)
+✔ controller: a refused map retries when held items become evictable, without any release (1.368083ms)
+✔ worker copies follow registry membership: forgotten when the body leaves, deferred while a request pins it (2.840958ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 16
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 366.480208
+
+✖ failing tests:
+
+test at reports/team-b-display-memory-budget-2026-10-08/pruebas/memoria.test.mjs:153:1
+✖ planner: exact reservation before allocation, cap on jobs, release on cancel (69.508458ms)
+  AssertionError [ERR_ASSERTION]: cancelled job reported
+      at file:///private/tmp/ara-memory-review-aAxIgo/reports/team-b-display-memory-budget-2026-10-08/pruebas/memoria.test.mjs:172:76
+      at terminarTrabajo (file:///private/tmp/ara-memory-review-aAxIgo/reports/team-b-display-memory-budget-2026-10-08/prototipo/planificador.js:62:35)
+      at ciclo (file:///private/tmp/ara-memory-review-aAxIgo/reports/team-b-display-memory-budget-2026-10-08/prototipo/planificador.js:82:23)
+      at TestContext.<anonymous> (file:///private/tmp/ara-memory-review-aAxIgo/reports/team-b-display-memory-budget-2026-10-08/pruebas/memoria.test.mjs:173:16)
+      at async Test.run (node:internal/test_runner/test:981:9)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:678:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'fail'
+  }

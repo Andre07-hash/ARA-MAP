@@ -150,6 +150,26 @@ async function clicEnMapa(page, id) {
     await esperar(450);
   }
 }
+// Basemap changes must preserve the selected boundary and avoid data reloads.
+async function comprobarFondos(s, id) {
+  const { page } = s;
+  const antes = { mapa: await mapa(page), previa: await previa(page), api: s.api.length };
+  for (const [nombre, key] of [['Satélite', 'satelite'], ['Calles', 'calles'], ['Claro', 'claro'], ['Satélite', 'satelite']]) {
+    await page.getByRole('radio', { name: nombre, exact: true }).click();
+    igual(await page.locator('.previa-mapa').getAttribute('data-basemap'), key, 'fondo aplicado');
+    igual(await page.getByRole('radio', { name: nombre, exact: true }).getAttribute('aria-checked'), 'true', 'selector');
+    igual(await mapa(page), antes.mapa, 'mismos terrenos y selección');
+    igual(await previa(page), antes.previa, 'mismo contorno y zoom');
+    igual((await posicion(page, id))?.contorno, true, 'contorno visible');
+  }
+  igual(s.api.length, antes.api, 'cambiar fondo no pide datos ni geometrías');
+  await aTabla(page);
+  await aMapa(page);
+  igual(await page.locator('.previa-mapa').getAttribute('data-basemap'), 'satelite', 'fondo conservado al volver');
+  igual((await mapa(page)).seleccion, id, 'selección conservada');
+  igual((await previa(page)).cuerpos, 1, 'un contorno');
+}
+
 async function filtrar(page, selector, valor) {
   await page.locator(selector).selectOption(valor);
   await listo(page);
@@ -250,6 +270,7 @@ await revisar('administrador: el círculo de un terreno sin X/Y carga su contorn
   const g1 = (await terreno(ada.page, conContorno)).ubicacion.geometria.id;
   cierto(cuerposPedidos(ada).slice(antes).every((l) => l.includes(`/geometrias/${g1}/`)), 'sólo su cuerpo');
   await foto(ada.page, '02-administrador-contorno-seleccionado');
+  await comprobarFondos(ada, conContorno);
   await ada.page.getByRole('button', { name: 'Encuadrar todo' }).click();
   await esperar(500);
   await clicEnMapa(ada.page, conContorno2);
@@ -534,6 +555,7 @@ await revisar('operador: Tabla / Mapa en su base; nunca recibe filas ni contorno
     `sólo la ruta de su base: ${privadas}`);
   await clicEnMapa(olga.page, conContorno);
   await hasta(async () => (await posicion(olga.page, conContorno))?.contorno === true, 'contorno en el operador');
+  await comprobarFondos(olga, conContorno);
   await foto(olga.page, '03-operador-mapa');
   // The server refuses what the interface never asks for.
   igual((await llamar(olga.page, 'GET', `/api/maestra/bases/${ajena.id}/terrenos?limit=200`)).status, 404, 'lista ajena');

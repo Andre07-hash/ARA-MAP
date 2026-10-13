@@ -19,13 +19,14 @@ import { fmtCount } from "../../lib/format.js";
 import { ubicacionDe } from "../../lib/geometria.js";
 import { itemDeInventario } from "../../lib/inventario.js";
 import { createMapCanvas } from "../map/MapCanvas.js";
+import { BasemapSwitcher } from "../map/BasemapSwitcher.js";
 
 const COLOR = "#1f6feb";
-const BASEMAP = "claro";
 
 export function createVistaPrevia({ cargador = () => null, onSeleccion, onError } = {}) {
   let vivo = true;
   let canvas = null;
+  let basemap = "claro";
   let filas = [];                 // renderer rows of the page
   let seleccion = null;           // terrain id
   let geometrias = new Map();     // at most one loaded body, by geometry id
@@ -54,10 +55,23 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     type: "button", class: "btn btn-quiet", onclick: () => encuadrarTodo(),
   }, "Encuadrar todo");
   const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de los terrenos de la vista" });
+  const fondos = el("div", { class: "previa-fondos" });
+  function pintarFondos() {
+    fondos.replaceChildren(BasemapSwitcher({
+      activo: basemap,
+      onChange: (key) => {
+        basemap = key;
+        canvas?.setBasemap(key);
+        pintarFondos();
+        fondos.querySelector('[aria-checked="true"]')?.focus();
+      },
+    }));
+  }
+  pintarFondos();
   const element = el("section", { class: "previa", "aria-labelledby": "previa-titulo" },
     el("header", { class: "previa-cabecera" }, Object.assign(titulo, { id: "previa-titulo" }), cuenta),
     nota, lienzo,
-    el("div", { class: "previa-pie" }, estado, reintentar, escala, encuadre));
+    el("div", { class: "previa-pie" }, fondos, estado, reintentar, escala, encuadre));
 
   const filaDe = (id) => filas.find((f) => f.id === id) ?? null;
   const decir = (texto, conReintento = false) => {
@@ -87,7 +101,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
         onSelect: (id) => { seleccionar(id, { desdeMapa: true }); },
         onDoubleSelect: (id) => { canvas.zoomToScale(id); },
       });
-      canvas.setBasemap(BASEMAP);
+      canvas.setBasemap(basemap);
       encuadrar = true;
     }
     canvas.invalidate();

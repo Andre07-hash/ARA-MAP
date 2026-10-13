@@ -1,15 +1,12 @@
-# Render Blueprint for the private pilot. Reviewed configuration only: nothing
-# is created or deployed by this file being in the repository. The operator
-# creates the service by hand from a reviewed commit (see the operator
-# checklist in reports/team-a-free-pilot-2026-10-12/).
-#
-# Free plan on purpose: no disk, no add-on, no paid instance. The service
-# sleeps when idle and keeps nothing on its own disk; all data lives in the
-# database and the private byte store named by the secrets below.
+# Render configuration for the definitive private portal.
+# The existing service publishes reviewed commits from main manually.
+# Free plan, auto-deploy off, no disk or paid add-ons. Data and file bytes
+# remain in the existing Neon database and private Supabase bucket.
 services:
   - type: web
     name: ara-map-piloto
     runtime: python
+    branch: main
     plan: free
     autoDeployTrigger: "off"   # deploys are manual, from a reviewed commit
     buildCommand: pip install -r requirements-hosted.txt

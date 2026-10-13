@@ -5,18 +5,26 @@ otro) que trabaje en este repositorio, en cualquier computadora. Aquí van las
 reglas estables. El estado del trabajo en curso vive en `reports/` y en los
 pull requests, no en este archivo.
 
-ARA Map es un mapa interactivo de terrenos en México: importa archivos de Excel
-o CSV, los dibuja, los filtra y los compara entre meses. Corre de dos formas con
-el mismo código: local en una Mac (SQLite) y en Vercel (Neon Postgres).
-[README.md](README.md) describe el producto para quien lo usa.
+ARA Map es el portal privado definitivo para registrar terrenos, editar su
+tabla y adjuntar PDF y KMZ. El sitio vigente es
+https://ara-map-piloto.onrender.com/; conserva «piloto» en su dirección, pero es
+el producto que se mantiene. Hosting: Render Free + Neon Postgres + Supabase
+Storage privado. La ejecución local usa SQLite y archivos locales de prueba.
+[README.md](README.md) describe el producto y
+[docs/DESARROLLO.md](docs/DESARROLLO.md) explica cómo trabajar en él.
+
+No hay asignaciones vigentes por «Team A / Team B». Se trabaja directamente
+con developers Claude Code, por cambios pequeños y pull requests. Los reportes
+anteriores se conservan como evidencia histórica, no como tareas pendientes.
 
 ## Antes de empezar
 
 1. `git fetch` y parte de `origin/main` actualizado. Varias personas y agentes
    trabajan en clones separados; lo que no está en GitHub no existe para los
    demás.
-2. Lee el `START_HERE.md` de la carpeta con fecha más reciente en `reports/`.
-   Si esa carpeta trae `COORDINATION.md`, sigue su protocolo de entrega.
+2. Lee `docs/DESARROLLO.md` y la tarea actual del propietario. `main` es la
+   base única de los cambios nuevos; Render publica desde esa rama. Los
+   checkpoints y protocolos A/B de `reports/` no sustituyen estas instrucciones.
 3. Revisa los pull requests abiertos (`gh pr list`) para no duplicar ni pisar
    trabajo en curso. Un PR abierto puede traer instrucciones más nuevas que
    `main`.
@@ -50,7 +58,8 @@ fallar en el PR. Las pruebas de navegador de `tests/e2e/` son opcionales.
 | `server/db.py`, `server/postgres.py` | Adaptadores de SQLite (local) y Postgres (nube); esquema y migraciones |
 | `server/asistente/` | Asistente de importación: detección de tabla, encabezados y columnas |
 | `server/auth.py` | Autenticación y política de rutas públicas y privadas, compartida por local y nube |
-| `api/index.py` | Entrada de Vercel: un adaptador delgado sobre `server.app.Handler` |
+| `server/hosted.py` | Entrada de Render: Postgres y almacenamiento externo privado |
+| `api/index.py` | Adaptador histórico de Vercel; fuera del flujo de publicación actual |
 | `web/` | Frontend en JavaScript sin paso de build: `components/`, `lib/`, `styles/` |
 | `vendor/python/` | openpyxl incluido para que la app local no necesite instalar nada |
 | `scripts/` | Operación de la nube: migraciones, cuentas, esquema |
@@ -61,20 +70,25 @@ fallar en el PR. Las pruebas de navegador de `tests/e2e/` son opcionales.
 
 Estas reglas no admiten excepción sin autorización explícita del dueño.
 
-- **No desplegar a producción.** Fusionar a `main` no publica nada: el
-  despliegue automático de producción está apagado a propósito. Los despliegues
-  los hace quien tiene acceso al proyecto de Vercel, desde un commit revisado.
+- **Publicación manual en Render.** Fusionar a `main` no publica nada:
+  auto-deploy permanece apagado. El responsable publica un SHA revisado y con
+  CI verde cuando la tarea del propietario autoriza la publicación. Tener
+  permiso de escritura en GitHub no otorga acceso a Render ni a los secretos.
 - **No ejecutar `scripts/migrate_cloud.py` ni `scripts/setup_cloud.py` sin
   `--url-env` apuntando a una base desechable.** Sin esa opción pueden usar la
   configuración de producción y modificar datos. No sirven como diagnóstico.
-- **No cambiar la configuración de despliegue de paso.** `vercel.json`, las
-  variables de entorno de Vercel y la integración de Neon se cambian sólo en un
-  PR dedicado a eso.
+- **No cambiar infraestructura de paso.** `render.yaml`, variables de Render,
+  Neon y Supabase se cambian sólo en una tarea y PR dedicados. No reabrir
+  Vercel/S3/Blob ni rediseñar transferencias sin un problema concreto.
+- **Sin tarjeta ni pagos.** Mantener los planes gratuitos; no contratar
+  recursos, pruebas que se conviertan en pago ni ampliaciones de facturación.
 - **Un cambio de esquema es un paso de release.** Va con su migración, su
   prueba de migración y una nota en el reporte para quien despliega. La base de
   producción puede ir versiones atrás de `main`.
-- **Preview y Production usan bases distintas.** No conectar un entorno de
-  prueba a la base de producción.
+- **Pruebas separadas de la operación real.** Usar SQLite, Postgres y archivos
+  desechables. No conectar un servidor de desarrollo a la base ni al bucket
+  del sitio vigente. No modificar cuentas o datos alojados sin la autorización
+  concreta del propietario.
 
 ## Flujo de trabajo
 
@@ -87,9 +101,11 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   de fusionar. Marcar como draft lo que no está probado.
 - Correr `./verificar.sh` antes de cada push.
 - Commits pequeños con mensaje en inglés que diga qué cambia y por qué.
-- Al terminar, reportar qué pruebas se corrieron, en qué commit y qué quedó
-  sin verificar. Una prueba local, una en Postgres desechable y una en un
-  entorno publicado son evidencias distintas; decir cuál se tiene.
+- Al terminar, reportar el PR, SHA, comportamiento cambiado, pruebas afectadas
+  y límites. Distinguir pruebas locales, CI y comprobación publicada.
+- Revisión proporcional: bloquear acceso indebido, pérdida de datos y flujos
+  esenciales rotos. Reutilizar evidencia del código que no cambió; no repetir
+  suites grandes de navegador o memoria por mejoras menores sin una razón.
 - No reescribir historial compartido ni forzar push sobre ramas ajenas.
 
 ## Convenciones de código
@@ -125,8 +141,15 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
 - **Un mapa guardado es una copia congelada**, no un espejo de su base.
 - La columna `ID` del Excel es el número de fila, no un identificador estable.
   La identidad de un terreno es nombre + estado + municipio + superficie.
-- Un terreno sin coordenadas válidas no se dibuja; nunca se coloca a la
-  adivina.
+- En Tabla / Mapa, un terreno con contorno activo puede aparecer sin X/Y;
+  con X/Y válidas y sin contorno aparece como punto. Sin ambos no se dibuja.
+- Los terrenos existen primero como filas; después se adjuntan PDF y KMZ.
+  Un KMZ con un contorno válido se activa al completar; con varios candidatos
+  se elige y activa en el detalle; uno inválido conserva el contorno anterior.
+- La importación Excel/CSV heredada no carga la tabla maestra. La carga inicial
+  de filas se hace con `scripts/cargar_maestra.py`.
+- El fallo del mapa de «Base Terrenos 09.26 copy» sigue pendiente por decisión
+  del propietario. No retomarlo sin una tarea nueva.
 
 ## Datos y secretos
 

@@ -720,7 +720,17 @@ export function createTabla({
 
   /* This table's own writes keep the map's set current without gathering it
    * again. A set kept for another query (the filters moved since) cannot be
-   * patched, so it is marked stale; a set being gathered is gathered again. */
+   * patched, so it is marked stale; a set being gathered is gathered again.
+   * Under a search or a filter on the terrain's own fields, whether an edited
+   * or created row still belongs is the server's query to say, not this
+   * table's: such a write drops the set, and it is gathered again when the
+   * map is shown. Without those, only the base and the archive decide. */
+  const filtraPorCampos = () =>
+    Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno);
+  function descartarConjunto() {
+    olvidarConjunto();
+    pintarMapa();
+  }
   function anotarEscritura() {
     if (conjunto.clave && !conjuntoVigente()) conjunto = { ...conjunto, obsoleto: true };
     if (reunion) reunion = { ...reunion, cambiado: true };
@@ -730,9 +740,10 @@ export function createTabla({
     if (modo === "mapa") entregarAlMapa();
     pintarAvisoMapa();
   }
-  function reemplazarEnConjunto(terreno) {
+  function reemplazarEnConjunto(terreno, { campos = true } = {}) {
     anotarEscritura();
     if (!filaDelConjunto(terreno.id)) return;
+    if (campos && filtraPorCampos()) { descartarConjunto(); return; }
     if (fueraDeLaVista(terreno)) { quitarDelConjunto(terreno.id); return; }
     cambiarConjunto(conjunto.filas.map((t) => (t.id === terreno.id ? terreno : t)));
   }
@@ -745,6 +756,7 @@ export function createTabla({
   function agregarAlConjunto(terreno) {
     anotarEscritura();
     if (!conjuntoVigente() || filaDelConjunto(terreno.id)) return;
+    if (filtraPorCampos()) { descartarConjunto(); return; }
     cambiarConjunto([terreno, ...conjunto.filas], conjunto.total + 1);
   }
 
@@ -827,10 +839,11 @@ export function createTabla({
     // the terrain is on the grid's page.
     const enMapa = filaDelConjunto(terreno.id);
     if (enMapa) {
+      // Files, location, archive and base only: no field a search or filter reads.
       reemplazarEnConjunto({
         ...enMapa, archivos: terreno.archivos, ubicacion: terreno.ubicacion,
         ...(terreno.version >= enMapa.version ? { archived_at: terreno.archived_at ?? null, base_id: terreno.base_id ?? null } : {}),
-      });
+      }, { campos: false });
     }
     const actual = filaDe(terreno.id);
     if (!actual) return;

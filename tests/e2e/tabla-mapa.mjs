@@ -425,6 +425,95 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && !x.clave?.includes('Sonora') && x.filas.length === activos.length; }, 'sin filtro');
 });
 
+/* The same active query: a write in the grid that takes a terrain out of the
+ * filtered result (or a blank create that never matched) must not leave it in
+ * the map's set. Membership is decided by the server's query, not here. */
+async function escribirCelda(page, id, col, valor) {
+  const td = page.locator(`tr[data-id="${id}"] td[data-col="${col}"]`);
+  await td.focus();
+  await page.keyboard.press('Enter');
+  await td.locator('.tabla-editor').fill(valor);
+  await page.keyboard.press('Enter');
+  await page.locator(`tr[data-id="${id}"] td[data-col="${col}"]:not(.is-pendiente):not(.is-editando)`).waitFor();
+  await hasta(async () => (await terreno(page, id))?.draft?.[col.replace('core:', '')] === valor, 'no se guardó');
+}
+const primeraFila = (page) => page.locator('tr.tabla-fila').first().getAttribute('data-id');
+const reunido = (page, parte) => hasta(async () => { const m = await mapa(page); return m && !m.reuniendo && m.clave?.includes(parte) && m; },
+  `no se reunió ${parte}`);
+
+await revisar('misma consulta (estado): editar el estado de un terreno lo saca del mapa filtrado sin pulsar Actualizar', async () => {
+  await irA(ada.page, base.id);
+  await filtrar(ada.page, '#tabla-estado', 'Sonora');
+  await aMapa(ada.page);
+  await reunido(ada.page, 'estado=Sonora');
+  await aTabla(ada.page);
+  const id = await primeraFila(ada.page);
+  igual((await mapa(ada.page)).filas.includes(id), true, 'estaba en el conjunto');
+  await escribirCelda(ada.page, id, 'core:estado', 'Colima');
+  await aMapa(ada.page);
+  const m = await reunido(ada.page, 'estado=Sonora');
+  cierto(!m.filas.includes(id), 'el terreno que ya no es de Sonora sigue en el mapa filtrado');
+  igual(await posicion(ada.page, id), null, 'sigue dibujado');
+  // No change since: switching does not gather again.
+  const antes = reuniones(ada);
+  await aTabla(ada.page);
+  await aMapa(ada.page);
+  igual(reuniones(ada) - antes, 0, 'alternar sin cambios no vuelve a reunir');
+  await filtrar(ada.page, '#tabla-estado', '');
+});
+
+await revisar('misma consulta (búsqueda): renombrar un terreno lo saca del mapa de la búsqueda', async () => {
+  await aTabla(ada.page);
+  await ada.page.locator('#tabla-buscar').fill('Lote Mapa 01');
+  await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) === 10, 'búsqueda');
+  await listo(ada.page);
+  await aMapa(ada.page);
+  await reunido(ada.page, 'q=Lote');
+  await aTabla(ada.page);
+  const id = await primeraFila(ada.page);
+  await escribirCelda(ada.page, id, 'core:terreno', 'Predio Renombrado Ficticio');
+  await aMapa(ada.page);
+  const m = await reunido(ada.page, 'q=Lote');
+  igual(m.filas.length, 9, 'nueve siguen coincidiendo');
+  cierto(!m.filas.includes(id), 'el renombrado sigue en el mapa de la búsqueda');
+  await aTabla(ada.page);
+  await ada.page.locator('#tabla-buscar').fill('');
+  await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) > 10, 'sin búsqueda');
+  await listo(ada.page);
+});
+
+await revisar('misma consulta: una fila en blanco creada con un filtro activo no entra al mapa; sin filtros sí, sin reunir de nuevo', async () => {
+  await filtrar(ada.page, '#tabla-estado', 'Jalisco');
+  await aMapa(ada.page);
+  await reunido(ada.page, 'estado=Jalisco');
+  const enJalisco = (await mapa(ada.page)).filas.length;
+  await aTabla(ada.page);
+  const antesIds = await ada.page.locator('tr.tabla-fila').evaluateAll((f) => f.map((x) => x.dataset.id));
+  await ada.page.getByRole('button', { name: 'Agregar terreno' }).click();
+  await ada.page.locator('tr.is-nueva').first().waitFor();
+  const nuevo = (await ada.page.locator('tr.is-nueva').evaluateAll((f) => f.map((x) => x.dataset.id))).find((i) => !antesIds.includes(i));
+  cierto(nuevo, 'sin fila nueva');
+  activos = [...activos, nuevo];
+  await aMapa(ada.page);
+  const m = await reunido(ada.page, 'estado=Jalisco');
+  cierto(!m.filas.includes(nuevo), 'la fila en blanco (sin estado) figura en el mapa de Jalisco');
+  igual(m.filas.length, enJalisco, 'el mismo resultado de Jalisco');
+  // Without filters, a blank create belongs to the view: it joins the set without a new gathering.
+  await filtrar(ada.page, '#tabla-estado', '');
+  const sinFiltro = await hasta(async () => { const x = await mapa(ada.page); return x && !x.reuniendo && x.clave && !x.clave.includes('estado=') && x; }, 'sin filtro');
+  igual(sinFiltro.filas.includes(nuevo), true, 'la nueva fila es de la vista sin filtros');
+  await aTabla(ada.page);
+  const ids2 = await ada.page.locator('tr.tabla-fila').evaluateAll((f) => f.map((x) => x.dataset.id));
+  await ada.page.getByRole('button', { name: 'Agregar terreno' }).click();
+  await hasta(async () => (await ada.page.locator('tr.is-nueva').evaluateAll((f) => f.map((x) => x.dataset.id))).some((i) => !ids2.includes(i)), 'segunda fila');
+  const otro = (await ada.page.locator('tr.is-nueva').evaluateAll((f) => f.map((x) => x.dataset.id))).find((i) => !ids2.includes(i));
+  activos = [...activos, otro];
+  const antes = reuniones(ada);
+  await aMapa(ada.page);
+  igual((await mapa(ada.page)).filas.includes(otro), true, 'la fila nueva sin filtros está en el mapa');
+  igual(reuniones(ada) - antes, 0, 'sin filtros no hace falta reunir de nuevo');
+});
+
 const olga = await abrir('olga');
 
 await revisar('operador: Tabla / Mapa en su base; nunca recibe filas ni contornos de otra base', async () => {

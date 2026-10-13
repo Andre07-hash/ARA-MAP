@@ -19,9 +19,13 @@ proveedor ni permisos del servidor.
   filtros, reunidos página a página (200 por página) con la misma ruta
   autorizada de la tabla (`/maestra/bases/<id>/terrenos` para el operador). Se
   conserva mientras vista y consulta no cambien: alternar o paginar no vuelve a
-  descargar. «Actualizar» o una revalidación lo vuelven a reunir. Las
-  escrituras de esta tabla lo actualizan en el lugar; si se hicieron con otro
-  filtro, el conjunto queda marcado para reunirse otra vez. Tope de 5,000
+  descargar. «Actualizar» o una revalidación lo vuelven a reunir. Sin
+  búsqueda ni filtros de campos, las escrituras de esta tabla lo actualizan en
+  el lugar (sólo base y archivo deciden la pertenencia). Con búsqueda o filtro
+  por estado, municipio o tipo, una edición o un alta descarta el conjunto y se
+  vuelve a reunir con la consulta del servidor al mostrar el mapa: la
+  pertenencia no se recalcula en el navegador. Una escritura hecha con otro
+  filtro deja el conjunto marcado para reunirse otra vez. Tope de 5,000
   terrenos: si se alcanza, el mapa dice «Mapa incompleto».
 - **Contornos.** Sólo se carga el cuerpo del terreno seleccionado (contorno
   ACTIVO), uno a la vez, con cancelación y descarte de respuestas atrasadas
@@ -45,7 +49,7 @@ proveedor ni permisos del servidor.
 
 | Prueba | Resultado |
 |---|---|
-| `node tests/e2e/tabla-mapa.mjs` (nueva; 111 terrenos ficticios en una base, 5 en otra) | 15/15 |
+| `node tests/e2e/tabla-mapa.mjs` (nueva; 111 terrenos ficticios en una base, 5 en otra) | 18/18 |
 | `node tests/e2e/tabla-elegir.mjs` (#33, convivencia) | 12/12 |
 | `node tests/e2e/recorrido-completo.mjs` (widgets reales; adaptado al selector) | 41/41 |
 | `tests/e2e/tabla-integrada.mjs` (con `tabla_servidor.py`) | 13/13 |
@@ -65,6 +69,13 @@ base, error y carga parcial que no se presenta como completa, escritura con
 otro filtro, y limpieza inmediata del mapa al cambiar el filtro. Las dos
 últimas reproducen los dos fallos que encontró la revisión independiente:
 fallan con el código anterior a la corrección y pasan después.
+
+Revisión del supervisor (misma consulta activa): editar el estado o el nombre
+de un terreno para que deje de coincidir con el filtro o la búsqueda, y crear
+una fila en blanco con un filtro activo, ya no lo dejan en el mapa filtrado.
+Tres regresiones lo cubren; las tres fallaban antes de la corrección. Sin
+filtros, la fila nueva entra al mapa sin otra reunión, y alternar sin cambios
+no vuelve a reunir.
 
 Una corrida intermedia de `recorrido-completo.mjs` falló en «R3-A2: se archiva
 la base mientras un administrador sube…» (aviso de base archivada); no se

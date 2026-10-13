@@ -108,8 +108,16 @@ test("routes: the table has an address; operators have the table and the catalog
   assert.deepEqual(parseRoute(`#/tabla/${BASE}`), { nombre: "tabla", id: BASE });
   assert.equal(routeHash({ nombre: "tabla", id: "maestra" }), "#/tabla/maestra");
   assert.equal(parseRoute("#/tabla/a/b"), null);
+  // Tabla / Mapa: the map of the same view has its own address, both ways.
+  for (const ruta of [{ nombre: "tabla", id: BASE, modo: "mapa" }, { nombre: "tabla", id: "maestra", modo: "mapa" },
+    { nombre: "tabla", id: null, modo: "mapa" }]) {
+    assert.deepEqual(parseRoute(routeHash(ruta)), ruta, routeHash(ruta));
+  }
+  assert.equal(routeHash({ nombre: "tabla", id: "maestra", modo: "mapa" }), "#/tabla/maestra/mapa");
+  assert.equal(parseRoute("#/tabla/maestra/mapa/x"), null);
+  // Everyone signed in starts in the table: administrators in the master table.
   assert.equal(defaultRoute(true, "operador").nombre, "tabla");
-  assert.equal(defaultRoute(true, "admin").nombre, "inventario");
+  assert.equal(defaultRoute(true, "admin").nombre, "tabla");
   assert.equal(defaultRoute(false).nombre, "catalogo");
   for (const nombre of ["inventario", "nuevo", "editar", "bases", "mapas", "mapa"]) {
     assert.equal(routeAllowed({ nombre }, "operador"), false, nombre);

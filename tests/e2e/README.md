@@ -39,6 +39,20 @@ node contornos-medicion.mjs     # tiempos y memoria (opcional: archivos de lími
 `CHROMIUM=/ruta/a/chrome` usa ese binario en lugar del canal `chrome`.
 `CONTORNOS_EVIDENCIA=/ruta` guarda capturas y un resumen JSON.
 
+## Tabla / Mapa
+
+Selector «Tabla / Mapa» de la tabla de empleados con los widgets, el cargador
+y el mapa reales: entrada del administrador, conjunto completo más allá de la
+página, filtros, contorno activo al tocar un círculo, respuestas atrasadas,
+alcance del operador, estados de error y vacío, y alternancia repetida. Datos
+ficticios al volumen del piloto (111 terrenos). Levanta y borra su propio
+servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-mapa.mjs                         # MAPA_CAPTURAS=carpeta para capturas
+```
+
 ## Elegir PDF/KMZ desde las celdas de la tabla
 
 Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:

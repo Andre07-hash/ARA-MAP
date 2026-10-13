@@ -1,15 +1,16 @@
-/* The map preview of the table's CURRENT PAGE (Round 3, INTERFACES §5).
+/* The table's map: the "Mapa" side of Tabla / Mapa (Round 3, INTERFACES §5).
  *
- * It draws only the rows the table is showing: their active boundary
- * descriptors and valid X/Y. It never asks for another page. One boundary
- * body is loaded at a time, for the selected terrain, through Team B's loader,
- * and handed to the unchanged renderer as `geometrias` (at most one entry).
- * Every other boundary stays at its descriptor's interior point with the
- * renderer's "outline not loaded" symbol. Rows with neither stay in the table
- * and are counted here, never placed.
+ * It draws the rows it is handed (the table gives it every terrain of the
+ * view and its filters, gathered page by page): their active boundary
+ * descriptors and valid X/Y. It never fetches rows itself. One boundary body
+ * is loaded at a time, for the selected terrain, through Team B's loader, and
+ * handed to the unchanged renderer as `geometrias` (at most one entry). Every
+ * other boundary stays at its descriptor's interior point with the renderer's
+ * "outline not loaded" symbol. Rows with neither are counted here as without
+ * location, never placed.
  *
- * The body, the selection and the map belong to one page of one scope:
- * pintar() with a new page drops the body and any load in flight, and
+ * The body, the selection and the map belong to one set of one scope:
+ * pintar() with a new set drops the body and any load in flight, and
  * destroy() removes the map itself.
  */
 
@@ -33,11 +34,12 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
   let encuadrar = false;
   let fallida = null;             // geometry id whose last load failed: not retried on a repaint
 
-  const titulo = el("h2", { class: "previa-titulo" }, "Mapa de esta página");
+  const titulo = el("h2", { class: "previa-titulo" }, "Mapa de la vista");
   const cuenta = el("p", { class: "previa-cuenta" });
   const nota = el("p", { class: "previa-nota" },
-    "Sólo se dibujan las filas de la página actual de la tabla. El contorno de un terreno se " +
-    "carga al seleccionarlo; los demás se muestran como un símbolo en su punto interior.");
+    "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
+    "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
+    "en su punto interior. Un KMZ subido sin activar no cambia el mapa.");
   const estado = el("p", { class: "previa-estado", role: "status", "aria-live": "polite" });
   const reintentar = el("button", {
     type: "button", class: "btn btn-quiet previa-reintentar", hidden: true,
@@ -49,9 +51,9 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     onclick: () => { if (seleccion) canvas?.zoomToScale(seleccion); },
   }, "Ver a escala");
   const encuadre = el("button", {
-    type: "button", class: "btn btn-quiet", onclick: () => canvas?.fitTo(filas),
-  }, "Encuadrar página");
-  const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de la página actual" });
+    type: "button", class: "btn btn-quiet", onclick: () => encuadrarTodo(),
+  }, "Encuadrar todo");
+  const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de los terrenos de la vista" });
   const element = el("section", { class: "previa", "aria-labelledby": "previa-titulo" },
     el("header", { class: "previa-cabecera" }, Object.assign(titulo, { id: "previa-titulo" }), cuenta),
     nota, lienzo,
@@ -94,6 +96,14 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     canvas.select(seleccion);
   }
 
+  /** Frame every row; like encuadrarSeleccion, it waits for a zoom step that is running. */
+  function encuadrarTodo() {
+    if (!canvas) return;
+    const { map } = canvas;
+    const ir = () => { if (vivo && canvas) canvas.fitTo(filas); };
+    if (map._animatingZoom) map.once("zoomend", ir); else ir();
+  }
+
   /**
    * Frame the selected terrain. Leaflet silently ignores a view change asked
    * for while a zoom animation is running (a framing that just started, a
@@ -108,8 +118,10 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
   }
 
   /**
-   * Show a page of records (the table's own row objects). The selection is
-   * kept only if that terrain is still on the page with the same boundary.
+   * Show a set of records (the table's own row objects). `nuevaPagina` says
+   * the set is a different one (another view or query): the body and the
+   * framing start over. Otherwise the selection is kept if that terrain is
+   * still there with the same boundary.
    */
   function pintar(registros, { total = 0, nuevaPagina = true } = {}) {
     if (!vivo) return;
@@ -122,10 +134,11 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     const ubicadas = filas.filter((f) => ubicacionDe(f).ubicado).length;
     const contornos = filas.filter((f) => ubicacionDe(f).modo === "geometria").length;
     cuenta.textContent = filas.length
-      ? `${fmtCount(ubicadas)} de ${fmtCount(filas.length)} filas de esta página con ubicación ` +
-        `(${fmtCount(contornos)} con contorno, ${fmtCount(filas.length - ubicadas)} sin ubicar)` +
-        (total > filas.length ? ` · la vista tiene ${fmtCount(total)} terrenos en total` : "")
-      : "Esta página no tiene filas.";
+      ? `${fmtCount(filas.length)} ${filas.length === 1 ? "terreno" : "terrenos"} · ` +
+        `${fmtCount(ubicadas)} en el mapa (${fmtCount(contornos)} con contorno activo, ` +
+        `${fmtCount(ubicadas - contornos)} por X/Y) · ${fmtCount(filas.length - ubicadas)} sin ubicación` +
+        (total > filas.length ? ` · la vista tiene ${fmtCount(total)} en total` : "")
+      : "Sin terrenos que mostrar.";
     escala.disabled = !seleccion;
     dibujar();
     if (seleccion && actual?.geometria && !geometrias.size && !carga && actual.geometria.id !== fallida) {
@@ -152,7 +165,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     const { modo } = ubicacionDe(fila);
     dibujar();
     if (modo === "ninguna") {
-      decir("Este terreno no tiene ubicación: sigue en la tabla y no se dibuja en el mapa.");
+      decir("Este terreno no tiene ubicación: se cuenta como sin ubicación y no se dibuja en el mapa.");
       return;
     }
     if (mover) encuadrarSeleccion();
@@ -182,7 +195,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
       geometrias = new Map([[fila.geometria.id, cuerpo]]);
       dibujar();
       encuadrarSeleccion();
-      decir("Contorno cargado. Los demás contornos de la página se cargan al seleccionarlos.");
+      decir("Contorno activo cargado. Los demás contornos se cargan al seleccionarlos.");
     } catch (error) {
       if (!vivo || mio !== pedido) return;        // superseded, or the scope ended
       carga = null;

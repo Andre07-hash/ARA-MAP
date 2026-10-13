@@ -153,6 +153,20 @@ const foto = async (page, nombre) => { if (SHOTS) await page.screenshot({ path: 
 const fila = (page, id) => page.locator(`tr[data-id="${id}"]`);
 const celda = (page, id, col) => page.locator(`tr[data-id="${id}"] td[data-col="${col}"]`);
 const estadoMapa = (page) => page.locator('.previa-estado');
+/* Tabla / Mapa: the map takes the grid's place. Selecting a row means going
+ * back to the grid, clicking it and returning to the map (the selection follows). */
+const botonModo = (page, nombre) => page.locator('.tabla-modo').getByRole('button', { name: nombre, exact: true });
+const enMapa = async (page) => (await botonModo(page, 'Mapa').getAttribute('aria-pressed').catch(() => null)) === 'true';
+async function abrirMapa(page) {
+  if (!(await enMapa(page))) await botonModo(page, 'Mapa').click();
+  await page.locator('.previa-mapa.leaflet-container').waitFor();
+}
+async function seleccionar(page, id) {
+  const mapa = await enMapa(page);
+  if (mapa) await botonModo(page, 'Tabla').click();
+  await celda(page, id, 'core:terreno').click();
+  if (mapa) await abrirMapa(page);
+}
 const hasta = async (fn, ms = 8000) => {
   const fin = Date.now() + ms;
   for (;;) { const v = await fn(); if (v) return v; if (Date.now() > fin) throw new Error('no ocurrió a tiempo'); await new Promise((r) => setTimeout(r, 60)); }
@@ -187,21 +201,22 @@ await caso('without Team B\'s modules the table works, says the files are unavai
   await fila(page, soloKmz).waitFor();
   assert.equal((await celda(page, soloKmz, 'core:kmz').innerText()).trim(), 'No disponible');
   assert.equal((await celda(page, soloKmz, 'core:archivos').innerText()).trim(), 'No disponible');
-  await page.getByRole('button', { name: 'Mapa de esta página' }).click();
+  await abrirMapa(page);
   await page.locator('.previa-mapa .leaflet-container, .previa-mapa.leaflet-container').waitFor();
   const cuenta = await page.locator('.previa-cuenta').innerText();
-  assert.match(cuenta, /2 de 3 filas de esta página con ubicación \(1 con contorno, 1 sin ubicar\)/);
-  assert.match(await page.locator('.previa-nota').innerText(), /Sólo se dibujan las filas de la página actual/);
-  await celda(page, soloKmz, 'core:terreno').click();
+  assert.match(cuenta, /3 terrenos · 2 en el mapa \(1 con contorno activo, 1 por X\/Y\) · 1 sin ubicación/);
+  assert.match(await page.locator('.previa-nota').innerText(), /Muestra todos los terrenos de esta vista con los filtros actuales/);
+  await seleccionar(page, soloKmz);
   await hasta(async () => /módulo de contornos no está disponible/.test(await estadoMapa(page).innerText()));
   assert.equal(await page.getByRole('button', { name: 'Reintentar' }).isVisible(), true);
-  await celda(page, enBlanco, 'core:terreno').click();
-  await hasta(async () => /no tiene ubicación: sigue en la tabla/.test(await estadoMapa(page).innerText()));
-  await celda(page, conXY, 'core:terreno').click();
+  await seleccionar(page, enBlanco);
+  await hasta(async () => /no tiene ubicación: se cuenta como sin ubicación/.test(await estadoMapa(page).innerText()));
+  await seleccionar(page, conXY);
   await hasta(async () => /coordenadas X\/Y/.test(await estadoMapa(page).innerText()));
   assert.equal(await fila(page, conXY).getAttribute('aria-selected'), 'true');
   await foto(page, '01-sin-modulos-mapa-de-pagina');
-  // Editing still works with the panel open.
+  // Editing still works after using the map: it happens in the grid.
+  await botonModo(page, 'Tabla').click();
   await celda(page, enBlanco, 'core:terreno').dblclick();
   await page.keyboard.type('Lote Nombrado Ficticio');
   await page.keyboard.press('Enter');
@@ -271,11 +286,11 @@ await caso('a file change refreshes that terrain once and never disturbs an open
 await caso('the page map loads only the selected boundary, through the loader, and keeps one body', async () => {
   const { context, page, api, errores } = await abrir('olga');
   await fila(page, soloKmz).waitFor();
-  await page.getByRole('button', { name: 'Mapa de esta página' }).click();
+  await abrirMapa(page);
   await page.locator('.previa-mapa.leaflet-container').waitFor();
   assert.equal(api.filter((l) => l.includes('/api/archivos/geometrias/')).length, 0, 'nothing is prefetched');
-  await celda(page, soloKmz, 'core:terreno').click();
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(page).innerText()));
+  await seleccionar(page, soloKmz);
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(page).innerText()));
   assert.equal(await page.evaluate(() => window.__doble.cargas), 1);
   // Drawn as a real outline at parcel scale, one body held, nothing loading.
   await hasta(async () => (await page.evaluate((id) => window.__araTabla.posicion(id), soloKmz))?.contorno === true);
@@ -288,26 +303,26 @@ await caso('the page map loads only the selected boundary, through the loader, a
   // X/Y of the boundary-only terrain stay blank in the table.
   assert.equal((await celda(page, soloKmz, 'core:lat').innerText()).trim(), '');
   // Another selection drops the body; coming back loads it again (no hidden cache in the host).
-  await celda(page, conXY, 'core:terreno').click();
+  await seleccionar(page, conXY);
   await hasta(async () => /coordenadas X\/Y/.test(await estadoMapa(page).innerText()));
   assert.equal((await page.evaluate(() => window.__araTabla.previa())).cuerpos, 0);
   assert.equal((await page.evaluate((id) => window.__araTabla.posicion(id), soloKmz)).contorno, false);
-  await celda(page, soloKmz, 'core:terreno').click();
+  await seleccionar(page, soloKmz);
   await hasta(async () => (await page.evaluate(() => window.__doble.cargas)) === 2);
   // A failure is said, the terrain stays at its interior point, and retry works.
-  await celda(page, conXY, 'core:terreno').click();
+  await seleccionar(page, conXY);
   await page.evaluate(() => { window.__dobleFalla = true; });
-  await celda(page, soloKmz, 'core:terreno').click();
+  await seleccionar(page, soloKmz);
   await hasta(async () => /No se pudo cargar el contorno/.test(await estadoMapa(page).innerText()));
   await foto(page, '04-contorno-no-disponible-con-reintento');
   await page.evaluate(() => { window.__dobleFalla = false; });
   await page.getByRole('button', { name: 'Reintentar' }).click();
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(page).innerText()));
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(page).innerText()));
   // A slow load that the next selection supersedes never lands.
-  await celda(page, conXY, 'core:terreno').click();
+  await seleccionar(page, conXY);
   await page.evaluate(() => { window.__dobleEspera = 600; });
-  await celda(page, soloKmz, 'core:terreno').click();
-  await celda(page, conXY, 'core:terreno').click();
+  await seleccionar(page, soloKmz);
+  await seleccionar(page, conXY);
   await new Promise((r) => setTimeout(r, 1000));
   assert.match(await estadoMapa(page).innerText(), /coordenadas X\/Y/);
   assert.deepEqual(errores, []);
@@ -317,10 +332,10 @@ await caso('the page map loads only the selected boundary, through the loader, a
 await caso('logout during a boundary load tears everything down; the next account gets nothing of it', async () => {
   const { context, page, errores } = await abrir('olga');
   await fila(page, soloKmz).waitFor();
-  await page.getByRole('button', { name: 'Mapa de esta página' }).click();
+  await abrirMapa(page);
   await page.locator('.previa-mapa.leaflet-container').waitFor();
   await page.evaluate(() => { window.__dobleEspera = 1500; });
-  await celda(page, soloKmz, 'core:terreno').click();
+  await seleccionar(page, soloKmz);
   await hasta(async () => /Cargando el contorno/.test(await estadoMapa(page).innerText()));
   const antes = await page.evaluate(() => ({ ...window.__doble }));
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
@@ -346,9 +361,9 @@ await caso('a second authorized session sees the same stored boundary; losing th
   const a = await abrir('omar');
   await fila(a.page, soloKmz).waitFor();
   await hasta(async () => (await celda(a.page, soloKmz, 'core:kmz').innerText()).trim() === 'kmz:activo');
-  await a.page.getByRole('button', { name: 'Mapa de esta página' }).click();
-  await celda(a.page, soloKmz, 'core:terreno').click();
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(a.page).innerText()));
+  await abrirMapa(a.page);
+  await seleccionar(a.page, soloKmz);
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(a.page).innerText()));
   // The administrator takes omar's grant away.
   const adm = await abrir('ada');
   const actual = (await llamar(adm.page, 'GET', `/api/maestra/bases/${base.id}/acceso`)).datos;
@@ -360,7 +375,7 @@ await caso('a second authorized session sees the same stored boundary; losing th
   await a.page.evaluate((id) => document.querySelector(`tr[data-id="${id}"] td[data-col="core:kmz"] .doble-archivo`).click(), soloKmz);
   await hasta(async () => (await a.page.locator('tr[data-id]').count()) === 0);
   await hasta(async () => (await a.page.getByText('Lote Solo Contorno Ficticio').count()) === 0);
-  assert.doesNotMatch(await estadoMapa(a.page).innerText().catch(() => ''), /Contorno cargado/);
+  assert.doesNotMatch(await estadoMapa(a.page).innerText().catch(() => ''), /Contorno activo cargado/);
   await foto(a.page, '05-sin-acceso-nada-queda');
   assert.deepEqual(a.errores, []);
   await a.context.close();

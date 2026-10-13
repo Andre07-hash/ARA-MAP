@@ -166,7 +166,8 @@ const celda = (page, id, col) => page.locator(`tr[data-id="${id}"] td[data-col="
 const textoCelda = async (page, id, col) => (await (/^core:(archivos|kmz)$/.test(col)
   ? celda(page, id, col).locator('.archivos-celda, .ranura-pendiente').first() : celda(page, id, col))
   .innerText().catch(() => '')).trim();
-const listo = (page) => page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
+// Attached, not visible: in the map view the grid is hidden but still loads its page.
+const listo = (page) => page.locator('.tabla-lienzo:not([aria-busy])').waitFor({ state: 'attached' });
 const estadoMapa = async (page) => (await page.locator('.previa-estado').innerText().catch(() => '')).trim();
 const foto = async (page, nombre) => { if (SHOTS) await page.screenshot({ path: join(SHOTS, `${nombre}.png`) }); };
 
@@ -176,6 +177,7 @@ async function irATabla(page) {
   await listo(page);
 }
 async function escribir(page, id, col, valor) {
+  await aTabla(page);
   await celda(page, id, col).focus();
   await page.keyboard.press('Enter');
   const editor = celda(page, id, col).locator('.tabla-editor');
@@ -185,6 +187,7 @@ async function escribir(page, id, col, valor) {
   await page.locator(`tr[data-id="${id}"] td[data-col="${col}"]:not(.is-pendiente):not(.is-editando)`).waitFor();
 }
 async function abrirDetalle(page, id, nombre) {
+  await aTabla(page);
   await fila(page, id).getByRole('button', { name: /Abrir terreno/ }).click();
   const d = page.getByRole('dialog', { name: nombre });
   await d.locator('.archivos-detalle[data-tipo="pdf"]').waitFor();
@@ -208,13 +211,30 @@ async function faseFinal(d, tipo, fases, ms = 90000) {
   await hasta(async () => fases.includes(await ultima.getAttribute('data-fase').catch(() => null)), `fase ${fases}`, ms);
   return ultima.getAttribute('data-fase');
 }
-async function abrirMapa(page) {
-  const b = page.getByRole('button', { name: 'Mapa de esta página' });
-  if ((await b.getAttribute('aria-pressed')) !== 'true') await b.click();
-  await page.locator('.previa-mapa.leaflet-container').waitFor();
+/* Tabla / Mapa: the grid and the map share the area, one at a time. Table
+ * actions go back to the grid first; the map gathers the whole view's set. */
+const botonModo = (page, nombre) => page.locator('.tabla-modo').getByRole('button', { name: nombre, exact: true });
+const enMapa = async (page) => (await botonModo(page, 'Mapa').getAttribute('aria-pressed').catch(() => null)) === 'true';
+async function aTabla(page) {
+  if (!(await enMapa(page))) return;
+  await botonModo(page, 'Tabla').click();
+  await page.locator('.tabla-lienzo').waitFor();
 }
+// The journeys that opened the map expect it back after a table action, as the
+// old side panel stayed open beside the grid.
+const conMapa = new WeakSet();
+async function abrirMapa(page) {
+  conMapa.add(page);
+  if (!(await enMapa(page))) await botonModo(page, 'Mapa').click();
+  await page.locator('.previa-mapa.leaflet-container').waitFor();
+  await hasta(async () => { const m = await page.evaluate(() => window.__araTabla?.mapa()); return m && m.clave && !m.reuniendo; },
+    'el mapa no reunió la vista');
+}
+/** Select a row in the grid; if the map was showing, come back to it (the selection follows). */
 async function seleccionarEnTabla(page, id) {
+  await aTabla(page);
   await celda(page, id, 'core:terreno').click();
+  if (conMapa.has(page)) await abrirMapa(page);
 }
 
 /* --------------------------------------------------------------- data */
@@ -317,7 +337,7 @@ await revisar('sube un KMZ con X/Y en blanco, elige entre candidatos, activa y v
   igual(olga.api.filter((l) => l.includes('/api/archivos/geometrias/')).length, 0, 'nada se pide con el mapa cerrado');
   await abrirMapa(olga.page);
   await seleccionarEnTabla(olga.page, lote);   // already selected since its cells were edited: its load starts with the map
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(olga.page)), 'contorno no cargado');
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(olga.page)), 'contorno no cargado');
   await hasta(async () => (await olga.page.evaluate((i) => window.__araTabla.posicion(i), lote))?.contorno === true, 'sin contorno dibujado');
   const p = await olga.page.evaluate(() => window.__araTabla.previa());
   igual([p.cuerpos, p.cargando], [1, false], 'un cuerpo');
@@ -338,7 +358,7 @@ await revisar('un reemplazo fallido conserva el último contorno utilizable', as
   igual([t.ubicacion.modo, t.ubicacion.geometria?.id, t.version], ['geometria', geometriaActiva, version0], 'contorno anterior');
   igual(await textoCelda(olga.page, lote, 'core:kmz'), 'Contorno activo', 'celda');
   await seleccionarEnTabla(olga.page, lote);
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(olga.page)), 'el mapa sigue con el contorno');
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(olga.page)), 'el mapa sigue con el contorno');
 });
 
 if (!FOCALIZADO) {
@@ -347,6 +367,7 @@ if (!FOCALIZADO) {
     const r = await llamar(olga.page, 'POST', `/api/maestra/bases/${base.id}/terrenos`,
       { terreno: VECINO, lat: 20.6015, lon: -100.398, superficie_m2: 1200 }, crypto.randomUUID());
     vecino = r.datos.terreno.id;
+    await aTabla(olga.page);
     await olga.page.getByRole('button', { name: 'Actualizar' }).click();
     await listo(olga.page);
     await fila(olga.page, vecino).waitFor();
@@ -361,12 +382,15 @@ if (!FOCALIZADO) {
     olga.page.on('request', (q) => { if (esCuerpo(q)) { enVuelo += 1; maximo = Math.max(maximo, enVuelo); } });
     olga.page.on('requestfinished', (q) => { if (esCuerpo(q)) { enVuelo -= 1; respondidas += 1; } });
     olga.page.on('requestfailed', (q) => { if (esCuerpo(q)) { enVuelo -= 1; canceladas += 1; } });
+    // Ten row clicks dispatched in one go while the map is shown (the grid is
+    // hidden behind it): each one moves the selection, as a click on the row does.
+    await abrirMapa(olga.page);
     await olga.page.evaluate(([a, b]) => {
       for (let i = 0; i < 10; i += 1) {
         document.querySelector(`tr[data-id="${i % 2 ? b : a}"] td[data-col="core:terreno"]`).click();
       }
     }, [lote, vecino]);
-    await hasta(async () => /Contorno cargado/.test(await estadoMapa(olga.page)), 'la última selección no cargó');
+    await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(olga.page)), 'la última selección no cargó');
     const p = await olga.page.evaluate(() => window.__araTabla.previa());
     igual([p.cuerpos, p.cargando], [1, false], 'residencia final');
     igual(await olga.page.evaluate((i) => window.__araTabla.posicion(i)?.contorno, vecino), true, 'el último seleccionado tiene contorno');
@@ -438,6 +462,7 @@ if (!FOCALIZADO) {
   await revisar('un cuerpo cerca del límite (100,000 vértices) se sube, se carga y se dibuja sin recortes', async () => {
     const r = await llamar(olga.page, 'POST', `/api/maestra/bases/${base.id}/terrenos`, { terreno: 'Lote Límite Ficticio' }, crypto.randomUUID());
     const limite = r.datos.terreno.id;
+    await aTabla(olga.page);
     await olga.page.getByRole('button', { name: 'Actualizar' }).click();
     await listo(olga.page);
     const d = await abrirDetalle(olga.page, limite, 'Lote Límite Ficticio');
@@ -467,7 +492,7 @@ if (!FOCALIZADO) {
     olga.page.on('response', contar);
     const t1 = Date.now();
     await seleccionarEnTabla(olga.page, limite);
-    await hasta(async () => /Contorno cargado/.test(await estadoMapa(olga.page)), 'cuerpo grande no cargado', 60000);
+    await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(olga.page)), 'cuerpo grande no cargado', 60000);
     const carga = Date.now() - t1;
     clearInterval(vigia);
     // Its 20,000 parts spread wider than one parcel: framed whole, each part is
@@ -479,7 +504,7 @@ if (!FOCALIZADO) {
     olga.page.off('response', contar);
     // Another selection drops it; the heap returns near where it was.
     await seleccionarEnTabla(olga.page, lote);
-    await hasta(async () => /Contorno cargado/.test(await estadoMapa(olga.page)), 'vuelta al lote');
+    await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(olga.page)), 'vuelta al lote');
     await seleccionarEnTabla(olga.page, vecino);
     await esperar(300);
     await cdp.send('HeapProfiler.collectGarbage');
@@ -505,7 +530,7 @@ await revisar('otra sesión autorizada lee los mismos archivos guardados y el mi
   await cerrarDetalle(omar.page, d);
   await abrirMapa(omar.page);
   await seleccionarEnTabla(omar.page, lote);
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(omar.page)), 'contorno');
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(omar.page)), 'contorno');
   cierto(omar.api.some((l) => l.includes(`/api/archivos/geometrias/${geometriaActiva}/contenido`) && l.endsWith(' 200')), 'el mismo contorno');
 });
 
@@ -544,7 +569,7 @@ await revisar('reinicio del servidor sobre la misma base y el mismo almacén: by
   await cerrarDetalle(s.page, d);
   await abrirMapa(s.page);
   await seleccionarEnTabla(s.page, lote);
-  await hasta(async () => /Contorno cargado/.test(await estadoMapa(s.page)), 'contorno tras reiniciar');
+  await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(s.page)), 'contorno tras reiniciar');
   igual((await terreno(s.page, lote)).ubicacion.geometria.id, geometriaActiva, 'misma geometría activa');
   await s.contexto.close();
   return { arranques, archivos: lista.length, versiones_pdf: versiones.length };
@@ -775,7 +800,7 @@ if (!FOCALIZADO) {
     await recargarTabla(oscar.page);
     await abrirMapa(oscar.page);
     await seleccionarEnTabla(oscar.page, t);
-    await hasta(async () => /Contorno cargado/.test(await estadoMapa(oscar.page)), 'la sesión nueva no pudo cargar el contorno');
+    await hasta(async () => /Contorno activo cargado/.test(await estadoMapa(oscar.page)), 'la sesión nueva no pudo cargar el contorno');
   });
 }
 /* ------------------------------------------------- Round 3 review: R3-A2
@@ -874,6 +899,7 @@ if (!FOCALIZADO) {
     await cerrarDetalle(oriol.page, d);
     // Unrelated work: an editor opened in another row, then the same loss again on a second archived-view terrain.
     const t2 = await nuevoTerreno('Lote Segundo Archivado Ficticio');
+    await aTabla(oriol.page);
     await oriol.page.getByRole('button', { name: 'Actualizar' }).click();
     await listo(oriol.page);
     d = await abrirDetalle(oriol.page, t2, 'Lote Segundo Archivado Ficticio');
@@ -1079,7 +1105,7 @@ if (!FOCALIZADO) {
     const p = await omar.page.evaluate(() => window.__araTabla?.previa());
     igual(p?.cuerpos ?? 0, 0, 'cuerpo retenido');
     igual(await omar.page.getByText(NOMBRE).count(), 0, 'nombre visible');
-    cierto(!/Contorno cargado/.test(await estadoMapa(omar.page)), 'contorno anunciado');
+    cierto(!/Contorno activo cargado/.test(await estadoMapa(omar.page)), 'contorno anunciado');
     await omar.page.unroute('**/api/archivos/geometrias/*/contenido*');
     await foto(omar.page, '05-revocado-durante-lectura');
   });

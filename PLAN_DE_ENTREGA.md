@@ -28,7 +28,7 @@ Esta es una fotografía del estado conocido al redactar el acuerdo, no una afirm
 | Entrada de servidor para Render | A publicó una primera entrega en #31; pruebas locales con Postgres | Integrar el adaptador de B y comprobar el comportamiento en Render |
 | Carga inicial de terrenos | A preparó comando de operador con simulación, control de duplicados y ensayo de 100 filas | Usar ese camino comprobado para la tabla maestra; la importación Excel/CSV antigua escribe en otro espacio de datos |
 | Adaptador de almacenamiento privado | B publicó una primera entrega en #32 con CI verde | Revisión e integración; terminar manejo esencial de fallos y herramientas de recuperación; comprobar el proveedor real |
-| Respaldo y restauración | A ensayó la parte de base de datos | Completar y ensayar la recuperación conjunta de base de datos y archivos |
+| Respaldo y restauración | A ensayó base de datos y copia verificada de archivos con almacén local sustituto | Reemplazar esa copia de ensayo por las herramientas de B y comprobar la recuperación del candidato final |
 | Portal entregable en internet | No demostrado por estas entregas parciales | Configuración autorizada, despliegue del candidato exacto y recorrido final |
 
 Referencias para no perder ni duplicar trabajo:
@@ -38,10 +38,12 @@ Referencias para no perder ni duplicar trabajo:
 | Núcleo A, [#29](https://github.com/Andre07-hash/ARA-MAP/pull/29) | `4670df7348265af66c640069e5ece2a274830fa3` | Base aceptada; preservar |
 | Archivos/mapa B, [#28](https://github.com/Andre07-hash/ARA-MAP/pull/28) | `b2ac9bd176043fc4b1625b13993f8f21407dc978` | Ya integrado en A; no volver a integrarlo |
 | Batching B, [#30](https://github.com/Andre07-hash/ARA-MAP/pull/30) | `bc7e421e5f2a94bdaa6a61ca14fc8c41e381f9c3` | Integrado una vez en #31 mediante `f81bc27`; no reasignar |
-| Primera entrega A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `2177c5b77e1742905537476bddedbf49e0e3dd35` | CI exacto verde, [38324150175](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38324150175); todavía sin almacenamiento conectado |
+| Avance A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `3cba52b2d254f0a27f4df1fdca918d890ca6b17c` | Ensayo por API con proceso hosted, Postgres y almacén local: 23 comprobaciones reportadas; Supabase aún sin conectar. [CI exacto 38326448017](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38326448017): JavaScript y Python/Postgres aprobados |
 | Primera entrega B, [#32](https://github.com/Andre07-hash/ARA-MAP/pull/32) | `9380ecc34af8a6b4fccdf387c066163c1dcdda59` | CI exacto verde, [38325006198](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38325006198); no constituye aceptación independiente del adaptador |
 
 Los avances nuevos deben actualizar este registro con su SHA y evidencia. Preservar también C1 y las ramas anteriores. La rama del supervisor contiene planificación; no confundir sus pruebas con las del código integrado de A/B.
+
+**Siguiente acción tras estas entregas:** A ya dispone del SHA de B y de `storage3==2.32.0`; puede integrar provisionalmente el adaptador mientras B termina ciclo de archivos y recuperación. No esperar al exportador para conectar el almacén. Los dos errores de configuración/autorización observados por A siguen siendo responsabilidad de B y deben cerrar antes de entregar. Véanse las [instrucciones de continuidad para ambos equipos](reports/free-private-pilot-2026-10-12/SEGUIMIENTO_A_B.md). No se cambia el alcance ni se marca ninguna casilla de entrega como terminada por estas pruebas locales.
 
 ## 3. Por qué PDF funciona localmente y el almacenamiento sigue pendiente
 

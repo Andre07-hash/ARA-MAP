@@ -112,7 +112,12 @@ nothing until an administrator grants a work base in the portal
 ## 5. Loading the first 50–100 terrains
 
 The portal's Excel/CSV import fills only the old imported-bases workspace; it
-does **not** put rows in the editable table. The load is an operator command:
+does **not** put rows in the editable table. The load is an operator command,
+**run as initial setup before employees start working in that base.** It does
+not lock the base against a simultaneous change by an administrator (an
+archive of the base committed mid-load is not waited for), and employees
+editing while it runs could create a terrain the load then cannot see as a
+duplicate. Run it while nobody else is working in the base:
 
 1. An administrator creates the work base in the portal and grants it.
 2. Save the spreadsheet as CSV UTF-8. Recognized headers are the import's own

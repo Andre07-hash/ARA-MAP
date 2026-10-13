@@ -81,6 +81,43 @@ memory use on the 512 MB instance, cold-wake time, and everything about files.
   cleared → content tables equal → old session refused, new sign-in sees the
   edited row and its history.
 
+## Integration journey prepared (store stand-in, awaiting B's adapter)
+
+[`ensayo_archivos.py`](ensayo_archivos.py) runs the employee workflow on the
+real hosted process and disposable Postgres, with the accepted local store in
+a folder outside the "host" standing in for the external store (rehearsal
+scaffolding only; `server/hosted.py` wires no disk store).
+[Output](evidencia/ensayo-archivos-postgres.txt): 23 checks pass.
+
+- Existing loaded row → edit a field → attach a three-contour KMZ → nothing
+  activates by itself → choose one → activate → the row without X/Y is now
+  located by its boundary; the geometry arrives whole and matches its SHA-256.
+- An invalid replacement KMZ is not applied; the previous boundary stays active.
+- A 25 MiB PDF uploads and downloads byte-identical with the private headers;
+  a 20.00 MiB valid KMZ uploads and is processed; 25 MiB + 1 is refused.
+- A second authorized session reads the same file and boundary; an account
+  without the base gets 404 exactly as for a file that does not exist.
+- Access revoked, or the terrain archived, before completion: the upload does
+  not become a file.
+- Process restart with the same database and store: same PDF, same boundary.
+- No store configured: download answers 503 while the table, the boundary
+  metadata and the geometry keep working.
+- Recovery: `pg_dump`, the dump's referenced final files copied out after
+  checking each one's size and SHA-256 (stand-in for B's exporter), restore
+  into a second database and a second store, operational tables cleared: old
+  session refused, PDF identical, boundary active, file history complete, the
+  upload left pending can be cancelled.
+
+**Two requirements on B's lifecycle slice are visibly not met by this tree**
+(printed as `PENDIENTE DE B`, as the contract anticipated): with no store, a
+new upload start still creates a pending row (200), and an account without
+access gets 503 instead of 404 on a download. The rehearsal will turn both
+into failures once B's candidate is merged.
+
+The load command is an initial-setup operation: the checklist says to run it
+before employees work in the base, and records that it does not lock the base
+against a concurrent administrator change.
+
 ## Next, in order
 
 1. On the owner's relay of B's exact adapter SHA: focused review

@@ -46,6 +46,17 @@ LUGARES = (("Jalisco", "Zapopan", 20.72, -103.39), ("Nuevo León", "Apodaca", 25
            ("Querétaro", "El Marqués", 20.61, -100.28), ("Yucatán", "Mérida", 20.97, -89.62))
 
 
+SUSTITUTO = """
+import os, sys
+from server import hosted
+from server.api import archivos
+puerto = hosted.configurar(os.environ)
+archivos.configurar_almacen(archivos.almacen_local(sys.argv[1]))
+hosted.comprobar_esquema()
+hosted.servir(puerto)
+"""
+
+
 def paso(texto: str) -> None:
     print(f"OK  {texto}", flush=True)
 
@@ -80,12 +91,18 @@ def csv_sintetico(n: int = 100) -> str:
 class Servicio:
     """The hosted entry point as its own process, like the platform runs it."""
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, almacen_sustituto: Path | None = None) -> None:
         self.entorno = {"ARA_MAP_DATABASE_URL": url, "ARA_MAP_HOST_PUBLICO": HOST, "PORT": str(PUERTO)}
         self.proceso: subprocess.Popen[bytes] | None = None
+        # Rehearsal scaffolding only: the accepted local store standing in for
+        # the external byte store, in a folder outside the "host". The hosted
+        # entry point itself never wires a disk store.
+        self.orden = [sys.executable, "-m", "server.hosted"]
+        if almacen_sustituto is not None:
+            self.orden = [sys.executable, "-c", SUSTITUTO, str(almacen_sustituto)]
 
     def arrancar(self) -> None:
-        self.proceso = subprocess.Popen([sys.executable, "-m", "server.hosted"], cwd=RAIZ,
+        self.proceso = subprocess.Popen(self.orden, cwd=RAIZ,
                                         env={**os.environ, **self.entorno},
                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for _ in range(100):
@@ -104,15 +121,17 @@ class Servicio:
 
     def pedir(self, metodo: str, ruta: str, cuerpo: object = None, cookie: str | None = None,
               host: str = HOST, extra: dict[str, str] | None = None) -> tuple[int, dict, dict[str, str]]:
-        conexion = http.client.HTTPConnection("127.0.0.1", PUERTO, timeout=30)
+        conexion = http.client.HTTPConnection("127.0.0.1", PUERTO, timeout=120)
         cabeceras = {"Host": host, **(ORIGEN if metodo != "GET" else {}), **(extra or {})}
         if cookie:
             cabeceras["Cookie"] = cookie
-        datos = None if cuerpo is None else json.dumps(cuerpo).encode()
+        datos = cuerpo if isinstance(cuerpo, bytes) or cuerpo is None else json.dumps(cuerpo).encode()
         conexion.request(metodo, ruta, body=datos, headers=cabeceras)
         respuesta = conexion.getresponse()
         crudo = respuesta.read()
         conexion.close()
+        if respuesta.getheader("Content-Type", "").split(";")[0] != "application/json":
+            return respuesta.status, {"bytes": crudo}, dict(respuesta.getheaders())
         try:
             return respuesta.status, json.loads(crudo), dict(respuesta.getheaders())
         except ValueError:

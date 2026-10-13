@@ -125,9 +125,8 @@ def configurar(environ: Mapping[str, str]) -> int:
     return puerto
 
 
-def serve() -> None:
-    puerto = configurar(os.environ)
-    comprobar_esquema()
+def servir(puerto: int) -> None:
+    """Serve until the platform stops the process."""
     httpd = ThreadingHTTPServer(("0.0.0.0", puerto), HostedHandler)
     # The platform stops a deployment with SIGTERM; finish what is in flight.
     signal.signal(signal.SIGTERM, lambda *_: threading.Thread(target=httpd.shutdown).start())
@@ -137,6 +136,12 @@ def serve() -> None:
         httpd.serve_forever()
     finally:
         httpd.server_close()
+
+
+def serve() -> None:
+    puerto = configurar(os.environ)
+    comprobar_esquema()
+    servir(puerto)
 
 
 if __name__ == "__main__":

@@ -25,9 +25,9 @@ Esta es una fotografía del estado conocido al redactar el acuerdo, no una afirm
 | --- | --- | --- |
 | Tabla maestra, cuentas, permisos, edición e historial | Implementados y con evidencia previa del núcleo aceptado de A | Reutilizar esa evidencia y comprobar el recorrido del empleado en el candidato final |
 | PDF, parser KMZ, selección, activación y dibujo del polígono | Flujo existente con evidencia local; no se debe reconstruir | Conectarlo al almacenamiento duradero y probarlo desde la URL real |
-| Entrada de servidor para Render | A publicó una primera entrega en #31; pruebas locales con Postgres | Integrar el adaptador de B y comprobar el comportamiento en Render |
+| Entrada de servidor para Render | A conectó el adaptador de B en #31 y fijó las dependencias alojadas | Integrar el cierre del ciclo de archivos y comprobar el comportamiento en Render |
 | Carga inicial de terrenos | A preparó comando de operador con simulación, control de duplicados y ensayo de 100 filas | Usar ese camino comprobado para la tabla maestra; la importación Excel/CSV antigua escribe en otro espacio de datos |
-| Adaptador de almacenamiento privado | B publicó una primera entrega en #32 con CI verde | Revisión e integración; terminar manejo esencial de fallos y herramientas de recuperación; comprobar el proveedor real |
+| Adaptador de almacenamiento privado | B `9380ecc` integrado en A; pruebas de integración con proveedor simulado. B publicó después `770cc83` con ciclo de archivos y recuperación | Revisar/integrar el cierre; corregir el fallo reproducido de fábrica en el exportador remoto; comprobar proveedor real |
 | Respaldo y restauración | A ensayó base de datos y copia verificada de archivos con almacén local sustituto | Reemplazar esa copia de ensayo por las herramientas de B y comprobar la recuperación del candidato final |
 | Portal entregable en internet | No demostrado por estas entregas parciales | Configuración autorizada, despliegue del candidato exacto y recorrido final |
 
@@ -38,16 +38,16 @@ Referencias para no perder ni duplicar trabajo:
 | Núcleo A, [#29](https://github.com/Andre07-hash/ARA-MAP/pull/29) | `4670df7348265af66c640069e5ece2a274830fa3` | Base aceptada; preservar |
 | Archivos/mapa B, [#28](https://github.com/Andre07-hash/ARA-MAP/pull/28) | `b2ac9bd176043fc4b1625b13993f8f21407dc978` | Ya integrado en A; no volver a integrarlo |
 | Batching B, [#30](https://github.com/Andre07-hash/ARA-MAP/pull/30) | `bc7e421e5f2a94bdaa6a61ca14fc8c41e381f9c3` | Integrado una vez en #31 mediante `f81bc27`; no reasignar |
-| Avance A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `3cba52b2d254f0a27f4df1fdca918d890ca6b17c` | Ensayo por API con proceso hosted, Postgres y almacén local: 23 comprobaciones reportadas; Supabase aún sin conectar. [CI exacto 38326448017](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38326448017): JavaScript y Python/Postgres aprobados |
-| Primera entrega B, [#32](https://github.com/Andre07-hash/ARA-MAP/pull/32) | `9380ecc34af8a6b4fccdf387c066163c1dcdda59` | CI exacto verde, [38325006198](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38325006198); no constituye aceptación independiente del adaptador |
+| Candidato combinado A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `df7984ddee736a8a37174ec83ea039a257c3f8d5` | B `9380ecc` integrado mediante `3da2170`; almacén conectado por entorno y dependencias fijadas. [CI 38332804387](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38332804387): JavaScript aprobado, Python/Postgres en curso al consultar. CI omite las pruebas que necesitan SDK; A reporta ejecución local con SDK |
+| Avance posterior B, [#32](https://github.com/Andre07-hash/ARA-MAP/pull/32) | `770cc8358ee42a3e71336517932ce7136c607e65` | Descubierto al revisar A; [CI 38331150339](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38331150339) verde. Incluye ciclo de archivos y exportador; aún no integrado en A ni aceptado. Fallo remoto reproducido, pendiente de corrección |
 
 Los avances nuevos deben actualizar este registro con su SHA y evidencia. Preservar también C1 y las ramas anteriores. La rama del supervisor contiene planificación; no confundir sus pruebas con las del código integrado de A/B.
 
-**Siguiente acción tras estas entregas:** A ya dispone del SHA de B y de `storage3==2.32.0`; puede integrar provisionalmente el adaptador mientras B termina ciclo de archivos y recuperación. No esperar al exportador para conectar el almacén. Los dos errores de configuración/autorización observados por A siguen siendo responsabilidad de B y deben cerrar antes de entregar. Véanse las [instrucciones de continuidad para ambos equipos](reports/free-private-pilot-2026-10-12/SEGUIMIENTO_A_B.md). No se cambia el alcance ni se marca ninguna casilla de entrega como terminada por estas pruebas locales.
+**Siguiente acción:** B corrige la construcción del almacén en el exportador remoto; A revisa el avance publicado de B e integra su cierre, hace obligatorias las aserciones pendientes y ensaya recuperación con la herramienta corregida. La [revisión del candidato combinado](reports/free-private-pilot-2026-10-12/REVISION_CANDIDATO_A.md) actualiza las [instrucciones anteriores](reports/free-private-pilot-2026-10-12/SEGUIMIENTO_A_B.md). Después toca prueba alojada y navegador, no una fase nueva. Ninguna casilla de entrega se cierra sólo por evidencia local.
 
 ## 3. Por qué PDF funciona localmente y el almacenamiento sigue pendiente
 
-PDF y KMZ usan el mismo sistema de almacenamiento de archivos. En local puede guardar los bytes en el disco de la computadora. En el candidato alojado de A todavía no está conectado el almacén duradero: sus rutas de contenido responden `503 almacen_no_configurado`. Esto afecta a ambos formatos, no solamente a KMZ.
+PDF y KMZ usan el mismo sistema de almacenamiento de archivos. En local puede guardar los bytes en el disco de la computadora. En A `df7984d` ya está conectado el adaptador de Supabase mediante variables de entorno; todavía no se ha probado contra las cuentas reales. Sin esa configuración, las rutas de contenido siguen respondiendo `503 almacen_no_configurado`. Esto afecta a ambos formatos, no solamente a KMZ.
 
 El KMZ además se procesa para producir geometría que se guarda en Postgres. Tener geometría o verla en el mapa no demuestra que el archivo original esté almacenado de forma duradera.
 

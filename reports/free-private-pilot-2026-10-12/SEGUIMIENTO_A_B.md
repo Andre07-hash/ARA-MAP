@@ -1,5 +1,7 @@
 # Continuidad A/B — integrar el almacén sin esperar al cierre completo de B
 
+**Seguimiento posterior:** A ya integró `9380ecc` y B publicó `770cc83`. Leer la [revisión del candidato combinado](REVISION_CANDIDATO_A.md) antes de reutilizar los prompts de este registro; no repetir la integración ya realizada.
+
 12 de octubre de 2026, hora de México. Aplicar el [acuerdo de entrega](../../PLAN_DE_ENTREGA.md) y el [contrato F0](START_HERE.md). Este seguimiento mantiene alcance, proveedores, backlog y restricciones; no inicia otra fase.
 
 ## Revisión del supervisor

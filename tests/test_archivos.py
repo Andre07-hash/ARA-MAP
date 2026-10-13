@@ -1237,6 +1237,182 @@ class LifecycleChecks:
                                  reloj=self.clock)
         self.assertFalse(quiet["limpieza_pendiente"])
 
+    # -- F0: a remote store that fails, refuses, loses answers or is not configured
+
+    def test_f0_storage_failures_are_safe_503s_with_the_stores_own_retry_verdict(self):
+        from server.almacen import FalloAlmacenError
+        denied = FalloAlmacenError(reintentar=False, proveedor="403/Unauthorized")
+        started = self.start(PDF)
+        for error, retry in ((denied, False), (FalloAlmacenError(), True)):
+            self.store.inyectar_error("guardar_temporal", error)
+            failure = self.assert_code("almacen_no_disponible", lambda: archivos.escribir_temporal(
+                self.sessions["ana"], started["version_id"], [PDF], self.store,
+                bd=self.database, reloj=self.clock))
+            self.assertEqual((failure.status, failure.detalle["reintentar"]), (503, retry))
+            self.assertNotIn("403", repr(failure.detalle) + failure.mensaje)
+        # The pending version survived both and is still usable.
+        archivos.escribir_temporal(self.sessions["ana"], started["version_id"], [PDF],
+                                   self.store, bd=self.database, reloj=self.clock)
+        self.store.inyectar_error("copiar", denied)
+        failure = self.assert_code("almacen_no_disponible", lambda: self.complete(started))
+        self.assertEqual((failure.status, failure.detalle["reintentar"]), (503, False))
+        self.assertEqual(self.rows("archivo_version")[0]["estado"], "subiendo")
+        self.assertEqual(self.complete(started)["version"]["estado"], "disponible")   # lease freed
+        before = self.rows("archivo_version")
+        for error, retry in ((denied, False), (FalloAlmacenError(), True)):
+            self.store.inyectar_error("leer", error)
+            failure = self.assert_code("almacen_no_disponible", lambda: archivos.descargar(
+                self.sessions["ana"], started["version_id"], self.store, bd=self.database))
+            self.assertEqual((failure.status, failure.detalle["reintentar"]), (503, retry))
+        self.assertEqual(self.rows("archivo_version"), before)
+        self.assertEqual(bytes(archivos.descargar(
+            self.sessions["ana"], started["version_id"], self.store,
+            bd=self.database)["contenido"]), PDF)
+
+    def test_f0_lost_answer_of_the_final_write_is_cleaned_by_nonce_and_reported(self):
+        started = self.upload(PDF)
+        self.store.inyectar_incierto()
+        failure = self.assert_code("almacen_no_disponible", lambda: self.complete(started))
+        self.assertTrue(failure.detalle["reintentar"])
+        self.assertTrue(failure.detalle["limpieza_pendiente"])      # a late write is possible
+        self.assertEqual(list(self.store.listar("final/")), [])     # its own nonce, removed
+        self.assertEqual(self.rows("archivo_version")[0]["estado"], "subiendo")
+        done = self.complete(started)
+        self.assertEqual(done["version"]["estado"], "disponible")
+        self.assertEqual(len(list(self.store.listar("final/"))), 1)
+
+    def test_f0_uncertain_write_is_retained_when_it_cannot_be_proven_unreferenced(self):
+        from server.almacen import FalloAlmacenError
+        from server.repo import archivos as repo
+        started = self.upload(PDF)
+        self.store.inyectar_incierto()
+        with patch.object(repo, "final_key_referenced", side_effect=RuntimeError("db")):
+            failure = self.assert_code("almacen_no_disponible", lambda: self.complete(started))
+        self.assertTrue(failure.detalle["limpieza_pendiente"])
+        orphans = [m.clave for m in self.store.listar("final/")]
+        self.assertEqual(len(orphans), 1)                           # kept on doubt
+        self.store.inyectar_incierto()
+        self.store.inyectar_error("borrar", FalloAlmacenError())    # cleanup itself fails
+        self.assert_code("almacen_no_disponible", lambda: self.complete(started))
+        self.assertEqual(len(list(self.store.listar("final/"))), 2)
+        done = self.complete(started)                               # a third, new nonce
+        finals = {m.clave for m in self.store.listar("final/")}
+        self.assertEqual(len(finals), 3)
+        referenced = self.rows("archivo_version")[0]["clave_final"]
+        self.assertIn(referenced, finals - set(orphans))
+        self.assertEqual(done["version"]["estado"], "disponible")
+        self.assertTrue(self.complete(started)["limpieza_pendiente"])   # replay still reports them
+        self.assertEqual(bytes(archivos.descargar(
+            self.sessions["ana"], started["version_id"], self.store,
+            bd=self.database)["contenido"]), PDF)
+
+    def test_f0_collision_winner_is_never_deleted(self):
+        from server.almacen import ColisionError
+        started = self.upload(PDF)
+        winner = archivos._final_prefix(started["version_id"]) + "ganador"
+        self.store._objetos[winner] = (b"bytes del ganador", 1.0)
+        self.store.inyectar_error("copiar", ColisionError())
+        with patch.object(self.store, "borrar", wraps=self.store.borrar) as borrar:
+            self.assert_code("almacen_no_disponible", lambda: self.complete(started))
+        borrar.assert_not_called()
+        self.assertEqual(self.store.tamano_de(winner), 17)
+        self.assertEqual(self.complete(started)["version"]["estado"], "disponible")
+        self.assertEqual(self.store.tamano_de(winner), 17)
+        self.assertNotEqual(self.rows("archivo_version")[0]["clave_final"], winner)
+
+    def test_f0_restart_between_final_write_and_commit_retries_with_a_new_nonce(self):
+        class Apagon(BaseException):
+            """The process died: no handler or cleanup of the request runs."""
+
+        def morir(_version_id):
+            raise Apagon()
+
+        started = self.upload(PDF)
+        with self.assertRaises(Apagon):
+            self.complete(started, ganchos=SimpleNamespace(antes_commit=morir))
+        orphan = [m.clave for m in self.store.listar("final/")]
+        self.assertEqual(len(orphan), 1)                            # written, never committed
+        row = self.rows("archivo_version")[0]
+        self.assertEqual((row["estado"], row["clave_final"]), ("subiendo", None))
+        self.assert_code("procesamiento_en_curso", lambda: self.complete(started))
+        self.clock.advance(archivos.LEASE_SECONDS + 1)              # the dead holder's lease ends
+        done = self.complete(started)
+        self.assertEqual(done["version"]["estado"], "disponible")
+        referenced = self.rows("archivo_version")[0]["clave_final"]
+        self.assertNotEqual(referenced, orphan[0])
+        self.assertEqual({m.clave for m in self.store.listar("final/")}, {referenced, orphan[0]})
+        self.assertTrue(self.complete(started)["limpieza_pendiente"])   # the orphan is reported
+        self.assertEqual(bytes(archivos.descargar(
+            self.sessions["ana"], started["version_id"], self.store,
+            bd=self.database)["contenido"]), PDF)
+
+    def test_f0_full_or_paused_store_keeps_committed_file_history_and_boundary(self):
+        from server.almacen import FalloAlmacenError
+        data = kmz("poligono_con_hueco")
+        first = self.upload(data, "kmz")
+        self.assertEqual(self.complete(first)["version"]["estado"], "disponible")
+        tables = ("archivo", "archivo_version", "archivo_evento", "archivo_intento", "geometria")
+        before = {table: self.rows(table) for table in tables}
+        full = FalloAlmacenError(reintentar=False, proveedor="413/Payload too large")
+        replacement = self.start(data + b"x", "kmz")
+        self.store.inyectar_error("guardar_temporal", full)
+        failure = self.assert_code("almacen_no_disponible", lambda: archivos.escribir_temporal(
+            self.sessions["ana"], replacement["version_id"], [data + b"x"], self.store,
+            bd=self.database, reloj=self.clock))
+        self.assertEqual((failure.status, failure.detalle["reintentar"]), (503, False))
+        for _ in range(2):                                          # and while completing
+            self.store.inyectar_error("copiar", full)
+            self.assert_code("almacen_no_disponible", lambda: self.complete(replacement))
+        after = {table: self.rows(table) for table in tables}
+        for table in ("archivo", "geometria", "archivo_intento"):
+            self.assertEqual(after[table], before[table], table)    # same active boundary
+        self.assertEqual([r for r in after["archivo_version"] if r["id"] == first["version_id"]],
+                         before["archivo_version"])
+        pending = [r for r in after["archivo_version"] if r["id"] == replacement["version_id"]]
+        self.assertEqual([r["estado"] for r in pending], ["subiendo"])   # not discarded
+        self.assertEqual(bytes(archivos.descargar(
+            self.sessions["ana"], first["version_id"], self.store,
+            bd=self.database)["contenido"]), data)
+
+    def test_f0_unconfigured_store_creates_no_pending_row_after_authorization(self):
+        def start(user, key, configured, terrain=None):
+            return archivos.iniciar(
+                self.sessions[user], terrain or self.terrain, tipo="pdf",
+                nombre_original="ficticio.pdf", tamano_declarado=len(PDF),
+                sha256_declarado=hashlib.sha256(PDF).hexdigest(), idempotency_key=key,
+                bd=self.database, reloj=self.clock, almacen_configurado=configured)
+
+        # Whoever may not upload here gets the same answer with or without a store.
+        for user, terrain in (("omar", self.terrain), ("olga", self.other_terrain)):
+            answers = []
+            for configured in (True, False):
+                with self.assertRaises(ApiError) as caught:
+                    start(user, str(uuid.uuid4()), configured, terrain)
+                answers.append((caught.exception.status, caught.exception.detalle))
+            self.assertEqual(answers[0], answers[1])
+            self.assertNotEqual(answers[0][0], 503)
+        failure = self.assert_code("almacen_no_configurado",
+                                   lambda: start("ana", "clave-sin-almacen", False))
+        self.assertEqual(failure.status, 503)
+        self.assertEqual(self.rows("archivo_version"), [])
+        self.assertEqual(self.rows("archivo"), [])
+        # The refusal was not recorded: the same key works once a store exists,
+        first = start("ana", "clave-sin-almacen", True)
+        # and an answer already given is replayed even if the store went away.
+        self.assertEqual(start("ana", "clave-sin-almacen", False), first)
+        self.assertEqual(len(self.rows("archivo_version")), 1)
+
+    def test_f0_store_that_cannot_be_built_is_reported_as_not_configured(self):
+        from server.almacen import AlmacenNoConfiguradoError
+        started = self.start(PDF)
+        self.store.inyectar_error("guardar_temporal", AlmacenNoConfiguradoError())
+        failure = self.assert_code("almacen_no_configurado", lambda: archivos.escribir_temporal(
+            self.sessions["ana"], started["version_id"], [PDF], self.store,
+            bd=self.database, reloj=self.clock))
+        self.assertEqual(failure.status, 503)
+        self.assertEqual(self.rows("archivo_version")[0]["estado"], "subiendo")
+
+
 class AttachmentLifecycleSQLite(LifecycleChecks, unittest.TestCase):
     def prepare_database(self) -> None:
         self.temp = tempfile.TemporaryDirectory()

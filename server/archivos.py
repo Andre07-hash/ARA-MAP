@@ -19,7 +19,14 @@ from types import SimpleNamespace
 from typing import Any, Callable, Union, cast
 
 from . import auth, db
-from .almacen import Almacen, AlmacenError, LimiteExcedidoError, ObjetoAusenteError
+from .almacen import (
+    Almacen,
+    AlmacenError,
+    AlmacenNoConfiguradoError,
+    LimiteExcedidoError,
+    ObjetoAusenteError,
+    ResultadoInciertoError,
+)
 from .errors import ApiError
 from .kmz import procesar_kmz
 from .protocols import DatabaseConnection
@@ -44,6 +51,24 @@ Processor = Callable[[bytes, object], dict[str, Any]]
 def _error(code: str, message: str, status: int = 400,
            **detail: Any) -> ApiError:
     return ApiError(message, status, {"code": code, **detail})
+
+
+def _no_store() -> ApiError:
+    return _error("almacen_no_configurado",
+                  "El almacenamiento de archivos no está configurado.", 503)
+
+
+def _store_failure(exc: AlmacenError, message: str) -> ApiError:
+    """A storage problem as a safe 503: never an application 401/403/404.
+
+    `reintentar` is the store's own judgement: an outage may pass, while a
+    rejected credential, a missing bucket or a full account needs the
+    operator. The provider's status stays in the server log.
+    """
+    if isinstance(exc, AlmacenNoConfiguradoError):
+        return _no_store()
+    return _error("almacen_no_disponible", message, 503,
+                  reintentar=bool(getattr(exc, "reintentar", True)))
 
 
 def _not_found() -> ApiError:
@@ -223,8 +248,14 @@ def _hook(hooks: object | None, name: str, *args: Any) -> None:
 def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
             nombre_original: str, tamano_declarado: int,
             sha256_declarado: str, idempotency_key: str,
-            bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
-    """Authorize an upload and create its immutable pending version."""
+            bd: Path | str | None = None, reloj: Clock | None = None,
+            almacen_configurado: bool = True) -> dict[str, Any]:
+    """Authorize an upload and create its immutable pending version.
+
+    `almacen_configurado` is a pure configuration fact, never a provider
+    call: without a store no new pending version is created, but only after
+    the request was authorized, and an earlier answer is still replayed.
+    """
     _valid_session(sesion)
     kind, maximum = _kind(tipo)
     name = _safe_name(nombre_original)
@@ -241,6 +272,8 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
         replay = _operation(conn, operation, key, request_hash)
         if replay is not None:
             return replay
+        if not almacen_configurado:
+            raise _no_store()
         now = _now(reloj)
         if repo.effective_pending_count(conn, sesion.user_id, now) >= PENDING_MAX:
             raise _conflict("limite_pendientes",
@@ -281,8 +314,7 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
         raise _error("tamano_excedido", "El archivo supera el tamaño permitido.",
                      413, limite=maximum) from exc
     except AlmacenError as exc:
-        raise _error("almacen_no_disponible", "No fue posible guardar el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_failure(exc, "No fue posible guardar el archivo.") from exc
     except (TypeError, ValueError) as exc:
         raise _error("bloque_invalido", "Los bloques de la subida no son válidos.") from exc
     current = _in_scope(sesion, _version(version_id), "archivos.subir", bd)
@@ -520,9 +552,13 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         verification = exc
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
-        failure = _error("almacen_no_disponible", "No fue posible verificar el archivo.", 503,
-                         reintentar=True)
-        _report_cleanup(failure, copied and _discard_final(final_key, almacen, bd))
+        failure = _store_failure(exc, "No fue posible verificar el archivo.")
+        # A final write whose answer was lost may exist. Remove this attempt's
+        # own nonce if the database proves it unreferenced, and still report
+        # cleanup as pending: a late write cannot be ruled out from here.
+        uncertain = not copied and isinstance(exc, ResultadoInciertoError)
+        pending = (copied or uncertain) and _discard_final(final_key, almacen, bd)
+        _report_cleanup(failure, pending or uncertain)
         raise failure from exc
     else:
         verification = None
@@ -654,8 +690,7 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         assert body is not None
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
-        raise _error("almacen_no_disponible", "No fue posible leer el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_failure(exc, "No fue posible leer el archivo.") from exc
     except ApiError:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
         raise
@@ -984,8 +1019,7 @@ def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         raise _error("contenido_no_disponible", "El contenido del archivo no está disponible.",
                      503) from exc
     except AlmacenError as exc:
-        raise _error("almacen_no_disponible", "No fue posible leer el archivo.", 503,
-                     reintentar=True) from exc
+        raise _store_failure(exc, "No fue posible leer el archivo.") from exc
     if len(content) != int(resource["tamano"]) or digest.hexdigest() != resource["sha256"]:
         raise _error("objeto_final_inconsistente",
                      "El archivo guardado no coincide con la versión registrada.", 503)

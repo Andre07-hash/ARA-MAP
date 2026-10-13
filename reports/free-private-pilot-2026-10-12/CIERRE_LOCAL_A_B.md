@@ -1,5 +1,7 @@
 # Cierre local A/B y preparación de la prueba alojada
 
+**Hito posterior completado:** A `31b6a1d` ya integra B `071d7d0` y tiene CI verde. No repetir las tareas de integración de este registro; seguir la [propuesta de prueba alojada](PRUEBA_ALOJADA_PARA_AUTORIZAR.md).
+
 12 de octubre de 2026, hora de México. El reporte de B usa fecha 13 de octubre en su nombre; se conserva esa ruta como referencia, sin cambiar la fecha local de esta decisión. Continúa el [plan de entrega](../../PLAN_DE_ENTREGA.md): portal privado, KMZ por terreno existente, PDF, recuperación, sin pagos ni ampliación de alcance.
 
 ## Estado y evidencia

@@ -2,6 +2,8 @@
 
 Actualizado: **12 de octubre de 2026**. Responsable del acuerdo: propietario y supervisor; equipos A y B implementan. Este es el punto de entrada para retomar el proyecto sin reconstruir las conversaciones.
 
+**Hito actual: candidato `31b6a1d` listo para prueba alojada, CI exacto verde.** La integración local de A/B está cerrada para este hito. El [alcance de la prueba alojada](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md) está preparado; su ejecución externa sigue pendiente de autorización del propietario. No es todavía entrega ni aceptación del proveedor real.
+
 **Prioridad: entregar ASAP un portal privado donde un empleado pueda editar terrenos existentes, adjuntar su KMZ, activar su polígono y conservar sus datos y archivos.** Terminar la conexión y comprobación del almacenamiento es el camino crítico. No abrir nuevas funcionalidades ni repetir fases aceptadas para alcanzar una perfección que no requiere este piloto.
 
 Este acuerdo fija alcance, prioridades y criterios de entrega. El [paquete técnico F0](reports/free-private-pilot-2026-10-12/START_HERE.md) conserva los contratos de implementación. Las propuestas anteriores de Vercel/AWS, transferencias por partes y otros proveedores son antecedentes; no son tareas pendientes del piloto. Una instrucción posterior explícita del propietario puede cambiar este acuerdo; registrar ese cambio aquí.
@@ -25,10 +27,10 @@ Esta es una fotografía del estado conocido al redactar el acuerdo, no una afirm
 | --- | --- | --- |
 | Tabla maestra, cuentas, permisos, edición e historial | Implementados y con evidencia previa del núcleo aceptado de A | Reutilizar esa evidencia y comprobar el recorrido del empleado en el candidato final |
 | PDF, parser KMZ, selección, activación y dibujo del polígono | Flujo existente con evidencia local; no se debe reconstruir | Conectarlo al almacenamiento duradero y probarlo desde la URL real |
-| Entrada de servidor para Render | A conectó el adaptador y el ciclo de archivos de B en #31; dependencias fijadas | Incorporar el último cierre B `071d7d0` y comprobar el comportamiento en Render |
+| Entrada de servidor para Render | Candidato combinado `31b6a1d`, con último B integrado y dependencias fijadas | Configuración/despliegue autorizados y comprobación en Render |
 | Carga inicial de terrenos | A preparó comando de operador con simulación, control de duplicados y ensayo de 100 filas | Usar ese camino comprobado para la tabla maestra; la importación Excel/CSV antigua escribe en otro espacio de datos |
-| Adaptador de almacenamiento privado | B `770cc83` integrado en A; los antiguos pendientes de configuración/permisos ya son aserciones obligatorias. B publicó cierre `071d7d0` | Integrar ese cierre y comprobar proveedor real |
-| Respaldo y restauración | A ensayó las herramientas de exportación, carga y verificación con almacén local. Corrección de fábrica remota B `071d7d0` verificada por el supervisor | Incorporar corrección; probar el camino por entorno y la recuperación del candidato con proveedor real |
+| Adaptador de almacenamiento privado | B `071d7d0` integrado; configuración/permisos/replay comprobados localmente | Comprobar proveedor real |
+| Respaldo y restauración | Candidato integrado ensayado con herramientas y almacén local; camino por entorno comprobado con SDK y transporte simulado, incluida detección de corrupción de igual tamaño | Comprobar la recuperación con proveedor real |
 | Portal entregable en internet | No demostrado por estas entregas parciales | Configuración autorizada, despliegue del candidato exacto y recorrido final |
 
 Referencias para no perder ni duplicar trabajo:
@@ -38,12 +40,12 @@ Referencias para no perder ni duplicar trabajo:
 | Núcleo A, [#29](https://github.com/Andre07-hash/ARA-MAP/pull/29) | `4670df7348265af66c640069e5ece2a274830fa3` | Base aceptada; preservar |
 | Archivos/mapa B, [#28](https://github.com/Andre07-hash/ARA-MAP/pull/28) | `b2ac9bd176043fc4b1625b13993f8f21407dc978` | Ya integrado en A; no volver a integrarlo |
 | Batching B, [#30](https://github.com/Andre07-hash/ARA-MAP/pull/30) | `bc7e421e5f2a94bdaa6a61ca14fc8c41e381f9c3` | Integrado una vez en #31 mediante `f81bc27`; no reasignar |
-| Candidato combinado A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `69ae72dfd7b31c6596eb85109f4c4c091ebcde59` | B `770cc83` integrado mediante `65f3f26`; 30 comprobaciones API locales y 41/41 recorridos Chrome sobre launcher local reportados. [CI 38335097876](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38335097876): JavaScript aprobado, Python/Postgres en curso al consultar. CI omite SDK; evidencia con SDK local |
-| Cierre B, [#32](https://github.com/Andre07-hash/ARA-MAP/pull/32) | `071d7d05c985167c9ea3efac5d8ac6eb2b3819a6` | [CI 38334388640](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38334388640) verde. Corrección de fábrica remota confirmada con prueba y control negativo; pendiente de integración en A. Proveedor real sin probar |
+| Candidato combinado A, [#31](https://github.com/Andre07-hash/ARA-MAP/pull/31) | `31b6a1dba827b57d448a2aeb62ad10c05db09afc` | B `071d7d0` integrado mediante `f2bf329`; [CI exacto 38336981960](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38336981960) verde. 30 comprobaciones API locales reportadas; evidencia SDK local y 41/41 Chrome local previo reutilizado. CI omite pruebas SDK |
+| Cierre B, [#32](https://github.com/Andre07-hash/ARA-MAP/pull/32) | `071d7d05c985167c9ea3efac5d8ac6eb2b3819a6` | [CI 38334388640](https://github.com/Andre07-hash/ARA-MAP/actions/runs/38334388640) verde; integrado en A. Cuerpo del PR actualizado; documentación antigua de carga opcional no bloquea el hito |
 
 Los avances nuevos deben actualizar este registro con su SHA y evidencia. Preservar también C1 y las ramas anteriores. La rama del supervisor contiene planificación; no confundir sus pruebas con las del código integrado de A/B.
 
-**Siguiente acción:** A integra el SHA B `071d7d0` y verifica el camino de recuperación por entorno corregido. Se conserva una sola secuencia operativa: exportar/verificar con B, cargar mediante `scripts/restaurar_archivos.py` de A y verificar de nuevo tamaño/SHA. No desarrollar otro mecanismo ni refactorizar los dos existentes para este hito. Leer el [cierre local y preparación de la prueba alojada](reports/free-private-pilot-2026-10-12/CIERRE_LOCAL_A_B.md), que actualiza las instrucciones anteriores. Después toca proveedor real y navegador del servidor alojado. Ninguna casilla de entrega se cierra sólo por evidencia local.
+**Siguiente acción:** autorización y ejecución de la [prueba alojada del candidato exacto](reports/free-private-pilot-2026-10-12/PRUEBA_ALOJADA_PARA_AUTORIZAR.md). No asignar otra integración ni pedir más desarrollo sin un fallo concreto. Secuencia de recuperación: exportar/verificar con B, cargar mediante `scripts/restaurar_archivos.py` de A y verificar tamaño/SHA. B atiende fallos del proveedor; A coordina el ensayo. Las casillas de entrega siguen abiertas hasta contar con evidencia alojada.
 
 ## 3. Por qué PDF funciona localmente y el almacenamiento sigue pendiente
 

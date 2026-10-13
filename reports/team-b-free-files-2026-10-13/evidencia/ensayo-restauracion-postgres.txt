@@ -1,0 +1,13 @@
+# 81f4803a0231ae858639b7f66ff95caf06876631 (código; el script se agrega en el commit siguiente) · Postgres 16 desechable local · 2026-10-13T01:40:16Z
+origen: {'archivo': 3, 'archivo_version': 5, 'archivo_evento': 16, 'archivo_intento': 3, 'geometria': 3}
+OK    filas restauradas iguales al origen
+OK    exportación verificada (salida 0) — {'ok': 4, 'ausente': 0, 'tamano_distinto': 0, 'sha_distinto': 0, 'ilegible': 0}
+OK    huérfano reportado, no borrado
+OK    bytes leídos = referenciados — {'referenciados': 1279, 'no_referenciados': 21, 'staging': 0, 'retenidos': 1300, 'presupuesto': 700000000, 'excede_presupuesto': False, 'leidos_del_almacen': 1279}
+OK    segunda exportación incremental (0 bytes leídos)
+OK    carga en bucket nuevo (salida 0) — {'cargados': 4, 'ya_presentes': 0, 'problemas': []}
+OK    base restaurada contra bucket restaurado (salida 0) — {'ok': 4, 'ausente': 0, 'tamano_distinto': 0, 'sha_distinto': 0, 'ilegible': 0}
+OK    subida pendiente listada sin temporal, no es error
+OK    sin huérfanos ni temporales en el destino
+OK    faltante y corrupto detectados (salida 1) — {'ok': 2, 'ausente': 1, 'tamano_distinto': 0, 'sha_distinto': 1, 'ilegible': 0}
+Ensayo correcto. Carpeta de trabajo temporal borrable.

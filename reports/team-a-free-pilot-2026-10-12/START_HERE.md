@@ -7,8 +7,8 @@
 
 **Combined local candidate, provisional: Team B's adapter
 (`9380ecc34af8a6b4fccdf387c066163c1dcdda59`) and its lifecycle and recovery
-slice (`770cc8358ee42a3e71336517932ce7136c607e65`), both from PR #32, are
-merged; the Supabase adapter is wired into the hosted entry point.** Nothing was
+slices (`770cc8358ee42a3e71336517932ce7136c607e65`, then the closing
+`071d7d05c985167c9ea3efac5d8ac6eb2b3819a6`), all from PR #32, are merged; the Supabase adapter is wired into the hosted entry point.** Nothing was
 provisioned or deployed; no account, secret, payment method or real data.
 **No result here comes from Supabase, Render or Neon, and none is a browser
 run.** #29, #28, #30, #32, C1 and the M1 checkpoint branch are unchanged.
@@ -52,17 +52,37 @@ size and SHA-256. It never overwrites, is safe to run twice, and uses the same
 three storage variables, set to the restore bucket. 5 tests
 (`tests/test_restaurar_archivos.py`). Against a real bucket it is untested.
 
+## Verified on the tree with B's closing `071d7d0`
+
+- **Start with a store that cannot be built** (complete settings, SDK not
+  importable): 503 `almacen_no_configurado`, no new `archivo_version` row; an
+  account without access still gets 404 and an anonymous request 401; the
+  earlier answer is still replayed for the same Idempotency-Key and body, and
+  the same key with another body is still 409. The buildability check runs
+  after authorization and before the write transaction; its verdict is applied
+  after reverification and replay.
+  `InicioConAlmacenNoConstruible` in `tests/test_hosted_archivos.py`; needs no
+  SDK, so it also runs in CI and on Python 3.9.
+- **Export through `--almacen-entorno` with the real contract** (three
+  settings → `fabrica_desde_entorno` → factory → store; only the transport is
+  B's fake provider): B's exporter verifies and exports the two uploaded
+  files; an empty second bucket fails verification; `restaurar_archivos.py
+  --almacen-entorno` uploads; the final verification exits 0. Then an object
+  of the right size and wrong bytes is planted in the target: the upload
+  reports "ya estaban" and exits 0, and the final verification exits 1.
+  `test_export_through_the_real_factory_then_restore_and_verify`; needs the
+  SDK, so **it runs locally and is skipped in CI**.
+
+One recovery sequence is documented: B's exporter/verifier →
+`scripts/restaurar_archivos.py` → final size-and-SHA-256 verification, which
+is mandatory. B's tool can also load an export itself; the two loaders are
+left as they are.
+
 ## Open items
 
-- **B, exporter defect (being fixed):** on `--almacen-entorno`,
-  `recuperacion._almacen_de` returns the store's factory instead of the store,
-  so B's tool cannot read a real bucket at this commit. Not patched here.
-  `--almacen-local` is unaffected and is what the rehearsal exercises. The
-  checklist's backup and restore commands for the real bucket are therefore
-  not runnable until B's corrected SHA is merged.
 - **CI skips the SDK-backed tests.** The workflow installs only psycopg, so
-  B's SDK door in `tests/test_almacen_supabase.py` and all of
-  `tests/test_hosted_archivos.py` are skipped in CI. They were run locally
+  B's SDK door in `tests/test_almacen_supabase.py` and the four SDK-backed
+  tests of `tests/test_hosted_archivos.py` are skipped in CI. They were run locally
   with the lock installed (results below). Installing the lock in CI is a
   one-line workflow edit this session's credential may not push; credentials
   were not widened.
@@ -173,14 +193,12 @@ The load command is an initial-setup operation: the checklist says to run it
 before employees work in the base, and records that it does not lock the base
 against a concurrent administrator change.
 
-## Next, in order
+## Next, in order (all await the owner's release)
 
-1. On B's corrected exporter SHA: ordinary merge, run the rehearsal's backup
-   and restore once through `--almacen-entorno` against B's simulated
-   provider if B offers one, and drop the defect note from the checklist.
-2. Employee journey in a browser against the deployed pilot.
-3. On the owner's release: the operator runs the checklist and
-   `humo_hospedado.py` on the free providers; results go in a hosted report.
+1. The operator runs the checklist on the free providers and
+   `humo_hospedado.py` against the deployed service.
+2. Employee journey in a browser against the deployed service.
+3. Backup and restore drill on the real bucket (sections 7 and 8).
 
 ## M1 work (superseded Vercel/AWS packet)
 

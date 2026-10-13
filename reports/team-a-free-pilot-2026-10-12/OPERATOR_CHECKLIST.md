@@ -209,13 +209,6 @@ bucket**: a database dump and the export folder made for that dump.
    service for the duration: people already signed in keep reading; signing
    in and every write answer 403.
 
-**Known defect at this commit (Team B is fixing it):** `--almacen-entorno`
-fails in `scripts/verificar_archivos.py` because it is handed the store's
-factory instead of the store. Until B's corrected SHA is merged, step 2 works
-only with `--almacen-local`, which is what the local rehearsal uses. The
-commands above are the intended ones and are **not yet runnable against the
-real bucket**.
-
 ## 8. Restore drill (once before real use; into fresh targets only)
 
 Never restore over the running pilot. Needs: one dump and its export folder.
@@ -234,33 +227,40 @@ Never restore over the running pilot. Needs: one dump and its export folder.
    COMMIT;
    ```
    Confirm which database the variable points at before running it.
-3. **Upload the files into a new private bucket.** B's tool verifies and
-   exports; it never uploads. The upload is this repository's
-   `scripts/restaurar_archivos.py`. With the storage variables of the
-   **restore** bucket (never the live one) in this shell:
+3. **Upload the files into a new private bucket**, with the storage
+   variables of the **restore** bucket (never the live one) in this shell:
    ```sh
    python scripts/restaurar_archivos.py <carpeta-de-respaldo> --almacen-entorno
    ```
    It checks every local file against the manifest's size and SHA-256 first
    and sends nothing if one is missing or different. It creates each object
-   at its original key and never overwrites: a second run reports
-   "ya estaban". Exit 0 means every object is in the bucket.
-   Do not upload by hand through the provider's dashboard: the keys, not the
-   file names, are what the database refers to.
-4. Verify the restored bucket against the same manifest:
+   at its original key and never overwrites. Do not upload by hand through
+   the provider's dashboard: the keys, not the file names, are what the
+   database refers to.
+4. **Final verification — mandatory, every time:**
    ```sh
    python scripts/verificar_archivos.py --manifiesto <carpeta-de-respaldo>/manifiesto.json --almacen-entorno --restauracion
    ```
-   Exit 0 is required. (Same `--almacen-entorno` defect as in section 7
-   until B's fix; `--almacen-local` works today.)
+   Exit 0 is required: it re-reads every object from the restored bucket and
+   compares size **and SHA-256** with the manifest. Step 3's own report is not
+   enough: "ya estaban" there means only that an object of the right size was
+   already at the key, not that its bytes are right.
+
+This is the one sequence for the pilot: **B's exporter/verifier → 
+`restaurar_archivos.py` → final verification.** B's tool can also load an
+export itself (`--restauracion --cargar-exportacion`); it is not the
+documented path here, and whichever loads, step 4 decides.
+
 5. Uploads that were pending at backup time come back pending, with their
    original deadlines and without their staged bytes. The tool lists them;
    the person cancels and starts again, or they expire.
 6. Point a **separate** service at the restored pair and repeat checks 2, 3
    and 7 of section 6.
 
-Rehearsed locally end to end with these exact commands and `--almacen-local`
-(see START_HERE). Against the real providers it is still to be done.
+Rehearsed locally end to end with these exact commands: with `--almacen-local`
+on the real hosted process and Postgres, and with `--almacen-entorno` against
+a simulated provider (see START_HERE). Against the real providers it is still
+to be done.
 
 ## 9. Identities to record
 

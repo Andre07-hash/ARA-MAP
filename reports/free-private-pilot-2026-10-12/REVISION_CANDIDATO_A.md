@@ -1,5 +1,7 @@
 # Revisión del candidato combinado de A y siguiente paso
 
+**Actualización posterior:** el defecto de fábrica está corregido en B `071d7d0`, y A `69ae72d` ya integra el ciclo de archivos de `770cc83`. Leer el [cierre local A/B](CIERRE_LOCAL_A_B.md); no reasignar los pendientes históricos de este reporte.
+
 12 de octubre de 2026, hora de México. Mantiene el [acuerdo de entrega y backlog](../../PLAN_DE_ENTREGA.md). Revisión de código, ascendencia, CI y un reproducer aislado; no es aceptación alojada ni ejecución independiente de las suites completas de A/B.
 
 ## Avance confirmado

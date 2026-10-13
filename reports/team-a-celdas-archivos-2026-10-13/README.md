@@ -23,10 +23,17 @@ reales, sin cambios de API, esquema, almacenamiento, límites ni permisos.
   detalle (⋯), que no cambia. Un KMZ con varios contornos dice en la celda
   «Varios contornos: elige en el detalle (⋯). Nada se activó.»
 
-**Regla existente que no se tocó:** al completar, el servidor activa un KMZ
-cuyo único contorno es válido (igual que desde el detalle). Con varios
-contornos no activa nada. Cambiar eso es un cambio de API/flujo; queda para
-decisión del propietario.
+**Activación KMZ (regla existente del servidor, sin cambios):**
+
+| KMZ | Al completar la subida (tabla o detalle) |
+|---|---|
+| Un solo contorno válido | El servidor lo activa (`aplicada`), sustituyendo el contorno anterior. |
+| Varios candidatos | No se activa nada: `requiere_seleccion`; se elige, procesa y activa explícitamente en el detalle. |
+| Sin contorno utilizable | `rechazado`; el contorno anterior se conserva. |
+
+Por indicación del supervisor no se añade una confirmación nueva en el
+servidor. La guía de inicio (`reports/team-a-free-pilot-2026-10-12/GUIA_DE_INICIO.md`,
+secciones 4 y 5) explica esta diferencia a quien la usa.
 
 Archivos: `web/components/archivos/celda.js` (nuevo), `index.js`,
 `detalle.js` (sólo exporta dos tablas de texto), `web/styles/archivos.css`,
@@ -54,7 +61,9 @@ del botón), `tests/e2e/README.md`.
   ambiental (`test_packaging`: el Python de este contenedor trae openpyxl; falla
   igual en la base), 297 omitidas (Postgres sin URL de prueba).
 - `verificar.sh` requiere zsh, que no existe en este contenedor; se corrieron
-  sus pasos por separado. No se corrió ruff/mypy (`--todo`).
+  sus pasos por separado. `ruff check server/ tests/` (0.16.8): sin
+  hallazgos; `mypy server/` (2.3.1): sin problemas en 58 archivos. Este cambio
+  no toca Python.
 
 Capturas: [administrador](01-administrador-botones-en-tabla.png),
 [operador](02-operador-botones-en-tabla.png) (datos ficticios).

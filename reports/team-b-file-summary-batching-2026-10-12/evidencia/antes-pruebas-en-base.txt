@@ -1,0 +1,6 @@
+      1 ERROR: test_batches_larger_than_one_chunk_split_without_changing_anything
+     70 ERROR: test_the_auth_helper_decides_like_require_terreno_for_each_read_capability
+      4 ERROR: test_the_auth_helper_refuses_write_capabilities
+      2 FAIL: test_statement_count_is_bounded_by_batches_not_by_terrains
+      1 Ran 20 tests in 1.624s
+      1 FAILED (failures=2, errors=75, skipped=10)

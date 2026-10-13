@@ -1,0 +1,16 @@
+ok   administrator: role-aware navigation, master table columns, bases, grants and custom columns
+ok   operator: only her bases; blank create; every core and custom type edited by keyboard; reload and a second session
+ok   keyboard only: Tab and arrows move, typing replaces, Escape cancels, Enter and Tab save, focus returns; a bad value is kept
+ok   two users, one cell: the stale save is a conflict that keeps both values; reapply and discard are explicit
+ok   a lost response is checked, not replayed; a lost blank create is retried with its own key and not duplicated
+ok   archive and restore a terrain; an archived row is read-only
+ok   transfer: real preview, explicit confirmation, the row leaves; the source operator loses it without a leak
+ok   custom columns: rename, reorder, retire and restore keep ids, values and history
+ok   grants: a concurrent change is shown, not overwritten; losing the grant clears the screen without a leak
+ok   no grant: a useful empty state; administrators' screens are not reachable by address
+ok   session loss: logout clears the table; the next account on the same page sees nothing of the previous one
+ok   an archived base is read-only for administrators and closed to operators
+ok   public and legacy administrator journeys still work
+
+Todo en orden: 13 recorridos.
+exit 0

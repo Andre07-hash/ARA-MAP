@@ -1,0 +1,2 @@
+{'responses_on_one_connection': 2, 'status_lines': ['HTTP/1.1 403 Forbidden', 'HTTP/1.1 200 OK']}
+DEFECT REPRODUCED: the unread body was served as a second request

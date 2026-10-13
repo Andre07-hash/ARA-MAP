@@ -1,0 +1,8 @@
+# Direct dependencies of the hosted service (python -m server.hosted).
+# requirements-hosted.txt is the exact lock compiled from this file:
+#   uv pip compile requirements-hosted.in --python-version 3.12 --no-header -o requirements-hosted.txt
+# The local app installs nothing: standard library plus vendor/python.
+psycopg[binary]==3.3.6
+# Team B's tested pins for the private byte store (server/almacen_supabase.py).
+storage3==2.32.0
+httpx==0.28.1

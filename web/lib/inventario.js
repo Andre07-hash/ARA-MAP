@@ -10,7 +10,7 @@ import { MONEDAS } from "./format.js";
 
 /* The server's maximum page. Fewer round trips; the default (100) is the
  * server's business, and the assembly loop works with either. */
-export const PAGE_LIMIT = 250;
+export const PAGE_LIMIT = 200;   // the server's list maximum
 
 export const DISPONIBILIDAD = Object.freeze({
   unknown: "Sin confirmar",
@@ -110,6 +110,12 @@ export function itemDeInventario(t) {
     publication_state: t.publication_state,
     estadoPublicacion: estadoPublicacion(t),
     ...ubicacion(d.lat, d.lon),
+    // The active boundary descriptor of the record's `ubicacion`, when the
+    // record carries one (null when it has none; absent on records that
+    // predate it, which stay plain XY rows). `ubicacion` above remains the XY
+    // diagnostic string and `lat`/`lon` the raw X/Y: nothing is copied from
+    // the boundary. Whether the row is located is geometria.js's ubicacionDe.
+    ...(t.ubicacion ? { geometria: t.ubicacion.geometria ?? null } : {}),
     registro: t,
   };
 }
@@ -199,7 +205,7 @@ export function contarFiltros(filtros, tipo) {
  * ponytail: the browser holds the whole result; contract v1 accepts this for
  * the small-team baseline. Server-side map aggregation if it grows.
  */
-export async function reunirPaginas(pedirPagina, { onProgreso } = {}) {
+export async function reunirPaginas(pedirPagina, { onProgreso, maximo = Infinity } = {}) {
   const porId = new Map();
   const cursores = new Set();
   let cursor = null;
@@ -214,11 +220,13 @@ export async function reunirPaginas(pedirPagina, { onProgreso } = {}) {
       cursores.add(cursor);
     }
     onProgreso?.(porId.size, primera.total ?? null);
-  } while (cursor != null);
+  } while (cursor != null && porId.size < maximo);
   return {
     terrenos: [...porId.values()],
     totalServidor: primera.total ?? porId.size,
     facets: primera.facets ?? {},
+    // `maximo` stopped it with pages left: the caller must not present this as the whole set.
+    incompleto: cursor != null,
   };
 }
 

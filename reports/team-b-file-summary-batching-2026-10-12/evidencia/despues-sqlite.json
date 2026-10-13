@@ -1,0 +1,62 @@
+{
+  "backend": "sqlite",
+  "arbol": "lote-codigo",
+  "paginas": [
+    {
+      "terrenos": 1,
+      "servicio": {
+        "sentencias": 7,
+        "ms_mediana": 2.92,
+        "con_archivos": 1,
+        "igual_a_la_referencia": true
+      },
+      "handler": {
+        "sentencias": 18,
+        "ms_mediana": 30.79,
+        "bytes": 3130
+      }
+    },
+    {
+      "terrenos": 50,
+      "servicio": {
+        "sentencias": 7,
+        "ms_mediana": 5.07,
+        "con_archivos": 50,
+        "igual_a_la_referencia": true
+      },
+      "handler": {
+        "sentencias": 18,
+        "ms_mediana": 26.31,
+        "bytes": 110775
+      }
+    },
+    {
+      "terrenos": 100,
+      "servicio": {
+        "sentencias": 7,
+        "ms_mediana": 4.11,
+        "con_archivos": 60,
+        "igual_a_la_referencia": true
+      },
+      "handler": {
+        "sentencias": 18,
+        "ms_mediana": 42.86,
+        "bytes": 206840
+      }
+    },
+    {
+      "terrenos": 200,
+      "servicio": {
+        "sentencias": 7,
+        "ms_mediana": 4.35,
+        "con_archivos": 60,
+        "igual_a_la_referencia": true
+      },
+      "handler": {
+        "sentencias": 18,
+        "ms_mediana": 36.52,
+        "bytes": 392570
+      }
+    }
+  ]
+}

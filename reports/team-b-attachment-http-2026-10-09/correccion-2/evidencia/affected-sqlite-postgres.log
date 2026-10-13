@@ -1,0 +1,221 @@
+test_ambiguous_kmz_selection_then_explicit_activation (tests.test_archivos.AttachmentLifecyclePostgres.test_ambiguous_kmz_selection_then_explicit_activation) ... ok
+test_cancel_and_retire_do_not_delete_final_history_or_resurrect (tests.test_archivos.AttachmentLifecyclePostgres.test_cancel_and_retire_do_not_delete_final_history_or_resurrect) ... ok
+test_changed_idempotent_start_conflicts_and_actor_scope_is_private (tests.test_archivos.AttachmentLifecyclePostgres.test_changed_idempotent_start_conflicts_and_actor_scope_is_private) ... ok
+test_cross_version_geometry_and_stale_revision_cannot_activate (tests.test_archivos.AttachmentLifecyclePostgres.test_cross_version_geometry_and_stale_revision_cannot_activate) ... ok
+test_every_slow_work_scope_change_is_rechecked_before_finalization (tests.test_archivos.AttachmentLifecyclePostgres.test_every_slow_work_scope_change_is_rechecked_before_finalization) ... ok
+test_history_is_bounded_and_cursor_stable (tests.test_archivos.AttachmentLifecyclePostgres.test_history_is_bounded_and_cursor_stable) ... ok
+test_initiator_only_completion_missing_ids_and_archived_policy (tests.test_archivos.AttachmentLifecyclePostgres.test_initiator_only_completion_missing_ids_and_archived_policy) ... ok
+test_input_boundaries_names_magic_rejection_and_oversized_chunk (tests.test_archivos.AttachmentLifecyclePostgres.test_input_boundaries_names_magic_rejection_and_oversized_chunk) ... ok
+test_l1_activation_resolves_version_ownership_before_any_lease (tests.test_archivos.AttachmentLifecyclePostgres.test_l1_activation_resolves_version_ownership_before_any_lease) ... ok
+test_l1_missing_and_out_of_scope_resources_are_one_result (tests.test_archivos.AttachmentLifecyclePostgres.test_l1_missing_and_out_of_scope_resources_are_one_result) ... ok
+test_l2_pending_privacy_is_one_rule_on_every_read_surface (tests.test_archivos.AttachmentLifecyclePostgres.test_l2_pending_privacy_is_one_rule_on_every_read_surface) ... ok
+test_l2_privacy_check_ignores_public_ids_that_contain_hidden_digits (tests.test_archivos.AttachmentLifecyclePostgres.test_l2_privacy_check_ignores_public_ids_that_contain_hidden_digits) ... ok
+test_l2_privacy_check_still_detects_real_leaks (tests.test_archivos.AttachmentLifecyclePostgres.test_l2_privacy_check_still_detects_real_leaks)
+Negative controls: each injected leak fails, and for its own reason. ... ok
+test_l3_completion_reads_the_clock_after_acquiring_its_boundary (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_completion_reads_the_clock_after_acquiring_its_boundary) ... ok
+test_l3_deadline_with_live_lease_is_in_progress_not_expired (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_deadline_with_live_lease_is_in_progress_not_expired) ... ok
+test_l3_expired_reprocessing_lease_is_controlled_and_writes_nothing (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_expired_reprocessing_lease_is_controlled_and_writes_nothing) ... ok
+test_l3_reprocessing_takeover_fences_the_late_holder (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_reprocessing_takeover_fences_the_late_holder) ... ok
+test_l3_start_and_failure_boundaries_use_post_acquire_time (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_start_and_failure_boundaries_use_post_acquire_time) ... ok
+test_l3_takeover_while_late_holder_waits_then_commits_first (tests.test_archivos.AttachmentLifecyclePostgres.test_l3_takeover_while_late_holder_waits_then_commits_first) ... ok
+test_l4_listing_is_bounded_paged_and_stable_with_equal_timestamps (tests.test_archivos.AttachmentLifecyclePostgres.test_l4_listing_is_bounded_paged_and_stable_with_equal_timestamps) ... ok
+test_l5_retired_pdfs_do_not_crowd_active_summaries (tests.test_archivos.AttachmentLifecyclePostgres.test_l5_retired_pdfs_do_not_crowd_active_summaries) ... ok
+test_l5_summary_replaces_lower_revision_pdf_beside_higher_revision (tests.test_archivos.AttachmentLifecyclePostgres.test_l5_summary_replaces_lower_revision_pdf_beside_higher_revision) ... ok
+test_l6_cancellation_never_claims_an_unattempted_or_failed_cleanup (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_cancellation_never_claims_an_unattempted_or_failed_cleanup) ... ok
+test_l6_lost_lease_error_carries_cleanup_status (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_lost_lease_error_carries_cleanup_status) ... ok
+test_l6_retirement_replay_reports_actual_staging_state (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_retirement_replay_reports_actual_staging_state) ... ok
+test_l6_successful_completion_staging_failure_survives_replay (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_successful_completion_staging_failure_survives_replay) ... ok
+test_l6_unprovable_reference_keeps_bytes_and_reports_pending (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_unprovable_reference_keeps_bytes_and_reports_pending) ... ok
+test_l6_verification_failure_reports_failed_cleanup_and_replay_rechecks (tests.test_archivos.AttachmentLifecyclePostgres.test_l6_verification_failure_reports_failed_cleanup_and_replay_rechecks) ... ok
+test_lease_started_before_completion_deadline_may_finish_after_it (tests.test_archivos.AttachmentLifecyclePostgres.test_lease_started_before_completion_deadline_may_finish_after_it) ... ok
+test_live_lease_takeover_fences_late_holder_and_keeps_one_final (tests.test_archivos.AttachmentLifecyclePostgres.test_live_lease_takeover_fences_late_holder_and_keeps_one_final) ... ok
+test_local_storage_backend_runs_the_same_pdf_lifecycle (tests.test_archivos.AttachmentLifecyclePostgres.test_local_storage_backend_runs_the_same_pdf_lifecycle) ... ok
+test_other_callers_see_generic_pending_summary_only (tests.test_archivos.AttachmentLifecyclePostgres.test_other_callers_see_generic_pending_summary_only) ... ok
+test_pdf_happy_path_replay_audit_and_terrain_stability (tests.test_archivos.AttachmentLifecyclePostgres.test_pdf_happy_path_replay_audit_and_terrain_stability) ... ok
+test_pending_limit_counts_effective_uploads_and_equality_expires (tests.test_archivos.AttachmentLifecyclePostgres.test_pending_limit_counts_effective_uploads_and_equality_expires) ... ok
+test_read_only_expiry_projection_does_not_write (tests.test_archivos.AttachmentLifecyclePostgres.test_read_only_expiry_projection_does_not_write) ... ok
+test_real_single_candidate_kmz_commits_mutual_rows_and_activates (tests.test_archivos.AttachmentLifecyclePostgres.test_real_single_candidate_kmz_commits_mutual_rows_and_activates) ... ok
+test_rejected_replacement_and_stale_parallel_completion_preserve_layout (tests.test_archivos.AttachmentLifecyclePostgres.test_rejected_replacement_and_stale_parallel_completion_preserve_layout) ... ok
+test_scope_loss_before_final_transaction_writes_no_outcome (tests.test_archivos.AttachmentLifecyclePostgres.test_scope_loss_before_final_transaction_writes_no_outcome) ... ok
+test_slow_work_has_no_open_write_transaction (tests.test_archivos.AttachmentLifecyclePostgres.test_slow_work_has_no_open_write_transaction) ... ok
+test_uncertain_commit_never_deletes_a_referenced_final (tests.test_archivos.AttachmentLifecyclePostgres.test_uncertain_commit_never_deletes_a_referenced_final) ... ok
+test_verification_failure_is_terminal_and_storage_failure_is_retryable (tests.test_archivos.AttachmentLifecyclePostgres.test_verification_failure_is_terminal_and_storage_failure_is_retryable) ... ok
+test_ambiguous_kmz_selection_then_explicit_activation (tests.test_archivos.AttachmentLifecycleSQLite.test_ambiguous_kmz_selection_then_explicit_activation) ... ok
+test_cancel_and_retire_do_not_delete_final_history_or_resurrect (tests.test_archivos.AttachmentLifecycleSQLite.test_cancel_and_retire_do_not_delete_final_history_or_resurrect) ... ok
+test_changed_idempotent_start_conflicts_and_actor_scope_is_private (tests.test_archivos.AttachmentLifecycleSQLite.test_changed_idempotent_start_conflicts_and_actor_scope_is_private) ... ok
+test_cross_version_geometry_and_stale_revision_cannot_activate (tests.test_archivos.AttachmentLifecycleSQLite.test_cross_version_geometry_and_stale_revision_cannot_activate) ... ok
+test_every_slow_work_scope_change_is_rechecked_before_finalization (tests.test_archivos.AttachmentLifecycleSQLite.test_every_slow_work_scope_change_is_rechecked_before_finalization) ... ok
+test_history_is_bounded_and_cursor_stable (tests.test_archivos.AttachmentLifecycleSQLite.test_history_is_bounded_and_cursor_stable) ... ok
+test_initiator_only_completion_missing_ids_and_archived_policy (tests.test_archivos.AttachmentLifecycleSQLite.test_initiator_only_completion_missing_ids_and_archived_policy) ... ok
+test_input_boundaries_names_magic_rejection_and_oversized_chunk (tests.test_archivos.AttachmentLifecycleSQLite.test_input_boundaries_names_magic_rejection_and_oversized_chunk) ... ok
+test_l1_activation_resolves_version_ownership_before_any_lease (tests.test_archivos.AttachmentLifecycleSQLite.test_l1_activation_resolves_version_ownership_before_any_lease) ... ok
+test_l1_missing_and_out_of_scope_resources_are_one_result (tests.test_archivos.AttachmentLifecycleSQLite.test_l1_missing_and_out_of_scope_resources_are_one_result) ... ok
+test_l2_pending_privacy_is_one_rule_on_every_read_surface (tests.test_archivos.AttachmentLifecycleSQLite.test_l2_pending_privacy_is_one_rule_on_every_read_surface) ... ok
+test_l2_privacy_check_ignores_public_ids_that_contain_hidden_digits (tests.test_archivos.AttachmentLifecycleSQLite.test_l2_privacy_check_ignores_public_ids_that_contain_hidden_digits) ... ok
+test_l2_privacy_check_still_detects_real_leaks (tests.test_archivos.AttachmentLifecycleSQLite.test_l2_privacy_check_still_detects_real_leaks)
+Negative controls: each injected leak fails, and for its own reason. ... ok
+test_l3_completion_reads_the_clock_after_acquiring_its_boundary (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_completion_reads_the_clock_after_acquiring_its_boundary) ... ok
+test_l3_deadline_with_live_lease_is_in_progress_not_expired (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_deadline_with_live_lease_is_in_progress_not_expired) ... ok
+test_l3_expired_reprocessing_lease_is_controlled_and_writes_nothing (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_expired_reprocessing_lease_is_controlled_and_writes_nothing) ... ok
+test_l3_reprocessing_takeover_fences_the_late_holder (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_reprocessing_takeover_fences_the_late_holder) ... ok
+test_l3_start_and_failure_boundaries_use_post_acquire_time (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_start_and_failure_boundaries_use_post_acquire_time) ... ok
+test_l3_takeover_while_late_holder_waits_then_commits_first (tests.test_archivos.AttachmentLifecycleSQLite.test_l3_takeover_while_late_holder_waits_then_commits_first) ... ok
+test_l4_listing_is_bounded_paged_and_stable_with_equal_timestamps (tests.test_archivos.AttachmentLifecycleSQLite.test_l4_listing_is_bounded_paged_and_stable_with_equal_timestamps) ... ok
+test_l5_retired_pdfs_do_not_crowd_active_summaries (tests.test_archivos.AttachmentLifecycleSQLite.test_l5_retired_pdfs_do_not_crowd_active_summaries) ... ok
+test_l5_summary_replaces_lower_revision_pdf_beside_higher_revision (tests.test_archivos.AttachmentLifecycleSQLite.test_l5_summary_replaces_lower_revision_pdf_beside_higher_revision) ... ok
+test_l6_cancellation_never_claims_an_unattempted_or_failed_cleanup (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_cancellation_never_claims_an_unattempted_or_failed_cleanup) ... ok
+test_l6_lost_lease_error_carries_cleanup_status (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_lost_lease_error_carries_cleanup_status) ... ok
+test_l6_retirement_replay_reports_actual_staging_state (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_retirement_replay_reports_actual_staging_state) ... ok
+test_l6_successful_completion_staging_failure_survives_replay (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_successful_completion_staging_failure_survives_replay) ... ok
+test_l6_unprovable_reference_keeps_bytes_and_reports_pending (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_unprovable_reference_keeps_bytes_and_reports_pending) ... ok
+test_l6_verification_failure_reports_failed_cleanup_and_replay_rechecks (tests.test_archivos.AttachmentLifecycleSQLite.test_l6_verification_failure_reports_failed_cleanup_and_replay_rechecks) ... ok
+test_lease_started_before_completion_deadline_may_finish_after_it (tests.test_archivos.AttachmentLifecycleSQLite.test_lease_started_before_completion_deadline_may_finish_after_it) ... ok
+test_live_lease_takeover_fences_late_holder_and_keeps_one_final (tests.test_archivos.AttachmentLifecycleSQLite.test_live_lease_takeover_fences_late_holder_and_keeps_one_final) ... ok
+test_local_storage_backend_runs_the_same_pdf_lifecycle (tests.test_archivos.AttachmentLifecycleSQLite.test_local_storage_backend_runs_the_same_pdf_lifecycle) ... ok
+test_other_callers_see_generic_pending_summary_only (tests.test_archivos.AttachmentLifecycleSQLite.test_other_callers_see_generic_pending_summary_only) ... ok
+test_pdf_happy_path_replay_audit_and_terrain_stability (tests.test_archivos.AttachmentLifecycleSQLite.test_pdf_happy_path_replay_audit_and_terrain_stability) ... ok
+test_pending_limit_counts_effective_uploads_and_equality_expires (tests.test_archivos.AttachmentLifecycleSQLite.test_pending_limit_counts_effective_uploads_and_equality_expires) ... ok
+test_read_only_expiry_projection_does_not_write (tests.test_archivos.AttachmentLifecycleSQLite.test_read_only_expiry_projection_does_not_write) ... ok
+test_real_single_candidate_kmz_commits_mutual_rows_and_activates (tests.test_archivos.AttachmentLifecycleSQLite.test_real_single_candidate_kmz_commits_mutual_rows_and_activates) ... ok
+test_rejected_replacement_and_stale_parallel_completion_preserve_layout (tests.test_archivos.AttachmentLifecycleSQLite.test_rejected_replacement_and_stale_parallel_completion_preserve_layout) ... ok
+test_scope_loss_before_final_transaction_writes_no_outcome (tests.test_archivos.AttachmentLifecycleSQLite.test_scope_loss_before_final_transaction_writes_no_outcome) ... ok
+test_slow_work_has_no_open_write_transaction (tests.test_archivos.AttachmentLifecycleSQLite.test_slow_work_has_no_open_write_transaction) ... ok
+test_uncertain_commit_never_deletes_a_referenced_final (tests.test_archivos.AttachmentLifecycleSQLite.test_uncertain_commit_never_deletes_a_referenced_final) ... ok
+test_verification_failure_is_terminal_and_storage_failure_is_retryable (tests.test_archivos.AttachmentLifecycleSQLite.test_verification_failure_is_terminal_and_storage_failure_is_retryable) ... ok
+test_control_characters_never_reach_the_header (tests.test_archivos_http.Disposicion.test_control_characters_never_reach_the_header) ... ok
+test_quotes_backslashes_and_separators_are_replaced_in_the_fallback (tests.test_archivos_http.Disposicion.test_quotes_backslashes_and_separators_are_replaced_in_the_fallback) ... ok
+test_unicode_keeps_its_utf8_form_and_gets_an_ascii_fallback (tests.test_archivos_http.Disposicion.test_unicode_keeps_its_utf8_form_and_gets_an_ascii_fallback) ... ok
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPPostgres.test_ambiguous_completion_is_resolved_by_replay) ... ok
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPPostgres.test_busy_is_controlled_and_never_retried) ... ok
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPPostgres.test_cancel_retire_and_retired_content_stays_readable) ... ok
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPPostgres.test_cancellation_and_retirement_racing_slow_work) ... ok
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPPostgres.test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict) ... ok
+test_content_length_is_checked_as_ascii_decimal_too (tests.test_archivos_http.HTTPPostgres.test_content_length_is_checked_as_ascii_decimal_too) ... ok
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPPostgres.test_cross_resource_ids_retry_deadline_and_busy_lease) ... ok
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPPostgres.test_dead_sessions_get_401_before_any_resource_check) ... ok
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPPostgres.test_declared_and_actual_size_type_and_hash_boundaries) ... ok
+test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPPostgres.test_desde_accepts_only_bounded_ascii_aligned_offsets) ... ok
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPPostgres.test_finalization_boundary_first_then_revocation_then_denied_replay) ... ok
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPPostgres.test_geometry_metadata_batch_order_dedupe_and_validation) ... ok
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPPostgres.test_grants_bases_admins_and_archive_policy) ... ok
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPPostgres.test_kmz_multi_candidate_selection_and_explicit_activation) ... ok
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPPostgres.test_kmz_single_candidate_activates_and_geometry_reassembles_exactly) ... ok
+test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPPostgres.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) ... ok
+test_limite_pages_exactly_at_valid_ascii_bounds (tests.test_archivos_http.HTTPPostgres.test_limite_pages_exactly_at_valid_ascii_bounds) ... ok
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPPostgres.test_malformed_requests_are_controlled) ... ok
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPPostgres.test_metadata_post_needs_its_read_only_exemption) ... ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 46100)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 429, in handle_one_request
+    if not self.parse_request():
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 340, in parse_request
+    self.send_error(
+    ~~~~~~~~~~~~~~~^
+        HTTPStatus.BAD_REQUEST,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+        "Bad HTTP/0.9 request type (%r)" % command)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/http/server.py", line 506, in send_error
+    self.wfile.write(body)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPPostgres.test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route) ... ok
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPPostgres.test_parser_limit_geometry_is_delivered_within_the_bounds) ... ok
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPPostgres.test_pdf_round_trip_download_identity_replay_and_terrain_independence) ... ok
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPPostgres.test_pending_upload_stays_private_over_http) ... ok
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPPostgres.test_replacement_retirement_and_revocation_between_chunks) ... ok
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPPostgres.test_retained_version_activation_and_failed_replacement_keep_layout) ... ok
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPPostgres.test_scope_loss_during_slow_completion_writes_nothing) ... ok
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPPostgres.test_serialization_ceiling_and_corrupt_bodies) ... ok
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPPostgres.test_store_not_configured_is_controlled) ... ok
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPPostgres.test_truncated_upload_stages_nothing) ... ok
+test_ambiguous_completion_is_resolved_by_replay (tests.test_archivos_http.HTTPSQLite.test_ambiguous_completion_is_resolved_by_replay) ... ok
+test_busy_is_controlled_and_never_retried (tests.test_archivos_http.HTTPSQLite.test_busy_is_controlled_and_never_retried) ... ok
+test_cancel_retire_and_retired_content_stays_readable (tests.test_archivos_http.HTTPSQLite.test_cancel_retire_and_retired_content_stays_readable) ... ok
+test_cancellation_and_retirement_racing_slow_work (tests.test_archivos_http.HTTPSQLite.test_cancellation_and_retirement_racing_slow_work) ... ok
+test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict (tests.test_archivos_http.HTTPSQLite.test_chunks_are_exact_bytes_across_utf8_boundaries_and_offsets_are_strict) ... ok
+test_content_length_is_checked_as_ascii_decimal_too (tests.test_archivos_http.HTTPSQLite.test_content_length_is_checked_as_ascii_decimal_too) ... ok
+test_cross_resource_ids_retry_deadline_and_busy_lease (tests.test_archivos_http.HTTPSQLite.test_cross_resource_ids_retry_deadline_and_busy_lease) ... ok
+test_dead_sessions_get_401_before_any_resource_check (tests.test_archivos_http.HTTPSQLite.test_dead_sessions_get_401_before_any_resource_check) ... ok
+test_declared_and_actual_size_type_and_hash_boundaries (tests.test_archivos_http.HTTPSQLite.test_declared_and_actual_size_type_and_hash_boundaries) ... ok
+test_desde_accepts_only_bounded_ascii_aligned_offsets (tests.test_archivos_http.HTTPSQLite.test_desde_accepts_only_bounded_ascii_aligned_offsets) ... ok
+test_finalization_boundary_first_then_revocation_then_denied_replay (tests.test_archivos_http.HTTPSQLite.test_finalization_boundary_first_then_revocation_then_denied_replay) ... ok
+test_geometry_metadata_batch_order_dedupe_and_validation (tests.test_archivos_http.HTTPSQLite.test_geometry_metadata_batch_order_dedupe_and_validation) ... ok
+test_grants_bases_admins_and_archive_policy (tests.test_archivos_http.HTTPSQLite.test_grants_bases_admins_and_archive_policy) ... ok
+test_kmz_multi_candidate_selection_and_explicit_activation (tests.test_archivos_http.HTTPSQLite.test_kmz_multi_candidate_selection_and_explicit_activation) ... ok
+test_kmz_single_candidate_activates_and_geometry_reassembles_exactly (tests.test_archivos_http.HTTPSQLite.test_kmz_single_candidate_activates_and_geometry_reassembles_exactly) ... ok
+test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route (tests.test_archivos_http.HTTPSQLite.test_limite_accepts_only_bounded_ascii_decimals_on_every_paged_route) ... ok
+test_limite_pages_exactly_at_valid_ascii_bounds (tests.test_archivos_http.HTTPSQLite.test_limite_pages_exactly_at_valid_ascii_bounds) ... ok
+test_malformed_requests_are_controlled (tests.test_archivos_http.HTTPSQLite.test_malformed_requests_are_controlled) ... ok
+test_metadata_post_needs_its_read_only_exemption (tests.test_archivos_http.HTTPSQLite.test_metadata_post_needs_its_read_only_exemption) ... ----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 37538)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 429, in handle_one_request
+    if not self.parse_request():
+           ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 340, in parse_request
+    self.send_error(
+    ~~~~~~~~~~~~~~~^
+        HTTPStatus.BAD_REQUEST,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+        "Bad HTTP/0.9 request type (%r)" % command)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/http/server.py", line 506, in send_error
+    self.wfile.write(body)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok
+test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route (tests.test_archivos_http.HTTPSQLite.test_missing_and_out_of_scope_ids_are_byte_identical_on_every_route) ... ok
+test_parser_limit_geometry_is_delivered_within_the_bounds (tests.test_archivos_http.HTTPSQLite.test_parser_limit_geometry_is_delivered_within_the_bounds) ... ok
+test_pdf_round_trip_download_identity_replay_and_terrain_independence (tests.test_archivos_http.HTTPSQLite.test_pdf_round_trip_download_identity_replay_and_terrain_independence) ... ok
+test_pending_upload_stays_private_over_http (tests.test_archivos_http.HTTPSQLite.test_pending_upload_stays_private_over_http) ... ok
+test_replacement_retirement_and_revocation_between_chunks (tests.test_archivos_http.HTTPSQLite.test_replacement_retirement_and_revocation_between_chunks) ... ok
+test_retained_version_activation_and_failed_replacement_keep_layout (tests.test_archivos_http.HTTPSQLite.test_retained_version_activation_and_failed_replacement_keep_layout) ... ok
+test_scope_loss_during_slow_completion_writes_nothing (tests.test_archivos_http.HTTPSQLite.test_scope_loss_during_slow_completion_writes_nothing) ... ok
+test_serialization_ceiling_and_corrupt_bodies (tests.test_archivos_http.HTTPSQLite.test_serialization_ceiling_and_corrupt_bodies) ... ok
+test_store_not_configured_is_controlled (tests.test_archivos_http.HTTPSQLite.test_store_not_configured_is_controlled) ... ok
+test_truncated_upload_stages_nothing (tests.test_archivos_http.HTTPSQLite.test_truncated_upload_stages_nothing) ... ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionPostgres.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/dd61d6a0-9e16-40b9-95ee-5809454a7a79 HTTP/1.1" 404 -
+ok
+test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation (tests.test_composicion_ronda2.ComposicionSqlite.test_a_created_terrain_keeps_its_attachments_through_edit_transfer_and_revocation) ...   "GET /api/inventario/terrenos/058cfa21-b5af-4788-af70-78c355d358d3 HTTP/1.1" 404 -
+ok
+
+----------------------------------------------------------------------
+Ran 145 tests in 101.887s
+
+OK
+exit 0

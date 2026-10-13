@@ -21,13 +21,22 @@ LEGACY_TABLES = ("carpeta", "base", "terreno", "incidencia", "mapa", "mapa_capa"
                  "formato_importacion", "importacion")
 # v8: accounts and inventory content. team_session and team_login_failure are
 # operational and deliberately absent. Text UUID keys: never in ID_TABLES.
-INVENTORY_TABLES = ("team_user", "inventory_terrain", "inventory_revision", "inventory_event",
-                    "inventory_operation_result")
-TABLES = LEGACY_TABLES + INVENTORY_TABLES
+# v9 adds the work-base tables, each after the tables it references.
+INVENTORY_TABLES = ("team_user", "maestra_base", "maestra_base_acceso", "inventory_terrain",
+                    "inventory_revision", "inventory_event", "inventory_operation_result",
+                    "inventory_column", "team_user_event", "maestra_base_event")
+# v10: attachments, parents first. Their three "fk_archivo_" cycles are
+# deferred, so this order loads inside one transaction. archivo_trabajo holds
+# live leases and is deliberately absent: a restore must not resurrect a worker.
+ATTACHMENT_TABLES = ("archivo", "archivo_version", "archivo_intento", "geometria", "archivo_evento")
+TABLES = LEGACY_TABLES + INVENTORY_TABLES + ATTACHMENT_TABLES
 # uso_ia is operational metadata, not workspace content: not in backups, but
 # its rows still need generated ids.
 ID_TABLES = (set(LEGACY_TABLES) - {"mapa_capa"}) | {"uso_ia"}
 LOCK_ID = 84202026
+# How long a session waits for the workspace lock, or any row lock, before it
+# fails as busy (db.OcupadoError). A name so tests can shorten the wait.
+LOCK_TIMEOUT = "30s"
 SCHEMA_VERSION_KEY = "schema_version"
 
 
@@ -94,9 +103,20 @@ def session() -> Iterator[Connection]:
     with psycopg.connect(os.environ["ARA_MAP_DATABASE_URL"], row_factory=row_factory,
                          connect_timeout=15) as raw:
         raw.execute("SET LOCAL statement_timeout = '60s'")
-        raw.execute("SET LOCAL lock_timeout = '30s'")
+        raw.execute(f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'")
         raw.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (LOCK_ID,))
         yield Connection(raw)
+
+
+def es_bloqueo(exc: BaseException) -> bool:
+    """Whether a failure was a lock that could not be had: a lock or statement
+    timeout, or a deadlock the server broke by aborting this transaction."""
+    import sys
+
+    psycopg = sys.modules.get("psycopg")  # never imported means it cannot be one of its errors
+    return psycopg is not None and isinstance(
+        exc, (psycopg.errors.LockNotAvailable, psycopg.errors.DeadlockDetected,
+              psycopg.errors.QueryCanceled))
 
 
 def _to_postgres(sql: str) -> str:
@@ -121,14 +141,15 @@ CREATE TABLE IF NOT EXISTS workspace_backup (
   created TIMESTAMPTZ NOT NULL DEFAULT now(), payload TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS workspace_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-""" + BORRADOR_SQL + inventory_sql()
+""" + BORRADOR_SQL + inventory_sql() + archivos_sql()
 
 
 def inventory_sql() -> str:
-    """The v8 tables, idempotently. The inventory/revision pointer cycle is
-    created without its two foreign keys, which are then added once both
-    tables exist (Postgres has no ADD CONSTRAINT IF NOT EXISTS)."""
-    from .db import INVENTORY_SCHEMA
+    """The v8 tables and the v9 work-base additions, idempotently. The
+    inventory/revision pointer cycle is created without its two foreign keys,
+    which are then added once both tables exist (Postgres has no ADD
+    CONSTRAINT IF NOT EXISTS)."""
+    from .db import INVENTORY_SCHEMA, V9_COLUMNS, V9_INDEXES, WORK_BASE_SCHEMA
 
     sin_ciclo = re.sub(r",?\s*CONSTRAINT fk_inventory_\w+ FOREIGN KEY[^\n]*", "", INVENTORY_SCHEMA)
     restricciones = "".join(f"""
@@ -140,7 +161,31 @@ DO $$ BEGIN
   END IF;
 END $$;""" for nombre, columna in (("fk_inventory_draft", "draft_revision_id"),
                                    ("fk_inventory_published", "published_revision_id")))
-    return _to_postgres(sin_ciclo) + restricciones + "\n"
+    columnas = "".join(f"ALTER TABLE {tabla} ADD COLUMN IF NOT EXISTS {columna} {definicion};\n"
+                       for tabla, columna, definicion in V9_COLUMNS)
+    return (_to_postgres(sin_ciclo) + restricciones + "\n"
+            + _to_postgres(WORK_BASE_SCHEMA) + columnas + V9_INDEXES)
+
+
+def archivos_sql() -> str:
+    """The v10 attachment tables, idempotently. As in ``inventory_sql``, the
+    deferred "fk_archivo_" cycle constraints are left out of the CREATE TABLEs
+    and added once every table exists."""
+    from .db import ATTACHMENT_SCHEMA
+
+    ciclo = re.compile(r",?\s*CONSTRAINT (fk_archivo_\w+) (FOREIGN KEY[^\n]*?),?(?=\n)")
+    restricciones = ""
+    for tabla in re.finditer(r"CREATE TABLE IF NOT EXISTS (\w+) \(.*?\n\);", ATTACHMENT_SCHEMA, re.S):
+        for nombre, definicion in ciclo.findall(tabla.group(0)):
+            restricciones += f"""
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{nombre}'
+                 AND conrelid = '{tabla.group(1)}'::regclass) THEN
+    ALTER TABLE {tabla.group(1)} ADD CONSTRAINT {nombre} {definicion};
+  END IF;
+END $$;"""
+    assert restricciones.count("ADD CONSTRAINT") == 3
+    return _to_postgres(ciclo.sub("", ATTACHMENT_SCHEMA)) + restricciones + "\n"
 
 
 # Import-assistant drafts: the parsed file and the choices made so far, kept
@@ -175,7 +220,7 @@ def migrate_sql() -> str:
     from .db import FOLDER_INDEXES, SCHEMA, SCHEMA_VERSION
 
     return ("".join(_crear_tabla(SCHEMA, t) for t in NUEVAS_TABLAS) + BORRADOR_SQL
-            + inventory_sql() + """
+            + inventory_sql() + archivos_sql() + """
 ALTER TABLE base ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE mapa ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE terreno ADD COLUMN IF NOT EXISTS moneda TEXT CHECK (moneda IN ('USD', 'MXN'));

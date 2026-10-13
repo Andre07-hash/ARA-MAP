@@ -16,11 +16,12 @@ import { compareLayers } from "../lib/comparar.js";
 import { append, clear, el } from "../lib/dom.js";
 import { activeCount, applyFilters, EMPTY_FILTERS, sinFiltrosDePrecio } from "../lib/filters.js";
 import { fmtCount, monedasDe, plural } from "../lib/format.js";
+import { ubicacionDe } from "../lib/geometria.js";
 import {
   contarFiltros, FILTROS_VACIOS, itemDeInventario, itemPublico, opcionesDeFacetas,
 } from "../lib/inventario.js";
 import {
-  defaultRoute, isPrivateRoute, navigate, parseRoute, routeHash, sameRoute,
+  defaultRoute, isPrivateRoute, navigate, parseRoute, routeAllowed, routeHash, sameRoute,
 } from "../lib/router.js";
 import {
   clearPrivateState, getState, resetFilters, setDataset, setFilter, setState, subscribe,
@@ -45,16 +46,22 @@ import { openTerrainHistory } from "./inventory/TerrainHistory.js";
 import { MapGallery } from "./maps/MapGallery.js";
 import { openOverlayBuilder, openSaveMapDialog } from "./maps/OverlayBuilder.js";
 import { createSession } from "./session/session.js";
+import { createTabla } from "./tabla/Tabla.js";
 import { createFilterRail } from "./terrain/FilterRail.js";
 import { openFiltersDrawer } from "./terrain/FiltersDrawer.js";
 import { TerrainDetail } from "./terrain/TerrainDetail.js";
 import { TerrainTable } from "./terrain/TerrainTable.js";
 import { UnplacedList } from "./terrain/UnplacedList.js";
-import { confirmDialog, openDialog } from "./ui/dialog.js";
+import { closeAllDialogs, confirmDialog, openDialog } from "./ui/dialog.js";
 import { clearToasts, toast, toastError } from "./ui/toast.js";
 
+/* Operators get the table of their work bases and the public catalog. The
+ * unscoped inventory and the legacy workspace are the administrators'. */
+const NAV_OPERADOR = [["tabla", "Tabla"], ["catalogo", "Catálogo público"]];
+/* "Inventario" left the menu: its map is the master table's "Mapa" view now.
+ * Its old addresses still work (see aplicarRuta). */
 const NAV_EQUIPO = [
-  ["inventario", "Inventario"],
+  ["tabla", "Tabla maestra"],
   ["mapa", "Mapa"],
   ["bases", "Bases"],
   ["mapas", "Mapas guardados"],
@@ -75,6 +82,8 @@ let configReadOnly = false;
 let cloud = false;
 
 let session = null;
+let tabla = null;           // the employee table of the signed-in account, kept alive
+let tablaDe = null;         // "id|rol" of the account that table belongs to
 let editor = null;          // the open TerrainEditor, kept alive across renders
 let editorEstado = null;    // { id, error } while an editor loads or failed to
 let legacyCargado = false;  // bases/maps/folders loaded for this session
@@ -116,12 +125,12 @@ export async function mount(root) {
   session = createSession({
     onSignedIn: alEntrar,
     onSignedOut: limpiarPrivado,
-    hasUnsavedWork: () => Boolean(editor?.dirty),
+    hasUnsavedWork: () => Boolean(editor?.dirty || tabla?.dirty),
   });
 
   window.addEventListener("hashchange", aplicarRuta);
   window.addEventListener("beforeunload", (event) => {
-    if (editor?.dirty) { event.preventDefault(); event.returnValue = ""; }
+    if (editor?.dirty || tabla?.dirty) { event.preventDefault(); event.returnValue = ""; }
   });
   // An open public page catches up when it is looked at again; nothing polls.
   document.addEventListener("visibilitychange", () => {
@@ -139,13 +148,27 @@ export async function mount(root) {
 
 /* ---------------------------------------------------------------- session */
 
-function alEntrar(_usuario, { returnTo, startup }) {
-  loadIndex();
+function alEntrar(usuario, { returnTo, startup }) {
+  // A table left by another account (it signed in over an expired session
+  // that had unsaved cells) is never shown to this one.
+  if (tabla && tablaDe !== `${usuario.id}|${usuario.rol}`) {
+    const habia = tabla.dirty;
+    cerrarTabla();
+    if (habia) toast("Se descartó trabajo sin guardar de la sesión anterior.");
+  }
+  if (usuario.rol === "admin") loadIndex();
   // /api/config's readOnly depends on the session, so it is read again now.
   if (startup) { readOnly = configReadOnly; return; }
-  api.config().then((config) => { readOnly = config.readOnly === true; setState({}); })
-    .catch(() => { readOnly = false; });
-  if (!navigate(returnTo ?? defaultRoute(true), { replace: true })) aplicarRuta();
+  api.config().then((config) => { readOnly = config.readOnly === true; setState({}); tabla?.permisos(); })
+    .catch(() => { readOnly = false; tabla?.permisos(); });
+  const destino = returnTo && routeAllowed(returnTo, usuario.rol) ? returnTo : defaultRoute(true, usuario.rol);
+  if (!navigate(destino, { replace: true })) aplicarRuta();
+}
+
+function cerrarTabla() {
+  tabla?.destroy();
+  tabla = null;
+  tablaDe = null;
 }
 
 /**
@@ -155,10 +178,11 @@ function alEntrar(_usuario, { returnTo, startup }) {
 function limpiarPrivado() {
   abortPrivate();
   cancelarCargas();
+  cerrarTabla();
   editor?.destroy();
   editor = null;
   editorEstado = null;
-  for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
+  closeAllDialogs();   // removed, not only closed: a detail or a history holds private text
   clearToasts();
   if (workspace) {
     for (const modo of ["inventario", "local"]) {
@@ -197,13 +221,13 @@ async function loadIndex({ forzar = false } = {}) {
 }
 
 async function cerrarSesion() {
-  if (editor?.dirty && !(await confirmarDescarte())) return;
+  if ((editor?.dirty || tabla?.dirty) && !(await confirmarDescarte())) return;
   session.signOut();
 }
 
 const confirmarDescarte = () => confirmDialog({
   titulo: "¿Descartar cambios?",
-  mensaje: "Tienes cambios sin guardar en este terreno. Si sales ahora, se pierden.",
+  mensaje: "Tienes cambios sin guardar. Si sales ahora, se pierden.",
   confirmar: "Descartar cambios",
   peligro: true,
 });
@@ -213,7 +237,14 @@ async function revalidar({ forzar = false } = {}) {
   ultimaRevalidacion = Date.now();
   await session.refresh();
   const { ruta, sesion } = getState();
-  if (ruta.nombre === "catalogo") pedirCarga("catalogo", { inmediato: true });
+  // Another account, or another role for this one, since the table was built.
+  if (tabla && sesion && tablaDe !== `${sesion.id}|${sesion.rol}`) {
+    cerrarTabla();
+    aplicarRuta();
+    return;
+  }
+  if (ruta.nombre === "tabla") tabla?.revalidar();
+  else if (ruta.nombre === "catalogo") pedirCarga("catalogo", { inmediato: true });
   else if (ruta.nombre === "inventario" && sesion) pedirCarga("inventario", { inmediato: true });
 }
 
@@ -225,7 +256,12 @@ async function aplicarRuta() {
   const ruta = parseRoute(location.hash);
   const { sesion } = getState();
   if (!ruta) {
-    if (!navigate(defaultRoute(Boolean(sesion)), { replace: true })) aplicarRuta();
+    if (!navigate(defaultRoute(Boolean(sesion), sesion?.rol), { replace: true })) aplicarRuta();
+    return;
+  }
+  // An operator who follows a link into the administrators' screens lands on the table.
+  if (sesion && !routeAllowed(ruta, sesion.rol)) {
+    navigate(defaultRoute(true, sesion.rol), { replace: true });
     return;
   }
 
@@ -237,6 +273,13 @@ async function aplicarRuta() {
     }
     editor.destroy();
     editor = null;
+  }
+
+  // The old inventory list is the master table's map now; a terrain's or the
+  // editor's inventory address keeps working for administrators.
+  if (sesion && ruta.nombre === "inventario" && !ruta.id) {
+    navigate({ nombre: "tabla", id: "maestra", modo: "mapa" }, { replace: true });
+    return;
   }
 
   if (isPrivateRoute(ruta) && !sesion) {
@@ -257,6 +300,8 @@ function efectosDeRuta(ruta) {
     if (!state[ruta.nombre].cargado && !state[ruta.nombre].cargando) cargar(ruta.nombre);
     if (ruta.id) cargarDetalle(ruta.nombre, ruta.id);
     else if (state.detalle) setState({ detalle: null });
+  } else if (ruta.nombre === "tabla") {
+    abrirTabla(ruta);
   } else if (ruta.nombre === "editar" || ruta.nombre === "nuevo") {
     if (!editor) abrirEditor(ruta);
   } else if (ruta.nombre === "mapa" && !state.baseActiva && !state.mapaActivo) {
@@ -265,6 +310,48 @@ function efectosDeRuta(ruta) {
     // Other team members add bases and maps too: revalidate on entry.
     loadIndex({ forzar: true });
   }
+}
+
+/* ------------------------------------------------------------------ table */
+
+function abrirTabla(ruta) {
+  const { sesion } = getState();
+  if (!sesion) return;
+  if (tabla) { tabla.mostrarComo(ruta.modo, { desdeRuta: true }); tabla.abrir(ruta.id); return; }
+  tablaDe = `${sesion.id}|${sesion.rol}`;
+  tabla = createTabla({
+    sesion, soloConsulta: () => readOnly, vistaInicial: ruta.id, modoInicial: ruta.modo,
+    // The table says which view and which presentation (table or map) it
+    // ended up showing; the address follows it.
+    onVista: (vista, modo) => {
+      if (getState().ruta.nombre === "tabla") navigate({ nombre: "tabla", id: vista, modo }, { replace: true });
+    },
+    // A write was refused for lack of permission while reading still works:
+    // ask again who this is and whether the application is read-only. A
+    // changed account or role goes through the session's own teardown; an
+    // unchanged one keeps its table, which only repaints what may be written.
+    onRevalidar: async () => {
+      await session.refresh();
+      if (!getState().sesion) return;
+      try { readOnly = (await api.config()).readOnly === true; } catch { /* keep what was known */ }
+      tabla?.permisos();
+    },
+    // The server refused something the role allowed a moment ago: ask who we are now.
+    onPermisos: async () => {
+      cerrarTabla();
+      await session.refresh();
+      if (getState().sesion) aplicarRuta();
+    },
+  });
+  setState({});
+}
+
+function renderTabla(host) {
+  if (tabla) {
+    if (tabla.element.parentNode !== host) { clear(host).append(tabla.element); tabla.alMostrar(); }
+    return;
+  }
+  clear(host).append(el("div", { class: "screen" }, el("p", { class: "secondary", role: "status" }, "Cargando…")));
 }
 
 /* ----------------------------------------------------------------- editor */
@@ -329,8 +416,8 @@ function renderEditor(host) {
     el("div", { class: "empty-state" },
       el("h2", {}, editorEstado?.error ? "No se pudo abrir el terreno" : "Cargando el terreno…"),
       editorEstado?.error && el("p", { class: "secondary" }, editorEstado.error),
-      editorEstado?.error && el("a", { class: "btn btn-quiet", href: routeHash({ nombre: "inventario" }) },
-        "Volver al inventario"),
+      editorEstado?.error && el("a", { class: "btn btn-quiet", href: routeHash({ nombre: "tabla", id: "maestra" }) },
+        "Volver a la tabla maestra"),
     )));
 }
 
@@ -340,15 +427,17 @@ let headerClave = null;
 
 function renderHeader(host) {
   const { ruta, sesion, sesionLista, baseActiva, mapaActivo } = getState();
-  const activa = ruta.nombre === "editar" || ruta.nombre === "nuevo" ? "inventario" : ruta.nombre;
+  const admin = sesion?.rol === "admin";
+  // The inventory's remaining addresses (a terrain, the editor) belong to the master table now.
+  const activa = ["editar", "nuevo", "inventario"].includes(ruta.nombre) ? "tabla" : ruta.nombre;
   const legacyAbierto = Boolean(baseActiva || mapaActivo);
   // Rebuilding the header on every keystroke is wasted work and a focus hazard
   // for anything inside it, so it is rebuilt only when what it shows changes.
-  const clave = [activa, sesion?.id, sesion?.display_name, sesionLista, legacyAbierto].join("|");
+  const clave = [activa, sesion?.id, sesion?.display_name, sesion?.rol, sesionLista, legacyAbierto].join("|");
   if (headerClave === clave && host.childElementCount) return;
   headerClave = clave;
 
-  const items = (sesion ? NAV_EQUIPO : NAV_PUBLICO)
+  const items = (!sesion ? NAV_PUBLICO : admin ? NAV_EQUIPO : NAV_OPERADOR)
     .filter(([key]) => key !== "mapa" || legacyAbierto);
 
   // append() skips the false of the conditional pieces; the native
@@ -399,6 +488,7 @@ function renderView(host) {
     return undefined;
   }
   switch (state.ruta.nombre) {
+    case "tabla": return renderTabla(host);
     case "bases": return renderBases(host, state);
     case "mapas": return renderMapas(host, state);
     case "editar":
@@ -566,12 +656,19 @@ const FiltrosBoton = (modo, activos) => el("button", {
 
 /* ------------------------------------------------- catalog and inventory */
 
+/* An internal row is located by its active boundary or by valid X/Y
+ * (geometria.js ubicacionDe); `ubicacion` stays the X/Y diagnostic. */
+function filaInterna(registro) {
+  const fila = itemDeInventario(registro);
+  return { ...fila, ubicado: ubicacionDe(fila).ubicado };
+}
+
 /* Rows are derived once per assembled result, not on every render. */
 const itemsCache = new WeakMap();
 function itemsDe(tipo, datos) {
   if (!itemsCache.has(datos.registros)) {
     itemsCache.set(datos.registros,
-      datos.registros.map(tipo === "catalogo" ? itemPublico : itemDeInventario));
+      datos.registros.map(tipo === "catalogo" ? itemPublico : filaInterna));
   }
   return itemsCache.get(datos.registros);
 }

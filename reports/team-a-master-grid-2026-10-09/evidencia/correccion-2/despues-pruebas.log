@@ -1,0 +1,16 @@
+test_a_refusal_answers_once_and_closes_whatever_the_body_holds (tests.test_despachador_cuerpos.Cuerpos.test_a_refusal_answers_once_and_closes_whatever_the_body_holds) ...   "POST /api/logout HTTP/1.1" 403 -
+ok
+test_absent_and_zero_lengths_are_still_an_empty_body (tests.test_despachador_cuerpos.Cuerpos.test_absent_and_zero_lengths_are_still_an_empty_body) ... ok
+test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body)
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding ...   "POST /api/login HTTP/1.1" 400 -
+ok
+test_read_only_mode_refuses_once_and_closes (tests.test_despachador_cuerpos.Cuerpos.test_read_only_mode_refuses_once_and_closes) ...   "POST /api/logout HTTP/1.1" 403 -
+ok
+test_requests_whose_body_was_read_keep_the_connection (tests.test_despachador_cuerpos.Cuerpos.test_requests_whose_body_was_read_keep_the_connection)
+The repair must not cost ordinary keep-alive: two real requests on ...   "POST /api/maestra/bases HTTP/1.1" 422 -
+ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.685s
+
+OK

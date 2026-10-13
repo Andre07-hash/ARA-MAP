@@ -1,0 +1,79 @@
+{
+  "_entrada": {
+    "seleccion": [
+      0.0
+    ]
+  },
+  "estado": "requiere_seleccion",
+  "error": {
+    "codigo": "SELECCION_INVALIDA",
+    "mensaje": "La selección contiene valores que no son contornos."
+  },
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Lote A",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.398,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    },
+    {
+      "indice": 1,
+      "nombre": "Lote B",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.3975,
+        20.6,
+        -100.3955,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    },
+    {
+      "indice": 2,
+      "nombre": "Lote C",
+      "carpeta": [
+        "Documento ficticio",
+        "Lotes ficticios"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.395,
+        20.6,
+        -100.393,
+        20.602
+      ],
+      "area_aproximada_m2": 46398.4,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

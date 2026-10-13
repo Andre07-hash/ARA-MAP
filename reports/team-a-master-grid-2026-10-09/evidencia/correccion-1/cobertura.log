@@ -1,0 +1,57 @@
+Name                             Stmts   Miss  Cover   Missing
+--------------------------------------------------------------
+server/__init__.py                   8      0   100%
+server/almacen.py                  486     23    95%   205, 208, 270-271, 303, 336, 346, 363, 374-375, 437-438, 452, 487-488, 527-530, 547-548, 552, 721
+server/api/__init__.py               0      0   100%
+server/api/asistente.py             63      7    89%   41-42, 53, 57, 59, 72, 75
+server/api/bases.py                 90      3    97%   63, 122, 128
+server/api/carpetas.py              81      0   100%
+server/api/columnas.py             110      1    99%   160
+server/api/exportar.py             108      2    98%   93, 145
+server/api/importar.py             224      3    99%   275, 324, 374
+server/api/inventario.py           197      9    95%   35, 44, 81, 153-154, 304-307
+server/api/maestra.py              118      0   100%
+server/api/mapas.py                143      9    94%   86, 110, 114, 116, 151-152, 196-197, 211
+server/api/sesion.py                43      0   100%
+server/app.py                      246     20    92%   244-245, 312, 316, 353, 358-374, 378
+server/archivos.py                 588     84    86%   60, 64, 66, 80, 124, 170, 187, 205, 214, 271, 274, 276, 281, 284, 291, 303, 308, 312, 329, 343-345, 368, 377-378, 444, 449-450, 464-465, 506-510, 513-518, 533, 543, 548-550, 563-566, 602, 607, 636, 642, 648, 655-661, 663-664, 671-674, 681, 693-694, 710, 721, 724-725, 732, 746, 756-757, 760, 773, 782, 793-794, 835-836, 852, 860
+server/asistente/__init__.py         0      0   100%
+server/asistente/borradores.py     100      2    98%   118, 125
+server/asistente/campos.py         127      8    94%   121, 240, 242, 253, 260, 267, 269, 275
+server/asistente/detectar.py       457     10    98%   253, 284, 388-390, 558, 621, 624, 736, 738
+server/asistente/filas.py           92      0   100%
+server/asistente/ia.py             291     18    94%   110-111, 122, 163, 198, 377, 379, 415-417, 427-428, 465-467, 480-481, 520
+server/asistente/perfil.py         107      5    95%   60, 74, 76, 83, 101
+server/asistente/plan.py           162      8    95%   111-112, 114, 214, 256, 259, 266, 270
+server/asistente/rejilla.py        192     13    93%   110, 158, 215, 228-229, 233, 243, 254, 303, 308, 310, 313, 320
+server/asistente/servicio.py       176      8    95%   52, 91-92, 133-134, 150, 197-198
+server/auth.py                     242      9    96%   113, 117-118, 152, 231, 389-390, 519-520
+server/columnas.py                 107      3    97%   48, 52-53
+server/csv_importer.py             143      5    97%   161, 189, 207, 215-216
+server/csv_numbers.py               66      1    98%   107
+server/db.py                       244     10    96%   676, 719-720, 835, 949, 976-978, 991, 1136
+server/errors.py                    10      0   100%
+server/importer.py                 158      7    96%   188-190, 308-309, 314, 326
+server/inventario.py               197      4    98%   64, 110, 122, 291
+server/kmz.py                      725     15    98%   287, 374, 449-450, 515, 603, 626, 640, 743, 842, 924, 1040, 1064, 1112, 1141
+server/matching.py                  87      1    99%   38
+server/normalize.py                 34      6    82%   61, 67, 71-74
+server/postgres.py                 111      0   100%
+server/protocols.py                  8      0   100%
+server/repo/__init__.py              0      0   100%
+server/repo/archivos.py            286     17    94%   35, 155, 269, 284, 307, 333, 343, 382, 401, 417, 442, 446, 451, 470, 488, 505, 531
+server/repo/bases.py                40      0   100%
+server/repo/carpetas.py             88      8    91%   107, 114-117, 129, 172, 194
+server/repo/columnas.py            132     10    92%   85-91, 206, 226, 253-254
+server/repo/formatos.py             56      2    96%   118-119
+server/repo/inventario.py          350      8    98%   326, 397-399, 444, 577, 616, 650
+server/repo/maestra.py             125      2    98%   224, 244
+server/repo/mapas.py               152      2    99%   92, 239
+server/repo/terrenos.py             71      1    99%   86
+server/router.py                    63      0   100%
+server/staging.py                   69      0   100%
+server/validation.py               109      0   100%
+server/web_util.py                  37      2    95%   23, 25
+--------------------------------------------------------------
+TOTAL                             7919    346    96%
+exit 0

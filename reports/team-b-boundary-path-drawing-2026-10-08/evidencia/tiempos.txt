@@ -1,0 +1,7 @@
+inicio 2026-10-08T19:44:39Z head 496233e3c86fac40981f23671633c4fbbd157b97
+micro exit 0
+medicion1 exit 0
+medicion2 exit 0
+trazo exit 0
+contornos exit 0
+fin 2026-10-08T19:51:26Z

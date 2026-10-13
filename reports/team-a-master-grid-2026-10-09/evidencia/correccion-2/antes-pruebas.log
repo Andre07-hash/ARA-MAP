@@ -1,0 +1,207 @@
+  "POST /api/logout HTTP/1.1" 403 -
+  "POST /api/logout HTTP/1.1" 403 -
+  "POST /api/maestra/bases HTTP/1.1" 401 -
+  "POST /api/maestra/bases HTTP/1.1" 401 -
+  "POST /api/maestra/bases HTTP/1.1" 403 -
+  "POST /api/no-existe HTTP/1.1" 404 -
+  "DELETE /api/maestra/bases HTTP/1.1" 405 -
+  "POST /api/logout HTTP/1.1" 413 -
+  "POST /api/logout HTTP/1.1" 400 -
+  "POST /api/logout HTTP/1.1" 400 -
+  "POST /api/logout HTTP/1.1" 400 -
+..  "POST /api/login HTTP/1.1" 401 -
+F  "POST /api/login HTTP/1.1" 400 -
+F  "POST /api/login HTTP/1.1" 400 -
+F  "POST /api/login HTTP/1.1" 401 -
+F  "POST /api/login HTTP/1.1" 401 -
+F  "POST /api/login HTTP/1.1" 400 -
+F  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 401 -
+F  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 400 -
+F  "POST /api/login HTTP/1.1" 400 -
+F  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 400 -
+  "POST /api/login HTTP/1.1" 401 -
+F  "POST /api/logout HTTP/1.1" 403 -
+  "POST /api/maestra/bases HTTP/1.1" 403 -
+.  "POST /api/maestra/bases HTTP/1.1" 422 -
+  "POST /api/login HTTP/1.1" 401 -
+.
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [0 then the real length]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([401, 200], True) != ([400], True)
+
+First differing element 0:
+[401, 200]
+[400]
+
+- ([401, 200], True)
+?     -----
+
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [the real length then 0]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([400], False) != ([400], True)
+
+First differing element 1:
+False
+True
+
+- ([400], False)
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [the same length twice]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([400], False) != ([400], True)
+
+First differing element 1:
+False
+True
+
+- ([400], False)
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [empty length]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([401, 200], True) != ([400], True)
+
+First differing element 0:
+[401, 200]
+[400]
+
+- ([401, 200], True)
+?     -----
+
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [empty length then a real one]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([401, 200], True) != ([400], True)
+
+First differing element 0:
+[401, 200]
+[400]
+
+- ([401, 200], True)
+?     -----
+
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [a real length then an empty one]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([400], False) != ([400], True)
+
+First differing element 1:
+False
+True
+
+- ([400], False)
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [0, empty encoding, chunked]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([401, 200], True) != ([400], True)
+
+First differing element 0:
+[401, 200]
+[400]
+
+- ([401, 200], True)
+?     -----
+
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [empty encoding and a length]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([400], False) != ([400], True)
+
+First differing element 1:
+False
+True
+
+- ([400], False)
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [a length and an empty encoding]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([400], False) != ([400], True)
+
+First differing element 1:
+False
+True
+
+- ([400], False)
++ ([400], True)
+
+======================================================================
+FAIL: test_ambiguous_framing_is_refused_once_before_the_body (tests.test_despachador_cuerpos.Cuerpos.test_ambiguous_framing_is_refused_once_before_the_body) [empty encoding alone]
+R2-A5: repeated or empty Content-Length and any Transfer-Encoding
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/jpahumada/Desktop/ARA/ARA-MAP/tests/test_despachador_cuerpos.py", line 117, in test_ambiguous_framing_is_refused_once_before_the_body
+    self.assertEqual(self.enviar(self.post("/api/login", cabeceras, largo=False)),
+AssertionError: Tuples differ: ([401, 200], True) != ([400], True)
+
+First differing element 0:
+[401, 200]
+[400]
+
+- ([401, 200], True)
+?     -----
+
++ ([400], True)
+
+----------------------------------------------------------------------
+Ran 5 tests in 10.440s
+
+FAILED (failures=10)

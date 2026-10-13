@@ -1,0 +1,18 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "rechazado",
+  "error": {
+    "codigo": "KML_SIN_CONTORNO",
+    "mensaje": "El archivo no contiene un contorno de terreno (contiene: Point)."
+  },
+  "avisos": [],
+  "ignorados": {
+    "Point": 1
+  },
+  "candidatos": [],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

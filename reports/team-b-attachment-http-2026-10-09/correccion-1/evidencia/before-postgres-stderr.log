@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "<tree-2ea602a>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a>/server/api/archivos.py", line 146, in listar
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a>/server/api/archivos.py", line 205, in historial
+    cursor=request.q("cursor"), limite=_limite(request))
+                                       ~~~~~~~^^^^^^^^^
+  File "<tree-2ea602a>/server/api/archivos.py", line 101, in _limite
+    return int(valor) if valor.isdigit() and len(valor) <= 4 else valor  # the service rejects the rest
+           ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'
+Traceback (most recent call last):
+  File "<tree-2ea602a>/server/app.py", line 208, in _dispatch
+    result = handler(request)
+  File "<tree-2ea602a>/server/api/archivos.py", line 243, in fragmento_geometria
+    desde: Any = int(valor) if valor.isdigit() and len(valor) <= 9 else -1
+                 ~~~^^^^^^^
+ValueError: invalid literal for int() with base 10: '²'

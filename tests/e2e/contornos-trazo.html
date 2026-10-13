@@ -1,0 +1,78 @@
+<!doctype html>
+<!-- Boundary ring-drawing harness (E1): the REAL createMapCanvas, either the
+     branch's (?mapa=actual) or the accepted B-2 file served by the driver at
+     /__base/MapCanvas.js (?mapa=base), with the vendored Leaflet, a 1200 x 640
+     map and fictional data only. ?espias=1 counts closePath() calls on the
+     2D context and on Path2D. Served by contornos-trazo.mjs and
+     contornos-trazo-medicion.mjs. No tiles, no network. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>cargando</title>
+<link rel="stylesheet" href="/web/vendor/leaflet.css">
+<link rel="stylesheet" href="/web/styles/tokens.css">
+<link rel="stylesheet" href="/web/styles/map.css">
+<style>
+  body { margin: 0; background: #f4f3ef; font: 13px system-ui, sans-serif; }
+  #mapa { width: 1200px; height: 640px; background: #e8e6df; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+<script>
+  // Counters, installed before any drawing when ?espias=1.
+  window.__cierres = { contexto: 0, path2d: 0 };
+  if (new URLSearchParams(location.search).get("espias") === "1") {
+    for (const [proto, clave] of [[CanvasRenderingContext2D.prototype, "contexto"], [Path2D.prototype, "path2d"]]) {
+      const original = proto.closePath;
+      proto.closePath = function closePath() { window.__cierres[clave] += 1; return original.call(this); };
+    }
+  }
+</script>
+<script src="/web/vendor/leaflet.js"></script>
+<script type="module">
+const parametros = new URLSearchParams(location.search);
+const mapa = parametros.get("mapa") ?? "actual";
+const { createMapCanvas } = await import(mapa === "base" ? "/__base/MapCanvas.js" : "/web/components/map/MapCanvas.js");
+
+const selecciones = [];
+const canvas = createMapCanvas(document.getElementById("mapa"), {
+  onSelect: (id) => selecciones.push(id),
+});
+canvas.invalidate();
+const colorFor = () => "#2a78d6";
+
+/* B-2's 12-row fixture (bodies from the accepted B-1 parser). */
+async function cargarFixture() {
+  const f = await (await fetch("/tests/js/fixtures/geometria/contornos.json")).json();
+  const geometrias = new Map(Object.entries(f.cuerpos).filter(([id]) => id !== "geo-sin-cuerpo"));
+  return { filas: f.filas, geometrias };
+}
+
+/* One parser-limit case, served by the driver: the boundary terrain plus an
+ * XY control just outside its south-west corner. */
+async function cargarLimite(nombre) {
+  const { descriptor, cuerpo } = await (await fetch(`/__casos/${nombre}.json`)).json();
+  return {
+    filas: [
+      { id: "contorno", terreno: "Contorno ficticio", lat: null, lon: null, geometria: descriptor },
+      { id: "xy", terreno: "Punto ficticio", lat: descriptor.bbox[1] - 0.004,
+        lon: descriptor.bbox[0] - 0.004, superficie_m2: 5000, geometria: null },
+    ],
+    geometrias: new Map([[descriptor.id, cuerpo]]),
+  };
+}
+
+/* XY-only control: 500 fictional points, no geometry option at all. */
+function cargarXY() {
+  const filas = Array.from({ length: 500 }, (_, i) => ({
+    id: `p-${i}`, terreno: `Punto ficticio ${i}`, lat: 20.4 + Math.floor(i / 25) * 0.01,
+    lon: -100.6 + (i % 25) * 0.01, superficie_m2: 20000, geometria: null }));
+  return { filas, geometrias: null };
+}
+
+window.__trazo = { mapa, canvas, colorFor, selecciones, cargarFixture, cargarLimite, cargarXY };
+document.title = "listo";
+</script>
+</body>
+</html>

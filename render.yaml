@@ -1,0 +1,29 @@
+# Render configuration for the definitive private portal.
+# The existing service publishes reviewed commits from main manually.
+# Free plan, auto-deploy off, no disk or paid add-ons. Data and file bytes
+# remain in the existing Neon database and private Supabase bucket.
+services:
+  - type: web
+    name: ara-map-piloto
+    runtime: python
+    branch: main
+    plan: free
+    autoDeployTrigger: "off"   # deploys are manual, from a reviewed commit
+    buildCommand: pip install -r requirements-hosted.txt
+    startCommand: python -m server.hosted
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      # Secrets: typed into the dashboard by the operator, never stored here.
+      - key: ARA_MAP_DATABASE_URL
+        sync: false
+      # The service's own hostname only, without https:// or a path.
+      - key: ARA_MAP_HOST_PUBLICO
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_URL
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_KEY
+        sync: false
+      - key: ARA_MAP_ARCHIVOS_SUPABASE_BUCKET
+        sync: false

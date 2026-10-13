@@ -1,0 +1,39 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "rechazado",
+  "error": {
+    "codigo": "GEOMETRIA_AUTOINTERSECCION",
+    "mensaje": "El contorno se cruza o se toca a sí mismo."
+  },
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Predio Ficticio Moño",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.396,
+        20.603
+      ],
+      "area_aproximada_m2": null,
+      "valido": false,
+      "error": {
+        "codigo": "GEOMETRIA_AUTOINTERSECCION",
+        "mensaje": "El contorno se cruza o se toca a sí mismo."
+      }
+    }
+  ],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

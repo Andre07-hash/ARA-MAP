@@ -1,0 +1,85 @@
+{
+  "url": "http://localhost:8434",
+  "chrome": "141.0.7390.37",
+  "fecha": "2026-10-12T04:17:06.482Z",
+  "que": "10 rondas por lote de: 2 contornos seleccionados y cargados, 1 terreno sólo X/Y, página siguiente (1 contorno) y anterior, otra base y volver, abrir y cerrar el detalle con los widgets reales",
+  "duracion_s": 95,
+  "max_cuerpos_retenidos": 1,
+  "puntos": [
+    {
+      "tras": "carga inicial con el mapa abierto",
+      "heap_kb": 4209,
+      "nodos_dom": 4523,
+      "listeners": 366,
+      "filas": 100,
+      "dialogos": 0,
+      "cuerpos_retenidos": 0,
+      "cargando": false,
+      "peticiones_de_cuerpo": 0
+    },
+    {
+      "tras": "calentamiento (10 rondas)",
+      "heap_kb": 5464,
+      "nodos_dom": 4454,
+      "listeners": 314,
+      "filas": 100,
+      "dialogos": 0,
+      "cuerpos_retenidos": 1,
+      "cargando": false,
+      "peticiones_de_cuerpo": 31
+    },
+    {
+      "tras": "lote 1 (10 rondas)",
+      "heap_kb": 5636,
+      "nodos_dom": 4454,
+      "listeners": 314,
+      "filas": 100,
+      "dialogos": 0,
+      "cuerpos_retenidos": 1,
+      "cargando": false,
+      "peticiones_de_cuerpo": 61
+    },
+    {
+      "tras": "lote 2 (10 rondas)",
+      "heap_kb": 5726,
+      "nodos_dom": 4454,
+      "listeners": 314,
+      "filas": 100,
+      "dialogos": 0,
+      "cuerpos_retenidos": 1,
+      "cargando": false,
+      "peticiones_de_cuerpo": 91
+    },
+    {
+      "tras": "lote 3 (10 rondas)",
+      "heap_kb": 5899,
+      "nodos_dom": 4454,
+      "listeners": 314,
+      "filas": 100,
+      "dialogos": 0,
+      "cuerpos_retenidos": 1,
+      "cargando": false,
+      "peticiones_de_cuerpo": 121
+    }
+  ],
+  "deltas_por_lote_tras_el_calentamiento": [
+    {
+      "entre": "calentamiento (10 rondas) -> lote 1 (10 rondas)",
+      "heap_kb": 172,
+      "nodos_dom": 0,
+      "listeners": 0
+    },
+    {
+      "entre": "lote 1 (10 rondas) -> lote 2 (10 rondas)",
+      "heap_kb": 90,
+      "nodos_dom": 0,
+      "listeners": 0
+    },
+    {
+      "entre": "lote 2 (10 rondas) -> lote 3 (10 rondas)",
+      "heap_kb": 173,
+      "nodos_dom": 0,
+      "listeners": 0
+    }
+  ]
+}

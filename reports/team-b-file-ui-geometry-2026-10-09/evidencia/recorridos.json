@@ -1,0 +1,138 @@
+{
+  "modo": "montado",
+  "almacen": "local-disk",
+  "total": 19,
+  "fallos": 0,
+  "resultados": [
+    {
+      "nombre": "los widgets montan con el resumen real: sin archivos no es 'cargando'",
+      "ok": true,
+      "ms": 96,
+      "detalle": {
+        "modo": "montado",
+        "puente": "peticionPrivada de web/lib/api.js (C1)"
+      }
+    },
+    {
+      "nombre": "un PDF sube (huella → inicio → PUT → completar) y la celda se actualiza por onCambio",
+      "ok": true,
+      "ms": 294
+    },
+    {
+      "nombre": "la descarga autenticada entrega exactamente los bytes guardados",
+      "ok": true,
+      "ms": 133
+    },
+    {
+      "nombre": "un archivo que no es PDF se rechaza antes de leerlo",
+      "ok": true,
+      "ms": 17
+    },
+    {
+      "nombre": "un KMZ de un contorno se activa y el mapa carga solo ese contorno verificado",
+      "ok": true,
+      "ms": 346,
+      "detalle": {
+        "bytes": 121,
+        "ms_carga": 107
+      }
+    },
+    {
+      "nombre": "un KMZ con varios contornos exige elegir y activar explícitamente",
+      "ok": true,
+      "ms": 997,
+      "detalle": {
+        "candidatos_validos": 3
+      }
+    },
+    {
+      "nombre": "un reemplazo fallido conserva el contorno activo anterior",
+      "ok": true,
+      "ms": 375
+    },
+    {
+      "nombre": "un reemplazo válido se activa y una versión retenida se puede volver a activar",
+      "ok": true,
+      "ms": 592
+    },
+    {
+      "nombre": "una segunda sesión autorizada lee los archivos guardados y el contorno real",
+      "ok": true,
+      "ms": 224
+    },
+    {
+      "nombre": "selecciones rápidas: una carga en curso, una en espera, un cuerpo listo; lo obsoleto se cancela",
+      "ok": true,
+      "ms": 388,
+      "detalle": {
+        "selecciones": 9,
+        "resultados": [
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cancelado",
+          "cargado"
+        ],
+        "maximos": {
+          "enCurso": 1,
+          "enEspera": 0
+        }
+      }
+    },
+    {
+      "nombre": "la subida pendiente de otra cuenta se ve genérica, sin nombre ni tamaño",
+      "ok": true,
+      "ms": 257,
+      "detalle": {
+        "version_privada": "oculta"
+      }
+    },
+    {
+      "nombre": "una cuenta sin permiso no ve nada: 404 indistinguible en lista, descarga y contorno",
+      "ok": true,
+      "ms": 338,
+      "detalle": {
+        "estado_harness": 404
+      }
+    },
+    {
+      "nombre": "solo lectura deshabilita controles pero no descargas",
+      "ok": true,
+      "ms": 52
+    },
+    {
+      "nombre": "cancelar una subida en curso usa el endpoint y lo informa",
+      "ok": true,
+      "ms": 396
+    },
+    {
+      "nombre": "retirar exige confirmación y es definitivo",
+      "ok": true,
+      "ms": 955
+    },
+    {
+      "nombre": "al expirar la sesión durante trabajo activo todo se desmonta y nada se instala después",
+      "ok": true,
+      "ms": 3559
+    },
+    {
+      "nombre": "sin errores de página (olga)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (omar)",
+      "ok": true,
+      "ms": 0
+    },
+    {
+      "nombre": "sin errores de página (otto)",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+Python 3.13.16 on Linux x86_64
+object size 256 MiB, write chunks 1 MiB, read chunks 64 KiB
+guardar_temporal     1.36 s    188.2 MiB/s  peak Python allocations  0.00 MiB  -> 268435456
+copiar               1.35 s    189.1 MiB/s  peak Python allocations  0.13 MiB  -> 268435456
+leer + sha256        0.25 s   1021.4 MiB/s  peak Python allocations  0.13 MiB  -> 486cc817b95d853d…
+max RSS grew by 0.4 MiB (ru_maxrss, KiB on Linux)

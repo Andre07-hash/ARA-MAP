@@ -1,0 +1,26 @@
+servidor sqlite, almacén /tmp/ara-recorrido-3a-fZowpj/instalacion/archivos
+ok   el operador crea un terreno en blanco: los campos de negocio quedan vacíos, no en cero
+ok   el operador edita el terreno en la tabla
+ok   sube un PDF desde el detalle y lo descarga byte por byte idéntico
+ok   sube un KMZ con X/Y en blanco, elige entre candidatos, activa y ve el contorno real
+ok   un reemplazo fallido conserva el último contorno utilizable
+ok   selecciones rápidas en la página: sólo el último contorno se instala, un cuerpo retenido
+ok   un archivo que termina mientras se edita una celda no toca el editor ni la versión
+ok   retirar el KMZ de un terreno con X/Y lo deja en su punto; el mapa lo dice
+ok   un cuerpo cerca del límite (100,000 vértices) se sube, se carga y se dibuja sin recortes
+ok   otra sesión autorizada lee los mismos archivos guardados y el mismo contorno
+ok   una cuenta sin permiso es rechazada y no recibe contenido
+ok   reinicio del servidor sobre la misma base y el mismo almacén: bytes, hash e historial siguen
+ok   se revoca el acceso mientras se leen los fragmentos del contorno: nada se instala y la fila se va
+ok   se transfiere el terreno mientras se descarga: no llega el archivo y el detalle se cierra
+ok   la sesión expira durante una subida: todo se desmonta y nada se repuebla después
+ok   sin errores de página (ada)
+ok   sin errores de página (olga)
+ok   sin errores de página (omar)
+ok   sin errores de página (otto)
+ok   sin errores de página (omar)
+ok   sin errores de página (ada)
+ok   sin errores de página (ada)
+
+22/22 recorridos correctos (sqlite)
+EXIT 0

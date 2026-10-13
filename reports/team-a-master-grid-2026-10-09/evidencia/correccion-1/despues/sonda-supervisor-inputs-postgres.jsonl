@@ -1,0 +1,5 @@
+{"backend": "postgres", "probe": "nul_name", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"nombre": "Contiene caracteres no admitidos."}}}}
+{"backend": "postgres", "probe": "surrogate_name", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"nombre": "Contiene caracteres no admitidos."}}}}
+{"backend": "postgres", "probe": "nul_option", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"opciones": "Contiene caracteres no admitidos."}}}}
+{"backend": "postgres", "probe": "date_trailing_newline", "status": 422, "stored": {}}
+{"backend": "postgres", "probe": "surrogate_value", "status": 422, "result": {"error": "Revisa los campos marcados.", "detalle": {"code": "validation_failed", "fields": {"custom:416b4ba4-4225-4f7e-bc09-269f5b45b338": "Contiene caracteres no admitidos."}}}}

@@ -1,0 +1,24 @@
+Chromium 141.0.7390.37 · http://127.0.0.1:35601/tests/e2e/contornos.html
+  ok  cada fila se coloca según contorno, XY o ninguno
+  ok  el ajuste inicial cubre todas las partes y puntos
+  ok  discrepancia: se dibuja el contorno, no el X/Y almacenado
+  ok  lista → selección: encuadra el contorno multiparte entero y lo resalta
+  ok  clic real en cada parte selecciona el mismo terreno
+  ok  hueco: sin relleno y sin selección al hacer clic dentro
+  ok  marca XY heredada: clic real la selecciona
+  ok  zoom lejano: símbolos en el punto interior; coincidentes como anillos
+  ok  doble clic en contorno: zoomToScale encuadra y reporta a_escala
+  ok  cuerpo no cargado: símbolo distinto, nunca contorno, aviso escapado
+  ok  cuerpo inconsistente (desplazado 2° al este): símbolo no disponible en su lugar
+  ok  cuerpo inconsistente (colapsado en un punto): símbolo no disponible en su lugar
+  ok  reemplazo fallido: se dibuja el contorno activo anterior, no el pendiente
+  ok  filtrar retira capas; las entradas sobrantes del mapa no se dibujan
+  ok  un clic pendiente sobre un terreno filtrado no llega a seleccionarse
+  ok  multiparte disperso de partes pequeñas: conserva un símbolo clicable
+  ok  render([]) limpia todo: capas, selección y conteo
+  ok  entrada inválida no rompe el mapa ni inventa contornos
+        píxeles pintados: base 26594, nuevo 26594; captura síncrona (diagnóstico): 26594 y 26594
+  ok  solo XY: idéntico al renderizador de la base
+  ok  sin errores de página
+
+Todas las comprobaciones pasaron.

@@ -1,0 +1,1808 @@
+{
+ "navegador": "141.0.7390.37",
+ "base": "5d8e2dcc125a688dbba38a260d5d7eca88a6d223",
+ "actual": "496233e3c86fac40981f23671633c4fbbd157b97",
+ "maquina": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+  "nucleos": 4,
+  "memoriaGiB": 15.7,
+  "sistema": "Linux 6.18.44-fc-v80",
+  "node": "v22.22.0"
+ },
+ "repeticiones": 3,
+ "dprs": [
+  1
+ ],
+ "controles": [
+  {
+   "mapa": "base",
+   "fase": "frio",
+   "tareaMaxMs": 173,
+   "llamadaMs": 168.3,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.8,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.7,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 156,
+   "llamadaMs": 151.1,
+   "detectada": true
+  },
+  {
+   "mapa": "base",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 156,
+   "llamadaMs": 151.3,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "frio",
+   "tareaMaxMs": 173,
+   "llamadaMs": 168.7,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.8,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "pan-directo",
+   "tareaMaxMs": 155,
+   "llamadaMs": 150.7,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 156,
+   "llamadaMs": 151.7,
+   "detectada": true
+  },
+  {
+   "mapa": "actual",
+   "fase": "zoom-directo",
+   "tareaMaxMs": 156,
+   "llamadaMs": 151,
+   "detectada": true
+  }
+ ],
+ "corridas": [
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 18.6,
+    "dosCuadrosMs": 24,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.6,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.3,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.3,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 17.4,
+    "dosCuadrosMs": 24.6,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 32.5,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.1,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.8,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 26.2,
+    "dosCuadrosMs": 32.4,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 6.3,
+     "dosCuadrosMs": 31.5,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 32.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.9,
+     "dosCuadrosMs": 33.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.9,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 18.2,
+    "dosCuadrosMs": 24.6,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.5,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.2,
+     "dosCuadrosMs": 33.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.1,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 19.7,
+    "dosCuadrosMs": 24.7,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.3,
+     "dosCuadrosMs": 33.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.6,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.4,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.2,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 22.4,
+    "dosCuadrosMs": 30.6,
+    "estado": "a_escala",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.9,
+     "dosCuadrosMs": 32.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 0.7,
+     "dosCuadrosMs": 33.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 0.9,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.3,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 17
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 53.5,
+    "dosCuadrosMs": 81.4,
+    "estado": "xy",
+    "tareaMaxMs": 53,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 33.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.4,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.6,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.6,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 42.4,
+    "dosCuadrosMs": 65.9,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.2,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.2,
+     "dosCuadrosMs": 32.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.5,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.6,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 38.9,
+    "dosCuadrosMs": 60.7,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.1,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.8,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 54,
+    "dosCuadrosMs": 85.3,
+    "estado": "xy",
+    "tareaMaxMs": 54,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.2,
+     "dosCuadrosMs": 32.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 32.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3,
+     "dosCuadrosMs": 34.6,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 42.4,
+    "dosCuadrosMs": 69.5,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 2.6,
+     "dosCuadrosMs": 32.5,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.1,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1.8,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 48.9,
+    "dosCuadrosMs": 66.9,
+    "estado": "xy",
+    "tareaMaxMs": 0,
+    "tareasLargas": 0
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1.1,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2.9,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2.1,
+     "dosCuadrosMs": 30.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 3.5,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    }
+   ],
+   "zoom": 11
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 272.4,
+    "dosCuadrosMs": 281.1,
+    "estado": "a_escala",
+    "tareaMaxMs": 272,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 13.6,
+     "dosCuadrosMs": 32.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 15.6,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 83.5,
+     "dosCuadrosMs": 88.6,
+     "tareaMaxMs": 83,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 68,
+     "dosCuadrosMs": 72.6,
+     "tareaMaxMs": 68,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 247.2,
+    "dosCuadrosMs": 254.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 247,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 10.1,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 12.8,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 133.3,
+     "dosCuadrosMs": 140.3,
+     "tareaMaxMs": 133,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 84,
+     "dosCuadrosMs": 88.7,
+     "tareaMaxMs": 84,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 257.4,
+    "dosCuadrosMs": 266.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 257,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 11.3,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 14,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 69.1,
+     "dosCuadrosMs": 74.2,
+     "tareaMaxMs": 69,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 82,
+     "dosCuadrosMs": 87.3,
+     "tareaMaxMs": 82,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 249.4,
+    "dosCuadrosMs": 257.5,
+    "estado": "a_escala",
+    "tareaMaxMs": 249,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 8.4,
+     "dosCuadrosMs": 33.5,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 10.9,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 102.1,
+     "dosCuadrosMs": 108.7,
+     "tareaMaxMs": 102,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 94.6,
+     "dosCuadrosMs": 99.7,
+     "tareaMaxMs": 94,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 181,
+    "dosCuadrosMs": 188.3,
+    "estado": "a_escala",
+    "tareaMaxMs": 181,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 24,
+     "dosCuadrosMs": 29.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 9.2,
+     "dosCuadrosMs": 32,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 74.2,
+     "dosCuadrosMs": 79.2,
+     "tareaMaxMs": 74,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 88.7,
+     "dosCuadrosMs": 92.9,
+     "tareaMaxMs": 88,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 227.8,
+    "dosCuadrosMs": 234.3,
+    "estado": "a_escala",
+    "tareaMaxMs": 227,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 10,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 11.5,
+     "dosCuadrosMs": 33.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 79.7,
+     "dosCuadrosMs": 85,
+     "tareaMaxMs": 79,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 92.7,
+     "dosCuadrosMs": 96.7,
+     "tareaMaxMs": 92,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 14
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 263.5,
+    "dosCuadrosMs": 270.1,
+    "estado": "a_escala",
+    "tareaMaxMs": 263,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 5.5,
+     "dosCuadrosMs": 30.3,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2.8,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 37.9,
+     "dosCuadrosMs": 40.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 87.3,
+     "dosCuadrosMs": 91.9,
+     "tareaMaxMs": 87,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 238.5,
+    "dosCuadrosMs": 244.9,
+    "estado": "a_escala",
+    "tareaMaxMs": 238,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 4.3,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2.6,
+     "dosCuadrosMs": 33,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 43.2,
+     "dosCuadrosMs": 45.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 98.3,
+     "dosCuadrosMs": 101.2,
+     "tareaMaxMs": 98,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 250,
+    "dosCuadrosMs": 256.5,
+    "estado": "a_escala",
+    "tareaMaxMs": 250,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 8.6,
+     "dosCuadrosMs": 32.7,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 4.5,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 58.6,
+     "dosCuadrosMs": 61.4,
+     "tareaMaxMs": 58,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 55.5,
+     "dosCuadrosMs": 58.5,
+     "tareaMaxMs": 55,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 218.5,
+    "dosCuadrosMs": 225.4,
+    "estado": "a_escala",
+    "tareaMaxMs": 218,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 9.4,
+     "dosCuadrosMs": 32.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 4.1,
+     "dosCuadrosMs": 33.2,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 49.6,
+     "dosCuadrosMs": 53.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 86,
+     "dosCuadrosMs": 88.8,
+     "tareaMaxMs": 86,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 213,
+    "dosCuadrosMs": 219.9,
+    "estado": "a_escala",
+    "tareaMaxMs": 213,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 6.2,
+     "dosCuadrosMs": 29.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2.6,
+     "dosCuadrosMs": 34.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 39.9,
+     "dosCuadrosMs": 42.9,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 66.6,
+     "dosCuadrosMs": 69.9,
+     "tareaMaxMs": 66,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 242.6,
+    "dosCuadrosMs": 248.4,
+    "estado": "a_escala",
+    "tareaMaxMs": 242,
+    "tareasLargas": 1
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 5.3,
+     "dosCuadrosMs": 32.8,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 3.1,
+     "dosCuadrosMs": 33.4,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 73.6,
+     "dosCuadrosMs": 77.3,
+     "tareaMaxMs": 73,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 92.7,
+     "dosCuadrosMs": 96.6,
+     "tareaMaxMs": 92,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 16
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 1346.8,
+    "dosCuadrosMs": 3670.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 2230,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1057.9,
+     "dosCuadrosMs": 1124.2,
+     "tareaMaxMs": 1058,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1037.1,
+     "dosCuadrosMs": 1099.7,
+     "tareaMaxMs": 1037,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1111.6,
+     "dosCuadrosMs": 1203.6,
+     "tareaMaxMs": 1111,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1209.5,
+     "dosCuadrosMs": 1327.5,
+     "tareaMaxMs": 1209,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 276.5,
+    "dosCuadrosMs": 433,
+    "estado": "a_escala",
+    "tareaMaxMs": 276,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 18.9,
+     "dosCuadrosMs": 89.4,
+     "tareaMaxMs": 70,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 21.9,
+     "dosCuadrosMs": 92.2,
+     "tareaMaxMs": 70,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 86.1,
+     "dosCuadrosMs": 174.1,
+     "tareaMaxMs": 87,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 85,
+     "dosCuadrosMs": 160.5,
+     "tareaMaxMs": 85,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 1384.2,
+    "dosCuadrosMs": 3721.3,
+    "estado": "a_escala",
+    "tareaMaxMs": 2336,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1115.3,
+     "dosCuadrosMs": 1185.5,
+     "tareaMaxMs": 1115,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1088.4,
+     "dosCuadrosMs": 1163.2,
+     "tareaMaxMs": 1088,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1081.8,
+     "dosCuadrosMs": 1166.4,
+     "tareaMaxMs": 1081,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1085.9,
+     "dosCuadrosMs": 1151.2,
+     "tareaMaxMs": 1086,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 287.7,
+    "dosCuadrosMs": 448.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 287,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 23.7,
+     "dosCuadrosMs": 110.1,
+     "tareaMaxMs": 86,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 33.4,
+     "dosCuadrosMs": 119.7,
+     "tareaMaxMs": 86,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 81,
+     "dosCuadrosMs": 170.6,
+     "tareaMaxMs": 89,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 81.8,
+     "dosCuadrosMs": 147.3,
+     "tareaMaxMs": 81,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 1369,
+    "dosCuadrosMs": 3737.8,
+    "estado": "a_escala",
+    "tareaMaxMs": 2309,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 1174.5,
+     "dosCuadrosMs": 1242,
+     "tareaMaxMs": 1174,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 1065.5,
+     "dosCuadrosMs": 1131.8,
+     "tareaMaxMs": 1065,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1019.5,
+     "dosCuadrosMs": 1102.4,
+     "tareaMaxMs": 1019,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1131.3,
+     "dosCuadrosMs": 1200,
+     "tareaMaxMs": 1131,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 251,
+    "dosCuadrosMs": 402.1,
+    "estado": "a_escala",
+    "tareaMaxMs": 251,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 20,
+     "dosCuadrosMs": 98.1,
+     "tareaMaxMs": 77,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 21.2,
+     "dosCuadrosMs": 113.6,
+     "tareaMaxMs": 92,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 96.8,
+     "dosCuadrosMs": 181.1,
+     "tareaMaxMs": 97,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 97.8,
+     "dosCuadrosMs": 161.1,
+     "tareaMaxMs": 97,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 10
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 2269.5,
+    "dosCuadrosMs": 6993.3,
+    "estado": "a_escala",
+    "tareaMaxMs": 4714,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 2094.4,
+     "dosCuadrosMs": 2227,
+     "tareaMaxMs": 2094,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2163.9,
+     "dosCuadrosMs": 2287.4,
+     "tareaMaxMs": 2164,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1526.2,
+     "dosCuadrosMs": 1747.6,
+     "tareaMaxMs": 1526,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2243.1,
+     "dosCuadrosMs": 2358,
+     "tareaMaxMs": 2243,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 0,
+   "frio": {
+    "llamadaMs": 282.7,
+    "dosCuadrosMs": 628.5,
+    "estado": "a_escala",
+    "tareaMaxMs": 282,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 31.8,
+     "dosCuadrosMs": 173.3,
+     "tareaMaxMs": 141,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 30.8,
+     "dosCuadrosMs": 166.3,
+     "tareaMaxMs": 135,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 92.4,
+     "dosCuadrosMs": 199,
+     "tareaMaxMs": 106,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 105.5,
+     "dosCuadrosMs": 281.9,
+     "tareaMaxMs": 105,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 2640.9,
+    "dosCuadrosMs": 7174.6,
+    "estado": "a_escala",
+    "tareaMaxMs": 4523,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 2038.4,
+     "dosCuadrosMs": 2153.7,
+     "tareaMaxMs": 2038,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2033,
+     "dosCuadrosMs": 2143.7,
+     "tareaMaxMs": 2033,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1428.3,
+     "dosCuadrosMs": 1564.2,
+     "tareaMaxMs": 1428,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2262.4,
+     "dosCuadrosMs": 2373.6,
+     "tareaMaxMs": 2262,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 1,
+   "frio": {
+    "llamadaMs": 299.1,
+    "dosCuadrosMs": 558,
+    "estado": "a_escala",
+    "tareaMaxMs": 299,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 26.5,
+     "dosCuadrosMs": 138.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 26.1,
+     "dosCuadrosMs": 136.6,
+     "tareaMaxMs": 110,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 69.6,
+     "dosCuadrosMs": 180.5,
+     "tareaMaxMs": 110,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 100.6,
+     "dosCuadrosMs": 223.7,
+     "tareaMaxMs": 122,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 2508.6,
+    "dosCuadrosMs": 7147,
+    "estado": "a_escala",
+    "tareaMaxMs": 4637,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 2166.6,
+     "dosCuadrosMs": 2289.8,
+     "tareaMaxMs": 2166,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 2035.9,
+     "dosCuadrosMs": 2150.2,
+     "tareaMaxMs": 2035,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 1405.5,
+     "dosCuadrosMs": 1525.9,
+     "tareaMaxMs": 1405,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 2215.9,
+     "dosCuadrosMs": 2326.5,
+     "tareaMaxMs": 2216,
+     "tareasLargas": 2
+    }
+   ],
+   "zoom": 12
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "repeticion": 2,
+   "frio": {
+    "llamadaMs": 288.7,
+    "dosCuadrosMs": 546.6,
+    "estado": "a_escala",
+    "tareaMaxMs": 288,
+    "tareasLargas": 2
+   },
+   "directo": [
+    {
+     "tipo": "pan",
+     "llamadaMs": 23.7,
+     "dosCuadrosMs": 140.1,
+     "tareaMaxMs": 0,
+     "tareasLargas": 0
+    },
+    {
+     "tipo": "pan",
+     "llamadaMs": 27,
+     "dosCuadrosMs": 146.6,
+     "tareaMaxMs": 119,
+     "tareasLargas": 1
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 105,
+     "dosCuadrosMs": 216.4,
+     "tareaMaxMs": 111,
+     "tareasLargas": 2
+    },
+    {
+     "tipo": "zoom",
+     "llamadaMs": 76.5,
+     "dosCuadrosMs": 187.3,
+     "tareaMaxMs": 76,
+     "tareasLargas": 1
+    }
+   ],
+   "zoom": 12
+  }
+ ],
+ "resumen": [
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "19.7 / 26.2",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "1 / 6.3",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "fixture",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "18.2 / 22.4",
+   "frío: tarea más larga ms": 0,
+   "directo: llamada ms (mediana / peor)": "0.9 / 1.3",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "42.4 / 53.5",
+   "frío: tarea más larga ms": 53,
+   "directo: llamada ms (mediana / peor)": "1.8 / 3.8",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "xy",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "48.9 / 54",
+   "frío: tarea más larga ms": 54,
+   "directo: llamada ms (mediana / peor)": "2 / 3.6",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 0",
+   "directo: tareas ≥ 50 ms": "0 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "257.4 / 272.4",
+   "frío: tarea más larga ms": 272,
+   "directo: llamada ms (mediana / peor)": "24 / 88.7",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 88",
+   "directo: tareas ≥ 50 ms": "6 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "circulo-100k",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "247.2 / 249.4",
+   "frío: tarea más larga ms": 249,
+   "directo: llamada ms (mediana / peor)": "12.8 / 133.3",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 133",
+   "directo: tareas ≥ 50 ms": "6 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "250 / 263.5",
+   "frío: tarea más larga ms": 263,
+   "directo: llamada ms (mediana / peor)": "8.6 / 87.3",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 87",
+   "directo: tareas ≥ 50 ms": "4 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "multiparte-20000",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "238.5 / 242.6",
+   "frío: tarea más larga ms": 242,
+   "directo: llamada ms (mediana / peor)": "9.4 / 98.3",
+   "directo: tarea más larga ms (mediana / peor)": "0 / 98",
+   "directo: tareas ≥ 50 ms": "4 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "1369 / 1384.2",
+   "frío: tarea más larga ms": 2336,
+   "directo: llamada ms (mediana / peor)": "1085.9 / 1209.5",
+   "directo: tarea más larga ms (mediana / peor)": "1086 / 1209",
+   "directo: tareas ≥ 50 ms": "12 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "grande-mas-19999",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "276.5 / 287.7",
+   "frío: tarea más larga ms": 287,
+   "directo: llamada ms (mediana / peor)": "33.4 / 97.8",
+   "directo: tarea más larga ms (mediana / peor)": "86 / 97",
+   "directo: tareas ≥ 50 ms": "12 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "base",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "2508.6 / 2640.9",
+   "frío: tarea más larga ms": 4714,
+   "directo: llamada ms (mediana / peor)": "2038.4 / 2262.4",
+   "directo: tarea más larga ms (mediana / peor)": "2038 / 2262",
+   "directo: tareas ≥ 50 ms": "12 de 12"
+  },
+  {
+   "dpr": 1,
+   "caso": "denso-grande-mas-19999",
+   "mapa": "actual",
+   "n": 3,
+   "frío: llamada ms (mediana / peor)": "288.7 / 299.1",
+   "frío: tarea más larga ms": 299,
+   "directo: llamada ms (mediana / peor)": "31.8 / 105.5",
+   "directo: tarea más larga ms (mediana / peor)": "110 / 141",
+   "directo: tareas ≥ 50 ms": "10 de 12"
+  }
+ ]
+}

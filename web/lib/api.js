@@ -104,6 +104,53 @@ async function request(path, { method = "GET", body, headers = {}, raw, signal }
   }
 }
 
+const cancelada = () => new DOMException("La petición se canceló.", "AbortError");
+
+/**
+ * The private transport for modules that read bodies themselves (attachments,
+ * geometry chunks). Unlike request() it decodes nothing and buffers nothing.
+ *
+ *   peticionPrivada(ruta, {method, headers, body, signal})
+ *     -> Promise<{response: Response, signal: AbortSignal}>
+ *
+ * `ruta` is a same-origin "/api/..." path; `body` is already encoded. The
+ * request is tied to the private session that is current when it is made: the
+ * returned signal is that session's (combined with the caller's) and stays so
+ * while the caller reads the body. A cancelled or obsolete call rejects with
+ * an AbortError, so a caller can release what it holds in `finally`; this is
+ * deliberately not request()'s never-settling convention. A 401 runs the
+ * session-expiry teardown first and never resolves. Any other status is
+ * returned for the caller to decode.
+ */
+export async function peticionPrivada(ruta, { method = "GET", headers, body, signal } = {}) {
+  // One leading slash, no backslash or control character: nothing a browser
+  // would resolve to another origin.
+  if (typeof ruta !== "string" || !/^\/api\/[^\\\u0000-\u0020]*$/.test(ruta)) {
+    throw new TypeError("peticionPrivada solo admite rutas /api/ de este origen.");
+  }
+  const sesion = privado.signal;
+  const senal = signal ? AbortSignal.any([signal, sesion]) : sesion;
+  if (senal.aborted) throw cancelada();
+  let response;
+  try {
+    response = await fetch(ruta, {
+      method, headers, body, signal: senal, credentials: "same-origin", cache: "no-store",
+    });
+  } catch (error) {
+    if (senal.aborted) throw cancelada();
+    if (error instanceof TypeError) throw errorDeRed();
+    throw error;
+  }
+  if (senal.aborted) throw cancelada();
+  if (response.status === 401) {
+    response.body?.cancel().catch(() => {});
+    const error = Object.assign(new Error("Inicia sesión para continuar."), { status: 401 });
+    alExpirar?.(error);
+    throw sesion.aborted ? cancelada() : error;
+  }
+  return { response, signal: senal };
+}
+
 const page = (consulta, cursor) => consultaDePagina(consulta, cursor);
 const enc = encodeURIComponent;
 
@@ -131,6 +178,49 @@ export const api = {
                       }),
   historial:          (id, cursor) => request(`/inventario/terrenos/${enc(id)}/historial` +
                         (cursor != null ? `?cursor=${enc(cursor)}` : "")),
+
+  /* The employee table (2A). Paths of lists come from lib/tabla.js; every
+   * list is one bounded page, filtered and counted by the server. */
+  tablaLista:         (ruta, consulta, signal) => request(`${ruta}?${consulta}`, { signal }),
+  tablaCrear:         (ruta, clave) => request(ruta, {
+                        method: "POST", body: {}, headers: { "Idempotency-Key": clave },
+                      }),
+  guardarCelda:       (id, cuerpo) => request(`/inventario/terrenos/${enc(id)}`, { method: "PATCH", body: cuerpo }),
+  archivarTerreno:    (id, expected_version, restaurar = false) =>
+                        request(`/inventario/terrenos/${enc(id)}/${restaurar ? "restaurar" : "archivar"}`,
+                          { method: "POST", body: { expected_version } }),
+  vistaDeTransferencia: (id, destino) =>
+                        request(`/inventario/terrenos/${enc(id)}/transferir?base_id=${enc(destino ?? "sin_asignar")}`),
+  transferirTerreno:  (id, expected_version, base_id) =>
+                        request(`/inventario/terrenos/${enc(id)}/transferir`,
+                          { method: "POST", body: { expected_version, base_id } }),
+
+  maestraBases:       (archivadas = false, signal) =>
+                        request(`/maestra/bases${archivadas ? "?archivadas=1" : ""}`, { signal }),
+  crearBaseDeTrabajo: (nombre) => request("/maestra/bases", { method: "POST", body: { nombre } }),
+  renombrarBaseDeTrabajo: (id, expected_version, nombre) =>
+                        request(`/maestra/bases/${enc(id)}`, { method: "PATCH", body: { expected_version, nombre } }),
+  archivarBaseDeTrabajo: (id, expected_version, restaurar = false) =>
+                        request(`/maestra/bases/${enc(id)}/${restaurar ? "restaurar" : "archivar"}`,
+                          { method: "POST", body: { expected_version } }),
+  accesoDeBase:       (id) => request(`/maestra/bases/${enc(id)}/acceso`),
+  reemplazarAcceso:   (id, expected_version, usuarios) =>
+                        request(`/maestra/bases/${enc(id)}/acceso`,
+                          { method: "PUT", body: { expected_version, usuarios } }),
+  operadores:         (q = "") => request(`/maestra/operadores?limit=200${q ? `&q=${enc(q)}` : ""}`),
+
+  columnas:           (base, retiradas = false, signal) =>
+                        request(`/maestra/bases/${enc(base)}/columnas${retiradas ? "?retiradas=1" : ""}`, { signal }),
+  crearColumna:       (base, cuerpo, clave) => request(`/maestra/bases/${enc(base)}/columnas`, {
+                        method: "POST", body: cuerpo, headers: { "Idempotency-Key": clave },
+                      }),
+  // A column id is "custom:<uuid>"; the path takes the uuid.
+  cambiarColumna:     (base, columna, cuerpo) =>
+                        request(`/maestra/bases/${enc(base)}/columnas/${enc(columna.replace(/^custom:/, ""))}`,
+                          { method: "PATCH", body: cuerpo }),
+  retirarColumna:     (base, columna, expected_version, restaurar = false) =>
+                        request(`/maestra/bases/${enc(base)}/columnas/${enc(columna.replace(/^custom:/, ""))}/` +
+                          (restaurar ? "restaurar" : "retirar"), { method: "POST", body: { expected_version } }),
 
   bases:        () => request("/bases"),
   base:         (id) => request(`/bases/${id}`),

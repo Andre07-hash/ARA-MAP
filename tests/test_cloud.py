@@ -128,13 +128,15 @@ class SignedIn(CloudServer, TempDatabase):
         status, body, headers = self.login(" ANA ")
         self.assertEqual(status, 200)
         user = json.loads(body)["user"]
-        self.assertEqual(set(user), {"id", "display_name"})
+        self.assertEqual(set(user), {"id", "display_name", "rol"})
         cookie = headers["Set-Cookie"]
         for attribute in ("Secure", "HttpOnly", "SameSite=Strict", "Path=/"):
             self.assertIn(attribute, cookie)
         jar = {"Cookie": cookie.split(";")[0]}
-        self.assertEqual(json.loads(self.request("GET", "/api/session", headers=jar)[1]),
-                         {"authenticated": True, "user": user})
+        estado = json.loads(self.request("GET", "/api/session", headers=jar)[1])
+        self.assertEqual(set(estado), {"authenticated", "user", "capacidades", "alcance"})
+        self.assertEqual((estado["authenticated"], estado["user"]), (True, user))
+        self.assertEqual((user["rol"], estado["alcance"]), ("admin", {"bases": "todas"}))
         self.assertFalse(json.loads(self.request("GET", "/api/config", headers=jar)[1])["readOnly"])
         self.assertEqual(self.request("GET", "/api/bases", headers=jar)[0], 200)
         status, _, headers = self.request("POST", "/api/logout", headers=jar)

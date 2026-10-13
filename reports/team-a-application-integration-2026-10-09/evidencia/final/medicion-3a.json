@@ -1,0 +1,139 @@
+{
+  "url": "http://localhost:8434",
+  "chrome": "141.0.7390.37",
+  "fecha": "2026-10-12T04:10:46.903Z",
+  "primera_pagina_operador": {
+    "que": "recarga completa de la app con sesión abierta hasta 100 filas pintadas y una celda enfocada (base de 3,000)",
+    "n": 5,
+    "mediana_ms": 602,
+    "max_ms": 623,
+    "objetivo_ms": 2000,
+    "peticiones_api": [
+      "GET /api/config 200 85 B",
+      "GET /api/session 200 374 B",
+      "GET /api/maestra/bases 200 255 B",
+      "GET /api/maestra/bases/9f90f714-5d87-44c9-a2a6-4e219d412e2c/columnas 200 16 B",
+      "GET /api/maestra/bases/9f90f714-5d87-44c9-a2a6-4e219d412e2c/terrenos 200 186770 B"
+    ],
+    "bytes_de_la_lista": 186770,
+    "filas_dom": 100,
+    "celdas_dom": 1400,
+    "total_mostrado": "1–100 de 3,000"
+  },
+  "respuesta_al_teclado": {
+    "que": "de la tecla a dos cuadros pintados después (página de 100 filas); incluye ~2 cuadros de espera por diseño de la medida",
+    "objetivo_ms": 100,
+    "abrir_editor_tecleando": {
+      "n": 15,
+      "mediana_ms": 42,
+      "max_ms": 56
+    },
+    "tecla_dentro_del_editor": {
+      "n": 15,
+      "mediana_ms": 17,
+      "max_ms": 26
+    },
+    "mover_foco_con_flecha": {
+      "n": 15,
+      "mediana_ms": 22,
+      "max_ms": 33
+    }
+  },
+  "guardar_una_celda": {
+    "que": "de Enter a la celda marcada \"guardando\" y a guardada (PATCH real)",
+    "a_estado_guardando": {
+      "n": 20,
+      "mediana_ms": 97,
+      "max_ms": 120
+    },
+    "a_guardada": {
+      "n": 20,
+      "mediana_ms": 105,
+      "max_ms": 151
+    }
+  },
+  "paginar_base_3000": {
+    "que": "60 cambios de página (100 filas) con Siguiente/Anterior en la base de 3,000",
+    "n": 60,
+    "mediana_ms": 231,
+    "max_ms": 328,
+    "ordenar_por_nombre_ms": 206,
+    "buscar_ms_incluye_300_de_espera": 464,
+    "coincidencias": "1–22 de 22",
+    "memoria_inicial": {
+      "heap_mb": 3.04,
+      "nodos_dom": 4390,
+      "listeners": 216
+    },
+    "memoria_tras_60_paginas": {
+      "heap_mb": 3.95,
+      "nodos_dom": 4394,
+      "listeners": 229
+    },
+    "memoria_con_200_filas": {
+      "heap_mb": 4.21,
+      "nodos_dom": 7804,
+      "listeners": 329
+    },
+    "filas_dom_con_200": 200
+  },
+  "tabla_maestra_25000": {
+    "que": "administradora, tabla maestra sobre 25,000",
+    "primera_pagina": {
+      "n": 5,
+      "mediana_ms": 763,
+      "max_ms": 883,
+      "objetivo_ms": 2000
+    },
+    "bytes_de_la_lista": 186363,
+    "total_mostrado": "1–100 de 2,100",
+    "siguiente_pagina": {
+      "n": 20,
+      "mediana_ms": 375,
+      "max_ms": 446
+    },
+    "cambio_de_base": {
+      "n": 24,
+      "mediana_ms": 224,
+      "max_ms": 305
+    },
+    "memoria_inicial": {
+      "heap_mb": 2.95,
+      "nodos_dom": 4677,
+      "listeners": 217
+    },
+    "memoria_tras_20_paginas_y_24_cambios_de_base": {
+      "heap_mb": 4,
+      "nodos_dom": 4101,
+      "listeners": 230
+    },
+    "filas_dom": 100
+  },
+  "cinco_sesiones": {
+    "que": "cinco operadores en la base de 3,000, cada uno en su navegador",
+    "cincuenta_ediciones_en_filas_distintas": {
+      "guardadas": 50,
+      "cambios_sin_resolver": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "n": 50,
+      "mediana_ms": 190,
+      "max_ms": 426
+    },
+    "misma_celda_a_la_vez": {
+      "conflictos_mostrados_por_sesion": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "version_final": 2,
+      "valor_final": "Disputa 3"
+    }
+  }
+}

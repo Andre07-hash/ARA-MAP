@@ -1,0 +1,3 @@
+{"backend": "sqlite", "probe": "limite=%C2%B2", "status": 400, "result": {"error": "El l\u00edmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}}
+{"backend": "sqlite", "probe": "limite=%C2%B2", "status": 400, "result": {"error": "El l\u00edmite debe estar entre 1 y 100.", "detalle": {"code": "limite_invalido"}}}
+{"backend": "sqlite", "probe": "desde=%C2%B2", "status": 400, "result": {"error": "El desplazamiento no es v\u00e1lido.", "detalle": {"code": "desplazamiento_invalido", "fragmento_bytes": 524288}}}

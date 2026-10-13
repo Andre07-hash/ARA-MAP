@@ -1,0 +1,361 @@
+Archivos: <tmp>/almacen
+servidor en modo montado, almacén local-disk
+ok   los widgets montan con el resumen real: sin archivos no es 'cargando'
+ok   un PDF sube (huella → inicio → PUT → completar) y la celda se actualiza por onCambio
+ok   la descarga autenticada entrega exactamente los bytes guardados
+ok   un archivo que no es PDF se rechaza antes de leerlo
+ok   un KMZ de un contorno se activa y el mapa carga solo ese contorno verificado
+ok   un KMZ con varios contornos exige elegir y activar explícitamente
+ok   un reemplazo fallido conserva el contorno activo anterior
+ok   un reemplazo válido se activa y una versión retenida se puede volver a activar
+ok   una segunda sesión autorizada lee los archivos guardados y el contorno real
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32800)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 143, in do_GET
+    self._dispatch("GET")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32802)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 143, in do_GET
+    self._dispatch("GET")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32816)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 451, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 143, in do_GET
+    self._dispatch("GET")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32826)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 451, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 143, in do_GET
+    self._dispatch("GET")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32812)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 146, in do_POST
+    self._dispatch("POST")
+    ~~~~~~~~~~~~~~^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 32822)
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 451, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 143, in do_GET
+    self._dispatch("GET")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 265, in _dispatch
+    return self._send_json(result, extra=request.response_headers)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok   selecciones rápidas: una carga en curso, una en espera, un cuerpo listo; lo obsoleto se cancela
+ok   la subida pendiente de otra cuenta se ve genérica, sin nombre ni tamaño
+ok   una cuenta sin permiso no ve nada: 404 indistinguible en lista, descarga y contorno
+ok   solo lectura deshabilita controles pero no descargas
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57012)
+Traceback (most recent call last):
+  File "<tree-42085bc>/server/app.py", line 239, in _dispatch
+    result = handler(request)
+  File "<tree-42085bc>/server/api/archivos.py", line 174, in contenido
+    raise ApiError("El contenido llegó incompleto.", 400, {"code": "cuerpo_incompleto"})
+server.errors.ApiError: El contenido llegó incompleto.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 149, in do_PUT
+    self._dispatch("PUT")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 241, in _dispatch
+    return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok   cancelar una subida en curso usa el endpoint y lo informa
+ok   retirar exige confirmación y es definitivo
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57004)
+Traceback (most recent call last):
+  File "<tree-42085bc>/server/app.py", line 239, in _dispatch
+    result = handler(request)
+  File "<tree-42085bc>/server/api/archivos.py", line 174, in contenido
+    raise ApiError("El contenido llegó incompleto.", 400, {"code": "cuerpo_incompleto"})
+server.errors.ApiError: El contenido llegó incompleto.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 453, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 439, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "<tree-42085bc>/server/app.py", line 149, in do_PUT
+    self._dispatch("PUT")
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 241, in _dispatch
+    return self._send_json({"error": exc.mensaje, "detalle": exc.detalle}, exc.status)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/tests/e2e/archivos_servidor.py", line 171, in _send_json
+    return super()._send_json(payload, status, extra)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 347, in _send_json
+    self._send(status, encode(payload), "application/json; charset=utf-8",
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               extra={"Cache-Control": "no-store", **(extra or {})})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<tree-42085bc>/server/app.py", line 364, in _send
+    self.wfile.write(payload)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+ok   al expirar la sesión durante trabajo activo todo se desmonta y nada se instala después
+ok   sin errores de página (olga)
+ok   sin errores de página (omar)
+ok   sin errores de página (otto)
+
+19/19 recorridos correctos (modo montado)

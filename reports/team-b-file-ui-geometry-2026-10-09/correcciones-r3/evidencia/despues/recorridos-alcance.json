@@ -1,0 +1,63 @@
+{
+  "modo": "montado",
+  "almacen": "local-disk",
+  "total": 8,
+  "fallos": 0,
+  "resultados": [
+    {
+      "nombre": "revocar el acceso mientras se completa: 404 limpia el detalle y llega al host",
+      "ok": true,
+      "ms": 31621,
+      "detalle": {
+        "mensaje": "Este terreno ya no está disponible para tu cuenta. Se actualizará la información."
+      }
+    },
+    {
+      "nombre": "revocar el acceso durante el PUT: 404 del contenido limpia y llega al host",
+      "ok": true,
+      "ms": 31567,
+      "detalle": {
+        "mensaje": "Este terreno ya no está disponible para tu cuenta. Se actualizará la información."
+      }
+    },
+    {
+      "nombre": "transferir el terreno a otra base mientras se completa: 404 limpia y llega al host",
+      "ok": true,
+      "ms": 31601,
+      "detalle": {
+        "mensaje": "Este terreno ya no está disponible para tu cuenta. Se actualizará la información."
+      }
+    },
+    {
+      "nombre": "cancelar después de perder el acceso: el 404 de la cancelación también limpia",
+      "ok": true,
+      "ms": 31620,
+      "detalle": {
+        "mensaje": "Este terreno ya no está disponible para tu cuenta. Se actualizará la información."
+      }
+    },
+    {
+      "nombre": "archivar el terreno mientras se completa: permiso perdido, el host revalida y la lista se conserva",
+      "ok": true,
+      "ms": 30625,
+      "detalle": {
+        "fase": "fallido"
+      }
+    },
+    {
+      "nombre": "cerrar el detalle mientras la cancelación espera: no sale ninguna petición después",
+      "ok": true,
+      "ms": 32039
+    },
+    {
+      "nombre": "control: con el acceso intacto una subida termina y una cancelación viva llega al servidor",
+      "ok": true,
+      "ms": 391
+    },
+    {
+      "nombre": "sin errores de página",
+      "ok": true,
+      "ms": 0
+    }
+  ]
+}

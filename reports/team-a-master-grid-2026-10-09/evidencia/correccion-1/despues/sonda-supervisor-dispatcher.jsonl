@@ -1,0 +1,3 @@
+{"case": "read_only", "statuses": [403]}
+{"case": "foreign_origin", "statuses": [403]}
+{"case": "bad_host", "statuses": [403]}

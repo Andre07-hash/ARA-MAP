@@ -1,0 +1,17 @@
+FAIL expiry with unsaved cells clears everything; a queued save never runs; the same user signs in again
+FAIL a different account signs in over an expired session: it sees and sends nothing of the previous one
+FAIL revalidation finds another account while a terrain detail is open: all of it is removed
+FAIL revalidation finds another account while a terrain history is open: all of it is removed
+FAIL revalidation finds another account while the columns of the base is open: all of it is removed
+ok   revalidation finds another account while an unsaved editor and a clean table is open: all of it is removed
+FAIL administrator dialogs (bases, grants, transfer preview) do not outlive the administrator
+FAIL a role change ends the session; signing in again shows the new role and nothing of the old screen
+FAIL the same user signs in again under changed grants: the old base and its queued edit are gone
+FAIL a terrain transferred away while its detail is open: the save is refused and the dialog goes with the row
+ok   logout with a save in flight and a dialog open leaves nothing, and the late answer paints nothing
+FAIL a successful save returns while a core cell is being edited: text, selection and focus stay; Enter then saves it
+FAIL a successful save returns while a custom cell is being edited: text, selection and focus stay; Enter then saves it
+FAIL same, then Escape: the open editor is cancelled, nothing of it is saved, focus returns to its cell
+FAIL a conflict returns while another cell is being edited: the editor stays, the conflict is listed, Enter saves at the current version
+FAIL the refreshed row changed the very cell being edited: Enter does not overwrite it unseen
+14 con fallas.

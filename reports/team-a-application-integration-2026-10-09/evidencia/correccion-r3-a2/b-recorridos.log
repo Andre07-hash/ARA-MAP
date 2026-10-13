@@ -1,0 +1,20 @@
+ok   los widgets montan con el resumen real: sin archivos no es 'cargando'
+ok   un PDF sube (huella → inicio → PUT → completar) y la celda se actualiza por onCambio
+ok   la descarga autenticada entrega exactamente los bytes guardados
+ok   un archivo que no es PDF se rechaza antes de leerlo
+ok   un KMZ de un contorno se activa y el mapa carga solo ese contorno verificado
+ok   un KMZ con varios contornos exige elegir y activar explícitamente
+ok   un reemplazo fallido conserva el contorno activo anterior
+ok   un reemplazo válido se activa y una versión retenida se puede volver a activar
+ok   una segunda sesión autorizada lee los archivos guardados y el contorno real
+ok   selecciones rápidas: una carga en curso, una en espera, un cuerpo listo; lo obsoleto se cancela
+ok   la subida pendiente de otra cuenta se ve genérica, sin nombre ni tamaño
+ok   una cuenta sin permiso no ve nada: 404 indistinguible en lista, descarga y contorno
+ok   solo lectura deshabilita controles pero no descargas
+ok   cancelar una subida en curso usa el endpoint y lo informa
+ok   retirar exige confirmación y es definitivo
+ok   al expirar la sesión durante trabajo activo todo se desmonta y nada se instala después
+ok   sin errores de página (olga)
+ok   sin errores de página (omar)
+ok   sin errores de página (otto)
+19/19 recorridos correctos (modo montado)

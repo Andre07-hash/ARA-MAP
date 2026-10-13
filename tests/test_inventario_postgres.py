@@ -54,7 +54,9 @@ class InventarioPostgres(unittest.TestCase):
             conn.raw.execute("TRUNCATE inventory_operation_result, inventory_event, inventory_revision,"
                              " inventory_terrain, team_session, team_login_failure, team_user,"
                              " workspace_backup CASCADE")
-            self.actors = [dict(auth.create_user(conn, n, n.capitalize(), TEST_PASSWORD, iterations=1000),
+            # Administrators: this suite exercises the unscoped inventory, the master table.
+            self.actors = [dict(auth.create_user(conn, n, n.capitalize(), TEST_PASSWORD, iterations=1000,
+                                                 rol="admin"),
                                 display_name=n.capitalize()) for n in ("ana", "beto", "carla")]
 
     def create(self, fields=None, key=None):
@@ -66,7 +68,7 @@ class InventarioPostgres(unittest.TestCase):
         with db.session() as conn:
             return conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]
 
-    def test_schema_is_v8_with_the_pointer_constraints(self):
+    def test_schema_is_current_with_the_pointer_constraints(self):
         with db.session() as conn:
             self.assertEqual(postgres.schema_version(conn), db.SCHEMA_VERSION)
             nombres = {r["conname"] for r in conn.execute(
@@ -89,8 +91,12 @@ class InventarioPostgres(unittest.TestCase):
         t = self.create({"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"}, key="pg-clave-1")
         with db.session() as conn:
             again = repo.create(conn, {"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"},
+                                self.actors[0], "pg-clave-1", "hash")
+            # Round 1: a key belongs to the account that used it.
+            ajeno = repo.create(conn, {"terreno": "Lote", "asking_m2": 122.5, "moneda": "USD"},
                                 self.actors[1], "pg-clave-1", "hash")
         self.assertEqual(again["terreno"]["id"], t["id"])
+        self.assertNotEqual(ajeno["terreno"]["id"], t["id"])
         with db.session() as conn:
             repo.update(conn, t["id"], 1, {"terreno": "Lote 2"}, (), self.actors[1])
         with self.assertRaises(repo.ConflictError), db.session() as conn:
@@ -102,7 +108,7 @@ class InventarioPostgres(unittest.TestCase):
             eventos, total, _ = repo.history(conn, t["id"], None, 10)
         self.assertEqual([(e["version"], e["actor"]["display_name"]) for e in eventos],
                          [(2, "Beto"), (1, "Ana")])
-        self.assertEqual(self.count("inventory_revision"), 2)
+        self.assertEqual(self.count("inventory_revision"), 3)  # two of this record, one of Beto's
 
     def test_simultaneous_saves_on_separate_connections_have_one_winner(self):
         t = self.create()

@@ -1,0 +1,53 @@
+{
+  "backend": "sqlite",
+  "registros": 25000,
+  "en_la_base": 3000,
+  "con_archivos_en_la_primera_pagina": 60,
+  "paginas": [
+    {
+      "limit": 50,
+      "lista_2a": {
+        "ms_mediana": 38.0,
+        "ms_max": 48.3,
+        "bytes": 87316,
+        "sentencias_sql": 11
+      },
+      "lista_3a": {
+        "ms_mediana": 43.9,
+        "ms_max": 44.9,
+        "bytes": 111166,
+        "sentencias_sql": 411
+      }
+    },
+    {
+      "limit": 100,
+      "lista_2a": {
+        "ms_mediana": 41.2,
+        "ms_max": 56.7,
+        "bytes": 173749,
+        "sentencias_sql": 11
+      },
+      "lista_3a": {
+        "ms_mediana": 51.7,
+        "ms_max": 73.1,
+        "bytes": 207609,
+        "sentencias_sql": 811
+      }
+    },
+    {
+      "limit": 200,
+      "lista_2a": {
+        "ms_mediana": 58.0,
+        "ms_max": 76.5,
+        "bytes": 345643,
+        "sentencias_sql": 11
+      },
+      "lista_3a": {
+        "ms_mediana": 68.5,
+        "ms_max": 74.0,
+        "bytes": 392603,
+        "sentencias_sql": 1611
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "_nota": "Ficticio. Ids are illustrative. olga is an operator granted Base Ejemplo; ada is an administrator.",
+  "crear_en_blanco": {
+    "peticion": "POST /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/terrenos",
+    "encabezados": {"Idempotency-Key": "c0ffee00-clave-1"},
+    "cuerpo": {},
+    "respuesta_200": {
+      "terreno": {
+        "id": "3f2a1b00-0000-4000-8000-0000000000t1",
+        "version": 1,
+        "base_id": "7a1e2b3c-0000-4000-8000-0000000000b1",
+        "publication_state": "draft",
+        "archived_at": null,
+        "draft": {
+          "terreno": null, "estado": null, "municipio": null, "tipo_terreno": null,
+          "direccion": null, "public_description": null, "contacto": null, "notas_internas": null,
+          "superficie_m2": null, "superficie_ha": null, "afectaciones_pct": null, "afectaciones_m2": null,
+          "asking_price": null, "asking_m2": null, "lat": null, "lon": null,
+          "moneda": null, "price_on_request": false, "availability": "unknown"
+        },
+        "custom": {},
+        "_resto": "confirmations, attention, revision_number, created_at/by, updated_at/by, as in the existing record"
+      }
+    }
+  },
+  "crear_con_valores": {
+    "peticion": "POST /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/terrenos",
+    "encabezados": {"Idempotency-Key": "c0ffee00-clave-2"},
+    "cuerpo": {"tipo_terreno": "Industrial", "terreno": "Lote Ficticio 12", "estado": "Jalisco",
+               "asking_price": 1470000},
+    "_nota": "The amount is saved with moneda null: the currency is unknown, not assumed."
+  },
+  "editar": {
+    "peticion": "PATCH /api/inventario/terrenos/3f2a1b00-0000-4000-8000-0000000000t1",
+    "cuerpo": {"expected_version": 1, "changes": {"tipo_terreno": "Agrícola", "asking_m2": 122.5}}
+  },
+  "listar_una_base": {
+    "peticion": "GET /api/maestra/bases/7a1e2b3c-0000-4000-8000-0000000000b1/terrenos?estado=Jalisco&q=ficticio&sort=-superficie_m2&limit=50",
+    "respuesta_200": {
+      "terrenos": ["… up to 50 records …"],
+      "total": 137,
+      "next_cursor": "WyItc3VwZXJmaWNpZV9tMiIsIDEyMDAwLjAsICIzZjJhMWIwMC4uLiJd",
+      "facets": {"estados": ["Colima", "Jalisco"], "municipios": ["Zapopan"], "monedas": ["MXN", "USD"],
+                 "tipos": ["Agrícola", "Industrial"]}
+    }
+  },
+  "tabla_maestra": {
+    "peticion": "GET /api/inventario/terrenos?base=7a1e2b3c-0000-4000-8000-0000000000b1&base=sin_asignar&tipo_terreno=Industrial&moneda=USD&price_max=2000000",
+    "_nota": "Administrators only. An operator gets 403 forbidden, capacidad maestra.global."
+  },
+  "archivar": {
+    "peticion": "POST /api/inventario/terrenos/3f2a1b00-0000-4000-8000-0000000000t1/archivar",
+    "cuerpo": {"expected_version": 2},
+    "_restaurar": "POST …/restaurar with the new expected_version"
+  },
+  "vista_previa_de_transferencia": {
+    "peticion": "GET /api/inventario/terrenos/3f2a1b00-0000-4000-8000-0000000000t1/transferir?base_id=7a1e2b3c-0000-4000-8000-0000000000b2",
+    "respuesta_200": {
+      "terreno": {"id": "3f2a1b00-0000-4000-8000-0000000000t1", "version": 3},
+      "origen": "7a1e2b3c-0000-4000-8000-0000000000b1",
+      "destino": "7a1e2b3c-0000-4000-8000-0000000000b2",
+      "sin_cambio": false,
+      "acceso": [{"id": "5b0c1f0e-0000-4000-8000-000000000004", "login": "omar",
+                  "display_name": "Omar Ficticio", "active": true}],
+      "columnas_que_se_ocultan": [{"id": "custom:9d0e0000-0000-4000-8000-0000000000c1", "nombre": "Folio",
+                                   "con_valor": true}]
+    },
+    "_sin_base": "base_id=sin_asignar previews leaving the terrain with no base"
+  },
+  "transferir": {
+    "peticion": "POST /api/inventario/terrenos/3f2a1b00-0000-4000-8000-0000000000t1/transferir",
+    "cuerpo": {"expected_version": 3, "base_id": "7a1e2b3c-0000-4000-8000-0000000000b2"},
+    "_sin_base": {"expected_version": 4, "base_id": null}
+  },
+  "historial": {
+    "peticion": "GET /api/inventario/terrenos/3f2a1b00-0000-4000-8000-0000000000t1/historial",
+    "evento_de_transferencia_para_una_operadora": {
+      "version": 4, "action": "transfer", "at": "2026-10-08T23:00:00+00:00",
+      "actor": {"id": "5b0c1f0e-0000-4000-8000-000000000002", "display_name": "Ada Ficticia"}
+    },
+    "el_mismo_evento_para_un_administrador": {
+      "version": 4, "action": "transfer",
+      "base": {"before": "7a1e2b3c-0000-4000-8000-0000000000b1", "after": "7a1e2b3c-0000-4000-8000-0000000000b2"}
+    }
+  },
+  "errores": {
+    "fuera_de_alcance_o_inexistente_404": {"error": "El terreno no existe.", "detalle": {"code": "not_found"}},
+    "base_fuera_de_alcance_o_inexistente_404": {"error": "La base de trabajo no existe.", "detalle": {"code": "not_found"}},
+    "version_vencida_409": {"detalle": {"code": "conflict", "current_version": 4, "terreno": "the record as it is now"}},
+    "clave_reutilizada_con_otros_datos_409": {"detalle": {"code": "idempotency_conflict"}},
+    "terreno_archivado_409": {"detalle": {"code": "terreno_archivado"}},
+    "terreno_no_archivado_409": {"detalle": {"code": "terreno_no_archivado"}},
+    "base_archivada_409": {"detalle": {"code": "base_archivada"}},
+    "publicado_y_no_es_admin_403": {"detalle": {"code": "requiere_admin"}},
+    "campo_no_admitido_422": {"detalle": {"code": "validation_failed", "fields": {"base_id": "Campo desconocido o no editable."}}},
+    "cursor_de_otro_orden_422": {"detalle": {"code": "validation_failed", "fields": {"cursor": "Cursor inválido para este orden."}}}
+  }
+}

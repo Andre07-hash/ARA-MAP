@@ -1,0 +1,5 @@
+----------------------------------------------------------------------
+Ran 1230 tests in 203.142s
+
+FAILED (failures=1, skipped=211)
+FAIL: test_the_system_python_has_no_openpyxl_of_its_own (tests.test_packaging.CleanMachine.test_the_system_python_has_no_openpyxl_of_its_own)

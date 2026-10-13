@@ -1,0 +1,32 @@
+
+── Pruebas unitarias e integración (Python del sistema) ──
+Ran 1254 tests in 281.565s
+
+FAILED (failures=1, skipped=223)
+   FALLA  suite de Python
+
+── Compatibilidad con el Python que trae macOS ──
+   FALLA  suite completa en Python 3.13.16
+
+── Lógica de mapa y comparación (JavaScript) ──
+# skipped 0
+# todo 0
+# duration_ms 1398.36807
+   OK   pruebas de JavaScript
+
+── Linter y tipos ──
+All checks passed!
+   OK   ruff
+Success: no issues found in 54 source files
+   OK   mypy
+--------------------------------------------------------------
+TOTAL                             8309    440    95%
+   OK   cobertura (mínimo 80%)
+
+── Pruebas de navegador ──
+   Requieren la aplicación corriendo y Chrome instalado:
+     ARA_MAP_DB=/tmp/ara-e2e.db python3 -m server.app
+     cd tests/e2e && npm install && npm test
+
+2 comprobación(es) con fallas.
+EXIT 2

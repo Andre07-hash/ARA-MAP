@@ -1,0 +1,90 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "listo",
+  "error": null,
+  "avisos": [
+    {
+      "codigo": "GEOMETRIA_FUERA_DE_MEXICO",
+      "mensaje": "El contorno es válido pero cae fuera de México; se conserva y no se usa para ubicar el terreno hasta revisarlo."
+    }
+  ],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Predio Ficticio Catorce",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -3.7,
+        40.4,
+        -3.696,
+        40.403
+      ],
+      "area_aproximada_m2": 113241.5,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": [
+    0
+  ],
+  "geometria": {
+    "geojson": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              -3.7,
+              40.4
+            ],
+            [
+              -3.696,
+              40.4
+            ],
+            [
+              -3.696,
+              40.403
+            ],
+            [
+              -3.7,
+              40.403
+            ],
+            [
+              -3.7,
+              40.4
+            ]
+          ]
+        ]
+      ]
+    },
+    "bbox": [
+      -3.7,
+      40.4,
+      -3.696,
+      40.403
+    ],
+    "punto_interior": {
+      "type": "Point",
+      "coordinates": [
+        -3.6980000000000004,
+        40.4015
+      ]
+    },
+    "area_aproximada_m2": 113241.5,
+    "partes": 1,
+    "huecos": 0,
+    "vertices": 5
+  },
+  "ubicacion": {
+    "dentro_de_mexico": false,
+    "utilizable": false
+  }
+}

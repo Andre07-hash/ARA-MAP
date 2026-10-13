@@ -21,3 +21,65 @@ npm test
 Para otra dirección: `ARA_URL=http://localhost:8421 npm test`.
 
 Para guardar una captura de cada comprobación que falle: `E2E_SHOTS=/ruta/a/carpeta npm test`.
+
+## Contornos KMZ en el mapa (B-2)
+
+Estas dos pruebas **no necesitan la aplicación ni una base de datos**: sirven la
+raíz del repositorio en un puerto local y abren `contornos.html`, que usa el
+`createMapCanvas` real con el Leaflet incluido y datos ficticios
+(`tests/js/fixtures/geometria/contornos.json`).
+
+```bash
+cd tests/e2e
+npm install
+node contornos.mjs              # comprobaciones con clics reales del ratón
+node contornos-medicion.mjs     # tiempos y memoria (opcional: archivos de límite)
+```
+
+`CHROMIUM=/ruta/a/chrome` usa ese binario en lugar del canal `chrome`.
+`CONTORNOS_EVIDENCIA=/ruta` guarda capturas y un resumen JSON.
+
+## Tabla / Mapa
+
+Selector «Tabla / Mapa» de la tabla de empleados con los widgets, el cargador
+y el mapa reales: entrada del administrador, conjunto completo más allá de la
+página, filtros, contorno activo al tocar un círculo, respuestas atrasadas,
+alcance del operador, estados de error y vacío, y alternancia repetida. Datos
+ficticios al volumen del piloto (111 terrenos). Levanta y borra su propio
+servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-mapa.mjs                         # MAPA_CAPTURAS=carpeta para capturas
+```
+
+## Elegir PDF/KMZ desde las celdas de la tabla
+
+Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:
+administrador y operador, asociación a la fila, selección y activación
+explícitas del KMZ, reemplazo inválido, selector cancelado, teclado y filas
+sin permiso. Levanta y borra su propio servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-elegir.mjs                       # ELEGIR_CAPTURAS=carpeta para capturas
+```
+
+## Tabla de empleados (2A)
+
+Recorridos integrados: servidor real, sesiones reales, Chrome real. Cada
+corrida necesita un servidor **nuevo**; `tabla_servidor.py` levanta uno con una
+base SQLite temporal y cuentas ficticias, y lo borra al cerrar.
+
+```bash
+python3 tests/e2e/tabla_servidor.py --puerto 8433          # terminal 1
+cd tests/e2e && npm ci
+ARA_URL=http://localhost:8433 node tabla-integrada.mjs [carpeta-de-capturas]
+```
+
+Medición local (25,000 terrenos sintéticos, 3,000 en una base, cinco sesiones):
+
+```bash
+python3 tests/e2e/tabla_servidor.py --puerto 8434 --registros 25000   # terminal 1
+ARA_URL=http://localhost:8434 node tests/e2e/tabla-medicion.mjs [salida.json]
+```

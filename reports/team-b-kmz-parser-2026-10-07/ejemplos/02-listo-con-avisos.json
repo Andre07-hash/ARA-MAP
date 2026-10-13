@@ -1,0 +1,97 @@
+{
+  "_entrada": {
+    "seleccion": null
+  },
+  "estado": "listo",
+  "error": null,
+  "avisos": [
+    {
+      "codigo": "KMZ_ARCHIVOS_ADICIONALES",
+      "mensaje": "El KMZ trae archivos adicionales (imágenes u otros); no se usan para el contorno."
+    },
+    {
+      "codigo": "KML_CONTENIDO_IGNORADO",
+      "mensaje": "Se ignoraron elementos que no son contornos: 1 LineString, 1 Point."
+    }
+  ],
+  "ignorados": {
+    "LineString": 1,
+    "Point": 1
+  },
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Predio Ficticio Siete",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.396,
+        20.604
+      ],
+      "area_aproximada_m2": 185592.4,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": [
+    0
+  ],
+  "geometria": {
+    "geojson": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              -100.4,
+              20.6
+            ],
+            [
+              -100.396,
+              20.6
+            ],
+            [
+              -100.396,
+              20.604
+            ],
+            [
+              -100.4,
+              20.604
+            ],
+            [
+              -100.4,
+              20.6
+            ]
+          ]
+        ]
+      ]
+    },
+    "bbox": [
+      -100.4,
+      20.6,
+      -100.396,
+      20.604
+    ],
+    "punto_interior": {
+      "type": "Point",
+      "coordinates": [
+        -100.398,
+        20.602
+      ]
+    },
+    "area_aproximada_m2": 185592.4,
+    "partes": 1,
+    "huecos": 0,
+    "vertices": 5
+  },
+  "ubicacion": {
+    "dentro_de_mexico": true,
+    "utilizable": true
+  }
+}

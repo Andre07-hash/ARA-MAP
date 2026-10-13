@@ -1,0 +1,33 @@
+OK    fixture DPR 1: same 68 views and styles
+OK    fixture DPR 1: 68/68 captures RGBA-identical (canvas 1440x768)
+OK    xy DPR 1: same 5 views and styles
+OK    xy DPR 1: 5/5 captures RGBA-identical (canvas 1440x768)
+OK    circulo-100k DPR 1: same 11 views and styles
+OK    circulo-100k DPR 1: 11/11 captures RGBA-identical (canvas 1440x768)
+OK    multiparte-20000 DPR 1: same 14 views and styles
+OK    multiparte-20000 DPR 1: 14/14 captures RGBA-identical (canvas 1440x768)
+OK    grande-mas-19999 DPR 1: same 14 views and styles
+OK    grande-mas-19999 DPR 1: 14/14 captures RGBA-identical (canvas 1440x768)
+OK    denso-grande-mas-19999 DPR 1: same 14 views and styles
+OK    denso-grande-mas-19999 DPR 1: 14/14 captures RGBA-identical (canvas 1440x768)
+OK    fixture DPR 2: same 68 views and styles
+OK    fixture DPR 2: 68/68 captures RGBA-identical (canvas 2880x1536)
+OK    xy DPR 2: same 5 views and styles
+OK    xy DPR 2: 5/5 captures RGBA-identical (canvas 2880x1536)
+OK    circulo-100k DPR 2: same 11 views and styles
+OK    circulo-100k DPR 2: 11/11 captures RGBA-identical (canvas 2880x1536)
+OK    multiparte-20000 DPR 2: same 14 views and styles
+OK    multiparte-20000 DPR 2: 14/14 captures RGBA-identical (canvas 2880x1536)
+OK    grande-mas-19999 DPR 2: same 14 views and styles
+OK    grande-mas-19999 DPR 2: 14/14 captures RGBA-identical (canvas 2880x1536)
+OK    denso-grande-mas-19999 DPR 2: same 14 views and styles
+OK    denso-grande-mas-19999 DPR 2: 14/14 captures RGBA-identical (canvas 2880x1536)
+OK    base: Leaflet closes rings on the context ({"contexto":2,"path2d":0})
+OK    branch: no closePath() call; rings closed by "Z" in one Path2D's path data ({"contexto":0,"path2d":0})
+OK    branch paints the same bytes at that view
+OK    fallback (Leaflet version not 1.9.4): Leaflet's own drawing, same bytes as the accepted renderer ({"cierres":{"contexto":2,"path2d":0},"errores":[]})
+OK    fallback (no Path2D): Leaflet's own drawing, same bytes as the accepted renderer ({"cierres":{"contexto":2,"path2d":0},"errores":[]})
+OK    fallback (positions not whole pixels): Leaflet's own drawing, same bytes as the accepted renderer ({"cierres":{"contexto":2,"path2d":0},"errores":[]})
+OK    SVG renderer: the outline class draws Leaflet's SVG path ({"clase":true,"anillos":2,"errores":[]})
+Chromium 141.0.7390.37 · base 5d8e2dc · actual 496233e · 252 comparisons
+Todas las comprobaciones pasaron

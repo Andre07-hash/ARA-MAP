@@ -1,0 +1,3 @@
+FALLO R3-A2 residual: en la tabla maestra se archiva la base de un terreno durante su subida: sus filas quedan en sólo lectura, las de otras bases activas y las sin asignar siguen editables, y el texto pendiente se conserva
+     Error: la fila de la base archivada sigue editable
+0/1 recorridos correctos (sqlite) — PARCIAL: 35 omitidos por RECORRIDO_SOLO

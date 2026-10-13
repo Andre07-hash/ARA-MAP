@@ -1,0 +1,12 @@
+FALLO R3-A2: se archiva el terreno mientras una subida se completa (vista de activos): sale de la vista, sin controles de escritura; la celda en edición de otra fila no se toca
+     Error: la fila archivada sigue en la vista de activos
+FALLO R3-A2: con «Incluir archivados», el terreno archivado durante la subida queda a la vista en sólo lectura: sin escritura, con lectura y descarga, y la edición en curso intacta
+     Error: el detalle sigue editable
+FALLO R3-A2: un cambio sin resolver en la misma fila no se descarta al archivarse: la fila queda en sólo lectura con su texto
+     Error: el detalle sigue editable
+FALLO R3-A2: se archiva la base mientras un administrador sube: toda la vista pasa a sólo lectura y conserva lo legible y el editor abierto
+     Error: el detalle sigue editable
+ok   R3-A2: se archiva la base mientras un operador sube: la base deja de estar a su alcance y la vista se limpia
+FALLO R3-A2 (respuesta 403 «forbidden» SIMULADA, la política real no la produce): se vuelve a preguntar sesión y modo; nada se desmonta ni se descarta
+     Error: no se volvió a preguntar la sesión
+1/6 recorridos correctos (sqlite) — PARCIAL: 29 omitidos por RECORRIDO_SOLO

@@ -1,0 +1,15 @@
+UP031 Use format specifiers instead of percent format
+   --> tests/test_registros_maestra.py:562:18
+    |
+560 |             ("-asking_price", cursor("-asking_price", float("-inf"), uno)),
+561 |             ("asking_price", base64.urlsafe_b64encode(
+562 |                 ('["asking_price", 1e999, "%s"]' % uno).encode()).decode()),
+    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+563 |             ("superficie_m2", cursor("superficie_m2", True, uno)),
+564 |             ("superficie_m2", cursor("superficie_m2", [1], uno)),
+    |
+help: Replace with format specifiers
+
+Found 1 error.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).
+exit 1

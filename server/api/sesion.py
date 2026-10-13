@@ -9,6 +9,8 @@ import os
 from typing import Any
 
 from .. import auth, db
+from ..protocols import DatabaseConnection
+from ..repo import maestra as repo_maestra
 from ..router import Request
 from ..web_util import ApiError, parse_json
 
@@ -28,10 +30,24 @@ def config(request: Request) -> Respuesta:
     }
 
 
+def _estado(conn: DatabaseConnection, sesion: auth.Sesion) -> Respuesta:
+    """What the signed-in user may do (capacidades) and where (alcance), read
+    now. It helps the interface decide what to show; every route checks again."""
+    alcance: Any = "todas"
+    if sesion.rol != "admin":
+        alcance = [{"id": b["id"], "nombre": b["nombre"]}
+                   for b in repo_maestra.listar(conn, sesion.user_id)]
+    return {"authenticated": True,
+            "user": {**sesion.actor, "rol": sesion.rol},
+            "capacidades": list(auth.CAPACIDADES[sesion.rol]),
+            "alcance": {"bases": alcance}}
+
+
 def session(request: Request) -> Respuesta:
-    if request.user is None:
+    if request.sesion is None:
         return {"authenticated": False}
-    return {"authenticated": True, "user": request.user}
+    with db.session() as conn:
+        return _estado(conn, request.sesion)
 
 
 def login(request: Request) -> Respuesta:
@@ -41,15 +57,17 @@ def login(request: Request) -> Respuesta:
     # The session block must end normally so the recorded failure commits on
     # Postgres too; the error is raised only afterwards.
     with db.session() as conn:
-        token, user, throttled = auth.login(conn, data.get("username"), data.get("password"))
+        token, _user, throttled = auth.login(conn, data.get("username"), data.get("password"))
+        sesion = auth.sesion_de_token(conn, token) if token else None
+        estado = _estado(conn, sesion) if sesion else None
     if throttled:
         raise ApiError("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", 429,
                        {"code": "rate_limited"})
-    if token is None:
+    if token is None or estado is None:
         raise ApiError("Usuario o contraseña incorrectos.", 401, {"code": "invalid_credentials"})
     request.response_headers["Set-Cookie"] = auth.cookie(token, auth.SESSION_SECONDS,
                                                          secure=request.cloud)
-    return {"authenticated": True, "user": user}
+    return estado
 
 
 def logout(request: Request) -> Respuesta:

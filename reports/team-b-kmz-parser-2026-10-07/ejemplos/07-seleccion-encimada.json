@@ -1,0 +1,58 @@
+{
+  "_entrada": {
+    "seleccion": [
+      0,
+      1
+    ]
+  },
+  "estado": "requiere_seleccion",
+  "error": {
+    "codigo": "GEOMETRIA_PARTES_SUPERPUESTAS",
+    "mensaje": "Las partes del contorno se enciman entre sí."
+  },
+  "avisos": [],
+  "ignorados": {},
+  "candidatos": [
+    {
+      "indice": 0,
+      "nombre": "Lote Uno",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.4,
+        20.6,
+        -100.397,
+        20.603
+      ],
+      "area_aproximada_m2": 104396.1,
+      "valido": true,
+      "error": null
+    },
+    {
+      "indice": 1,
+      "nombre": "Lote Dos",
+      "carpeta": [
+        "Documento ficticio"
+      ],
+      "partes": 1,
+      "huecos": 0,
+      "vertices": 5,
+      "bbox": [
+        -100.398,
+        20.602,
+        -100.395,
+        20.605
+      ],
+      "area_aproximada_m2": 104394.7,
+      "valido": true,
+      "error": null
+    }
+  ],
+  "seleccion": null,
+  "geometria": null,
+  "ubicacion": null
+}

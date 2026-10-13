@@ -1,0 +1,67 @@
+Chromium 141.0.7390.37 · Intel(R) Xeon(R) Processor @ 2.80GHz ×4
+┌─────────┬──────────┬────────────────┬────────────┬───────────┬───────────┐
+│ (index) │ mapa     │ fase           │ tareaMaxMs │ llamadaMs │ detectada │
+├─────────┼──────────┼────────────────┼────────────┼───────────┼───────────┤
+│ 0       │ 'base'   │ 'frio'         │ 173        │ 168.3     │ true      │
+│ 1       │ 'base'   │ 'pan-directo'  │ 155        │ 150.8     │ true      │
+│ 2       │ 'base'   │ 'pan-directo'  │ 155        │ 150.7     │ true      │
+│ 3       │ 'base'   │ 'zoom-directo' │ 156        │ 151.1     │ true      │
+│ 4       │ 'base'   │ 'zoom-directo' │ 156        │ 151.3     │ true      │
+│ 5       │ 'actual' │ 'frio'         │ 173        │ 168.7     │ true      │
+│ 6       │ 'actual' │ 'pan-directo'  │ 155        │ 150.8     │ true      │
+│ 7       │ 'actual' │ 'pan-directo'  │ 155        │ 150.7     │ true      │
+│ 8       │ 'actual' │ 'zoom-directo' │ 156        │ 151.7     │ true      │
+│ 9       │ 'actual' │ 'zoom-directo' │ 156        │ 151       │ true      │
+└─────────┴──────────┴────────────────┴────────────┴───────────┴───────────┘
+{"dpr":1,"caso":"fixture","mapa":"base","i":0,"frioLlamada":18.6,"frioTarea":0,"directoLlamadaMax":1.3,"directoTareaMax":0}
+{"dpr":1,"caso":"fixture","mapa":"actual","i":0,"frioLlamada":17.4,"frioTarea":0,"directoLlamadaMax":1.1,"directoTareaMax":0}
+{"dpr":1,"caso":"fixture","mapa":"base","i":1,"frioLlamada":26.2,"frioTarea":0,"directoLlamadaMax":6.3,"directoTareaMax":0}
+{"dpr":1,"caso":"fixture","mapa":"actual","i":1,"frioLlamada":18.2,"frioTarea":0,"directoLlamadaMax":1.2,"directoTareaMax":0}
+{"dpr":1,"caso":"fixture","mapa":"base","i":2,"frioLlamada":19.7,"frioTarea":0,"directoLlamadaMax":1.4,"directoTareaMax":0}
+{"dpr":1,"caso":"fixture","mapa":"actual","i":2,"frioLlamada":22.4,"frioTarea":0,"directoLlamadaMax":1.3,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"base","i":0,"frioLlamada":53.5,"frioTarea":53,"directoLlamadaMax":3.6,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"actual","i":0,"frioLlamada":42.4,"frioTarea":0,"directoLlamadaMax":3.6,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"base","i":1,"frioLlamada":38.9,"frioTarea":0,"directoLlamadaMax":3.8,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"actual","i":1,"frioLlamada":54,"frioTarea":54,"directoLlamadaMax":3,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"base","i":2,"frioLlamada":42.4,"frioTarea":0,"directoLlamadaMax":3.1,"directoTareaMax":0}
+{"dpr":1,"caso":"xy","mapa":"actual","i":2,"frioLlamada":48.9,"frioTarea":0,"directoLlamadaMax":3.5,"directoTareaMax":0}
+{"dpr":1,"caso":"circulo-100k","mapa":"base","i":0,"frioLlamada":272.4,"frioTarea":272,"directoLlamadaMax":83.5,"directoTareaMax":83}
+{"dpr":1,"caso":"circulo-100k","mapa":"actual","i":0,"frioLlamada":247.2,"frioTarea":247,"directoLlamadaMax":133.3,"directoTareaMax":133}
+{"dpr":1,"caso":"circulo-100k","mapa":"base","i":1,"frioLlamada":257.4,"frioTarea":257,"directoLlamadaMax":82,"directoTareaMax":82}
+{"dpr":1,"caso":"circulo-100k","mapa":"actual","i":1,"frioLlamada":249.4,"frioTarea":249,"directoLlamadaMax":102.1,"directoTareaMax":102}
+{"dpr":1,"caso":"circulo-100k","mapa":"base","i":2,"frioLlamada":181,"frioTarea":181,"directoLlamadaMax":88.7,"directoTareaMax":88}
+{"dpr":1,"caso":"circulo-100k","mapa":"actual","i":2,"frioLlamada":227.8,"frioTarea":227,"directoLlamadaMax":92.7,"directoTareaMax":92}
+{"dpr":1,"caso":"multiparte-20000","mapa":"base","i":0,"frioLlamada":263.5,"frioTarea":263,"directoLlamadaMax":87.3,"directoTareaMax":87}
+{"dpr":1,"caso":"multiparte-20000","mapa":"actual","i":0,"frioLlamada":238.5,"frioTarea":238,"directoLlamadaMax":98.3,"directoTareaMax":98}
+{"dpr":1,"caso":"multiparte-20000","mapa":"base","i":1,"frioLlamada":250,"frioTarea":250,"directoLlamadaMax":58.6,"directoTareaMax":58}
+{"dpr":1,"caso":"multiparte-20000","mapa":"actual","i":1,"frioLlamada":218.5,"frioTarea":218,"directoLlamadaMax":86,"directoTareaMax":86}
+{"dpr":1,"caso":"multiparte-20000","mapa":"base","i":2,"frioLlamada":213,"frioTarea":213,"directoLlamadaMax":66.6,"directoTareaMax":66}
+{"dpr":1,"caso":"multiparte-20000","mapa":"actual","i":2,"frioLlamada":242.6,"frioTarea":242,"directoLlamadaMax":92.7,"directoTareaMax":92}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"base","i":0,"frioLlamada":1346.8,"frioTarea":2230,"directoLlamadaMax":1209.5,"directoTareaMax":1209}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"actual","i":0,"frioLlamada":276.5,"frioTarea":276,"directoLlamadaMax":86.1,"directoTareaMax":87}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"base","i":1,"frioLlamada":1384.2,"frioTarea":2336,"directoLlamadaMax":1115.3,"directoTareaMax":1115}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"actual","i":1,"frioLlamada":287.7,"frioTarea":287,"directoLlamadaMax":81.8,"directoTareaMax":89}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"base","i":2,"frioLlamada":1369,"frioTarea":2309,"directoLlamadaMax":1174.5,"directoTareaMax":1174}
+{"dpr":1,"caso":"grande-mas-19999","mapa":"actual","i":2,"frioLlamada":251,"frioTarea":251,"directoLlamadaMax":97.8,"directoTareaMax":97}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"base","i":0,"frioLlamada":2269.5,"frioTarea":4714,"directoLlamadaMax":2243.1,"directoTareaMax":2243}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"actual","i":0,"frioLlamada":282.7,"frioTarea":282,"directoLlamadaMax":105.5,"directoTareaMax":141}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"base","i":1,"frioLlamada":2640.9,"frioTarea":4523,"directoLlamadaMax":2262.4,"directoTareaMax":2262}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"actual","i":1,"frioLlamada":299.1,"frioTarea":299,"directoLlamadaMax":100.6,"directoTareaMax":122}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"base","i":2,"frioLlamada":2508.6,"frioTarea":4637,"directoLlamadaMax":2215.9,"directoTareaMax":2216}
+{"dpr":1,"caso":"denso-grande-mas-19999","mapa":"actual","i":2,"frioLlamada":288.7,"frioTarea":288,"directoLlamadaMax":105,"directoTareaMax":119}
+┌─────────┬─────┬──────────────────────────┬──────────┬───┬───────────────────────────────────┬──────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────────────┬─────────────────────────┐
+│ (index) │ dpr │ caso                     │ mapa     │ n │ frío: llamada ms (mediana / peor) │ frío: tarea más larga ms │ directo: llamada ms (mediana / peor) │ directo: tarea más larga ms (mediana / peor) │ directo: tareas ≥ 50 ms │
+├─────────┼─────┼──────────────────────────┼──────────┼───┼───────────────────────────────────┼──────────────────────────┼──────────────────────────────────────┼──────────────────────────────────────────────┼─────────────────────────┤
+│ 0       │ 1   │ 'fixture'                │ 'base'   │ 3 │ '19.7 / 26.2'                     │ 0                        │ '1 / 6.3'                            │ '0 / 0'                                      │ '0 de 12'               │
+│ 1       │ 1   │ 'fixture'                │ 'actual' │ 3 │ '18.2 / 22.4'                     │ 0                        │ '0.9 / 1.3'                          │ '0 / 0'                                      │ '0 de 12'               │
+│ 2       │ 1   │ 'xy'                     │ 'base'   │ 3 │ '42.4 / 53.5'                     │ 53                       │ '1.8 / 3.8'                          │ '0 / 0'                                      │ '0 de 12'               │
+│ 3       │ 1   │ 'xy'                     │ 'actual' │ 3 │ '48.9 / 54'                       │ 54                       │ '2 / 3.6'                            │ '0 / 0'                                      │ '0 de 12'               │
+│ 4       │ 1   │ 'circulo-100k'           │ 'base'   │ 3 │ '257.4 / 272.4'                   │ 272                      │ '24 / 88.7'                          │ '0 / 88'                                     │ '6 de 12'               │
+│ 5       │ 1   │ 'circulo-100k'           │ 'actual' │ 3 │ '247.2 / 249.4'                   │ 249                      │ '12.8 / 133.3'                       │ '0 / 133'                                    │ '6 de 12'               │
+│ 6       │ 1   │ 'multiparte-20000'       │ 'base'   │ 3 │ '250 / 263.5'                     │ 263                      │ '8.6 / 87.3'                         │ '0 / 87'                                     │ '4 de 12'               │
+│ 7       │ 1   │ 'multiparte-20000'       │ 'actual' │ 3 │ '238.5 / 242.6'                   │ 242                      │ '9.4 / 98.3'                         │ '0 / 98'                                     │ '4 de 12'               │
+│ 8       │ 1   │ 'grande-mas-19999'       │ 'base'   │ 3 │ '1369 / 1384.2'                   │ 2336                     │ '1085.9 / 1209.5'                    │ '1086 / 1209'                                │ '12 de 12'              │
+│ 9       │ 1   │ 'grande-mas-19999'       │ 'actual' │ 3 │ '276.5 / 287.7'                   │ 287                      │ '33.4 / 97.8'                        │ '86 / 97'                                    │ '12 de 12'              │
+│ 10      │ 1   │ 'denso-grande-mas-19999' │ 'base'   │ 3 │ '2508.6 / 2640.9'                 │ 4714                     │ '2038.4 / 2262.4'                    │ '2038 / 2262'                                │ '12 de 12'              │
+│ 11      │ 1   │ 'denso-grande-mas-19999' │ 'actual' │ 3 │ '288.7 / 299.1'                   │ 299                      │ '31.8 / 105.5'                       │ '110 / 141'                                  │ '10 de 12'              │
+└─────────┴─────┴──────────────────────────┴──────────┴───┴───────────────────────────────────┴──────────────────────────┴──────────────────────────────────────┴──────────────────────────────────────────────┴─────────────────────────┘

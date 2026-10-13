@@ -1,0 +1,43 @@
+Archivos: <tmp>/almacen
+{
+  "modo": "montado",
+  "almacen": "local-disk",
+  "navegador": "141.0.7390.37",
+  "subida": {
+    "total_ms": 8094,
+    "completar_ms": 7902,
+    "bytes_kmz": 439185,
+    "pico_heap_mib": 12.349945068359375,
+    "base_heap_mib": 2.576995849609375
+  },
+  "geometria": {
+    "bytes": 4117139,
+    "vertices": 100000,
+    "sha256_cargado": "327fb4366cf44fadbab495749541161d0573132299cec27010aab4e21ff3c666",
+    "sha256_servidor": "327fb4366cf44fadbab495749541161d0573132299cec27010aab4e21ff3c666",
+    "fragmentos": 8,
+    "peticiones": 9,
+    "cargar_y_verificar_ms": 195,
+    "dibujar_ms": 80,
+    "primera_carga_ms": 249,
+    "render": {
+      "colocados": 2,
+      "cuerpos": 1
+    },
+    "zoom_a_escala": {
+      "estado": "a_escala",
+      "contorno": true,
+      "zoom": 19,
+      "requerido": 19,
+      "maximo": 20
+    }
+  },
+  "heap_mib": {
+    "antes": 8.131702423095703,
+    "pico_durante_carga": 25.212196350097656,
+    "con_cuerpo_listo": 21.93663787841797,
+    "tras_reset": 8.214153289794922
+  },
+  "errores": []
+}
+medición completa

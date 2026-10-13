@@ -11,10 +11,17 @@ FIXTURE = Path(__file__).parent / "fixtures" / "base_terrenos_09_26.xlsx"
 TEST_PASSWORD = "contraseña-de-prueba-larga"
 
 
-def create_user(conn, login="ana", nombre="Ana Prueba"):
-    """A fictional team account. Few PBKDF2 rounds: only tests use these."""
+def create_user(conn, login="ana", nombre="Ana Prueba", rol="admin"):
+    """A fictional team account. Few PBKDF2 rounds: only tests use these.
+
+    An administrator unless told otherwise, which is the opposite of the
+    application's own default (operator). The suites written before roles
+    existed exercise the legacy workspace and the unscoped inventory, which
+    are administrator routes now; what an operator may and may not do is
+    tested with explicit rol="operador" accounts (tests/test_roles_y_bases.py).
+    """
     from server import auth
-    return auth.create_user(conn, login, nombre, TEST_PASSWORD, iterations=1000)
+    return auth.create_user(conn, login, nombre, TEST_PASSWORD, iterations=1000, rol=rol)
 
 
 def session_cookie(conn, login="ana"):

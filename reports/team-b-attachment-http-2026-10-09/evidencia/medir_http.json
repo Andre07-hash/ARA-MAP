@@ -1,0 +1,208 @@
+{
+  "python": "3.13.16",
+  "sqlite": "3.45.1",
+  "platform": "Linux-6.18.44-fc-v80-x86_64-with-glibc2.39",
+  "mediciones": [
+    {
+      "fase": "kmz-100000-vertices: completar SIN tracemalloc",
+      "status": 200,
+      "segundos": 8.658,
+      "resultado_intento": "listo"
+    },
+    {
+      "fase": "pdf-25MiB-exacto: iniciar",
+      "segundos": 0.039,
+      "pico_python_mib": 0.05,
+      "sentencias_sql": 17,
+      "status": 200
+    },
+    {
+      "fase": "pdf-25MiB-exacto: PUT contenido",
+      "segundos": 0.075,
+      "pico_python_mib": 27.02,
+      "sentencias_sql": 11,
+      "status": 200,
+      "bytes_peticion": 26214400
+    },
+    {
+      "fase": "pdf-25MiB-exacto: completar",
+      "segundos": 0.109,
+      "pico_python_mib": 0.15,
+      "sentencias_sql": 32,
+      "status": 200,
+      "estado": "disponible",
+      "resultado_intento": null
+    },
+    {
+      "fase": "pdf-25MiB-exacto: descarga",
+      "segundos": 0.134,
+      "pico_python_mib": 75.19,
+      "sentencias_sql": 6,
+      "status": 200,
+      "bytes_respuesta": 26214400,
+      "hash_identico": true
+    },
+    {
+      "fase": "kmz-casi-20MiB: iniciar",
+      "segundos": 0.043,
+      "pico_python_mib": 0.05,
+      "sentencias_sql": 18,
+      "status": 200
+    },
+    {
+      "fase": "kmz-casi-20MiB: PUT contenido",
+      "segundos": 0.06,
+      "pico_python_mib": 22.02,
+      "sentencias_sql": 11,
+      "status": 200,
+      "bytes_peticion": 20968109
+    },
+    {
+      "fase": "kmz-casi-20MiB: completar",
+      "segundos": 0.145,
+      "pico_python_mib": 42.44,
+      "sentencias_sql": 36,
+      "status": 200,
+      "estado": "disponible",
+      "resultado_intento": "listo"
+    },
+    {
+      "fase": "kmz-casi-20MiB: descarga",
+      "segundos": 0.101,
+      "pico_python_mib": 66.38,
+      "sentencias_sql": 6,
+      "status": 200,
+      "bytes_respuesta": 20968109,
+      "hash_identico": true
+    },
+    {
+      "fase": "kmz-100000-vertices: iniciar",
+      "segundos": 0.023,
+      "pico_python_mib": 0.04,
+      "sentencias_sql": 18,
+      "status": 200
+    },
+    {
+      "fase": "kmz-100000-vertices: PUT contenido",
+      "segundos": 0.017,
+      "pico_python_mib": 0.86,
+      "sentencias_sql": 11,
+      "status": 200,
+      "bytes_peticion": 439185
+    },
+    {
+      "fase": "kmz-100000-vertices: completar",
+      "segundos": 87.293,
+      "pico_python_mib": 46.02,
+      "sentencias_sql": 36,
+      "status": 200,
+      "estado": "disponible",
+      "resultado_intento": "listo"
+    },
+    {
+      "fase": "kmz-100000-vertices: descarga",
+      "segundos": 0.012,
+      "pico_python_mib": 1.33,
+      "sentencias_sql": 6,
+      "status": 200,
+      "bytes_respuesta": 439185,
+      "hash_identico": true
+    },
+    {
+      "fase": "geometria: metadatos (1 id)",
+      "segundos": 0.012,
+      "pico_python_mib": 0.04,
+      "sentencias_sql": 9,
+      "status": 200,
+      "bytes_geojson": 4117139,
+      "fragmentos": 8,
+      "vertices": 100000,
+      "partes": 20000
+    },
+    {
+      "fase": "geometria: metadatos (50 ids)",
+      "segundos": 0.014,
+      "pico_python_mib": 0.04,
+      "sentencias_sql": 9,
+      "status": 200,
+      "bytes_respuesta": 2769
+    },
+    {
+      "fase": "geometria: fragmento desde=0",
+      "segundos": 0.013,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=524288",
+      "segundos": 0.013,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=1048576",
+      "segundos": 0.014,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=1572864",
+      "segundos": 0.013,
+      "pico_python_mib": 0.53,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=2097152",
+      "segundos": 0.014,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=2621440",
+      "segundos": 0.012,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=3145728",
+      "segundos": 0.012,
+      "pico_python_mib": 1.02,
+      "sentencias_sql": 7,
+      "status": 200,
+      "bytes_respuesta": 524288,
+      "final": "0"
+    },
+    {
+      "fase": "geometria: fragmento desde=3670016",
+      "segundos": 0.023,
+      "pico_python_mib": 1.46,
+      "sentencias_sql": 14,
+      "status": 200,
+      "bytes_respuesta": 447123,
+      "final": "1"
+    },
+    {
+      "fase": "geometria: reensamblado",
+      "bytes": 4117139,
+      "sha256_coincide": true
+    }
+  ]
+}

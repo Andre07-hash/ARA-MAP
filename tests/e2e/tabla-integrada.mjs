@@ -117,7 +117,8 @@ const NOMBRE = 'Lote Ñandú Compartido';
 await caso('administrator: role-aware navigation, master table columns, bases, grants and custom columns', async () => {
   const { context, page, errores } = await abrir('ada');
   const nav = await page.locator('nav .nav-item').allInnerTexts();
-  assert.deepEqual(nav, ['Tabla maestra', 'Inventario', 'Bases', 'Mapas guardados', 'Catálogo público']);
+  // "Inventario" left the menu: its map is the master table's Tabla / Mapa now.
+  assert.deepEqual(nav, ['Tabla maestra', 'Bases', 'Mapas guardados', 'Catálogo público']);
   await irATabla(page);
   assert.match(page.url(), /#\/tabla\/maestra$/);
   const cabeceras = await page.locator('thead th[data-col]').allInnerTexts();
@@ -697,9 +698,12 @@ await caso('public and legacy administrator journeys still work', async () => {
   await anon.context.close();
 
   const { context, page, api, errores } = await abrir('ada');
-  await page.waitForURL(/#\/inventario$/);                 // the administrators' entry point is unchanged
-  await page.locator('.toolbar-estado', { hasText: /terreno/ }).waitFor();
-  assert.ok(api.some((l) => l === 'GET /api/inventario/terrenos 200'), 'the legacy inventory list loads');
+  await page.waitForURL(/#\/tabla\/maestra$/);             // administrators start in the master table
+  await page.locator('.tabla-pantalla').waitFor();
+  // The old inventory address lands on the master table's map, the same terrains.
+  await page.goto(`${URL_BASE}/#/inventario`);
+  await page.waitForURL(/#\/tabla\/maestra\/mapa$/);
+  await page.locator('.previa-mapa').waitFor();
   assert.ok(!api.some((l) => / (4\d\d|500)$/.test(l) ), `no failing call: ${api.filter((l) => / (4\d\d|500)$/.test(l))}`);
   await page.getByRole('link', { name: 'Bases', exact: true }).click();
   await page.waitForURL(/#\/bases$/);

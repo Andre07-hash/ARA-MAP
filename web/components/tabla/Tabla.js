@@ -20,8 +20,15 @@
  * summary to Team B's widgets. Neither is part of the terrain's version: when
  * a widget reports a change, one request refreshes that terrain and only
  * those two fields of the row are replaced. No cell is repainted, so an open
- * or unresolved editor is not touched. The optional map panel previews the
- * current page only (vistaPrevia.js).
+ * or unresolved editor is not touched.
+ *
+ * Tabla / Mapa. The same view, with the same filters, shows either the grid
+ * (one page) or a map of EVERY terrain that matches (vistaPrevia.js). The
+ * map's set is gathered page by page from the view's own authorized list
+ * route, kept while its view and query stay the same (switching back and
+ * forth, or paging the grid, does not fetch it again) and patched by this
+ * table's own writes. "Actualizar" gathers it again. Leaving the view, the
+ * account or the scope drops it with any gathering in flight.
  */
 
 import { api } from "../../lib/api.js";
@@ -37,11 +44,15 @@ import { openTerrainHistory } from "../inventory/TerrainHistory.js";
 import { closeAllDialogs, confirmDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
 import { conectarArchivos } from "./archivosAnfitrion.js";
+import { reunirPaginas } from "../../lib/inventario.js";
+import { segment } from "../inventory/DatosView.js";
 import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
 import { createVistaPrevia } from "./vistaPrevia.js";
 
 const BUSCAR_MS = 300;
+const PAGINA_MAPA = 200;          // the list's largest page
+const MAXIMO_MAPA = 5000;         // a map set larger than this is drawn as partial and said so
 const ESTADOS = {
   pendiente: "guardando", error: "sin guardar", conflicto: "en conflicto", incierto: "sin confirmar",
 };
@@ -51,7 +62,7 @@ const ESTADOS = {
 const SIN_ESCRITURA = new Set(["forbidden", "terreno_archivado", "base_archivada"]);
 
 export function createTabla({
-  sesion, soloConsulta = () => false, vistaInicial = null, onVista, onPermisos, onRevalidar,
+  sesion, soloConsulta = () => false, vistaInicial = null, modoInicial = null, onVista, onPermisos, onRevalidar,
 }) {
   const admin = sesion.rol === "admin";
 
@@ -80,7 +91,13 @@ export function createTabla({
   let ranuras = [];
   let seleccion = null;           // terrain id shared with the map preview
   let detalleAbierto = null;      // the open record detail, for file refreshes
-  let pintada = null;             // the page object the preview last drew
+  let modo = modoInicial === "mapa" ? "mapa" : "tabla";
+  // The map's set: every terrain of the view for one query (`clave`).
+  let conjunto = { clave: null, filas: [], total: 0, incompleto: false, obsoleto: false, error: null };
+  let reunion = null;             // { clave, control } while the set is being gathered
+  let reunionGen = 0;
+  let mapaPintado = null;         // the set key the map last framed
+  let paginaObsoleta = false;     // the grid was not revalidated while the map was shown
   const refrescos = new Map();    // terrain id -> "pedido" | "repetir" (coalesced file refreshes)
   // Team B's widgets and geometry loader, for this session only.
   const archivos = conectarArchivos({
@@ -132,13 +149,13 @@ export function createTabla({
     "Columnas");
   const btnBases = admin && el("button", { type: "button", class: "btn btn-quiet", onclick: () => basesDialogo() },
     "Bases y accesos");
-  const btnRecargar = el("button", { type: "button", class: "btn btn-quiet", onclick: () => recargar() },
-    "Actualizar");
-  const btnMapa = el("button", {
-    type: "button", class: "btn btn-quiet", "aria-pressed": "false", "aria-controls": "tabla-previa",
-    title: "Muestra en un mapa las filas de la página actual",
-    onclick: () => alternarMapa(),
-  }, "Mapa de esta página");
+  const btnRecargar = el("button", {
+    type: "button", class: "btn btn-quiet", onclick: () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()),
+  }, "Actualizar");
+  const btnModoTabla = segment("Tabla", modo === "tabla", () => mostrarComo("tabla"));
+  const btnModoMapa = segment("Mapa", modo === "mapa", () => mostrarComo("mapa"));
+  const selectorModo = el("div", { class: "segmented tabla-modo", role: "group", "aria-label": "Mostrar como" },
+    btnModoTabla, btnModoMapa);
 
   const campoDe = (control, etiqueta) => el("div", { class: "tabla-campo" },
     el("label", { class: "field-label", for: control.id }, etiqueta), control);
@@ -153,7 +170,7 @@ export function createTabla({
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
     casilla(chkArchivados, "Incluir archivados"),
-    el("div", { class: "tabla-acciones" }, btnAgregar, btnColumnas, btnBases, btnRecargar, btnMapa),
+    el("div", { class: "tabla-acciones" }, selectorModo, btnAgregar, btnColumnas, btnBases, btnRecargar),
   );
 
   const aviso = el("p", { class: "tabla-aviso", hidden: true });
@@ -169,10 +186,16 @@ export function createTabla({
   const btnSiguiente = el("button", { type: "button", class: "btn btn-quiet", onclick: () => paginar(1) }, "Siguiente");
   const estado = el("span", { class: "tabla-estado", role: "status", "aria-live": "polite" });
   const alerta = el("span", { class: "tabla-alerta", role: "alert" });
-  const pie = el("div", { class: "tabla-pie" }, cuenta, campoDe(selLimite, "Filas por página"),
+  const campoLimite = campoDe(selLimite, "Filas por página");
+  const pie = el("div", { class: "tabla-pie" }, cuenta, campoLimite,
     btnAnterior, btnSiguiente, estado, alerta);
 
-  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true }, previa.element);
+  const avisoMapa = el("p", { class: "tabla-mapa-aviso", role: "status", "aria-live": "polite" });
+  const btnMapaReintentar = el("button", {
+    type: "button", class: "btn btn-quiet btn-small", hidden: true, onclick: () => actualizarMapa(),
+  }, "Volver a intentar");
+  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true },
+    el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar), previa.element);
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
   const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, cuerpo, vacio, pie);
 
@@ -232,9 +255,6 @@ export function createTabla({
     ranuras = [];
     refrescos.clear();
     detalleAbierto = null;
-    seleccion = null;
-    pintada = null;
-    previa.pintar([]);            // drops the loaded boundary and any load in flight
     pagina = { filas: [], total: 0, facets: {}, siguiente: null };
     definiciones = [];
     cursor = null;
@@ -245,6 +265,11 @@ export function createTabla({
     bandeja.hidden = true;
     alerta.textContent = "";
     if (deVista) {
+      // The map's set, its boundary body and any gathering or load in flight
+      // belong to the view being left. Within a view, a new query or page
+      // keeps them: the set is kept or gathered again by its own key.
+      olvidarConjunto();
+      seleccion = null;
       // A detail, a history, the columns or the grants of the view being left.
       closeAllDialogs();
       columnas = columnasDe(VISTA_MAESTRA);
@@ -296,7 +321,7 @@ export function createTabla({
     if (!forzar && pedida === vista) return;
     if (vista !== null && !(await puedeSalir())) {
       selVista.value = vista ?? "";
-      onVista?.(vista);
+      onVista?.(vista, modoDeRuta());
       return;
     }
     limpiarAlcance();
@@ -310,7 +335,7 @@ export function createTabla({
     chkArchivados.checked = false;
     selOrden.value = "id";
     pintarMarco();
-    onVista?.(vista);
+    onVista?.(vista, modoDeRuta());
     if (vista) await cargar();
     else lienzo.removeAttribute("aria-busy");
   }
@@ -348,6 +373,10 @@ export function createTabla({
     // What is typed in the search box counts even if its own timer had not fired yet.
     consulta = { ...consulta, q: buscar.value };
     aplicar();
+    // A gathering for the query being left stops now, and the map never keeps
+    // the old query's rows while the new page loads.
+    if (reunion && reunion.clave !== claveConjunto()) soltarReunion();
+    pintarMapa();
     await cargar();
   }
 
@@ -432,7 +461,7 @@ export function createTabla({
     selVista.value = vista ?? "";
 
     const sinAcceso = !vista;
-    for (const nodo of [lienzo, pie, bandeja]) nodo.hidden = sinAcceso || (nodo === bandeja && !bandeja.childElementCount);
+    for (const nodo of [pie, bandeja]) nodo.hidden = sinAcceso || (nodo === bandeja && !bandeja.childElementCount);
     for (const control of [buscar, selEstado, selMunicipio, selTipo, selOrden, chkDesc, chkArchivados, selVista]) {
       control.disabled = sinAcceso;
     }
@@ -448,15 +477,15 @@ export function createTabla({
         }, "Volver a comprobar"),
       );
     }
-    pintarPermisos();
+    pintarModo();          // the grid or the map, and what may be written
   }
 
   function pintarPermisos() {
     const base = baseActual();
     const lectura = vistaSoloLectura();
-    btnAgregar.hidden = !vista || lectura;
+    btnAgregar.hidden = !vista || lectura || modo === "mapa";
     btnAgregar.disabled = creacion?.estado === "enviando";
-    btnColumnas.hidden = !vista || esGlobal(vista);
+    btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
     btnRecargar.hidden = !vista;
     aviso.hidden = !(vista && lectura);
     aviso.textContent = soloConsulta()
@@ -496,18 +525,227 @@ export function createTabla({
     if (errorDeCarga) alerta.textContent = errorDeCarga;
     pintarBandeja();
     if (tenia) enfocar(tenia.id, tenia.colId);
-    if (seleccion && !filaDe(seleccion)) seleccion = null;
+    if (seleccion && !existe(seleccion)) seleccion = null;
     marcarSeleccion();
-    pintarPrevia();
+    pintarMapa();
   }
 
   /* ------------------------------------------------ files, location, map */
 
-  /** Hand the preview the page as it is now. A page object it has not seen
-   * is a new page: its boundary body and framing start over. */
-  function pintarPrevia() {
-    previa.pintar(pagina.filas, { total: pagina.total, nuevaPagina: pintada !== pagina });
-    pintada = pagina;
+  const modoDeRuta = () => (modo === "mapa" ? "mapa" : null);
+  /** The map set's key: the view and its query (filters, order, archived), not the page. */
+  const claveConjunto = () =>
+    (vista ? `${vista}?${consultaDeLista(vista, { ...consulta, limit: PAGINA_MAPA })}` : null);
+  const conjuntoVigente = () => conjunto.clave !== null && conjunto.clave === claveConjunto();
+  const filaDelConjunto = (id) => (conjuntoVigente() ? conjunto.filas.find((t) => t.id === id) ?? null : null);
+  /** A terrain this view shows: on the grid's page or in the map's current set. */
+  const existe = (id) => Boolean(filaDe(id) || filaDelConjunto(id));
+  const CONJUNTO_VACIO = Object.freeze({
+    clave: null, filas: [], total: 0, incompleto: false, obsoleto: false, error: null, errorDe: null,
+  });
+
+  function soltarReunion() {
+    reunionGen += 1;
+    reunion?.control.abort();
+    reunion = null;
+  }
+
+  /** Drop the map's set, its boundary body and whatever is gathering or loading. */
+  function olvidarConjunto() {
+    soltarReunion();
+    conjunto = CONJUNTO_VACIO;
+    mapaPintado = null;
+    previa.pintar([]);
+    pintarAvisoMapa();
+  }
+
+  /** Show the view as its grid or as its map. The page of the grid, the query
+   * and the selection stay; the map's set is gathered only if it is missing,
+   * stale or for another query. */
+  function mostrarComo(pedido, { desdeRuta = false } = {}) {
+    const nuevo = pedido === "mapa" ? "mapa" : "tabla";
+    if (!vivo || nuevo === modo) return;
+    modo = nuevo;
+    pintarModo();
+    // The address already says it when the change came from it.
+    if (!desdeRuta) onVista?.(vista, modoDeRuta());
+    if (modo === "mapa") {
+      pintarMapa();
+      previa.mostrar();                    // Leaflet measures the map once it is visible
+      return;
+    }
+    // The grid was not revalidated while hidden: look again, keeping its page.
+    if (paginaObsoleta && vista && !sucio()) { paginaObsoleta = false; recargar(); }
+    marcarSeleccion()?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function pintarModo() {
+    const mapa = modo === "mapa";
+    for (const [boton, activo] of [[btnModoTabla, !mapa], [btnModoMapa, mapa]]) {
+      boton.classList.toggle("is-active", activo);
+      boton.setAttribute("aria-pressed", String(activo));
+    }
+    const sinAcceso = !vista;
+    selectorModo.hidden = sinAcceso;
+    lienzo.hidden = sinAcceso || mapa;
+    panelMapa.hidden = sinAcceso || !mapa;
+    cuerpo.classList.toggle("modo-mapa", mapa);
+    // The page controls belong to the grid; the map shows the whole view.
+    for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
+    pintarPermisos();
+  }
+
+  /** Hand the map the view's whole set, gathering it first when needed. Never
+   * shows another query's or another view's rows under this one. */
+  function pintarMapa() {
+    if (!vivo || modo !== "mapa") return;
+    const clave = claveConjunto();
+    if (!clave) { previa.pintar([]); pintarAvisoMapa(); return; }
+    const vigente = conjuntoVigente();
+    if (!vigente) { previa.pintar([]); mapaPintado = null; }
+    if ((!vigente || conjunto.obsoleto) && conjunto.errorDe !== clave) reunir(clave);
+    else if (vigente) entregarAlMapa();
+    pintarAvisoMapa();
+  }
+
+  function entregarAlMapa() {
+    previa.pintar(conjunto.filas, { total: conjunto.total, nuevaPagina: mapaPintado !== conjunto.clave });
+    mapaPintado = conjunto.clave;
+    if (seleccion && seleccion !== previa.seleccion && filaDelConjunto(seleccion)) previa.seleccionar(seleccion);
+  }
+
+  /**
+   * Gather every page of the view for the map, through the view's own list
+   * route (the same authorization as the grid; nothing global is fetched for
+   * an operator). One gathering at a time: a newer one, a new view or the end
+   * of the session aborts it, and an answer for another query is dropped.
+   */
+  async function reunir(clave) {
+    if (reunion?.clave === clave) return;
+    reunion?.control.abort();
+    const control = new AbortController();
+    const mia = ++reunionGen;
+    reunion = { clave, control, recibidos: 0, total: null };
+    const deVista = vista;
+    const deConsulta = { ...consulta, limit: PAGINA_MAPA };
+    pintarAvisoMapa();
+    try {
+      const r = await reunirPaginas(
+        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente), control.signal),
+        {
+          maximo: MAXIMO_MAPA,
+          onProgreso: (recibidos, total) => {
+            if (mia !== reunionGen) return;
+            reunion = { ...reunion, recibidos, total };
+            pintarAvisoMapa();
+          },
+        },
+      );
+      if (!vivo || mia !== reunionGen) return;
+      const cambiado = reunion.cambiado;
+      reunion = null;
+      if (claveConjunto() !== clave) { pintarMapa(); return; }
+      conjunto = {
+        ...CONJUNTO_VACIO, clave, filas: r.terrenos, total: r.totalServidor, incompleto: r.incompleto,
+        // This table wrote while the pages were on their way: they may predate it. Gather once more.
+        obsoleto: Boolean(cambiado),
+      };
+      if (seleccion && !existe(seleccion)) seleccion = null;
+      marcarSeleccion();
+      if (modo === "mapa") entregarAlMapa();
+      if (cambiado) pintarMapa();
+    } catch (error) {
+      if (!vivo || mia !== reunionGen || error.name === "AbortError") return;
+      reunion = null;
+      if (error.status === 404 || error.status === 403) {
+        alcancePerdido("Ya no tienes acceso a esa vista.", { permisos: error.status === 403 });
+        return;
+      }
+      // A failed refresh keeps the set it had, said to be stale. It is not
+      // retried by itself: "Volver a intentar" or "Actualizar" does.
+      conjunto = conjunto.clave === clave
+        ? { ...conjunto, error: error.message, errorDe: clave }
+        : { ...CONJUNTO_VACIO, error: error.message, errorDe: clave };
+    }
+    pintarAvisoMapa();
+  }
+
+  function pintarAvisoMapa() {
+    let texto = "";
+    let tipo = "";
+    if (reunion) {
+      tipo = "cargando";
+      texto = reunion.total != null
+        ? `Reuniendo los terrenos de esta vista para el mapa: ${fmtCount(reunion.recibidos)} de ${fmtCount(reunion.total)}…`
+        : "Reuniendo los terrenos de esta vista para el mapa…";
+    } else if (conjunto.error && conjunto.errorDe === claveConjunto()) {
+      tipo = "error";
+      texto = conjuntoVigente()
+        ? `No se pudo actualizar el mapa: muestra lo que se reunió antes${conjunto.incompleto ? ", que está incompleto" : ""}. ${conjunto.error}`
+        : `No se pudieron reunir los terrenos para el mapa. ${conjunto.error}`;
+    } else if (conjuntoVigente() && conjunto.incompleto) {
+      tipo = "aviso";
+      texto = `Mapa incompleto: muestra ${fmtCount(conjunto.filas.length)} de ${fmtCount(conjunto.total)} ` +
+        "terrenos, el máximo que se reúne a la vez. Usa los filtros para acotar la vista.";
+    } else if (conjuntoVigente() && !conjunto.filas.length) {
+      texto = "Ningún terreno coincide con esta vista y sus filtros.";
+    }
+    avisoMapa.textContent = texto;
+    avisoMapa.dataset.tipo = tipo;
+    avisoMapa.hidden = !texto;
+    btnMapaReintentar.hidden = tipo !== "error";
+  }
+
+  /** "Actualizar" on the map, or a revalidation while it is shown: gather the
+   * set again, keeping the selection if it is still there. */
+  function actualizarMapa() {
+    if (!vivo || !vista) return;
+    paginaObsoleta = true;
+    conjunto = { ...conjunto, obsoleto: true, error: null, errorDe: null };
+    pintarMapa();
+  }
+
+  /** "Actualizar" on the grid, or a revalidation while it is shown: reload its
+   * page, and gather the map's set again the next time the map is shown. */
+  function actualizarTabla() {
+    if (conjunto.clave) conjunto = { ...conjunto, obsoleto: true };
+    return recargar();
+  }
+
+  /** Whether a row, as it is now, still belongs in this view's list. */
+  function fueraDeLaVista(fila) {
+    const deOtraBase = vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
+    return deOtraBase || Boolean(fila.archived_at && !consulta.incluirArchivados);
+  }
+
+  /* This table's own writes keep the map's set current without gathering it
+   * again. A set kept for another query (the filters moved since) cannot be
+   * patched, so it is marked stale; a set being gathered is gathered again. */
+  function anotarEscritura() {
+    if (conjunto.clave && !conjuntoVigente()) conjunto = { ...conjunto, obsoleto: true };
+    if (reunion) reunion = { ...reunion, cambiado: true };
+  }
+  function cambiarConjunto(filas, total = conjunto.total) {
+    conjunto = { ...conjunto, filas, total };
+    if (modo === "mapa") entregarAlMapa();
+    pintarAvisoMapa();
+  }
+  function reemplazarEnConjunto(terreno) {
+    anotarEscritura();
+    if (!filaDelConjunto(terreno.id)) return;
+    if (fueraDeLaVista(terreno)) { quitarDelConjunto(terreno.id); return; }
+    cambiarConjunto(conjunto.filas.map((t) => (t.id === terreno.id ? terreno : t)));
+  }
+  function quitarDelConjunto(id) {
+    anotarEscritura();
+    if (!filaDelConjunto(id)) return;
+    if (seleccion === id && !filaDe(id)) seleccion = null;
+    cambiarConjunto(conjunto.filas.filter((t) => t.id !== id), Math.max(0, conjunto.total - 1));
+  }
+  function agregarAlConjunto(terreno) {
+    anotarEscritura();
+    if (!conjuntoVigente() || filaDelConjunto(terreno.id)) return;
+    cambiarConjunto([terreno, ...conjunto.filas], conjunto.total + 1);
   }
 
   function marcarSeleccion() {
@@ -521,23 +759,14 @@ export function createTabla({
   }
 
   /** One selected terrain, by id, in the table and on the map. Choosing it on
-   * the map brings its row into view without moving the keyboard focus. */
+   * the map marks its row if it is on the grid's page; the page itself stays. */
   function seleccionar(id, { desdeMapa = false } = {}) {
-    if (!vivo || !filaDe(id)) return;
+    if (!vivo || !existe(id)) return;
     const cambio = id !== seleccion;
     seleccion = id;
     const tr = marcarSeleccion();
-    if (desdeMapa) tr?.scrollIntoView({ block: "nearest", inline: "nearest" });
-    else if (cambio && !panelMapa.hidden) previa.seleccionar(id);
-  }
-
-  function alternarMapa() {
-    panelMapa.hidden = !panelMapa.hidden;
-    btnMapa.setAttribute("aria-pressed", String(!panelMapa.hidden));
-    cuerpo.classList.toggle("con-mapa", !panelMapa.hidden);
-    if (panelMapa.hidden) return;
-    previa.mostrar();
-    if (seleccion) previa.seleccionar(seleccion);
+    if (desdeMapa) { if (modo === "tabla") tr?.scrollIntoView({ block: "nearest", inline: "nearest" }); }
+    else if (cambio && modo === "mapa") previa.seleccionar(id);
   }
 
   /** The widgets arrived after rows were drawn: mount them where the
@@ -562,7 +791,7 @@ export function createTabla({
    * flight. Only what the files and the permissions depend on is taken.
    */
   async function refrescarArchivos(id) {
-    if (!vivo || !filaDe(id)) return;
+    if (!vivo || !existe(id)) return;
     if (refrescos.has(id)) { refrescos.set(id, "repetir"); return; }
     const gen = generacion;
     try {
@@ -594,6 +823,15 @@ export function createTabla({
    * change is repainted.
    */
   function aplicarArchivos(terreno) {
+    // The map's set takes the same fields under the same rule, whether or not
+    // the terrain is on the grid's page.
+    const enMapa = filaDelConjunto(terreno.id);
+    if (enMapa) {
+      reemplazarEnConjunto({
+        ...enMapa, archivos: terreno.archivos, ubicacion: terreno.ubicacion,
+        ...(terreno.version >= enMapa.version ? { archived_at: terreno.archived_at ?? null, base_id: terreno.base_id ?? null } : {}),
+      });
+    }
     const actual = filaDe(terreno.id);
     if (!actual) return;
     const vigente = terreno.version >= actual.version;
@@ -625,7 +863,6 @@ export function createTabla({
       }
     }
     permisosDelDetalle(fila);
-    pintarPrevia();
   }
 
   /** The open detail, if it is this terrain's, learns what may be changed now. */
@@ -931,24 +1168,25 @@ export function createTabla({
   }
 
   function reemplazar(terreno) {
+    reemplazarEnConjunto(terreno);
     const i = pagina.filas.findIndex((t) => t.id === terreno.id);
     if (i < 0) return;
     pagina.filas = pagina.filas.map((t, n) => (n === i ? terreno : t));
     pintarFila(terreno.id);
     pintarBandeja();
     permisosDelDetalle(terreno);
-    pintarPrevia();
   }
 
   function quitarFila(id) {
     closeAllDialogs();   // its detail, history or transfer may be open
     for (const k of [...celdas.keys()]) if (k.startsWith(`${id}|`)) celdas.delete(k);
+    const enPagina = Boolean(filaDe(id));
     pagina.filas = pagina.filas.filter((t) => t.id !== id);
-    pagina.total = Math.max(0, pagina.total - 1);
+    if (enPagina) pagina.total = Math.max(0, pagina.total - 1);
+    quitarDelConjunto(id);
     if (seleccion === id) seleccion = null;
     pintarFila(id);
     pintarBandeja();
-    pintarPrevia();
   }
 
   function fallo(error, id, col, enviado) {
@@ -1094,6 +1332,7 @@ export function createTabla({
         pagina.filas = [terreno, ...pagina.filas].slice(0, consulta.limit);   // the page stays bounded
         pagina.total += 1;
       }
+      agregarAlConjunto(terreno);
       pintarTodo();
       enfocar(terreno.id, columnas[1].id);
       decir("Terreno en blanco agregado. Está al principio de esta página.");
@@ -1205,7 +1444,11 @@ export function createTabla({
   // Opt-in hook for browser checks (only with ?test=1, as in app.js): what
   // the preview holds and where a terrain is drawn. Never in normal use.
   if (new URLSearchParams(location.search).has("test")) {
-    window.__araTabla = { previa: () => previa.estado, posicion: (id) => previa.posicionDe(id) };
+    window.__araTabla = {
+      previa: () => previa.estado, posicion: (id) => previa.posicionDe(id),
+      mapa: () => ({ modo, clave: conjunto.clave, filas: conjunto.filas.map((t) => t.id), total: conjunto.total,
+        incompleto: conjunto.incompleto, reuniendo: Boolean(reunion), seleccion }),
+    };
   }
 
   /* ------------------------------------------------------------ lifecycle */
@@ -1223,8 +1466,17 @@ export function createTabla({
       if (editando) aplicarPermisos();     // an open editor is not rebuilt under the person
       else { pintarTodo(); const t = detalleAbierto && filaDe(detalleAbierto.terrenoId); if (t) permisosDelDetalle(t); }
     },
-    /** Look again when the window regains attention, unless work is open. */
-    revalidar() { if (vivo && vista && !sucio() && !editando && !document.querySelector("dialog[open]")) recargar(); },
+    /** Look again when the window regains attention, unless work is open. The
+     * map gathers its set again; the hidden grid waits until it is shown. */
+    revalidar() {
+      if (!vivo || !vista || sucio() || editando || document.querySelector("dialog[open]")) return;
+      if (modo === "mapa") actualizarMapa();
+      else actualizarTabla();
+    },
+    get modo() { return modo; },
+    mostrarComo,
+    /** The shell put the table back on screen: the map measures its area again. */
+    alMostrar() { if (vivo && modo === "mapa") previa.mostrar(); },
     /** The account is leaving (logout, expiry, another user): forget it all. */
     destroy() {
       vivo = false;

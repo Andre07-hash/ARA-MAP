@@ -147,6 +147,19 @@ test("facets come from the server's first page, for the whole candidate set", as
   assert.equal(opciones.estados[0].conteo, null);   // names only: no invented counts
 });
 
+test("a complete assembly says so; a capped one stops at whole pages and says it is partial", async () => {
+  const items = publicTerrains(251);
+  const { resultado } = await reunir(items, 100);
+  assert.equal(resultado.incompleto, false);
+  const pedidas = [];
+  const parcial = await reunirPaginas(async (cursor) => { pedidas.push(cursor); return paginate(items, { limit: 100, cursor }); },
+    { maximo: 150 });
+  assert.equal(pedidas.length, 2);                 // stops once the cap is reached, never asks for the third page
+  assert.equal(parcial.terrenos.length, 200);
+  assert.equal(parcial.totalServidor, 251);
+  assert.equal(parcial.incompleto, true);
+});
+
 test("a server that repeats a cursor is reported, not looped on", async () => {
   await assert.rejects(
     reunirPaginas(async () => ({ terrenos: [{ id: "a" }], total: 9, next_cursor: "a" })),

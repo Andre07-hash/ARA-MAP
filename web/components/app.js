@@ -58,9 +58,10 @@ import { clearToasts, toast, toastError } from "./ui/toast.js";
 /* Operators get the table of their work bases and the public catalog. The
  * unscoped inventory and the legacy workspace are the administrators'. */
 const NAV_OPERADOR = [["tabla", "Tabla"], ["catalogo", "Catálogo público"]];
+/* "Inventario" left the menu: its map is the master table's "Mapa" view now.
+ * Its old addresses still work (see aplicarRuta). */
 const NAV_EQUIPO = [
   ["tabla", "Tabla maestra"],
-  ["inventario", "Inventario"],
   ["mapa", "Mapa"],
   ["bases", "Bases"],
   ["mapas", "Mapas guardados"],
@@ -274,6 +275,13 @@ async function aplicarRuta() {
     editor = null;
   }
 
+  // The old inventory list is the master table's map now; a terrain's or the
+  // editor's inventory address keeps working for administrators.
+  if (sesion && ruta.nombre === "inventario" && !ruta.id) {
+    navigate({ nombre: "tabla", id: "maestra", modo: "mapa" }, { replace: true });
+    return;
+  }
+
   if (isPrivateRoute(ruta) && !sesion) {
     // A private link opened without a session: offer sign-in, show nothing private.
     setState({ ruta: defaultRoute(false) });
@@ -309,13 +317,14 @@ function efectosDeRuta(ruta) {
 function abrirTabla(ruta) {
   const { sesion } = getState();
   if (!sesion) return;
-  if (tabla) { tabla.abrir(ruta.id); return; }
+  if (tabla) { tabla.mostrarComo(ruta.modo, { desdeRuta: true }); tabla.abrir(ruta.id); return; }
   tablaDe = `${sesion.id}|${sesion.rol}`;
   tabla = createTabla({
-    sesion, soloConsulta: () => readOnly, vistaInicial: ruta.id,
-    // The table says which view it ended up showing; the address follows it.
-    onVista: (vista) => {
-      if (getState().ruta.nombre === "tabla") navigate({ nombre: "tabla", id: vista }, { replace: true });
+    sesion, soloConsulta: () => readOnly, vistaInicial: ruta.id, modoInicial: ruta.modo,
+    // The table says which view and which presentation (table or map) it
+    // ended up showing; the address follows it.
+    onVista: (vista, modo) => {
+      if (getState().ruta.nombre === "tabla") navigate({ nombre: "tabla", id: vista, modo }, { replace: true });
     },
     // A write was refused for lack of permission while reading still works:
     // ask again who this is and whether the application is read-only. A
@@ -339,7 +348,7 @@ function abrirTabla(ruta) {
 
 function renderTabla(host) {
   if (tabla) {
-    if (tabla.element.parentNode !== host) clear(host).append(tabla.element);
+    if (tabla.element.parentNode !== host) { clear(host).append(tabla.element); tabla.alMostrar(); }
     return;
   }
   clear(host).append(el("div", { class: "screen" }, el("p", { class: "secondary", role: "status" }, "Cargando…")));
@@ -407,8 +416,8 @@ function renderEditor(host) {
     el("div", { class: "empty-state" },
       el("h2", {}, editorEstado?.error ? "No se pudo abrir el terreno" : "Cargando el terreno…"),
       editorEstado?.error && el("p", { class: "secondary" }, editorEstado.error),
-      editorEstado?.error && el("a", { class: "btn btn-quiet", href: routeHash({ nombre: "inventario" }) },
-        "Volver al inventario"),
+      editorEstado?.error && el("a", { class: "btn btn-quiet", href: routeHash({ nombre: "tabla", id: "maestra" }) },
+        "Volver a la tabla maestra"),
     )));
 }
 
@@ -419,7 +428,8 @@ let headerClave = null;
 function renderHeader(host) {
   const { ruta, sesion, sesionLista, baseActiva, mapaActivo } = getState();
   const admin = sesion?.rol === "admin";
-  const activa = ruta.nombre === "editar" || ruta.nombre === "nuevo" ? "inventario" : ruta.nombre;
+  // The inventory's remaining addresses (a terrain, the editor) belong to the master table now.
+  const activa = ["editar", "nuevo", "inventario"].includes(ruta.nombre) ? "tabla" : ruta.nombre;
   const legacyAbierto = Boolean(baseActiva || mapaActivo);
   // Rebuilding the header on every keystroke is wasted work and a focus hazard
   // for anything inside it, so it is rebuilt only when what it shows changes.

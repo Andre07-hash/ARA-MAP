@@ -22,13 +22,13 @@ test("every route round-trips through its hash", () => {
   }
 });
 
-test("only the catalog is public; anonymous lands on it, signed-in on the inventory", () => {
+test("only the catalog is public; anonymous lands on it, signed-in on the table", () => {
   assert.equal(isPrivateRoute({ nombre: "catalogo" }), false);
   for (const nombre of ["inventario", "editar", "nuevo", "bases", "mapas", "mapa"]) {
     assert.equal(isPrivateRoute({ nombre }), true, nombre);
   }
   assert.equal(defaultRoute(false).nombre, "catalogo");
-  assert.equal(defaultRoute(true).nombre, "inventario");
+  assert.equal(defaultRoute(true).nombre, "tabla");
 });
 
 test("unknown or malformed hashes are not routes", () => {

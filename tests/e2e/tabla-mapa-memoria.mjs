@@ -8,6 +8,12 @@
  * Team B's real file widgets. It reports whether the numbers level off and
  * how many bodies are held at rest. Not a leak hunt and not a capacity claim.
  *
+ * NOT ADAPTED to Tabla / Mapa (2026-10-13): it drives the former "Mapa de esta
+ * página" side panel, which no longer exists, and pages the grid while the map
+ * is open. Its evidence stays as recorded for that design. For the current
+ * design, tabla-mapa.mjs checks repeated switching, one body at most and no
+ * piled-up maps at the pilot's volume.
+ *
  *   python3 tests/e2e/tabla_servidor.py --puerto 8434 --registros 25000     # terminal 1
  *   ARA_URL=http://localhost:8434 node tests/e2e/tabla-mapa-memoria.mjs [salida.json]
  */

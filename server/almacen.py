@@ -603,6 +603,7 @@ def _fsync_directorio(directorio: int) -> None:
 # ---------------------------------------------------------------- fake backend
 
 _OPERACIONES_CON_FALLA = ("guardar_temporal", "copiar", "leer")
+_OPERACIONES = _OPERACIONES_CON_FALLA + ("tamano_de", "borrar", "listar")
 
 
 class _LecturaMemoria(Lectura):
@@ -649,8 +650,30 @@ class AlmacenEnMemoria:
         self._objetos: dict[str, tuple[bytes, float]] = {}
         self._candado = threading.Lock()
         self._fallas: dict[str, list[int]] = {op: [] for op in _OPERACIONES_CON_FALLA}
+        self._errores: dict[str, list[AlmacenError]] = {}
+        self._incierto = 0
 
     # -- test surface
+
+    def inyectar_error(self, operacion: str, error: AlmacenError) -> None:
+        """Make the next call of `operacion` raise exactly `error`, before any effect."""
+        if operacion not in _OPERACIONES:
+            raise ValueError(f"no error injection for {operacion!r}")
+        with self._candado:
+            self._errores.setdefault(operacion, []).append(error)
+
+    def inyectar_incierto(self) -> None:
+        """Make the next copiar WRITE its object and then raise ResultadoInciertoError,
+        as a provider whose answer was lost would."""
+        with self._candado:
+            self._incierto += 1
+
+    def _tomar_error(self, operacion: str) -> None:
+        with self._candado:
+            cola = self._errores.get(operacion)
+            error = cola.pop(0) if cola else None
+        if error is not None:
+            raise error
 
     def inyectar_falla(self, operacion: str, tras_bloques: int = 0) -> None:
         """Make the next call of `operacion` raise FalloAlmacenError.
@@ -681,6 +704,7 @@ class AlmacenEnMemoria:
         partes_de_clave(clave, TEMPORAL)
         _validar_limite(limite)
         bloques = _bloques_validos(bloques)
+        self._tomar_error("guardar_temporal")
         falla = self._tomar_falla("guardar_temporal")
         recibidos: list[bytes] = []
         total = 0
@@ -702,6 +726,7 @@ class AlmacenEnMemoria:
         partes_de_clave(origen, TEMPORAL)
         partes_de_clave(destino, FINAL)
         _validar_limite(limite)
+        self._tomar_error("copiar")
         falla = self._tomar_falla("copiar")
         with self._candado:
             if origen not in self._objetos:
@@ -714,12 +739,17 @@ class AlmacenEnMemoria:
             if falla is not None:
                 raise FalloAlmacenError()
             self._objetos[destino] = (datos, time.time())
+            incierto = self._incierto > 0
+            self._incierto -= incierto
+        if incierto:
+            raise ResultadoInciertoError()
         return len(datos)
 
     def leer(self, clave: str, limite: int, bloque: int = BLOQUE_LECTURA) -> Lectura:
         partes_de_clave(clave)
         _validar_limite(limite)
         _validar_tamano_bloque(bloque)
+        self._tomar_error("leer")
         falla = self._tomar_falla("leer")
         with self._candado:
             if clave not in self._objetos:
@@ -731,17 +761,20 @@ class AlmacenEnMemoria:
 
     def tamano_de(self, clave: str) -> int | None:
         partes_de_clave(clave)
+        self._tomar_error("tamano_de")
         with self._candado:
             objeto = self._objetos.get(clave)
         return None if objeto is None else len(objeto[0])
 
     def borrar(self, clave: str) -> bool:
         partes_de_clave(clave)
+        self._tomar_error("borrar")
         with self._candado:
             return self._objetos.pop(clave, None) is not None
 
     def listar(self, prefijo: str) -> Iterator[Metadato]:
         partes = _partes_de_prefijo(prefijo)
+        self._tomar_error("listar")
         return self._listar(prefijo, partes)
 
     def _listar(self, prefijo: str, partes: tuple[str, ...]) -> Iterator[Metadato]:

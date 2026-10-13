@@ -19,12 +19,21 @@ from __future__ import annotations
 import re
 import threading
 import unicodedata
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Iterator
 from typing import Any
 from urllib.parse import quote
 
 from .. import archivos
-from ..almacen import MAX_BLOQUE, Almacen, AlmacenLocal
+from ..almacen import (
+    BLOQUE_LECTURA,
+    MAX_BLOQUE,
+    Almacen,
+    AlmacenLocal,
+    AlmacenNoConfiguradoError,
+    Bloque,
+    Lectura,
+    Metadato,
+)
 from ..router import Request
 from ..web_util import ApiError, parse_json
 from .binario import RespuestaBinaria
@@ -70,10 +79,41 @@ def _almacen_actual() -> Almacen:
     with _candado:
         if _almacen is None:
             if _fabrica is None:
-                raise ApiError("El almacenamiento de archivos no está configurado.", 503,
-                               {"code": "almacen_no_configurado"})
+                raise AlmacenNoConfiguradoError()
             _almacen = _fabrica()
         return _almacen
+
+
+class _AlmacenDiferido:
+    """The configured store, resolved at first use instead of per request.
+
+    Handlers hand this to the service, which authorizes the session, the
+    capability, the current scope and the pending owner before its first
+    store call. A missing or unbuildable store therefore surfaces after
+    authorization, as the service's safe storage 503, and never replaces a
+    401/403/404. It holds no state: one instance serves every request.
+    """
+
+    def guardar_temporal(self, clave: str, bloques: Iterable[Bloque], limite: int) -> int:
+        return _almacen_actual().guardar_temporal(clave, bloques, limite)
+
+    def copiar(self, origen: str, destino: str, limite: int) -> int:
+        return _almacen_actual().copiar(origen, destino, limite)
+
+    def leer(self, clave: str, limite: int, bloque: int = BLOQUE_LECTURA) -> Lectura:
+        return _almacen_actual().leer(clave, limite, bloque)
+
+    def tamano_de(self, clave: str) -> int | None:
+        return _almacen_actual().tamano_de(clave)
+
+    def borrar(self, clave: str) -> bool:
+        return _almacen_actual().borrar(clave)
+
+    def listar(self, prefijo: str) -> Iterator[Metadato]:
+        return _almacen_actual().listar(prefijo)
+
+
+_DIFERIDO: Almacen = _AlmacenDiferido()
 
 
 # -- request parsing -------------------------------------------------------------
@@ -152,7 +192,8 @@ def iniciar(request: Request) -> Respuesta:
         request.sesion, _parametro(request, "id"), tipo=_campo(datos, "tipo"),
         nombre_original=_campo(datos, "nombre_original"),
         tamano_declarado=_campo(datos, "tamano_declarado"),
-        sha256_declarado=_campo(datos, "sha256_declarado"), idempotency_key=_clave(request))
+        sha256_declarado=_campo(datos, "sha256_declarado"), idempotency_key=_clave(request),
+        almacen_configurado=_fabrica is not None)
 
 
 def listar(request: Request) -> Respuesta:
@@ -175,15 +216,15 @@ def contenido(request: Request) -> Respuesta:
     vista = memoryview(request.body)
     bloques = (vista[i:i + MAX_BLOQUE] for i in range(0, len(vista), MAX_BLOQUE))
     return archivos.escribir_temporal(request.sesion, _parametro(request, "vid"), bloques,
-                                      _almacen_actual())
+                                      _DIFERIDO)
 
 
 def completar(request: Request) -> Respuesta:
-    return archivos.completar(request.sesion, _parametro(request, "vid"), _almacen_actual())
+    return archivos.completar(request.sesion, _parametro(request, "vid"), _DIFERIDO)
 
 
 def cancelar(request: Request) -> Respuesta:
-    return archivos.cancelar(request.sesion, _parametro(request, "vid"), _almacen_actual())
+    return archivos.cancelar(request.sesion, _parametro(request, "vid"), _DIFERIDO)
 
 
 def procesar(request: Request) -> Respuesta:
@@ -193,7 +234,7 @@ def procesar(request: Request) -> Respuesta:
             isinstance(i, int) and not isinstance(i, bool) for i in seleccion)):
         raise ApiError("La selección debe ser una lista de índices.", 400,
                        {"code": "seleccion_invalida"})
-    return archivos.reprocesar(request.sesion, _parametro(request, "vid"), _almacen_actual(),
+    return archivos.reprocesar(request.sesion, _parametro(request, "vid"), _DIFERIDO,
                                seleccion=seleccion, idempotency_key=_clave(request))
 
 
@@ -209,7 +250,7 @@ def retirar(request: Request) -> Respuesta:
     datos = _cuerpo(request)
     return archivos.retirar(request.sesion, _parametro(request, "aid"),
                             expected_revision=_campo(datos, "expected_revision"),
-                            idempotency_key=_clave(request), almacen=_almacen_actual())
+                            idempotency_key=_clave(request), almacen=_DIFERIDO)
 
 
 # -- reads -------------------------------------------------------------------------
@@ -235,7 +276,7 @@ def intento(request: Request) -> Respuesta:
 
 def descarga(request: Request) -> RespuestaBinaria:
     """The finalized version's exact bytes, as a download (never inline)."""
-    r = archivos.descargar(request.sesion, _parametro(request, "vid"), _almacen_actual())
+    r = archivos.descargar(request.sesion, _parametro(request, "vid"), _DIFERIDO)
     return RespuestaBinaria(r["contenido"], r["tipo_contenido"], {
         "Content-Disposition": disposicion(r["nombre_original"], r["tipo"]),
         "Cache-Control": _SIN_CACHE, "Content-Security-Policy": _AISLADO,

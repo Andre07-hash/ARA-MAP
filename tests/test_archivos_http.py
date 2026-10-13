@@ -1015,11 +1015,64 @@ class HTTPChecks:
         self.assertEqual(cuerpo, PDF)
 
     def test_store_not_configured_is_controlled(self):
+        s, inicio = self.iniciar(PDF, login="olga")
+        self.assertEqual(s, 200, inicio)
+        vid = inicio["version_id"]
+        con_almacen = {login: self.subir(vid, PDF, login) for login in ("omar", "ana")}
         api.configurar_almacen(None)
-        s, inicio = self.iniciar(PDF)
-        s, r = self.subir(inicio["version_id"], PDF)
+        s, r = self.subir(vid, PDF, "olga")
         self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        s, r = self.completar(vid, "olga")
+        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual(self.filas("archivo_version")[0]["estado"], "subiendo")
+        # Authorization still answers first: no scope (omar) and not the owner (ana).
+        for login, antes in con_almacen.items():
+            self.assertEqual(self.subir(vid, PDF, login), antes, login)
+            self.assertNotEqual(antes[0], 503)
+        s, _ = self.c.json("PUT", f"/api/archivos/versiones/{vid}/contenido", cuerpo=PDF,
+                           cabeceras={"Content-Type": "application/pdf"})
+        self.assertEqual(s, 401)
+        # No new pending version without a store; an earlier start still replays.
+        s, r = self.iniciar(PDF, login="olga")
+        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual(len(self.filas("archivo_version")), 1)
+        s, r = self.iniciar(PDF, login="omar")
+        self.assertNotEqual(s, 503)
+        # Routes that need no bytes keep working.
+        s, r = self.j("GET", f"/api/inventario/terrenos/{self.terreno}/archivos", "olga")
+        self.assertEqual(s, 200, r)
+        s, r = self.j("POST", "/api/archivos/geometrias/metadatos", "olga", {"ids": [str(uuid.uuid4())]})
+        self.assertEqual(s, 200, r)
+        s, r = self.j("POST", f"/api/archivos/versiones/{vid}/cancelar", "olga")
+        self.assertEqual((s, r["estado"], r["limpieza_pendiente"]), (200, "cancelado", True))
+
+    def test_store_is_built_only_after_authorization_and_build_failure_is_a_503(self):
+        from server.almacen import AlmacenNoConfiguradoError, FalloAlmacenError
+        s, inicio = self.iniciar(PDF, login="olga")
+        vid = inicio["version_id"]
+        construcciones = []
+
+        def fabrica():
+            construcciones.append(1)
+            raise AlmacenNoConfiguradoError()       # e.g. the SDK is not installed
+
+        api.configurar_almacen(fabrica)
+        self.assertEqual(self.subir(vid, PDF, "omar")[0], 404)
+        self.c.json("PUT", f"/api/archivos/versiones/{vid}/contenido", cuerpo=PDF,
+                    cabeceras={"Content-Type": "application/pdf"})
+        self.j("GET", f"/api/inventario/terrenos/{self.terreno}/archivos", "olga")
+        self.assertEqual(construcciones, [])        # nobody authorized needed bytes yet
+        s, r = self.subir(vid, PDF, "olga")
+        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual(construcciones, [1])
+        # A provider that rejects the server credential is a storage 503, not a 401/403.
         api.configurar_almacen(lambda: self.store)
+        self.store.inyectar_error("guardar_temporal", FalloAlmacenError(
+            reintentar=False, proveedor="403/Unauthorized"))
+        s, r = self.subir(vid, PDF, "olga")
+        self.assertEqual((s, r["detalle"]), (503, {"code": "almacen_no_disponible",
+                                                   "reintentar": False}))
+        self.assertEqual(self.subir(vid, PDF, "olga")[0], 200)
 
     def test_cross_resource_ids_retry_deadline_and_busy_lease(self):
         uno, r1 = self.archivo_completo(kmz("ambiguo_tres_lotes"), "kmz")

@@ -121,11 +121,12 @@ class Montaje(TempDatabase):
         s, inicio = self.j("POST", f"/api/inventario/terrenos/{self.terreno}/archivos", "olga",
                            {"tipo": "pdf", "nombre_original": "a.pdf", "tamano_declarado": len(PDF),
                             "sha256_declarado": hashlib.sha256(PDF).hexdigest()}, str(uuid.uuid4()))
-        self.assertEqual(s, 200, inicio)
-        s, r = self.c.json("PUT", f"/api/archivos/versiones/{inicio['version_id']}/contenido",
+        # F0: without a store no pending version is created (after authorization).
+        self.assertEqual((s, inicio["detalle"]["code"]), (503, "almacen_no_configurado"))
+        s, r = self.c.json("PUT", f"/api/archivos/versiones/{uuid.uuid4()}/contenido",
                            cookie=self.cookies["olga"], cuerpo=PDF,
                            cabeceras={"Content-Type": "application/pdf"})
-        self.assertEqual((s, r["detalle"]["code"]), (503, "almacen_no_configurado"))
+        self.assertEqual(s, 404, r)         # an unknown version is still just not found
 
     # -- binary answers ----------------------------------------------------------------
 

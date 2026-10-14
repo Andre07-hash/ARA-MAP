@@ -122,6 +122,7 @@ export function createTabla({
   let enLote = false;             // a bulk action is running
   let detalleAbierto = null;      // the open record detail, for file refreshes
   let modo = modoInicial === "mapa" ? "mapa" : "tabla";
+  let aperturas = 0;              // abrir() calls; only the latest may set the view
   // The map's set: every terrain of the view for one query (`clave`).
   let conjunto = { clave: null, filas: [], total: 0, incompleto: false, obsoleto: false, error: null };
   let reunion = null;             // { clave, control } while the set is being gathered
@@ -386,7 +387,9 @@ export function createTabla({
   async function abrir(pedida, { forzar = false } = {}) {
     if (!vivo) return;
     if (!forzar && pedida === vista) return;
+    const mia = ++aperturas;
     if (vista !== null && !(await puedeSalir({ deVista: true }))) {
+      if (mia !== aperturas) return;
       selVista.value = vista ?? "";
       onVista?.(vista, modoDeRuta());
       return;
@@ -394,7 +397,9 @@ export function createTabla({
     limpiarAlcance();
     lienzo.setAttribute("aria-busy", "true");
     if (!basesListas) await cargarBases();
-    if (!vivo) return;
+    // A later opening (another view asked for while the bases loaded) wins:
+    // this one must not put its view, or its address, back over that one.
+    if (!vivo || mia !== aperturas) return;
     vista = vistaValida(pedida) ? pedida : vistaPorDefecto();
     consulta = { ...CONSULTA_VACIA, limit: consulta.limit };
     buscar.value = "";

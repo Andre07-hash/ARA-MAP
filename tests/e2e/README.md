@@ -68,6 +68,21 @@ cd tests/e2e && npm ci
 node tabla-mapa-paneles.mjs                 # MAPA_CAPTURAS=carpeta para capturas
 ```
 
+## Subidas PDF ante recargas de la tabla
+
+Una subida de PDF no se interrumpe al recuperar foco o visibilidad, con una
+recarga que ya estaba en vuelo, al crear otra fila, con Actualizar, filtros o
+páginas; cambiar de vista, cerrar el detalle (botón, Escape o fondo) y cerrar
+sesión preguntan antes. Reintentar, cancelar, sesión terminada y otra cuenta,
+descarga con los mismos bytes y estados de subidas vencidas con y sin un PDF
+guardado. Retiene peticiones con `page.route` para controlar el momento.
+Levanta y borra su propio servidor desechable con datos ficticios.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-subidas.mjs                      # SUBIDAS_CAPTURAS=carpeta para capturas
+```
+
 ## Elegir PDF/KMZ desde las celdas de la tabla
 
 Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:

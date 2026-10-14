@@ -30,6 +30,15 @@
  * table's own writes. "Actualizar" gathers it again. Leaving the view, the
  * account or the scope drops it with any gathering in flight.
  *
+ * Uploads in progress (issue #39). A repaint or reload of the same view
+ * (focus revalidation, Actualizar, a filter, a page, a new row, a late
+ * answer of a request already in flight) never destroys a file mount whose
+ * upload is unfinished: it is set aside and put back in its terrain's new
+ * row. A mount whose terrain is no longer drawn keeps running detached while
+ * its upload is being sent or verified, and is released once it stops (an
+ * unfinished version stays on the server, to continue from the detail).
+ * Leaving the view, or the session, asks first; losing the scope does not.
+ *
  * The map screen (mapaPaneles.js) adds its own filters, a price legend and a
  * read-only record on top of that set. Its filters are not this table's
  * query: they narrow what the map draws, never the grid, its page or its
@@ -94,6 +103,9 @@ export function createTabla({
   const enVuelo = new Set();
   const cola = crearCola();
   let ranuras = [];
+  const apartadas = new Map();    // "id|tipo" -> a busy file mount whose row is being repainted
+  const porPintar = new Set();    // keys set aside since the last paint: theirs is not decided yet
+  let vigiaApartadas = null;
   let seleccion = null;           // terrain id shared with the map preview
   let detalleAbierto = null;      // the open record detail, for file refreshes
   let modo = modoInicial === "mapa" ? "mapa" : "tabla";
@@ -191,9 +203,10 @@ export function createTabla({
   const btnSiguiente = el("button", { type: "button", class: "btn btn-quiet", onclick: () => paginar(1) }, "Siguiente");
   const estado = el("span", { class: "tabla-estado", role: "status", "aria-live": "polite" });
   const alerta = el("span", { class: "tabla-alerta", role: "alert" });
+  const avisoSubidas = el("span", { class: "tabla-subidas", role: "status", hidden: true });
   const campoLimite = campoDe(selLimite, "Filas por página");
   const pie = el("div", { class: "tabla-pie" }, cuenta, campoLimite,
-    btnAnterior, btnSiguiente, estado, alerta);
+    btnAnterior, btnSiguiente, estado, avisoSubidas, alerta);
 
   const avisoMapa = el("p", { class: "tabla-mapa-aviso", role: "status", "aria-live": "polite" });
   const btnMapaReintentar = el("button", {
@@ -253,8 +266,8 @@ export function createTabla({
     cola.olvidar();
     enVuelo.clear();
     nuevos = new Set();
-    for (const r of ranuras) r.destroy();
-    ranuras = [];
+    // Within the view a busy upload outlives the repaint; leaving the view ends it.
+    if (deVista) soltarRanuras(); else apartarRanuras();
     refrescos.clear();
     detalleAbierto = null;
     pagina = { filas: [], total: 0, facets: {}, siguiente: null };
@@ -283,19 +296,30 @@ export function createTabla({
     }
   }
 
-  /** Let saves in flight finish, then ask before discarding what is unsaved. */
-  async function puedeSalir() {
+  /** Let saves in flight finish, then ask before discarding what is unsaved.
+   * Leaving the view (`deVista`) also asks before interrupting an upload. */
+  async function puedeSalir({ deVista = false } = {}) {
     if (editando) confirmar();
     if (enVuelo.size) {
       decir("Terminando de guardar…");
       await Promise.allSettled([...enVuelo]);
     }
     if (!vivo) return false;
-    if (!sinResolver()) return true;
-    return confirmDialog({
+    if (sinResolver() && !(await confirmDialog({
       titulo: "¿Descartar cambios sin guardar?",
       mensaje: "Hay celdas con cambios que no se guardaron. Si continúas, se pierden.",
       confirmar: "Descartar", peligro: true,
+    }))) return false;
+    if (!deVista || !vivo) return vivo;
+    const n = archivos.pendientes();
+    if (!n) return true;
+    return confirmDialog({
+      titulo: "¿Interrumpir la subida de archivos?",
+      mensaje: `${n === 1 ? "Hay una subida de archivo sin terminar" : `Hay ${n} subidas de archivos sin terminar`} ` +
+        "en esta vista. Si cambias de vista ahora, se interrumpe: los archivos ya guardados se conservan, y una " +
+        "subida sin terminar puede continuarse desde el detalle del terreno eligiendo otra vez el mismo archivo. " +
+        "Para no interrumpirla, quédate en esta vista hasta que diga «Listo».",
+      confirmar: "Interrumpir y cambiar de vista", cancelar: "Seguir en esta vista", peligro: true,
     });
   }
 
@@ -322,7 +346,7 @@ export function createTabla({
   async function abrir(pedida, { forzar = false } = {}) {
     if (!vivo) return;
     if (!forzar && pedida === vista) return;
-    if (vista !== null && !(await puedeSalir())) {
+    if (vista !== null && !(await puedeSalir({ deVista: true }))) {
       selVista.value = vista ?? "";
       onVista?.(vista, modoDeRuta());
       return;
@@ -505,8 +529,7 @@ export function createTabla({
 
   function pintarTodo() {
     const tenia = tbody.contains(document.activeElement) && !editando ? foco : null;
-    for (const r of ranuras) r.destroy();
-    ranuras = [];
+    apartarRanuras();
     pintarMarco();
     facetas(selEstado, pagina.facets.estados, consulta.estado, "Todos");
     facetas(selMunicipio, pagina.facets.municipios, consulta.municipio, "Todos");
@@ -519,6 +542,7 @@ export function createTabla({
       }, c.etiqueta, c.custom && el("span", { class: "tabla-th-tipo" }, ` · ${c.tipo}`))),
     ));
     tbody.replaceChildren(...pagina.filas.map((t, i) => Fila(t, i)));
+    vigilarApartadas();          // what was not put back runs detached until it stops
 
     pintarCuenta();
     btnAnterior.disabled = !anteriores.length;
@@ -816,8 +840,7 @@ export function createTabla({
   /** The widgets arrived after rows were drawn: mount them where the
    * placeholders are. Only file cells are touched. */
   function remontarRanuras() {
-    for (const r of ranuras) r.destroy();
-    ranuras = [];
+    apartarRanuras();
     for (const t of pagina.filas) {
       const tr = tbody.querySelector(`tr[data-id="${CSS.escape(t.id)}"]`);
       for (const c of columnas) {
@@ -825,6 +848,71 @@ export function createTabla({
         tr.querySelector(`td[data-col="${CSS.escape(c.id)}"]`)?.replaceWith(Celda(t, c, filaEditable(t)));
       }
     }
+    vigilarApartadas();
+  }
+
+  /* ---------------------------------------------------- busy file mounts */
+
+  const claveRanura = (id, tipo) => `${id}|${tipo}`;
+
+  /** Before a repaint: keep the mounts whose upload is unfinished, end the rest. */
+  function apartarRanuras() {
+    for (const r of ranuras) {
+      if (r.ocupado?.()) {
+        apartadas.set(claveRanura(r.terrenoId, r.tipo), r);
+        porPintar.add(claveRanura(r.terrenoId, r.tipo));
+      } else r.destroy();
+    }
+    ranuras = [];
+  }
+
+  /** Leaving the view or the scope: every mount ends, busy or not. */
+  function soltarRanuras() {
+    for (const r of ranuras) r.destroy();
+    ranuras = [];
+    for (const r of apartadas.values()) r.destroy();
+    apartadas.clear();
+    porPintar.clear();
+    clearInterval(vigiaApartadas);
+    vigiaApartadas = null;
+    pintarApartadas();
+  }
+
+  /** A set-aside mount for this cell, put back in the new row. */
+  function recuperarRanura(t, c, editable) {
+    const r = apartadas.get(claveRanura(t.id, c.archivo));
+    if (!r) return null;
+    apartadas.delete(claveRanura(t.id, c.archivo));
+    porPintar.delete(claveRanura(t.id, c.archivo));
+    r.update({ soloLectura: !editable, resumen: t.archivos ?? undefined });
+    ranuras.push(r);
+    return r.container;
+  }
+
+  /* Mounts left out of the new rows (their terrain is on another page or out
+   * of the filters) keep sending while they are active; once they stop they
+   * are released, and the server keeps the unfinished version. Called after a
+   * paint: what that paint did not put back is decided now. A mount set aside
+   * by a reload still on its way waits for that paint (porPintar). */
+  function vigilarApartadas() {
+    porPintar.clear();
+    const revisar = () => {
+      for (const [k, r] of apartadas) {
+        if (!porPintar.has(k) && !r.activo?.()) { r.destroy(); apartadas.delete(k); }
+      }
+      if (!apartadas.size) { clearInterval(vigiaApartadas); vigiaApartadas = null; }
+      pintarApartadas();
+    };
+    revisar();
+    if (apartadas.size && !vigiaApartadas) vigiaApartadas = setInterval(() => { if (vivo) revisar(); }, 1000);
+  }
+
+  function pintarApartadas() {
+    const n = [...apartadas.keys()].filter((k) => !porPintar.has(k)).length;
+    avisoSubidas.hidden = !n;
+    avisoSubidas.textContent = n ? `${n === 1 ? "Una subida sigue" : `${n} subidas siguen`} en curso para ` +
+      `${n === 1 ? "un terreno que no está" : "terrenos que no están"} en esta página. Al terminar, su resumen ` +
+      "se actualiza cuando vuelvas a verlo." : "";
   }
 
   /**
@@ -974,6 +1062,8 @@ export function createTabla({
 
   function Celda(t, c, editable) {
     if (c.tipo === "archivo") {
+      const conservada = recuperarRanura(t, c, editable);
+      if (conservada) return conservada;
       const td = el("td", { class: "tabla-celda tabla-celda-archivo", dataset: { col: c.id } });
       ranuras.push(montarRanura({
         container: td, terrenoId: t.id, tipo: c.archivo, soloLectura: !editable,
@@ -1487,6 +1577,8 @@ export function createTabla({
   return {
     element,
     get dirty() { return sucio(); },
+    /** Unfinished uploads of this session's file widgets: logging out would stop them. */
+    get subiendo() { return archivos.pendientes(); },
     get vista() { return vista; },
     abrir,
     /** The application's read-only mode became known or changed. */

@@ -55,15 +55,16 @@ export function abrirDetalle({
   function pintarEstado() {
     acciones.replaceChildren(...[
       boton("Historial", () => onHistorial()),
-      admin && puedeCambiar && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
+      admin && puedeCambiar && boton("Transferir a otra base…", async () => {
+        if (await close()) onTransferir();
+      }),
       // A published terrain changes what the public sees: administrators only (the server agrees).
       puedeCambiar && (admin || !terreno.published_revision_id) && boton("Borrar terreno…", async () => {
         if (!(await confirmarBorrado({
           titulo: `¿Borrar «${terreno.draft?.terreno || "Terreno sin nombre"}»?`,
           mensaje: "Se borran el terreno, todos sus datos, su historial y sus PDF y KMZ.",
         }))) return;
-        close();
-        onBorrar();
+        if (await close()) onBorrar();
       }, "btn btn-small btn-peligro"),
     ].filter(Boolean));
   }
@@ -72,6 +73,14 @@ export function abrirDetalle({
     ancho: "38rem",
     contenido: el("div", {}, datos, acciones),
     acciones: [cerrar],
+    // Closing destroys the file controls: never silently while an upload is unfinished.
+    antesDeCerrar: () => (montadas.some((m) => m.ocupado?.()) ? confirmDialog({
+      titulo: "¿Cerrar e interrumpir la subida?",
+      mensaje: "Una subida de archivo de este terreno no ha terminado. Si cierras el detalle ahora, se " +
+        "interrumpe: los archivos ya guardados se conservan, y la subida puede continuarse después desde " +
+        "aquí eligiendo otra vez el mismo archivo. También puedes cancelarla con su botón «Cancelar».",
+      confirmar: "Cerrar e interrumpir", cancelar: "Seguir en el detalle", peligro: true,
+    }) : true),
   });
   pintarEstado();
   dialog.addEventListener("close", () => {

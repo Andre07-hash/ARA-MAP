@@ -66,9 +66,8 @@ test("a cell's body names one field and the version it was edited at", () => {
 
 test("a list query is one bounded page; filters and order are the server's", () => {
   assert.equal(consultaDeLista(BASE, {}), "limit=100");
-  assert.equal(consultaDeLista("sin_asignar", { q: " lote ", sort: "-terreno", estado: "Jalisco", limit: 200,
-    incluirArchivados: true }, "CUR"),
-  "q=lote&estado=Jalisco&include_archived=true&base=sin_asignar&sort=-terreno&limit=200&cursor=CUR");
+  assert.equal(consultaDeLista("sin_asignar", { q: " lote ", sort: "-terreno", estado: "Jalisco", limit: 200 }, "CUR"),
+  "q=lote&estado=Jalisco&base=sin_asignar&sort=-terreno&limit=200&cursor=CUR");
   assert.equal(consultaDeLista(BASE, { limit: 5000 }), "limit=100");               // never more than the maximum
   assert.equal(rutaDeLista("maestra"), "/inventario/terrenos");
   assert.equal(rutaDeLista(BASE), `/maestra/bases/${BASE}/terrenos`);

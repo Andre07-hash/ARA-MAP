@@ -186,8 +186,8 @@ export const api = {
                         method: "POST", body: {}, headers: { "Idempotency-Key": clave },
                       }),
   guardarCelda:       (id, cuerpo) => request(`/inventario/terrenos/${enc(id)}`, { method: "PATCH", body: cuerpo }),
-  archivarTerreno:    (id, expected_version, restaurar = false) =>
-                        request(`/inventario/terrenos/${enc(id)}/${restaurar ? "restaurar" : "archivar"}`,
+  borrarTerreno:      (id, expected_version) =>
+                        request(`/inventario/terrenos/${enc(id)}/borrar`,
                           { method: "POST", body: { expected_version } }),
   vistaDeTransferencia: (id, destino) =>
                         request(`/inventario/terrenos/${enc(id)}/transferir?base_id=${enc(destino ?? "sin_asignar")}`),
@@ -195,22 +195,19 @@ export const api = {
                         request(`/inventario/terrenos/${enc(id)}/transferir`,
                           { method: "POST", body: { expected_version, base_id } }),
 
-  maestraBases:       (archivadas = false, signal) =>
-                        request(`/maestra/bases${archivadas ? "?archivadas=1" : ""}`, { signal }),
+  maestraBases:       (signal) => request("/maestra/bases", { signal }),
   crearBaseDeTrabajo: (nombre) => request("/maestra/bases", { method: "POST", body: { nombre } }),
   renombrarBaseDeTrabajo: (id, expected_version, nombre) =>
                         request(`/maestra/bases/${enc(id)}`, { method: "PATCH", body: { expected_version, nombre } }),
-  archivarBaseDeTrabajo: (id, expected_version, restaurar = false) =>
-                        request(`/maestra/bases/${enc(id)}/${restaurar ? "restaurar" : "archivar"}`,
-                          { method: "POST", body: { expected_version } }),
+  borrarBaseDeTrabajo: (id, expected_version) =>
+                        request(`/maestra/bases/${enc(id)}/borrar`, { method: "POST", body: { expected_version } }),
   accesoDeBase:       (id) => request(`/maestra/bases/${enc(id)}/acceso`),
   reemplazarAcceso:   (id, expected_version, usuarios) =>
                         request(`/maestra/bases/${enc(id)}/acceso`,
                           { method: "PUT", body: { expected_version, usuarios } }),
   operadores:         (q = "") => request(`/maestra/operadores?limit=200${q ? `&q=${enc(q)}` : ""}`),
 
-  columnas:           (base, retiradas = false, signal) =>
-                        request(`/maestra/bases/${enc(base)}/columnas${retiradas ? "?retiradas=1" : ""}`, { signal }),
+  columnas:           (base, signal) => request(`/maestra/bases/${enc(base)}/columnas`, { signal }),
   crearColumna:       (base, cuerpo, clave) => request(`/maestra/bases/${enc(base)}/columnas`, {
                         method: "POST", body: cuerpo, headers: { "Idempotency-Key": clave },
                       }),
@@ -218,9 +215,9 @@ export const api = {
   cambiarColumna:     (base, columna, cuerpo) =>
                         request(`/maestra/bases/${enc(base)}/columnas/${enc(columna.replace(/^custom:/, ""))}`,
                           { method: "PATCH", body: cuerpo }),
-  retirarColumna:     (base, columna, expected_version, restaurar = false) =>
-                        request(`/maestra/bases/${enc(base)}/columnas/${enc(columna.replace(/^custom:/, ""))}/` +
-                          (restaurar ? "restaurar" : "retirar"), { method: "POST", body: { expected_version } }),
+  borrarColumna:      (base, columna, expected_version) =>
+                        request(`/maestra/bases/${enc(base)}/columnas/${enc(columna.replace(/^custom:/, ""))}/borrar`,
+                          { method: "POST", body: { expected_version } }),
 
   bases:        () => request("/bases"),
   base:         (id) => request(`/bases/${id}`),

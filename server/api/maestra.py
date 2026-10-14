@@ -63,10 +63,6 @@ def _cambiar(request: Request, cambio: Any) -> Respuesta:
                 "Otra persona cambió esta base de trabajo. Revisa su versión antes de repetir"
                 " el cambio.", 409,
                 {"code": "conflict", "base": repo.obtener(conn, base_id)}) from None
-        except repo.EstadoError as exc:
-            mensaje = ("La base de trabajo está archivada." if exc.code == "base_archivada"
-                       else "La base de trabajo no está archivada.")
-            raise ApiError(mensaje, 409, {"code": exc.code}) from None
 
 
 def _respuesta(conn: DatabaseConnection, base: dict[str, Any]) -> Respuesta:
@@ -74,12 +70,9 @@ def _respuesta(conn: DatabaseConnection, base: dict[str, Any]) -> Respuesta:
 
 
 def listing(request: Request) -> Respuesta:
-    """?archivadas=1 adds archived bases, for administrators only."""
     sesion: auth.Sesion = request.sesion
-    admin = sesion.rol == "admin"
     with db.session() as conn:
-        bases = repo.listar(conn, None if admin else sesion.user_id,
-                            con_archivadas=admin and request.q("archivadas") == "1")
+        bases = repo.listar(conn, None if sesion.rol == "admin" else sesion.user_id)
     return {"bases": bases, "total": len(bases)}
 
 
@@ -129,22 +122,27 @@ def rename(request: Request) -> Respuesta:
     return _cambiar(request, lambda conn, bid, actor: repo.renombrar(conn, bid, expected, nombre, actor))
 
 
-def archive(request: Request) -> Respuesta:
-    """{expected_version}"""
-    return _archivo(request, repo.archivar)
-
-
-def restore(request: Request) -> Respuesta:
-    """{expected_version}"""
-    return _archivo(request, repo.restaurar)
-
-
-def _archivo(request: Request, operacion: Any) -> Respuesta:
+def delete(request: Request) -> Respuesta:
+    """{expected_version}: delete an empty work base for good, with its
+    columns and grants. A base with terrains is a 409 base_con_terrenos."""
     data, errors = _body(request, "expected_version")
     expected = _version(data, errors)
     if errors:
         raise _invalid(errors)
-    return _cambiar(request, lambda conn, bid, actor: operacion(conn, bid, expected, actor))
+    base_id = request.uuid_param("bid")
+    with db.escritura() as conn:
+        auth.reverificar_base(conn, request.sesion, base_id, "bases.gestionar", exclusivo=True)
+        try:
+            repo.borrar(conn, base_id, expected)
+        except repo.ConflictError:
+            raise ApiError(
+                "Otra persona cambió esta base de trabajo. Revisa su versión antes de repetir"
+                " el cambio.", 409,
+                {"code": "conflict", "base": repo.obtener(conn, base_id)}) from None
+        except repo.EstadoError as exc:
+            raise ApiError("La base todavía tiene terrenos. Bórralos o transfiérelos a otra base"
+                           " antes de borrarla.", 409, {"code": exc.code}) from None
+    return {"borrado": True}
 
 
 def access(request: Request) -> Respuesta:

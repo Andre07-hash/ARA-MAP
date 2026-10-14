@@ -10,7 +10,7 @@ import { api } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
-import { confirmDialog, openDialog } from "../ui/dialog.js";
+import { confirmarBorrado, openDialog } from "../ui/dialog.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];
@@ -27,13 +27,12 @@ function Aviso() {
 /* ------------------------------------------------------------- one terrain */
 
 export function abrirDetalle({
-  terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onArchivar, onTransferir,
+  terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onBorrar, onTransferir,
   onArchivos, onErrorDeArchivos,
 }) {
-  // What may be changed can move while the dialog is open (the terrain or its
-  // base archived or restored by someone else): permisos() below updates it.
-  let archivado = Boolean(terreno.archived_at);
-  let soloLectura = !puedeCambiar || archivado;
+  // What may be changed can move while the dialog is open (a grant changed by
+  // someone else): permisos() below updates it.
+  let soloLectura = !puedeCambiar;
   const montadas = [];
   const ranura = (tipo) => {
     const container = el("dd", { class: "detalle-ranura" });
@@ -52,31 +51,26 @@ export function abrirDetalle({
     el("dt", {}, "Última edición"),
     el("dd", {}, `${terreno.updated_by?.display_name ?? "—"} · versión ${terreno.version}`),
   );
-  const nota = el("p", { class: "detalle-nota", role: "status" });
   const acciones = el("div", { class: "detalle-acciones" });
   function pintarEstado() {
-    nota.textContent = archivado ? "Archivado: se puede consultar y restaurar." : "";
-    nota.hidden = !archivado;
     acciones.replaceChildren(...[
       boton("Historial", () => onHistorial()),
-      puedeCambiar && boton(archivado ? "Restaurar terreno" : "Archivar terreno", async () => {
-        const estaba = archivado;
-        if (!estaba && !(await confirmDialog({
-          titulo: "¿Archivar este terreno?",
-          mensaje: "Sale de la tabla y deja de poder editarse. Sus datos, archivos e historial se " +
-            "conservan y se puede restaurar.",
-          confirmar: "Archivar",
+      admin && puedeCambiar && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
+      // A published terrain changes what the public sees: administrators only (the server agrees).
+      puedeCambiar && (admin || !terreno.published_revision_id) && boton("Borrar terreno…", async () => {
+        if (!(await confirmarBorrado({
+          titulo: `¿Borrar «${terreno.draft?.terreno || "Terreno sin nombre"}»?`,
+          mensaje: "Se borran el terreno, todos sus datos, su historial y sus PDF y KMZ.",
         }))) return;
         close();
-        onArchivar(estaba);
-      }),
-      admin && puedeCambiar && !archivado && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
+        onBorrar();
+      }, "btn btn-small btn-peligro"),
     ].filter(Boolean));
   }
   const { dialog, close } = openDialog({
     titulo: terreno.draft?.terreno || "Terreno sin nombre",
     ancho: "38rem",
-    contenido: el("div", {}, nota, datos, acciones),
+    contenido: el("div", {}, datos, acciones),
     acciones: [cerrar],
   });
   pintarEstado();
@@ -92,10 +86,9 @@ export function abrirDetalle({
      * What this account may do with the terrain now. The file mounts and the
      * actions follow; what is being read (lists, an open history) stays.
      */
-    permisos({ archivado: ahora, puedeCambiar: puede, resumen }) {
-      archivado = Boolean(ahora);
+    permisos({ puedeCambiar: puede, resumen }) {
       puedeCambiar = Boolean(puede);
-      soloLectura = !puedeCambiar || archivado;
+      soloLectura = !puedeCambiar;
       pintarEstado();
       for (const m of montadas) m.update({ soloLectura, resumen: resumen ?? undefined });
     },
@@ -232,45 +225,43 @@ export function abrirColumnas({ base, soloLectura, onCerrar, onAlcancePerdido })
   function Definicion(c, indice) {
     const nuevoNombre = el("input", {
       class: "input", value: c.nombre, maxlength: "100", "aria-label": `Nombre de la columna ${c.nombre}`,
-      disabled: soloLectura || c.retirada,
+      disabled: soloLectura,
     });
-    const nuevaOpcion = c.tipo === "opcion" && !c.retirada && !soloLectura && el("input", {
+    const nuevaOpcion = c.tipo === "opcion" && !soloLectura && el("input", {
       class: "input", placeholder: "Agregar opción", "aria-label": `Agregar opción a ${c.nombre}`,
     });
     const cambiar = (cuerpo) => hacer(() =>
       api.cambiarColumna(base.id, c.id, { expected_version: c.version, ...cuerpo }));
-    return el("li", { class: ["columnas-item", c.retirada && "is-retirada"] },
+    return el("li", { class: "columnas-item" },
       nuevoNombre,
       el("span", { class: "secondary columnas-tipo" },
-        TIPOS.find(([v]) => v === c.tipo)?.[1] ?? c.tipo, c.retirada && " · retirada",
+        TIPOS.find(([v]) => v === c.tipo)?.[1] ?? c.tipo,
         c.tipo === "opcion" && `: ${c.opciones.join(", ")}`),
       nuevaOpcion,
       !soloLectura && el("div", { class: "columnas-botones" },
-        !c.retirada && boton("Guardar", () => {
+        boton("Guardar", () => {
           const cuerpo = {};
           if (nuevoNombre.value.trim() !== c.nombre) cuerpo.nombre = nuevoNombre.value;
           if (nuevaOpcion && nuevaOpcion.value.trim()) cuerpo.opciones = [...c.opciones, nuevaOpcion.value];
           if (Object.keys(cuerpo).length) cambiar(cuerpo);
         }),
-        !c.retirada && indice > 0 && boton("Subir", () => cambiar({ posicion: indice - 1 })),
-        !c.retirada && indice < vivas - 1 && boton("Bajar", () => cambiar({ posicion: indice + 1 })),
-        boton(c.retirada ? "Restaurar" : "Retirar", async () => {
-          if (!c.retirada && !(await confirmDialog({
-            titulo: `¿Retirar la columna «${c.nombre}»?`,
-            mensaje: "Deja de mostrarse y de aceptar valores. Los valores ya guardados y su historial " +
-              "se conservan y vuelven si la restauras.",
-            confirmar: "Retirar",
+        indice > 0 && boton("Subir", () => cambiar({ posicion: indice - 1 })),
+        indice < vivas - 1 && boton("Bajar", () => cambiar({ posicion: indice + 1 })),
+        boton("Borrar…", async () => {
+          if (!(await confirmarBorrado({
+            titulo: `¿Borrar la columna «${c.nombre}»?`,
+            mensaje: "La columna desaparece de esta base y sus valores dejan de mostrarse en todos sus terrenos.",
           }))) return;
-          hacer(() => api.retirarColumna(base.id, c.id, c.version, c.retirada));
-        }),
+          hacer(() => api.borrarColumna(base.id, c.id, c.version));
+        }, "btn btn-small btn-peligro"),
       ),
     );
   }
 
   async function cargar() {
     try {
-      const { columnas } = await api.columnas(base.id, true);
-      vivas = columnas.filter((c) => !c.retirada).length;
+      const { columnas } = await api.columnas(base.id);
+      vivas = columnas.length;
       lista.replaceChildren(...(columnas.length
         ? columnas.map((c, i) => Definicion(c, i))
         : [el("li", { class: "secondary" }, "Esta base todavía no tiene columnas propias.")]));
@@ -333,32 +324,32 @@ export function abrirBases({ onCerrar }) {
   function Base(b) {
     const nuevo = el("input", {
       class: "input", value: b.nombre, maxlength: "100", "aria-label": `Nombre de la base ${b.nombre}`,
-      disabled: b.archivada,
     });
-    return el("li", { class: ["bases-item", b.archivada && "is-retirada"] },
+    return el("li", { class: "bases-item" },
       nuevo,
-      el("span", { class: "secondary" }, `${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}` +
-        (b.archivada ? " · archivada (sólo lectura)" : "")),
+      el("span", { class: "secondary" }, `${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}`),
       el("div", { class: "columnas-botones" },
-        !b.archivada && boton("Renombrar", () => hacer(() =>
-          api.renombrarBaseDeTrabajo(b.id, b.version, nuevo.value))),
+        boton("Renombrar", () => hacer(() => api.renombrarBaseDeTrabajo(b.id, b.version, nuevo.value))),
         boton("Accesos…", () => abrirAccesos({ base: b, onCerrar: (c) => { cambio = cambio || c; cargar(); } })),
-        boton(b.archivada ? "Restaurar" : "Archivar", async () => {
-          if (!b.archivada && !(await confirmDialog({
-            titulo: `¿Archivar la base «${b.nombre}»?`,
-            mensaje: "Se cierra para los operadores y queda de sólo lectura. Sus terrenos, columnas, " +
-              "archivos y accesos se conservan, y se puede restaurar.",
-            confirmar: "Archivar",
+        boton("Borrar…", async () => {
+          if (b.terrenos > 0) {
+            aviso.decir(`«${b.nombre}» todavía tiene ${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}. ` +
+              "Bórralos o transfiérelos a otra base antes de borrarla.");
+            return;
+          }
+          if (!(await confirmarBorrado({
+            titulo: `¿Borrar la base «${b.nombre}»?`,
+            mensaje: "Se borran la base, sus columnas y sus accesos.",
           }))) return;
-          hacer(() => api.archivarBaseDeTrabajo(b.id, b.version, b.archivada));
-        }),
+          hacer(() => api.borrarBaseDeTrabajo(b.id, b.version));
+        }, "btn btn-small btn-peligro"),
       ),
     );
   }
 
   async function cargar() {
     try {
-      const { bases } = await api.maestraBases(true);
+      const { bases } = await api.maestraBases();
       lista.replaceChildren(...(bases.length ? bases.map(Base)
         : [el("li", { class: "secondary" }, "Todavía no hay bases de trabajo.")]));
     } catch (error) { aviso.decir(error.message); }

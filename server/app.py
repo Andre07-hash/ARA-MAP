@@ -67,12 +67,10 @@ router.add("GET", "/api/inventario/terrenos/:id/historial", api_inventario.histo
 router.add("GET", "/api/maestra/bases", api_maestra.listing, "maestra.ver")
 router.add("POST", "/api/maestra/bases", api_maestra.create, "bases.gestionar")
 router.add("PATCH", "/api/maestra/bases/:bid", api_maestra.rename, "bases.gestionar")
-router.add("POST", "/api/maestra/bases/:bid/archivar", api_maestra.archive, "bases.gestionar")
-router.add("POST", "/api/maestra/bases/:bid/restaurar", api_maestra.restore, "bases.gestionar")
+router.add("POST", "/api/maestra/bases/:bid/borrar", api_maestra.delete, "bases.gestionar")
 router.add("GET", "/api/maestra/bases/:bid/terrenos", api_inventario.base_listing, "maestra.ver")
 router.add("POST", "/api/maestra/bases/:bid/terrenos", api_inventario.base_create, "maestra.editar")
-router.add("POST", "/api/inventario/terrenos/:id/archivar", api_inventario.archive, "maestra.archivar")
-router.add("POST", "/api/inventario/terrenos/:id/restaurar", api_inventario.restore, "maestra.archivar")
+router.add("POST", "/api/inventario/terrenos/:id/borrar", api_inventario.delete, "maestra.borrar")
 router.add("GET", "/api/inventario/terrenos/:id/transferir", api_inventario.transfer_preview,
            "bases.gestionar")
 router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.transfer,
@@ -85,9 +83,7 @@ router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "mae
 router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")
 router.add("PATCH", "/api/maestra/bases/:bid/columnas/:cid", api_columnas.update,
            "columnas.gestionar")
-router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/retirar", api_columnas.retire,
-           "columnas.gestionar")
-router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/restaurar", api_columnas.restore,
+router.add("POST", "/api/maestra/bases/:bid/columnas/:cid/borrar", api_columnas.delete,
            "columnas.gestionar")
 # The legacy workspace (imported bases, saved maps, folders, formats, import,
 # export) is the administrators': derivados.ver to read, .gestionar to change.

@@ -140,14 +140,13 @@ class Resumenes:
                                  ("geometria", gid))
                 self.assertEqual(despues["version"], t["version"])
 
-    def test_retiring_the_kmz_falls_back_to_valid_xy_or_to_nothing(self):
+    def test_deleting_the_kmz_falls_back_to_valid_xy_or_to_nothing(self):
         con_xy, sin_xy = self.crear(lat=20.5, lon=-100.4), self.crear()
         for t, esperado in ((con_xy, "punto"), (sin_xy, "ninguna")):
             completo = self.kmz_activo(t["id"])
             self.assertEqual(self.ver(t["id"])["ubicacion"]["modo"], "geometria")
-            s, r = self.j("POST", f"/api/archivos/{completo['archivo']['id']}/retirar",
-                          datos={"expected_revision": completo["archivo"]["revision"]},
-                          clave=str(uuid.uuid4()))
+            s, r = self.j("POST", f"/api/archivos/{completo['archivo']['id']}/borrar",
+                          datos={"expected_revision": completo["archivo"]["revision"]})
             self.assertEqual(s, 200, r)
             ahora = self.ver(t["id"])
             self.assertEqual((ahora["ubicacion"]["modo"], ahora["ubicacion"]["geometria"],

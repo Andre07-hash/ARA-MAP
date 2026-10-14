@@ -43,7 +43,6 @@ test("publication status uses the agreed Spanish labels", () => {
   assert.equal(estadoPublicacion({ ...pendiente, has_pending_changes: false, public_visible: false }).etiqueta,
     "Fuera del catálogo · Vendido");
   assert.equal(estadoPublicacion({ ...borrador, publication_state: "unpublished" }).etiqueta, "No publicado");
-  assert.equal(estadoPublicacion({ ...borrador, publication_state: "archived" }).etiqueta, "Archivado");
 });
 
 test("a saved 'sold' draft over a live publication is flagged as not yet public", () => {
@@ -95,14 +94,14 @@ test("geography is repeated parameters; price only travels with its currency", (
 });
 
 test("internal-only filters never reach the public catalog query", () => {
-  const filtros = { publicacion: "draft", disponibilidad: "sold", incluirArchivados: true };
+  const filtros = { publicacion: "draft", disponibilidad: "sold" };
   assert.equal(consultaDe(filtros, "catalogo").toString(), "");
   const interna = consultaDe(filtros, "inventario");
   assert.equal(interna.get("publication_state"), "draft");
   assert.equal(interna.get("availability"), "sold");
-  assert.equal(interna.get("include_archived"), "true");
+  assert.equal(interna.get("include_archived"), null);
   assert.equal(contarFiltros(filtros, "catalogo"), 0);
-  assert.equal(contarFiltros(filtros, "inventario"), 3);
+  assert.equal(contarFiltros(filtros, "inventario"), 2);
 });
 
 test("a page query keeps the filters and adds the cursor and the maximum limit", () => {

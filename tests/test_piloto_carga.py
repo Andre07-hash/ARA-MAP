@@ -262,13 +262,7 @@ class Piloto(Escenario, unittest.TestCase):
 
         # Same identity with another price: skipped and reported, never updated.
         # Same name and place with another area: a different parcel, created.
-        # A repeat inside the file: only the first is created. Archived still counts.
-        archivado = sql(lambda c: c.execute(
-            "SELECT t.id, t.version FROM inventory_terrain t JOIN inventory_revision r"
-            " ON r.id = t.draft_revision_id WHERE r.terreno = ?",
-            ("Predio Ficticio 003",)).fetchone())
-        self.ok(self.call("POST", f"/api/inventario/terrenos/{archivado['id']}/archivar",
-                          {"expected_version": archivado["version"]}))
+        # A repeat inside the file: only the first is created.
         nuevo_predio = {"terreno": "Predio Ficticio 101", "estado": "Jalisco",
                         "municipio": "Zapopan", "superficie_m2": 5000.0}
         mezcla = [{**self.datos[0], "asking_price": 1.0},
@@ -284,7 +278,7 @@ class Piloto(Escenario, unittest.TestCase):
             ("Predio Ficticio 001",)).fetchall())
         self.assertEqual([p["asking_price"] for p in precio], [self.datos[0]["asking_price"]])
 
-    def test_an_unknown_ambiguous_or_archived_base_is_refused(self):
+    def test_an_unknown_or_ambiguous_base_is_refused(self):
         with self.assertRaises(SystemExit) as caso:
             self.cargar(base=nuevo())
         self.assertIn("no existe", str(caso.exception))
@@ -292,10 +286,6 @@ class Piloto(Escenario, unittest.TestCase):
         with self.assertRaises(SystemExit) as caso:
             self.cargar(base="Piloto Ficticio")
         self.assertIn("no es única", str(caso.exception))
-        self.ok(self.archivar(self.base_piloto))
-        with self.assertRaises(SystemExit) as caso:
-            self.cargar()
-        self.assertIn("está archivada", str(caso.exception))
         self.assertEqual(self.escritas(), dict.fromkeys(ESCRITAS, 0))
 
     def test_only_an_active_administrator_may_be_the_actor(self):

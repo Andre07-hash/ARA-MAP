@@ -20,8 +20,7 @@
  * - Only a confirmed outcome is terminal. A failed step while the server
  *   version is still pending stays counted, cancellable and, where safe,
  *   retryable (R3-B3).
- * - Losing the scope (404) or the right to write (403, archived terrain or
- *   base) ends the upload here and is handed to the host through
+ * - Losing the scope (404) or the right to write (403) ends the upload here and is handed to the host through
  *   `alPerderAcceso`, so private state is cleared and the record revalidated
  *   (R3-B2).
  */
@@ -57,8 +56,8 @@ const esAbort = (e) => e?.name === "AbortError";
 
 /* The server's answer means this account may no longer act on the terrain:
  * gone from its scope (404, indistinguishable from missing), or still visible
- * but not writable (403, archived terrain or base). */
-const ACCESO_PERDIDO = new Set(["forbidden", "terreno_archivado", "base_archivada"]);
+ * but not writable (403). */
+const ACCESO_PERDIDO = new Set(["forbidden"]);
 export const pierdeAcceso = (e) => e instanceof ErrorArchivos
   && (e.status === 404 || e.status === 403 || (e.status === 409 && ACCESO_PERDIDO.has(e.codigo)));
 

@@ -187,18 +187,16 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
 
   const internos = modo === "inventario" && (() => {
     const publicacion = crearSelect("filtro-publicacion",
-      [["", "Todas"], ...Object.entries(PUBLICACION).filter(([k]) => k !== "archived")], "publicacion");
+      [["", "Todas"], ...Object.entries(PUBLICACION)], "publicacion");
     const disponibilidad = crearSelect("filtro-disponibilidad",
       [["", "Todas"], ...Object.entries(DISPONIBILIDAD)], "disponibilidad");
-    const archivados = crearToggle("incluir-archivados", "Incluir archivados", "incluirArchivados");
     const fieldset = el("div", { class: "rail-field rail-toggles" },
       el("label", { class: "field-label", for: "filtro-publicacion" }, "Publicación"),
       publicacion,
       el("label", { class: "field-label rail-sublabel", for: "filtro-disponibilidad" }, "Disponibilidad"),
       disponibilidad,
-      archivados.label,
     );
-    return { publicacion, disponibilidad, archivados, fieldset };
+    return { publicacion, disponibilidad, fieldset };
   })();
 
   /* ---- assembly ------------------------------------------------------ */
@@ -339,8 +337,6 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
       if (internos.publicacion.value !== pub) internos.publicacion.value = pub;
       const disp = filtros.disponibilidad ?? "";
       if (internos.disponibilidad.value !== disp) internos.disponibilidad.value = disp;
-      const arch = Boolean(filtros.incluirArchivados);
-      if (internos.archivados.input.checked !== arch) internos.archivados.input.checked = arch;
     }
 
     if (soloUbicados.input.checked !== Boolean(filtros.soloUbicados)) {

@@ -803,47 +803,35 @@ def activar(sesion: auth.Sesion, archivo_id: str, *, version_id: str,
         return result
 
 
-def retirar(sesion: auth.Sesion, archivo_id: str, *, expected_revision: int,
-            idempotency_key: str, almacen: Almacen | None = None,
-            bd: Path | str | None = None, reloj: Clock | None = None) -> dict[str, Any]:
+def borrar(sesion: auth.Sesion, archivo_id: str, *, expected_revision: int,
+           almacen: Almacen | None = None, bd: Path | str | None = None) -> dict[str, Any]:
+    """Delete an attachment for good: every version, its geometry and its
+    history, then its bytes. Not reversible; the client asks first.
+
+    The rows go in one transaction. The bytes go after it commits, best
+    effort: a store that fails leaves unreferenced objects (reported by the
+    recovery verifier), never a row that points at missing bytes.
+    """
     _valid_session(sesion)
-    key = _key(idempotency_key)
     if isinstance(expected_revision, bool) or not isinstance(expected_revision, int):
         raise _error("revision_invalida", "La revisión esperada no es válida.")
-    request_hash = _hash_payload({"expected_revision": expected_revision})
-    attachment = _in_scope(sesion, _attachment(archivo_id), "archivos.retirar", bd)
+    attachment = _in_scope(sesion, _attachment(archivo_id), "archivos.borrar", bd)
     terrain_id = str(attachment["inventory_id"])
-    operation = f"archivos.retirar:{sesion.user_id}:{archivo_id}"
     with db.escritura(bd) as conn:
-        scope = _reverify(conn, sesion, terrain_id, "archivos.retirar")
+        _reverify(conn, sesion, terrain_id, "archivos.borrar")
         current = repo.resource_for_attachment(conn, archivo_id, lock=True)
         if current is None:
             raise _not_found()
-        replay = _operation(conn, operation, key, request_hash)
-        if replay is not None:
-            staging = (repo.retirement_staging_keys(conn, current)
-                       if replay.get("limpieza_pendiente") else [])
-        else:
-            now = _now(reloj)
-            try:
-                updated, staging = repo.retire(
-                    conn, attachment=current, expected_revision=expected_revision, now=now,
-                    actor=scope.actor, base_id=scope.base_id)
-            except repo.ConflictError as exc:
-                raise _conflict("revision_conflictiva",
-                                "La decisión cambió; vuelve a cargar el archivo.") from exc
-            # Stored before external cleanup, so the durable record says
-            # pending until a replay proves the staging gone.
-            result = {"archivo": updated, "replay": False,
-                      "limpieza_pendiente": bool(staging)}
-            repo.save_operation_result(conn, operation, key, request_hash,
-                                       sesion.user_id, now, result)
-    if replay is not None:
-        replay["replay"] = True
-        replay["limpieza_pendiente"] = _staging_remains(staging, almacen)
-        return replay
-    result["limpieza_pendiente"] = _discard_staging(staging, almacen)
-    return result
+        if int(current["revision"]) != expected_revision:
+            raise _conflict("revision_conflictiva",
+                            "El archivo cambió; vuelve a cargarlo antes de borrarlo.")
+        keys = repo.delete(conn, attachment_id=archivo_id)
+    return {"borrado": True, "limpieza_pendiente": borrar_bytes(keys, almacen)}
+
+
+def borrar_bytes(keys: Sequence[str], almacen: Almacen | None) -> bool:
+    """Best-effort removal of the bytes of deleted rows; True if any may remain."""
+    return _discard_staging(keys, almacen)
 
 
 def listar(sesion: auth.Sesion, terreno_id: str, *, cursor: str | None = None,

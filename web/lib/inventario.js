@@ -24,7 +24,6 @@ export const PUBLICACION = Object.freeze({
   draft: "Borrador",
   published: "Publicado",
   unpublished: "No publicado",
-  archived: "Archivado",
 });
 
 /* INTEGRATION_DECISIONS §5: the complete PublicTerrain allowlist. */
@@ -68,7 +67,6 @@ const ubicacion = (lat, lon) => {
  */
 export function estadoPublicacion(t) {
   const estado = t?.publication_state;
-  if (estado === "archived" || t?.archived_at) return { etiqueta: "Archivado", tono: "archivado" };
   if (estado === "draft") return { etiqueta: "Borrador · No publicado", tono: "borrador" };
   if (estado === "unpublished") return { etiqueta: "No publicado", tono: "borrador" };
   if (estado === "published") {
@@ -140,7 +138,6 @@ export const FILTROS_VACIOS = Object.freeze({
   precioMax: null,
   publicacion: null,      // internal only
   disponibilidad: null,   // internal only
-  incluirArchivados: false,
 });
 
 /**
@@ -166,7 +163,6 @@ export function consultaDe(filtros, tipo) {
   if (tipo === "inventario") {
     if (f.publicacion) q.set("publication_state", f.publicacion);
     if (f.disponibilidad) q.set("availability", f.disponibilidad);
-    if (f.incluirArchivados) q.set("include_archived", "true");
   }
   return q;
 }
@@ -191,7 +187,6 @@ export function contarFiltros(filtros, tipo) {
   if (tipo === "inventario") {
     if (f.publicacion) n += 1;
     if (f.disponibilidad) n += 1;
-    if (f.incluirArchivados) n += 1;
   }
   return n;
 }

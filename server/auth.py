@@ -62,8 +62,8 @@ _PUBLIC_DETAIL = re.compile(r"^/api/publico/terrenos/[^/]+$")
 
 
 ROLES = ("admin", "operador")
-_DE_TRABAJO = ("maestra.ver", "maestra.editar", "maestra.archivar", "columnas.gestionar",
-               "archivos.ver", "archivos.subir", "archivos.retirar")
+_DE_TRABAJO = ("maestra.ver", "maestra.editar", "maestra.borrar", "columnas.gestionar",
+               "archivos.ver", "archivos.subir", "archivos.borrar")
 # What each role may do. Where is a separate question, answered per request
 # from the database (never cached): see _verificar.
 CAPACIDADES = {
@@ -71,11 +71,8 @@ CAPACIDADES = {
     "admin": (*_DE_TRABAJO, "maestra.global", "bases.gestionar", "derivados.ver",
               "derivados.gestionar", "usuarios.gestionar"),
 }
-# Reads may look at archived content inside scope; these may also change it.
+# The capabilities that only read, for the batched read check.
 _LECTURA = ("maestra.ver", "archivos.ver")
-_EDICION_ORDINARIA = ("maestra.editar", "archivos.subir", "archivos.retirar")
-# Administering a base (its grants, restoring it) is how an archived base is reopened.
-_ADMINISTRA_BASE = ("bases.gestionar",)
 
 # The audit identity of scripts/cuentas.py, which has no signed-in account.
 ACTOR_CLI = "CLI scripts/cuentas.py"
@@ -309,19 +306,16 @@ class Alcance:
     """What one authorization check established, as read from the database at
     that moment. Not a dataclass, for the same reason as Sesion."""
 
-    __slots__ = ("sesion", "actor", "rol", "capacidad", "terreno_id", "base_id",
-                 "terreno_archivado", "base_archivada")
+    __slots__ = ("sesion", "actor", "rol", "capacidad", "terreno_id", "base_id")
 
     def __init__(self, sesion: Sesion, rol: str, capacidad: str, terreno_id: str | None,
-                 base_id: str | None, terreno_archivado: bool, base_archivada: bool) -> None:
+                 base_id: str | None) -> None:
         self.sesion = sesion
         self.actor = sesion.actor
         self.rol = rol
         self.capacidad = capacidad
         self.terreno_id = terreno_id
         self.base_id = base_id
-        self.terreno_archivado = terreno_archivado
-        self.base_archivada = base_archivada
 
     def __repr__(self) -> str:
         return f"<Alcance {self.capacidad} terreno={self.terreno_id} base={self.base_id}>"
@@ -355,7 +349,7 @@ def user_for_token(conn: DatabaseConnection, token: str) -> dict[str, Any] | Non
 #
 # 401 no valid session; 403 the role lacks the capability; 404 the resource is
 # missing OR outside the caller's scope (the two are indistinguishable on
-# purpose); 409 the caller is in scope but the terrain or base is archived.
+# purpose).
 
 def no_autenticado() -> ApiError:
     return ApiError("Inicia sesión para continuar.", 401, {"code": "unauthenticated"})
@@ -415,8 +409,7 @@ def terrenos_legibles(conn: DatabaseConnection, sesion: Sesion, terreno_ids: Seq
     capability are checked once, first, with the same errors (401, 403) the
     first per-id call would raise; then a terrain that is missing, unassigned
     (for an operator), in a missing base, or in a base the operator has no
-    grant on or that is archived, is unavailable (require_terreno's 404). Read
-    capabilities never raise 409. Statements: two for the session, then three
+    grant on, is unavailable (require_terreno's 404). Statements: two for the session, then three
     per LOTE_LECTURA ids (terrains, bases, grants; administrators skip grants),
     none at all for an empty list. It takes no locks: it is not a write check.
     """
@@ -434,12 +427,12 @@ def terrenos_legibles(conn: DatabaseConnection, sesion: Sesion, terreno_ids: Seq
         terrenos = {str(r["id"]): r["base_id"] for r in conn.execute(
             f"SELECT id, base_id FROM inventory_terrain WHERE id IN ({marcas})", tuple(lote)).fetchall()}
         base_ids = sorted({str(b) for b in terrenos.values() if b is not None})
-        bases: dict[str, bool] = {}
+        bases: set[str] = set()
         concedidas: set[str] = set()
         if base_ids:
             marcas_b = ", ".join("?" for _ in base_ids)
-            bases = {str(r["id"]): r["archived_at"] is not None for r in conn.execute(
-                f"SELECT id, archived_at FROM maestra_base WHERE id IN ({marcas_b})",
+            bases = {str(r["id"]) for r in conn.execute(
+                f"SELECT id FROM maestra_base WHERE id IN ({marcas_b})",
                 tuple(base_ids)).fetchall()}
             if not admin:
                 concedidas = {str(r["base_id"]) for r in conn.execute(
@@ -453,7 +446,7 @@ def terrenos_legibles(conn: DatabaseConnection, sesion: Sesion, terreno_ids: Seq
             base = str(base_id)
             if base not in bases:
                 continue
-            if admin or (base in concedidas and not bases[base]):
+            if admin or base in concedidas:
                 legibles.add(terreno_id)
     disponibles = [i for i in ids if i in legibles]
     return disponibles, [i for i in ids if i not in legibles]
@@ -480,9 +473,9 @@ def reverificar_terreno(conn: DatabaseConnection, sesion: Sesion, terreno_id: st
     else is refused on SQLite and NOT detected on Postgres. It reads again,
     on that connection, everything the decision depends on: the session
     (revoked, expired, credential generation), the account (active, role), the
-    terrain (exists, current base, archived), that base (archived) and the
-    caller's grant on it. Whatever the request saw when it started no longer
-    counts. Raises the same 401/403/404/409 as require_terreno; on any of
+    terrain (exists, current base), that base (exists) and the caller's grant
+    on it. Whatever the request saw when it started no longer counts. Raises
+    the same 401/403/404 as require_terreno; on any of
     them the caller must write nothing and let the transaction roll back.
 
     On Postgres each row is read FOR SHARE, in the fixed order user ->
@@ -526,41 +519,28 @@ def _verificar(conn: DatabaseConnection, sesion: Sesion, capacidad: str, *,
         raise prohibido(capacidad)
 
     falta = NO_EXISTE_BASE
-    terreno_archivado = base_archivada = False
     if terreno_id is not None:
         falta = NO_EXISTE_TERRENO
         terreno = conn.execute(
-            "SELECT base_id, archived_at FROM inventory_terrain WHERE id = ?" + del_recurso,
+            "SELECT base_id FROM inventory_terrain WHERE id = ?" + del_recurso,
             (terreno_id,)).fetchone()
         # An unassigned terrain belongs to no work base: administrators only.
         if terreno is None or (terreno["base_id"] is None and rol != "admin"):
             raise _no_existe(falta)
         base_id = terreno["base_id"]
-        terreno_archivado = terreno["archived_at"] is not None
     if base_id is not None:
         base = conn.execute(
-            "SELECT archived_at FROM maestra_base WHERE id = ?"
+            "SELECT id FROM maestra_base WHERE id = ?"
             + (compartido if terreno_id is not None else del_recurso), (base_id,)).fetchone()
         if base is None:
             raise _no_existe(falta)
-        base_archivada = base["archived_at"] is not None
         if rol != "admin":
             acceso = conn.execute(
                 "SELECT 1 AS ok FROM maestra_base_acceso WHERE base_id = ? AND user_id = ?"
                 + compartido, (base_id, usuario["id"])).fetchone()
-            # An archived base is closed to operators, granted or not.
-            if acceso is None or base_archivada:
+            if acceso is None:
                 raise _no_existe(falta)
-
-    # Only now, in scope, may the caller learn that something is archived.
-    if capacidad not in _LECTURA and capacidad not in _ADMINISTRA_BASE:
-        if base_archivada:
-            raise ApiError("La base de trabajo está archivada; restáurala para hacer cambios.",
-                           409, {"code": "base_archivada"})
-        if terreno_archivado and capacidad in _EDICION_ORDINARIA:
-            raise ApiError("El terreno está archivado; restáuralo para hacer cambios.",
-                           409, {"code": "terreno_archivado"})
-    return Alcance(sesion, rol, capacidad, terreno_id, base_id, terreno_archivado, base_archivada)
+    return Alcance(sesion, rol, capacidad, terreno_id, base_id)
 
 
 def logout(conn: DatabaseConnection, token: str) -> None:

@@ -3,7 +3,7 @@
 Each definition is its own versioned resource: a change is a compare-and-set
 on inventory_column.version and leaves one maestra_base_event carrying the
 column id, the actor and the time. No terrain, revision or value is touched by
-any of it: renaming or retiring a column changes how stored values are shown,
+any of it: renaming or deleting a column changes how stored values are shown,
 never the values, and never a terrain's version.
 
 Callers are inside db.escritura(), already re-authorized with
@@ -23,7 +23,7 @@ from typing import Any
 from .. import columnas, db
 from ..protocols import DatabaseConnection
 
-_SELECT = ("SELECT id, base_id, nombre, tipo, opciones_json, orden, version, retired_at,"
+_SELECT = ("SELECT id, base_id, nombre, tipo, opciones_json, orden, version,"
            " created_at, updated_at FROM inventory_column")
 
 
@@ -45,12 +45,11 @@ class IdempotencyConflictError(Exception):
 
 # -- reads ---------------------------------------------------------------------
 
-def listar(conn: DatabaseConnection, base_id: str, con_retiradas: bool = False,
-           ) -> list[dict[str, Any]]:
-    """The definitions of one base in display order, retired ones last."""
-    rows = conn.execute(
-        _SELECT + " WHERE base_id = ?" + ("" if con_retiradas else " AND retired_at IS NULL")
-        + " ORDER BY retired_at IS NOT NULL, orden, id", (base_id,)).fetchall()
+def listar(conn: DatabaseConnection, base_id: str) -> list[dict[str, Any]]:
+    """The definitions of one base in display order. A column retired before
+    columns were deleted instead is an ordinary one."""
+    rows = conn.execute(_SELECT + " WHERE base_id = ? ORDER BY orden, id",
+                        (base_id,)).fetchall()
     return [_dto(r) for r in rows]
 
 
@@ -126,8 +125,6 @@ def cambiar(conn: DatabaseConnection, base_id: str, column_id: str, expected_ver
     moved definition gets a new version.
     """
     actual = _vigente(conn, base_id, column_id, expected_version)
-    if actual["retirada"]:
-        raise EstadoError("columna_retirada")
     detalles: dict[str, Any] = {}
     asignar, params = [], []
     if nombre is not None and nombre != actual["nombre"]:
@@ -162,25 +159,17 @@ def cambiar(conn: DatabaseConnection, base_id: str, column_id: str, expected_ver
     return _existente(conn, base_id, column_id)
 
 
-def retirar(conn: DatabaseConnection, base_id: str, column_id: str, expected_version: int,
-            actor: Mapping[str, Any], restaurar: bool = False) -> dict[str, Any]:
-    """Retire a definition, or restore it. Its values and their history stay
-    stored either way; a retired column is simply shown and written by nobody."""
-    actual = _vigente(conn, base_id, column_id, expected_version)
-    if actual["retirada"] != restaurar:
-        raise EstadoError("columna_no_retirada" if restaurar else "columna_retirada")
-    if restaurar:
-        _libre(conn, base_id, actual["nombre"], excepto=column_id)
-        if len(listar(conn, base_id)) >= columnas.MAX_COLUMNAS:
-            raise EstadoError("limite_columnas")
-    ahora = db.now()
+def borrar(conn: DatabaseConnection, base_id: str, column_id: str, expected_version: int) -> None:
+    """Delete a definition for good, with its own history. The values stored
+    under it stay inside each terrain's revisions but nothing shows them:
+    a column id is never reused."""
+    _vigente(conn, base_id, column_id, expected_version)
     with db.transaction(conn):
-        _reclamar(conn, column_id, expected_version, actor, ahora,
-                  "retired_at = ?, retired_by = ?",
-                  (None, None) if restaurar else (ahora, actor["id"]))
-        _evento(conn, base_id, column_id, expected_version + 1,
-                "columna_restaurar" if restaurar else "columna_retirar", actor, ahora)
-    return _existente(conn, base_id, column_id)
+        conn.execute("DELETE FROM maestra_base_event WHERE column_id = ?", (column_id,))
+        if conn.execute("DELETE FROM inventory_column WHERE id = ? AND version = ?",
+                        (column_id, expected_version)).rowcount != 1:
+            raise ConflictError()
+        _reordenar(conn, base_id, [c["id"] for c in listar(conn, base_id)])
 
 
 # -- helpers -------------------------------------------------------------------
@@ -226,11 +215,9 @@ def _reclamar(conn: DatabaseConnection, column_id: str, expected_version: int,
         raise ConflictError()
 
 
-def _reordenar(conn: DatabaseConnection, base_id: str, vivas_en_orden: list[str]) -> None:
-    """Renumber the base's columns: the live ones as given, retired ones after
-    them in their previous order. Position is all this changes."""
-    retiradas = [c["id"] for c in listar(conn, base_id, con_retiradas=True) if c["retirada"]]
-    for n, clave in enumerate([*vivas_en_orden, *retiradas], start=1):
+def _reordenar(conn: DatabaseConnection, base_id: str, en_orden: list[str]) -> None:
+    """Renumber the base's columns as given. Position is all this changes."""
+    for n, clave in enumerate(en_orden, start=1):
         conn.execute("UPDATE inventory_column SET orden = ? WHERE id = ? AND orden <> ?",
                      (n, columnas.id_de_clave(clave), n))
 
@@ -259,5 +246,4 @@ def _dto(row: Mapping[str, Any]) -> dict[str, Any]:
     return {"id": columnas.clave(row["id"]), "base_id": row["base_id"], "nombre": row["nombre"],
             "tipo": row["tipo"], "opciones": _opciones(row["opciones_json"]),
             "orden": row["orden"], "version": row["version"],
-            "retirada": row["retired_at"] is not None, "retired_at": row["retired_at"],
             "created_at": row["created_at"], "updated_at": row["updated_at"]}

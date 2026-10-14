@@ -10,8 +10,7 @@
  * retries and cancellations) means the terrain left this account's scope:
  * the mount stops everything it has in flight, clears every private thing it
  * shows and becomes inert, then asks the host to revalidate (onError
- * "no_encontrado" and onCambio). Losing only the right to write (403, an
- * archived terrain or base) ends the upload and asks the host to revalidate
+ * "no_encontrado" and onCambio). Losing only the right to write (403) ends the upload and asks the host to revalidate
  * the record's read-only state; readable content stays.
  *
  * Nothing here decides authorization: read-only state only disables controls,
@@ -148,7 +147,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
    * readable and asks the host to revalidate the record's state. */
   function accesoPerdido(error) {
     if (!vivo || fuera) return;
-    if (error.status === 404) return alcancePerdido();
+    if (error.status === 404) return comprobarAlcance();
     avisar(error.message, "error");
     onError?.({ codigo: error.codigo, mensaje: error.message });
     notificarCambio();
@@ -157,7 +156,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   /* A failure the person should read. */
   function fallo(error, contexto) {
     if (!vivo || fuera || esAbort(error)) return;
-    if (error instanceof ErrorArchivos && error.status === 404) return alcancePerdido();
+    if (error instanceof ErrorArchivos && error.status === 404) return comprobarAlcance();
     if (pierdeAcceso(error)) return accesoPerdido(error);
     const mensaje = error instanceof ErrorArchivos ? error.message : "No se pudo completar la operación.";
     avisar(contexto ? `${contexto}: ${mensaje}` : mensaje, "error");
@@ -165,6 +164,21 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   }
 
   const senal = () => vida.signal;
+
+  /* A 404 on one file or version may only mean someone deleted that file.
+   * Ask for the terrain's own list: only a 404 there is a lost scope. */
+  async function comprobarAlcance() {
+    try {
+      await ctx.cliente.listar(terrenoId, { limite: 1, signal: senal() });
+    } catch (error) {
+      if (esAbort(error)) return;
+      if (error instanceof ErrorArchivos && error.status === 404) return alcancePerdido();
+    }
+    if (!vivo || fuera) return;
+    avisar("Ese archivo ya no existe; alguien lo borró. La lista se actualizó.", "error");
+    notificarCambio();
+    cargarLista({ forzar: true });
+  }
 
   /** One key per logical operation; the same body reuses it until it succeeds. */
   function claveDe(operacion) {
@@ -332,7 +346,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     }
   }
 
-  /* ---------------------------------------------- activation, retire */
+  /* ---------------------------------------------- activation, delete */
 
   async function activar(archivo, versionId, geometriaId) {
     if (solo) return;
@@ -357,33 +371,30 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     }
   }
 
-  async function retirar(archivo, disparador) {
+  async function borrar(archivo, disparador) {
     if (solo) return;
     const ok = await confirmar({
-      titulo: `¿Retirar este ${ETIQUETA}?`,
-      mensaje: "Dejará de ser un archivo actual del terreno y se cancelarán sus subidas pendientes. " +
-        "Sus versiones guardadas y su historial se conservan. En esta versión de ARA Map no se puede deshacer.",
-      accion: "Retirar",
+      titulo: `¿Borrar este ${ETIQUETA}?`,
+      mensaje: "Se borran el archivo, todas sus versiones y su historial" +
+        (tipo === "kmz" ? ", y el terreno deja de mostrar su contorno" : "") +
+        ". Esta acción no se puede deshacer.",
+      accion: "Borrar definitivamente",
     });
     if (!ok || !vivo) return;
-    const operacion = `retirar|${archivo.id}|${archivo.revision}`;
     try {
-      avisar("Retirando…");
-      const r = await ctx.cliente.retirar(archivo.id, archivo.revision, claveDe(operacion), { signal: senal() });
-      claves.delete(operacion);
+      avisar("Borrando…");
+      await ctx.cliente.borrar(archivo.id, archivo.revision, { signal: senal() });
       if (!vivo) return;
-      avisar(r?.limpieza_pendiente ? "Archivo retirado. El servidor terminará de limpiar el contenido temporal."
-        : "Archivo retirado.");
+      avisar("Archivo borrado.");
       notificarCambio();
       cargarLista({ forzar: true });
     } catch (error) {
       if (error instanceof ErrorArchivos && error.codigo === "revision_conflictiva") {
-        claves.delete(operacion);
-        avisar("El archivo cambió mientras tanto; no se retiró. Revisa la lista actualizada.", "error");
+        avisar("El archivo cambió mientras tanto; no se borró. Revisa la lista actualizada.", "error");
         cargarLista({ forzar: true });
         return;
       }
-      fallo(error, "No se pudo retirar");
+      fallo(error, "No se pudo borrar");
     } finally {
       if (vivo && disparador?.isConnected) disparador.focus();
     }
@@ -611,7 +622,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       return { items: r.eventos ?? [], cursor: r.cursor_siguiente };
     }, lineaEvento);
     if (!archivo.retirado_en && !solo) {
-      const b = boton("Retirar…", () => retirar(archivo, b), { peligro: true, etiqueta: `Retirar ${nombre}`, escritura: true });
+      const b = boton("Borrar…", () => borrar(archivo, b), { peligro: true, etiqueta: `Borrar ${nombre}`, escritura: true });
       acciones.append(b);
     }
     return li;

@@ -105,7 +105,7 @@ export function cuerpoDeCelda(columna, valor, expectedVersion) {
 /* ------------------------------------------------------------------ lists */
 
 export const CONSULTA_VACIA = Object.freeze({
-  q: "", sort: "id", estado: "", municipio: "", tipo_terreno: "", incluirArchivados: false,
+  q: "", sort: "id", estado: "", municipio: "", tipo_terreno: "",
   limit: LIMITE_INICIAL,
 });
 
@@ -121,7 +121,6 @@ export function consultaDeLista(vista, consulta, cursor = null) {
   const q = new URLSearchParams();
   if (c.q.trim()) q.set("q", c.q.trim());
   for (const campo of ["estado", "municipio", "tipo_terreno"]) if (c[campo]) q.set(campo, c[campo]);
-  if (c.incluirArchivados) q.set("include_archived", "true");
   if (vista === VISTA_SIN_ASIGNAR) q.set("base", VISTA_SIN_ASIGNAR);
   if (c.sort && c.sort !== "id") q.set("sort", c.sort);
   q.set("limit", String(LIMITES.includes(c.limit) ? c.limit : LIMITE_INICIAL));

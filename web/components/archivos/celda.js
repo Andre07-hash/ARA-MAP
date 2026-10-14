@@ -33,6 +33,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   let solo = Boolean(soloLectura);
   let subida = null;            // the cell's last upload, until a new one replaces it
   let cambioPendiente = false;
+  // The picker is open: coming back from it gives the window focus (which may
+  // reload the table) before the chosen file arrives. Until then this cell is
+  // busy too, so a repaint keeps it instead of dropping the choice.
+  let eligiendo = false;
 
   const texto = el("span", { class: "archivos-celda", dataset: { tipo } });
   const entrada = el("input", { type: "file", class: "archivos-entrada", tabindex: "-1", "aria-hidden": "true",
@@ -159,8 +163,14 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     s.ejecutar();
   }
 
-  elegir.addEventListener("click", () => { if (!elegir.disabled) entrada.click(); });
+  elegir.addEventListener("click", () => {
+    if (elegir.disabled) return;
+    eligiendo = true;
+    entrada.click();
+  });
+  entrada.addEventListener("cancel", () => { eligiendo = false; });
   entrada.addEventListener("change", () => {
+    eligiendo = false;
     const archivo = entrada.files?.[0] ?? null;
     entrada.value = "";
     if (archivo) empezar(archivo);         // a cancelled picker sends nothing
@@ -177,7 +187,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       pintar();
     },
     /** Whether destroying this cell now would drop an unfinished upload. */
-    ocupado: () => vivo && enCurso(),
+    ocupado: () => vivo && (enCurso() || eligiendo),
     /** Whether that upload is being read, sent or verified right now. */
     activo: () => vivo && Boolean(subida) && EN_PROGRESO.has(subida.estado().fase),
     destroy() {

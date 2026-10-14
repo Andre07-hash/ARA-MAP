@@ -216,7 +216,7 @@ const ops = Object.fromEntries((await admin('GET', '/api/maestra/operadores?limi
 igual((await admin('PUT', `/api/maestra/bases/${base.id}/acceso`, { expected_version: base.version, usuarios: [ops.olga] })).status, 200, 'acceso');
 const crear = async (nombre) => (await admin('POST', `/api/maestra/bases/${base.id}/terrenos`, { terreno: nombre })).datos.terreno.id;
 const T = {};
-for (const k of ['foco', 'recarga', 'completar', 'otraFila', 'filtro', 'detalle', 'cancelar', 'operador', 'salida', 'previo', 'vencida']) {
+for (const k of ['foco', 'recarga', 'completar', 'otraFila', 'filtro', 'detalle', 'cancelar', 'operador', 'salida', 'previo', 'vencida', 'selector']) {
   T[k] = await crear(`Lote Subida ${k} Ficticio`);
 }
 // The table read its bases when the session opened: read them again.
@@ -239,6 +239,19 @@ await revisar('foco de la ventana mientras se envía el PDF: la subida no se int
   igual(contenidos(ada, desde), [], 'los bytes se enviaron una sola vez');
   cierto(await pdfGuardado(ada.page, T.foco), 'el servidor no tiene el PDF guardado');
   await hasta(async () => (await resumen(ada.page, T.foco, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+});
+
+await revisar('regreso del selector de archivos: el foco recarga la tabla antes de que llegue el archivo', async () => {
+  await irA(ada.page, base.id);
+  const listasAntes = listas(ada);
+  const [selector] = await Promise.all([ada.page.waitForEvent('filechooser'), elegirEn(ada.page, T.selector, COL.pdf).click()]);
+  await enfocar(ada, 'focus');                                // the picker closing gives the window focus first
+  await hasta(async () => listas(ada) > listasAntes, 'la revalidación no recargó la tabla');
+  await ada.page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
+  await selector.setFiles({ name: 'Avalúo ficticio.pdf', buffer: readFileSync(F.pdf), mimeType: 'application/pdf' });
+  igual(await faseFinal(ada.page, T.selector, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']).catch(() => null), 'listo',
+    'el archivo elegido se perdió con la recarga');
+  cierto(await pdfGuardado(ada.page, T.selector), 'el servidor no tiene el PDF guardado');
 });
 
 await revisar('crear otra fila durante la subida no la interrumpe', async () => {

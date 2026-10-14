@@ -327,6 +327,12 @@ await revisar('cambiar de vista pregunta antes de interrumpir; quedarse conserva
   cierto(/se interrumpe/.test(await d.innerText()) && /mismo archivo/.test(await d.innerText()), 'el aviso explica qué pasa');
   await d.getByRole('button', { name: 'Seguir en esta vista' }).click();
   igual(await ada.page.locator('#tabla-vista').inputValue(), base.id, 'la vista no cambió');
+  // Escape on that question also stays, and nothing is left waiting.
+  await ada.page.locator('#tabla-vista').selectOption('maestra');
+  await d.waitFor();
+  await ada.page.keyboard.press('Escape');
+  await hasta(async () => (await ada.page.locator('#tabla-vista').inputValue()) === base.id, 'Escape dejó la vista a medias');
+  igual(await d.count(), 0, 'la pregunta sigue abierta');
   igual(await fase(ada.page, T.cancelar, 'pdf'), 'subiendo', 'la subida sigue');
   // Its own Cancelar still works while the PUT is held.
   await celda(ada.page, T.cancelar, COL.pdf).getByRole('button', { name: 'Cancelar' }).click();
@@ -373,6 +379,21 @@ await revisar('detalle: cerrar, Escape y el fondo preguntan durante la subida; e
     await pregunta.getByRole('button', { name: 'Seguir en el detalle' }).click();
     cierto(await det.isVisible(), `${como}: el detalle se cerró`);
   }
+  // Escape on the question is a "no", and the detail still asks next time.
+  await ada.page.keyboard.press('Escape');
+  await pregunta.waitFor();
+  await ada.page.keyboard.press('Escape');
+  await hasta(async () => (await pregunta.count()) === 0, 'Escape no cerró la pregunta');
+  cierto(await det.isVisible(), 'Escape en la pregunta cerró el detalle');
+  await det.getByRole('button', { name: 'Cerrar', exact: true }).click();
+  await pregunta.waitFor().catch(() => { throw new Error('tras Escape, «Cerrar» ya no pregunta'); });
+  await pregunta.getByRole('button', { name: 'Seguir en el detalle' }).click();
+  // Keyboard only, Escape after Escape: never past the question, never two of them.
+  for (let i = 0; i < 6; i += 1) { await ada.page.keyboard.press('Escape'); await esperar(150); }
+  cierto(await det.isVisible(), 'Escape repetido cerró el detalle');
+  cierto((await pregunta.count()) <= 1, 'quedaron preguntas apiladas');
+  if (await pregunta.count()) await pregunta.getByRole('button', { name: 'Seguir en el detalle' }).click();
+  igual(await det.locator('[data-fase="subiendo"]').count(), 1, 'la subida del detalle sigue');
   await put.soltar();
   await hasta(async () => pdfGuardado(ada.page, T.detalle), 'el servidor no guardó el PDF del detalle');
   await hasta(async () => (await det.locator('.archivos-subida[data-fase="listo"], [data-fase="listo"]').count()) > 0, 'el detalle no dijo Listo');
@@ -411,9 +432,9 @@ await revisar('estados: subida vencida sin PDF previo, y con un PDF guardado que
   }
   await irA(ada.page, base.id);
   igual(await resumen(ada.page, T.vencida, COL.pdf), 'Sin PDF guardado', 'sin PDF previo');
-  cierto(/subida vencida/.test(await celda(ada.page, T.vencida, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'dice subida vencida');
+  cierto(/subida vencida/i.test(await celda(ada.page, T.vencida, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'dice subida vencida');
   igual(await resumen(ada.page, T.previo, COL.pdf), '1 PDF', 'el PDF guardado sigue contando');
-  cierto(/subida vencida/.test(await celda(ada.page, T.previo, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'con nota de la subida vencida');
+  cierto(/subida vencida/i.test(await celda(ada.page, T.previo, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'con nota de la subida vencida');
   const texto = await ada.page.locator('.tabla-lienzo').innerText();
   cierto(!/PDF vencido/.test(texto), 'nunca «PDF vencido»');
   // The detail: no download for the never-finished one; the saved one stays reachable.

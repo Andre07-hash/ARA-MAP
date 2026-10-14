@@ -29,7 +29,7 @@ function nota(v, actual) {
     return v.estado === "expirado" ? "Una subida de otra cuenta venció sin terminar" : "Otra cuenta está subiendo una versión";
   }
   if (v.estado === "subiendo") return "Tienes una subida sin terminar";
-  if (v.estado === "expirado") return "Tu última subida venció sin terminar (subida vencida)";
+  if (v.estado === "expirado") return "Subida vencida: tu última subida no terminó a tiempo";
   if (v.estado === "fallido") return "La última subida fue rechazada";
   if (v.estado === "disponible" && actual && v.id !== actual) return "Hay una versión nueva sin activar";
   return null;
@@ -104,12 +104,12 @@ export function describirResumen(resumen, tipo) {
   const ultima = k.ultima_version ?? null;
   const n = nota(ultima, k.version_actual_id);
   if (k.geometria_activa_id) {
-    return { estado: pendienteDe(ultima) ? ESTADO.PENDIENTE
-      : vencidaDe(ultima) || ultima?.estado === "fallido" ? ESTADO.FALLIDO : ESTADO.LISTO,
-    texto: "Contorno activo", nota: n };
+    // An expired attempt changes nothing: the active boundary is as good as before.
+    return { estado: pendienteDe(ultima) ? ESTADO.PENDIENTE : ultima?.estado === "fallido" ? ESTADO.FALLIDO
+      : ESTADO.LISTO, texto: "Contorno activo", nota: n };
   }
   if (pendienteDe(ultima)) return { estado: ESTADO.PENDIENTE, texto: "KMZ en curso", nota: n };
-  if (vencidaDe(ultima)) return { estado: ESTADO.FALLIDO, texto: "Subida KMZ vencida", nota: n };
+  if (vencidaDe(ultima) && !k.version_actual_id) return { estado: ESTADO.FALLIDO, texto: "Subida KMZ vencida", nota: n };
   if (ultima?.estado === "fallido") return { estado: ESTADO.FALLIDO, texto: "KMZ falló", nota: n };
   return { estado: ESTADO.SIN_ACTIVAR, texto: "KMZ sin contorno activo", nota: n };
 }

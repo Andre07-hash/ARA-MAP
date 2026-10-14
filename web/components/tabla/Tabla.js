@@ -104,6 +104,7 @@ export function createTabla({
   const cola = crearCola();
   let ranuras = [];
   const apartadas = new Map();    // "id|tipo" -> a busy file mount whose row is being repainted
+  const porPintar = new Set();    // keys set aside since the last paint: theirs is not decided yet
   let vigiaApartadas = null;
   let seleccion = null;           // terrain id shared with the map preview
   let detalleAbierto = null;      // the open record detail, for file refreshes
@@ -869,8 +870,10 @@ export function createTabla({
   /** Before a repaint: keep the mounts whose upload is unfinished, end the rest. */
   function apartarRanuras() {
     for (const r of ranuras) {
-      if (r.ocupado?.()) apartadas.set(claveRanura(r.terrenoId, r.tipo), r);
-      else r.destroy();
+      if (r.ocupado?.()) {
+        apartadas.set(claveRanura(r.terrenoId, r.tipo), r);
+        porPintar.add(claveRanura(r.terrenoId, r.tipo));
+      } else r.destroy();
     }
     ranuras = [];
   }
@@ -881,6 +884,7 @@ export function createTabla({
     ranuras = [];
     for (const r of apartadas.values()) r.destroy();
     apartadas.clear();
+    porPintar.clear();
     clearInterval(vigiaApartadas);
     vigiaApartadas = null;
     pintarApartadas();
@@ -891,6 +895,7 @@ export function createTabla({
     const r = apartadas.get(claveRanura(t.id, c.archivo));
     if (!r) return null;
     apartadas.delete(claveRanura(t.id, c.archivo));
+    porPintar.delete(claveRanura(t.id, c.archivo));
     r.update({ soloLectura: !editable, resumen: t.archivos ?? undefined });
     ranuras.push(r);
     return r.container;
@@ -898,10 +903,15 @@ export function createTabla({
 
   /* Mounts left out of the new rows (their terrain is on another page or out
    * of the filters) keep sending while they are active; once they stop they
-   * are released, and the server keeps the unfinished version. */
+   * are released, and the server keeps the unfinished version. Called after a
+   * paint: what that paint did not put back is decided now. A mount set aside
+   * by a reload still on its way waits for that paint (porPintar). */
   function vigilarApartadas() {
+    porPintar.clear();
     const revisar = () => {
-      for (const [k, r] of apartadas) if (!r.activo?.()) { r.destroy(); apartadas.delete(k); }
+      for (const [k, r] of apartadas) {
+        if (!porPintar.has(k) && !r.activo?.()) { r.destroy(); apartadas.delete(k); }
+      }
       if (!apartadas.size) { clearInterval(vigiaApartadas); vigiaApartadas = null; }
       pintarApartadas();
     };
@@ -910,7 +920,7 @@ export function createTabla({
   }
 
   function pintarApartadas() {
-    const n = apartadas.size;
+    const n = [...apartadas.keys()].filter((k) => !porPintar.has(k)).length;
     avisoSubidas.hidden = !n;
     avisoSubidas.textContent = n ? `${n === 1 ? "Una subida sigue" : `${n} subidas siguen`} en curso para ` +
       `${n === 1 ? "un terreno que no está" : "terrenos que no están"} en esta página. Al terminar, su resumen ` +

@@ -577,10 +577,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       // A newer attempt did not finish (or is another account's): the saved version stays reachable.
       const guardada = { id: archivo.version_actual_id, nombre_original: null };
       acciones.append(boton("Descargar guardada", () => descargar(guardada),
-        { etiqueta: `Descargar la versión guardada de ${nombre}` }));
+        { etiqueta: "Descargar la versión guardada" }));
       if (tipo === "pdf") {
         acciones.append(boton("Abrir guardada", () => descargar(guardada, true),
-          { etiqueta: `Abrir la versión guardada de ${nombre}` }));
+          { etiqueta: "Abrir la versión guardada" }));
       }
     }
     const verVersiones = boton("Versiones", null);

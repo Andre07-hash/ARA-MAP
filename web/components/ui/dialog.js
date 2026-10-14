@@ -73,11 +73,20 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) close();
   });
-  dialog.addEventListener("cancel", (event) => {
-    if (!antesDeCerrar) { dialog.remove(); return; }
-    event.preventDefault();      // Escape asks first, like the close button
-    close();
-  });
+  // Escape. Unguarded, the native close runs and the "close" listener below
+  // removes the dialog (removing it here would swallow that event, and with it
+  // the answer of a confirmDialog). Guarded, the key itself is taken so it
+  // never reaches the browser's own close, which a page may only veto once
+  // per user activation.
+  if (antesDeCerrar) {
+    dialog.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+    });
+    dialog.addEventListener("cancel", (event) => { event.preventDefault(); close(); });
+  }
   // However it closes (a button, Escape, or code calling close()), it leaves the document.
   dialog.addEventListener("close", () => { vivos.delete(dialog); dialog.remove(); });
   vivos.add(dialog);
@@ -109,5 +118,6 @@ export function confirmDialog({ titulo, mensaje, confirmar = "Confirmar", cancel
       ],
     });
     dialog.addEventListener("close", () => finish(false));
+    dialog.addEventListener("cancel", () => finish(false));     // Escape is a "no"
   });
 }

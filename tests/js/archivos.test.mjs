@@ -445,7 +445,7 @@ test("summary: a PDF counts only with a saved version; unfinished uploads say wh
   // Never finished and nothing saved: not "1 PDF", and "vencida" is the upload's deadline.
   const sola = R.describirResumen({ pdf_total: 1, pdf_recientes: [vencida()] }, "pdf");
   assert.deepEqual([sola.texto, sola.estado], ["Sin PDF guardado", R.ESTADO.FALLIDO]);
-  assert.match(sola.nota, /subida vencida/);
+  assert.match(sola.nota, /subida vencida/i);
   assert.doesNotMatch(`${sola.texto} ${sola.nota}`, /PDF vencido/);
   const rechazada = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({}, { id: randomUUID(), estado: "fallido" })] }, "pdf");
   assert.deepEqual([rechazada.texto, rechazada.nota], ["Sin PDF guardado", "La última subida fue rechazada"]);
@@ -453,7 +453,7 @@ test("summary: a PDF counts only with a saved version; unfinished uploads say wh
   const conPrevio = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({ version_actual_id: vid },
     { id: randomUUID(), numero: 2, estado: "expirado", propia: true })] }, "pdf");
   assert.deepEqual([conPrevio.texto, conPrevio.estado], ["1 PDF", R.ESTADO.LISTO]);
-  assert.match(conPrevio.nota, /subida vencida/);
+  assert.match(conPrevio.nota, /subida vencida/i);
 });
 
 test("summary: a truncated PDF list is never totalled as saved PDFs (#39)", () => {
@@ -466,10 +466,17 @@ test("summary: a truncated PDF list is never totalled as saved PDFs (#39)", () =
   assert.doesNotMatch(r.texto, /^\d+ PDF$/);
 });
 
-test("summary: an expired KMZ upload is not shown as in progress", () => {
-  const r = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz" },
-    { id: randomUUID(), estado: "expirado", propia: true }) }, "kmz");
-  assert.deepEqual([r.texto, r.estado], ["Subida KMZ vencida", R.ESTADO.FALLIDO]);
+test("summary: an expired KMZ upload is not shown as in progress, nor hides what is saved", () => {
+  const vencida = { id: randomUUID(), estado: "expirado", propia: true };
+  const sola = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz" }, vencida) }, "kmz");
+  assert.deepEqual([sola.texto, sola.estado], ["Subida KMZ vencida", R.ESTADO.FALLIDO]);
+  const guardado = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz",
+    version_actual_id: randomUUID() }, vencida) }, "kmz");
+  assert.equal(guardado.texto, "KMZ sin contorno activo");
+  const activo = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz",
+    version_actual_id: randomUUID(), geometria_activa_id: randomUUID() }, vencida) }, "kmz");
+  assert.deepEqual([activo.texto, activo.estado], ["Contorno activo", R.ESTADO.LISTO]);
+  assert.match(activo.nota, /subida vencida/i);
 });
 
 test("summary: KMZ keeps the active boundary while a replacement is pending or failed", () => {

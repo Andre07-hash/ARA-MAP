@@ -615,9 +615,10 @@ export function createTabla({
   function definicionesDeBase(baseId, signal) {
     if (!esGlobal(vista) && baseId === vista) return definiciones;
     if (!signal) return null;
-    const gen = generacion;
+    // Bound to the view, not to a page or query of it: leaving the view aborts it (reiniciar).
+    const deVista = vista;
     return api.columnas(baseId, false, signal).then((r) => {
-      if (!vivo || gen !== generacion) throw Object.assign(new Error("fuera de alcance"), { name: "AbortError" });
+      if (!vivo || deVista !== vista) throw Object.assign(new Error("fuera de alcance"), { name: "AbortError" });
       return r.columnas ?? [];
     });
   }

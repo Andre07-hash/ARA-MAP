@@ -310,6 +310,10 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
   await escribir(elegido, { changes: { notas_internas: 'Comentario ficticio nuevo' } });
   await ada.page.getByRole('button', { name: 'Actualizar' }).click();
   await hasta(async () => (await fichaTexto(ada.page)).includes('Comentario ficticio nuevo'), 'valor actual en la ficha');
+  // A table search that still includes the selected terrain keeps the selection and its record.
+  await ada.page.locator('#tabla-buscar').fill('Lote Panel 00');
+  await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('q=Lote'); }, 'reunión con la búsqueda');
+  await hasta(async () => (await mapa(ada.page)).seleccion === elegido && await ficha(ada.page).isVisible(), 'la selección sigue tras la búsqueda');
   await ada.page.getByRole('button', { name: 'Ver a escala' }).click();
   await foto(ada.page, '02-administrador-ficha');
   await ficha(ada.page).getByRole('button', { name: 'Cerrar detalle' }).click();

@@ -95,7 +95,8 @@ export function createMapaPaneles({
     resultado = filtrarMapa(filas, filtros);
     const { visibles, monedas, breaks } = resultado;
     previa.pintar(visibles.map((f) => f.registro), {
-      total, nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
+      // "The view has N in total" is said only for an incomplete gathering, not for the map's filters.
+      total: registros.length < total ? total : 0, nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
     });
     rail.update({ terrenos: filas, filtros, visibles: visibles.length, monedas });
     const activos = filtrosActivos();
@@ -110,7 +111,8 @@ export function createMapaPaneles({
     }));
     avisoAlcance.textContent = alcance?.() ?? "";
     pintarFicha();
-    if (antes && !previa.seleccion) onDeseleccion?.(antes);
+    // Only when the map's filters left it out; a set that no longer holds it is the table's to handle.
+    if (antes && !previa.seleccion && registroDe(antes)) onDeseleccion?.(antes);
   }
 
   function aplicarFiltros() {
@@ -149,7 +151,9 @@ export function createMapaPaneles({
       columnas = { id: registro.id, baseId, estado: "listo", definiciones: definiciones ?? [] };
       pintarFicha();
     }, (error) => {
-      if (!vivo || mio !== pedidoColumnas || error?.name === "AbortError") return;
+      if (!vivo || mio !== pedidoColumnas) return;
+      // Still the selection's own request, yet dropped: forget it so the next paint asks again.
+      if (error?.name === "AbortError") { columnas = null; return; }
       columnas = { id: registro.id, baseId, estado: "error", definiciones: [], mensaje: error?.message ?? "" };
       pintarFicha();
     });

@@ -43,7 +43,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
   const titulo = el("h2", { class: "previa-titulo" }, "Mapa de la vista");
   const cuenta = el("p", { class: "previa-cuenta" });
   const nota = el("p", { class: "previa-nota" },
-    "Muestra los terrenos de esta vista que cumplen los filtros, no sólo la página de la tabla. " +
+    "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
     "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
     "en su punto interior. Un KMZ subido sin activar no cambia el mapa.");
   const estado = el("p", { class: "previa-estado", role: "status", "aria-live": "polite" });

@@ -60,6 +60,10 @@ export function montarRanura({ container, terrenoId, tipo, soloLectura, resumen,
   return {
     container, terrenoId, tipo,
     update(cambios) { if (vivo) montado.update?.(cambios); },
+    /** Whether destroying this slot now would drop an unfinished upload. */
+    ocupado: () => vivo && Boolean(montado.ocupado?.()),
+    /** Whether that upload is being read, sent or verified right now. */
+    activo: () => vivo && Boolean(montado.activo?.()),
     destroy() {
       if (!vivo) return;
       vivo = false;

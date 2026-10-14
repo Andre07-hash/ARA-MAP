@@ -19,7 +19,13 @@ export function closeAllDialogs() {
   }
 }
 
-export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "34rem" }) {
+/**
+ * `antesDeCerrar` (optional) is asked before the person closes the dialog
+ * (an action, Escape, the backdrop): a false answer keeps it open. Code that
+ * removes every dialog (closeAllDialogs) is not asked. `close()` resolves
+ * whether the dialog closed.
+ */
+export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "34rem", antesDeCerrar = null }) {
   // One id per dialog: a dialog opened over another must be named by its own title.
   const idTitulo = `dialog-title-${abiertos += 1}`;
   const dialog = el("dialog", { class: "dialog", style: { maxWidth: ancho } });
@@ -31,9 +37,22 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
   );
 
   const footer = el("footer", { class: "dialog-footer" });
-  const close = (value) => {
+  let preguntando = false;
+  const cerrarYa = (value) => {
     dialog.close(value ?? "");
     dialog.remove();
+  };
+  const close = async (value) => {
+    if (!dialog.isConnected) return true;
+    if (antesDeCerrar) {
+      if (preguntando) return false;
+      preguntando = true;
+      let seguir = false;
+      try { seguir = await antesDeCerrar(); } finally { preguntando = false; }
+      if (!seguir || !dialog.isConnected) return !dialog.isConnected;
+    }
+    cerrarYa(value);
+    return true;
   };
 
   for (const accion of acciones ?? []) {
@@ -54,7 +73,11 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) close();
   });
-  dialog.addEventListener("cancel", () => dialog.remove());
+  dialog.addEventListener("cancel", (event) => {
+    if (!antesDeCerrar) { dialog.remove(); return; }
+    event.preventDefault();      // Escape asks first, like the close button
+    close();
+  });
   // However it closes (a button, Escape, or code calling close()), it leaves the document.
   dialog.addEventListener("close", () => { vivos.delete(dialog); dialog.remove(); });
   vivos.add(dialog);
@@ -67,7 +90,7 @@ export function openDialog({ titulo, descripcion, contenido, acciones, ancho = "
 }
 
 /** A yes/no confirmation. Resolves true only if the user confirms. */
-export function confirmDialog({ titulo, mensaje, confirmar = "Confirmar", peligro = false }) {
+export function confirmDialog({ titulo, mensaje, confirmar = "Confirmar", cancelar = "Cancelar", peligro = false }) {
   return new Promise((resolve) => {
     let settled = false;
     const finish = (value) => { if (!settled) { settled = true; resolve(value); } };
@@ -77,7 +100,7 @@ export function confirmDialog({ titulo, mensaje, confirmar = "Confirmar", peligr
       contenido: el("p", { class: "secondary" }, mensaje),
       ancho: "28rem",
       acciones: [
-        { etiqueta: "Cancelar", onClick: (close) => { finish(false); close(); } },
+        { etiqueta: cancelar, onClick: (close) => { finish(false); close(); } },
         {
           etiqueta: confirmar,
           variante: peligro ? "peligro" : "principal",

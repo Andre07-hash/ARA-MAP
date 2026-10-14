@@ -125,12 +125,13 @@ export async function mount(root) {
   session = createSession({
     onSignedIn: alEntrar,
     onSignedOut: limpiarPrivado,
-    hasUnsavedWork: () => Boolean(editor?.dirty || tabla?.dirty),
+    hasUnsavedWork: () => Boolean(editor?.dirty || tabla?.dirty || tabla?.subiendo),
   });
 
   window.addEventListener("hashchange", aplicarRuta);
   window.addEventListener("beforeunload", (event) => {
-    if (editor?.dirty || tabla?.dirty) { event.preventDefault(); event.returnValue = ""; }
+    // Unsaved cells, or an upload a reload would interrupt.
+    if (editor?.dirty || tabla?.dirty || tabla?.subiendo) { event.preventDefault(); event.returnValue = ""; }
   });
   // An open public page catches up when it is looked at again; nothing polls.
   document.addEventListener("visibilitychange", () => {
@@ -222,6 +223,13 @@ async function loadIndex({ forzar = false } = {}) {
 
 async function cerrarSesion() {
   if ((editor?.dirty || tabla?.dirty) && !(await confirmarDescarte())) return;
+  if (tabla?.subiendo && !(await confirmDialog({
+    titulo: "¿Cerrar sesión e interrumpir la subida?",
+    mensaje: "Hay una subida de archivo sin terminar. Si cierras sesión ahora, se interrumpe: los archivos ya " +
+      "guardados se conservan, y la subida puede continuarse después desde el detalle del terreno eligiendo " +
+      "otra vez el mismo archivo.",
+    confirmar: "Cerrar sesión", cancelar: "Seguir en la sesión", peligro: true,
+  }))) return;
   session.signOut();
 }
 

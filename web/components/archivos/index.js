@@ -1,9 +1,9 @@
 /* File widgets for the table host (Round 3 INTERFACES §3, packet 3B).
  *
- *   crearWidgetsArchivos({peticionPrivada}) -> {mount, mountDetalle, destroy}
+ *   crearWidgetsArchivos({peticionPrivada}) -> {mount, mountDetalle, pendientes(), destroy}
  *
  *   mount / mountDetalle({container, terrenoId, tipo, soloLectura, resumen, onCambio, onError})
- *     -> {update({soloLectura, resumen}), destroy()}
+ *     -> {update({soloLectura, resumen}), ocupado(), activo(), destroy()}
  *
  * `mount` is the compact cell: the caller-aware summary and, when the row may
  * be changed, a button that picks a file and runs the same upload (celda.js);
@@ -20,6 +20,11 @@
  * injected private bridge, the single upload/hash pipeline turn and the count
  * of unfinished uploads (no more than the server's five). destroy() tears
  * every mount down; after it nothing is sent and nothing is shown.
+ *
+ * The host asks the same record before it repaints or leaves: `pendientes()`
+ * is how many uploads are unfinished; a mount's `ocupado()` says whether
+ * destroying it now would drop one of them, and `activo()` whether one is
+ * being read, sent or verified right now.
  */
 
 import { crearClienteArchivos } from "../../lib/archivos.js";
@@ -60,6 +65,8 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
     let vivo = true;
     const envoltura = {
       update(cambios = {}) { if (vivo && !destruido) montado.update(cambios); },
+      ocupado: () => vivo && !destruido && Boolean(montado.ocupado?.()),
+      activo: () => vivo && !destruido && Boolean(montado.activo?.()),
       destroy() {
         if (!vivo) return;
         vivo = false;
@@ -78,6 +85,7 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
       validar(args);
       return registrar(montarCelda(args, contexto), args);
     },
+    pendientes: () => (destruido ? 0 : subidas.size),
     mountDetalle(args) {
       if (destruido) throw new Error("Los widgets de archivos ya se destruyeron.");
       validar(args);

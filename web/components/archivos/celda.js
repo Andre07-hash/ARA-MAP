@@ -176,6 +176,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       pintarResumen(nuevo);
       pintar();
     },
+    /** Whether destroying this cell now would drop an unfinished upload. */
+    ocupado: () => vivo && enCurso(),
+    /** Whether that upload is being read, sent or verified right now. */
+    activo: () => vivo && Boolean(subida) && EN_PROGRESO.has(subida.estado().fase),
     destroy() {
       if (!vivo) return;
       vivo = false;

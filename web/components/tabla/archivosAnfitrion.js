@@ -47,6 +47,8 @@ export function conectarArchivos({ onListo } = {}) {
     /** The geometry loader, or null while it is loading or if it is missing. */
     get cargador() { return cargador; },
     get faltan() { return [...faltan]; },
+    /** Unfinished uploads across this session's file widgets (cells and detail). */
+    pendientes: () => widgets?.pendientes?.() ?? 0,
     destroy() {
       if (!vivo) return;
       vivo = false;

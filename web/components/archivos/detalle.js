@@ -43,7 +43,9 @@ const ACCIONES = {
 };
 
 const ESTADO_VERSION = {
-  subiendo: "Subiendo", disponible: "Guardada", fallido: "Rechazada", cancelado: "Cancelada", expirado: "Vencida",
+  // "Vencida" is the upload's deadline to finish: a saved version never expires.
+  subiendo: "Subida sin terminar", disponible: "Guardada", fallido: "Rechazada", cancelado: "Cancelada",
+  expirado: "Subida vencida",
 };
 
 const RESULTADO_INTENTO = {
@@ -56,7 +58,7 @@ export const FASE_TEXTO = {
   [FASE.COMPLETANDO]: "Verificando", [FASE.LISTO]: "Listo", [FASE.REQUIERE_SELECCION]: "Elige contornos",
   [FASE.NO_APLICADA]: "Guardado sin activar", [FASE.RECHAZADO]: "Sin contorno utilizable",
   [FASE.FALLIDO]: "Falló", [FASE.INTERRUMPIDO]: "Interrumpida", [FASE.INCIERTO]: "Sin confirmar", [FASE.EN_CURSO]: "En proceso",
-  [FASE.EXPIRADO]: "Vencida", [FASE.REQUIERE_ARCHIVO]: "Falta el archivo", [FASE.CANCELANDO]: "Cancelando",
+  [FASE.EXPIRADO]: "Subida vencida", [FASE.REQUIERE_ARCHIVO]: "Falta el archivo", [FASE.CANCELANDO]: "Cancelando",
   [FASE.CANCELADO]: "Cancelada",
 };
 export const EN_PROGRESO = new Set([FASE.LEYENDO, FASE.INICIANDO, FASE.SUBIENDO, FASE.COMPLETANDO, FASE.CANCELANDO]);
@@ -558,7 +560,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       el("span", { class: "archivos-item-nombre" }, nombre),
       archivo.retirado_en ? el("span", { class: "archivos-chip archivos-chip-retirado" }, "Retirado")
         : archivo.version_actual_id ? el("span", { class: "archivos-chip archivos-chip-actual" }, "Actual")
-          : el("span", { class: "archivos-chip" }, "Sin versión actual"),
+          : el("span", { class: "archivos-chip" }, tipo === "pdf" ? "Sin PDF guardado" : "Sin versión actual"),
       tipo === "kmz" && archivo.geometria_activa_id && !archivo.retirado_en
         ? el("span", { class: "archivos-chip archivos-chip-actual" }, "Contorno activo") : null,
       v ? el("span", { class: "secondary" }, v.propia === false
@@ -571,6 +573,15 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
     if (archivo.version_actual_id && v && v.id === archivo.version_actual_id && v.estado === "disponible") {
       acciones.append(boton("Descargar", () => descargar(v), { etiqueta: `Descargar ${nombre}` }));
       if (tipo === "pdf") acciones.append(boton("Abrir", () => descargar(v, true), { etiqueta: `Abrir ${nombre}` }));
+    } else if (archivo.version_actual_id && !archivo.retirado_en) {
+      // A newer attempt did not finish (or is another account's): the saved version stays reachable.
+      const guardada = { id: archivo.version_actual_id, nombre_original: null };
+      acciones.append(boton("Descargar guardada", () => descargar(guardada),
+        { etiqueta: `Descargar la versión guardada de ${nombre}` }));
+      if (tipo === "pdf") {
+        acciones.append(boton("Abrir guardada", () => descargar(guardada, true),
+          { etiqueta: `Abrir la versión guardada de ${nombre}` }));
+      }
     }
     const verVersiones = boton("Versiones", null);
     const verHistorial = boton("Historial", null);
@@ -688,6 +699,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       if (solo !== antesSolo) pintarModo();
       if (cambioResumen) refrescarLista();
     },
+    /** Whether destroying the detail now would drop an unfinished upload. */
+    ocupado: () => vivo && [...subidas.keys()].some((s) => !esTerminal(s.estado().fase)),
+    /** Whether one of them is being read, sent or verified right now. */
+    activo: () => vivo && [...subidas.keys()].some((s) => EN_PROGRESO.has(s.estado().fase)),
     destroy() {
       if (!vivo) return;
       vivo = false;

@@ -203,9 +203,15 @@ await caso('without Team B\'s modules the table works, says the files are unavai
   assert.equal((await celda(page, soloKmz, 'core:archivos').innerText()).trim(), 'No disponible');
   await abrirMapa(page);
   await page.locator('.previa-mapa .leaflet-container, .previa-mapa.leaflet-container').waitFor();
-  const cuenta = await page.locator('.previa-cuenta').innerText();
-  assert.match(cuenta, /3 terrenos · 2 en el mapa \(1 con contorno activo, 1 por X\/Y\) · 1 sin ubicación/);
-  assert.match(await page.locator('.previa-nota').innerText(), /Muestra todos los terrenos de esta vista con los filtros actuales/);
+  // Counts: filtered in the filters panel, placed / not placed in the legend; the explanation behind the info toggle.
+  await hasta(async () => /3 terrenos de 3/.test(await page.locator('.mapa-tabla-rail .rail-result').innerText()));
+  const leyenda = await page.locator('.previa .legend').innerText();
+  assert.match(leyenda, /2 terrenos/);
+  assert.match(leyenda, /1 terreno fuera del mapa/);
+  assert.match(await page.locator('.previa-nota').textContent(), /Muestra todos los terrenos de esta vista con los filtros actuales/);
+  // The module failure stays said on the map: the footer shows only that alert.
+  assert.equal(await page.locator('.tabla-alerta').isVisible(), true);
+  assert.match(await page.locator('.tabla-alerta').innerText(), /No se pudo cargar el módulo/);
   await seleccionar(page, soloKmz);
   await hasta(async () => /módulo de contornos no está disponible/.test(await estadoMapa(page).innerText()));
   assert.equal(await page.getByRole('button', { name: 'Reintentar' }).isVisible(), true);

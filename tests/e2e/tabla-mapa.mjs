@@ -297,6 +297,9 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
 });
 
 await revisar('administrador: el círculo de un terreno sin X/Y carga su contorno activo; otro círculo, el suyo', async () => {
+  // A row chosen in the grid (the last KMZ cell) is the map's selection too, and its body may still
+  // be on its way: count only what the click asks for.
+  await hasta(async () => !(await previa(ada.page)).cargando, 'la carga anterior no terminó', 120000);
   const antes = cuerposPedidos(ada).length;
   await clicEnMapa(ada.page, conContorno);
   await hasta(async () => (await posicion(ada.page, conContorno))?.contorno === true, 'sin contorno');

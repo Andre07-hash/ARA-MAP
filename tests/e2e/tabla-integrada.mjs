@@ -670,13 +670,22 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
   await page.getByRole('button', { name: 'Bases y accesos' }).click();
   let bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
   await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
-  await bases.getByText(/«Base Sur» todavía tiene 1 terreno/).waitFor();
+  // Earlier journeys (the transfer) may have left terrains in Base Sur too: the server says how many.
+  const enSurAhora = (await pedir(page, '/api/maestra/bases')).body.bases.find((b) => b.id === B['Base Sur']).terrenos;
+  assert.ok(enSurAhora >= 1, 'the new row is in Base Sur');
+  await bases.getByText(new RegExp(`«Base Sur» todavía tiene ${enSurAhora} terrenos?\\.`)).waitFor();
   assert.equal(await page.getByRole('dialog', { name: /¿Borrar la base/ }).count(), 0, 'no confirmation while it has terrains');
   await foto(page, '19-base-con-terrenos');
   await bases.getByRole('button', { name: 'Cerrar' }).click();
 
   await borrarTerreno(page, enSur, 'Lote del Sur');
   await page.locator(`tr[data-id="${enSur}"]`).waitFor({ state: 'detached' });
+  // What other journeys left there goes too, through the same route, so the base is empty.
+  const resto = (await pedir(page, `/api/maestra/bases/${B['Base Sur']}/terrenos?limit=200`)).body.terrenos;
+  for (const t of resto) {
+    const r = await pedir(page, `/api/inventario/terrenos/${t.id}/borrar`, { method: 'POST', body: JSON.stringify({ expected_version: t.version }) });
+    assert.equal(r.status, 200, `borrar ${t.id}`);
+  }
   await irATabla(page, B['Base Norte']);             // not standing in the base that goes away
   await page.getByRole('button', { name: 'Bases y accesos' }).click();
   bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });

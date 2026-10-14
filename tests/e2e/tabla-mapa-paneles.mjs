@@ -19,7 +19,7 @@
  * The map's layout (issue #40): one slim bar with only the view, Tabla / Mapa
  * and Actualizar; no strips above or below the map; "Encuadrar todo" over the
  * map beside the zoom control; the terrain type as a local map filter; and
- * the table's filters (archived included) kept and said in a small note.
+ * the table's filters kept and said in a small note.
  * Optional: MAPA_CAPTURAS=dir (screenshots), CHROMIUM=/path, MAPA_PUERTO.
  */
 
@@ -243,7 +243,7 @@ await revisar('administrador: filtros a la izquierda, mapa con leyenda por preci
 await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni pie, Encuadrar todo sobre el mapa', async () => {
   const p = ada.page;
   // Only the view, Tabla / Mapa and Actualizar: the grid's query controls are hidden, not cleared.
-  for (const id of ['tabla-buscar', 'tabla-estado', 'tabla-municipio', 'tabla-tipo', 'tabla-orden', 'tabla-desc', 'tabla-archivados']) {
+  for (const id of ['tabla-buscar', 'tabla-estado', 'tabla-municipio', 'tabla-tipo', 'tabla-orden', 'tabla-desc']) {
     igual(await p.locator(`#${id}`).isVisible(), false, `#${id} oculto en el mapa`);
   }
   for (const nombre of ['Agregar terreno', 'Columnas', 'Bases y accesos']) {
@@ -367,25 +367,22 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await hasta(async () => (await previa(ada.page)).filas < jalisco, 'búsqueda dentro del alcance');
   await ada.page.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
   await hasta(async () => (await previa(ada.page)).filas === jalisco, 'Limpiar vuelve al alcance, no a toda la base');
-  // The table's type and archived filters: kept, said, and never offered as map controls.
+  // The table's type filter: kept, said, and never offered as a map control.
   await aTabla(ada.page);
   await ada.page.locator('#tabla-tipo').selectOption('Industrial Ficticio');
-  await ada.page.locator('#tabla-archivados').check();
   await aMapa(ada.page);
-  await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && /tipo_terreno=Industrial/.test(x.clave) && /archiv/.test(x.clave); }, 'reunión con tipo y archivados');
-  igual(await resumen.innerText(), 'Filtros de la tabla (3)', 'tres filtros heredados');
+  await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && /tipo_terreno=Industrial/.test(x.clave); }, 'reunión con el tipo');
+  igual(await resumen.innerText(), 'Filtros de la tabla (2)', 'dos filtros heredados');
   await resumen.click();
   const panel = await nota.locator('.tabla-heredados-panel').innerText();
-  cierto(/Estado: Jalisco/.test(panel) && /Tipo de terreno: Industrial Ficticio/.test(panel) && /Archivados: incluidos/.test(panel), `nota: ${panel}`);
+  cierto(/Estado: Jalisco/.test(panel) && /Tipo de terreno: Industrial Ficticio/.test(panel), `nota: ${panel}`);
   await ada.page.keyboard.press('Escape');
-  igual(await ada.page.locator('#incluir-archivados, .mapa-tabla-rail input[id*="archiv"]').count(), 0, 'sin casilla de archivados en el mapa');
   const tipos = await ada.page.locator('.mapa-tabla-rail [id^="tipos-"]').evaluateAll((n) => n.map((c) => c.value));
   igual(tipos, ['Industrial Ficticio'], 'el Tipo local sólo ofrece los tipos del conjunto');
   await aTabla(ada.page);
-  igual([await ada.page.locator('#tabla-estado').inputValue(), await ada.page.locator('#tabla-tipo').inputValue(),
-    await ada.page.locator('#tabla-archivados').isChecked()], ['Jalisco', 'Industrial Ficticio', true], 'la tabla conserva sus filtros');
+  igual([await ada.page.locator('#tabla-estado').inputValue(), await ada.page.locator('#tabla-tipo').inputValue()],
+    ['Jalisco', 'Industrial Ficticio'], 'la tabla conserva sus filtros');
   await ada.page.locator('#tabla-tipo').selectOption('');
-  await ada.page.locator('#tabla-archivados').uncheck();
   await aMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await ada.page.locator('#tabla-vista').selectOption(otra.id);

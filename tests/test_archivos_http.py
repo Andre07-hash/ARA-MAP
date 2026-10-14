@@ -314,7 +314,7 @@ class HTTPChecks:
         self.assertEqual(r["archivo"]["geometria_activa_id"], g1)
         self.assertEqual(self.version_terreno(self.terreno), 1)
 
-    def test_cancel_retire_and_retired_content_stays_readable(self):
+    def test_cancel_and_delete_over_http(self):
         s, pendiente = self.iniciar(PDF)
         self.subir(pendiente["version_id"], PDF)
         s, cancelado = self.j("POST", f"/api/archivos/versiones/{pendiente['version_id']}/cancelar")
@@ -322,18 +322,18 @@ class HTTPChecks:
         s, otra = self.j("POST", f"/api/archivos/versiones/{pendiente['version_id']}/cancelar")
         self.assertEqual((s, otra["detalle"]["code"]), (409, "subida_no_pendiente"))
         inicio, completo = self.archivo_completo(kmz("poligono_simple"), "kmz")
-        s, retirado = self.j("POST", f"/api/archivos/{inicio['archivo_id']}/retirar",
-                             datos={"expected_revision": completo["archivo"]["revision"]}, clave="retirar-1")
-        self.assertEqual(s, 200, retirado)
-        s, replay = self.j("POST", f"/api/archivos/{inicio['archivo_id']}/retirar",
-                           datos={"expected_revision": completo["archivo"]["revision"]}, clave="retirar-1")
-        self.assertTrue(replay["replay"])
+        s, borrado = self.j("POST", f"/api/archivos/{inicio['archivo_id']}/borrar",
+                            datos={"expected_revision": completo["archivo"]["revision"]})
+        self.assertEqual((s, borrado), (200, {"borrado": True, "limpieza_pendiente": False}))
+        s, otra = self.j("POST", f"/api/archivos/{inicio['archivo_id']}/borrar",
+                         datos={"expected_revision": completo["archivo"]["revision"]})
+        self.assertEqual((s, otra["detalle"]["code"]), (404, "not_found"))
         s, h, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga")
-        self.assertEqual(s, 200)
+        self.assertEqual(s, 404)
         gid = completo["archivo"]["geometria_activa_id"]
         s, meta = self.j("POST", "/api/archivos/geometrias/metadatos", datos={"ids": [gid]})
-        self.assertFalse(meta["geometrias"][gid]["activa"])
-        self.geometria_completa(gid)
+        self.assertEqual((meta["geometrias"], meta["no_disponibles"]), ({}, [gid]))
+        self.assertEqual(list(self.store.listar("final/")), [])
 
 
     # -- authorization and non-disclosure ------------------------------------------
@@ -356,7 +356,7 @@ class HTTPChecks:
             ("descarga", "GET", f"/api/archivos/versiones/{r['vid']}/descarga", None, True),
             ("activar", "POST", f"/api/archivos/{r['aid']}/activar",
              {"version_id": r["vid"], "geometria_id": r["gid"], "expected_revision": r["rev"]}, False),
-            ("retirar", "POST", f"/api/archivos/{r['aid']}/retirar", {"expected_revision": r["rev"]}, False),
+            ("borrar", "POST", f"/api/archivos/{r['aid']}/borrar", {"expected_revision": r["rev"]}, False),
             ("historial", "GET", f"/api/archivos/{r['aid']}/historial", None, False),
             ("versiones", "GET", f"/api/archivos/{r['aid']}/versiones", None, False),
             ("intento", "GET", f"/api/archivos/intentos/{r['iid']}", None, False),
@@ -428,7 +428,7 @@ class HTTPChecks:
         s, _, b = self.c.pedir("GET", f"/api/archivos/{r['aid']}/historial")
         self.assertEqual(s, 401)
 
-    def test_grants_bases_admins_and_archive_policy(self):
+    def test_grants_bases_admins_and_legacy_archived_rows(self):
         r1 = self._recursos(self.terreno, login="olga")
         r2 = self._recursos(self.terreno2, login="olga")    # second granted base
         s, meta = self.j("POST", "/api/archivos/geometrias/metadatos", "olga",
@@ -436,27 +436,19 @@ class HTTPChecks:
         self.assertEqual(sorted(meta["geometrias"]), sorted([r1["gid"], r2["gid"]]))
         s, _ = self.j("GET", f"/api/archivos/{r1['aid']}/historial", "beto")   # another admin
         self.assertEqual(s, 200)
-        # Archived terrain: reads stay, writes are refused in scope.
+        # A terrain or base archived before deleting replaced archiving is an
+        # ordinary one: its operator reads and writes as before.
         self.sql("UPDATE inventory_terrain SET archived_at = ? WHERE id = ?", (db.now(), self.terreno))
+        self.sql("UPDATE maestra_base SET archived_at = ? WHERE id = ?", (db.now(), self.base))
         s, h, _ = self.bajar(f"/api/archivos/versiones/{r1['vid']}/descarga", "olga")
         self.assertEqual(s, 200)
-        s, err = self.iniciar(PDF, login="olga")
-        self.assertEqual((s, err["detalle"]["code"]), (409, "terreno_archivado"))
-        s, err = self.j("POST", f"/api/archivos/{r1['aid']}/retirar", "olga", {"expected_revision": r1["rev"]},
-                        "retirar-archivado")
-        self.assertEqual((s, err["detalle"]["code"]), (409, "terreno_archivado"))
-        # Archived base: closed to operators (non-disclosing), readable by admins.
-        self.sql("UPDATE inventory_terrain SET archived_at = NULL WHERE id = ?", (self.terreno,))
-        self.sql("UPDATE maestra_base SET archived_at = ? WHERE id = ?", (db.now(), self.base))
-        s, h, b = self.bajar(f"/api/archivos/versiones/{r1['vid']}/descarga", "olga")
-        self.assertEqual((s, json.loads(b)["detalle"]["code"]), (404, "not_found"))
         s, meta = self.j("POST", "/api/archivos/geometrias/metadatos", "olga", {"ids": [r1["gid"], r2["gid"]]})
-        self.assertEqual((list(meta["geometrias"]), meta["no_disponibles"]), ([r2["gid"]], [r1["gid"]]))
-        s, h, _ = self.bajar(f"/api/archivos/versiones/{r1['vid']}/descarga", "ana")
-        self.assertEqual(s, 200)
-        s, err = self.j("POST", f"/api/archivos/{r1['aid']}/retirar", "ana", {"expected_revision": r1["rev"]},
-                        "retirar-base-archivada")
-        self.assertEqual((s, err["detalle"]["code"]), (409, "base_archivada"))
+        self.assertEqual(sorted(meta["geometrias"]), sorted([r1["gid"], r2["gid"]]))
+        s, inicio = self.iniciar(PDF, login="olga")
+        self.assertEqual(s, 200, inicio)
+        s, borrado = self.j("POST", f"/api/archivos/{r1['aid']}/borrar", "olga",
+                            {"expected_revision": r1["rev"]})
+        self.assertEqual((s, borrado["borrado"]), (200, True))
 
     def test_pending_upload_stays_private_over_http(self):
         secreto = "privado-ficticio.pdf"
@@ -545,8 +537,8 @@ class HTTPChecks:
             ("seleccion", lambda: self.j("POST", f"/api/archivos/versiones/{vid}/procesar",
                                          datos={"seleccion": "1"}, clave="sel-ficticia"),
              400, "seleccion_invalida"),
-            ("revision", lambda: self.j("POST", f"/api/archivos/{inicio['archivo_id']}/retirar",
-                                        datos={"expected_revision": "1"}, clave="rev-ficticia"),
+            ("revision", lambda: self.j("POST", f"/api/archivos/{inicio['archivo_id']}/borrar",
+                                        datos={"expected_revision": "1"}),
              400, "revision_invalida"),
         ]
         for nombre, llamada, estado, codigo in casos:
@@ -842,7 +834,7 @@ class HTTPChecks:
         s, _, b = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde=0")
         self.assertEqual((s, json.loads(b)["detalle"]["code"]), (503, "geometria_inconsistente"))
 
-    def test_replacement_retirement_and_revocation_between_chunks(self):
+    def test_replacement_and_deletion_between_chunks(self):
         r = self._recursos(self.terreno, login="olga")
         original = self._reemplazar_geojson(r["gid"], self._geojson_de(3 * CHUNK + 17))
         s, h0, c0 = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde=0", "olga")
@@ -850,14 +842,12 @@ class HTTPChecks:
         self.assertNotEqual(completo["archivo"]["geometria_activa_id"], r["gid"])
         s, h1, c1 = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde={CHUNK}", "olga")
         self.assertEqual(s, 200)
-        self.j("POST", f"/api/archivos/{r['aid']}/retirar", "olga",
-               {"expected_revision": completo["archivo"]["revision"]}, "retirar-entre-trozos")
-        s, h2, c2 = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde={2 * CHUNK}", "olga")
+        self.assertEqual(c0 + c1, original[:2 * CHUNK])
+        s, _ = self.j("POST", f"/api/archivos/{r['aid']}/borrar", "olga",
+                      {"expected_revision": completo["archivo"]["revision"]})
         self.assertEqual(s, 200)
-        self.assertEqual(c0 + c1 + c2, original[:3 * CHUNK])
-        self.sql("DELETE FROM maestra_base_acceso WHERE base_id = ? AND user_id = ?",
-                 (self.base, self.users["olga"]["id"]))
-        s, _, b = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde={3 * CHUNK}", "olga")
+        # A deleted geometry is gone mid-read: the next chunk is a plain 404.
+        s, _, b = self.bajar(f"/api/archivos/geometrias/{r['gid']}/contenido?desde={2 * CHUNK}", "olga")
         self.assertEqual((s, json.loads(b)["detalle"]["code"]), (404, "not_found"))
 
     def test_parser_limit_geometry_is_delivered_within_the_bounds(self):
@@ -935,7 +925,7 @@ class HTTPChecks:
         s, r = self.completar(inicio["version_id"], "olga")
         self.assertEqual((s, r["detalle"]["code"]), (404, "not_found"))
 
-    def test_cancellation_and_retirement_racing_slow_work(self):
+    def test_cancellation_and_deletion_racing_slow_work(self):
         s, inicio = self.iniciar(PDF, login="olga")
         self.subir(inicio["version_id"], PDF, "olga")
         real = archivos._verify_final
@@ -951,27 +941,29 @@ class HTTPChecks:
         self.assertEqual((s, r["detalle"]["code"]), (409, "lease_perdido"))
         self.assertEqual(self.filas("archivo_version", "id = ?", (inicio["version_id"],))[0]["estado"], "cancelado")
         self.assertEqual(list(self.store.listar("final/")), [])
-        # Retirement while a reprocess is parsing: the attempt is history only.
+        # Deletion while a reprocess is parsing: the reprocess saves nothing.
         uno, completo = self.archivo_completo(kmz("ambiguo_tres_lotes"), "kmz", login="olga")
         real_intento = archivos._attempt        # runs after parsing, outside any transaction
-        retiro = []
+        borrado = []
 
-        def con_retiro(*args, **kwargs):
+        def con_borrado(*args, **kwargs):
             resultado = real_intento(*args, **kwargs)
-            retiro.append(self.j("POST", f"/api/archivos/{uno['archivo_id']}/retirar", "olga",
-                                 {"expected_revision": completo["archivo"]["revision"]}, "retiro-carrera"))
+            borrado.append(self.j("POST", f"/api/archivos/{uno['archivo_id']}/borrar", "olga",
+                                  {"expected_revision": completo["archivo"]["revision"]}))
             return resultado
 
-        with patch.object(archivos, "_attempt", con_retiro):
+        with patch.object(archivos, "_attempt", con_borrado):
             s, sel = self.j("POST", f"/api/archivos/versiones/{uno['version_id']}/procesar", "olga",
                             {"seleccion": [0]}, "proceso-carrera")
-        self.assertEqual(s, 200, sel)
-        self.assertEqual(retiro[0][0], 200, retiro)
-        self.assertIsNotNone(sel["archivo"]["retirado_en"])
-        s, act = self.j("POST", f"/api/archivos/{uno['archivo_id']}/activar", "olga",
-                        {"version_id": uno["version_id"], "geometria_id": sel["geometria_id"],
-                         "expected_revision": sel["archivo"]["revision"]}, "activar-retirado")
-        self.assertEqual((s, act["detalle"]["code"]), (409, "revision_conflictiva"))
+        self.assertEqual(borrado[0][0], 200, borrado)
+        self.assertEqual((s, sel["detalle"]["code"]), (409, "version_no_procesable"), sel)
+        for tabla in ("archivo", "archivo_version", "archivo_intento", "geometria", "archivo_evento"):
+            columna = "id" if tabla == "archivo" else "archivo_id"
+            if tabla == "archivo_intento":
+                continue
+            self.assertEqual(self.filas(tabla, f"{columna} = ?", (uno["archivo_id"],)), [], tabla)
+        self.assertEqual(self.filas("archivo_intento", "archivo_version_id = ?",
+                                    (uno["version_id"],)), [])
 
     def test_busy_is_controlled_and_never_retried(self):
         s, inicio = self.iniciar(PDF)

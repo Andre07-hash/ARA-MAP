@@ -120,18 +120,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         actor = {"id": cuenta["id"], "display_name": cuenta["display_name"]}
 
         # ponytail: the base row is read, not locked. SQLite's write reservation
-        # covers it; on Postgres an archive committed mid-load is not waited for.
+        # covers it; on Postgres a delete committed mid-load is not waited for.
         # Lock it in server/repo/maestra.py if loads ever run beside live admins.
-        bases = [b for b in repo_maestra.listar(conn, None, con_archivadas=True)
+        bases = [b for b in repo_maestra.listar(conn, None)
                  if args.base in (b["id"], b["nombre"])]
         if len(bases) != 1:
             raise SystemExit(f"La base de trabajo «{args.base}» "
                              + ("no existe" if not bases else "no es única; usa su id")
                              + "; no se escribió nada.")
         base = bases[0]
-        if base["archivada"]:
-            raise SystemExit(f"La base de trabajo «{base['nombre']}» está archivada;"
-                             " no se escribió nada.")
 
         decisiones = classify(records, _existentes(conn, base["id"]))
         nuevas = 0
@@ -173,13 +170,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _existentes(conn: Any, base_id: str) -> list[dict[str, Any]]:
-    """Every terrain of the base, archived ones included, shaped for classify()."""
+    """Every terrain of the base, shaped for classify()."""
     from server import inventario
     from server.matching import dedupe_key
     from server.repo import inventario as repo
 
     consulta = inventario.parse_query(
-        {"limit": [str(inventario.MAX_LIST_LIMIT)], "include_archived": ["true"]},
+        {"limit": [str(inventario.MAX_LIST_LIMIT)]},
         inventario.SCOPED_QUERY)
     existentes: list[dict[str, Any]] = []
     while True:

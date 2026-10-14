@@ -4,8 +4,8 @@ Through the real HTTP dispatcher with real sessions, on SQLite and (when
 ARA_MAP_TEST_DATABASE_URL is set) on a disposable Postgres schema. The fixture
 is the one of tests/test_roles_y_bases.py: administrators ada and alan;
 operators olga (Base Uno), omar (Base Uno and Base Dos), otto (no grant); t1
-in Base Uno, t2 in Base Dos, t0 unassigned, ta archived in Base Uno, t3 in the
-archived base.
+in Base Uno, t2 in Base Dos, t0 unassigned, ta in Base Uno, t3 in Base Archivada
+(ta and that base carry a legacy archive stamp, which means nothing now).
 """
 
 from __future__ import annotations
@@ -120,15 +120,14 @@ class Registros(Escenario):
         self.assertEqual(self.en_base(self.b2, user="omar")[0], 200)
         self.assertEqual(self.en_base(self.b1, user="ada")[1]["terreno"]["base_id"], self.b1)
 
+        self.assertEqual(self.en_base(self.b3)[0], 200)  # a legacy archive stamp is nothing
         antes = self.cuenta("inventory_terrain")
-        # No grant, another base, an archived base she was granted, a base that does not exist:
+        # No grant, another base, a base that does not exist:
         # one answer, whether or not the request was otherwise valid.
-        fuera = [self.en_base(self.b1, user="otto"), self.en_base(self.b2), self.en_base(self.b3),
+        fuera = [self.en_base(self.b1, user="otto"), self.en_base(self.b2),
                  self.en_base(nuevo()), self.en_base(nuevo(), user="ada"),
                  self.call("POST", f"/api/maestra/bases/{self.b2}/terrenos", {"lat": 999}, "olga")]
         self.assertEqual({encode(r) for r in fuera}, {encode(BASE_NO_EXISTE)})
-        status, body = self.en_base(self.b3, user="ada")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
         # The unscoped create is the administrators'; an operator cannot borrow it.
         status, body = self.call("POST", "/api/inventario/terrenos", {"base_id": self.b1}, "olga",
                                  {"Idempotency-Key": "clave-operadora-9"})
@@ -348,15 +347,14 @@ class Registros(Escenario):
         self.patch(self.t0, {"estado": "Sonora", "tipo_terreno": "Secreto"}, "ada")
         status, body = self.lista(self.b1)
         self.assertEqual((status, body["total"], sorted(t["draft"]["terreno"] for t in body["terrenos"])),
-                         (200, 2, ["Lote 1", "Uno A"]))
+                         (200, 3, ["Lote 1", "Lote a", "Uno A"]))
         self.assertEqual({t["base_id"] for t in body["terrenos"]}, {self.b1})
         self.assertEqual(body["facets"], {"estados": ["Jalisco"], "municipios": ["Zapopan"],
                                           "monedas": ["USD"], "tipos": ["Industrial"]})
         self.assertEqual(set(body), {"terrenos", "total", "next_cursor", "facets"})
-        # Archived records only when asked for.
-        self.assertEqual(self.lista(self.b1, "include_archived=true")[1]["total"], 3)
-        self.assertEqual([t["id"] for t in self.lista(self.b1, "publication_state=archived")[1]["terrenos"]],
-                         [self.ta])
+        # Nothing is archived: the old filters are unknown now.
+        for query in ("include_archived=true", "publication_state=archived"):
+            self.assertEqual(self.lista(self.b1, query)[0], 422, query)
         # Filters cannot widen the scope; neither can asking for another base.
         for query in ("estado=Colima", "estado=Sonora", "q=Dos", "tipo_terreno=Secreto", "moneda=MXN",
                       "q=Lote%203"):
@@ -365,17 +363,17 @@ class Registros(Escenario):
         self.assertEqual((status, list(body["detalle"]["fields"])), (422, ["base"]))
         self.assertEqual(self.lista(self.b2, user="omar")[1]["total"], 2)
         # Out of scope: 404 before the query is even looked at.
-        fuera = [self.lista(self.b2), self.lista(self.b3), self.lista(self.b1, user="otto"),
+        fuera = [self.lista(self.b2), self.lista(self.b1, user="otto"),
                  self.lista(nuevo()), self.lista(self.b2, "limit=9999&no=existe"),
                  self.lista(nuevo(), user="ada")]
         self.assertEqual({encode(r) for r in fuera}, {encode(BASE_NO_EXISTE)})
-        self.assertEqual(self.lista(self.b3, user="ada")[0], 200)  # an administrator may read an archived base
+        self.assertEqual(self.lista(self.b3)[0], 200)
 
     def test_the_master_table_filters_by_base_type_and_unassigned(self):
         self.sembrar(self.b1, "olga", {"tipo_terreno": "Industrial"}, {"tipo_terreno": "Agrícola"})
         self.sembrar(self.b2, "omar", {"tipo_terreno": "Industrial"})
         todo = self.maestra()
-        self.assertEqual((todo["total"], todo["facets"]["tipos"]), (7, ["Agrícola", "Industrial"]))
+        self.assertEqual((todo["total"], todo["facets"]["tipos"]), (8, ["Agrícola", "Industrial"]))
 
         def ids(query):
             return self.maestra(query)["total"]
@@ -383,8 +381,8 @@ class Registros(Escenario):
                           ids(f"base={self.b1}&base=sin_asignar"), ids(f"base={self.b3}"),
                           ids(f"base={nuevo()}"), ids("tipo_terreno=Industrial"),
                           ids(f"tipo_terreno=Industrial&base={self.b2}"),
-                          ids("tipo_terreno=Industrial&tipo_terreno=Agr%C3%ADcola"),
-                          ids(f"base={self.b1}&include_archived=1")], [3, 2, 1, 4, 1, 0, 2, 1, 3, 4])
+                          ids("tipo_terreno=Industrial&tipo_terreno=Agr%C3%ADcola")],
+                         [4, 2, 1, 5, 1, 0, 2, 1, 3])
         self.assertEqual(self.maestra(f"base={self.b2}")["facets"]["tipos"], ["Industrial"])
         status, body = self.call("GET", "/api/inventario/terrenos?base=todas")
         self.assertEqual((status, list(body["detalle"]["fields"])), (422, ["base"]))
@@ -466,10 +464,10 @@ class Registros(Escenario):
         (tid,) = self.sembrar(self.b1, "olga", completo)
         self.ok(self.patch(tid, {}, "olga", confirm=["price", "availability"]))
         todos, si, no = (self.ok(self.lista(self.b1, q)) for q in ("", "attention=true", "attention=false"))
-        self.assertEqual((todos["total"], si["total"], no["total"]), (2, 1, 1))
+        self.assertEqual((todos["total"], si["total"], no["total"]), (3, 2, 1))
         self.assertEqual([t["id"] for t in no["terrenos"]], [tid])
         self.assertEqual(no["terrenos"][0]["attention"], [])
-        self.assertEqual(self.ok(self.lista(self.b1, "attention=true&limit=1"))["next_cursor"], None)
+        self.assertEqual(self.ok(self.lista(self.b1, "attention=true&limit=2"))["next_cursor"], None)
 
     def test_the_attention_filter_in_sql_is_the_rule_shown_on_each_record(self):
         """The filter is a SQL predicate; the reasons on a record are Python.
@@ -623,62 +621,45 @@ class Registros(Escenario):
 
     # -- 4. archive and restore ---------------------------------------------------
 
-    def test_archiving_is_reversible_and_changes_only_the_archive_state(self):
-        adjuntos = self.adjuntos(self.t1)
-        antes = self.ver(self.t1)[1]["terreno"]
-        status, body = self.accion(self.t1, "archivar")
-        t = body["terreno"]
-        self.assertEqual((status, t["version"], t["publication_state"], t["draft_revision_id"], t["draft"]),
-                         (200, 2, "archived", antes["draft_revision_id"], antes["draft"]))
-        self.assertEqual(self.lista(self.b1)[1]["total"], 0)
-        self.assertEqual(self.ver(self.t1)[0], 200)  # still readable in scope
-        for respuesta, codigo in ((self.patch(self.t1, {"estado": "X"}, "olga"), "terreno_archivado"),
-                                  (self.accion(self.t1, "archivar"), "terreno_archivado"),
-                                  (self.accion(self.t1, "transferir", "ada", base_id=self.b2), "terreno_archivado")):
-            self.assertEqual((respuesta[0], respuesta[1]["detalle"]["code"]), (409, codigo))
-        status, body = self.call("POST", f"/api/inventario/terrenos/{self.t1}/restaurar", {"expected_version": 1})
+    def test_deleting_a_terrain_takes_its_record_history_and_files(self):
+        otros = {t: filas(t) for t in ARCHIVOS}
+        self.adjuntos(self.t1)
+        self.ok(self.patch(self.t1, {"estado": "Jalisco"}, "olga"))
+        status, body = self.call("POST", f"/api/inventario/terrenos/{self.t1}/borrar", {"expected_version": 1})
         self.assertEqual((status, body["detalle"]["code"], body["detalle"]["current_version"]), (409, "conflict", 2))
-        status, body = self.accion(self.t1, "restaurar", "omar")
-        self.assertEqual((status, body["terreno"]["version"], body["terreno"]["publication_state"],
-                          body["terreno"]["id"]), (200, 3, "draft", self.t1))
-        status, body = self.accion(self.t1, "restaurar")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "terreno_no_archivado"))
-        self.assertEqual(self.patch(self.t1, {"estado": "Jalisco"}, "olga")[0], 200)
-        eventos = self.ver(self.t1, sufijo="/historial")[1]["eventos"]
-        self.assertEqual([(e["version"], e["action"], e["actor"]["display_name"]) for e in eventos][-3:], [
-            (3, "restore", "Omar Ficticia"), (2, "archive", "Olga Ficticia"), (1, "create", "Ada Ficticia")])
-        self.assertEqual(self.cuenta("inventory_revision", "inventory_id = ?", (self.t1,)), 2)  # only the edit
-        self.assertEqual({t: filas(t) for t in ARCHIVOS}, adjuntos)
+        status, body = self.accion(self.t1, "borrar")
+        self.assertEqual((status, body["borrado"]), (200, True))
+        self.assertEqual(self.ver(self.t1), NO_EXISTE)
+        self.assertEqual(self.ver(self.t1, "ada"), NO_EXISTE)
+        for tabla in ("inventory_terrain", "inventory_revision", "inventory_event"):
+            self.assertEqual(self.cuenta(tabla, ("id" if tabla == "inventory_terrain" else "inventory_id")
+                                         + " = ?", (self.t1,)), 0, tabla)
+        # Its own attachment graph is gone; everyone else's is untouched.
+        self.assertEqual({t: filas(t) for t in ARCHIVOS}, otros)
+        self.assertEqual(self.lista(self.b1)[1]["total"], 1)  # ta
+        self.assertEqual(self.call("POST", f"/api/inventario/terrenos/{self.t1}/borrar",
+                                   {"expected_version": 2}, "olga"), NO_EXISTE)
 
-    def test_archive_and_restore_are_refused_out_of_scope_or_in_an_archived_base(self):
-        casos = [self.accion(self.t2, "archivar"), self.accion(self.t0, "archivar"),
-                 self.accion(self.t3, "restaurar"), self.accion(self.t1, "archivar", "otto"),
-                 self.call("POST", f"/api/inventario/terrenos/{nuevo()}/archivar", {"expected_version": 1}, "olga"),
-                 self.call("POST", f"/api/inventario/terrenos/{self.t2}/archivar", {"expected_version": "x"}, "olga")]
+    def test_delete_is_refused_out_of_scope_and_validated(self):
+        casos = [self.accion(self.t2, "borrar"), self.accion(self.t0, "borrar"),
+                 self.accion(self.t1, "borrar", "otto"),
+                 self.call("POST", f"/api/inventario/terrenos/{nuevo()}/borrar", {"expected_version": 1}, "olga"),
+                 self.call("POST", f"/api/inventario/terrenos/{self.t2}/borrar", {"expected_version": "x"}, "olga")]
         self.assertEqual({encode(r) for r in casos}, {encode(NO_EXISTE)})
-        for accion in ("archivar", "restaurar"):  # restoring a terrain cannot reopen its base
-            status, body = self.accion(self.t3, accion, "ada")
-            self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
-        self.assertEqual(self.accion(self.t0, "archivar", "ada")[0], 200)
         for cuerpo in ({}, {"expected_version": 0}, {"expected_version": 1, "motivo": "x"}):
-            status, body = self.call("POST", f"/api/inventario/terrenos/{self.t1}/archivar", cuerpo, "olga")
+            status, body = self.call("POST", f"/api/inventario/terrenos/{self.t1}/borrar", cuerpo, "olga")
             self.assertEqual((status, body["detalle"]["code"]), (422, "validation_failed"))
-        self.assertEqual([self.version(t) for t in (self.t1, self.t2, self.t3)], [1, 1, 1])
+        self.assertEqual([self.version(t) for t in (self.t1, self.t2, self.t0)], [1, 1, 1])
+        self.assertEqual(self.accion(self.t0, "borrar", "ada")[0], 200)
 
-    def test_an_operator_cannot_change_what_the_public_sees_by_archiving(self):
+    def test_an_operator_cannot_change_what_the_public_sees_by_deleting(self):
         sql(lambda c: c.execute(
             "UPDATE inventory_terrain SET published_revision_id = draft_revision_id, published_at = ?,"
             " first_published_at = ? WHERE id = ?", (db.now(), db.now(), self.t1)))
-        status, body = self.accion(self.t1, "archivar")
+        status, body = self.accion(self.t1, "borrar")
         self.assertEqual((status, body["detalle"]["code"]), (403, "requiere_admin"))
         self.assertEqual(self.version(self.t1), 1)
-        status, body = self.accion(self.t1, "archivar", "ada")
-        self.assertEqual((status, body["terreno"]["publication_state"],
-                          body["terreno"]["published_revision_id"] is not None), (200, "archived", True))
-        self.assertEqual(self.accion(self.t1, "restaurar")[1]["detalle"]["code"], "requiere_admin")
-        self.assertEqual(self.accion(self.t1, "restaurar", "ada")[1]["terreno"]["publication_state"], "published")
-
-    # -- 5. transfers --------------------------------------------------------------
+        self.assertEqual(self.accion(self.t1, "borrar", "ada")[0], 200)
 
     def test_a_transfer_moves_the_one_record_with_its_files_and_history(self):
         adjuntos = self.adjuntos(self.t1)
@@ -696,11 +677,11 @@ class Registros(Escenario):
         self.assertEqual({t: filas(t) for t in ARCHIVOS}, adjuntos)
         # The source-only operator loses it at once; a destination operator has it, history included.
         for respuesta in (self.ver(self.t1), self.ver(self.t1, sufijo="/historial"),
-                          self.patch(self.t1, {"estado": "X"}, "olga"), self.accion(self.t1, "archivar"),
+                          self.patch(self.t1, {"estado": "X"}, "olga"), self.accion(self.t1, "borrar"),
                           self.call("PATCH", f"/api/inventario/terrenos/{self.t1}",
                                     {"expected_version": 2, "changes": {"estado": "Tarde"}}, "olga")):
             self.assertEqual(respuesta, NO_EXISTE)
-        self.assertEqual(self.lista(self.b1)[1]["total"], 0)
+        self.assertEqual(self.lista(self.b1)[1]["total"], 1)  # ta stays
         self.assertEqual(self.lista(self.b2, user="omar")[1]["total"], 2)
         eventos = self.ver(self.t1, "omar", "/historial")[1]["eventos"]
         self.assertEqual([(e["version"], e["action"]) for e in eventos], [(3, "transfer"), (2, "update"), (1, "create")])
@@ -810,8 +791,7 @@ class Registros(Escenario):
         self.assertNotIn(secreto, texto)
         self.assertNotIn(self.b1, texto)  # nor where it came from
         with db.escritura() as conn:
-            conn.execute("UPDATE inventory_column SET retired_at = ? WHERE id = ?",
-                         (db.now(), retirada.split(":")[1]))
+            conn.execute("DELETE FROM inventory_column WHERE id = ?", (retirada.split(":")[1],))
         evento, texto = primero("omar")
         self.assertEqual(evento["changes"], {**nucleo, destino: {"before": None, "after": otro}})
         self.assertNotIn("VALOR-RETIRADO", texto)
@@ -820,7 +800,7 @@ class Registros(Escenario):
                  self.lista(self.b2, "q=VALOR-SOLO-DE-ORIGEN", "omar"),
                  self.call("PATCH", f"/api/inventario/terrenos/{self.t1}",
                            {"expected_version": 1, "changes": {"estado": "Colima"}}, "omar"),
-                 self.call("POST", f"/api/inventario/terrenos/{self.t1}/archivar", {"expected_version": 1}, "omar")]
+                 self.call("POST", f"/api/inventario/terrenos/{self.t1}/borrar", {"expected_version": 1}, "omar")]
         self.assertEqual([r[0] for r in otras], [200, 200, 200, 409, 409])
         self.assertEqual(otras[2][1]["total"], 0)
         self.assertEqual(otras[0][1]["terreno"]["custom"], {destino: otro})
@@ -862,10 +842,6 @@ class Registros(Escenario):
                               ({"expected_version": 1, "base_id": self.b2, "actor_id": "x"}, "actor_id")):
             status, body = self.call("POST", ruta, cuerpo)
             self.assertEqual((status, list(body["detalle"]["fields"])), (422, [campo]), cuerpo)
-        status, body = self.call("POST", ruta, {"expected_version": 1, "base_id": self.b3})
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))  # archived destination
-        status, body = self.accion(self.t3, "transferir", "ada", base_id=self.b1)
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))  # archived source
         status, body = self.call("POST", ruta, {"expected_version": 7, "base_id": self.b2})
         self.assertEqual((status, body["detalle"]["code"]), (409, "conflict"))
         self.assertEqual(self.call("POST", f"/api/inventario/terrenos/{nuevo()}/transferir",
@@ -936,19 +912,25 @@ class Registros(Escenario):
         def transferir(version):
             return lambda: self.call("POST", f"/api/inventario/terrenos/{self.t1}/transferir",
                                      {"expected_version": version, "base_id": self.b2})
-        # Destination archived first: the transfer is refused and nothing moves.
-        self.ok(self.archivar(self.b2))
-        status, body = transferir(1)()
-        self.assertEqual((status, body["detalle"]["code"], self.version(self.t1)), (409, "base_archivada", 1))
-        self.ok(self.archivar(self.b2, "restaurar"))
-        # Transfer first: archiving the destination, and revoking its grant, wait for it.
-        version_b2 = self.base(self.b2)["version"]
-        traslado, archivo = self.carrera("transferir", transferir(1), lambda: self.call(
-            "POST", f"/api/maestra/bases/{self.b2}/archivar", {"expected_version": version_b2}))
-        self.assertEqual((traslado[0], archivo[0]), (200, 200))
-        self.assertEqual(filas("inventory_terrain", "id = ?", (self.t1,))[0]["base_id"], self.b2)
-        self.assertEqual(self.ver(self.t1, "omar"), NO_EXISTE)  # its base is archived now
-        self.ok(self.archivar(self.b2, "restaurar"))
+        # Destination deleted first: the transfer is refused and nothing moves.
+        borrada = self.crear_base("Destino Borrado")
+        self.ok(self.borrar_base(borrada))
+        status, body = self.call("POST", f"/api/inventario/terrenos/{self.t1}/transferir",
+                                 {"expected_version": 1, "base_id": borrada})
+        self.assertEqual((status, list(body["detalle"]["fields"]), self.version(self.t1)), (422, ["base_id"], 1))
+        # Transfer first: deleting the (then empty) destination waits for it, and is refused.
+        vacia = self.crear_base("Destino Vacío")
+        version_vacia = self.base(vacia)["version"]
+        traslado, borrado = self.carrera(
+            "transferir",
+            lambda: self.call("POST", f"/api/inventario/terrenos/{self.t1}/transferir",
+                              {"expected_version": 1, "base_id": vacia}),
+            lambda: self.call("POST", f"/api/maestra/bases/{vacia}/borrar",
+                              {"expected_version": version_vacia}))
+        self.assertEqual((traslado[0], borrado[0], borrado[1]["detalle"]["code"]),
+                         (200, 409, "base_con_terrenos"))
+        self.assertEqual(filas("inventory_terrain", "id = ?", (self.t1,))[0]["base_id"], vacia)
+        self.assertEqual(self.ver(self.t1, "omar"), NO_EXISTE)  # no grant on its new base
         version_b1 = self.base(self.b1)["version"]
         traslado, revocacion = self.carrera(
             "transferir",

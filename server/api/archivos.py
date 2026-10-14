@@ -131,6 +131,12 @@ class _AlmacenDiferido:
 _DIFERIDO: Almacen = _AlmacenDiferido()
 
 
+def almacen() -> Almacen:
+    """The configured store for callers outside this module (deleting a
+    terrain discards its files' bytes); resolved at first use like here."""
+    return _DIFERIDO
+
+
 # -- request parsing -------------------------------------------------------------
 
 def _cuerpo(request: Request) -> dict[str, Any]:
@@ -261,11 +267,11 @@ def activar(request: Request) -> Respuesta:
         idempotency_key=_clave(request))
 
 
-def retirar(request: Request) -> Respuesta:
+def borrar(request: Request) -> Respuesta:
     datos = _cuerpo(request)
-    return archivos.retirar(request.sesion, _parametro(request, "aid"),
-                            expected_revision=_campo(datos, "expected_revision"),
-                            idempotency_key=_clave(request), almacen=_DIFERIDO)
+    return archivos.borrar(request.sesion, _parametro(request, "aid"),
+                           expected_revision=_campo(datos, "expected_revision"),
+                           almacen=_DIFERIDO)
 
 
 # -- reads -------------------------------------------------------------------------
@@ -335,7 +341,7 @@ RUTAS: tuple[tuple[str, str, Callable[[Request], Any], str], ...] = (
     ("GET", "/api/archivos/versiones/:vid/intentos", intentos, "archivos.ver"),
     ("GET", "/api/archivos/versiones/:vid/descarga", descarga, "archivos.ver"),
     ("POST", "/api/archivos/:aid/activar", activar, "archivos.subir"),
-    ("POST", "/api/archivos/:aid/retirar", retirar, "archivos.retirar"),
+    ("POST", "/api/archivos/:aid/borrar", borrar, "archivos.borrar"),
     ("GET", "/api/archivos/:aid/historial", historial, "archivos.ver"),
     ("GET", "/api/archivos/:aid/versiones", versiones, "archivos.ver"),
     ("POST", "/api/inventario/terrenos/:id/archivos", iniciar, "archivos.subir"),

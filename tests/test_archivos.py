@@ -20,6 +20,7 @@ from unittest.mock import Mock, patch
 from server import archivos, auth, db, postgres
 from server.almacen import AlmacenEnMemoria, AlmacenLocal
 from server.errors import ApiError
+from server.repo import inventario as repo_inventario
 from server.repo import maestra
 from tests.support import TEST_PASSWORD
 
@@ -277,7 +278,7 @@ class LifecycleChecks:
         self.assertEqual(parsed["version"]["estado"], "disponible")
         self.assertEqual(parsed["intento"]["resultado"], "rechazado")
 
-    def test_initiator_only_completion_missing_ids_and_archived_policy(self):
+    def test_initiator_only_completion_missing_ids_and_legacy_archived_terrain(self):
         pending = self.upload(PDF, user="olga")
         denied = self.assert_code("not_found", lambda: self.complete(pending, user="ana"))
         self.assertEqual(denied.status, 404)
@@ -286,12 +287,13 @@ class LifecycleChecks:
         self.assertEqual(self.assert_code("not_found", lambda: archivos.completar(
             self.sessions["ana"], missing, self.store,
             bd=self.database, reloj=self.clock)).status, 404)
+        # A terrain archived before deletion replaced archiving is an ordinary one.
         with db.escritura(self.database) as conn:
             conn.execute("UPDATE inventory_terrain SET archived_at = ? WHERE id = ?",
                          (db.now(), self.terrain))
         self.assertTrue(archivos.listar(self.sessions["ana"], self.terrain,
                                        bd=self.database, reloj=self.clock)["archivos"])
-        self.assert_code("terreno_archivado", lambda: self.start(PDF, key="archived"))
+        self.assertTrue(self.start(PDF, key="archived")["version_id"])
 
     def test_rejected_replacement_and_stale_parallel_completion_preserve_layout(self):
         initial = self.upload(kmz("poligono_simple"), "kmz")
@@ -440,7 +442,7 @@ class LifecycleChecks:
         self.assertEqual(len(list(self.store.listar("final/"))), 0)
 
     def test_every_slow_work_scope_change_is_rechecked_before_finalization(self):
-        cases = ("grant", "transfer", "terrain_archive", "base_archive", "deactivate",
+        cases = ("grant", "transfer", "terrain_delete", "deactivate",
                  "role", "logout", "credential", "session_expiry")
         for index, change in enumerate(cases):
             with self.subTest(change=change):
@@ -474,12 +476,11 @@ class LifecycleChecks:
                         elif change == "transfer":
                             conn.execute("UPDATE inventory_terrain SET base_id = ? WHERE id = ?",
                                          (target, terrain))
-                        elif change == "terrain_archive":
-                            conn.execute("UPDATE inventory_terrain SET archived_at = ? WHERE id = ?",
-                                         (db.now(), terrain))
-                        elif change == "base_archive":
-                            conn.execute("UPDATE maestra_base SET archived_at = ? WHERE id = ?",
-                                         (db.now(), base))
+                        elif change == "terrain_delete":
+                            version = conn.execute(
+                                "SELECT version FROM inventory_terrain WHERE id = ?",
+                                (terrain,)).fetchone()["version"]
+                            repo_inventario.borrar(conn, terrain, version)
                         elif change == "deactivate":
                             conn.execute("UPDATE team_user SET active = 0 WHERE id = ?", (user_id,))
                         elif change == "role":
@@ -502,17 +503,19 @@ class LifecycleChecks:
                 with self.assertRaises(ApiError) as caught:
                     archivos.completar(session, started["version_id"], self.store,
                                        bd=self.database, reloj=self.clock, ganchos=Hooks())
-                expected = {"terrain_archive": "terreno_archivado"}.get(
-                    change, "not_found" if change in ("grant", "transfer", "base_archive")
-                    else "unauthenticated")
+                expected = ("not_found" if change in ("grant", "transfer", "terrain_delete")
+                            else "unauthenticated")
                 self.assertEqual(caught.exception.detalle["code"], expected)
-                version = self.rows("archivo_version", "id = ?", (started["version_id"],))[0]
-                self.assertEqual(version["estado"], "subiendo")
+                versions = self.rows("archivo_version", "id = ?", (started["version_id"],))
+                if change == "terrain_delete":
+                    self.assertEqual(versions, [])
+                    continue
+                self.assertEqual(versions[0]["estado"], "subiendo")
                 self.assertEqual(self.rows("archivo_intento", "archivo_version_id = ?",
                                            (started["version_id"],)), [])
         self.assertEqual(len(list(self.store.listar("final/"))), 0)
 
-    def test_cancel_and_retire_do_not_delete_final_history_or_resurrect(self):
+    def test_delete_removes_rows_history_and_bytes_and_never_resurrects(self):
         pending = self.upload(PDF, user="olga")
         cancelled = archivos.cancelar(
             self.sessions["beto"], pending["version_id"], self.store,
@@ -520,17 +523,27 @@ class LifecycleChecks:
         self.assertEqual(cancelled["estado"], "cancelado")
         done = self.upload(kmz("poligono_simple"), "kmz")
         completed = self.complete(done)
-        final_key = self.rows("archivo_version", "id = ?", (done["version_id"],))[0]["clave_final"]
-        retired = archivos.retirar(
-            self.sessions["ana"], done["archivo_id"], expected_revision=2,
-            idempotency_key="retirar-1", almacen=self.store,
-            bd=self.database, reloj=self.clock)
-        self.assertIsNotNone(retired["archivo"]["retirado_en"])
-        self.assertIsNone(retired["archivo"]["version_actual_id"])
-        self.assertIsNotNone(self.store.tamano_de(final_key))
+        version = self.rows("archivo_version", "id = ?", (done["version_id"],))[0]
+        self.assertEqual(completed["version"]["estado"], "disponible")
+        stale = self.assert_code("revision_conflictiva", lambda: archivos.borrar(
+            self.sessions["ana"], done["archivo_id"], expected_revision=1, almacen=self.store,
+            bd=self.database))
+        self.assertEqual(stale.status, 409)
+        deleted = archivos.borrar(self.sessions["ana"], done["archivo_id"], expected_revision=2,
+                                  almacen=self.store, bd=self.database)
+        self.assertEqual(deleted, {"borrado": True, "limpieza_pendiente": False})
+        for table, column in (("archivo", "id"), ("archivo_version", "archivo_id"),
+                              ("archivo_evento", "archivo_id"), ("geometria", "archivo_id")):
+            self.assertEqual(self.rows(table, f"{column} = ?", (done["archivo_id"],)), [])
+        self.assertIsNone(self.store.tamano_de(version["clave_final"]))
+        self.assertIsNone(self.store.tamano_de(version["clave_temporal"]))
+        self.assert_code("not_found", lambda: archivos.borrar(
+            self.sessions["ana"], done["archivo_id"], expected_revision=2, almacen=self.store,
+            bd=self.database))
+        # The other terrain's file and this terrain's other attachments stay.
+        self.assertEqual(len(self.rows("archivo", "id = ?", (pending["archivo_id"],))), 1)
         replacement = self.start(kmz("poligono_simple"), "kmz", key="new-kmz")
         self.assertNotEqual(replacement["archivo_id"], done["archivo_id"])
-        self.assertEqual(completed["version"]["estado"], "disponible")
 
     def test_other_callers_see_generic_pending_summary_only(self):
         started = self.start(PDF, user="ana", name="secreto-ficticio.pdf")
@@ -608,9 +621,8 @@ class LifecycleChecks:
             "activar": lambda v, a: archivos.activar(
                 olga, a, version_id=v, expected_revision=2, idempotency_key="k",
                 bd=self.database, reloj=self.clock),
-            "retirar": lambda v, a: archivos.retirar(
-                olga, a, expected_revision=2, idempotency_key="k", almacen=self.store,
-                bd=self.database, reloj=self.clock),
+            "borrar": lambda v, a: archivos.borrar(
+                olga, a, expected_revision=2, almacen=self.store, bd=self.database),
             "historial": lambda v, a: archivos.historial(olga, a, bd=self.database),
         }
         before = self.snapshot()
@@ -1030,8 +1042,6 @@ class LifecycleChecks:
                               bd=self.database, reloj=self.clock)
             ids.append(started["archivo_id"])
         retired = self.completed_pdf(name="retirado-ficticio.pdf")
-        archivos.retirar(self.sessions["ana"], retired["archivo_id"], expected_revision=2,
-                         idempotency_key="retirar", bd=self.database, reloj=self.clock)
         ids.append(retired["archivo_id"])
         pages, cursor = [], None
         while True:
@@ -1073,27 +1083,27 @@ class LifecycleChecks:
                                             "2026-10-08T12:00:00+00:00", None, 100)
         self.assertEqual((len(rows), counting.calls), (100, 1))
 
-    def test_l5_retired_pdfs_do_not_crowd_active_summaries(self):
+    def test_l5_deleted_and_legacy_retired_pdfs_are_gone_from_summaries_and_lists(self):
         active = self.completed_pdf(name="activo-ficticio.pdf")
-        retired = []
         for n in range(5):
             self.clock.advance(1)
-            started = self.completed_pdf(name=f"retirado-{n}.pdf")
-            archivos.retirar(self.sessions["ana"], started["archivo_id"], expected_revision=2,
-                             idempotency_key=f"r{n}", bd=self.database, reloj=self.clock)
-            retired.append(started["archivo_id"])
+            started = self.completed_pdf(name=f"borrado-{n}.pdf")
+            archivos.borrar(self.sessions["ana"], started["archivo_id"], expected_revision=2,
+                            almacen=self.store, bd=self.database)
+        self.clock.advance(1)
+        legacy = self.completed_pdf(name="retirado-antes.pdf")
+        with db.escritura(self.database) as conn:   # retired before deleting replaced it
+            conn.execute("UPDATE archivo SET retirado_en = ?, retirado_motivo = 'usuario'"
+                         " WHERE id = ?", (db.now(), legacy["archivo_id"]))
         with db.session(self.database) as conn:
             summary = archivos.resumenes_de_archivos(conn, [self.terrain], self.sessions["ana"],
                                                      reloj=self.clock)
         cell = summary["resultados"][self.terrain]
         self.assertEqual(cell["pdf_total"], 1)
         self.assertEqual([r["id"] for r in cell["pdf_recientes"]], [active["archivo_id"]])
-        self.assertFalse(cell["pdf_recientes"][0]["retirado"])
         listed = archivos.listar(self.sessions["ana"], self.terrain, bd=self.database,
                                  reloj=self.clock)["archivos"]
-        self.assertEqual({i["id"] for i in listed if i["retirado_en"]}, set(retired))
-        history = archivos.historial(self.sessions["ana"], retired[0], bd=self.database)
-        self.assertIn("retirado", [e["accion"] for e in history["eventos"]])
+        self.assertEqual([i["id"] for i in listed], [active["archivo_id"]])
 
     def test_l5_summary_replaces_lower_revision_pdf_beside_higher_revision(self):
         low = self.completed_pdf(name="bajo-ficticio.pdf")
@@ -1205,37 +1215,22 @@ class LifecycleChecks:
                     self.sessions["ana"], started["version_id"], self.store,
                     bd=self.database, reloj=self.clock))
 
-    def test_l6_retirement_replay_reports_actual_staging_state(self):
+    def test_l6_delete_reports_bytes_it_could_not_remove(self):
         from server.almacen import FalloAlmacenError
         live = self.upload(kmz("poligono_simple"), "kmz")
         self.complete(live)
-        pending = self.upload(kmz("poligono_simple"), "kmz", user="olga", key="pendiente")
-        staged = self.rows("archivo_version", "id = ?",
-                           (pending["version_id"],))[0]["clave_temporal"]
-
-        def retire(store):
-            return archivos.retirar(self.sessions["ana"], live["archivo_id"], expected_revision=2,
-                                    idempotency_key="retirar", almacen=store,
-                                    bd=self.database, reloj=self.clock)
-
-        with patch.object(self.store, "borrar", side_effect=FalloAlmacenError()):
-            first = retire(self.store)
-        self.assertTrue(first["limpieza_pendiente"])
-        self.assertIsNotNone(self.store.tamano_de(staged))
-        self.assertTrue(retire(self.store)["limpieza_pendiente"])
-        self.assertTrue(retire(None)["limpieza_pendiente"])
-        self.store.borrar(staged)
-        replay = retire(self.store)
-        self.assertTrue(replay["replay"])
-        self.assertFalse(replay["limpieza_pendiente"])
-        self.assertEqual(replay["archivo"], first["archivo"])
         final = self.rows("archivo_version", "id = ?", (live["version_id"],))[0]["clave_final"]
+        with patch.object(self.store, "borrar", side_effect=FalloAlmacenError()):
+            first = archivos.borrar(self.sessions["ana"], live["archivo_id"],
+                                    expected_revision=2, almacen=self.store, bd=self.database)
+        # The rows are gone either way; the bytes left behind are reported.
+        self.assertEqual(first, {"borrado": True, "limpieza_pendiente": True})
+        self.assertEqual(self.rows("archivo", "id = ?", (live["archivo_id"],)), [])
         self.assertIsNotNone(self.store.tamano_de(final))
-        nothing = self.completed_pdf()
-        quiet = archivos.retirar(self.sessions["ana"], nothing["archivo_id"], expected_revision=2,
-                                 idempotency_key="sin-pendientes", bd=self.database,
-                                 reloj=self.clock)
-        self.assertFalse(quiet["limpieza_pendiente"])
+        without_store = self.completed_pdf()
+        self.assertTrue(archivos.borrar(self.sessions["ana"], without_store["archivo_id"],
+                                        expected_revision=2, bd=self.database)
+                        ["limpieza_pendiente"])
 
     # -- F0: a remote store that fails, refuses, loses answers or is not configured
 

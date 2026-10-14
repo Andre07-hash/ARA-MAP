@@ -257,9 +257,9 @@ test("R3-B2: a 404 on retry and on explicit cancellation reaches alPerderAcceso"
   assert.ok(esTerminal(cancelacion.s.estado().fase));
 });
 
-test("R3-B2: losing write permission (403, archived) reaches alPerderAcceso; 401 and network do not", async () => {
-  for (const [e, espera] of [[error("forbidden", 403), 1], [error("base_archivada", 409), 1],
-    [error("terreno_archivado", 409), 1], [error("unauthenticated", 401), 0], [error("red", 0, { incierto: true }), 0],
+test("R3-B2: losing write permission (403) reaches alPerderAcceso; 401 and network do not", async () => {
+  for (const [e, espera] of [[error("forbidden", 403), 1],
+    [error("unauthenticated", 401), 0], [error("red", 0, { incierto: true }), 0],
     [error("contenido_temporal_ausente", 409), 0]]) {
     const { cliente } = clienteGuionado({ iniciar: async () => inicio, subir: async () => ({}),
       completar: async () => { throw e; }, cancelar: async () => ({}) });

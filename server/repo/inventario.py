@@ -19,6 +19,7 @@ from typing import Any
 
 from .. import db, inventario
 from ..protocols import DatabaseConnection
+from . import archivos as repo_archivos
 
 REVISION_FIELDS = inventario.EDITABLE
 
@@ -64,13 +65,12 @@ class CursorError(ValueError):
 
 _FROM = " FROM inventory_terrain t JOIN inventory_revision d ON d.id = t.draft_revision_id"
 _BUSCADOS = ("terreno", "municipio", "estado", "direccion")
+# A terrain is deleted, never archived: one archived before that is an
+# ordinary record in whichever of these states it is.
 _ESTADOS_DE_PUBLICACION = {
-    "archived": "t.archived_at IS NOT NULL",
-    "published": "(t.archived_at IS NULL AND t.published_revision_id IS NOT NULL)",
-    "unpublished": "(t.archived_at IS NULL AND t.published_revision_id IS NULL"
-                   " AND t.first_published_at IS NOT NULL)",
-    "draft": "(t.archived_at IS NULL AND t.published_revision_id IS NULL"
-             " AND t.first_published_at IS NULL)",
+    "published": "t.published_revision_id IS NOT NULL",
+    "unpublished": "(t.published_revision_id IS NULL AND t.first_published_at IS NOT NULL)",
+    "draft": "(t.published_revision_id IS NULL AND t.first_published_at IS NULL)",
 }
 
 
@@ -110,7 +110,7 @@ def listar(conn: DatabaseConnection, q: Mapping[str, Any], base_id: str | None =
 
 def _candidatos(q: Mapping[str, Any], base_id: str | None) -> tuple[list[str], tuple[Any, ...]]:
     """What the caller is looking at before any business filter: the scope,
-    the base filter and whether archived records are in view. Facets are
+    and the base filter. Facets are
     computed over exactly this, so choosing a filter never removes the options
     needed to change it."""
     partes: list[str] = ["1 = 1"]
@@ -127,9 +127,6 @@ def _candidatos(q: Mapping[str, Any], base_id: str | None) -> tuple[list[str], t
         if inventario.SIN_ASIGNAR in q["base"]:
             opciones.append("t.base_id IS NULL")
         partes.append("(" + " OR ".join(opciones) + ")")
-    # Archived records only when asked for, either way.
-    if not (q["include_archived"] or "archived" in q["publication_state"]):
-        partes.append("t.archived_at IS NULL")
     return partes, tuple(params)
 
 
@@ -432,7 +429,7 @@ def update(conn: DatabaseConnection, inventory_id: str, expected_version: int,
 
     ``custom`` holds already-validated values keyed "custom:<column id>"; None
     clears one. They are merged into what the revision stores, never built
-    from what a caller was shown: values of other bases and of retired columns
+    from what a caller was shown: values of other bases and of deleted columns
     ride along untouched. Each one that changes is an entry of the event's
     ``changes`` beside the core fields, {"before", "after"}, both scalars.
 
@@ -493,21 +490,28 @@ class EstadoError(Exception):
         self.code = code
 
 
-def archivar(conn: DatabaseConnection, inventory_id: str, expected_version: int,
-             actor: Mapping[str, Any], restaurar: bool = False) -> dict[str, Any]:
-    """Archive a terrain, or restore it. Reversible, and the record itself is
-    untouched: same id, same revision, same files and layout. Only archived_at
-    and the version change, with one event."""
-    current = _vigente(conn, inventory_id, expected_version)
-    if bool(current["archived_at"]) != restaurar:
-        raise EstadoError("terreno_no_archivado" if restaurar else "terreno_archivado")
-    ahora = db.now()
+def borrar(conn: DatabaseConnection, inventory_id: str, expected_version: int) -> list[str]:
+    """Delete a terrain for good: its attachments, history, revisions and the
+    record. Nothing is kept. Returns the storage keys of its files, for the
+    caller to discard after the transaction commits.
+
+    Revisions go before the record (they refer to it immediately); the
+    record's own links to its revisions are deferred to COMMIT.
+    """
+    fila = conn.execute("SELECT version FROM inventory_terrain WHERE id = ?",
+                        (inventory_id,)).fetchone()
+    if fila is None:
+        raise LookupError(inventory_id)
+    if fila["version"] != expected_version:
+        raise ConflictError()
     with db.transaction(conn):
-        _claim(conn, inventory_id, expected_version, actor, ahora,
-               "archived_at = ?", (None if restaurar else ahora,))
-        _event(conn, inventory_id, expected_version + 1, "restore" if restaurar else "archive",
-               actor, ahora, current["draft_revision_id"], current["draft_revision_id"], {})
-    return _existente(conn, inventory_id)
+        claves = repo_archivos.delete(conn, terrain_id=inventory_id)
+        conn.execute("DELETE FROM inventory_event WHERE inventory_id = ?", (inventory_id,))
+        conn.execute("DELETE FROM inventory_revision WHERE inventory_id = ?", (inventory_id,))
+        if conn.execute("DELETE FROM inventory_terrain WHERE id = ? AND version = ?",
+                        (inventory_id, expected_version)).rowcount != 1:
+            raise ConflictError()
+    return claves
 
 
 def transferir(conn: DatabaseConnection, inventory_id: str, expected_version: int,
@@ -553,7 +557,7 @@ def vista_previa_de_transferencia(conn: DatabaseConnection, inventory_id: str,
         (inventory_id,)).fetchone()
     valores = json.loads(fila["custom_json"] or "{}")
     columnas = [] if fila["base_id"] is None else conn.execute(
-        "SELECT id, nombre FROM inventory_column WHERE base_id = ? AND retired_at IS NULL"
+        "SELECT id, nombre FROM inventory_column WHERE base_id = ?"
         " ORDER BY orden, id", (fila["base_id"],)).fetchall()
     acceso = [] if destino is None else conn.execute(
         "SELECT u.id, u.login, u.display_name, u.active FROM maestra_base_acceso a"
@@ -654,8 +658,6 @@ def _unique_violation(exc: Exception) -> bool:
 # -- the InternalTerrain DTO ------------------------------------------------------
 
 def publication_state(row: Mapping[str, Any]) -> str:
-    if row["archived_at"]:
-        return "archived"
     if row["published_revision_id"]:
         return "published"
     return "unpublished" if row["first_published_at"] else "draft"
@@ -699,8 +701,8 @@ def _columnas(conn: DatabaseConnection, bases: Sequence[str]) -> dict[str, set[s
     visibles: dict[str, set[str]] = {b: set() for b in bases}
     if bases:
         for c in conn.execute(
-                "SELECT id, base_id FROM inventory_column WHERE retired_at IS NULL"
-                f" AND base_id IN ({', '.join('?' for _ in bases)})", tuple(bases)).fetchall():
+                "SELECT id, base_id FROM inventory_column"
+                f" WHERE base_id IN ({', '.join('?' for _ in bases)})", tuple(bases)).fetchall():
             visibles[c["base_id"]].add(f"custom:{c['id']}")
     return visibles
 
@@ -708,7 +710,7 @@ def _columnas(conn: DatabaseConnection, bases: Sequence[str]) -> dict[str, set[s
 def _dto(row: Mapping[str, Any], visibles: Mapping[str, set[str]]) -> dict[str, Any]:
     draft = {f: row[f] for f in REVISION_FIELDS}
     # Custom values of the terrain's CURRENT base only. Values kept from a base
-    # it used to belong to, or of a retired column, are stored and not shown.
+    # it used to belong to, or of a deleted column, are stored and not shown.
     propias = visibles.get(row["base_id"] or "", set())
     custom = {k: v for k, v in json.loads(row["custom_json"] or "{}").items() if k in propias}
     draft["price_on_request"] = bool(row["price_on_request"])
@@ -733,7 +735,6 @@ def _dto(row: Mapping[str, Any], visibles: Mapping[str, set[str]]) -> dict[str, 
         "has_pending_changes": bool(row["published_revision_id"])
         and row["published_revision_id"] != row["draft_revision_id"],
         "published_at": row["published_at"],
-        "archived_at": row["archived_at"],
         "base_id": row["base_id"],
         "draft": draft,
         "custom": custom,

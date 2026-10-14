@@ -262,9 +262,9 @@ export function crearClienteArchivos({ peticionPrivada }) {
           expected_revision: revision },
       }),
 
-    retirar: async (archivoId, revision, clave, { signal } = {}) =>
-      json(`/api/archivos/${id(archivoId)}/retirar`,
-        { method: "POST", datos: { expected_revision: revision }, clave, signal }),
+    borrar: async (archivoId, revision, { signal } = {}) =>
+      json(`/api/archivos/${id(archivoId)}/borrar`,
+        { method: "POST", datos: { expected_revision: revision }, signal }),
 
     listar: async (terrenoId, opciones = {}) =>
       json(`/api/inventario/terrenos/${id(terrenoId)}/archivos${pagina(opciones)}`, opciones),

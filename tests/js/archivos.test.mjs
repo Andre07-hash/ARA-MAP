@@ -139,7 +139,7 @@ test("client: requests carry exact paths, bodies and keys; PUT never sets Conten
   const cliente = A.crearClienteArchivos({ peticionPrivada: async (ruta, o) => { vistas.push({ ruta, ...o }); return { response: json(200, {}) }; } });
   const aid = randomUUID(), vid = randomUUID(), gid = randomUUID();
   await cliente.activar(aid, { versionId: vid, geometriaId: gid, revision: 4 }, "clave-1");
-  await cliente.retirar(aid, 5, "clave-2");
+  await cliente.borrar(aid, 5);
   await cliente.procesar(vid, [0, 2], "clave-3");
   await cliente.subir(vid, "kmz", new Blob([new Uint8Array(3)]));
   await cliente.versiones(aid, { cursor: 7, limite: 5 });

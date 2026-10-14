@@ -28,7 +28,7 @@ from .web_util import texto_seguro
 AVAILABILITY = ("unknown", "available", "negotiation", "sold", "withdrawn")
 PUBLIC_AVAILABILITY = ("available", "negotiation")
 MONEDAS = ("USD", "MXN")
-PUBLICATION_STATES = ("draft", "published", "unpublished", "archived")
+PUBLICATION_STATES = ("draft", "published", "unpublished")
 
 # Text fields and their length limits. Short ones are single-spaced.
 SHORT_TEXT = {"terreno": 200, "estado": 100, "municipio": 100, "tipo_terreno": 100}
@@ -259,7 +259,7 @@ PUBLIC_QUERY = ("q", "estado", "municipio", "area_min_m2", "area_max_m2", "moned
                 "price_min", "price_max", "price_basis", "cursor", "limit")
 # One work base's list. "sort" names a key of SORTS, "-" in front for descending.
 SCOPED_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
-                "include_archived", "tipo_terreno", "sort")
+                "tipo_terreno", "sort")
 # The administrators' master table adds the base filter: base ids and/or
 # SIN_ASIGNAR for records that belong to no base.
 INTERNAL_QUERY = (*SCOPED_QUERY, "base")
@@ -311,11 +311,10 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     for name, choices in (("publication_state", PUBLICATION_STATES), ("availability", AVAILABILITY)):
         if any(v not in choices for v in q[name]):
             errors[name] = f"Valores admitidos: {', '.join(choices)}."
-    for name in ("attention", "include_archived"):
-        value = single.get(name)
-        if value not in (None, "true", "false", "1", "0"):
-            errors[name] = "Usa true o false."
-        q[name] = None if value is None else value in ("true", "1")
+    value = single.get("attention")
+    if value not in (None, "true", "false", "1", "0"):
+        errors["attention"] = "Usa true o false."
+    q["attention"] = None if value is None else value in ("true", "1")
     # Text that reaches a bound parameter: a NUL from %00 is refused by Postgres.
     for name in ("q", "estado", "municipio", "tipo_terreno"):
         valores = [q[name]] if name == "q" else q[name]

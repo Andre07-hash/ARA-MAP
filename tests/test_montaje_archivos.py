@@ -167,7 +167,7 @@ class Montaje(TempDatabase):
                                  ("POST", f"/api/archivos/versiones/{vid}/cancelar"),
                                  ("POST", f"/api/archivos/versiones/{vid}/procesar"),
                                  ("POST", f"/api/archivos/{vid}/activar"),
-                                 ("POST", f"/api/archivos/{vid}/retirar")):
+                                 ("POST", f"/api/archivos/{vid}/borrar")):
                 with self.subTest(ruta=ruta):
                     s, r = self.j(metodo, ruta, datos={})
                     self.assertEqual((s, r["error"]), (403, "ARA Map está en modo de solo consulta."))

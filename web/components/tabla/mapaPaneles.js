@@ -225,7 +225,6 @@ export function createMapaPaneles({
           el("span", { class: "eyebrow" }, baseNombre),
           el("h2", {}, nombre),
           lugar && el("p", { class: "secondary" }, lugar),
-          registro.archived_at && el("span", { class: "chip tabla-chip" }, "Archivado"),
         ),
         el("button", {
           type: "button", class: "icon-btn", "aria-label": "Cerrar detalle", dataset: { ficha: "cerrar" },

@@ -11,8 +11,8 @@
  * keeps its explicit choice and activation (in the detail, which still works);
  * an invalid replacement keeps the active boundary; a cancelled picker sends
  * nothing; the buttons work from the keyboard and never open a cell editor;
- * rows that may not be changed (archived terrain, archived base) offer no
- * upload. Optional: ELEGIR_CAPTURAS=dir (screenshots), CHROMIUM=/path,
+ * deleting a terrain from its detail removes its row and leaves the others'
+ * buttons. Optional: ELEGIR_CAPTURAS=dir (screenshots), CHROMIUM=/path,
  * ELEGIR_PUERTO.
  */
 
@@ -112,14 +112,10 @@ const resumen = async (page, id, col) => (await celda(page, id, col).locator('.a
 const elegirEn = (page, id, col) => celda(page, id, col).locator('.archivos-celda-elegir');
 const COL = { pdf: 'core:archivos', kmz: 'core:kmz' };
 
-async function irA(page, vista, { archivados = false } = {}) {
+async function irA(page, vista) {
   await page.goto(`${URLBASE}/?test=1#/tabla/${vista}`);
   await page.locator('.tabla-pantalla').waitFor();
   await page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
-  if (archivados) {
-    await page.locator('#tabla-archivados').check();
-    await page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
-  }
 }
 /** Click the cell's button and give the picker this file (a path) or nothing (cancel). */
 async function elegir(page, id, tipo, ruta, { teclado = null } = {}) {
@@ -157,18 +153,12 @@ const botonesVisibles = (page, id) => fila(page, id).locator('.archivos-celda-el
 const ada = await abrir('ada');
 const admin = (m, r, c) => llamar(ada.page, m, r, c);
 const base = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Celdas Ficticia' })).datos.base;
-const otra = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Que Se Archiva Ficticia' })).datos.base;
 const ops = Object.fromEntries((await admin('GET', '/api/maestra/operadores?limit=200')).datos.usuarios.map((o) => [o.login, o.id]));
-for (const b of [base, otra]) igual((await admin('PUT', `/api/maestra/bases/${b.id}/acceso`, { expected_version: b.version, usuarios: [ops.olga] })).status, 200, 'acceso');
+for (const b of [base]) igual((await admin('PUT', `/api/maestra/bases/${b.id}/acceso`, { expected_version: b.version, usuarios: [ops.olga] })).status, 200, 'acceso');
 const crear = async (b, nombre) => (await admin('POST', `/api/maestra/bases/${b.id}/terrenos`, { terreno: nombre })).datos.terreno.id;
 const A = await crear(base, 'Lote Celda Uno Ficticio');
 const B = await crear(base, 'Lote Celda Dos Ficticio');
-const C = await crear(base, 'Lote Celda Archivado Ficticio');
-const D = await crear(otra, 'Lote De Base Archivada Ficticio');
-{
-  const t = await terreno(ada.page, C);
-  igual((await admin('POST', `/api/inventario/terrenos/${C}/archivar`, { expected_version: t.version })).status, 200, 'archivar terreno');
-}
+const C = await crear(base, 'Lote Celda Borrado Ficticio');
 
 /* ----------------------------------------------------------- journeys */
 
@@ -298,31 +288,15 @@ await revisar('teclado: Enter y Espacio abren el selector; ni teclas ni doble cl
   igual(olga.escrituras.slice(antes), [], 'nada enviado');
 });
 
-await revisar('sin permiso de escritura no hay botones: terreno archivado', async () => {
-  await irA(olga.page, base.id, { archivados: true });
-  await fila(olga.page, C).waitFor();
-  await hasta(async () => (await resumen(olga.page, C, COL.pdf)) === 'Sin PDF', 'resumen');
-  igual(await botonesVisibles(olga.page, C), 0, 'operador, fila archivada');
-  igual(await botonesVisibles(olga.page, A), 2, 'operador, fila activa');
-  await irA(ada.page, base.id, { archivados: true });
-  await fila(ada.page, C).waitFor();
-  igual(await botonesVisibles(ada.page, C), 0, 'administrador, fila archivada');
-});
-
-await revisar('sin permiso de escritura no hay botones: base archivada (vista de la base y tabla maestra)', async () => {
-  const b = (await admin('GET', `/api/maestra/bases/${otra.id}/acceso`)).datos.base;
-  igual((await admin('POST', `/api/maestra/bases/${otra.id}/archivar`, { expected_version: b.version })).status, 200, 'archivar base');
-  await irA(ada.page, 'maestra');
-  await ada.page.reload();               // a fresh session view: the bases as they are now
-  await ada.page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
-  await fila(ada.page, D).waitFor();
-  await hasta(async () => (await resumen(ada.page, D, COL.pdf)) === 'Sin PDF', 'resumen');
-  igual(await celda(ada.page, D, 'core:municipio').getAttribute('aria-readonly'), 'true', 'la regla central marca la fila');
-  igual(await botonesVisibles(ada.page, D), 0, 'maestra, fila de base archivada');
-  igual(await botonesVisibles(ada.page, A), 2, 'maestra, fila de base activa');
-  await irA(ada.page, otra.id);
-  await fila(ada.page, D).waitFor();
-  igual(await botonesVisibles(ada.page, D), 0, 'vista de la base archivada');
+await revisar('borrar un terreno desde su detalle: la fila sale y las demás conservan sus botones', async () => {
+  await irA(ada.page, base.id);
+  await fila(ada.page, C).getByTitle('Detalle, historial, transferir y borrar').click();
+  await ada.page.getByRole('dialog', { name: 'Lote Celda Borrado Ficticio' }).getByRole('button', { name: 'Borrar terreno…' }).click();
+  await ada.page.getByRole('dialog', { name: '¿Borrar «Lote Celda Borrado Ficticio»?' })
+    .getByRole('button', { name: 'Borrar definitivamente' }).click();
+  await hasta(async () => (await fila(ada.page, C).count()) === 0, 'la fila borrada sigue en la tabla');
+  igual((await llamar(ada.page, 'GET', `/api/inventario/terrenos/${C}`)).status, 404, 'el terreno sigue en el servidor');
+  igual(await botonesVisibles(ada.page, A), 2, 'fila vecina');
 });
 
 await revisar('sin errores de página', async () => {

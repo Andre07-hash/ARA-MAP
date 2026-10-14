@@ -3,7 +3,7 @@
  * (web/lib/cargadorGeometrias.js). Nothing is stubbed: the real mounted server
  * (server.app.Handler through tests/e2e/tabla_servidor.py), its local disk
  * store, real cookie sessions and Chromium. Uploads, choices, activation,
- * downloads and retirement are made by clicking the widgets.
+ * downloads and deletion are made by clicking the widgets.
  *
  *   cd tests/e2e && node recorrido-completo.mjs                       # SQLite, every journey
  *   ARA_MAP_TEST_DATABASE_URL=postgresql://…/desechable RECORRIDO_BD=postgres \
@@ -264,7 +264,7 @@ let base, ajena, ids;
 const NOMBRE = 'Lote Recorrido Ficticio';
 const VECINO = 'Lote Vecino Ficticio';
 let lote = null;          // created blank in the UI by olga
-let vecino = null;        // X/Y + boundary, for concurrent selection and retirement
+let vecino = null;        // X/Y + boundary, for concurrent selection and deletion
 let version0 = null;
 let geometriaActiva = null;
 const medidas = {};
@@ -450,12 +450,12 @@ if (!FOCALIZADO) {
     }
   });
 
-  await revisar('retirar el KMZ de un terreno con X/Y lo deja en su punto; el mapa lo dice', async () => {
+  await revisar('borrar el KMZ de un terreno con X/Y lo deja en su punto; el mapa lo dice', async () => {
     const d = await abrirDetalle(olga.page, vecino, VECINO);
     const k = d.locator('.archivos-detalle[data-tipo="kmz"]');
-    await k.getByRole('button', { name: /^Retirar/ }).first().click();
-    await olga.page.getByRole('dialog', { name: /Retirar/ }).getByRole('button', { name: 'Retirar' }).click();
-    await hasta(async () => (await textoCelda(olga.page, vecino, 'core:kmz')) === 'Sin KMZ', 'celda tras retirar');
+    await k.getByRole('button', { name: /^Borrar/ }).first().click();
+    await olga.page.getByRole('dialog', { name: /¿Borrar este KMZ\?/ }).getByRole('button', { name: 'Borrar definitivamente' }).click();
+    await hasta(async () => (await textoCelda(olga.page, vecino, 'core:kmz')) === 'Sin KMZ', 'celda tras borrar');
     await cerrarDetalle(olga.page, d);
     const t = await terreno(olga.page, vecino);
     igual([t.ubicacion.modo, t.ubicacion.geometria, t.draft.lat], ['punto', null, 20.6015], 'ubicación por X/Y');
@@ -841,9 +841,9 @@ async function subirYPerderEscritura(s, d, cambio) {
   await paso.quitar();
   return estado;
 }
-const archivarTerreno = async (id) => {
+const borrarTerreno = async (id) => {
   const t = (await admin('GET', `/api/inventario/terrenos/${id}`)).datos.terreno;
-  igual((await admin('POST', `/api/inventario/terrenos/${id}/archivar`, { expected_version: t.version })).status, 200, 'archivar terreno');
+  igual((await admin('POST', `/api/inventario/terrenos/${id}/borrar`, { expected_version: t.version })).status, 200, 'borrar terreno');
 };
 const editorAbierto = (page) => page.evaluate(() => {
   const e = document.activeElement;
@@ -863,16 +863,14 @@ async function abrirEditor(page, id, col, texto) {
 await conceder(['oscar', 'olivia', 'oriol']);
 const oriol = await abrir('oriol');
 
-await revisar('R3-A2: se archiva el terreno mientras una subida se completa (vista de activos): sale de la vista, sin controles de escritura; la otra fila de la base sigue editable', async () => {
-  const [t, otro] = [await nuevoTerreno('Lote Archivado Ficticio'), await nuevoTerreno('Lote En Edición Ficticio')];
+await revisar('R3-A2: se borra el terreno mientras una subida se completa: sale de la vista, sin controles de escritura; la otra fila de la base sigue editable', async () => {
+  const [t, otro] = [await nuevoTerreno('Lote Borrado Ficticio'), await nuevoTerreno('Lote En Edición Ficticio')];
   await recargarTabla(oriol.page);
   await fila(oriol.page, t).waitFor();
-  const d = await abrirDetalle(oriol.page, t, 'Lote Archivado Ficticio');
-  const estado = await subirYPerderEscritura(oriol, d, async () => {
-    await archivarTerreno(t);
-  });
-  igual(estado, 409, 'completar');
-  await hasta(async () => (await fila(oriol.page, t).count()) === 0, 'la fila archivada sigue en la vista de activos');
+  const d = await abrirDetalle(oriol.page, t, 'Lote Borrado Ficticio');
+  const estado = await subirYPerderEscritura(oriol, d, () => borrarTerreno(t));
+  igual(estado, 404, 'completar');
+  await hasta(async () => (await fila(oriol.page, t).count()) === 0, 'la fila borrada sigue en la vista');
   await hasta(async () => (await oriol.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
   igual(await escrituraOfrecida(oriol.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
   igual(await fila(oriol.page, otro).count(), 1, 'la otra fila debía seguir');
@@ -882,193 +880,27 @@ await revisar('R3-A2: se archiva el terreno mientras una subida se completa (vis
 });
 
 if (!FOCALIZADO) {
-  await revisar('R3-A2: con «Incluir archivados», el terreno archivado durante la subida queda a la vista en sólo lectura: sin escritura, con lectura y descarga, y la edición en curso intacta', async () => {
-    const [t, otro] = [await nuevoTerreno('Lote Visible Archivado Ficticio'), await nuevoTerreno('Lote Con Editor Ficticio')];
+  await revisar('R3-A2: se borra un terreno con una subida retenida mientras otra fila tiene un editor abierto: el editor sigue intacto y guarda', async () => {
+    const [t, otro] = [await nuevoTerreno('Lote Que Se Borra Ficticio'), await nuevoTerreno('Lote Con Editor Ficticio')];
     await recargarTabla(oriol.page);
-    await oriol.page.getByLabel('Incluir archivados').check();
-    await listo(oriol.page);
     await fila(oriol.page, t).waitFor();
-    let d = await abrirDetalle(oriol.page, t, 'Lote Visible Archivado Ficticio');
-    await subirEnDetalle(d, 'pdf', F.pdf);                                   // a file that will stay readable
-    igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'PDF previo');
     const version = (await terreno(oriol.page, otro)).version;
-    const estado = await subirYPerderEscritura(oriol, d, () => archivarTerreno(t));
-    igual(estado, 409, 'completar');
-    await hasta(async () => (await detallePdf(d).getAttribute('data-solo-lectura')) === '1', 'el detalle sigue editable');
-    igual(await escrituraOfrecida(oriol.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
-    igual(await fila(oriol.page, t).count(), 1, 'la fila debía seguir a la vista con archivados incluidos');
-    cierto(/Archivado/.test(await fila(oriol.page, t).innerText()), 'la fila no dice que está archivada');
-    igual(await celda(oriol.page, t, 'core:terreno').getAttribute('aria-readonly'), 'true', 'las celdas siguen editables');
-    cierto(await d.getByText('Archivado: se puede consultar y restaurar.').isVisible(), 'el detalle no dice que está archivado');
-    cierto(await d.getByRole('button', { name: 'Restaurar terreno' }).isVisible(), 'el detalle no ofrece restaurar');
-    igual(await d.getByRole('button', { name: 'Archivar terreno' }).count(), 0, 'el detalle aún ofrece archivar');
-    // Permitted reads: the stored file is listed and downloads byte for byte.
-    const item = detallePdf(d).locator('.archivos-item', { hasText: 'Avalúo ficticio.pdf' });
-    const [descarga] = await Promise.all([oriol.page.waitForEvent('download'), item.getByRole('button', { name: /^Descargar/ }).click()]);
-    igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf)), 'descarga tras archivar');
-    await cerrarDetalle(oriol.page, d);
-    // Unrelated work: an editor opened in another row, then the same loss again on a second archived-view terrain.
-    const t2 = await nuevoTerreno('Lote Segundo Archivado Ficticio');
-    await aTabla(oriol.page);
-    await oriol.page.getByRole('button', { name: 'Actualizar' }).click();
-    await listo(oriol.page);
-    d = await abrirDetalle(oriol.page, t2, 'Lote Segundo Archivado Ficticio');
+    const d = await abrirDetalle(oriol.page, t, 'Lote Que Se Borra Ficticio');
     const paso = await retener(oriol.page, '**/api/archivos/versiones/*/completar');
     await zonaPdf(d).setInputFiles(archivoPrivado);
     await hasta(() => paso.estado.vistas > 0, 'no se pidió completar');
     await esperar(300);
     await cerrarDetalle(oriol.page, d, { interrumpir: true });               // the upload belongs to the closed detail; the cell mount remains
     await abrirEditor(oriol.page, otro, 'core:municipio', 'Texto sin guardar');
-    await archivarTerreno(t2);
+    await borrarTerreno(t);
     paso.soltar();
-    await oriol.page.getByRole('button', { name: 'Actualizar' }).isVisible();
     await esperar(1500);
     igual(await editorAbierto(oriol.page), { editor: true, valor: 'Texto sin guardar', seleccion: 2 }, 'el editor de otra fila');
     await paso.quitar();
     await oriol.page.keyboard.press('Enter');
     await hasta(async () => (await textoCelda(oriol.page, otro, 'core:municipio')) === 'Texto sin guardar', 'la celda no guardó');
     igual((await terreno(oriol.page, otro)).version, version + 1, 'versión de la otra fila');
-    await foto(oriol.page, '08-r3-a2-archivado-en-solo-lectura');
-  });
-
-  await revisar('R3-A2: un cambio sin resolver en la misma fila no se descarta al archivarse: la fila queda en sólo lectura con su texto', async () => {
-    const t = await nuevoTerreno('Lote Con Pendiente Ficticio');
-    await recargarTabla(oriol.page);                                        // active-only view again
-    await fila(oriol.page, t).waitFor();
-    await celda(oriol.page, t, 'core:superficie_m2').focus();
-    await oriol.page.keyboard.press('Enter');
-    await celda(oriol.page, t, 'core:superficie_m2').locator('.tabla-editor').fill('no es un número');
-    await oriol.page.keyboard.press('Enter');
-    await oriol.page.locator(`tr[data-id="${t}"] td[data-col="core:superficie_m2"].is-error`).waitFor();
-    const d = await abrirDetalle(oriol.page, t, 'Lote Con Pendiente Ficticio');
-    igual(await subirYPerderEscritura(oriol, d, () => archivarTerreno(t)), 409, 'completar');
-    await hasta(async () => (await detallePdf(d).getAttribute('data-solo-lectura')) === '1', 'el detalle sigue editable');
-    igual(await escrituraOfrecida(oriol.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
-    igual(await fila(oriol.page, t).count(), 1, 'la fila con un cambio sin resolver no debía quitarse');
-    cierto(/no es un número/.test(await celda(oriol.page, t, 'core:superficie_m2').innerText()), 'el texto sin resolver se perdió');
-    cierto(/Archivado/.test(await fila(oriol.page, t).innerText()), 'la fila no dice que está archivada');
-    await cerrarDetalle(oriol.page, d);
-  });
-
-  await revisar('R3-A2: se archiva la base mientras un administrador sube: toda la vista pasa a sólo lectura y conserva lo legible', async () => {
-    const baseB = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Que Se Archiva Ficticia' })).datos.base;
-    const crear = async (nombre) => (await admin('POST', `/api/maestra/bases/${baseB.id}/terrenos`, { terreno: nombre })).datos.terreno.id;
-    const [t, otro] = [await crear('Lote De Base Archivada Ficticio'), await crear('Lote Vecino De Base Ficticio')];
-    const alan = await abrir('alan');
-    await alan.page.goto(`${URLBASE}/?test=1#/tabla/${baseB.id}`);
-    await alan.page.locator('.tabla-pantalla').waitFor();
-    await listo(alan.page);
-    await fila(alan.page, t).waitFor();
-    const d = await abrirDetalle(alan.page, t, 'Lote De Base Archivada Ficticio');
-    const estado = await subirYPerderEscritura(alan, d, async () => {
-      const b = (await admin('GET', `/api/maestra/bases/${baseB.id}/acceso`)).datos.base;
-      igual((await admin('POST', `/api/maestra/bases/${baseB.id}/archivar`, { expected_version: b.version })).status, 200, 'archivar base');
-    });
-    igual(estado, 409, 'completar');
-    await hasta(async () => (await detallePdf(d).getAttribute('data-solo-lectura')) === '1', 'el detalle sigue editable');
-    igual(await escrituraOfrecida(alan.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
-    await cerrarDetalle(alan.page, d);
-    await hasta(async () => /archivada/.test(await alan.page.locator('.tabla-aviso').innerText().catch(() => '')), 'la vista no avisa que la base está archivada');
-    igual(await alan.page.getByRole('button', { name: 'Agregar terreno' }).isVisible(), false, '«Agregar terreno» sigue ofrecido');
-    igual(await alan.page.locator('tr[data-id]').count(), 2, 'las filas legibles debían seguir');
-    igual(await celda(alan.page, otro, 'core:terreno').getAttribute('aria-readonly'), 'true', 'las celdas siguen editables');
-    await alan.contexto.close();
-  });
-
-  await revisar('R3-A2 residual: en la tabla maestra se archiva la base de un terreno durante su subida: sus filas quedan en sólo lectura, las de otras bases activas y las sin asignar siguen editables, y el texto pendiente se conserva', async () => {
-    const crearBase = async (nombre) => (await admin('POST', '/api/maestra/bases', { nombre })).datos.base;
-    const crearEn = async (base, nombre) => (await admin('POST', base ? `/api/maestra/bases/${base.id}/terrenos` : '/api/inventario/terrenos', { terreno: nombre })).datos.terreno.id;
-    const [baseX, baseY] = [await crearBase('Base Maestra Que Se Archiva Ficticia'), await crearBase('Base Maestra Activa Ficticia')];
-    const [t, hermano] = [await crearEn(baseX, 'Lote Maestro Subiendo Ficticio'), await crearEn(baseX, 'Lote Maestro Hermano Ficticio')];
-    const [activo, suelto] = [await crearEn(baseY, 'Lote Maestro De Base Activa Ficticio'), await crearEn(null, 'Lote Maestro Sin Asignar Ficticio')];
-    const alan = await abrir('alan');
-    await alan.page.goto(`${URLBASE}/?test=1#/tabla/maestra`);
-    await alan.page.locator('.tabla-pantalla').waitFor();
-    await listo(alan.page);
-    for (const id of [t, hermano, activo, suelto]) await fila(alan.page, id).waitFor();
-    const editable = async (id) => (await celda(alan.page, id, 'core:municipio').getAttribute('aria-readonly')) !== 'true';
-    igual(await Promise.all([t, hermano, activo, suelto].map(editable)), [true, true, true, true], 'antes de archivar todo es editable');
-    // An unresolved change on a row of the base that will be archived.
-    await celda(alan.page, hermano, 'core:superficie_m2').focus();
-    await alan.page.keyboard.press('Enter');
-    await celda(alan.page, hermano, 'core:superficie_m2').locator('.tabla-editor').fill('texto pendiente');
-    await alan.page.keyboard.press('Enter');
-    await alan.page.locator(`tr[data-id="${hermano}"] td[data-col="core:superficie_m2"].is-error`).waitFor();
-    const d = await abrirDetalle(alan.page, t, 'Lote Maestro Subiendo Ficticio');
-    await subirEnDetalle(d, 'pdf', F.pdf);                                   // stays readable afterwards
-    igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'PDF previo');
-    const estado = await subirYPerderEscritura(alan, d, async () => {
-      const b = (await admin('GET', `/api/maestra/bases/${baseX.id}/acceso`)).datos.base;
-      igual((await admin('POST', `/api/maestra/bases/${baseX.id}/archivar`, { expected_version: b.version })).status, 200, 'archivar base');
-    });
-    igual(estado, 409, 'completar');
-    await hasta(async () => (await detallePdf(d).getAttribute('data-solo-lectura')) === '1', 'el detalle sigue editable');
-    igual(await escrituraOfrecida(alan.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
-    // Permitted read: the stored PDF is still listed and downloads byte for byte.
-    const item = detallePdf(d).locator('.archivos-item', { hasText: 'Avalúo ficticio.pdf' });
-    const [descarga] = await Promise.all([alan.page.waitForEvent('download'), item.getByRole('button', { name: /^Descargar/ }).click()]);
-    igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf)), 'descarga tras archivar la base');
-    await cerrarDetalle(alan.page, d);
-    // Per row: the archived base's rows are read-only, the others are not.
-    await hasta(async () => !(await editable(t)), 'la fila de la base archivada sigue editable');
-    igual(await Promise.all([t, hermano, activo, suelto].map(editable)), [false, false, true, true], 'permisos por fila');
-    for (const id of [t, hermano]) {                      // no new editor opens there, by key or by double click
-      await celda(alan.page, id, 'core:municipio').focus();
-      await alan.page.keyboard.press('Enter');
-      await celda(alan.page, id, 'core:municipio').dblclick();
-      await alan.page.keyboard.type('x');
-      await esperar(150);
-      igual(await alan.page.locator(`tr[data-id="${id}"] .tabla-editor`).count(), 0, 'se abrió un editor en una fila de base archivada');
-    }
-    cierto(/texto pendiente/.test(await celda(alan.page, hermano, 'core:superficie_m2').innerText()), 'el texto pendiente se perdió');
-    cierto(/texto pendiente/.test(await alan.page.locator('.tabla-bandeja').innerText()), 'el texto pendiente salió de la bandeja');
-    igual(await alan.page.getByRole('button', { name: 'Agregar terreno' }).isVisible(), true, 'la vista maestra debía seguir permitiendo agregar');
-    // Other active bases and unassigned records still edit and save.
-    for (const id of [activo, suelto]) {
-      const antes = (await terreno(alan.page, id)).version;
-      await escribir(alan.page, id, 'core:municipio', 'Municipio Editable');
-      igual(await textoCelda(alan.page, id, 'core:municipio'), 'Municipio Editable', 'la fila de otra base no guardó');
-      igual((await terreno(alan.page, id)).version, antes + 1, 'versión');
-    }
-    // The server agrees about the archived base's row: the write is refused there.
-    const v = (await terreno(alan.page, t)).version;
-    const negado = await llamar(alan.page, 'PATCH', `/api/inventario/terrenos/${t}`, { expected_version: v, changes: { municipio: 'No debe guardarse' } });
-    cierto(negado.status >= 400, `el servidor aceptó la escritura (${negado.status})`);
-    // Restored base: the same rows edit again after a refresh.
-    const b2 = (await admin('GET', `/api/maestra/bases/${baseX.id}/acceso`)).datos.base;
-    igual((await admin('POST', `/api/maestra/bases/${baseX.id}/restaurar`, { expected_version: b2.version })).status, 200, 'restaurar base');
-    await alan.page.reload();
-    await alan.page.locator('.tabla-pantalla').waitFor();
-    await listo(alan.page);
-    await fila(alan.page, t).waitFor();
-    igual(await editable(t), true, 'la base restaurada debía volver a ser editable');
-    await foto(alan.page, '09-r3-a2-maestra-permisos-por-fila');
-    await alan.contexto.close();
-    return { servidor_niega: negado.status };
-  });
-
-  await revisar('R3-A2: se archiva la base mientras un operador sube: la base deja de estar a su alcance y la vista se limpia', async () => {
-    const baseC = (await admin('POST', '/api/maestra/bases', { nombre: 'Base Cerrada Al Operador Ficticia' })).datos.base;
-    igual((await admin('PUT', `/api/maestra/bases/${baseC.id}/acceso`, { expected_version: baseC.version, usuarios: [ids.olivia] })).status, 200, 'acceso');
-    const t = (await admin('POST', `/api/maestra/bases/${baseC.id}/terrenos`, { terreno: 'Lote Del Operador Ficticio' })).datos.terreno.id;
-    const olivia = await abrir('olivia');
-    await olivia.page.goto(`${URLBASE}/?test=1#/tabla/${baseC.id}`);
-    await olivia.page.locator('.tabla-pantalla').waitFor();
-    await listo(olivia.page);
-    await fila(olivia.page, t).waitFor();
-    const d = await abrirDetalle(olivia.page, t, 'Lote Del Operador Ficticio');
-    const estado = await subirYPerderEscritura(olivia, d, async () => {
-      const b = (await admin('GET', `/api/maestra/bases/${baseC.id}/acceso`)).datos.base;
-      igual((await admin('POST', `/api/maestra/bases/${baseC.id}/archivar`, { expected_version: b.version })).status, 200, 'archivar base');
-    });
-    cierto([404, 409].includes(estado), `completar respondió ${estado}`);
-    await hasta(async () => (await fila(olivia.page, t).count()) === 0, 'la fila sigue');
-    await hasta(async () => (await olivia.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
-    await esperar(1500);
-    igual(await escrituraOfrecida(olivia.page), NADA_QUE_ESCRIBIR, 'controles de escritura');
-    igual((await privadoDe(olivia.page, [PRIVADO, 'Lote Del Operador Ficticio'])).nombres, [], 'nombres visibles');
-    await olivia.contexto.close();
-    return { completar: estado };
+    await foto(oriol.page, '08-r3-a2-borrado-con-editor-abierto');
   });
 
   await revisar('R3-A2 (respuesta 403 «forbidden» SIMULADA, la política real no la produce): se vuelve a preguntar sesión y modo; nada se desmonta ni se descarta', async () => {

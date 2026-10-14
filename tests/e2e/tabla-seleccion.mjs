@@ -121,7 +121,11 @@ await revisar('borrar la selección: cancelar no borra; confirmar sí', async ()
   await ada.getByRole('button', { name: 'Borrar definitivamente' }).click();
   await ada.getByText('2 terrenos borrados.').first().waitFor();
   igual(await total(ada), inicial - 2, 'borrados');
-  igual(await ada.locator('.tabla-cuenta').innerText(), `1–${inicial - 2} de ${inicial - 2}`, 'el contador');
+  // The toast comes when the table starts reloading; the counter follows when the page arrives.
+  const contador = `1–${inicial - 2} de ${inicial - 2}`;
+  await ada.waitForFunction((t) => document.querySelector('.tabla-cuenta')?.textContent === t, contador, { timeout: 15000 })
+    .catch(() => {});
+  igual(await ada.locator('.tabla-cuenta').innerText(), contador, 'el contador');
 });
 
 await revisar('el operador sólo puede borrar', async () => {

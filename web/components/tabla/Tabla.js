@@ -55,12 +55,14 @@ import {
   VISTA_SIN_ASIGNAR,
 } from "../../lib/tabla.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
-import { closeAllDialogs, confirmDialog } from "../ui/dialog.js";
+import { closeAllDialogs, confirmarBorrado, confirmDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
 import { conectarArchivos } from "./archivosAnfitrion.js";
 import { reunirPaginas } from "../../lib/inventario.js";
 import { segment } from "../inventory/DatosView.js";
-import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
+import {
+  abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia, pedirDestino, pedirNombreDeBase,
+} from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
 
@@ -107,6 +109,11 @@ export function createTabla({
   const porPintar = new Set();    // keys set aside since the last paint: theirs is not decided yet
   let vigiaApartadas = null;
   let seleccion = null;           // terrain id shared with the map preview
+  // Rows ticked for a bulk action, id -> the version seen. They belong to one
+  // view and query (`marcadosClave`) and may span pages.
+  const marcados = new Map();
+  let marcadosClave = null;
+  let enLote = false;             // a bulk action is running
   let detalleAbierto = null;      // the open record detail, for file refreshes
   let modo = modoInicial === "mapa" ? "mapa" : "tabla";
   // The map's set: every terrain of the view for one query (`clave`).
@@ -215,7 +222,8 @@ export function createTabla({
   const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true },
     el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar), previa.element);
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
-  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, cuerpo, vacio, pie);
+  const lote = el("div", { class: "tabla-lote", role: "region", "aria-label": "Terrenos seleccionados", hidden: true });
+  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, lote, cuerpo, vacio, pie);
 
   tbody.addEventListener("focusin", (e) => {
     const celda = e.target.closest("td[data-col]");
@@ -266,6 +274,7 @@ export function createTabla({
     cola.olvidar();
     enVuelo.clear();
     nuevos = new Set();
+    if (deVista) marcados.clear();
     // Within the view a busy upload outlives the repaint; leaving the view ends it.
     if (deVista) soltarRanuras(); else apartarRanuras();
     refrescos.clear();
@@ -506,6 +515,7 @@ export function createTabla({
   }
 
   function pintarPermisos() {
+    pintarLote();
     const lectura = vistaSoloLectura();
     btnAgregar.hidden = !vista || lectura || modo === "mapa";
     btnAgregar.disabled = creacion?.estado === "enviando";
@@ -536,7 +546,8 @@ export function createTabla({
     facetas(selTipo, pagina.facets.tipos, consulta.tipo_terreno, "Todos");
 
     thead.replaceChildren(el("tr", {},
-      el("th", { scope: "col", class: "tabla-th tabla-th-fila" }, el("span", { class: "sr-only" }, "Terreno")),
+      el("th", { scope: "col", class: "tabla-th tabla-th-fila" }, casillaDePagina(),
+        el("span", { class: "sr-only" }, "Terreno")),
       columnas.map((c) => el("th", {
         scope: "col", class: ["tabla-th", `tabla-col-${c.tipo}`], title: c.ayuda ?? null, "data-col": c.id,
       }, c.etiqueta, c.custom && el("span", { class: "tabla-th-tipo" }, ` · ${c.tipo}`))),
@@ -552,7 +563,150 @@ export function createTabla({
     if (tenia) enfocar(tenia.id, tenia.colId);
     if (seleccion && !existe(seleccion)) seleccion = null;
     marcarSeleccion();
+    pintarLote();
     pintarMapa();
+  }
+
+  /* ------------------------------------------------------- bulk actions */
+
+  const puedeMarcar = () => Boolean(vista) && !vistaSoloLectura() && modo === "tabla";
+  const terrenos = (n) => `${fmtCount(n)} ${n === 1 ? "terreno" : "terrenos"}`;
+
+  /** The selection belongs to one view and query; another one starts empty. */
+  function seleccionVigente() {
+    if (marcadosClave !== claveConjunto()) { marcados.clear(); marcadosClave = claveConjunto(); }
+  }
+
+  function marcar(t, si) {
+    seleccionVigente();
+    if (si) marcados.set(t.id, t.version); else marcados.delete(t.id);
+    pintarLote();
+  }
+
+  function casillaDePagina() {
+    if (!puedeMarcar() || !pagina.filas.length) return null;
+    const marcadas = pagina.filas.filter((t) => marcados.has(t.id)).length;
+    const casilla = el("input", {
+      type: "checkbox", class: "tabla-marca", "aria-label": "Seleccionar los terrenos de esta página",
+      checked: marcadas === pagina.filas.length,
+      onchange: (e) => { for (const t of pagina.filas) marcar(t, e.target.checked); pintarCasillas(); },
+    });
+    casilla.indeterminate = marcadas > 0 && marcadas < pagina.filas.length;
+    return casilla;
+  }
+
+  /** The ticks on screen follow `marcados` without repainting any cell. */
+  function pintarCasillas() {
+    for (const c of tbody.querySelectorAll("input.tabla-marca")) c.checked = marcados.has(c.dataset.id);
+    thead.querySelector(".tabla-th-fila input.tabla-marca")?.replaceWith(casillaDePagina() ?? "");
+  }
+
+  function pintarLote() {
+    seleccionVigente();
+    const n = marcados.size;
+    lote.hidden = !puedeMarcar() || n === 0;
+    if (lote.hidden) { lote.replaceChildren(); return; }
+    const boton = (texto, onclick, clase = "btn btn-small btn-quiet") =>
+      el("button", { type: "button", class: clase, disabled: enLote, onclick }, texto);
+    const faltan = pagina.total - n;
+    lote.replaceChildren(...[
+      el("strong", {}, `${terrenos(n)} ${n === 1 ? "seleccionado" : "seleccionados"}`),
+      faltan > 0 && boton(`Seleccionar los ${terrenos(pagina.total)} de esta vista`, () => marcarVista()),
+      admin && boton("Crear base con ellos…", () => loteNuevaBase()),
+      admin && boton("Transferir…", () => loteTransferir()),
+      boton("Borrar…", () => loteBorrar(), "btn btn-small btn-peligro"),
+      boton("Quitar selección", () => { marcados.clear(); pintarCasillas(); pintarLote(); }),
+    ].filter(Boolean));
+  }
+
+  /** Every terrain of this view and query, gathered page by page like the map's set. */
+  async function marcarVista() {
+    const clave = claveConjunto();
+    const deVista = vista;
+    const deConsulta = { ...consulta, limit: PAGINA_MAPA };
+    decir("Reuniendo los terrenos de esta vista…");
+    try {
+      const r = conjuntoVigente() && !conjunto.incompleto ? { terrenos: conjunto.filas } : await reunirPaginas(
+        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente)),
+        { maximo: MAXIMO_MAPA });
+      if (!vivo || claveConjunto() !== clave) return;
+      for (const t of r.terrenos) marcar(t, true);
+      pintarCasillas();
+      decir(`${terrenos(marcados.size)} seleccionados.`);
+    } catch (error) {
+      if (vivo) toastError(`No se pudieron reunir los terrenos: ${error.message}`);
+    }
+  }
+
+  /**
+   * Run one write per selected terrain, one after another, then reload. Each
+   * sends the version this table last saw for it, so a terrain someone else
+   * changed meanwhile is refused and reported, never overwritten.
+   */
+  // ponytail: one request per terrain, sequential; a bulk endpoint if pilots outgrow ~hundreds.
+  async function enLoteHacer(verbo, accion) {
+    const ids = [...marcados.keys()];
+    const fallos = [];
+    enLote = true;
+    pintarLote();
+    let hechos = 0;
+    for (const [i, id] of ids.entries()) {
+      decir(`${verbo} ${i + 1} de ${ids.length}…`);
+      try {
+        await accion(id, filaDe(id)?.version ?? marcados.get(id));
+        hechos += 1;
+        marcados.delete(id);
+      } catch (error) {
+        fallos.push(error.message);
+      }
+      if (!vivo) return { hechos, fallos };
+    }
+    enLote = false;
+    actualizarTabla();
+    return { hechos, fallos };
+  }
+
+  function informar(resultado, hecho) {
+    const { hechos, fallos } = resultado;
+    if (!fallos.length) { toast(`${terrenos(hechos)} ${hecho}.`); return; }
+    const motivos = [...new Set(fallos)].join(" ");
+    toastError(`${terrenos(hechos)} ${hecho}; ${fallos.length} no se pudieron: ${motivos} ` +
+      "Siguen seleccionados.");
+  }
+
+  async function loteBorrar() {
+    const n = marcados.size;
+    if (!(await confirmarBorrado({
+      titulo: `¿Borrar ${terrenos(n)}?`,
+      mensaje: `Se borran ${n === 1 ? "ese terreno" : `esos ${fmtCount(n)} terrenos`} con todos sus datos, su historial y sus PDF y KMZ.`,
+    }))) return;
+    informar(await enLoteHacer("Borrando", (id, version) => api.borrarTerreno(id, version)),
+      n === 1 ? "borrado" : "borrados");
+  }
+
+  async function loteTransferir() {
+    const n = marcados.size;
+    const destino = await pedirDestino({ cantidad: n, bases });
+    if (!destino) return;
+    const baseId = destino === "sin_asignar" ? null : destino;
+    informar(await enLoteHacer("Transfiriendo", (id, version) => api.transferirTerreno(id, version, baseId)),
+      n === 1 ? "transferido" : "transferidos");
+  }
+
+  async function loteNuevaBase() {
+    const n = marcados.size;
+    const nombre = await pedirNombreDeBase({ cantidad: n });
+    if (!nombre) return;
+    let base;
+    try {
+      ({ base } = await api.crearBaseDeTrabajo(nombre));
+    } catch (error) {
+      toastError(`No se pudo crear la base: ${error.message}`);
+      return;
+    }
+    await refrescarBases();
+    informar(await enLoteHacer("Moviendo", (id, version) => api.transferirTerreno(id, version, base.id)),
+      `${n === 1 ? "movido" : "movidos"} a «${base.nombre}»`);
   }
 
   /* ------------------------------------------------ files, location, map */
@@ -1045,6 +1199,11 @@ export function createTabla({
   function CabeceraDeFila(t, indice) {
     const nombre = t.draft?.terreno || "sin nombre";
     return el("th", { scope: "row", class: "tabla-th-fila" },
+      puedeMarcar() && el("input", {
+        type: "checkbox", class: "tabla-marca", dataset: { id: t.id }, checked: marcados.has(t.id),
+        "aria-label": `Seleccionar terreno ${nombre}, fila ${indice + 1}`,
+        onchange: (e) => { marcar(t, e.target.checked); pintarCasillas(); },
+      }),
       el("button", {
         type: "button", class: "icon-btn tabla-abrir", "aria-label": `Abrir terreno ${nombre}, fila ${indice + 1}`,
         title: "Detalle, historial, transferir y borrar", onclick: () => detalle(t.id),
@@ -1306,8 +1465,10 @@ export function createTabla({
     if (enPagina) pagina.total = Math.max(0, pagina.total - 1);
     quitarDelConjunto(id);
     if (seleccion === id) seleccion = null;
+    marcados.delete(id);
     pintarFila(id);
     pintarCuenta();
+    pintarLote();
     pintarBandeja();
   }
 

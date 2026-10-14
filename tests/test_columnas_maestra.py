@@ -4,8 +4,8 @@ Through the real HTTP dispatcher with real sessions, on SQLite and (when
 ARA_MAP_TEST_DATABASE_URL is set) on a disposable Postgres schema. The fixture
 is the one of tests/test_roles_y_bases.py: administrators ada and alan;
 operators olga (Base Uno), omar (Base Uno and Base Dos), otto (no grant); t1
-in Base Uno, t2 in Base Dos, t0 unassigned, ta archived in Base Uno, t3 in the
-archived base.
+in Base Uno, t2 in Base Dos, t0 unassigned, ta in Base Uno, t3 in Base Archivada
+(ta and that base carry a legacy archive stamp, which means nothing now).
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from tests.test_roles_y_bases import URL, Escenario, filas, nuevo
 
 BASE_NO_EXISTE = (404, {"error": "La base de trabajo no existe.", "detalle": {"code": "not_found"}})
 TERRENO_NO_EXISTE = (404, {"error": "El terreno no existe.", "detalle": {"code": "not_found"}})
-DESCONOCIDA = "Columna desconocida o retirada."
+DESCONOCIDA = "Columna desconocida."
 SECRETO = "VALOR-SOLO-DE-BASE-UNO"
 
 
@@ -50,14 +50,14 @@ class Columnas(Escenario):
     def columna(self, base, nombre, tipo="texto", **extra):
         return self.ok(self.crear(base, nombre, tipo, **extra))["columna"]
 
-    def lista(self, base, user="ada", retiradas=False):
-        return self.call("GET", self.ruta(base) + ("?retiradas=1" if retiradas else ""), user=user)
+    def lista(self, base, user="ada"):
+        return self.call("GET", self.ruta(base), user=user)
 
     def nombres(self, base, **kwargs):
         return [c["nombre"] for c in self.ok(self.lista(base, **kwargs))["columnas"]]
 
     def actual(self, col):
-        return next(c for c in self.ok(self.lista(col["base_id"], retiradas=True))["columnas"]
+        return next(c for c in self.ok(self.lista(col["base_id"]))["columnas"]
                     if c["id"] == col["id"])
 
     def cambiar(self, col, user="ada", accion=None, **cuerpo):
@@ -97,9 +97,9 @@ class Columnas(Escenario):
         self.assertEqual(status, 200)
         self.assertEqual(columnas.id_de_clave(col["id"]), col["id"][7:])
         self.assertEqual({k: col[k] for k in ("base_id", "nombre", "tipo", "opciones", "orden",
-                                              "version", "retirada")},
+                                              "version")},
                          {"base_id": self.b1, "nombre": "Uso de suelo", "tipo": "texto",
-                          "opciones": [], "orden": 1, "version": 1, "retirada": False})
+                          "opciones": [], "orden": 1, "version": 1})
         # The same key and body: the same definition, however many times.
         self.assertEqual(self.crear(self.b1, "Uso de suelo", key="clave-columna-01", user="olga")[1], body)
         status, otro = self.crear(self.b1, "Otra cosa", key="clave-columna-01", user="olga")
@@ -172,17 +172,15 @@ class Columnas(Escenario):
         self.assertEqual((status, body["detalle"]["code"]), (409, "sin_opciones"))
         self.assertEqual(self.actual(col)["tipo"], "opcion")
 
-        # A base holds a bounded number of live columns; retiring one makes room.
+        # A base holds a bounded number of columns; deleting one makes room.
         for n in range(columnas.MAX_COLUMNAS - 2):
             self.columna(self.b1, f"Columna {n}")
         status, body = self.crear(self.b1, "Una de más")
         self.assertEqual((status, body["detalle"]["code"]), (409, "limite_columnas"))
-        self.ok(self.cambiar(texto, accion="retirar"))
+        self.assertEqual(self.cambiar(texto, accion="borrar"), (200, {"borrado": True}))
         self.assertEqual(self.crear(self.b1, "Una de más")[0], 200)
-        status, body = self.cambiar(texto, accion="restaurar")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "limite_columnas"))
 
-    def test_rename_order_retire_and_restore_are_versioned_and_audited(self):
+    def test_rename_order_and_delete_are_versioned_and_audited(self):
         a, b, c = (self.columna(self.b1, n) for n in ("Alfa", "Beta", "Gama"))
         status, body = self.cambiar(b, user="olga", nombre="Beta dos")
         self.assertEqual((status, body["columna"]["nombre"], body["columna"]["version"],
@@ -205,31 +203,16 @@ class Columnas(Escenario):
         self.ok(self.cambiar(c, posicion=40, nombre="Gama final"))
         self.assertEqual(self.nombres(self.b1), ["Alfa", "Beta dos", "Gama final"])
 
-        status, body = self.cambiar(a, accion="retirar", user="olga")
-        self.assertEqual((status, body["columna"]["retirada"], body["columna"]["version"]), (200, True, 2))
+        status, body = self.cambiar(a, accion="borrar", user="olga", expected_version=7)
+        self.assertEqual((status, body["detalle"]["code"]), (409, "conflict"))
+        self.assertEqual(self.cambiar(a, accion="borrar", user="olga"), (200, {"borrado": True}))
         self.assertEqual(self.nombres(self.b1), ["Beta dos", "Gama final"])
-        self.assertEqual(self.nombres(self.b1, retiradas=True, user="olga")[-1], "Alfa")
-        for intento, codigo in ((dict(accion="retirar"), "columna_retirada"),
-                                (dict(nombre="Otra"), "columna_retirada"),
-                                (dict(posicion=1), "columna_retirada")):
-            status, body = self.cambiar(a, **intento)
-            self.assertEqual((status, body["detalle"]["code"]), (409, codigo))
-        # Its name is free while it is retired, and blocks its return while taken.
-        nueva = self.columna(self.b1, "Alfa")
-        status, body = self.cambiar(a, accion="restaurar")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "nombre_duplicado"))
-        self.ok(self.cambiar(nueva, nombre="Alfa nueva"))
-        status, body = self.cambiar(a, accion="restaurar")
-        self.assertEqual((status, body["columna"]["retirada"], body["columna"]["id"],
-                          body["columna"]["version"]), (200, False, a["id"], 3))
-        status, body = self.cambiar(a, accion="restaurar")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "columna_no_retirada"))
-
-        eventos = filas("maestra_base_event", "column_id = ?", (a["id"][7:],))
-        self.assertEqual(sorted((e["version"], e["action"], e["actor_id"]) for e in eventos),
-                         [(1, "columna_crear", self.ids["ada"]), (2, "columna_retirar", self.ids["olga"]),
-                          (3, "columna_restaurar", self.ids["ada"])])
-        self.assertTrue(all(e["at"] and e["actor_name"] for e in eventos))
+        self.assertEqual([c["orden"] for c in self.ok(self.lista(self.b1))["columnas"]], [1, 2])
+        status, body = self.call("POST", self.ruta(self.b1, a["id"], "borrar"), {"expected_version": 1})
+        self.assertEqual((status, body["detalle"]["code"]), (404, "not_found"))
+        # Its name is free again, and its own history went with it.
+        self.columna(self.b1, "Alfa")
+        self.assertEqual(filas("maestra_base_event", "column_id = ?", (a["id"][7:],)), [])
         movida = [json.loads(e["details_json"]) for e in filas(
             "maestra_base_event", "column_id = ? AND version = 3", (c["id"][7:],))]
         self.assertEqual(movida, [{"nombre": {"antes": "Gama", "despues": "Gama final"},
@@ -237,14 +220,13 @@ class Columnas(Escenario):
         # None of it gave any terrain a new version.
         self.assertEqual({t["version"] for t in filas("inventory_terrain")}, {1})
 
-    def test_definitions_follow_the_base_scope_and_an_archived_base_is_read_only(self):
+    def test_definitions_follow_the_base_scope(self):
         col = self.columna(self.b1, "Privada")
         fuera = [self.lista(self.b1, "otto"), self.lista(self.b2, "olga"), self.lista(nuevo()),
-                 self.lista(self.b3, "olga"),  # granted, but archived: closed to operators
                  self.crear(self.b1, "X", user="otto"), self.crear(self.b2, "X", user="olga"),
                  self.call("POST", self.ruta(self.b2), {"tipo": 9}, "olga"),
                  self.cambiar(col, "otto", nombre="X", expected_version=1),
-                 self.cambiar(col, "otto", accion="retirar", expected_version=1),
+                 self.cambiar(col, "otto", accion="borrar", expected_version=1),
                  self.call("PATCH", self.ruta(self.b2, col["id"]), {"expected_version": "x"}, "olga")]
         self.assertEqual({encode(r) for r in fuera}, {encode(BASE_NO_EXISTE)})
         # In scope, a column of another base, or none, is one answer.
@@ -253,17 +235,12 @@ class Columnas(Escenario):
         for ruta in (self.ruta(self.b1, ajena["id"]), self.ruta(self.b1, nuevo()),
                      self.ruta(self.b1) + "/no-es-un-id"):
             self.assertEqual(self.call("PATCH", ruta, {"expected_version": 1, "nombre": "Y"}, "olga"), no_hay)
-            self.assertEqual(self.call("POST", ruta + "/retirar", {}, "ada"), no_hay)
+            self.assertEqual(self.call("POST", ruta + "/borrar", {}, "ada"), no_hay)
         self.assertEqual(self.actual(ajena)["nombre"], "De la dos")
 
-        # An archived base: administrators still read its definitions; nobody changes them.
-        self.ok(self.archivar(self.b1))
-        self.assertEqual(self.nombres(self.b1), ["Privada"])
-        for respuesta in (self.crear(self.b1, "Z"), self.cambiar(col, nombre="Z"),
-                          self.cambiar(col, accion="retirar")):
-            self.assertEqual((respuesta[0], respuesta[1]["detalle"]["code"]), (409, "base_archivada"))
-        self.assertEqual(self.crear(self.b1, "Z", user="olga"), BASE_NO_EXISTE)
-        self.ok(self.archivar(self.b1, "restaurar"))
+        # A legacy archive stamp on the base changes nothing for its operators.
+        self.assertEqual(self.nombres(self.b3, user="olga"), [])
+        self.assertEqual(self.crear(self.b3, "Z", user="olga")[0], 200)
         self.assertEqual(self.cambiar(col, "olga", nombre="Z")[0], 200)
 
     # -- 2. values ---------------------------------------------------------------
@@ -322,12 +299,12 @@ class Columnas(Escenario):
                 return error.code, json.loads(error.read())
 
     def test_only_live_columns_of_the_current_base_accept_a_value(self):
-        propia, retirada = self.columna(self.b1, "Propia"), self.columna(self.b1, "Retirada")
+        propia, retirada = self.columna(self.b1, "Propia"), self.columna(self.b1, "Borrada")
         ajena = self.columna(self.b2, "Ajena")
-        self.ok(self.guardar(self.t1, {retirada["id"]: "antes de retirarla"}))
-        self.ok(self.cambiar(retirada, accion="retirar"))
+        self.ok(self.guardar(self.t1, {retirada["id"]: "antes de borrarla"}))
+        self.ok(self.cambiar(retirada, accion="borrar"))
         antes = self.huella(self.t1)
-        # Unknown, retired and another base's column: one answer, even for an administrator.
+        # Unknown, deleted and another base's column: one answer, even for an administrator.
         for clave in (retirada["id"], ajena["id"], f"custom:{nuevo()}", "custom:no-es-un-id",
                       propia["id"].upper(), "terreno", "core:kmz"):
             for user in ("olga", "ada"):
@@ -337,7 +314,7 @@ class Columnas(Escenario):
         self.assertEqual(self.guardar(self.t0, {propia["id"]: "x"}, "ada")[1]["detalle"]["fields"],
                          {propia["id"]: DESCONOCIDA})
         self.assertEqual(self.huella(self.t1), antes)
-        self.assertEqual(self.guardado(self.t1), {retirada["id"]: "antes de retirarla"})
+        self.assertEqual(self.guardado(self.t1), {retirada["id"]: "antes de borrarla"})
         # Creating still takes core fields only.
         status, body = self.call("POST", f"/api/maestra/bases/{self.b1}/terrenos",
                                  {"custom": {propia["id"]: "x"}}, "olga",
@@ -517,22 +494,18 @@ class Columnas(Escenario):
         self.assertNotIn(dos["id"].encode(), superficies("olga", self.b1))
         self.assertEqual(self.ver(tid, "otto"), TERRENO_NO_EXISTE)
 
-        # Retiring one column hides its value and its history entries; the other stays.
+        # Deleting one column hides its value and its history entries; the other stays.
         guardado, eventos = self.guardado(tid), filas("inventory_event", "inventory_id = ?", (tid,))
-        self.ok(self.cambiar(uno, accion="retirar", user="olga"))
+        self.ok(self.cambiar(uno, accion="borrar", user="olga"))
         self.assertEqual(self.ver(tid, "olga")[1]["terreno"]["custom"], {otra["id"]: SECRETO + "-2"})
         self.assertEqual(campos("olga")[3], sorted(["municipio", otra["id"]]))
         visto = superficies("olga", self.b1)
         self.assertNotIn(uno["id"].encode(), visto)
         self.assertNotIn(f'"{SECRETO}"'.encode(), visto)
-        # An edit meanwhile keeps the retired column's value stored.
+        # A later edit rewrites nothing it did not change: the old value rides along unseen.
         self.ok(self.guardar(tid, {otra["id"]: "nuevo"}, "olga"))
         self.assertEqual(self.guardado(tid)[uno["id"]], SECRETO)
-        # Restored: the same id, the same value, the same history.
-        self.ok(self.cambiar(uno, accion="restaurar"))
-        self.assertEqual(self.ver(tid, "olga")[1]["terreno"]["custom"],
-                         {uno["id"]: SECRETO, otra["id"]: "nuevo"})
-        self.assertEqual(campos("olga")[4], en_uno[0])
+        self.assertEqual(self.ver(tid, "olga")[1]["terreno"]["custom"], {otra["id"]: "nuevo"})
 
         # The administrators' audit is whole throughout, and nothing stored was rewritten.
         completo = historial("ada")
@@ -581,29 +554,26 @@ class Columnas(Escenario):
             b.join(20)
         return resultado["primero"], resultado["despues"]
 
-    def test_a_cell_save_and_a_retirement_are_serialized_in_both_orders(self):
+    def test_a_cell_save_and_a_column_deletion_are_serialized_in_both_orders(self):
         col = self.columna(self.b1, "Disputada")
 
-        def guardar():
-            return self.guardar(self.t1, {col["id"]: SECRETO}, version=1)
+        def guardar(columna):
+            return lambda: self.guardar(self.t1, {columna["id"]: SECRETO}, version=self.version(self.t1))
 
-        def retirar():
-            return self.cambiar(col, accion="retirar", expected_version=1)
-        # The retirement holds the boundary: the save waits, then finds no such column.
-        retiro, guardada = self.carrera(api_columnas.repo, "retirar", retirar, guardar)
-        self.assertEqual((retiro[0], guardada[0], guardada[1]["detalle"]["fields"]),
+        def borrar(columna):
+            return lambda: self.cambiar(columna, accion="borrar", expected_version=1)
+        # The deletion holds the boundary: the save waits, then finds no such column.
+        borrado, guardada = self.carrera(api_columnas.repo, "borrar", borrar(col), guardar(col))
+        self.assertEqual((borrado[0], guardada[0], guardada[1]["detalle"]["fields"]),
                          (200, 422, {col["id"]: DESCONOCIDA}))
         self.assertEqual((self.huella(self.t1), self.guardado(self.t1)), ((1, 1, 1), {}))
         self.assertNotIn(SECRETO.encode(), encode(guardada))
 
-        # The save holds the boundary: the retirement waits, then hides a value that was saved whole.
-        self.ok(self.cambiar(col, accion="restaurar"))
-
-        def retirar_2():
-            return self.cambiar(col, accion="retirar", expected_version=3)
-        guardada, retiro = self.carrera(api_inventario.repo, "update", guardar, retirar_2)
-        self.assertEqual((guardada[0], retiro[0]), (200, 200))
-        self.assertEqual((self.huella(self.t1), self.guardado(self.t1)), ((2, 2, 2), {col["id"]: SECRETO}))
+        # The save holds the boundary: the deletion waits, then hides a value that was saved whole.
+        otra = self.columna(self.b1, "Disputada dos")
+        guardada, borrado = self.carrera(api_inventario.repo, "update", guardar(otra), borrar(otra))
+        self.assertEqual((guardada[0], borrado[0]), (200, 200))
+        self.assertEqual((self.huella(self.t1), self.guardado(self.t1)), ((2, 2, 2), {otra["id"]: SECRETO}))
         self.assertEqual(self.ver(self.t1)[1]["terreno"]["custom"], {})
 
     def test_a_cell_save_and_a_transfer_are_serialized_in_both_orders(self):
@@ -637,7 +607,7 @@ class Columnas(Escenario):
         self.assertEqual(self.cuenta("inventory_revision", "inventory_id = ?", (self.t1,)),
                          self.version(self.t1))
 
-    def test_a_cell_save_and_a_grant_loss_or_base_archive_are_serialized_in_both_orders(self):
+    def test_a_cell_save_and_a_grant_loss_are_serialized_in_both_orders(self):
         col = self.columna(self.b1, "Disputada")
 
         def guardar(user="olga"):
@@ -645,29 +615,16 @@ class Columnas(Escenario):
 
         def revocar():
             return self.otorgar(self.b1, "omar")
-
-        def archivar():
-            return self.archivar(self.b1)
-        # The save first: the grant change and the archive wait, then succeed.
+        # The save first: the grant change waits, then succeeds.
         guardada, revocado = self.carrera(api_inventario.repo, "update", guardar, revocar)
         self.assertEqual((guardada[0], revocado[0], self.version(self.t1)), (200, 200, 2))
         self.ok(self.otorgar(self.b1, "olga", "omar"))
-        self.ok(self.guardar(self.t1, {col["id"]: None}))
-        guardada, archivado = self.carrera(api_inventario.repo, "update", guardar, archivar)
-        self.assertEqual((guardada[0], archivado[0], self.version(self.t1)), (200, 200, 4))
-        self.ok(self.archivar(self.b1, "restaurar"))
         self.ok(self.guardar(self.t1, {col["id"]: None}))
         antes = self.huella(self.t1)
 
         # The grant loss first: her save waits and is then out of scope.
         revocado, guardada = self.carrera(api_maestra.repo, "reemplazar_accesos", revocar, guardar)
         self.assertEqual((revocado[0], guardada), (200, TERRENO_NO_EXISTE))
-        self.ok(self.otorgar(self.b1, "olga", "omar"))
-        # The archive first: closed to the operator, read-only for the administrator.
-        archivado, guardada = self.carrera(api_maestra.repo, "archivar", archivar, guardar)
-        self.assertEqual((archivado[0], guardada), (200, TERRENO_NO_EXISTE))
-        status, body = guardar("ada")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
         self.assertEqual((self.huella(self.t1), self.guardado(self.t1)), (antes, {}))
 
     def test_concurrent_definition_changes_and_grant_changes_do_not_overwrite(self):

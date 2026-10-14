@@ -376,49 +376,33 @@ def cancel_pending(conn: DatabaseConnection, *, resource: Mapping[str, Any], now
     return True
 
 
-def retire(conn: DatabaseConnection, *, attachment: Mapping[str, Any], expected_revision: int,
-           now: str, actor: Mapping[str, str], base_id: str | None) -> tuple[dict[str, Any], list[str]]:
-    if attachment["retirado_en"] is not None or int(attachment["revision"]) != expected_revision:
-        raise ConflictError()
-    pending = conn.execute("SELECT id, clave_temporal FROM archivo_version"
-                           " WHERE archivo_id = ? AND estado = 'subiendo'",
-                           (attachment["id"],)).fetchall()
-    for row in pending:
-        conn.execute("UPDATE archivo_version SET estado = 'cancelado', terminado_en = ?,"
-                     " terminado_por = ? WHERE id = ? AND estado = 'subiendo'",
-                     (now, actor["id"], row["id"]))
-        conn.execute("DELETE FROM archivo_trabajo WHERE archivo_version_id = ?", (row["id"],))
-        _event(conn, attachment_id=str(attachment["id"]), terrain_id=str(attachment["inventory_id"]),
-               action="subida_cancelada", now=now, actor=actor, base_id=base_id,
-               version_id=str(row["id"]), details={"motivo": "retirado"})
-    revision = expected_revision + 1
-    changed = conn.execute(
-        "UPDATE archivo SET revision = ?, version_actual_id = NULL, geometria_activa_id = NULL,"
-        " retirado_en = ?, retirado_por = ?, retirado_motivo = 'usuario', actualizado_en = ?,"
-        " actualizado_por = ? WHERE id = ? AND revision = ? AND retirado_en IS NULL",
-        (revision, now, actor["id"], now, actor["id"], attachment["id"], expected_revision)).rowcount
-    if changed != 1:
-        raise ConflictError()
-    _event(conn, attachment_id=str(attachment["id"]), terrain_id=str(attachment["inventory_id"]),
-           action="retirado", now=now, actor=actor, base_id=base_id, revision=revision,
-           details={"version_anterior_id": attachment["version_actual_id"],
-                    "geometria_anterior_id": attachment["geometria_activa_id"]})
-    current = resource_for_attachment(conn, str(attachment["id"]))
-    assert current is not None
-    return attachment_dto(current), [str(r["clave_temporal"]) for r in pending]
+def delete(conn: DatabaseConnection, *, attachment_id: str | None = None,
+           terrain_id: str | None = None) -> list[str]:
+    """Delete one attachment, or every attachment of a terrain, for good: its
+    versions, attempts, geometries, history and leases. Nothing is kept.
 
-
-def retirement_staging_keys(conn: DatabaseConnection, attachment: Mapping[str, Any]) -> list[str]:
-    """Staging keys of the uploads that the attachment's retirement cancelled.
-
-    The retirement transaction stamps those versions with its own timestamp.
+    Returns the storage keys (final and staging) the deleted rows named, for
+    the caller to discard after the transaction commits. Child rows go first
+    because their foreign keys are checked immediately; the deferred ones
+    (current version, active geometry) are checked at COMMIT, when both
+    sides are already gone.
     """
-    if attachment["retirado_en"] is None:
-        return []
-    rows = conn.execute("SELECT clave_temporal FROM archivo_version WHERE archivo_id = ?"
-                        " AND estado = 'cancelado' AND terminado_en = ?",
-                        (attachment["id"], attachment["retirado_en"])).fetchall()
-    return [str(r["clave_temporal"]) for r in rows]
+    if (attachment_id is None) == (terrain_id is None):
+        raise ValueError("Name exactly one attachment or one terrain.")
+    which = ("SELECT id FROM archivo WHERE id = ?" if attachment_id is not None
+             else "SELECT id FROM archivo WHERE inventory_id = ?")
+    param = (attachment_id if attachment_id is not None else terrain_id,)
+    keys = [str(k) for r in conn.execute(
+        f"SELECT clave_temporal, clave_final FROM archivo_version WHERE archivo_id IN ({which})",
+        param).fetchall() for k in (r["clave_temporal"], r["clave_final"]) if k]
+    versions = f"SELECT id FROM archivo_version WHERE archivo_id IN ({which})"
+    conn.execute(f"DELETE FROM archivo_evento WHERE archivo_id IN ({which})", param)
+    conn.execute(f"DELETE FROM archivo_trabajo WHERE archivo_version_id IN ({versions})", param)
+    conn.execute(f"DELETE FROM geometria WHERE archivo_id IN ({which})", param)
+    conn.execute(f"DELETE FROM archivo_intento WHERE archivo_version_id IN ({versions})", param)
+    conn.execute(f"DELETE FROM archivo_version WHERE archivo_id IN ({which})", param)
+    conn.execute(f"DELETE FROM archivo WHERE id IN ({which})", param)
+    return keys
 
 
 def geometry_for_activation(conn: DatabaseConnection, attachment_id: str, version_id: str,
@@ -567,11 +551,12 @@ def projected_version(version: Mapping[str, Any], lease_live: bool, actor_id: st
 def list_for_terrain(conn: DatabaseConnection, terrain_id: str, actor_id: str, now: str,
                      cursor: tuple[str, str] | None,
                      limit: int) -> tuple[list[dict[str, Any]], str | None]:
-    """One bounded page of a terrain's attachments, retired ones included.
+    """One bounded page of a terrain's attachments. One retired before files
+    were deleted instead is left out: it has no content to show.
 
     Ordered by ``(creado_en, id)`` descending; one query hydrates every row.
     """
-    where = "a.inventory_id = ?"
+    where = "a.inventory_id = ? AND a.retirado_en IS NULL"
     params: list[Any] = [now, terrain_id]
     if cursor:
         where += " AND (a.creado_en < ? OR (a.creado_en = ? AND a.id < ?))"
@@ -603,7 +588,6 @@ def summaries(conn: DatabaseConnection, terrain_ids: Sequence[str], actor_id: st
               now: str) -> dict[str, dict[str, Any]]:
     """Current cell projection: live PDFs and the live KMZ only.
 
-    Retired attachments stay in bounded listing and history, not here.
     Batched for a page: per LOTE_RESUMENES terrains, one statement counts the
     live PDFs and one reads the rows shown (each terrain's five most recent
     live PDFs, chosen in SQL, and its one live KMZ, with their latest

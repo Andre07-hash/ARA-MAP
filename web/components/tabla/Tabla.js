@@ -43,6 +43,12 @@
  * read-only record on top of that set. Its filters are not this table's
  * query: they narrow what the map draws, never the grid, its page or its
  * cursors, and they start empty again whenever the view is left.
+ *
+ * On the map, the bar keeps only the view, Tabla / Mapa and Actualizar. The
+ * grid's query controls are hidden, never cleared: their values still bound
+ * the set, and a small "Filtros de la tabla (N)" note lists them when there
+ * are any. The footer's count and status are the grid's; on the map the
+ * footer shows only alerts and unfinished uploads.
  */
 
 import { api } from "../../lib/api.js";
@@ -55,12 +61,14 @@ import {
   VISTA_SIN_ASIGNAR,
 } from "../../lib/tabla.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
-import { closeAllDialogs, confirmDialog } from "../ui/dialog.js";
+import { closeAllDialogs, confirmarBorrado, confirmDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
 import { conectarArchivos } from "./archivosAnfitrion.js";
 import { reunirPaginas } from "../../lib/inventario.js";
 import { segment } from "../inventory/DatosView.js";
-import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
+import {
+  abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia, pedirDestino, pedirNombreDeBase,
+} from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
 
@@ -73,7 +81,7 @@ const ESTADOS = {
 
 /* What Team B's widgets report when a write was refused although the content
  * may still be read (server codes): not a scope loss, a permission change. */
-const SIN_ESCRITURA = new Set(["forbidden", "terreno_archivado", "base_archivada"]);
+const SIN_ESCRITURA = new Set(["forbidden"]);
 
 export function createTabla({
   sesion, soloConsulta = () => false, vistaInicial = null, modoInicial = null, onVista, onPermisos, onRevalidar,
@@ -107,6 +115,11 @@ export function createTabla({
   const porPintar = new Set();    // keys set aside since the last paint: theirs is not decided yet
   let vigiaApartadas = null;
   let seleccion = null;           // terrain id shared with the map preview
+  // Rows ticked for a bulk action, id -> the version seen. They belong to one
+  // view and query (`marcadosClave`) and may span pages.
+  const marcados = new Map();
+  let marcadosClave = null;
+  let enLote = false;             // a bulk action is running
   let detalleAbierto = null;      // the open record detail, for file refreshes
   let modo = modoInicial === "mapa" ? "mapa" : "tabla";
   // The map's set: every terrain of the view for one query (`clave`).
@@ -131,7 +144,6 @@ export function createTabla({
     onDeseleccion: (id) => { if (seleccion === id) { seleccion = null; marcarSeleccion(); } },
     nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
     definicionesDe: (baseId, signal) => definicionesDeBase(baseId, signal),
-    alcance: () => alcanceDeLaVista(),
     // A boundary that is no longer available (retired, replaced, or out of
     // scope) means this row may be stale: ask for the terrain again, which
     // either updates its location or removes it from the view.
@@ -157,10 +169,6 @@ export function createTabla({
   const selOrden = el("select", { id: "tabla-orden", class: "input", onchange: () => ordenar() },
     ORDENES.map(([valor, etiqueta]) => el("option", { value: valor }, etiqueta)));
   const chkDesc = el("input", { id: "tabla-desc", type: "checkbox", onchange: () => ordenar() });
-  const chkArchivados = el("input", {
-    id: "tabla-archivados", type: "checkbox",
-    onchange: () => consultar({ incluirArchivados: chkArchivados.checked }),
-  });
   const selLimite = el("select", {
     id: "tabla-limite", class: "input", onchange: () => consultar({ limit: Number(selLimite.value) }),
   }, LIMITES.map((n) => el("option", { value: n, selected: n === consulta.limit }, String(n))));
@@ -183,15 +191,39 @@ export function createTabla({
     el("label", { class: "field-label", for: control.id }, etiqueta), control);
   const casilla = (control, etiqueta) => el("label", { class: "check tabla-casilla", for: control.id }, control, etiqueta);
 
-  const barra = el("div", { class: "tabla-barra" },
-    campoDe(selVista, "Vista"),
+  // The grid's query controls. The map does not show them: it keeps their
+  // values (they bound its set) and says so in the inherited-filters note.
+  const deLaConsulta = [
     campoDe(buscar, "Buscar"),
     campoDe(selEstado, "Estado"),
     campoDe(selMunicipio, "Municipio"),
     campoDe(selTipo, "Tipo"),
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
-    casilla(chkArchivados, "Incluir archivados"),
+  ];
+  const listaHeredados = el("ul", { class: "tabla-heredados-lista" });
+  const heredados = el("details", { class: "tabla-heredados", hidden: true },
+    el("summary", { class: "btn btn-small" }),
+    el("div", {
+      class: "tabla-heredados-panel", role: "note", "aria-label": "Filtros de la tabla en el mapa", tabindex: "-1",
+    },
+      el("p", {}, "El mapa sólo incluye los terrenos que cumplen estos filtros de la tabla:"),
+      listaHeredados,
+      el("p", { class: "muted" }, "Los filtros del mapa se aplican dentro de este conjunto. " +
+        "Para cambiar estos, vuelve a Tabla."),
+    ));
+  heredados.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !heredados.open) return;
+    e.stopPropagation();
+    heredados.open = false;
+    heredados.querySelector("summary").focus();
+  });
+  // Closes when the focus leaves it; the panel takes the focus of a click on its text.
+  heredados.addEventListener("focusout", (e) => { if (!heredados.contains(e.relatedTarget)) heredados.open = false; });
+  const barra = el("div", { class: "tabla-barra" },
+    campoDe(selVista, "Vista"),
+    heredados,
+    ...deLaConsulta,
     el("div", { class: "tabla-acciones" }, selectorModo, btnAgregar, btnColumnas, btnBases, btnRecargar),
   );
 
@@ -217,10 +249,12 @@ export function createTabla({
   const btnMapaReintentar = el("button", {
     type: "button", class: "btn btn-quiet btn-small", hidden: true, onclick: () => actualizarMapa(),
   }, "Volver a intentar");
-  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true },
-    el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar), previa.element);
+  // The set's notices float over the map, not in a strip of their own.
+  previa.avisos(el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar));
+  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true }, previa.element);
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
-  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, cuerpo, vacio, pie);
+  const lote = el("div", { class: "tabla-lote", role: "region", "aria-label": "Terrenos seleccionados", hidden: true });
+  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, lote, cuerpo, vacio, pie);
 
   tbody.addEventListener("focusin", (e) => {
     const celda = e.target.closest("td[data-col]");
@@ -242,17 +276,14 @@ export function createTabla({
 
   const baseDe = (id) => bases.find((b) => b.id === id) ?? null;
   const baseActual = () => (esGlobal(vista) ? null : baseDe(vista));
-  const vistaSoloLectura = () => soloConsulta() || Boolean(baseActual()?.archivada);
+  const vistaSoloLectura = () => soloConsulta();
   const filaDe = (id) => pagina.filas.find((t) => t.id === id) ?? null;
   const colDe = (colId) => columnas.find((c) => c.id === colId) ?? null;
   const clave = (id, colId) => `${id}|${colId}`;
-  /** Whether the record's detail offers changes at all (archive, restore, files):
-   * not in read-only mode, and not while the terrain's OWN base is archived. In
-   * the master table the view has no base, so the row's is what counts. */
-  const puedeCambiarFila = (t) => !soloConsulta() && !(t.base_id && baseDe(t.base_id)?.archivada);
-  /** Whether this row's cells and file cells may be written: the view, the
-   * row's own base and the row itself all have to allow it. */
-  const filaEditable = (t) => !vistaSoloLectura() && puedeCambiarFila(t) && !t.archived_at;
+  /** Whether the record's detail offers changes at all (delete, files): not in read-only mode. */
+  const puedeCambiarFila = () => !soloConsulta();
+  /** Whether this row's cells and file cells may be written. */
+  const filaEditable = () => !vistaSoloLectura();
 
   const sinResolver = () => [...celdas.values()].filter((c) => c.estado !== "pendiente").length
     + (creacion?.estado === "incierto" ? 1 : 0);
@@ -274,6 +305,7 @@ export function createTabla({
     cola.olvidar();
     enVuelo.clear();
     nuevos = new Set();
+    if (deVista) marcados.clear();
     // Within the view a busy upload outlives the repaint; leaving the view ends it.
     if (deVista) soltarRanuras(); else apartarRanuras();
     refrescos.clear();
@@ -334,7 +366,7 @@ export function createTabla({
   async function cargarBases() {
     const gen = generacion;
     try {
-      const respuesta = await api.maestraBases(admin);
+      const respuesta = await api.maestraBases();
       if (!vivo || gen !== generacion) return false;
       bases = respuesta.bases ?? [];
       basesListas = true;
@@ -367,7 +399,6 @@ export function createTabla({
     consulta = { ...CONSULTA_VACIA, limit: consulta.limit };
     buscar.value = "";
     chkDesc.checked = false;
-    chkArchivados.checked = false;
     selOrden.value = "id";
     pintarMarco();
     onVista?.(vista, modoDeRuta());
@@ -433,7 +464,6 @@ export function createTabla({
     buscar.value = consulta.q;
     selOrden.value = consulta.sort.replace(/^-/, "");
     chkDesc.checked = consulta.sort.startsWith("-");
-    chkArchivados.checked = consulta.incluirArchivados;
     selLimite.value = String(consulta.limit);
     for (const [control, campo] of [[selEstado, "estado"], [selMunicipio, "municipio"], [selTipo, "tipo_terreno"]]) {
       control.value = consulta[campo];
@@ -451,7 +481,7 @@ export function createTabla({
     try {
       const [lista, cols] = await Promise.all([
         api.tablaLista(rutaDeLista(vista), consultaDeLista(vista, consulta, cursor), signal),
-        esGlobal(vista) ? null : api.columnas(vista, false, signal),
+        esGlobal(vista) ? null : api.columnas(vista, signal),
       ]);
       if (!vivo || gen !== generacion) return;
       if (cols) definiciones = cols.columnas ?? [];
@@ -490,14 +520,14 @@ export function createTabla({
       opciones.push(opcion(VISTA_MAESTRA, "Tabla maestra (todas las bases)", vista === VISTA_MAESTRA),
         opcion(VISTA_SIN_ASIGNAR, "Sin asignar", vista === VISTA_SIN_ASIGNAR));
     }
-    const deTrabajo = bases.map((b) => opcion(b.id, b.nombre + (b.archivada ? " · archivada" : ""), b.id === vista));
+    const deTrabajo = bases.map((b) => opcion(b.id, b.nombre, b.id === vista));
     opciones.push(admin ? el("optgroup", { label: "Bases de trabajo" }, deTrabajo) : deTrabajo);
     selVista.replaceChildren(...opciones.flat());
     selVista.value = vista ?? "";
 
     const sinAcceso = !vista;
     for (const nodo of [pie, bandeja]) nodo.hidden = sinAcceso || (nodo === bandeja && !bandeja.childElementCount);
-    for (const control of [buscar, selEstado, selMunicipio, selTipo, selOrden, chkDesc, chkArchivados, selVista]) {
+    for (const control of [buscar, selEstado, selMunicipio, selTipo, selOrden, chkDesc, selVista]) {
       control.disabled = sinAcceso;
     }
     vacio.hidden = !sinAcceso;
@@ -516,22 +546,26 @@ export function createTabla({
   }
 
   function pintarPermisos() {
-    const base = baseActual();
+    pintarLote();
     const lectura = vistaSoloLectura();
     btnAgregar.hidden = !vista || lectura || modo === "mapa";
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
     btnRecargar.hidden = !vista;
     aviso.hidden = !(vista && lectura);
-    aviso.textContent = soloConsulta()
-      ? "ARA Map está en modo de solo consulta: no se puede editar."
-      : base?.archivada ? "Esta base de trabajo está archivada: se puede consultar, no editar. " +
-        "Un administrador puede restaurarla." : "";
+    aviso.textContent = soloConsulta() ? "ARA Map está en modo de solo consulta: no se puede editar." : "";
   }
 
   function facetas(control, valores, actual, todos) {
     const lista = [...new Set([...(valores ?? []), ...(actual ? [actual] : [])])];
     control.replaceChildren(opcion("", todos, !actual), ...lista.map((v) => opcion(v, v, v === actual)));
+  }
+
+  function pintarCuenta() {
+    const desde = pagina.filas.length ? anteriores.length * consulta.limit + 1 : 0;
+    cuenta.textContent = errorDeCarga ?? (pagina.total
+      ? `${fmtCount(desde)}–${fmtCount(desde + pagina.filas.length - 1)} de ${fmtCount(pagina.total)}`
+      : "Sin terrenos en esta vista");
   }
 
   function pintarTodo() {
@@ -543,7 +577,8 @@ export function createTabla({
     facetas(selTipo, pagina.facets.tipos, consulta.tipo_terreno, "Todos");
 
     thead.replaceChildren(el("tr", {},
-      el("th", { scope: "col", class: "tabla-th tabla-th-fila" }, el("span", { class: "sr-only" }, "Terreno")),
+      el("th", { scope: "col", class: "tabla-th tabla-th-fila" }, casillaDePagina(),
+        el("span", { class: "sr-only" }, "Terreno")),
       columnas.map((c) => el("th", {
         scope: "col", class: ["tabla-th", `tabla-col-${c.tipo}`], title: c.ayuda ?? null, "data-col": c.id,
       }, c.etiqueta, c.custom && el("span", { class: "tabla-th-tipo" }, ` · ${c.tipo}`))),
@@ -551,10 +586,7 @@ export function createTabla({
     tbody.replaceChildren(...pagina.filas.map((t, i) => Fila(t, i)));
     vigilarApartadas();          // what was not put back runs detached until it stops
 
-    const desde = pagina.filas.length ? anteriores.length * consulta.limit + 1 : 0;
-    cuenta.textContent = errorDeCarga ?? (pagina.total
-      ? `${fmtCount(desde)}–${fmtCount(desde + pagina.filas.length - 1)} de ${fmtCount(pagina.total)}`
-      : "Sin terrenos en esta vista");
+    pintarCuenta();
     btnAnterior.disabled = !anteriores.length;
     btnSiguiente.disabled = !pagina.siguiente;
     if (errorDeCarga) alerta.textContent = errorDeCarga;
@@ -562,13 +594,156 @@ export function createTabla({
     if (tenia) enfocar(tenia.id, tenia.colId);
     if (seleccion && !existe(seleccion)) seleccion = null;
     marcarSeleccion();
+    pintarLote();
     pintarMapa();
+  }
+
+  /* ------------------------------------------------------- bulk actions */
+
+  const puedeMarcar = () => Boolean(vista) && !vistaSoloLectura() && modo === "tabla";
+  const terrenos = (n) => `${fmtCount(n)} ${n === 1 ? "terreno" : "terrenos"}`;
+
+  /** The selection belongs to one view and query; another one starts empty. */
+  function seleccionVigente() {
+    if (marcadosClave !== claveConjunto()) { marcados.clear(); marcadosClave = claveConjunto(); }
+  }
+
+  function marcar(t, si) {
+    seleccionVigente();
+    if (si) marcados.set(t.id, t.version); else marcados.delete(t.id);
+    pintarLote();
+  }
+
+  function casillaDePagina() {
+    if (!puedeMarcar() || !pagina.filas.length) return null;
+    const marcadas = pagina.filas.filter((t) => marcados.has(t.id)).length;
+    const casilla = el("input", {
+      type: "checkbox", class: "tabla-marca", "aria-label": "Seleccionar los terrenos de esta página",
+      checked: marcadas === pagina.filas.length,
+      onchange: (e) => { for (const t of pagina.filas) marcar(t, e.target.checked); pintarCasillas(); },
+    });
+    casilla.indeterminate = marcadas > 0 && marcadas < pagina.filas.length;
+    return casilla;
+  }
+
+  /** The ticks on screen follow `marcados` without repainting any cell. */
+  function pintarCasillas() {
+    for (const c of tbody.querySelectorAll("input.tabla-marca")) c.checked = marcados.has(c.dataset.id);
+    thead.querySelector(".tabla-th-fila input.tabla-marca")?.replaceWith(casillaDePagina() ?? "");
+  }
+
+  function pintarLote() {
+    seleccionVigente();
+    const n = marcados.size;
+    lote.hidden = !puedeMarcar() || n === 0;
+    if (lote.hidden) { lote.replaceChildren(); return; }
+    const boton = (texto, onclick, clase = "btn btn-small btn-quiet") =>
+      el("button", { type: "button", class: clase, disabled: enLote, onclick }, texto);
+    const faltan = pagina.total - n;
+    lote.replaceChildren(...[
+      el("strong", {}, `${terrenos(n)} ${n === 1 ? "seleccionado" : "seleccionados"}`),
+      faltan > 0 && boton(`Seleccionar los ${terrenos(pagina.total)} de esta vista`, () => marcarVista()),
+      admin && boton("Crear base con ellos…", () => loteNuevaBase()),
+      admin && boton("Transferir…", () => loteTransferir()),
+      boton("Borrar…", () => loteBorrar(), "btn btn-small btn-peligro"),
+      boton("Quitar selección", () => { marcados.clear(); pintarCasillas(); pintarLote(); }),
+    ].filter(Boolean));
+  }
+
+  /** Every terrain of this view and query, gathered page by page like the map's set. */
+  async function marcarVista() {
+    const clave = claveConjunto();
+    const deVista = vista;
+    const deConsulta = { ...consulta, limit: PAGINA_MAPA };
+    decir("Reuniendo los terrenos de esta vista…");
+    try {
+      const r = conjuntoVigente() && !conjunto.incompleto ? { terrenos: conjunto.filas } : await reunirPaginas(
+        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente)),
+        { maximo: MAXIMO_MAPA });
+      if (!vivo || claveConjunto() !== clave) return;
+      for (const t of r.terrenos) marcar(t, true);
+      pintarCasillas();
+      decir(`${terrenos(marcados.size)} seleccionados.`);
+    } catch (error) {
+      if (vivo) toastError(`No se pudieron reunir los terrenos: ${error.message}`);
+    }
+  }
+
+  /**
+   * Run one write per selected terrain, one after another, then reload. Each
+   * sends the version this table last saw for it, so a terrain someone else
+   * changed meanwhile is refused and reported, never overwritten.
+   */
+  // ponytail: one request per terrain, sequential; a bulk endpoint if pilots outgrow ~hundreds.
+  async function enLoteHacer(verbo, accion) {
+    const ids = [...marcados.keys()];
+    const fallos = [];
+    enLote = true;
+    pintarLote();
+    let hechos = 0;
+    for (const [i, id] of ids.entries()) {
+      decir(`${verbo} ${i + 1} de ${ids.length}…`);
+      try {
+        await accion(id, filaDe(id)?.version ?? marcados.get(id));
+        hechos += 1;
+        marcados.delete(id);
+      } catch (error) {
+        fallos.push(error.message);
+      }
+      if (!vivo) return { hechos, fallos };
+    }
+    enLote = false;
+    actualizarTabla();
+    return { hechos, fallos };
+  }
+
+  function informar(resultado, hecho) {
+    const { hechos, fallos } = resultado;
+    if (!fallos.length) { toast(`${terrenos(hechos)} ${hecho}.`); return; }
+    const motivos = [...new Set(fallos)].join(" ");
+    toastError(`${terrenos(hechos)} ${hecho}; ${fallos.length} no se pudieron: ${motivos} ` +
+      "Siguen seleccionados.");
+  }
+
+  async function loteBorrar() {
+    const n = marcados.size;
+    if (!(await confirmarBorrado({
+      titulo: `¿Borrar ${terrenos(n)}?`,
+      mensaje: `Se borran ${n === 1 ? "ese terreno" : `esos ${fmtCount(n)} terrenos`} con todos sus datos, su historial y sus PDF y KMZ.`,
+    }))) return;
+    informar(await enLoteHacer("Borrando", (id, version) => api.borrarTerreno(id, version)),
+      n === 1 ? "borrado" : "borrados");
+  }
+
+  async function loteTransferir() {
+    const n = marcados.size;
+    const destino = await pedirDestino({ cantidad: n, bases });
+    if (!destino) return;
+    const baseId = destino === "sin_asignar" ? null : destino;
+    informar(await enLoteHacer("Transfiriendo", (id, version) => api.transferirTerreno(id, version, baseId)),
+      n === 1 ? "transferido" : "transferidos");
+  }
+
+  async function loteNuevaBase() {
+    const n = marcados.size;
+    const nombre = await pedirNombreDeBase({ cantidad: n });
+    if (!nombre) return;
+    let base;
+    try {
+      ({ base } = await api.crearBaseDeTrabajo(nombre));
+    } catch (error) {
+      toastError(`No se pudo crear la base: ${error.message}`);
+      return;
+    }
+    await refrescarBases();
+    informar(await enLoteHacer("Moviendo", (id, version) => api.transferirTerreno(id, version, base.id)),
+      `${n === 1 ? "movido" : "movidos"} a «${base.nombre}»`);
   }
 
   /* ------------------------------------------------ files, location, map */
 
   const modoDeRuta = () => (modo === "mapa" ? "mapa" : null);
-  /** The map set's key: the view and its query (filters, order, archived), not the page. */
+  /** The map set's key: the view and its query (filters and order), not the page. */
   const claveConjunto = () =>
     (vista ? `${vista}?${consultaDeLista(vista, { ...consulta, limit: PAGINA_MAPA })}` : null);
   const conjuntoVigente = () => conjunto.clave !== null && conjunto.clave === claveConjunto();
@@ -625,8 +800,13 @@ export function createTabla({
     lienzo.hidden = sinAcceso || mapa;
     panelMapa.hidden = sinAcceso || !mapa;
     cuerpo.classList.toggle("modo-mapa", mapa);
+    element.classList.toggle("modo-mapa", mapa);
     // The page controls belong to the grid; the map shows the whole view.
     for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
+    // Hidden, never cleared: the grid finds its query as it left it.
+    for (const nodo of deLaConsulta) nodo.hidden = mapa;
+    if (btnBases) btnBases.hidden = mapa;
+    pintarHeredados();
     pintarPermisos();
   }
 
@@ -641,26 +821,30 @@ export function createTabla({
     if (!signal) return null;
     // Bound to the view, not to a page or query of it: leaving the view aborts it (reiniciar).
     const deVista = vista;
-    return api.columnas(baseId, false, signal).then((r) => {
+    return api.columnas(baseId, signal).then((r) => {
       if (!vivo || deVista !== vista) throw Object.assign(new Error("fuera de alcance"), { name: "AbortError" });
       return r.columnas ?? [];
     });
   }
 
-  /** The table's own filters, which bound the map's set, in words. */
-  function alcanceDeLaVista() {
-    if (!vista) return "";
-    const nombre = vista === VISTA_MAESTRA ? "Tabla maestra (todas las bases)"
-      : vista === VISTA_SIN_ASIGNAR ? "Sin asignar" : baseDe(vista)?.nombre ?? "—";
-    const partes = [
-      consulta.q.trim() && `búsqueda «${consulta.q.trim()}»`,
-      consulta.estado && `estado ${consulta.estado}`,
-      consulta.municipio && `municipio ${consulta.municipio}`,
-      consulta.tipo_terreno && `tipo ${consulta.tipo_terreno}`,
-      consulta.incluirArchivados && "incluye archivados",
+  /** The table's own filters, which bound the map's set: [label, value]. */
+  function filtrosHeredados() {
+    return [
+      consulta.q.trim() && ["Búsqueda", `«${consulta.q.trim()}»`],
+      consulta.estado && ["Estado", consulta.estado],
+      consulta.municipio && ["Municipio", consulta.municipio],
+      consulta.tipo_terreno && ["Tipo de terreno", consulta.tipo_terreno],
     ].filter(Boolean);
-    return `Alcance: ${nombre}` + (partes.length ? ` · filtros de la tabla: ${partes.join(", ")}.` : " · sin filtros de la tabla.") +
-      " Los filtros del mapa se aplican dentro de este alcance.";
+  }
+
+  /** On the map, a small note of the table's filters, only when there are any. */
+  function pintarHeredados() {
+    const partes = modo === "mapa" && vista ? filtrosHeredados() : [];
+    heredados.hidden = !partes.length;
+    if (!partes.length) { heredados.open = false; return; }
+    heredados.querySelector("summary").textContent = `Filtros de la tabla (${partes.length})`;
+    listaHeredados.replaceChildren(...partes.map(([etiqueta, valor]) =>
+      el("li", {}, el("span", { class: "muted" }, `${etiqueta}: `), valor)));
   }
 
   /** Hand the map the view's whole set, gathering it first when needed. Never
@@ -677,7 +861,7 @@ export function createTabla({
   }
 
   function entregarAlMapa() {
-    previa.pintar(conjunto.filas, { total: conjunto.total, nuevaPagina: mapaPintado !== conjunto.clave });
+    previa.pintar(conjunto.filas, { nuevaPagina: mapaPintado !== conjunto.clave });
     mapaPintado = conjunto.clave;
     if (seleccion && seleccion !== previa.seleccion && filaDelConjunto(seleccion)) previa.seleccionar(seleccion);
   }
@@ -782,8 +966,7 @@ export function createTabla({
 
   /** Whether a row, as it is now, still belongs in this view's list. */
   function fueraDeLaVista(fila) {
-    const deOtraBase = vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
-    return deOtraBase || Boolean(fila.archived_at && !consulta.incluirArchivados);
+    return vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
   }
 
   /* This table's own writes keep the map's set current without gathering it
@@ -792,7 +975,7 @@ export function createTabla({
    * Under a search or a filter on the terrain's own fields, whether an edited
    * or created row still belongs is the server's query to say, not this
    * table's: such a write drops the set, and it is gathered again when the
-   * map is shown. Without those, only the base and the archive decide. */
+   * map is shown. Without those, only the base decides. */
   const filtraPorCampos = () =>
     Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno);
   function descartarConjunto() {
@@ -958,23 +1141,21 @@ export function createTabla({
   const conTrabajo = (id) => editando?.id === id || [...celdas.keys()].some((k) => k.startsWith(`${id}|`));
 
   /**
-   * Take from a fresh record its files, its location and its permission
-   * metadata: whether it is archived and which base it is in. Those two decide
-   * what may be written and whether the row belongs in this view; they are
-   * taken only from an answer at least as new as the row (an older one could
-   * undo an archive or a transfer this table already knows about). Nothing
-   * else of the row is replaced and no cell with an editor or an unresolved
-   * change is repainted.
+   * Take from a fresh record its files, its location and which base it is in.
+   * The base decides whether the row belongs in this view; it is taken only
+   * from an answer at least as new as the row (an older one could undo a
+   * transfer this table already knows about). Nothing else of the row is
+   * replaced and no cell with an editor or an unresolved change is repainted.
    */
   function aplicarArchivos(terreno) {
     // The map's set takes the same fields under the same rule, whether or not
     // the terrain is on the grid's page.
     const enMapa = filaDelConjunto(terreno.id);
     if (enMapa) {
-      // Files, location, archive and base only: no field a search or filter reads.
+      // Files, location and base only: no field a search or filter reads.
       reemplazarEnConjunto({
         ...enMapa, archivos: terreno.archivos, ubicacion: terreno.ubicacion,
-        ...(terreno.version >= enMapa.version ? { archived_at: terreno.archived_at ?? null, base_id: terreno.base_id ?? null } : {}),
+        ...(terreno.version >= enMapa.version ? { base_id: terreno.base_id ?? null } : {}),
       }, { campos: false });
     }
     const actual = filaDe(terreno.id);
@@ -982,23 +1163,15 @@ export function createTabla({
     const vigente = terreno.version >= actual.version;
     const fila = {
       ...actual, archivos: terreno.archivos, ubicacion: terreno.ubicacion,
-      ...(vigente ? { archived_at: terreno.archived_at ?? null, base_id: terreno.base_id ?? null } : {}),
+      ...(vigente ? { base_id: terreno.base_id ?? null } : {}),
     };
-    const cambioDeEstado = Boolean(fila.archived_at) !== Boolean(actual.archived_at) || fila.base_id !== actual.base_id;
+    const cambioDeEstado = fila.base_id !== actual.base_id;
     pagina.filas = pagina.filas.map((t) => (t.id === fila.id ? fila : t));
-    if (cambioDeEstado && !conTrabajo(fila.id)) {
-      // As when this person archives or transfers it: it leaves a view it no longer belongs to.
-      const fuera = vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
-      if (fuera) {
-        quitarFila(fila.id);
-        toast("Ese terreno se movió a otra base y ya no está en esta vista.");
-        return;
-      }
-      if (fila.archived_at && !consulta.incluirArchivados) {
-        quitarFila(fila.id);
-        toast("Ese terreno fue archivado. Puedes verlo con «Incluir archivados».");
-        return;
-      }
+    if (cambioDeEstado && !conTrabajo(fila.id) && fueraDeLaVista(fila)) {
+      // As when this person transfers it: it leaves a view it no longer belongs to.
+      quitarFila(fila.id);
+      toast("Ese terreno se movió a otra base y ya no está en esta vista.");
+      return;
     }
     if (cambioDeEstado) pintarFila(fila.id);     // cell by cell; an open editor stays as it is
     else {
@@ -1013,14 +1186,11 @@ export function createTabla({
   /** The open detail, if it is this terrain's, learns what may be changed now. */
   function permisosDelDetalle(t) {
     if (detalleAbierto?.terrenoId !== t.id) return;
-    detalleAbierto.permisos({
-      archivado: Boolean(t.archived_at), puedeCambiar: puedeCambiarFila(t), resumen: t.archivos,
-    });
+    detalleAbierto.permisos({ puedeCambiar: puedeCambiarFila(t), resumen: t.archivos });
   }
 
   /**
-   * The view's own write permission moved (its base archived or restored, the
-   * application's read-only mode): every row, file mount and the open detail
+   * The view's own write permission moved (the application's read-only mode): every row, file mount and the open detail
    * follow. Rows are repainted cell by cell, so an open editor and what is
    * unresolved in the tray stay exactly as they are.
    */
@@ -1046,15 +1216,15 @@ export function createTabla({
    */
   function sinPermisoDeEscritura(id, codigo, mensaje) {
     toastError(mensaje || "Ya no se puede cambiar este terreno.");
-    refrescarArchivos(id);                                  // the record: archived, base
-    if (codigo === "base_archivada") refrescarBases();      // the base, then every row of the view
+    refrescarArchivos(id);                                  // the record and its base
     if (codigo === "forbidden") onRevalidar?.();            // the role and the read-only mode
   }
 
   function errorDeArchivo(id, { codigo, mensaje }) {
     if (!vivo) return;
     if (codigo === "404" || codigo === "not_found" || codigo === "no_encontrado") {
-      alcanceDeArchivoPerdido(id);
+      // A deleted file is a 404 too: the record decides whether the terrain left the view.
+      refrescarArchivos(id);
       return;
     }
     if (SIN_ESCRITURA.has(codigo)) {
@@ -1064,17 +1234,21 @@ export function createTabla({
     toastError(mensaje || "No se pudo completar la operación con el archivo.");
   }
 
-  const clasesDeFila = (t) => ["tabla-fila", t.archived_at && "is-archivada", nuevos.has(t.id) && "is-nueva"]
+  const clasesDeFila = (t) => ["tabla-fila", nuevos.has(t.id) && "is-nueva"]
     .filter(Boolean).join(" ");
 
   function CabeceraDeFila(t, indice) {
     const nombre = t.draft?.terreno || "sin nombre";
     return el("th", { scope: "row", class: "tabla-th-fila" },
+      puedeMarcar() && el("input", {
+        type: "checkbox", class: "tabla-marca", dataset: { id: t.id }, checked: marcados.has(t.id),
+        "aria-label": `Seleccionar terreno ${nombre}, fila ${indice + 1}`,
+        onchange: (e) => { marcar(t, e.target.checked); pintarCasillas(); },
+      }),
       el("button", {
         type: "button", class: "icon-btn tabla-abrir", "aria-label": `Abrir terreno ${nombre}, fila ${indice + 1}`,
-        title: "Detalle, historial, archivar y transferir", onclick: () => detalle(t.id),
+        title: "Detalle, historial, transferir y borrar", onclick: () => detalle(t.id),
       }, "⋯"),
-      t.archived_at && el("span", { class: "chip tabla-chip" }, "Archivado"),
       nuevos.has(t.id) && el("span", { class: "chip tabla-chip" }, "Nuevo"),
     );
   }
@@ -1332,7 +1506,10 @@ export function createTabla({
     if (enPagina) pagina.total = Math.max(0, pagina.total - 1);
     quitarDelConjunto(id);
     if (seleccion === id) seleccion = null;
+    marcados.delete(id);
     pintarFila(id);
+    pintarCuenta();
+    pintarLote();
     pintarBandeja();
   }
 
@@ -1365,7 +1542,6 @@ export function createTabla({
       const mensaje = campos[col.custom ? col.id : col.campo] ?? Object.values(campos)[0] ?? error.message;
       celdas.set(k, { estado: "error", ...enviado, mensaje });
       alerta.textContent = `${col.etiqueta}: ${mensaje}`;
-      if (codigo === "base_archivada" || codigo === "terreno_archivado") refrescarBases();
     }
     pintarFila(id);
     pintarBandeja();
@@ -1495,7 +1671,6 @@ export function createTabla({
       } else {
         creacion = null;
         alerta.textContent = `No se pudo agregar el terreno: ${error.message}`;
-        if (error.detalle?.code === "base_archivada") refrescarBases();
       }
       pintarPermisos();
       pintarBandeja();
@@ -1508,7 +1683,7 @@ export function createTabla({
     if (!(await cargarBases())) return;
     pintarMarco();
     if (vista && !vistaValida(vista)) alcancePerdido("Esa base ya no está disponible.");
-    else if (vista) aplicarPermisos();     // the base may have been archived or restored
+    else if (vista) aplicarPermisos();
   }
 
   // Focus goes back to the row a dialog was opened from only if nothing else
@@ -1530,25 +1705,24 @@ export function createTabla({
       onArchivos: (e) => refrescarArchivos(e.terrenoId),
       onErrorDeArchivos: (e) => errorDeArchivo(id, e),
       onHistorial: () => openTerrainHistory({ id: t.id, nombre: t.draft?.terreno }),
-      onArchivar: (restaurar) => archivar(id, restaurar),
+      onBorrar: () => borrar(id),
       onTransferir: () => abrirTransferencia({
-        terreno: filaDe(id) ?? t, bases: bases.filter((b) => !b.archivada),
+        terreno: filaDe(id) ?? t, bases,
         onHecho: (movido) => transferido(movido), onConflicto: (actual) => reemplazar(actual),
       }),
     });
     detalleAbierto = abierto;
   }
 
-  async function archivar(id, restaurar) {
+  async function borrar(id) {
     const t = filaDe(id);
     const gen = generacion;
     if (!t) return;
     try {
-      const { terreno } = await api.archivarTerreno(id, t.version, restaurar);
+      await api.borrarTerreno(id, t.version);
       if (!vivo || gen !== generacion) return;
-      toast(restaurar ? "Terreno restaurado." : "Terreno archivado. Puedes verlo con «Incluir archivados».");
-      if (!restaurar && !consulta.incluirArchivados) quitarFila(id);
-      else reemplazar(terreno);
+      toast("Terreno borrado.");
+      quitarFila(id);
     } catch (error) {
       if (!vivo || gen !== generacion) return;
       if (error.status === 409 && error.detalle?.terreno) {

@@ -88,9 +88,8 @@ class Composicion(Escenario):
                 sesion, tid, tipo="pdf", nombre_original="ficticio.pdf", tamano_declarado=len(PDF),
                 sha256_declarado=hashlib.sha256(PDF).hexdigest(),
                 idempotency_key="clave-pdf-composicion"))
-            self.negado(lambda: archivos.retirar(
-                sesion, archivo_id, expected_revision=revisiones[archivo_id],
-                idempotency_key="clave-retiro-negado"))
+            self.negado(lambda: archivos.borrar(
+                sesion, archivo_id, expected_revision=revisiones[archivo_id]))
 
         esperado = lee("olga")
         self.assertEqual(len(esperado), 2)
@@ -126,14 +125,15 @@ class Composicion(Escenario):
         self.assertEqual(repite()["version"]["id"], version_id)
         self.assertEqual(lee("olga"), esperado)
 
-        # The counters are independent in the other direction too: retiring the PDF moves
-        # the attachment revision and leaves the terrain version where the transfers put it.
-        retirado = archivos.retirar(self.sesion("olga"), archivo_id,
-                                    expected_revision=revisiones[archivo_id],
-                                    idempotency_key="clave-retiro-composicion", almacen=self.almacen)
-        self.assertEqual(retirado["archivo"]["revision"], revisiones[archivo_id] + 1)
+        # The counters are independent in the other direction too: deleting the PDF takes
+        # its own rows only and leaves the terrain version where the transfers put it.
+        borrado = archivos.borrar(self.sesion("olga"), archivo_id,
+                                  expected_revision=revisiones[archivo_id], almacen=self.almacen)
+        self.assertEqual(borrado["borrado"], True)
         self.assertEqual(self.version(tid), 4)
-        self.assertEqual({t: filas(t) for t in INMUTABLES}, fijo)
+        self.assertEqual({t: filas(t) for t in INMUTABLES},
+                         {t: [f for f in fijo[t] if f.get("archivo_id") != archivo_id
+                              and f.get("archivo_version_id") != version_id] for t in INMUTABLES})
         self.assertEqual(len(filas("inventory_revision", "inventory_id = ?", (tid,))), 4)
 
 

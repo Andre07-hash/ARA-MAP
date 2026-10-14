@@ -1,9 +1,9 @@
 """Work bases and who may open them.
 
 A work base is a container: terrains are assigned to it and operators are
-granted access to it. It holds no terrain data itself, so archiving one, or
-changing its grants, touches no terrain, revision, column, file or published
-content. Every change here is a compare-and-set on the base's version and
+granted access to it. It holds no terrain data itself, so changing its grants
+touches no terrain, revision, column, file or published content, and only an
+empty one can be deleted. Every change here is a compare-and-set on the base's version and
 leaves one maestra_base_event; grants also leave a team_user_event per person,
 which is what keeps a revoked grant on record after its row is deleted.
 
@@ -22,9 +22,8 @@ from .. import db
 from ..protocols import DatabaseConnection
 
 _SELECT = """
-SELECT b.id, b.nombre, b.version, b.archived_at, b.created_at, b.updated_at,
-       (SELECT COUNT(*) FROM inventory_terrain t
-         WHERE t.base_id = b.id AND t.archived_at IS NULL) AS terrenos
+SELECT b.id, b.nombre, b.version, b.created_at, b.updated_at,
+       (SELECT COUNT(*) FROM inventory_terrain t WHERE t.base_id = b.id) AS terrenos
 FROM maestra_base b
 """
 
@@ -51,20 +50,17 @@ class UsuariosError(Exception):
 
 # -- reads ---------------------------------------------------------------------
 
-def listar(conn: DatabaseConnection, user_id: str | None,
-           con_archivadas: bool = False) -> list[dict[str, Any]]:
+def listar(conn: DatabaseConnection, user_id: str | None) -> list[dict[str, Any]]:
     """The work bases one caller may open, filtered in SQL.
 
     ``user_id`` None is an administrator: every base. Otherwise only the
-    active bases granted to that person; an archived base is closed to
-    operators, so ``con_archivadas`` only widens an administrator's list.
+    bases granted to that person.
     """
     if user_id is None:
-        donde = "" if con_archivadas else " WHERE b.archived_at IS NULL"
+        donde = ""
         params: tuple[Any, ...] = ()
     else:
-        donde = (" JOIN maestra_base_acceso a ON a.base_id = b.id AND a.user_id = ?"
-                 " WHERE b.archived_at IS NULL")
+        donde = " JOIN maestra_base_acceso a ON a.base_id = b.id AND a.user_id = ?"
         params = (user_id,)
     rows = conn.execute(_SELECT + donde + " ORDER BY b.nombre, b.id", params).fetchall()
     return [_dto(r) for r in rows]
@@ -126,8 +122,6 @@ def crear(conn: DatabaseConnection, nombre: str, actor: Mapping[str, Any]) -> di
 def renombrar(conn: DatabaseConnection, base_id: str, expected_version: int, nombre: str,
               actor: Mapping[str, Any]) -> dict[str, Any]:
     actual = _actual(conn, base_id, expected_version)
-    if actual["archived_at"]:
-        raise EstadoError("base_archivada")
     if actual["nombre"] == nombre:
         return actual
     ahora = db.now()
@@ -138,30 +132,26 @@ def renombrar(conn: DatabaseConnection, base_id: str, expected_version: int, nom
     return _existente(conn, base_id)
 
 
-def archivar(conn: DatabaseConnection, base_id: str, expected_version: int,
-             actor: Mapping[str, Any]) -> dict[str, Any]:
-    """Close the base to operators and to ordinary writes. Reversible, and
-    nothing that belongs to it is changed: only the base row."""
-    if _actual(conn, base_id, expected_version)["archived_at"]:
-        raise EstadoError("base_archivada")
-    ahora = db.now()
-    with db.transaction(conn):
-        _reclamar(conn, base_id, expected_version, actor, ahora,
-                  "archived_at = ?, archived_by = ?", (ahora, actor["id"]))
-        _evento(conn, base_id, expected_version + 1, "archivar", actor, ahora)
-    return _existente(conn, base_id)
+def borrar(conn: DatabaseConnection, base_id: str, expected_version: int) -> None:
+    """Delete an empty base for good, with its columns, grants and history.
 
-
-def restaurar(conn: DatabaseConnection, base_id: str, expected_version: int,
-              actor: Mapping[str, Any]) -> dict[str, Any]:
-    if not _actual(conn, base_id, expected_version)["archived_at"]:
-        raise EstadoError("base_no_archivada")
-    ahora = db.now()
+    A base that still has terrains is refused (``base_con_terrenos``): they
+    are deleted or moved first, one by one, so no click takes them along.
+    History of other records that names the base keeps the event and loses
+    only the reference: a terrain that once belonged here, a grant record.
+    """
+    _actual(conn, base_id, expected_version)
+    if conn.execute("SELECT 1 AS ok FROM inventory_terrain WHERE base_id = ? LIMIT 1",
+                    (base_id,)).fetchone():
+        raise EstadoError("base_con_terrenos")
     with db.transaction(conn):
-        _reclamar(conn, base_id, expected_version, actor, ahora,
-                  "archived_at = NULL, archived_by = NULL", ())
-        _evento(conn, base_id, expected_version + 1, "restaurar", actor, ahora)
-    return _existente(conn, base_id)
+        for tabla in ("inventory_revision", "archivo_evento", "team_user_event"):
+            conn.execute(f"UPDATE {tabla} SET base_id = NULL WHERE base_id = ?", (base_id,))
+        for tabla in ("maestra_base_event", "inventory_column", "maestra_base_acceso"):
+            conn.execute(f"DELETE FROM {tabla} WHERE base_id = ?", (base_id,))
+        if conn.execute("DELETE FROM maestra_base WHERE id = ? AND version = ?",
+                        (base_id, expected_version)).rowcount != 1:
+            raise ConflictError()
 
 
 def reemplazar_accesos(conn: DatabaseConnection, base_id: str, expected_version: int,
@@ -255,6 +245,5 @@ def _evento(conn: DatabaseConnection, base_id: str, version: int, action: str,
 
 def _dto(row: Mapping[str, Any]) -> dict[str, Any]:
     return {"id": row["id"], "nombre": row["nombre"], "version": row["version"],
-            "archivada": row["archived_at"] is not None, "archived_at": row["archived_at"],
             "terrenos": row["terrenos"], "created_at": row["created_at"],
             "updated_at": row["updated_at"]}

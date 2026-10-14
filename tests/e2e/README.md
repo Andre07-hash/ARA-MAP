@@ -60,7 +60,10 @@ por m² sobre el mapa y ficha de solo lectura a la derecha: los filtros del mapa
 no tocan la consulta ni la página de la tabla, Limpiar/Actualizar y el cambio
 de vista, columnas personalizadas de la base de cada terreno (desde una base y
 desde la maestra), contorno activo sin X/Y, monedas mezcladas, fondos, teclado,
-cajón en pantalla estrecha y alcance del operador. Levanta y borra su propio
+cajón en pantalla estrecha y alcance del operador. También el espacio del
+mapa (#40): una fila delgada arriba, sin franjas ni pie, «Encuadrar todo» junto
+al zoom, Tipo de terreno como filtro local y la nota de filtros heredados de la
+tabla (archivados incluidos), en escritorio y a 390 px. Levanta y borra su propio
 servidor desechable con datos ficticios.
 
 ```bash

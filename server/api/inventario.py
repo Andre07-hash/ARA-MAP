@@ -23,6 +23,7 @@ from ..repo import columnas as repo_columnas
 from ..repo import inventario as repo
 from ..router import Request
 from ..web_util import ApiError, parse_json
+from . import archivos as api_archivos
 
 Respuesta = dict[str, Any]
 
@@ -154,7 +155,7 @@ def _crear(request: Request, base_id: str | None) -> Respuesta:
             raise ApiError("Esa Idempotency-Key ya se usó con otros datos.", 409,
                            {"code": "idempotency_conflict"}) from None
         if repetida:
-            # The record may have been moved or archived since: answer from
+            # The record may have been moved or deleted since: answer from
             # what it is now, and only if this caller may still see it.
             auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.ver")
         return {"terreno": _presentar_uno(conn, request, repo.get(conn, inventory_id))}
@@ -230,38 +231,28 @@ def _version_esperada(request: Request, *permitidos: str) -> tuple[dict[str, Any
     return data, expected
 
 
-def archive(request: Request) -> Respuesta:
-    """{expected_version}: take the terrain out of active work. Reversible."""
-    return _archivar(request, restaurar=False)
-
-
-def restore(request: Request) -> Respuesta:
-    """{expected_version}: bring an archived terrain back, same id and content."""
-    return _archivar(request, restaurar=True)
-
-
-def _archivar(request: Request, restaurar: bool) -> Respuesta:
+def delete(request: Request) -> Respuesta:
+    """{expected_version}: delete the terrain for good, with its history and
+    its PDF/KMZ. Not reversible; the client asks for confirmation first."""
     inventory_id = request.uuid_param("id")
     with db.escritura() as conn:
-        alcance = auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.archivar",
+        alcance = auth.reverificar_terreno(conn, request.sesion, inventory_id, "maestra.borrar",
                                            exclusivo=True)
         _, expected = _version_esperada(request)
         publicado = conn.execute(
             "SELECT published_revision_id FROM inventory_terrain WHERE id = ?",
             (inventory_id,)).fetchone()["published_revision_id"]
         if publicado and alcance.rol != "admin":
-            # Archiving or restoring a published terrain changes what the public
-            # sees. An operator never does that, even indirectly.
-            raise ApiError("Este terreno está publicado; pide a un administrador que lo haga.",
+            # Deleting a published terrain changes what the public sees. An
+            # operator never does that, even indirectly.
+            raise ApiError("Este terreno está publicado; pide a un administrador que lo borre.",
                            403, {"code": "requiere_admin"})
         try:
-            return {"terreno": _presentar_uno(conn, request, repo.archivar(
-                conn, inventory_id, expected, alcance.actor, restaurar))}
+            claves = repo.borrar(conn, inventory_id, expected)
         except repo.ConflictError:
             raise _conflicto(conn, request, inventory_id) from None
-        except repo.EstadoError as exc:
-            raise ApiError("El terreno ya está archivado." if exc.code == "terreno_archivado"
-                           else "El terreno no está archivado.", 409, {"code": exc.code}) from None
+    return {"borrado": True,
+            "limpieza_pendiente": archivos.borrar_bytes(claves, api_archivos.almacen())}
 
 
 def _destino(valor: Any) -> str | None:
@@ -276,16 +267,14 @@ def _destino(valor: Any) -> str | None:
                                    " para dejar el terreno sin base."}) from None
 
 
-def _destino_activo(conn: DatabaseConnection, destino: str | None) -> None:
+def _destino_existe(conn: DatabaseConnection, destino: str | None) -> None:
     if destino is None:
         return
-    # Locked like the source, so archiving the destination waits for this transfer.
-    base = conn.execute("SELECT archived_at FROM maestra_base WHERE id = ?" + db.bloqueo(conn),
+    # Locked like the source, so deleting the destination waits for this transfer.
+    base = conn.execute("SELECT id FROM maestra_base WHERE id = ?" + db.bloqueo(conn),
                         (destino,)).fetchone()
     if base is None:
         raise _invalid({"base_id": "La base de destino no existe."})
-    if base["archived_at"]:
-        raise ApiError("La base de destino está archivada.", 409, {"code": "base_archivada"})
 
 
 def transfer_preview(request: Request) -> Respuesta:
@@ -314,15 +303,8 @@ def transfer(request: Request) -> Respuesta:
         if "base_id" not in data:
             raise _invalid({"base_id": "Indica la base de destino (null para ninguna)."})
         destino = _destino(data["base_id"])
-        # A transfer is not a way around an archive: restore first.
-        if alcance.base_archivada:
-            raise ApiError("La base de origen está archivada; restáurala antes de mover el terreno.",
-                           409, {"code": "base_archivada"})
-        if alcance.terreno_archivado:
-            raise ApiError("El terreno está archivado; restáuralo antes de moverlo.", 409,
-                           {"code": "terreno_archivado"})
         if destino != alcance.base_id:
-            _destino_activo(conn, destino)
+            _destino_existe(conn, destino)
         try:
             return {"terreno": _presentar_uno(conn, request, repo.transferir(
                 conn, inventory_id, expected, destino, alcance.actor))}

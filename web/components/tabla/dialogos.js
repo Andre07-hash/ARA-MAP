@@ -10,7 +10,7 @@ import { api } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
-import { confirmDialog, openDialog } from "../ui/dialog.js";
+import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];
@@ -24,16 +24,78 @@ function Aviso() {
   return { nodo, decir: (texto) => { nodo.textContent = texto ?? ""; } };
 }
 
+/* ------------------------------------------------- several terrains at once */
+
+const terrenos = (n) => `${n} ${n === 1 ? "terreno" : "terrenos"}`;
+
+/* A one-field dialog that answers once: the button's value, or null when it
+ * is cancelled or dismissed. The answer is given before the dialog closes,
+ * because a dialog removed as it closes never fires its "close" event. */
+function preguntar({ titulo, descripcion, contenido, accion, valor }) {
+  return new Promise((resolve) => {
+    let hecho = false;
+    const responder = (v) => { if (!hecho) { hecho = true; resolve(v); } };
+    const { dialog } = openDialog({
+      titulo, descripcion, contenido,
+      acciones: [
+        { etiqueta: "Cancelar", onClick: (close) => { responder(null); close(); } },
+        { etiqueta: accion, variante: "principal", onClick: (close) => {
+          const v = valor();
+          if (v == null) return;
+          responder(v);
+          close();
+        } },
+      ],
+    });
+    dialog.addEventListener("close", () => responder(null));
+  });
+}
+
+/**
+ * Where to move the selected terrains. Resolves a base id, "sin_asignar",
+ * or null when the person cancels.
+ */
+export function pedirDestino({ cantidad, bases }) {
+  const destino = el("select", { id: "multiple-destino", class: "input" },
+    el("option", { value: "" }, "Elige un destino…"),
+    el("option", { value: "sin_asignar" }, "Sin base (sólo administradores)"),
+    bases.map((b) => el("option", { value: b.id }, b.nombre)));
+  const aviso = Aviso();
+  return preguntar({
+    titulo: `Transferir ${terrenos(cantidad)}`,
+    descripcion: "Cada terreno conserva sus datos, archivos e historial. Las columnas propias de su " +
+      "base actual dejan de mostrarse en la nueva.",
+    contenido: el("div", {},
+      el("label", { class: "field-label", for: "multiple-destino" }, "Base de destino"), destino, aviso.nodo),
+    accion: "Transferir",
+    valor: () => destino.value || (aviso.decir("Elige una base de destino."), null),
+  });
+}
+
+/** The name of a new base for the selected terrains, or null when cancelled. */
+export function pedirNombreDeBase({ cantidad }) {
+  const nombre = el("input", { id: "multiple-base", class: "input", maxlength: "100", autocomplete: "off" });
+  const aviso = Aviso();
+  return preguntar({
+    titulo: `Crear una base con ${terrenos(cantidad)}`,
+    descripcion: "Se crea una base de trabajo nueva y los terrenos seleccionados pasan a ella. " +
+      "Después puedes darle acceso a los operadores en «Bases y accesos».",
+    contenido: el("div", {},
+      el("label", { class: "field-label", for: "multiple-base" }, "Nombre de la base"), nombre, aviso.nodo),
+    accion: "Crear y mover",
+    valor: () => (nombre.value.trim() ? nombre.value : (aviso.decir("Escribe un nombre."), null)),
+  });
+}
+
 /* ------------------------------------------------------------- one terrain */
 
 export function abrirDetalle({
-  terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onArchivar, onTransferir,
+  terreno, columnas, base, admin, puedeCambiar, onCerrar, onHistorial, onBorrar, onTransferir,
   onArchivos, onErrorDeArchivos,
 }) {
-  // What may be changed can move while the dialog is open (the terrain or its
-  // base archived or restored by someone else): permisos() below updates it.
-  let archivado = Boolean(terreno.archived_at);
-  let soloLectura = !puedeCambiar || archivado;
+  // What may be changed can move while the dialog is open (a grant changed by
+  // someone else): permisos() below updates it.
+  let soloLectura = !puedeCambiar;
   const montadas = [];
   const ranura = (tipo) => {
     const container = el("dd", { class: "detalle-ranura" });
@@ -52,32 +114,27 @@ export function abrirDetalle({
     el("dt", {}, "Última edición"),
     el("dd", {}, `${terreno.updated_by?.display_name ?? "—"} · versión ${terreno.version}`),
   );
-  const nota = el("p", { class: "detalle-nota", role: "status" });
   const acciones = el("div", { class: "detalle-acciones" });
   function pintarEstado() {
-    nota.textContent = archivado ? "Archivado: se puede consultar y restaurar." : "";
-    nota.hidden = !archivado;
     acciones.replaceChildren(...[
       boton("Historial", () => onHistorial()),
-      puedeCambiar && boton(archivado ? "Restaurar terreno" : "Archivar terreno", async () => {
-        const estaba = archivado;
-        if (!estaba && !(await confirmDialog({
-          titulo: "¿Archivar este terreno?",
-          mensaje: "Sale de la tabla y deja de poder editarse. Sus datos, archivos e historial se " +
-            "conservan y se puede restaurar.",
-          confirmar: "Archivar",
-        }))) return;
-        if (await close()) onArchivar(estaba);
-      }),
-      admin && puedeCambiar && !archivado && boton("Transferir a otra base…", async () => {
+      admin && puedeCambiar && boton("Transferir a otra base…", async () => {
         if (await close()) onTransferir();
       }),
+      // A published terrain changes what the public sees: administrators only (the server agrees).
+      puedeCambiar && (admin || !terreno.published_revision_id) && boton("Borrar terreno…", async () => {
+        if (!(await confirmarBorrado({
+          titulo: `¿Borrar «${terreno.draft?.terreno || "Terreno sin nombre"}»?`,
+          mensaje: "Se borran el terreno, todos sus datos, su historial y sus PDF y KMZ.",
+        }))) return;
+        if (await close()) onBorrar();
+      }, "btn btn-small btn-peligro"),
     ].filter(Boolean));
   }
   const { dialog, close } = openDialog({
     titulo: terreno.draft?.terreno || "Terreno sin nombre",
     ancho: "38rem",
-    contenido: el("div", {}, nota, datos, acciones),
+    contenido: el("div", {}, datos, acciones),
     acciones: [cerrar],
     // Closing destroys the file controls: never silently while an upload is unfinished.
     antesDeCerrar: () => (montadas.some((m) => m.ocupado?.()) ? confirmDialog({
@@ -101,10 +158,9 @@ export function abrirDetalle({
      * What this account may do with the terrain now. The file mounts and the
      * actions follow; what is being read (lists, an open history) stays.
      */
-    permisos({ archivado: ahora, puedeCambiar: puede, resumen }) {
-      archivado = Boolean(ahora);
+    permisos({ puedeCambiar: puede, resumen }) {
       puedeCambiar = Boolean(puede);
-      soloLectura = !puedeCambiar || archivado;
+      soloLectura = !puedeCambiar;
       pintarEstado();
       for (const m of montadas) m.update({ soloLectura, resumen: resumen ?? undefined });
     },
@@ -241,45 +297,43 @@ export function abrirColumnas({ base, soloLectura, onCerrar, onAlcancePerdido })
   function Definicion(c, indice) {
     const nuevoNombre = el("input", {
       class: "input", value: c.nombre, maxlength: "100", "aria-label": `Nombre de la columna ${c.nombre}`,
-      disabled: soloLectura || c.retirada,
+      disabled: soloLectura,
     });
-    const nuevaOpcion = c.tipo === "opcion" && !c.retirada && !soloLectura && el("input", {
+    const nuevaOpcion = c.tipo === "opcion" && !soloLectura && el("input", {
       class: "input", placeholder: "Agregar opción", "aria-label": `Agregar opción a ${c.nombre}`,
     });
     const cambiar = (cuerpo) => hacer(() =>
       api.cambiarColumna(base.id, c.id, { expected_version: c.version, ...cuerpo }));
-    return el("li", { class: ["columnas-item", c.retirada && "is-retirada"] },
+    return el("li", { class: "columnas-item" },
       nuevoNombre,
       el("span", { class: "secondary columnas-tipo" },
-        TIPOS.find(([v]) => v === c.tipo)?.[1] ?? c.tipo, c.retirada && " · retirada",
+        TIPOS.find(([v]) => v === c.tipo)?.[1] ?? c.tipo,
         c.tipo === "opcion" && `: ${c.opciones.join(", ")}`),
       nuevaOpcion,
       !soloLectura && el("div", { class: "columnas-botones" },
-        !c.retirada && boton("Guardar", () => {
+        boton("Guardar", () => {
           const cuerpo = {};
           if (nuevoNombre.value.trim() !== c.nombre) cuerpo.nombre = nuevoNombre.value;
           if (nuevaOpcion && nuevaOpcion.value.trim()) cuerpo.opciones = [...c.opciones, nuevaOpcion.value];
           if (Object.keys(cuerpo).length) cambiar(cuerpo);
         }),
-        !c.retirada && indice > 0 && boton("Subir", () => cambiar({ posicion: indice - 1 })),
-        !c.retirada && indice < vivas - 1 && boton("Bajar", () => cambiar({ posicion: indice + 1 })),
-        boton(c.retirada ? "Restaurar" : "Retirar", async () => {
-          if (!c.retirada && !(await confirmDialog({
-            titulo: `¿Retirar la columna «${c.nombre}»?`,
-            mensaje: "Deja de mostrarse y de aceptar valores. Los valores ya guardados y su historial " +
-              "se conservan y vuelven si la restauras.",
-            confirmar: "Retirar",
+        indice > 0 && boton("Subir", () => cambiar({ posicion: indice - 1 })),
+        indice < vivas - 1 && boton("Bajar", () => cambiar({ posicion: indice + 1 })),
+        boton("Borrar…", async () => {
+          if (!(await confirmarBorrado({
+            titulo: `¿Borrar la columna «${c.nombre}»?`,
+            mensaje: "La columna desaparece de esta base y sus valores dejan de mostrarse en todos sus terrenos.",
           }))) return;
-          hacer(() => api.retirarColumna(base.id, c.id, c.version, c.retirada));
-        }),
+          hacer(() => api.borrarColumna(base.id, c.id, c.version));
+        }, "btn btn-small btn-peligro"),
       ),
     );
   }
 
   async function cargar() {
     try {
-      const { columnas } = await api.columnas(base.id, true);
-      vivas = columnas.filter((c) => !c.retirada).length;
+      const { columnas } = await api.columnas(base.id);
+      vivas = columnas.length;
       lista.replaceChildren(...(columnas.length
         ? columnas.map((c, i) => Definicion(c, i))
         : [el("li", { class: "secondary" }, "Esta base todavía no tiene columnas propias.")]));
@@ -342,32 +396,32 @@ export function abrirBases({ onCerrar }) {
   function Base(b) {
     const nuevo = el("input", {
       class: "input", value: b.nombre, maxlength: "100", "aria-label": `Nombre de la base ${b.nombre}`,
-      disabled: b.archivada,
     });
-    return el("li", { class: ["bases-item", b.archivada && "is-retirada"] },
+    return el("li", { class: "bases-item" },
       nuevo,
-      el("span", { class: "secondary" }, `${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}` +
-        (b.archivada ? " · archivada (sólo lectura)" : "")),
+      el("span", { class: "secondary" }, `${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}`),
       el("div", { class: "columnas-botones" },
-        !b.archivada && boton("Renombrar", () => hacer(() =>
-          api.renombrarBaseDeTrabajo(b.id, b.version, nuevo.value))),
+        boton("Renombrar", () => hacer(() => api.renombrarBaseDeTrabajo(b.id, b.version, nuevo.value))),
         boton("Accesos…", () => abrirAccesos({ base: b, onCerrar: (c) => { cambio = cambio || c; cargar(); } })),
-        boton(b.archivada ? "Restaurar" : "Archivar", async () => {
-          if (!b.archivada && !(await confirmDialog({
-            titulo: `¿Archivar la base «${b.nombre}»?`,
-            mensaje: "Se cierra para los operadores y queda de sólo lectura. Sus terrenos, columnas, " +
-              "archivos y accesos se conservan, y se puede restaurar.",
-            confirmar: "Archivar",
+        boton("Borrar…", async () => {
+          if (b.terrenos > 0) {
+            aviso.decir(`«${b.nombre}» todavía tiene ${b.terrenos} ${b.terrenos === 1 ? "terreno" : "terrenos"}. ` +
+              "Bórralos o transfiérelos a otra base antes de borrarla.");
+            return;
+          }
+          if (!(await confirmarBorrado({
+            titulo: `¿Borrar la base «${b.nombre}»?`,
+            mensaje: "Se borran la base, sus columnas y sus accesos.",
           }))) return;
-          hacer(() => api.archivarBaseDeTrabajo(b.id, b.version, b.archivada));
-        }),
+          hacer(() => api.borrarBaseDeTrabajo(b.id, b.version));
+        }, "btn btn-small btn-peligro"),
       ),
     );
   }
 
   async function cargar() {
     try {
-      const { bases } = await api.maestraBases(true);
+      const { bases } = await api.maestraBases();
       lista.replaceChildren(...(bases.length ? bases.map(Base)
         : [el("li", { class: "secondary" }, "Todavía no hay bases de trabajo.")]));
     } catch (error) { aviso.decir(error.message); }

@@ -353,7 +353,7 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
 
     const quien = actual.updated_by?.display_name ?? actual.updated_by ?? null;
     const valor = (clave, draft) => mostrarValor(campo(clave), draft[clave]);
-    const ciclo = actual.publication_state !== base.publication_state || actual.archived_at
+    const ciclo = actual.publication_state !== base.publication_state
       ? `Su estado ahora es «${estadoPublicacion(actual).etiqueta}».` : null;
 
     alertas.replaceChildren(el("section", { class: "conflicto note note-aviso" },

@@ -5,12 +5,15 @@ sessions, on SQLite and (when ARA_MAP_TEST_DATABASE_URL is set) on a
 disposable Postgres schema. Fictional accounts:
 
     ada, alan   administrators
-    olga        operator granted Base Uno (and the archived base)
+    olga        operator granted Base Uno (and Base Archivada)
     omar        operator granted Base Uno and Base Dos
     otto        operator with no grant
 
-    t1 in Base Uno · t2 in Base Dos · t0 unassigned · ta archived, in Base Uno
-    t3 in Base Archivada (an archived work base)
+    t1 in Base Uno · t2 in Base Dos · t0 unassigned · ta in Base Uno
+    t3 in Base Archivada
+
+ta and Base Archivada carry the archived_at an archive left before deleting
+replaced archiving. That stamp means nothing now: both are ordinary rows.
 """
 
 from __future__ import annotations
@@ -33,6 +36,7 @@ from unittest.mock import patch
 from server import app as app_module
 from server import auth, db, postgres
 from server.errors import ApiError
+from server.repo import inventario as repo_inventario
 from server.web_util import encode
 from tests.support import TEST_PASSWORD
 
@@ -94,8 +98,9 @@ class Escenario:
                              (base, terreno))
             conn.execute("UPDATE inventory_terrain SET archived_at = ? WHERE id = ?",
                          (db.now(), self.ta))
-        sql(asignar)  # fixture: assignment and terrain archiving have no route in this packet
-        self.archivar(self.b3)
+            conn.execute("UPDATE maestra_base SET archived_at = ? WHERE id = ?",
+                         (db.now(), self.b3))
+        sql(asignar)  # fixture: assignment and the legacy stamps have no route
 
     def bajar(self):
         self.httpd.shutdown()
@@ -146,9 +151,9 @@ class Escenario:
                          {"expected_version": self.base(base_id)["version"],
                           "usuarios": [self.ids[n] for n in logins]}, user)
 
-    def archivar(self, base_id, accion="archivar"):
-        return self.call("POST", f"/api/maestra/bases/{base_id}/{accion}",
-                         {"expected_version": self.base(base_id)["version"]})
+    def borrar_base(self, base_id, user="ada"):
+        return self.call("POST", f"/api/maestra/bases/{base_id}/borrar",
+                         {"expected_version": self.base(base_id)["version"]}, user)
 
     def crear_terreno(self, nombre):
         return self.ok(self.call("POST", "/api/inventario/terrenos", {"terreno": f"Lote {nombre}"},
@@ -245,11 +250,11 @@ class Matriz(Escenario):
 
     # -- 2. work bases and grants -----------------------------------------------
 
-    def test_an_administrator_creates_renames_archives_and_restores_a_base(self):
+    def test_an_administrator_creates_renames_and_deletes_a_base(self):
         status, body = self.call("POST", "/api/maestra/bases", {"nombre": "  Base   Nueva "})
         base = body["base"]
-        self.assertEqual((status, base["nombre"], base["version"], base["archivada"], base["terrenos"],
-                          body["usuarios"]), (200, "Base Nueva", 1, False, 0, []))
+        self.assertEqual((status, base["nombre"], base["version"], base["terrenos"],
+                          body["usuarios"]), (200, "Base Nueva", 1, 0, []))
         bid = base["id"]
         ruta = f"/api/maestra/bases/{bid}"
 
@@ -263,23 +268,14 @@ class Matriz(Escenario):
         self.assertEqual(self.call("PATCH", ruta, {"expected_version": 2, "nombre": "Base Renombrada"})[1]
                          ["base"]["version"], 2)
 
-        status, body = self.call("POST", ruta + "/archivar", {"expected_version": 2})
-        self.assertEqual((status, body["base"]["archivada"], body["base"]["version"]), (200, True, 3))
-        for accion, cuerpo in (("archivar", {"expected_version": 3}),):
-            status, body = self.call("POST", f"{ruta}/{accion}", cuerpo)
-            self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
-        status, body = self.call("PATCH", ruta, {"expected_version": 3, "nombre": "No"})
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
-        self.assertEqual(self.call("POST", ruta + "/restaurar", {"expected_version": 2})[0], 409)
-        status, body = self.call("POST", ruta + "/restaurar", {"expected_version": 3})
-        self.assertEqual((status, body["base"]["archivada"], body["base"]["version"]), (200, False, 4))
-        status, body = self.call("POST", ruta + "/restaurar", {"expected_version": 4})
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_no_archivada"))
-
-        eventos = filas("maestra_base_event", "base_id = ?", (bid,))
-        self.assertEqual(sorted((e["version"], e["action"], e["actor_id"]) for e in eventos), [
-            (1, "crear", self.ids["ada"]), (2, "renombrar", self.ids["alan"]),
-            (3, "archivar", self.ids["ada"]), (4, "restaurar", self.ids["ada"])])
+        status, body = self.call("POST", ruta + "/borrar", {"expected_version": 1})
+        self.assertEqual((status, body["detalle"]["code"]), (409, "conflict"))
+        self.assertEqual(self.call("POST", ruta + "/borrar", {"expected_version": 2}, "alan"),
+                         (200, {"borrado": True}))
+        self.assertEqual(self.call("GET", ruta + "/acceso")[0], 404)
+        self.assertEqual(self.call("POST", ruta + "/borrar", {"expected_version": 2})[0], 404)
+        self.assertEqual(filas("maestra_base", "id = ?", (bid,)), [])
+        self.assertEqual(filas("maestra_base_event", "base_id = ?", (bid,)), [])
 
     def test_base_requests_are_validated_before_anything_changes(self):
         antes = {t: filas(t) for t in AUDITADAS}
@@ -292,8 +288,8 @@ class Matriz(Escenario):
                 ("PATCH", ruta, {"nombre": "Sin versión"}),
                 ("PATCH", ruta, {"expected_version": "1", "nombre": "Texto"}),
                 ("PATCH", ruta, {"expected_version": True, "nombre": "Booleano"}),
-                ("POST", ruta + "/archivar", {}),
-                ("POST", ruta + "/archivar", {"expected_version": 0}),
+                ("POST", ruta + "/borrar", {}),
+                ("POST", ruta + "/borrar", {"expected_version": 0}),
                 ("PUT", ruta + "/acceso", {"expected_version": 2}),
                 ("PUT", ruta + "/acceso", {"expected_version": 2, "usuarios": "todos"}),
                 ("PUT", ruta + "/acceso", {"expected_version": 2, "usuarios": ["*"]}),
@@ -301,7 +297,7 @@ class Matriz(Escenario):
                 ("PUT", ruta + "/acceso", {"expected_version": 2, "usuarios": [], "todos": True})):
             status, body = self.call(method, path, cuerpo)
             self.assertEqual((status, body["detalle"]["code"]), (422, "validation_failed"), cuerpo)
-        for method, path in (("PATCH", ""), ("POST", "/archivar"), ("POST", "/restaurar"),
+        for method, path in (("PATCH", ""), ("POST", "/borrar"),
                              ("GET", "/acceso"), ("PUT", "/acceso")):
             cuerpo = None if method == "GET" else {"expected_version": 1, "nombre": "X"}
             if method == "POST":
@@ -369,29 +365,36 @@ class Matriz(Escenario):
         status, body = self.call("PUT", ruta, {"expected_version": 3, "usuarios": []})
         self.assertEqual((status, body["usuarios"], body["base"]["version"]), (200, [], 4))
 
-    def test_archiving_a_base_changes_only_the_base(self):
+    def test_a_base_with_terrains_is_not_deleted_and_an_empty_one_takes_only_its_own_rows(self):
+        antes = {t: filas(t) for t in CONTENIDO}
+        status, body = self.borrar_base(self.b1)
+        self.assertEqual((status, body["detalle"]["code"]), (409, "base_con_terrenos"))
+        self.assertEqual({t: filas(t) for t in CONTENIDO}, antes)
+        self.assertEqual(self.borrar_base(self.b1, "olga")[0], 403)
+
+        # An empty base with a column, a grant and a terrain that passed through it.
+        vacia = self.crear_base("Base Vacía")
+        self.otorgar(vacia, "olga")
         sql(lambda c: c.execute(
             "INSERT INTO inventory_column (id, base_id, nombre, tipo, orden, created_at, created_by,"
             " updated_at, updated_by) VALUES (?, ?, 'Folio', 'texto', 1, ?, ?, ?, ?)",
-            (nuevo(), self.b1, db.now(), self.ids["ada"], db.now(), self.ids["ada"])))
-        antes = {t: filas(t) for t in CONTENIDO}
-        publico = self.call("GET", "/api/publico/terrenos", user=None)
-        self.ok(self.archivar(self.b1))
-        self.assertEqual({t: filas(t) for t in CONTENIDO}, antes)
-        self.assertEqual(self.call("GET", "/api/publico/terrenos", user=None), publico)
+            (nuevo(), vacia, db.now(), self.ids["ada"], db.now(), self.ids["ada"])))
+        for destino in (vacia, self.b1):
+            self.ok(self.call("POST", f"/api/inventario/terrenos/{self.t1}/transferir",
+                              {"expected_version": self.version(self.t1), "base_id": destino}))
+        revisiones = len(filas("inventory_revision", "inventory_id = ?", (self.t1,)))
+        self.assertEqual(self.borrar_base(vacia), (200, {"borrado": True}))
 
-        # Closed to its operators, read-only for administrators, grants still manageable.
-        self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga")[0], 404)
-        self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}")[0], 200)
-        status, body = self.patch(self.t1, {"terreno": "No"}, "ada")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
-        self.assertEqual(self.otorgar(self.b1, "olga")[0], 200)
-        self.assertEqual([b["id"] for b in self.call("GET", "/api/maestra/bases", user="omar")[1]["bases"]],
-                         [self.b2])
-        self.ok(self.archivar(self.b1, "restaurar"))
+        for tabla in ("maestra_base", "maestra_base_acceso", "maestra_base_event",
+                      "inventory_column"):
+            self.assertEqual(filas(tabla, ("id" if tabla == "maestra_base" else "base_id") + " = ?",
+                                   (vacia,)), [], tabla)
+        for tabla in ("inventory_revision", "team_user_event", "archivo_evento"):
+            self.assertEqual(filas(tabla, "base_id = ?", (vacia,)), [], tabla)
+        # The terrain that passed through keeps every revision, now naming no base there.
+        self.assertEqual(len(filas("inventory_revision", "inventory_id = ?", (self.t1,))), revisiones)
         self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga")[0], 200)
-        self.assertEqual({t: filas(t) for t in CONTENIDO if t != "maestra_base_acceso"},
-                         {t: v for t, v in antes.items() if t != "maestra_base_acceso"})
+        self.assertNotIn(vacia, [b["id"] for b in self.call("GET", "/api/maestra/bases", user="olga")[1]["bases"]])
 
     # -- 3. scope ----------------------------------------------------------------
 
@@ -400,23 +403,21 @@ class Matriz(Escenario):
             body = self.ok(self.call("GET", "/api/maestra/bases" + query, user=user))
             self.assertEqual(body["total"], len(body["bases"]))
             return [b["nombre"] for b in body["bases"]]
-        self.assertEqual(nombres("ada"), ["Base Dos", "Base Uno"])
-        self.assertEqual(nombres("ada", "?archivadas=1"), ["Base Archivada", "Base Dos", "Base Uno"])
-        self.assertEqual(nombres("olga"), ["Base Uno"])  # her archived base is closed to her
-        self.assertEqual(nombres("olga", "?archivadas=1"), ["Base Uno"])
+        self.assertEqual(nombres("ada"), ["Base Archivada", "Base Dos", "Base Uno"])
+        self.assertEqual(nombres("olga"), ["Base Archivada", "Base Uno"])
         self.assertEqual(nombres("omar"), ["Base Dos", "Base Uno"])
         self.assertEqual(nombres("otto"), [])
-        uno = next(b for b in self.call("GET", "/api/maestra/bases", user="olga")[1]["bases"])
-        self.assertEqual(uno["terrenos"], 1)  # t1; the archived ta is not counted
+        uno = next(b for b in self.call("GET", "/api/maestra/bases", user="olga")[1]["bases"]
+                   if b["id"] == self.b1)
+        self.assertEqual(uno["terrenos"], 2)  # t1 and ta
 
-    def test_an_operator_reaches_only_records_of_her_active_bases(self):
+    def test_an_operator_reaches_only_records_of_her_bases(self):
         for sufijo in ("", "/historial"):
-            self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}{sufijo}", user="olga")[0], 200)
-            # Archived terrain, in scope: readable.
-            self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.ta}{sufijo}", user="olga")[0], 200)
+            for tid in (self.t1, self.ta, self.t3):
+                self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{tid}{sufijo}", user="olga")[0], 200)
             respuestas = {nombre: self.call("GET", f"/api/inventario/terrenos/{tid}{sufijo}", user="olga")
                           for nombre, tid in (("otra base", self.t2), ("sin asignar", self.t0),
-                                              ("base archivada", self.t3), ("inexistente", nuevo()))}
+                                              ("inexistente", nuevo()))}
             # Out of scope and missing are the same answer, to the byte.
             self.assertEqual(set(map(encode, respuestas.values())), {encode(
                 (404, {"error": "El terreno no existe.", "detalle": {"code": "not_found"}}))})
@@ -424,12 +425,12 @@ class Matriz(Escenario):
             self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{tid}")[0], 200)  # administrator
         self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t2}", user="omar")[0], 200)
 
-    def test_an_operator_edits_only_inside_scope_and_archived_content_is_read_only(self):
+    def test_an_operator_edits_only_inside_scope(self):
         status, body = self.patch(self.t1, {"estado": "Jalisco"}, "olga")
         self.assertEqual((status, body["terreno"]["draft"]["estado"],
                           body["terreno"]["updated_by"]["display_name"]), (200, "Jalisco", "Olga Ficticia"))
         fuera = {n: self.patch(t, {"estado": "X"}, "olga")
-                 for n, t in (("otra", self.t2), ("libre", self.t0), ("archivada", self.t3))}
+                 for n, t in (("otra", self.t2), ("libre", self.t0))}
         fuera["inexistente"] = self.call("PATCH", f"/api/inventario/terrenos/{nuevo()}",
                                          {"expected_version": 1, "changes": {"estado": "X"}}, "olga")
         # Even a request that would fail validation learns nothing but 404.
@@ -437,13 +438,12 @@ class Matriz(Escenario):
                                       {"expected_version": "mal", "changes": {"rol": "admin"}}, "olga")
         self.assertEqual({r[0] for r in fuera.values()}, {404})
         self.assertEqual(len({encode(r[1]) for r in fuera.values()}), 1)
-        status, body = self.patch(self.ta, {"estado": "X"}, "olga")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "terreno_archivado"))
-        status, body = self.patch(self.t3, {"estado": "X"}, "ada")
-        self.assertEqual((status, body["detalle"]["code"]), (409, "base_archivada"))
+        # Legacy archive stamps change nothing: both are edited like any other.
+        self.assertEqual(self.patch(self.ta, {"estado": "X"}, "olga")[0], 200)
+        self.assertEqual(self.patch(self.t3, {"estado": "X"}, "olga")[0], 200)
         self.assertEqual(self.patch(self.t0, {"estado": "Colima"}, "alan")[0], 200)
         self.assertEqual([self.version(t) for t in (self.t1, self.t2, self.t0, self.ta, self.t3)],
-                         [2, 1, 2, 1, 1])
+                         [2, 1, 2, 2, 2])
 
     def test_the_master_table_and_the_legacy_workspace_are_administrators_only(self):
         for method, path, cuerpo in (
@@ -456,13 +456,13 @@ class Matriz(Escenario):
                 ("POST", "/api/maestra/bases", {"nombre": "Mía"}),
                 ("GET", f"/api/maestra/bases/{self.b1}/acceso", None),
                 ("PUT", f"/api/maestra/bases/{self.b1}/acceso", {"expected_version": 2, "usuarios": []}),
-                ("POST", f"/api/maestra/bases/{self.b3}/restaurar", {"expected_version": 3})):
+                ("POST", f"/api/maestra/bases/{self.b3}/borrar", {"expected_version": 3})):
             with self.subTest(method=method, path=path):
                 status, body = self.call(method, path, cuerpo, "olga",
                                          {"Idempotency-Key": "clave-operadora-1"})
                 self.assertEqual((status, body["detalle"]["code"]), (403, "forbidden"))
         self.assertEqual(self.cuenta("inventory_terrain"), 5)
-        self.assertEqual(self.call("GET", "/api/inventario/terrenos")[1]["total"], 4)  # ta is archived
+        self.assertEqual(self.call("GET", "/api/inventario/terrenos")[1]["total"], 5)
 
     def test_nothing_the_client_sends_can_grant_role_actor_or_base(self):
         falsos = {"X-Rol": "admin", "X-User": self.ids["ada"], "X-Actor-Id": self.ids["ada"],
@@ -517,7 +517,8 @@ class Matriz(Escenario):
             "authenticated": True,
             "user": {"id": self.ids["olga"], "display_name": "Olga Ficticia", "rol": "operador"},
             "capacidades": list(auth.CAPACIDADES["operador"]),
-            "alcance": {"bases": [{"id": self.b1, "nombre": "Base Uno"}]}})
+            "alcance": {"bases": [{"id": self.b3, "nombre": "Base Archivada"},
+                                  {"id": self.b1, "nombre": "Base Uno"}]}})
         self.assertEqual(self.call("GET", "/api/session", user="otto")[1]["alcance"], {"bases": []})
         ada = self.call("GET", "/api/session", user="ada")[1]
         self.assertEqual((ada["user"]["rol"], ada["capacidades"], ada["alcance"]),
@@ -537,8 +538,9 @@ class Matriz(Escenario):
         self.ok(self.otorgar(self.b1, "omar"))  # olga is no longer in the set
         self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga")[0], 404)
         self.assertEqual(self.patch(self.t1, {"estado": "X"}, "olga")[0], 404)
-        self.assertEqual(self.call("GET", "/api/session", user="olga")[1]["alcance"], {"bases": []})
-        self.assertEqual(self.call("GET", "/api/maestra/bases", user="olga")[1]["bases"], [])
+        self.assertEqual(self.call("GET", "/api/session", user="olga")[1]["alcance"], {"bases": [{"id": self.b3, "nombre": "Base Archivada"}]})
+        self.assertEqual([b["id"] for b in self.call("GET", "/api/maestra/bases", user="olga")[1]["bases"]],
+                         [self.b3])
         self.ok(self.otorgar(self.b1, "omar", "olga"))
         self.assertEqual(self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga")[0], 200)
 
@@ -586,7 +588,6 @@ class Matriz(Escenario):
         expirar = "UPDATE team_session SET expires_at = 1 WHERE user_id = ?"
         return {
             "grant revoked": (lambda: self.ok(self.otorgar(self.b1, "omar")), 404),
-            "base archived": (lambda: self.ok(self.archivar(self.b1)), 404),
             "role changed": (lambda: cuenta(lambda c: auth.set_role(c, "olga", "admin")), 401),
             "account deactivated": (lambda: cuenta(lambda c: auth.set_active(c, "olga", False)), 401),
             "signed out": (lambda: self.ok(self.call("POST", "/api/logout", user="olga")), 401),
@@ -594,8 +595,8 @@ class Matriz(Escenario):
                 c, "olga", TEST_PASSWORD + "-nueva", iterations=1000)), 401),
             "terrain transferred": (lambda: sql(lambda c: c.execute(
                 "UPDATE inventory_terrain SET base_id = ? WHERE id = ?", (self.b2, self.t1))), 404),
-            "terrain archived": (lambda: sql(lambda c: c.execute(
-                "UPDATE inventory_terrain SET archived_at = ? WHERE id = ?", (db.now(), self.t1))), 409),
+            "terrain deleted": (lambda: sql(lambda c: repo_inventario.borrar(c, self.t1, c.execute(
+                "SELECT version FROM inventory_terrain WHERE id = ?", (self.t1,)).fetchone()["version"])), 404),
             "session expired": (lambda: sql(lambda c: c.execute(expirar, (self.ids["olga"],))), 401),
         }
 
@@ -603,10 +604,9 @@ class Matriz(Escenario):
         sesion = self.sesion("olga")
         peticion = type("Peticion", (), {"sesion": sesion})()
         alcance = auth.require_terreno(peticion, self.t1, "archivos.subir")  # request start
-        self.assertEqual((alcance.rol, alcance.terreno_id, alcance.base_id, alcance.actor, alcance.sesion,
-                          alcance.terreno_archivado, alcance.base_archivada),
+        self.assertEqual((alcance.rol, alcance.terreno_id, alcance.base_id, alcance.actor, alcance.sesion),
                          ("operador", self.t1, self.b1, {"id": self.ids["olga"], "display_name": "Olga Ficticia"},
-                          sesion, False, False))
+                          sesion))
         archivo = self.adjuntar(sesion, self.t1)
         self.assertEqual(filas("archivo", "id = ?", (archivo,))[0]["creado_por"], self.ids["olga"])
         evento = filas("archivo_evento", "archivo_id = ?", (archivo,))[0]
@@ -646,8 +646,8 @@ class Matriz(Escenario):
 
     def test_a_scope_change_arriving_after_the_boundary_waits_for_the_write(self):
         for nombre, (_, esperado) in self.cambios_de_alcance().items():
-            if nombre == "session expired":
-                continue  # the clock is not a writer; nothing to wait for
+            if nombre in ("session expired", "terrain deleted"):
+                continue  # the clock is not a writer; a deletion takes the write with it
             with self.subTest(nombre):
                 self.reiniciar()
                 self.carrera(self.cambios_de_alcance()[nombre][0], esperado)
@@ -709,7 +709,7 @@ class Matriz(Escenario):
         self.adjuntar(sesion, self.t1)
         self.assertEqual(self.escrito(), (1, 1))
 
-    def test_capabilities_and_archive_rules_at_the_boundary(self):
+    def test_capabilities_and_scope_at_the_boundary(self):
         olga, ada = self.sesion("olga"), self.sesion("ada")
 
         def estado(sesion, terreno, capacidad):
@@ -720,20 +720,17 @@ class Matriz(Escenario):
             except ApiError as exc:
                 return exc.status, exc.detalle["code"]
         casos = {
-            (olga, self.t1, "archivos.subir"): 200, (olga, self.t1, "archivos.retirar"): 200,
+            (olga, self.t1, "archivos.subir"): 200, (olga, self.t1, "archivos.borrar"): 200,
             (olga, self.t1, "maestra.global"): (403, "forbidden"),   # capability before scope
             (olga, self.t2, "maestra.global"): (403, "forbidden"),
             (olga, self.t2, "archivos.subir"): (404, "not_found"),
             (olga, self.t0, "archivos.ver"): (404, "not_found"),
-            (olga, self.t3, "archivos.ver"): (404, "not_found"),     # archived base: closed, not 409
-            (olga, self.ta, "archivos.ver"): 200,                    # archived terrain: readable
-            (olga, self.ta, "archivos.subir"): (409, "terreno_archivado"),
-            (olga, self.ta, "archivos.retirar"): (409, "terreno_archivado"),
-            (olga, self.ta, "maestra.editar"): (409, "terreno_archivado"),
-            (olga, self.ta, "maestra.archivar"): 200,                # restoring has its own later policy
-            (ada, self.t0, "archivos.subir"): 200, (ada, self.t3, "archivos.ver"): 200,
-            (ada, self.t3, "archivos.subir"): (409, "base_archivada"),
-            (ada, self.t3, "maestra.archivar"): (409, "base_archivada"),
+            # A legacy archive stamp, on the terrain or its base, changes nothing.
+            (olga, self.t3, "archivos.ver"): 200, (olga, self.t3, "maestra.editar"): 200,
+            (olga, self.ta, "archivos.subir"): 200, (olga, self.ta, "maestra.editar"): 200,
+            (olga, self.ta, "maestra.borrar"): 200,
+            (ada, self.t0, "archivos.subir"): 200, (ada, self.t3, "archivos.subir"): 200,
+            (ada, self.t3, "maestra.borrar"): 200,
             (ada, nuevo(), "archivos.subir"): (404, "not_found"),
         }
         for (sesion, terreno, capacidad), esperado in casos.items():
@@ -751,8 +748,8 @@ class Matriz(Escenario):
                           base(olga, self.b3, "maestra.ver"), base(olga, nuevo(), "maestra.ver"),
                           base(olga, self.b1, "bases.gestionar"), base(ada, self.b3, "bases.gestionar"),
                           base(ada, self.b3, "maestra.ver"), base(ada, self.b3, "columnas.gestionar")],
-                         [200, (404, "not_found"), (404, "not_found"), (404, "not_found"),
-                          (403, "forbidden"), 200, 200, (409, "base_archivada")])
+                         [200, (404, "not_found"), 200, (404, "not_found"),
+                          (403, "forbidden"), 200, 200, 200])
 
     def reiniciar(self):
         """A fresh fixture inside one test, for its subtests."""
@@ -1079,7 +1076,6 @@ class RowLocksPostgres(Escenario, unittest.TestCase):
         return {
             "grant revoked": ("DELETE FROM maestra_base_acceso WHERE base_id = %s AND user_id = %s",
                               (self.b1, self.ids["olga"]), 404),
-            "base archived": ("UPDATE maestra_base SET archived_at = 'x' WHERE id = %s", (self.b1,), 404),
             "role changed": ("UPDATE team_user SET rol = 'admin', credential_revision ="
                              " credential_revision + 1 WHERE id = %s", (self.ids["olga"],), 401),
             "account deactivated": ("UPDATE team_user SET active = 0 WHERE id = %s", (self.ids["olga"],), 401),

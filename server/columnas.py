@@ -141,7 +141,7 @@ def limpiar_valores(data: Any, vivas: Mapping[str, Mapping[str, Any]],
     for nombre, valor in data.items():
         columna = vivas.get(nombre) if isinstance(nombre, str) else None
         if columna is None:
-            errores[str(nombre)] = "Columna desconocida o retirada."
+            errores[str(nombre)] = "Columna desconocida."
             continue
         try:
             limpios[nombre] = limpiar_valor(columna, valor)

@@ -323,7 +323,7 @@ class ResumenesLote:
 
     def test_the_auth_helper_refuses_write_capabilities(self):
         with db.session(self.database) as conn:
-            for capacidad in ("archivos.subir", "archivos.retirar", "maestra.editar", "bases.gestionar"):
+            for capacidad in ("archivos.subir", "archivos.borrar", "maestra.editar", "bases.gestionar"):
                 with self.subTest(capacidad=capacidad), self.assertRaises(ValueError):
                     auth.terrenos_legibles(conn, self.s["ana"], [self.t["a1"]], capacidad)
 
@@ -357,12 +357,13 @@ class ResumenesLote:
         propia = [r["ultima_version"] for r in ana["pdf_recientes"] if r["ultima_version"].get("propia")]
         self.assertEqual([(v["estado"], v["propia"]) for v in propia], [("subiendo", True)])
 
-    def test_operator_scope_hides_other_bases_archived_bases_and_unassigned(self):
+    def test_operator_scope_hides_other_bases_and_unassigned(self):
+        # Archived before deleting replaced archiving: ordinary rows (a_archivado, c1).
         with db.session(self.database) as conn:
             r = self.nuevo(conn, list(self.t.values()), self.s["olga"])
-        visibles = {self.t[n] for n in ("a1", "a2", "a3", "a_archivado")}
+        visibles = {self.t[n] for n in ("a1", "a2", "a3", "a_archivado", "c1")}
         self.assertEqual(set(r["resultados"]), visibles)
-        self.assertEqual(r["no_disponibles"], [self.t[n] for n in ("b1", "c1", "sin_base")])
+        self.assertEqual(r["no_disponibles"], [self.t[n] for n in ("b1", "sin_base")])
         with db.session(self.database) as conn:
             todo = self.nuevo(conn, list(self.t.values()), self.s["ana"])
         self.assertEqual(set(todo["resultados"]), set(self.t.values()))

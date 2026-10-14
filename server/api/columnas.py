@@ -24,8 +24,6 @@ Respuesta = dict[str, Any]
 
 _KEY = re.compile(r"^[\x21-\x7e]{8,200}$")
 _MENSAJES = {
-    "columna_retirada": "La columna está retirada; restáurala para cambiarla.",
-    "columna_no_retirada": "La columna no está retirada.",
     "nombre_duplicado": "Ya hay una columna con ese nombre en esta base.",
     "limite_columnas": f"Una base admite hasta {columnas.MAX_COLUMNAS} columnas personalizadas.",
     "sin_opciones": "Sólo las columnas de opción tienen opciones.",
@@ -71,11 +69,10 @@ def _estado(exc: repo.EstadoError) -> ApiError:
 
 
 def listing(request: Request) -> Respuesta:
-    """?retiradas=1 adds the retired definitions."""
     base_id = request.uuid_param("bid")
     with db.session() as conn:
         auth.require_base(request, base_id, "maestra.ver", conn)
-        return {"columnas": repo.listar(conn, base_id, request.q("retiradas") == "1")}
+        return {"columnas": repo.listar(conn, base_id)}
 
 
 def create(request: Request) -> Respuesta:
@@ -140,26 +137,19 @@ def update(request: Request) -> Respuesta:
     return _cambiar(request, cambio)
 
 
-def retire(request: Request) -> Respuesta:
-    """{expected_version}: stop showing and accepting the column. Reversible."""
-    return _retirar(request, restaurar=False)
-
-
-def restore(request: Request) -> Respuesta:
-    """{expected_version}: the column and the values kept under it show again."""
-    return _retirar(request, restaurar=True)
-
-
-def _retirar(request: Request, restaurar: bool) -> Respuesta:
+def delete(request: Request) -> Respuesta:
+    """{expected_version}: delete the column for good. Not reversible; the
+    client asks for confirmation first."""
     def cambio(conn: DatabaseConnection, base_id: str, column_id: str,
-               actor: dict[str, Any]) -> dict[str, Any]:
+               actor: dict[str, Any]) -> None:
         data = parse_json(request.body)
         errors = {k: "Campo no admitido." for k in data if k != "expected_version"}
         expected = _version(data, errors)
         if errors:
             raise _invalid(errors)
-        return repo.retirar(conn, base_id, column_id, expected, actor, restaurar)
-    return _cambiar(request, cambio)
+        repo.borrar(conn, base_id, column_id, expected)
+    _cambiar(request, cambio)
+    return {"borrado": True}
 
 
 def _cambiar(request: Request, cambio: Any) -> Respuesta:

@@ -121,3 +121,17 @@ export function confirmDialog({ titulo, mensaje, confirmar = "Confirmar", cancel
     dialog.addEventListener("cancel", () => finish(false));     // Escape is a "no"
   });
 }
+
+/**
+ * The last warning before deleting something for good. Resolves true only
+ * when the person presses "Borrar definitivamente"; Escape, Cancelar or
+ * closing the dialog keep everything.
+ */
+export function confirmarBorrado({ titulo, mensaje }) {
+  return confirmDialog({
+    titulo,
+    mensaje: `${mensaje} Esta acción no se puede deshacer.`,
+    confirmar: "Borrar definitivamente",
+    peligro: true,
+  });
+}

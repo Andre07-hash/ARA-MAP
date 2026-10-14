@@ -189,10 +189,22 @@ async function comprobarFondos(s, id) {
   igual((await previa(page)).cuerpos, 1, 'un contorno');
 }
 
-async function filtrar(page, selector, valor) {
-  await page.locator(selector).selectOption(valor);
-  await listo(page);
+/** The table's query controls are shown in Tabla only (issue #40): from the
+ * map, change one there and come back to the map. */
+const enMapa = async (page) => (await modoBoton(page, 'Mapa').getAttribute('aria-pressed')) === 'true';
+async function enLaTabla(page, fn) {
+  const volver = await enMapa(page);
+  if (volver) await aTabla(page);
+  await fn();
+  if (volver) await aMapa(page);
 }
+async function filtrar(page, selector, valor) {
+  await enLaTabla(page, async () => {
+    await page.locator(selector).selectOption(valor);
+    await listo(page);
+  });
+}
+const buscarEnTabla = (page, texto) => enLaTabla(page, () => page.locator('#tabla-buscar').fill(texto));
 async function subirKmzEnCelda(page, id, ruta) {
   const boton = page.locator(`tr[data-id="${id}"] td[data-col="core:kmz"] .archivos-celda-elegir`);
   await boton.waitFor();
@@ -273,8 +285,11 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
   igual([...m.filas].sort(), [...TODOS].sort(), 'mismos terrenos');
   cierto(m.filas.some((id) => !pagina.includes(id)), 'debe incluir terrenos fuera de la página');
   igual(reuniones(ada) - antes, 1, 'una reunión (111 < 200 por página)');
-  const cuenta = await ada.page.locator('.previa-cuenta').innerText();
-  cierto(/111 terrenos · 103 en el mapa \(3 con contorno activo, 100 por X\/Y\) · 8 sin ubicación/.test(cuenta), `cuenta: ${cuenta}`);
+  // The counts live in the filters panel (filtered) and the legend (placed / not placed), once.
+  cierto(/111 terrenos de 111/.test(await ada.page.locator('.mapa-tabla-rail .rail-result').innerText()), 'filtrados en el panel');
+  const leyenda = await ada.page.locator('.previa .legend').innerText();
+  cierto(/103 terrenos/.test(leyenda) && /8 terrenos fuera del mapa/.test(leyenda), `leyenda: ${leyenda}`);
+  igual(await ada.page.locator('.previa-cuenta, .previa-pie, .tabla-pie:visible').count(), 0, 'sin cuentas repetidas arriba ni abajo');
   igual((await previa(ada.page)).cuerpos, 0, 'ningún cuerpo sin selección');
   for (const id of [conContorno, puntos[99]]) cierto(await posicion(ada.page, id), `${id} dibujado`);
   for (const id of sinUbicacion) igual(await posicion(ada.page, id), null, 'sin ubicación no se dibuja');
@@ -282,6 +297,9 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
 });
 
 await revisar('administrador: el círculo de un terreno sin X/Y carga su contorno activo; otro círculo, el suyo', async () => {
+  // A row chosen in the grid (the last KMZ cell) is the map's selection too, and its body may still
+  // be on its way: count only what the click asks for.
+  await hasta(async () => !(await previa(ada.page)).cargando, 'la carga anterior no terminó', 120000);
   const antes = cuerposPedidos(ada).length;
   await clicEnMapa(ada.page, conContorno);
   await hasta(async () => (await posicion(ada.page, conContorno))?.contorno === true, 'sin contorno');
@@ -353,9 +371,13 @@ await revisar('los filtros acotan el mapa; un filtro sin resultados y «sin ubic
   await aTabla(ada.page);
   igual(await ada.page.locator('#tabla-estado').inputValue(), 'Sonora', 'el filtro sigue en la tabla');
   await aMapa(ada.page);
-  await ada.page.locator('#tabla-buscar').fill('nada coincide con esto');
+  await buscarEnTabla(ada.page, 'nada coincide con esto');
   await hasta(async () => (await mapa(ada.page)).filas.length === 0 && /Ningún terreno coincide/.test(await ada.page.locator('.tabla-mapa-aviso').innerText()), 'estado vacío');
-  await ada.page.locator('#tabla-buscar').fill('');
+  // The empty-set notice floats over the map, not in a strip of its own.
+  const aviso = await ada.page.locator('.tabla-mapa-aviso').boundingBox();
+  const lienzo = await ada.page.locator('.previa-mapa').boundingBox();
+  cierto(aviso.y >= lienzo.y && aviso.y + aviso.height <= lienzo.y + lienzo.height, 'aviso sobre el mapa');
+  await buscarEnTabla(ada.page, '');
   await filtrar(ada.page, '#tabla-estado', '');
   await hasta(async () => (await mapa(ada.page)).filas.length === TODOS.length, 'vuelve al total');
 });
@@ -449,8 +471,11 @@ await revisar('una escritura hecha con otro filtro deja el conjunto anterior des
 
 await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cancela la reunión anterior', async () => {
   // The grid's page answers slowly; the map must not wait for it to drop the old query's rows.
+  // The filter is changed in Tabla and the map shown again at once, before the grid's page arrives.
+  await aTabla(ada.page);
   await ada.page.route(/\/terrenos\?(?!.*limit=200)/, async (r) => { await esperar(1500); await r.continue(); });
   await ada.page.locator('#tabla-estado').selectOption('Sonora');
+  await modoBoton(ada.page, 'Mapa').click();
   await esperar(300);                          // well before the grid's page (1.5 s)
   // Never the old query's 110 rows: either nothing yet or already the 52 of Sonora.
   const sonora = 52;

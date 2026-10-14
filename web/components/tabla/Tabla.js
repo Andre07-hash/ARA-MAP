@@ -43,6 +43,12 @@
  * read-only record on top of that set. Its filters are not this table's
  * query: they narrow what the map draws, never the grid, its page or its
  * cursors, and they start empty again whenever the view is left.
+ *
+ * On the map, the bar keeps only the view, Tabla / Mapa and Actualizar. The
+ * grid's query controls are hidden, never cleared: their values still bound
+ * the set, and a small "Filtros de la tabla (N)" note lists them when there
+ * are any. The footer's count and status are the grid's; on the map the
+ * footer shows only alerts and unfinished uploads.
  */
 
 import { api } from "../../lib/api.js";
@@ -131,7 +137,6 @@ export function createTabla({
     onDeseleccion: (id) => { if (seleccion === id) { seleccion = null; marcarSeleccion(); } },
     nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
     definicionesDe: (baseId, signal) => definicionesDeBase(baseId, signal),
-    alcance: () => alcanceDeLaVista(),
     // A boundary that is no longer available (retired, replaced, or out of
     // scope) means this row may be stale: ask for the terrain again, which
     // either updates its location or removes it from the view.
@@ -179,14 +184,39 @@ export function createTabla({
     el("label", { class: "field-label", for: control.id }, etiqueta), control);
   const casilla = (control, etiqueta) => el("label", { class: "check tabla-casilla", for: control.id }, control, etiqueta);
 
-  const barra = el("div", { class: "tabla-barra" },
-    campoDe(selVista, "Vista"),
+  // The grid's query controls. The map does not show them: it keeps their
+  // values (they bound its set) and says so in the inherited-filters note.
+  const deLaConsulta = [
     campoDe(buscar, "Buscar"),
     campoDe(selEstado, "Estado"),
     campoDe(selMunicipio, "Municipio"),
     campoDe(selTipo, "Tipo"),
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
+  ];
+  const listaHeredados = el("ul", { class: "tabla-heredados-lista" });
+  const heredados = el("details", { class: "tabla-heredados", hidden: true },
+    el("summary", { class: "btn btn-small" }),
+    el("div", {
+      class: "tabla-heredados-panel", role: "note", "aria-label": "Filtros de la tabla en el mapa", tabindex: "-1",
+    },
+      el("p", {}, "El mapa sólo incluye los terrenos que cumplen estos filtros de la tabla:"),
+      listaHeredados,
+      el("p", { class: "muted" }, "Los filtros del mapa se aplican dentro de este conjunto. " +
+        "Para cambiar estos, vuelve a Tabla."),
+    ));
+  heredados.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !heredados.open) return;
+    e.stopPropagation();
+    heredados.open = false;
+    heredados.querySelector("summary").focus();
+  });
+  // Closes when the focus leaves it; the panel takes the focus of a click on its text.
+  heredados.addEventListener("focusout", (e) => { if (!heredados.contains(e.relatedTarget)) heredados.open = false; });
+  const barra = el("div", { class: "tabla-barra" },
+    campoDe(selVista, "Vista"),
+    heredados,
+    ...deLaConsulta,
     el("div", { class: "tabla-acciones" }, selectorModo, btnAgregar, btnColumnas, btnBases, btnRecargar),
   );
 
@@ -212,8 +242,9 @@ export function createTabla({
   const btnMapaReintentar = el("button", {
     type: "button", class: "btn btn-quiet btn-small", hidden: true, onclick: () => actualizarMapa(),
   }, "Volver a intentar");
-  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true },
-    el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar), previa.element);
+  // The set's notices float over the map, not in a strip of their own.
+  previa.avisos(el("div", { class: "tabla-mapa-estado" }, avisoMapa, btnMapaReintentar));
+  const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true }, previa.element);
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
   const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, cuerpo, vacio, pie);
 
@@ -615,8 +646,13 @@ export function createTabla({
     lienzo.hidden = sinAcceso || mapa;
     panelMapa.hidden = sinAcceso || !mapa;
     cuerpo.classList.toggle("modo-mapa", mapa);
+    element.classList.toggle("modo-mapa", mapa);
     // The page controls belong to the grid; the map shows the whole view.
     for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
+    // Hidden, never cleared: the grid finds its query as it left it.
+    for (const nodo of deLaConsulta) nodo.hidden = mapa;
+    if (btnBases) btnBases.hidden = mapa;
+    pintarHeredados();
     pintarPermisos();
   }
 
@@ -637,19 +673,24 @@ export function createTabla({
     });
   }
 
-  /** The table's own filters, which bound the map's set, in words. */
-  function alcanceDeLaVista() {
-    if (!vista) return "";
-    const nombre = vista === VISTA_MAESTRA ? "Tabla maestra (todas las bases)"
-      : vista === VISTA_SIN_ASIGNAR ? "Sin asignar" : baseDe(vista)?.nombre ?? "—";
-    const partes = [
-      consulta.q.trim() && `búsqueda «${consulta.q.trim()}»`,
-      consulta.estado && `estado ${consulta.estado}`,
-      consulta.municipio && `municipio ${consulta.municipio}`,
-      consulta.tipo_terreno && `tipo ${consulta.tipo_terreno}`,
+  /** The table's own filters, which bound the map's set: [label, value]. */
+  function filtrosHeredados() {
+    return [
+      consulta.q.trim() && ["Búsqueda", `«${consulta.q.trim()}»`],
+      consulta.estado && ["Estado", consulta.estado],
+      consulta.municipio && ["Municipio", consulta.municipio],
+      consulta.tipo_terreno && ["Tipo de terreno", consulta.tipo_terreno],
     ].filter(Boolean);
-    return `Alcance: ${nombre}` + (partes.length ? ` · filtros de la tabla: ${partes.join(", ")}.` : " · sin filtros de la tabla.") +
-      " Los filtros del mapa se aplican dentro de este alcance.";
+  }
+
+  /** On the map, a small note of the table's filters, only when there are any. */
+  function pintarHeredados() {
+    const partes = modo === "mapa" && vista ? filtrosHeredados() : [];
+    heredados.hidden = !partes.length;
+    if (!partes.length) { heredados.open = false; return; }
+    heredados.querySelector("summary").textContent = `Filtros de la tabla (${partes.length})`;
+    listaHeredados.replaceChildren(...partes.map(([etiqueta, valor]) =>
+      el("li", {}, el("span", { class: "muted" }, `${etiqueta}: `), valor)));
   }
 
   /** Hand the map the view's whole set, gathering it first when needed. Never
@@ -666,7 +707,7 @@ export function createTabla({
   }
 
   function entregarAlMapa() {
-    previa.pintar(conjunto.filas, { total: conjunto.total, nuevaPagina: mapaPintado !== conjunto.clave });
+    previa.pintar(conjunto.filas, { nuevaPagina: mapaPintado !== conjunto.clave });
     mapaPintado = conjunto.clave;
     if (seleccion && seleccion !== previa.seleccion && filaDelConjunto(seleccion)) previa.seleccionar(seleccion);
   }

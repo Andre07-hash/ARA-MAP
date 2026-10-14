@@ -16,6 +16,10 @@
  * per m² with fixed thresholds, mixed currencies fall back; basemaps;
  * keyboard typing; the narrow layout's drawer; the operator only sees their
  * base; the grid still edits and its file cells still work.
+ * The map's layout (issue #40): one slim bar with only the view, Tabla / Mapa
+ * and Actualizar; no strips above or below the map; "Encuadrar todo" over the
+ * map beside the zoom control; the terrain type as a local map filter; and
+ * the table's filters kept and said in a small note.
  * Optional: MAPA_CAPTURAS=dir (screenshots), CHROMIUM=/path, MAPA_PUERTO.
  */
 
@@ -176,6 +180,7 @@ const puntos = [];
 for (let i = 0; i < 120; i += 1) {
   puntos.push(await crear(base, {
     terreno: `Lote Panel ${String(i).padStart(3, '0')} Ficticio`, estado: i % 2 ? 'Sonora' : 'Jalisco',
+    tipo_terreno: i % 3 ? 'Industrial Ficticio' : 'Habitacional Ficticio',
     municipio: i % 2 ? 'Hermosillo' : 'Zapopan', superficie_m2: 1000 + i * 100,
     asking_price: 100000 + i * 1000, asking_m2: 100 + i * 10, moneda: 'MXN',
     lat: 18 + (i % 10) * 0.8, lon: -108 + Math.floor(i / 10) * 0.9,
@@ -232,8 +237,55 @@ await revisar('administrador: filtros a la izquierda, mapa con leyenda por preci
   cierto(/asking \$\/m²/i.test(await leyenda(ada.page).innerText()), 'leyenda por precio por m²');
   cierto(/4 terrenos fuera del mapa: sin contorno activo ni X\/Y válidas/.test(await leyenda(ada.page).innerText()), 'sin ubicación referida al mapa');
   cierto(!/falta de coordenadas|círculos/.test(await leyenda(ada.page).innerText()), 'sin textos heredados');
-  cierto(/Alcance: Base Paneles Ficticia · sin filtros de la tabla/.test(await ada.page.locator('.mapa-tabla-alcance').innerText()), 'alcance visible');
   await foto(ada.page, '01-administrador-mapa');
+});
+
+await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni pie, Encuadrar todo sobre el mapa', async () => {
+  const p = ada.page;
+  // Only the view, Tabla / Mapa and Actualizar: the grid's query controls are hidden, not cleared.
+  for (const id of ['tabla-buscar', 'tabla-estado', 'tabla-municipio', 'tabla-tipo', 'tabla-orden', 'tabla-desc']) {
+    igual(await p.locator(`#${id}`).isVisible(), false, `#${id} oculto en el mapa`);
+  }
+  for (const nombre of ['Agregar terreno', 'Columnas', 'Bases y accesos']) {
+    igual(await p.locator('.tabla-barra').getByRole('button', { name: nombre }).isVisible(), false, `${nombre} oculto`);
+  }
+  cierto(await p.locator('#tabla-vista').isVisible() && await modoBoton(p, 'Tabla').isVisible()
+    && await p.getByRole('button', { name: 'Actualizar' }).isVisible(), 'vista, Tabla/Mapa y Actualizar');
+  const barra = await p.locator('.tabla-barra').boundingBox();
+  cierto(barra.height <= 48, `una fila delgada (${barra.height}px)`);
+  igual(await p.locator('.tabla-heredados').isVisible(), false, 'sin filtros heredados no hay nota');
+  for (const quitado of ['.mapa-tabla-alcance', '.previa-cuenta', '.previa-titulo', '.previa-pie', '.mapa-tabla-cabecera']) {
+    igual(await p.locator(quitado).count(), 0, `sin ${quitado}`);
+  }
+  igual(await p.locator('.tabla-pie').isVisible(), false, 'sin el pie que repite «N terrenos»');
+  igual(await p.locator('.previa-nota').isVisible(), false, 'la explicación queda tras el botón de información');
+  // The map reaches the bottom of the screen and starts right under the bar.
+  const lienzo = await p.locator('.previa-mapa').boundingBox();
+  cierto(Math.abs(lienzo.y - (barra.y + barra.height)) <= 2, `el mapa empieza bajo la barra (${lienzo.y})`);
+  cierto(Math.abs(lienzo.y + lienzo.height - 900) <= 2, `el mapa llega al borde inferior (${lienzo.y + lienzo.height})`);
+  // Counts: filtered in the rail, placed / not placed in the legend.
+  cierto(/125 terrenos de 125/.test(await p.locator('.mapa-tabla-rail .rail-result').innerText()), 'cuenta de filtrados en el panel');
+  cierto(/121 terrenos/.test(await leyenda(p).locator('.legend-count').innerText()), 'ubicados en la leyenda');
+  // "Encuadrar todo" over the map, under the zoom control, overlapping neither it nor the credits.
+  const encuadre = await p.getByRole('button', { name: 'Encuadrar todo' }).boundingBox();
+  const zoom = await p.locator('.previa-mapa .leaflet-control-zoom').boundingBox();
+  const creditos = await p.locator('.previa-mapa .leaflet-control-attribution').boundingBox();
+  const separados = (a, b) => a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y;
+  cierto(separados(encuadre, zoom) && separados(encuadre, creditos), 'sin tapar zoom ni créditos');
+  cierto(encuadre.y >= lienzo.y && encuadre.y + encuadre.height <= lienzo.y + lienzo.height
+    && encuadre.y - (zoom.y + zoom.height) < 30, 'sobre el mapa, junto al zoom');
+  cierto(separados(await leyenda(p).boundingBox(), creditos), 'la leyenda no tapa los créditos');
+  // Encuadrar todo by keyboard; a click on it does not select anything on the map.
+  await p.getByRole('button', { name: 'Encuadrar todo' }).focus();
+  await p.keyboard.press('Enter');
+  igual((await mapa(p)).seleccion, null, 'sin selección accidental');
+  // The info toggle opens and closes by keyboard.
+  const info = p.locator('.previa-info > summary');
+  await info.focus();
+  await p.keyboard.press('Enter');
+  cierto(/Un KMZ subido sin activar no cambia el mapa/.test(await p.locator('.previa-nota').innerText()), 'explicación disponible');
+  await p.keyboard.press('Escape');
+  igual(await p.locator('.previa-nota').isVisible(), false, 'Escape la cierra');
 });
 
 await revisar('los filtros del mapa acotan el mapa, conservan los colores y no tocan la tabla', async () => {
@@ -271,15 +323,67 @@ await revisar('los filtros del mapa acotan el mapa, conservan los colores y no t
   igual(await ada.page.locator('#tabla-buscar').inputValue(), '', 'Limpiar no toca la tabla');
 });
 
+await revisar('Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toca la tabla', async () => {
+  const p = ada.page;
+  cierto(await p.locator('.mapa-tabla-rail').getByRole('group', { name: 'Tipo de terreno' }).isVisible(), 'Tipo en el panel izquierdo');
+  const listas = ada.api.filter((l) => /\/terrenos\?/.test(l)).length;
+  await p.locator('[id="tipos-Habitacional Ficticio"]').check();
+  await hasta(async () => (await previa(p)).filas === 40, `tipo en el mapa: ${(await previa(p)).filas}`);
+  igual(ada.api.filter((l) => /\/terrenos\?/.test(l)).length, listas, 'filtrar por tipo no pide listas');
+  igual(await p.locator('#mapa-tabla-filtros').textContent(), 'Filtros (1)', 'cuenta como un filtro');
+  await aTabla(p);
+  igual(await p.locator('#tabla-tipo').inputValue(), '', 'el tipo de la tabla no cambia');
+  // Actualizar on the map left the grid to be read again: it reloads the same page.
+  await hasta(async () => (await p.locator('tr.tabla-fila').count()) === paginaTabla.filas, 'misma página');
+  igual(await p.locator('.tabla-cuenta').innerText(), paginaTabla.cuenta, 'misma cuenta');
+  await aMapa(p);
+  igual(await p.locator('[id="tipos-Habitacional Ficticio"]').isChecked(), true, 'se conserva al alternar');
+  await p.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
+  await hasta(async () => (await previa(p)).filas === TODOS.length, 'Limpiar quita el tipo');
+  igual(await p.locator('[id="tipos-Habitacional Ficticio"]').isChecked(), false, 'casilla limpia');
+});
+
 await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin filtros del mapa', async () => {
+  await aTabla(ada.page);
   await ada.page.locator('#tabla-estado').selectOption('Jalisco');
+  await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('estado=Jalisco'); }, 'reunión con el estado');
   const jalisco = (await mapa(ada.page)).filas.length;
-  cierto(/filtros de la tabla: estado Jalisco/.test(await ada.page.locator('.mapa-tabla-alcance').innerText()), 'alcance dice el filtro de la tabla');
+  // A small note says the table's filter; it opens by click and keyboard and closes with Escape.
+  const nota = ada.page.locator('.tabla-heredados');
+  const resumen = nota.locator('summary');
+  igual(await resumen.innerText(), 'Filtros de la tabla (1)', 'nota de filtros heredados');
+  await resumen.click();
+  cierto(/Estado: Jalisco/.test(await nota.locator('.tabla-heredados-panel').innerText()), 'dice el filtro de la tabla');
+  await nota.locator('.tabla-heredados-lista li').first().click();
+  cierto(await nota.locator('.tabla-heredados-panel').isVisible(), 'un clic en su texto no la cierra');
+  await ada.page.keyboard.press('Escape');
+  igual(await nota.locator('.tabla-heredados-panel').isVisible(), false, 'Escape cierra');
+  await resumen.focus();
+  await ada.page.keyboard.press('Enter');
+  cierto(await nota.locator('.tabla-heredados-panel').isVisible(), 'abre con el teclado');
+  await ada.page.keyboard.press('Escape');
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await hasta(async () => (await previa(ada.page)).filas < jalisco, 'búsqueda dentro del alcance');
   await ada.page.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
   await hasta(async () => (await previa(ada.page)).filas === jalisco, 'Limpiar vuelve al alcance, no a toda la base');
+  // The table's type filter: kept, said, and never offered as a map control.
+  await aTabla(ada.page);
+  await ada.page.locator('#tabla-tipo').selectOption('Industrial Ficticio');
+  await aMapa(ada.page);
+  await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && /tipo_terreno=Industrial/.test(x.clave); }, 'reunión con el tipo');
+  igual(await resumen.innerText(), 'Filtros de la tabla (2)', 'dos filtros heredados');
+  await resumen.click();
+  const panel = await nota.locator('.tabla-heredados-panel').innerText();
+  cierto(/Estado: Jalisco/.test(panel) && /Tipo de terreno: Industrial Ficticio/.test(panel), `nota: ${panel}`);
+  await ada.page.keyboard.press('Escape');
+  const tipos = await ada.page.locator('.mapa-tabla-rail [id^="tipos-"]').evaluateAll((n) => n.map((c) => c.value));
+  igual(tipos, ['Industrial Ficticio'], 'el Tipo local sólo ofrece los tipos del conjunto');
+  await aTabla(ada.page);
+  igual([await ada.page.locator('#tabla-estado').inputValue(), await ada.page.locator('#tabla-tipo').inputValue()],
+    ['Jalisco', 'Industrial Ficticio'], 'la tabla conserva sus filtros');
+  await ada.page.locator('#tabla-tipo').selectOption('');
+  await aMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await ada.page.locator('#tabla-vista').selectOption(otra.id);
   await hasta(async () => { const x = await mapa(ada.page); return x && !x.reuniendo && x.clave?.startsWith(otra.id); }, 'otra vista');
@@ -311,7 +415,9 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
   await ada.page.getByRole('button', { name: 'Actualizar' }).click();
   await hasta(async () => (await fichaTexto(ada.page)).includes('Comentario ficticio nuevo'), 'valor actual en la ficha');
   // A table search that still includes the selected terrain keeps the selection and its record.
+  await aTabla(ada.page);
   await ada.page.locator('#tabla-buscar').fill('Lote Panel 00');
+  await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('q=Lote'); }, 'reunión con la búsqueda');
   await hasta(async () => (await mapa(ada.page)).seleccion === elegido && await ficha(ada.page).isVisible(), 'la selección sigue tras la búsqueda');
   await ada.page.getByRole('button', { name: 'Ver a escala' }).click();
@@ -380,7 +486,9 @@ await revisar('fondos Claro/Satélite/Calles con ficha abierta; la tabla sigue e
 });
 
 await revisar('pantalla estrecha: filtros en un cajón, ficha superpuesta, teclado', async () => {
+  await aTabla(ada.page);
   await ada.page.locator('#tabla-buscar').fill('');
+  await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.filas.length > 100; }, 'sin la búsqueda de la tabla');
   await ada.page.setViewportSize({ width: 800, height: 900 });
   await esperar(300);
@@ -403,6 +511,28 @@ await revisar('pantalla estrecha: filtros en un cajón, ficha superpuesta, tecla
   const ancho = await ada.page.evaluate(() => document.documentElement.scrollWidth);
   cierto(ancho <= 800, `sin desplazamiento horizontal (${ancho})`);
   await foto(ada.page, '03-estrecha');
+  // A phone: the bar wraps without clipping, the map takes the rest, and the record opens over it and closes.
+  await ada.page.setViewportSize({ width: 390, height: 844 });
+  await esperar(300);
+  for (const control of [ada.page.locator('#tabla-vista'), modoBoton(ada.page, 'Mapa'), ada.page.getByRole('button', { name: 'Actualizar' }), boton]) {
+    const c = await control.boundingBox();
+    cierto(c && c.x >= 0 && c.x + c.width <= 390, 'control esencial dentro de la pantalla');
+  }
+  cierto(await ada.page.evaluate(() => document.documentElement.scrollWidth) <= 390, 'sin desplazamiento horizontal en 390px');
+  const lienzo = await ada.page.locator('.previa-mapa').boundingBox();
+  cierto(lienzo.width >= 388 && lienzo.y + lienzo.height >= 842, `el mapa ocupa el resto (${JSON.stringify(lienzo)})`);
+  await aTabla(ada.page);
+  // One the drawer's search ("Lote Panel 11") keeps on the map.
+  await elegirDesdeTabla(ada.page, puntos[110], 'Lote Panel 110 Ficticio');
+  const cerrar = ficha(ada.page).getByRole('button', { name: 'Cerrar detalle' });
+  const caja = await cerrar.boundingBox();
+  cierto(caja && caja.x + caja.width <= 390, 'cerrar la ficha está a la vista');
+  await foto(ada.page, '03b-telefono-ficha');
+  await cerrar.click();
+  igual(await ficha(ada.page).isVisible(), false, 'la ficha se cierra');
+  await aTabla(ada.page);
+  await ada.page.locator('#tabla-buscar').fill('');
+  await aMapa(ada.page);
   await ada.page.setViewportSize({ width: 1500, height: 900 });
 });
 

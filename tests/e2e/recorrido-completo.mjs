@@ -193,8 +193,14 @@ async function abrirDetalle(page, id, nombre) {
   await d.locator('.archivos-detalle[data-tipo="pdf"]').waitFor();
   return d;
 }
-async function cerrarDetalle(page, d) {
+/* `interrumpir`: an upload of this detail is unfinished, so closing asks
+ * first (issue #39); the journey confirms the interruption. */
+async function cerrarDetalle(page, d, { interrumpir = false } = {}) {
   await d.getByRole('button', { name: 'Cerrar' }).last().click();
+  if (interrumpir) {
+    await page.getByRole('dialog', { name: '¿Cerrar e interrumpir la subida?' })
+      .getByRole('button', { name: 'Cerrar e interrumpir' }).click();
+  }
   await d.waitFor({ state: 'detached' }).catch(() => d.waitFor({ state: 'hidden' }));
   // A closed <dialog> leaves the accessibility tree at once, but its `close`
   // event (which removes it and hands focus back to the table) is a later
@@ -705,13 +711,17 @@ if (!FOCALIZADO) {
       const paso = await retener(oscar.page, '**/api/archivos/versiones/*/contenido', 'PUT');
       await zonaPdf(d).setInputFiles(archivoPrivado);
       await hasta(() => paso.estado.vistas > 0, 'no se envió el contenido');
-      const tras = escrituras(oscar.page);
       // Cancel (it now waits for the held PUT) and sign out in the same task.
       await oscar.page.evaluate(() => {
         [...document.querySelectorAll('.archivos-detalle[data-tipo="pdf"] .archivos-subida button')].find((b) => b.textContent === 'Cancelar subida').click();
         [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Cerrar sesión').click();
       });
+      // With an unfinished upload, signing out asks first (issue #39). While it
+      // asks, the old session is still this account's: its own cancel may go out.
+      await oscar.page.getByRole('dialog', { name: '¿Cerrar sesión e interrumpir la subida?' })
+        .getByRole('button', { name: 'Cerrar sesión' }).click();
       await oscar.page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
+      const tras = escrituras(oscar.page);                       // from the end of the old session on
       await entrar(oscar.page, quien);
       paso.soltar();                                             // the old step may now "finish"
       await esperar(2500);
@@ -907,7 +917,7 @@ if (!FOCALIZADO) {
     await zonaPdf(d).setInputFiles(archivoPrivado);
     await hasta(() => paso.estado.vistas > 0, 'no se pidió completar');
     await esperar(300);
-    await cerrarDetalle(oriol.page, d);                                      // the upload belongs to the closed detail; the cell mount remains
+    await cerrarDetalle(oriol.page, d, { interrumpir: true });               // the upload belongs to the closed detail; the cell mount remains
     await abrirEditor(oriol.page, otro, 'core:municipio', 'Texto sin guardar');
     await archivarTerreno(t2);
     paso.soltar();

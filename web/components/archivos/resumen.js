@@ -18,19 +18,76 @@ export const ESTADO = Object.freeze({
   SIN_ACTIVAR: "sin_activar", // KMZ stored without an active boundary
 });
 
-const pendienteDe = (v) => v && (v.estado === "subiendo" || v.estado === "expirado");
+const pendienteDe = (v) => v?.estado === "subiendo";
+const vencidaDe = (v) => v?.estado === "expirado";
 
-/* The latest upload's state, said for a reader who cannot see private metadata. */
+/* The latest upload's state, said for a reader who cannot see private metadata.
+ * "Vencida" is the upload's deadline to finish, never a stored PDF expiring. */
 function nota(v, actual) {
   if (!v) return null;
   if (v.propia === false) {
-    return v.estado === "expirado" ? "Una subida de otra cuenta venció" : "Otra cuenta está subiendo una versión";
+    return v.estado === "expirado" ? "Una subida de otra cuenta venció sin terminar" : "Otra cuenta está subiendo una versión";
   }
   if (v.estado === "subiendo") return "Tienes una subida sin terminar";
-  if (v.estado === "expirado") return "Tu última subida venció";
-  if (v.estado === "fallido") return "La última subida falló";
+  if (v.estado === "expirado") return "Subida vencida: tu última subida no terminó a tiempo";
+  if (v.estado === "fallido") return "La última subida fue rechazada";
   if (v.estado === "disponible" && actual && v.id !== actual) return "Hay una versión nueva sin activar";
   return null;
+}
+
+/* What a PDF attachment with no saved version is: [singular, plural]. */
+function sinGuardar(v) {
+  if (!v) return ["adjunto sin versión", "adjuntos sin versión"];
+  if (v.estado === "subiendo") {
+    return v.propia === false ? ["subida de otra cuenta en curso", "subidas de otra cuenta en curso"]
+      : ["subida sin terminar", "subidas sin terminar"];
+  }
+  if (v.estado === "expirado") return ["subida vencida", "subidas vencidas"];
+  if (v.estado === "fallido") return ["subida rechazada", "subidas rechazadas"];
+  if (v.estado === "cancelado") return ["subida cancelada", "subidas canceladas"];
+  return ["adjunto sin guardar", "adjuntos sin guardar"];
+}
+
+const contar = (formas) => {
+  const n = new Map();
+  for (const [uno, varios] of formas) n.set(uno, { varios, k: (n.get(uno)?.k ?? 0) + 1 });
+  return [...n].map(([uno, { varios, k }]) => (k === 1 ? `1 ${uno}` : `${k} ${varios}`));
+};
+
+/**
+ * The PDF side. An attachment counts as a PDF only when it has a saved
+ * (current) version; one whose upload never finished says so instead. The
+ * server lists at most a few recent attachments: when it lists fewer than it
+ * counts, nothing is totalled from the ones it did not list.
+ */
+function describirPdf(resumen) {
+  const total = Number.isInteger(resumen.pdf_total) ? resumen.pdf_total : null;
+  const filas = Array.isArray(resumen.pdf_recientes) ? resumen.pdf_recientes : [];
+  if (total === null) return { estado: ESTADO.CARGANDO, texto: "…", nota: "Cargando la información de archivos" };
+  if (total === 0) return { estado: ESTADO.VACIO, texto: "Sin PDF", nota: null };
+  const completo = filas.length >= total;
+  const guardados = filas.filter((f) => f.version_actual_id);
+  const pendientes = filas.filter((f) => !f.version_actual_id);
+  const notas = [
+    ...contar(pendientes.map((f) => sinGuardar(f.ultima_version))),
+    ...guardados.map((f) => nota(f.ultima_version, f.version_actual_id)).filter(Boolean),
+  ];
+  if (!completo) notas.unshift(`se resumen los ${filas.length} más recientes`);
+  const ultima = filas[0]?.ultima_version ?? null;
+  const enCurso = filas.some((f) => pendienteDe(f.ultima_version));
+  const fallo = filas.some((f) => vencidaDe(f.ultima_version) || f.ultima_version?.estado === "fallido");
+  const estado = enCurso ? ESTADO.PENDIENTE : guardados.length ? ESTADO.LISTO : fallo ? ESTADO.FALLIDO
+    : ESTADO.VACIO;
+  let texto;
+  if (!completo) texto = `${total} adjuntos PDF`;
+  else if (guardados.length) texto = guardados.length === 1 ? "1 PDF" : `${guardados.length} PDF`;
+  else texto = "Sin PDF guardado";
+  const unica = notas.length ? notas.join(" · ") : null;
+  // The single-attachment wording the cell has always used, when it fits.
+  if (completo && filas.length === 1 && !guardados.length && ultima) {
+    return { estado, texto, nota: nota(ultima, null) ?? unica };
+  }
+  return { estado, texto, nota: unica ? unica.charAt(0).toUpperCase() + unica.slice(1) : null };
 }
 
 /**
@@ -41,26 +98,18 @@ export function describirResumen(resumen, tipo) {
   if (resumen === undefined || resumen === null || typeof resumen !== "object") {
     return { estado: ESTADO.CARGANDO, texto: "…", nota: "Cargando la información de archivos" };
   }
-  if (tipo === "pdf") {
-    const total = Number.isInteger(resumen.pdf_total) ? resumen.pdf_total : null;
-    const ultima = resumen.pdf_recientes?.[0]?.ultima_version ?? null;
-    const n = nota(ultima, resumen.pdf_recientes?.[0]?.version_actual_id);
-    if (total === null) return { estado: ESTADO.CARGANDO, texto: "…", nota: "Cargando la información de archivos" };
-    if (total === 0) return { estado: ESTADO.VACIO, texto: "Sin PDF", nota: null };
-    const texto = total === 1 ? "1 PDF" : `${total} PDF`;
-    const estado = pendienteDe(ultima) ? ESTADO.PENDIENTE
-      : ultima?.estado === "fallido" ? ESTADO.FALLIDO : ESTADO.LISTO;
-    return { estado, texto, nota: n };
-  }
+  if (tipo === "pdf") return describirPdf(resumen);
   const k = resumen.kmz;
   if (!k) return { estado: ESTADO.VACIO, texto: "Sin KMZ", nota: null };
   const ultima = k.ultima_version ?? null;
   const n = nota(ultima, k.version_actual_id);
   if (k.geometria_activa_id) {
-    return { estado: pendienteDe(ultima) ? ESTADO.PENDIENTE : ultima?.estado === "fallido" ? ESTADO.FALLIDO : ESTADO.LISTO,
-      texto: "Contorno activo", nota: n };
+    // An expired attempt changes nothing: the active boundary is as good as before.
+    return { estado: pendienteDe(ultima) ? ESTADO.PENDIENTE : ultima?.estado === "fallido" ? ESTADO.FALLIDO
+      : ESTADO.LISTO, texto: "Contorno activo", nota: n };
   }
   if (pendienteDe(ultima)) return { estado: ESTADO.PENDIENTE, texto: "KMZ en curso", nota: n };
+  if (vencidaDe(ultima) && !k.version_actual_id) return { estado: ESTADO.FALLIDO, texto: "Subida KMZ vencida", nota: n };
   if (ultima?.estado === "fallido") return { estado: ESTADO.FALLIDO, texto: "KMZ falló", nota: n };
   return { estado: ESTADO.SIN_ACTIVAR, texto: "KMZ sin contorno activo", nota: n };
 }

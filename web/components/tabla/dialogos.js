@@ -67,10 +67,11 @@ export function abrirDetalle({
             "conservan y se puede restaurar.",
           confirmar: "Archivar",
         }))) return;
-        close();
-        onArchivar(estaba);
+        if (await close()) onArchivar(estaba);
       }),
-      admin && puedeCambiar && !archivado && boton("Transferir a otra base…", () => { close(); onTransferir(); }),
+      admin && puedeCambiar && !archivado && boton("Transferir a otra base…", async () => {
+        if (await close()) onTransferir();
+      }),
     ].filter(Boolean));
   }
   const { dialog, close } = openDialog({
@@ -78,6 +79,14 @@ export function abrirDetalle({
     ancho: "38rem",
     contenido: el("div", {}, nota, datos, acciones),
     acciones: [cerrar],
+    // Closing destroys the file controls: never silently while an upload is unfinished.
+    antesDeCerrar: () => (montadas.some((m) => m.ocupado?.()) ? confirmDialog({
+      titulo: "¿Cerrar e interrumpir la subida?",
+      mensaje: "Una subida de archivo de este terreno no ha terminado. Si cierras el detalle ahora, se " +
+        "interrumpe: los archivos ya guardados se conservan, y la subida puede continuarse después desde " +
+        "aquí eligiendo otra vez el mismo archivo. También puedes cancelarla con su botón «Cancelar».",
+      confirmar: "Cerrar e interrumpir", cancelar: "Seguir en el detalle", peligro: true,
+    }) : true),
   });
   pintarEstado();
   dialog.addEventListener("close", () => {

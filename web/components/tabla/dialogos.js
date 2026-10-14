@@ -24,6 +24,69 @@ function Aviso() {
   return { nodo, decir: (texto) => { nodo.textContent = texto ?? ""; } };
 }
 
+/* ------------------------------------------------- several terrains at once */
+
+const terrenos = (n) => `${n} ${n === 1 ? "terreno" : "terrenos"}`;
+
+/* A one-field dialog that answers once: the button's value, or null when it
+ * is cancelled or dismissed. The answer is given before the dialog closes,
+ * because a dialog removed as it closes never fires its "close" event. */
+function preguntar({ titulo, descripcion, contenido, accion, valor }) {
+  return new Promise((resolve) => {
+    let hecho = false;
+    const responder = (v) => { if (!hecho) { hecho = true; resolve(v); } };
+    const { dialog } = openDialog({
+      titulo, descripcion, contenido,
+      acciones: [
+        { etiqueta: "Cancelar", onClick: (close) => { responder(null); close(); } },
+        { etiqueta: accion, variante: "principal", onClick: (close) => {
+          const v = valor();
+          if (v == null) return;
+          responder(v);
+          close();
+        } },
+      ],
+    });
+    dialog.addEventListener("close", () => responder(null));
+  });
+}
+
+/**
+ * Where to move the selected terrains. Resolves a base id, "sin_asignar",
+ * or null when the person cancels.
+ */
+export function pedirDestino({ cantidad, bases }) {
+  const destino = el("select", { id: "multiple-destino", class: "input" },
+    el("option", { value: "" }, "Elige un destino…"),
+    el("option", { value: "sin_asignar" }, "Sin base (sólo administradores)"),
+    bases.map((b) => el("option", { value: b.id }, b.nombre)));
+  const aviso = Aviso();
+  return preguntar({
+    titulo: `Transferir ${terrenos(cantidad)}`,
+    descripcion: "Cada terreno conserva sus datos, archivos e historial. Las columnas propias de su " +
+      "base actual dejan de mostrarse en la nueva.",
+    contenido: el("div", {},
+      el("label", { class: "field-label", for: "multiple-destino" }, "Base de destino"), destino, aviso.nodo),
+    accion: "Transferir",
+    valor: () => destino.value || (aviso.decir("Elige una base de destino."), null),
+  });
+}
+
+/** The name of a new base for the selected terrains, or null when cancelled. */
+export function pedirNombreDeBase({ cantidad }) {
+  const nombre = el("input", { id: "multiple-base", class: "input", maxlength: "100", autocomplete: "off" });
+  const aviso = Aviso();
+  return preguntar({
+    titulo: `Crear una base con ${terrenos(cantidad)}`,
+    descripcion: "Se crea una base de trabajo nueva y los terrenos seleccionados pasan a ella. " +
+      "Después puedes darle acceso a los operadores en «Bases y accesos».",
+    contenido: el("div", {},
+      el("label", { class: "field-label", for: "multiple-base" }, "Nombre de la base"), nombre, aviso.nodo),
+    accion: "Crear y mover",
+    valor: () => (nombre.value.trim() ? nombre.value : (aviso.decir("Escribe un nombre."), null)),
+  });
+}
+
 /* ------------------------------------------------------------- one terrain */
 
 export function abrirDetalle({

@@ -134,12 +134,31 @@ async function aTabla(page) {
 }
 /** A real click on a terrain's symbol on the map. The fictional KMZ fixtures
  * all lie in the same place, so the map is first zoomed in (mouse wheel) on
- * the symbol until no other boundary is within reach of the click. */
+ * the symbol until no other boundary is within reach of the click. A symbol
+ * under the legend and basemap overlay is first panned out from under it
+ * (keyboard): the overlay takes the wheel and the click, as on the old map. */
 let cercanos = [];
+async function alCentro(page, caja, id) {
+  let movido = false;
+  for (let n = 0; n < 30; n += 1) {
+    const p = await posicion(page, id);
+    const sobre = await page.locator('.previa-sobre-mapa').boundingBox();
+    const dentro = p && sobre && caja.x + p.x <= sobre.x + sobre.width + 30 && caja.y + p.y >= sobre.y - 30;
+    if (!dentro) return movido;
+    // Leaflet's keyboard panning moves the content without touching any symbol.
+    await page.locator('.previa-mapa').focus();
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowDown');
+    await esperar(250);
+    movido = true;
+  }
+  return movido;
+}
 async function clicEnMapa(page, id) {
   const caja = await page.locator('.previa-mapa').boundingBox();
   for (let i = 0; ; i += 1) {
-    const p = await hasta(async () => posicion(page, id), `el terreno ${id} no está en el mapa`);
+    let p = await hasta(async () => posicion(page, id), `el terreno ${id} no está en el mapa`);
+    if (await alCentro(page, caja, id)) p = await hasta(async () => posicion(page, id), `el terreno ${id} no está en el mapa`);
     const otros = (await Promise.all(cercanos.filter((o) => o !== id).map((o) => posicion(page, o)))).filter(Boolean);
     if (i >= 12 || otros.every((o) => Math.hypot(o.x - p.x, o.y - p.y) > 24)) {
       await page.mouse.click(caja.x + p.x, caja.y + p.y);

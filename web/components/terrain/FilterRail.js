@@ -6,7 +6,7 @@
  * typing stops after one letter. So the rail is built once and `update` patches
  * what changed, leaving the node the user is typing into untouched.
  *
- *   createFilterRail({ onChange, onReset, modo })
+ *   createFilterRail({ onChange, onReset, modo, conIncidencias })
  *     -> { element, update({ terrenos, filtros, visibles, monedas, opciones, cargando }), destroy() }
  *
  * `modo` is "local" (a legacy base or saved map, filtered in the browser) or
@@ -14,6 +14,9 @@
  * state/municipality options come from the server's facets for the whole
  * candidate set (`opciones`), and price filtering takes one explicit currency
  * and one basis, never a mix.
+ *
+ * `conIncidencias: false` leaves out the "Solo con incidencias" toggle, for
+ * rows that carry no import findings (the tables' map).
  *
  * `monedas` are the currencies of the priced terrains in view. With more than
  * one, the local price ranges are disabled: a range in one currency would
@@ -37,7 +40,7 @@ const SEP = "␟";
 /* Option lists show this many until expanded; every value stays reachable. */
 const LIMITES = { estados: 6, municipios: 8 };
 
-export function createFilterRail({ onChange, onReset, modo = "local" }) {
+export function createFilterRail({ onChange, onReset, modo = "local", conIncidencias = true }) {
   const servidor = modo !== "local";
   let estado = { terrenos: [], filtros: {}, visibles: 0 };
   let componiendo = false;
@@ -149,7 +152,7 @@ export function createFilterRail({ onChange, onReset, modo = "local" }) {
   }
 
   const toggles = el("div", { class: "rail-field rail-toggles" },
-    soloUbicados.label, soloIncidencias.label);
+    soloUbicados.label, conIncidencias && soloIncidencias.label);
 
   /* ---- server modes: one currency, one basis, one range ----------------- */
 

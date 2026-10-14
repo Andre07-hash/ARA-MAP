@@ -29,6 +29,11 @@
  * forth, or paging the grid, does not fetch it again) and patched by this
  * table's own writes. "Actualizar" gathers it again. Leaving the view, the
  * account or the scope drops it with any gathering in flight.
+ *
+ * The map screen (mapaPaneles.js) adds its own filters, a price legend and a
+ * read-only record on top of that set. Its filters are not this table's
+ * query: they narrow what the map draws, never the grid, its page or its
+ * cursors, and they start empty again whenever the view is left.
  */
 
 import { api } from "../../lib/api.js";
@@ -48,7 +53,7 @@ import { reunirPaginas } from "../../lib/inventario.js";
 import { segment } from "../inventory/DatosView.js";
 import { abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
-import { createVistaPrevia } from "./vistaPrevia.js";
+import { createMapaPaneles } from "./mapaPaneles.js";
 
 const BUSCAR_MS = 300;
 const PAGINA_MAPA = 200;          // the list's largest page
@@ -107,9 +112,14 @@ export function createTabla({
       if (faltan.length) alerta.textContent = `No se pudo cargar el módulo de ${faltan.join(" ni el de ")}.`;
     },
   });
-  const previa = createVistaPrevia({
+  const previa = createMapaPaneles({
     cargador: () => archivos.cargador,
     onSeleccion: (id) => seleccionar(id, { desdeMapa: true }),
+    // The map's filters left the selected terrain out, or its record was closed.
+    onDeseleccion: (id) => { if (seleccion === id) { seleccion = null; marcarSeleccion(); } },
+    nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
+    definicionesDe: (baseId, signal) => definicionesDeBase(baseId, signal),
+    alcance: () => alcanceDeLaVista(),
     // A boundary that is no longer available (retired, replaced, or out of
     // scope) means this row may be stale: ask for the terrain again, which
     // either updates its location or removes it from the view.
@@ -268,6 +278,7 @@ export function createTabla({
       // The map's set, its boundary body and any gathering or load in flight
       // belong to the view being left. Within a view, a new query or page
       // keeps them: the set is kept or gathered again by its own key.
+      previa.reiniciar();          // the map's own filters belong to the view being left
       olvidarConjunto();
       seleccion = null;
       // A detail, a history, the columns or the grants of the view being left.
@@ -593,6 +604,39 @@ export function createTabla({
     // The page controls belong to the grid; the map shows the whole view.
     for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
     pintarPermisos();
+  }
+
+  /**
+   * A base's live custom columns, for the map's record. The selected base's
+   * are already here; from the master table, only the terrain's own base is
+   * asked for, by the same authorized route as the columns dialog. Without a
+   * signal, says only what is known (null: it has to be asked).
+   */
+  function definicionesDeBase(baseId, signal) {
+    if (!esGlobal(vista) && baseId === vista) return definiciones;
+    if (!signal) return null;
+    // Bound to the view, not to a page or query of it: leaving the view aborts it (reiniciar).
+    const deVista = vista;
+    return api.columnas(baseId, false, signal).then((r) => {
+      if (!vivo || deVista !== vista) throw Object.assign(new Error("fuera de alcance"), { name: "AbortError" });
+      return r.columnas ?? [];
+    });
+  }
+
+  /** The table's own filters, which bound the map's set, in words. */
+  function alcanceDeLaVista() {
+    if (!vista) return "";
+    const nombre = vista === VISTA_MAESTRA ? "Tabla maestra (todas las bases)"
+      : vista === VISTA_SIN_ASIGNAR ? "Sin asignar" : baseDe(vista)?.nombre ?? "—";
+    const partes = [
+      consulta.q.trim() && `búsqueda «${consulta.q.trim()}»`,
+      consulta.estado && `estado ${consulta.estado}`,
+      consulta.municipio && `municipio ${consulta.municipio}`,
+      consulta.tipo_terreno && `tipo ${consulta.tipo_terreno}`,
+      consulta.incluirArchivados && "incluye archivados",
+    ].filter(Boolean);
+    return `Alcance: ${nombre}` + (partes.length ? ` · filtros de la tabla: ${partes.join(", ")}.` : " · sin filtros de la tabla.") +
+      " Los filtros del mapa se aplican dentro de este alcance.";
   }
 
   /** Hand the map the view's whole set, gathering it first when needed. Never

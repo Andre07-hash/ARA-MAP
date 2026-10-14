@@ -53,6 +53,21 @@ cd tests/e2e && npm ci
 node tabla-mapa.mjs                         # MAPA_CAPTURAS=carpeta para capturas
 ```
 
+## Mapa de las tablas: filtros, leyenda y ficha
+
+Pantalla Mapa de Tabla / Mapa con filtros a la izquierda, leyenda por precio
+por m² sobre el mapa y ficha de solo lectura a la derecha: los filtros del mapa
+no tocan la consulta ni la página de la tabla, Limpiar/Actualizar y el cambio
+de vista, columnas personalizadas de la base de cada terreno (desde una base y
+desde la maestra), contorno activo sin X/Y, monedas mezcladas, fondos, teclado,
+cajón en pantalla estrecha y alcance del operador. Levanta y borra su propio
+servidor desechable con datos ficticios.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-mapa-paneles.mjs                 # MAPA_CAPTURAS=carpeta para capturas
+```
+
 ## Elegir PDF/KMZ desde las celdas de la tabla
 
 Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:

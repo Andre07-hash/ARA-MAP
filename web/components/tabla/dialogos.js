@@ -10,7 +10,7 @@ import { api } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
-import { confirmarBorrado, openDialog } from "../ui/dialog.js";
+import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];

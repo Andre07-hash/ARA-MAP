@@ -1,6 +1,6 @@
 /* R3-B2 / R3-B1 browser regressions: an upload that loses its scope or its
  * write permission mid-flight, in Chromium against the real mounted server
- * (tests/e2e/archivos_servidor.py), with real grants, transfers and archives
+ * (tests/e2e/archivos_servidor.py), with real grants, transfers and deletions
  * made through the real administrator API. Nothing in the application is
  * mocked; a Playwright route only HOLDS one request at a chosen boundary and
  * then lets it continue unchanged.
@@ -78,7 +78,7 @@ async function api(method, ruta, data) {
 }
 await api("POST", "/api/login", { username: "ana", password: CLAVE });
 async function versionBase(bid) {
-  return (await api("GET", "/api/maestra/bases?archivadas=1")).bases.find((b) => b.id === bid).version;
+  return (await api("GET", "/api/maestra/bases")).bases.find((b) => b.id === bid).version;
 }
 const conceder = async (usuarios) => api("PUT", `/api/maestra/bases/${semilla.base}/acceso`,
   { expected_version: await versionBase(semilla.base), usuarios });
@@ -275,31 +275,21 @@ await revisar("cancelar después de perder el acceso: el 404 de la cancelación 
   return r;
 });
 
-await revisar("archivar el terreno mientras se completa: permiso perdido, el host revalida y la lista se conserva", async () => {
+// Last to use T.dos: it is deleted for good here.
+await revisar("borrar el terreno mientras se completa: 404 limpia el detalle y llega al host", async () => {
   alTerminar.push(cancelarPendientesPropias);
-  await seleccionar(T.uno.id);
+  await seleccionar(T.dos.id);
   const completar = await retener("**/api/archivos/versiones/*/completar", "POST");
   const [e0, c0] = await contadores();
-  await subirPdf("Privado archivado.pdf");
+  await subirPdf("Privado borrado.pdf");
   await completar.entrada;
   await esperarRefrescosDelInicio();
-  alTerminar.push(async () => {
-    const t = (await api("GET", `/api/inventario/terrenos/${T.uno.id}`)).terreno;
-    if (t.archived_at) await api("POST", `/api/inventario/terrenos/${T.uno.id}/restaurar`, { expected_version: t.version });
-  });
-  const { terreno } = await api("GET", `/api/inventario/terrenos/${T.uno.id}`);
-  await api("POST", `/api/inventario/terrenos/${T.uno.id}/archivar`, { expected_version: terreno.version });
+  const { terreno } = await api("GET", `/api/inventario/terrenos/${T.dos.id}`);
+  await api("POST", `/api/inventario/terrenos/${T.dos.id}/borrar`, { expected_version: terreno.version });
   const respuesta = page.waitForResponse((r) => r.url().endsWith("/completar"));
   completar.soltar();
-  igual((await respuesta).status(), 409, "completar");
-  await page.waitForFunction((n) => window.__arnes.errores.length > n, e0, { timeout: 15000 });
-  const v = await vistaDelDetalle("Privado archivado.pdf");
-  igual(v.errores.slice(e0), ["terreno_archivado"], "onError del host");
-  cierto(v.cambios.slice(c0).includes(T.uno.id), "onCambio del host (revalidación)");
-  const fase = await detalle("pdf").locator(".archivos-subida").last().getAttribute("data-fase");
-  igual(fase, "fallido", "la subida termina aquí");
-  cierto(v.filas >= 1, "la lista legible se conserva");
-  return { fase };
+  igual((await respuesta).status(), 404, "completar");
+  return comprobarAlcancePerdido("Privado borrado.pdf", T.dos.id, e0, c0);
 });
 
 await revisar("cerrar el detalle mientras la cancelación espera: no sale ninguna petición después", async () => {

@@ -227,7 +227,7 @@ const conContorno2 = await crear(base, { terreno: 'Lote Contorno U Ficticio', es
 const conLimite = await crear(base, { terreno: 'Lote Contorno Grande Ficticio', estado: 'Jalisco' });
 const TODOS = [...puntos, ...sinUbicacion, conContorno, conContorno2, conLimite];
 cercanos = [conContorno, conContorno2, conLimite];
-let activos = TODOS;              // what the base's active list holds (one is archived below)
+let activos = TODOS;              // what the base's active list holds (one is deleted below)
 const deAjena = [];
 for (let i = 0; i < 5; i += 1) deAjena.push(await crear(ajena, { terreno: `Lote Ajeno ${i} Ficticio`, estado: 'Sonora', lat: 25, lon: -99 + i * 0.5 }));
 
@@ -427,26 +427,23 @@ await revisar('un error al reunir se dice y se puede reintentar; la carga parcia
   await hasta(async () => !(await ada.page.locator('.tabla-mapa-aviso').isVisible()), 'actualizado');
 });
 
-await revisar('una escritura hecha con otro filtro deja el conjunto anterior desactualizado: el mapa no muestra lo archivado', async () => {
+await revisar('una escritura hecha con otro filtro deja el conjunto anterior desactualizado: el mapa no muestra lo borrado', async () => {
   await irA(ada.page, base.id);
   await aMapa(ada.page);
   const victima = puntos[0];
   igual((await mapa(ada.page)).filas.includes(victima), true, 'está en el mapa');
   await aTabla(ada.page);
-  await ada.page.locator('#tabla-archivados').check();
-  await listo(ada.page);
   await ada.page.locator('#tabla-buscar').fill('Lote Mapa 000 Ficticio');
   await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) === 1, 'búsqueda');
   await ada.page.locator(`tr[data-id="${victima}"]`).getByRole('button', { name: /Abrir terreno/ }).click();
-  await ada.page.getByRole('button', { name: 'Archivar terreno' }).click();
-  await ada.page.getByRole('dialog', { name: '¿Archivar este terreno?' }).getByRole('button', { name: 'Archivar' }).click();
-  await hasta(async () => Boolean((await terreno(ada.page, victima)).archived_at), 'no se archivó');
+  await ada.page.getByRole('button', { name: 'Borrar terreno…' }).click();
+  await ada.page.getByRole('dialog', { name: /^¿Borrar «/ }).getByRole('button', { name: 'Borrar definitivamente' }).click();
+  await hasta(async () => (await terreno(ada.page, victima)) === undefined, 'no se borró');
   await ada.page.locator('#tabla-buscar').fill('');
-  await ada.page.locator('#tabla-archivados').uncheck();
   await listo(ada.page);
   await aMapa(ada.page);
-  await hasta(async () => { const m = await mapa(ada.page); return !m.reuniendo && !m.filas.includes(victima); }, 'el archivado sigue en el mapa');
-  igual((await mapa(ada.page)).filas.length, TODOS.length - 1, 'uno menos');
+  await hasta(async () => { const m = await mapa(ada.page); return !m.reuniendo && m.filas.length === TODOS.length - 1; }, 'el mapa no reunió el resto');
+  igual((await mapa(ada.page)).filas.includes(victima), false, 'el borrado sigue en el mapa');
   activos = TODOS.filter((id) => id !== victima);
 });
 

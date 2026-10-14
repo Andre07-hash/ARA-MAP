@@ -7,7 +7,7 @@
  *   ARA_URL=http://localhost:8433 node tabla-integrada.mjs [carpeta-de-capturas]
  *
  * It needs a FRESH server each run: it creates the bases, grants, columns and
- * terrains it uses, all fictional, and deletes nothing.
+ * terrains it uses, all fictional, and deletes only some of what it created.
  */
 
 import assert from 'node:assert/strict';
@@ -409,7 +409,15 @@ await caso('a lost response is checked, not replayed; a lost blank create is ret
   await context.close();
 });
 
-await caso('archive and restore a terrain; an archived row is read-only', async () => {
+/** From the row's detail: "Borrar terreno…", then the final confirmation (or Cancelar). */
+async function borrarTerreno(page, id, nombre, { confirmar = true } = {}) {
+  await page.locator(`tr[data-id="${id}"]`).getByRole('button', { name: /^Abrir terreno/ }).click();
+  await page.getByRole('dialog', { name: nombre }).getByRole('button', { name: 'Borrar terreno…' }).click();
+  await page.getByRole('dialog', { name: `¿Borrar «${nombre}»?` })
+    .getByRole('button', { name: confirmar ? 'Borrar definitivamente' : 'Cancelar' }).click();
+}
+
+await caso('delete a terrain for good, only after the final confirmation', async () => {
   const { context, page, errores } = await abrir('olga');
   await listo(page);
   const fila = page.locator(`tr[data-id="${lote}"]`);
@@ -418,23 +426,19 @@ await caso('archive and restore a terrain; an archived row is read-only', async 
   await detalle.locator('.archivos-detalle[data-tipo="pdf"]').waitFor();   // Team B's detail controls, mounted
   assert.equal(await detalle.getByRole('button', { name: /Transferir/ }).count(), 0, 'operators do not transfer');
   await foto(page, '09-detalle-del-terreno');
-  await detalle.getByRole('button', { name: 'Archivar terreno' }).click();
-  await page.getByRole('dialog', { name: '¿Archivar este terreno?' }).getByRole('button', { name: 'Archivar' }).click();
-  await fila.waitFor({ state: 'detached' });
-  assert.ok((await terreno(page, lote)).archived_at);
+  await detalle.getByRole('button', { name: 'Cerrar' }).click();
 
-  await page.getByLabel('Incluir archivados').check();
-  await listo(page);
-  await fila.locator('.tabla-chip', { hasText: 'Archivado' }).waitFor();
-  await celda(page, lote, 'core:estado').focus();
-  await page.keyboard.press('Enter');
-  assert.equal(await page.locator('.tabla-editor').count(), 0, 'an archived terrain does not open an editor');
-  await foto(page, '10-terreno-archivado');
-  await fila.getByRole('button', { name: /^Abrir terreno/ }).click();
-  await page.getByRole('dialog', { name: NOMBRE }).getByRole('button', { name: 'Restaurar terreno' }).click();
-  await page.locator(`tr[data-id="${lote}"]:not(.is-archivada)`).waitFor();
-  assert.equal((await terreno(page, lote)).archived_at, null);
-  await escribir(page, lote, 'core:estado', 'Jalisco');
+  // A terrain of its own: the shared one is used by the cases below.
+  const victima = await agregar(page);
+  await escribir(page, victima, 'core:terreno', 'Lote Para Borrar');
+  await borrarTerreno(page, victima, 'Lote Para Borrar', { confirmar: false });
+  await page.getByRole('dialog', { name: 'Lote Para Borrar' }).getByRole('button', { name: 'Cerrar' }).click();
+  assert.equal((await terreno(page, victima)).id, victima, 'Cancelar keeps the terrain');
+  await borrarTerreno(page, victima, 'Lote Para Borrar');
+  await page.locator(`tr[data-id="${victima}"]`).waitFor({ state: 'detached' });
+  await foto(page, '10-terreno-borrado');
+  assert.equal((await pedir(page, `/api/inventario/terrenos/${victima}`)).status, 404);
+  await escribir(page, lote, 'core:estado', 'Jalisco');                      // the others stay editable
   assert.deepEqual(errores, []);
   await context.close();
 });
@@ -495,7 +499,7 @@ await caso('transfer: real preview, explicit confirmation, the row leaves; the s
   await context.close();
 });
 
-await caso('custom columns: rename, reorder, retire and restore keep ids, values and history', async () => {
+await caso('custom columns: rename and reorder keep ids, values and history; delete removes column and values', async () => {
   const { context, page, errores } = await abrir('ada');
   await irATabla(page, B['Base Norte']);
   await page.getByRole('button', { name: 'Columnas' }).click();
@@ -510,15 +514,19 @@ await caso('custom columns: rename, reorder, retire and restore keep ids, values
   await item('Visita').getByRole('button', { name: 'Subir' }).click();
   await page.waitForFunction(() => [...document.querySelectorAll('.columnas-item input[aria-label^="Nombre de la columna"]')]
     .map((i) => i.value).join() === 'Observación,Avance,Visita,Etapa');
-  await item('Avance').getByRole('button', { name: 'Retirar' }).click();
-  await page.getByRole('dialog', { name: /¿Retirar la columna «Avance»\?/ }).getByRole('button', { name: 'Retirar' }).click();
-  await item('Avance').getByRole('button', { name: 'Restaurar' }).waitFor();
-  await foto(page, '13-columna-retirada');
+  assert.equal(await textoDe(page, lote, COL.Avance), '42.5');
+  await item('Avance').getByRole('button', { name: 'Borrar…' }).click();
+  await page.getByRole('dialog', { name: /¿Borrar la columna «Avance»\?/ }).getByRole('button', { name: 'Cancelar' }).click();
+  await item('Avance').getByRole('button', { name: 'Borrar…' }).click();
+  await page.getByRole('dialog', { name: /¿Borrar la columna «Avance»\?/ }).getByRole('button', { name: 'Borrar definitivamente' }).click();
+  await item('Avance').waitFor({ state: 'detached' });
+  await foto(page, '13-columna-borrada');
   await columnas.getByRole('button', { name: 'Cerrar' }).click();
   await hasta(propias(page), ['Observación · texto', 'Visita · fecha', 'Etapa · opcion']);
   assert.equal(await textoDe(page, lote, COL.Nota), 'Nota de Olga');           // same id under the new label
-  const oculto = await terreno(page, lote);
-  assert.ok(!(COL.Avance in oculto.custom), 'a retired column shows no value');
+  assert.ok(!(COL.Avance in (await terreno(page, lote)).custom), 'a deleted column keeps no value');
+  const restantes = (await pedir(page, `/api/maestra/bases/${B['Base Norte']}/columnas`)).body.columnas.map((c) => c.id);
+  assert.ok(!restantes.includes(COL.Avance), 'the deleted column is gone from the base');
 
   await page.locator(`tr[data-id="${lote}"]`).getByRole('button', { name: /^Abrir terreno/ }).click();
   await page.getByRole('dialog', { name: NOMBRE }).getByRole('button', { name: 'Historial' }).click();
@@ -527,14 +535,6 @@ await caso('custom columns: rename, reorder, retire and restore keep ids, values
   await foto(page, '14-historial');
   await historial.getByRole('button', { name: 'Cerrar' }).click();
   await page.getByRole('dialog', { name: NOMBRE }).getByRole('button', { name: 'Cerrar' }).click();
-
-  await page.getByRole('button', { name: 'Columnas' }).click();
-  await item('Avance').getByRole('button', { name: 'Restaurar' }).click();
-  await item('Avance').getByRole('button', { name: 'Retirar' }).waitFor();
-  await columnas.getByRole('button', { name: 'Cerrar' }).click();
-  // Restored where it was: retiring does not renumber the columns.
-  await hasta(propias(page), ['Observación · texto', 'Avance · numero', 'Visita · fecha', 'Etapa · opcion']);
-  assert.equal(await textoDe(page, lote, COL.Avance), '42.5');                  // the value was kept
   assert.deepEqual(errores, []);
   await context.close();
 });
@@ -661,25 +661,31 @@ await caso('session loss: logout clears the table; the next account on the same 
   await context.close();
 });
 
-await caso('an archived base is read-only for administrators and closed to operators', async () => {
+await caso('a base with terrains cannot be deleted; once empty it is deleted for good', async () => {
   const { context, page, errores } = await abrir('ada');
   await irATabla(page, B['Base Sur']);
   const enSur = await agregar(page);
   await escribir(page, enSur, 'core:terreno', 'Lote del Sur');
+  const sur = (dialogo) => dialogo.locator('li', { has: page.getByLabel('Nombre de la base Base Sur') });
   await page.getByRole('button', { name: 'Bases y accesos' }).click();
-  const bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
-  await bases.locator('li', { has: page.getByLabel('Nombre de la base Base Sur') }).getByRole('button', { name: 'Archivar' }).click();
-  await page.getByRole('dialog', { name: /¿Archivar la base «Base Sur»\?/ }).getByRole('button', { name: 'Archivar' }).click();
-  await bases.getByText(/archivada \(sólo lectura\)/).waitFor();
+  let bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
+  await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
+  await bases.getByText(/«Base Sur» todavía tiene 1 terreno/).waitFor();
+  assert.equal(await page.getByRole('dialog', { name: /¿Borrar la base/ }).count(), 0, 'no confirmation while it has terrains');
+  await foto(page, '19-base-con-terrenos');
   await bases.getByRole('button', { name: 'Cerrar' }).click();
-  await page.getByText(/Esta base de trabajo está archivada/).waitFor();
-  await listo(page);
-  assert.equal(await page.getByRole('button', { name: 'Agregar terreno' }).isVisible(), false);
-  await celda(page, enSur, 'core:terreno').focus();
-  await page.keyboard.press('Enter');
-  assert.equal(await page.locator('.tabla-editor').count(), 0);
-  assert.equal(await celda(page, enSur, 'core:terreno').getAttribute('aria-readonly'), 'true');
-  await foto(page, '19-base-archivada');
+
+  await borrarTerreno(page, enSur, 'Lote del Sur');
+  await page.locator(`tr[data-id="${enSur}"]`).waitFor({ state: 'detached' });
+  await irATabla(page, B['Base Norte']);             // not standing in the base that goes away
+  await page.getByRole('button', { name: 'Bases y accesos' }).click();
+  bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
+  await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
+  await page.getByRole('dialog', { name: '¿Borrar la base «Base Sur»?' }).getByRole('button', { name: 'Borrar definitivamente' }).click();
+  await sur(bases).waitFor({ state: 'detached' });
+  await bases.getByRole('button', { name: 'Cerrar' }).click();
+  const quedan = (await pedir(page, '/api/maestra/bases')).body.bases.map((b) => b.nombre);
+  assert.ok(!quedan.includes('Base Sur'), 'the base is gone');
   const omar = await abrir('omar');
   await omar.page.waitForURL(/#\/tabla\//);
   await listo(omar.page);

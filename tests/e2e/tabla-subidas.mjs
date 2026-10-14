@@ -112,14 +112,10 @@ const resumen = async (page, id, col) => (await celda(page, id, col).locator('.a
 const elegirEn = (page, id, col) => celda(page, id, col).locator('.archivos-celda-elegir');
 const COL = { pdf: 'core:archivos', kmz: 'core:kmz' };
 
-async function irA(page, vista, { archivados = false } = {}) {
+async function irA(page, vista) {
   await page.goto(`${URLBASE}/?test=1#/tabla/${vista}`);
   await page.locator('.tabla-pantalla').waitFor();
   await page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
-  if (archivados) {
-    await page.locator('#tabla-archivados').check();
-    await page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
-  }
 }
 /** Click the cell's button and give the picker this file (a path) or nothing (cancel). */
 async function elegir(page, id, tipo, ruta, { teclado = null } = {}) {

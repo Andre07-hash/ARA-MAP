@@ -299,17 +299,17 @@ paginaActual = olga.page;
 await revisar("solo lectura deshabilita controles pero no descargas", async () => {
   await seleccionar(olga.page, T.uno.id);
   const d = detalle(olga.page, "pdf");
-  await d.getByRole("button", { name: /^Retirar/ }).first().waitFor();
+  await d.getByRole("button", { name: /^Borrar/ }).first().waitFor();
   try {
     await olga.page.evaluate(() => window.__arnes.ponerSoloLectura(true));
     cierto(await d.locator(".archivos-zona").isHidden(), "zona de subida visible");
-    igual(await d.getByRole("button", { name: /^Retirar/ }).count(), 0, "retirar presente");
+    igual(await d.getByRole("button", { name: /^Borrar/ }).count(), 0, "borrar presente");
     await d.getByRole("button", { name: /^Descargar/ }).first().waitFor();
     cierto(await d.getByRole("button", { name: /^Descargar/ }).first().isEnabled(), "descarga deshabilitada");
   } finally {
     await olga.page.evaluate(() => window.__arnes.ponerSoloLectura(false));
   }
-  await d.getByRole("button", { name: /^Retirar/ }).first().waitFor();
+  await d.getByRole("button", { name: /^Borrar/ }).first().waitFor();
 });
 
 await revisar("cancelar una subida en curso usa el endpoint y lo informa", async () => {
@@ -328,20 +328,23 @@ await revisar("cancelar una subida en curso usa el endpoint y lo informa", async
   igual(versiones[0].estado, "cancelado", "estado en el servidor");
 });
 
-await revisar("retirar exige confirmación y es definitivo", async () => {
+await revisar("borrar exige confirmación y es definitivo", async () => {
   const d = detalle(olga.page, "pdf");
-  await d.getByRole("button", { name: /^Retirar/ }).first().click();
+  const pdfs = async () => olga.page.evaluate(async (t) =>
+    (await (await fetch(`/api/inventario/terrenos/${t}/archivos`)).json()).archivos.filter((a) => a.tipo === "pdf").map((a) => a.id), T.uno.id);
+  const [aid] = await pdfs();
+  await d.getByRole("button", { name: /^Borrar/ }).first().click();
   await olga.page.getByRole("dialog").getByRole("button", { name: "Cancelar" }).click();
   await textoCelda(olga.page, T.uno.id, "pdf", "1 PDF");
-  await d.getByRole("button", { name: /^Retirar/ }).first().click();
-  await olga.page.getByRole("dialog").getByRole("button", { name: "Retirar" }).click();
+  igual(await pdfs(), [aid], "cancelar conserva el PDF");
+  await d.getByRole("button", { name: /^Borrar/ }).first().click();
+  await olga.page.getByRole("dialog").getByRole("button", { name: "Borrar definitivamente" }).click();
   await textoCelda(olga.page, T.uno.id, "pdf", "Sin PDF");
-  await d.locator(".archivos-chip-retirado").first().waitFor();
-  // Retained content stays downloadable under current authorization.
-  await d.locator(".archivos-item").first().getByRole("button", { name: "Versiones" }).click();
-  const [descarga] = await Promise.all([olga.page.waitForEvent("download"),
-    d.getByRole("button", { name: /Descargar versión 1/ }).click()]);
-  igual(sha(readFileSync(await descarga.path())), sha(readFileSync(F.pdf)), "sha256 retenido");
+  await olga.page.waitForFunction(() => !document.querySelector('[data-detalle="pdf"] .archivos-item'));
+  igual(await pdfs(), [], "el PDF sigue en la lista del servidor");
+  // Nothing is retained: its versions are gone with it.
+  const estado = await olga.page.evaluate(async (a) => (await fetch(`/api/archivos/${a}/versiones`)).status, aid);
+  igual(estado, 404, "versiones del archivo borrado");
 });
 
 await revisar("al expirar la sesión durante trabajo activo todo se desmonta y nada se instala después", async () => {

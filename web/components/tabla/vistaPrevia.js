@@ -12,6 +12,10 @@
  * The body, the selection and the map belong to one set of one scope:
  * pintar() with a new set drops the body and any load in flight, and
  * destroy() removes the map itself.
+ *
+ * The host decides the marks' colour (`colorFor`) and what floats over the
+ * map beside the basemap selector (`capas`, e.g. the price legend). "Ver a
+ * escala" is the host's to offer, next to the selected terrain's record.
  */
 
 import { el } from "../../lib/dom.js";
@@ -23,7 +27,7 @@ import { BasemapSwitcher } from "../map/BasemapSwitcher.js";
 
 const COLOR = "#1f6feb";
 
-export function createVistaPrevia({ cargador = () => null, onSeleccion, onError } = {}) {
+export function createVistaPrevia({ cargador = () => null, onSeleccion, onError, colorFor = () => COLOR } = {}) {
   let vivo = true;
   let canvas = null;
   let basemap = "claro";
@@ -34,11 +38,12 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
   let pedido = 0;
   let encuadrar = false;
   let fallida = null;             // geometry id whose last load failed: not retried on a repaint
+  let colorear = colorFor;        // renderer row -> fill colour
 
   const titulo = el("h2", { class: "previa-titulo" }, "Mapa de la vista");
   const cuenta = el("p", { class: "previa-cuenta" });
   const nota = el("p", { class: "previa-nota" },
-    "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
+    "Muestra los terrenos de esta vista que cumplen los filtros, no sólo la página de la tabla. " +
     "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
     "en su punto interior. Un KMZ subido sin activar no cambia el mapa.");
   const estado = el("p", { class: "previa-estado", role: "status", "aria-live": "polite" });
@@ -46,16 +51,13 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     type: "button", class: "btn btn-quiet previa-reintentar", hidden: true,
     onclick: () => { if (seleccion) cargarContorno(seleccion); },
   }, "Reintentar");
-  const escala = el("button", {
-    type: "button", class: "btn btn-quiet", disabled: true,
-    title: "Acerca el mapa hasta ver el terreno seleccionado a su tamaño real",
-    onclick: () => { if (seleccion) canvas?.zoomToScale(seleccion); },
-  }, "Ver a escala");
   const encuadre = el("button", {
     type: "button", class: "btn btn-quiet", onclick: () => encuadrarTodo(),
   }, "Encuadrar todo");
   const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de los terrenos de la vista" });
   const fondos = el("div", { class: "previa-fondos" });
+  const capas = el("div", { class: "previa-capas" });
+  const sobreMapa = el("div", { class: "previa-sobre-mapa" }, capas, fondos);
   function pintarFondos() {
     fondos.replaceChildren(BasemapSwitcher({
       activo: basemap,
@@ -70,8 +72,8 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
   pintarFondos();
   const element = el("section", { class: "previa", "aria-labelledby": "previa-titulo" },
     el("header", { class: "previa-cabecera" }, Object.assign(titulo, { id: "previa-titulo" }), cuenta),
-    nota, lienzo,
-    el("div", { class: "previa-pie" }, fondos, estado, reintentar, escala, encuadre));
+    nota, el("div", { class: "previa-escenario" }, lienzo, sobreMapa),
+    el("div", { class: "previa-pie" }, estado, reintentar, encuadre));
 
   const filaDe = (id) => filas.find((f) => f.id === id) ?? null;
   const decir = (texto, conReintento = false) => {
@@ -105,7 +107,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
       encuadrar = true;
     }
     canvas.invalidate();
-    canvas.render(filas, { colorFor: () => COLOR, geometrias });
+    canvas.render(filas, { colorFor: colorear, geometrias });
     if (encuadrar) { canvas.fitTo(filas); encuadrar = false; }
     canvas.select(seleccion);
   }
@@ -137,8 +139,9 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
    * framing start over. Otherwise the selection is kept if that terrain is
    * still there with the same boundary.
    */
-  function pintar(registros, { total = 0, nuevaPagina = true } = {}) {
+  function pintar(registros, { total = 0, nuevaPagina = true, colorFor: color = null } = {}) {
     if (!vivo) return;
+    if (color) colorear = color;
     const antes = filaDe(seleccion)?.geometria?.id ?? null;
     filas = registros.map(itemDeInventario);
     const actual = filaDe(seleccion);
@@ -153,7 +156,6 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
         `${fmtCount(ubicadas - contornos)} por X/Y) · ${fmtCount(filas.length - ubicadas)} sin ubicación` +
         (total > filas.length ? ` · la vista tiene ${fmtCount(total)} en total` : "")
       : "Sin terrenos que mostrar.";
-    escala.disabled = !seleccion;
     dibujar();
     if (seleccion && actual?.geometria && !geometrias.size && !carga && actual.geometria.id !== fallida) {
       cargarContorno(seleccion);
@@ -173,7 +175,6 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     seleccion = fila ? id : null;
     fallida = null;
     soltarCuerpo();
-    escala.disabled = !seleccion;
     if (desdeMapa && seleccion) onSeleccion?.(seleccion);
     if (!fila) { canvas?.select(null); decir(""); return; }
     const { modo } = ubicacionDe(fila);
@@ -228,6 +229,10 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError 
     pintar,
     seleccionar,
     get seleccion() { return seleccion; },
+    /** Zoom until the selected terrain is shown at its real size. */
+    verAEscala() { if (seleccion) canvas?.zoomToScale(seleccion); },
+    /** What floats over the map beside the basemap selector (the legend). */
+    capas(...nodos) { capas.replaceChildren(...nodos.filter(Boolean)); },
     /** For checks: how many boundary bodies are held (0 or 1) and loading. */
     get estado() { return { cuerpos: geometrias.size, cargando: Boolean(carga), filas: filas.length, zoom: canvas?.map.getZoom() ?? null }; },
     /** The panel became visible or changed size. */

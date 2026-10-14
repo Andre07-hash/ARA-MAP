@@ -4,6 +4,10 @@
  * palette sits below 3:1 against the map, so the colour-vision guidance
  * requires visible labels as relief rather than colour alone. Layers past the
  * validated colour range are marked as relying on their dashed ring too.
+ *
+ * `textos` lets a map say its own unplaced and mixed-currency notes: the
+ * tables' map places a terrain by its active boundary too, so "no
+ * coordinates" would not be true there.
  */
 
 import { CAPAS_SEGURAS, PRICE_RAMP, layerNeedsPattern } from "../../lib/colors.js";
@@ -11,11 +15,11 @@ import { el } from "../../lib/dom.js";
 import { fmtPriceShort, nombraMonedas, plural } from "../../lib/format.js";
 
 export function Legend({
-  modo, capas, breaks, monedas = [], conteo, sinUbicacion, invalidas = 0, escala, onToggleCapa,
+  modo, capas, breaks, monedas = [], conteo, sinUbicacion, invalidas = 0, escala, onToggleCapa, textos = {},
 }) {
   const cuerpo = modo === "base"
     ? capasLegend(capas, onToggleCapa)
-    : priceLegend(breaks, monedas);
+    : priceLegend(breaks, monedas, textos.mezcla);
 
   const excede = modo === "base" && capas.length > CAPAS_SEGURAS;
   const huerfanas = capas.filter((c) => c.base_existe === false).length;
@@ -28,7 +32,8 @@ export function Legend({
     cuerpo,
     // Updated in place as the map zooms, so it never triggers a re-render.
     el("p", { class: "legend-note legend-escala" }, escalaTexto(escala)),
-    sinUbicacion > 0 && el("p", { class: "legend-note" },
+    sinUbicacion > 0 && textos.sinUbicacion && el("p", { class: "legend-note" }, textos.sinUbicacion),
+    sinUbicacion > 0 && !textos.sinUbicacion && el("p", { class: "legend-note" },
       `${plural(sinUbicacion, "terreno")} fuera del mapa`,
       invalidas > 0
         ? `: ${invalidas} con coordenadas imposibles y ` +
@@ -85,12 +90,12 @@ function capasLegend(capas, onToggleCapa) {
   );
 }
 
-function priceLegend(breaks, monedas) {
+function priceLegend(breaks, monedas, mezcla) {
   if (monedas.length > 1) {
     // One scale for two currencies would rank 100 USD and 100 MXN as equal.
     return el("p", { class: "legend-note legend-aviso" },
       `Los precios están en ${nombraMonedas(monedas)}; no se gradúan juntos. ` +
-      "Muestra una sola capa o colorea por capa; la ubicación se compara igual.");
+      (mezcla ?? "Muestra una sola capa o colorea por capa; la ubicación se compara igual."));
   }
   if (!breaks) {
     return el("p", { class: "legend-note" },

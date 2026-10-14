@@ -20,6 +20,10 @@ export const EMPTY_FILTERS = Object.freeze({
   soloConIncidencias: false,
 });
 
+/* `tipos` (terrain types) is an extra filter only the tables' map offers
+ * (mapaTabla.js FILTROS_MAPA). It is not part of EMPTY_FILTERS, so the other
+ * screens' state and saved maps stay as they were; absent means no filter. */
+
 const inRange = (value, min, max) => {
   if (min != null && (value == null || value < min)) return false;
   if (max != null && (value == null || value > max)) return false;
@@ -33,6 +37,7 @@ export function matches(terreno, filters) {
   if (f.soloConIncidencias && !(terreno.incidencias?.length > 0)) return false;
   if (f.estados.length && !f.estados.includes(terreno.estado)) return false;
   if (f.municipios.length && !f.municipios.includes(terreno.municipio)) return false;
+  if (f.tipos?.length && !f.tipos.includes(terreno.tipo_terreno)) return false;
 
   if (!inRange(terreno.superficie_m2, f.superficieMin, f.superficieMax)) return false;
   if (!inRange(terreno.asking_price, f.precioMin, f.precioMax)) return false;
@@ -65,6 +70,7 @@ export function activeCount(filters) {
   if (f.busqueda) count += 1;
   if (f.estados.length) count += 1;
   if (f.municipios.length) count += 1;
+  if (f.tipos?.length) count += 1;
   if (f.superficieMin != null || f.superficieMax != null) count += 1;
   if (f.precioMin != null || f.precioMax != null) count += 1;
   if (f.unitarioMin != null || f.unitarioMax != null) count += 1;
@@ -87,6 +93,7 @@ export function deriveOptions(terrenos, filters = EMPTY_FILTERS) {
   return {
     estados,
     municipios,
+    tipos: tally(terrenos, "tipo_terreno"),
     rangos: {
       superficie: extent(terrenos, "superficie_m2"),
       precio: extent(terrenos, "asking_price"),

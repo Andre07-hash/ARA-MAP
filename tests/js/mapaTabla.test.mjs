@@ -5,6 +5,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { PRICE_RAMP, priceBreaks } from "../../web/lib/colors.js";
+import { activeCount, deriveOptions, EMPTY_FILTERS, matches } from "../../web/lib/filters.js";
 import {
   camposDeFicha, CAMPOS_DE_FICHA, colorDeFila, conteoDeUbicacion, filaDeMapa, filtrarMapa, FILTROS_MAPA,
   personalizadasDeFicha, ubicacionDeFicha,
@@ -54,6 +55,35 @@ test("search, states, municipalities and the three ranges narrow the set", () =>
   assert.deepEqual(ids({ precioMax: 500 }), ["Rancho Uno"], "a missing price is not zero");
   assert.deepEqual(ids({ unitarioMin: 20 }), ["Rancho Dos"]);
   assert.deepEqual(ids({}), ["Rancho Uno", "Rancho Dos", "Parcela Tres"]);
+});
+
+test("the terrain type is a local map filter over the stored values; Limpiar clears it", () => {
+  const filas = [
+    registro({ terreno: "Rancho Uno", tipo_terreno: "Industrial" }),
+    registro({ terreno: "Rancho Dos", tipo_terreno: "Habitacional" }),
+    registro({ terreno: "Parcela Tres", tipo_terreno: null }),
+    registro({ terreno: "Parcela Cuatro", tipo_terreno: "industrial" }),
+  ].map(filaDeMapa);
+  const ids = (f) => filtrarMapa(filas, { ...FILTROS_MAPA, ...f }).visibles.map((t) => t.terreno);
+  assert.deepEqual(FILTROS_MAPA.tipos, [], "starts without a type");
+  assert.deepEqual(ids({}), ["Rancho Uno", "Rancho Dos", "Parcela Tres", "Parcela Cuatro"]);
+  // Values are compared as stored: no folding, no invented classes; a row without a type is left out.
+  assert.deepEqual(ids({ tipos: ["Industrial"] }), ["Rancho Uno"]);
+  assert.deepEqual(ids({ tipos: ["Industrial", "Habitacional"] }), ["Rancho Uno", "Rancho Dos"]);
+  assert.deepEqual(ids({ tipos: ["Industrial"], busqueda: "parcela" }), [], "combined with the other filters");
+  assert.equal(activeCount({ ...FILTROS_MAPA, tipos: ["Industrial"] }), 1, "counted as one active filter");
+  assert.equal(activeCount(FILTROS_MAPA), 0, "Limpiar (FILTROS_MAPA) leaves no type");
+  // The rail's options are counted from the set's own values.
+  assert.deepEqual(deriveOptions(filas).tipos, [
+    { valor: "Habitacional", conteo: 1 }, { valor: "industrial", conteo: 1 }, { valor: "Industrial", conteo: 1 },
+  ]);
+});
+
+test("the other screens' filters are unchanged: no type in EMPTY_FILTERS, and absent means no filter", () => {
+  assert.equal("tipos" in EMPTY_FILTERS, false);
+  const fila = filaDeMapa(registro({ tipo_terreno: "Industrial" }));
+  assert.equal(matches(fila, EMPTY_FILTERS), true);
+  assert.equal(activeCount(EMPTY_FILTERS), 0);
 });
 
 test("colour thresholds come from the whole set, so filtering never changes a colour", () => {

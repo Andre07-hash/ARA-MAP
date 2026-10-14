@@ -6,7 +6,7 @@
  * typing stops after one letter. So the rail is built once and `update` patches
  * what changed, leaving the node the user is typing into untouched.
  *
- *   createFilterRail({ onChange, onReset, modo, conIncidencias })
+ *   createFilterRail({ onChange, onReset, modo, conIncidencias, conTipo })
  *     -> { element, update({ terrenos, filtros, visibles, monedas, opciones, cargando }), destroy() }
  *
  * `modo` is "local" (a legacy base or saved map, filtered in the browser) or
@@ -17,6 +17,9 @@
  *
  * `conIncidencias: false` leaves out the "Solo con incidencias" toggle, for
  * rows that carry no import findings (the tables' map).
+ *
+ * `conTipo: true` adds a "Tipo de terreno" group (the `tipos` filter), with
+ * options counted from the rows' own `tipo_terreno` values (the tables' map).
  *
  * `monedas` are the currencies of the priced terrains in view. With more than
  * one, the local price ranges are disabled: a range in one currency would
@@ -38,9 +41,9 @@ const RANGOS = [
 const SEP = "␟";
 
 /* Option lists show this many until expanded; every value stays reachable. */
-const LIMITES = { estados: 6, municipios: 8 };
+const LIMITES = { estados: 6, municipios: 8, tipos: 8 };
 
-export function createFilterRail({ onChange, onReset, modo = "local", conIncidencias = true }) {
+export function createFilterRail({ onChange, onReset, modo = "local", conIncidencias = true, conTipo = false }) {
   const servidor = modo !== "local";
   let estado = { terrenos: [], filtros: {}, visibles: 0 };
   let componiendo = false;
@@ -88,6 +91,7 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
   const grupos = {
     estados: crearGrupo("Estado", "estados"),
     municipios: crearGrupo("Municipio", "municipios"),
+    tipos: conTipo ? crearGrupo("Tipo de terreno", "tipos") : null,
   };
 
   function crearGrupo(titulo, campo) {
@@ -212,6 +216,7 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
     resultado,
     grupos.estados.fieldset,
     grupos.municipios.fieldset,
+    grupos.tipos?.fieldset,
     ...rangos.map((r) => r.fieldset),
     precio && precio.fieldset,
     internos ? internos.fieldset : !servidor && toggles,
@@ -304,6 +309,7 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
 
     actualizarGrupo(grupos.estados, opciones.estados, filtros.estados ?? [], LIMITES.estados);
     actualizarGrupo(grupos.municipios, opciones.municipios, filtros.municipios ?? [], LIMITES.municipios);
+    if (grupos.tipos) actualizarGrupo(grupos.tipos, opciones.tipos ?? [], filtros.tipos ?? [], LIMITES.tipos);
 
     for (const rango of rangos) {
       const extremos = opciones.rangos[rango.campo];

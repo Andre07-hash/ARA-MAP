@@ -17,7 +17,9 @@ import { ubicacionDe } from "./geometria.js";
 import { itemDeInventario } from "./inventario.js";
 import { COLUMNAS_BASICAS, textoDe, valorDe } from "./tabla.js";
 
-export const FILTROS_MAPA = EMPTY_FILTERS;
+/* The map's own filters: the shared ones plus the terrain type, a value the
+ * rows already carry (`tipo_terreno`, as stored; nothing is classified). */
+export const FILTROS_MAPA = Object.freeze({ ...EMPTY_FILTERS, tipos: Object.freeze([]) });
 
 /**
  * A table row as a map row: located by its active boundary or by valid X/Y

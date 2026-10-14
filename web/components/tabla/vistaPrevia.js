@@ -14,12 +14,18 @@
  * destroy() removes the map itself.
  *
  * The host decides the marks' colour (`colorFor`) and what floats over the
- * map beside the basemap selector (`capas`, e.g. the price legend). "Ver a
- * escala" is the host's to offer, next to the selected terrain's record.
+ * map beside the basemap selector (`capas`, e.g. the price legend) and in its
+ * top-left corner (`arriba`, e.g. the filters button and the set's notices).
+ * "Ver a escala" is the host's to offer, next to the selected terrain's record.
+ *
+ * Nothing takes a strip of its own above or below the map: the boundary
+ * status and its retry float in the top-left corner only while there is
+ * something to say, "Encuadrar todo" and the explanation (behind a small
+ * info toggle) float beside the zoom control. The counts are the host's
+ * (its filters and legend).
  */
 
 import { el } from "../../lib/dom.js";
-import { fmtCount } from "../../lib/format.js";
 import { ubicacionDe } from "../../lib/geometria.js";
 import { itemDeInventario } from "../../lib/inventario.js";
 import { createMapCanvas } from "../map/MapCanvas.js";
@@ -40,24 +46,34 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
   let fallida = null;             // geometry id whose last load failed: not retried on a repaint
   let colorear = colorFor;        // renderer row -> fill colour
 
-  const titulo = el("h2", { class: "previa-titulo" }, "Mapa de la vista");
-  const cuenta = el("p", { class: "previa-cuenta" });
-  const nota = el("p", { class: "previa-nota" },
-    "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
-    "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
-    "en su punto interior. Un KMZ subido sin activar no cambia el mapa.");
+  // The live region stays in the page while empty, so what it says next is announced.
   const estado = el("p", { class: "previa-estado", role: "status", "aria-live": "polite" });
   const reintentar = el("button", {
-    type: "button", class: "btn btn-quiet previa-reintentar", hidden: true,
+    type: "button", class: "btn btn-quiet btn-small previa-reintentar", hidden: true,
     onclick: () => { if (seleccion) cargarContorno(seleccion); },
   }, "Reintentar");
   const encuadre = el("button", {
-    type: "button", class: "btn btn-quiet", onclick: () => encuadrarTodo(),
+    type: "button", class: "btn btn-small previa-encuadre", onclick: () => encuadrarTodo(),
+    title: "Encuadrar todos los terrenos que el mapa muestra",
   }, "Encuadrar todo");
+  const info = el("details", { class: "previa-info" },
+    el("summary", { "aria-label": "Cómo funciona este mapa", title: "Cómo funciona este mapa" }, "i"),
+    el("p", { class: "previa-nota", tabindex: "-1" },
+      "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
+      "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
+      "en su punto interior. Un KMZ subido sin activar no cambia el mapa."));
+  info.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && info.open) { e.stopPropagation(); info.open = false; info.querySelector("summary").focus(); }
+  });
+  info.addEventListener("focusout", (e) => { if (!info.contains(e.relatedTarget)) info.open = false; });
   const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de los terrenos de la vista" });
   const fondos = el("div", { class: "previa-fondos" });
   const capas = el("div", { class: "previa-capas" });
   const sobreMapa = el("div", { class: "previa-sobre-mapa" }, capas, fondos);
+  const delAnfitrion = el("div", { class: "previa-anfitrion" });
+  const arriba = el("div", { class: "previa-arriba" }, delAnfitrion,
+    el("div", { class: "previa-aviso" }, estado, reintentar));
+  const herramientas = el("div", { class: "previa-herramientas" }, encuadre, info);
   function pintarFondos() {
     fondos.replaceChildren(BasemapSwitcher({
       activo: basemap,
@@ -70,10 +86,8 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     }));
   }
   pintarFondos();
-  const element = el("section", { class: "previa", "aria-labelledby": "previa-titulo" },
-    el("header", { class: "previa-cabecera" }, Object.assign(titulo, { id: "previa-titulo" }), cuenta),
-    nota, el("div", { class: "previa-escenario" }, lienzo, sobreMapa),
-    el("div", { class: "previa-pie" }, estado, reintentar, encuadre));
+  const element = el("section", { class: "previa", "aria-label": "Mapa de la vista" },
+    el("div", { class: "previa-escenario" }, lienzo, arriba, herramientas, sobreMapa));
 
   const filaDe = (id) => filas.find((f) => f.id === id) ?? null;
   const decir = (texto, conReintento = false) => {
@@ -139,7 +153,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
    * framing start over. Otherwise the selection is kept if that terrain is
    * still there with the same boundary.
    */
-  function pintar(registros, { total = 0, nuevaPagina = true, colorFor: color = null } = {}) {
+  function pintar(registros, { nuevaPagina = true, colorFor: color = null } = {}) {
     if (!vivo) return;
     if (color) colorear = color;
     const antes = filaDe(seleccion)?.geometria?.id ?? null;
@@ -148,14 +162,6 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     if (!actual) seleccion = null;
     if (nuevaPagina || !actual || (actual.geometria?.id ?? null) !== antes) soltarCuerpo();
     if (nuevaPagina) encuadrar = true;
-    const ubicadas = filas.filter((f) => ubicacionDe(f).ubicado).length;
-    const contornos = filas.filter((f) => ubicacionDe(f).modo === "geometria").length;
-    cuenta.textContent = filas.length
-      ? `${fmtCount(filas.length)} ${filas.length === 1 ? "terreno" : "terrenos"} · ` +
-        `${fmtCount(ubicadas)} en el mapa (${fmtCount(contornos)} con contorno activo, ` +
-        `${fmtCount(ubicadas - contornos)} por X/Y) · ${fmtCount(filas.length - ubicadas)} sin ubicación` +
-        (total > filas.length ? ` · la vista tiene ${fmtCount(total)} en total` : "")
-      : "Sin terrenos que mostrar.";
     dibujar();
     if (seleccion && actual?.geometria && !geometrias.size && !carga && actual.geometria.id !== fallida) {
       cargarContorno(seleccion);
@@ -233,6 +239,8 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     verAEscala() { if (seleccion) canvas?.zoomToScale(seleccion); },
     /** What floats over the map beside the basemap selector (the legend). */
     capas(...nodos) { capas.replaceChildren(...nodos.filter(Boolean)); },
+    /** What floats in the map's top-left corner, above the boundary status. */
+    arriba(...nodos) { delAnfitrion.replaceChildren(...nodos.filter(Boolean)); },
     /** For checks: how many boundary bodies are held (0 or 1) and loading. */
     get estado() { return { cuerpos: geometrias.size, cargando: Boolean(carga), filas: filas.length, zoom: canvas?.map.getZoom() ?? null }; },
     /** The panel became visible or changed size. */

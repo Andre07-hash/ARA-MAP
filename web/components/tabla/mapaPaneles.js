@@ -7,7 +7,13 @@
  * that set with the map's OWN filters before drawing. Those filters are not
  * the table's query: they never reach the grid, its page or its cursors, and
  * "Limpiar" only clears them. reiniciar() drops them when the view, the scope
- * or the account changes.
+ * or the account changes. The terrain type is one of them (the table's own
+ * type filter, when set, already bounds the set it hands over).
+ *
+ * The map takes the whole centre: no header strip above it. The "Filtros"
+ * button (narrow screens) and the host's notices (avisos) float in its
+ * top-left corner. The count of filtered terrains is the rail's, the placed /
+ * not placed ones the legend's.
  *
  * The record is read-only. It shows the row as the table holds it now, the
  * live custom columns of the terrain's OWN base (the current base's, or, from
@@ -38,12 +44,11 @@ function filasDe(registros) {
 }
 
 export function createMapaPaneles({
-  cargador, onSeleccion, onDeseleccion, onError, nombreDeBase, definicionesDe, alcance,
+  cargador, onSeleccion, onDeseleccion, onError, nombreDeBase, definicionesDe,
 }) {
   let vivo = true;
   let filtros = FILTROS_MAPA;
   let registros = [];             // the view's whole set, as the table holds it
-  let total = 0;
   let resultado = filtrarMapa([]);
   // The selected terrain's custom columns: { id, baseId, estado, definiciones, control }.
   let columnas = null;
@@ -57,20 +62,22 @@ export function createMapaPaneles({
 
   const rail = createFilterRail({
     conIncidencias: false,
+    conTipo: true,
     onChange: (cambio) => { filtros = { ...filtros, ...cambio }; aplicarFiltros(); },
     onReset: () => { filtros = FILTROS_MAPA; aplicarFiltros(); },
   });
   const railSlot = el("div", { class: "mapa-tabla-rail rail-slot" }, rail.element);
-  const avisoAlcance = el("p", { class: "mapa-tabla-alcance" });
   const btnFiltros = el("button", {
-    type: "button", id: "mapa-tabla-filtros", class: "btn btn-quiet filtros-btn", "aria-haspopup": "dialog",
+    type: "button", id: "mapa-tabla-filtros", class: "btn btn-small filtros-btn", "aria-haspopup": "dialog",
     onclick: () => abrirFiltros(),
   }, "Filtros");
+  let avisos = [];
+  const pintarArriba = () => previa.arriba(btnFiltros, ...avisos);
+  pintarArriba();
   const ficha = el("aside", {
     class: "mapa-tabla-ficha detail-slot", "aria-label": "Ficha del terreno", hidden: true,
   });
-  const centro = el("div", { class: "mapa-tabla-centro" },
-    el("div", { class: "mapa-tabla-cabecera" }, btnFiltros, avisoAlcance), previa.element);
+  const centro = el("div", { class: "mapa-tabla-centro" }, previa.element);
   const element = el("div", { class: "mapa-tabla" }, railSlot, centro, ficha);
 
   function abrirFiltros() {
@@ -95,8 +102,7 @@ export function createMapaPaneles({
     resultado = filtrarMapa(filas, filtros);
     const { visibles, monedas, breaks } = resultado;
     previa.pintar(visibles.map((f) => f.registro), {
-      // "The view has N in total" is said only for an incomplete gathering, not for the map's filters.
-      total: registros.length < total ? total : 0, nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
+      nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
     });
     rail.update({ terrenos: filas, filtros, visibles: visibles.length, monedas });
     const activos = filtrosActivos();
@@ -109,7 +115,6 @@ export function createMapaPaneles({
         sinUbicacion: `${plural(sinUbicacion, "terreno")} fuera del mapa: sin contorno activo ni X/Y válidas.`,
       },
     }));
-    avisoAlcance.textContent = alcance?.() ?? "";
     pintarFicha();
     // Only when the map's filters left it out; a set that no longer holds it is the table's to handle.
     if (antes && !previa.seleccion && registroDe(antes)) onDeseleccion?.(antes);
@@ -262,13 +267,15 @@ export function createMapaPaneles({
 
   return {
     element,
-    /** The view's whole set (the table's rows). `nuevaPagina`: another view or query. */
-    pintar(nuevos, { total: t = 0, nuevaPagina = true } = {}) {
+    /** The view's whole set (the table's rows). `nuevaPagina`: another view or query.
+     * An incomplete set is the host's to say (its notices). */
+    pintar(nuevos, { nuevaPagina = true } = {}) {
       if (!vivo) return;
       registros = nuevos;
-      total = t;
       dibujar({ nuevaPagina });
     },
+    /** The host's notices about the set (loading, errors, incomplete), over the map. */
+    avisos(...nodos) { avisos = nodos.filter(Boolean); pintarArriba(); },
     seleccionar(id) {
       if (!vivo) return;
       // Chosen in the grid but left out by the map's filters: not selected here.

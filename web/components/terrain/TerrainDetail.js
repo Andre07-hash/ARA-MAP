@@ -40,11 +40,11 @@ export function TerrainDetail({ terreno, baseNombre, onZoomAEscala, onClose }) {
     el("div", { class: "detail-lead" },
       el("div", {},
         el("span", { class: "eyebrow" }, "Asking Price"),
-        el("p", { class: "figure-lead" }, fmtPrice(terreno.asking_price, terreno.moneda)),
+        el("p", { class: "figure-lead" }, fmtPrice(terreno.asking_price)),
       ),
       el("div", { class: "detail-lead-sub" },
         el("span", { class: "eyebrow" }, "Asking $/m²"),
-        el("p", { class: "figure-sub" }, fmtUnitPrice(terreno.asking_m2, terreno.moneda)),
+        el("p", { class: "figure-sub" }, fmtUnitPrice(terreno.asking_m2)),
       ),
     ),
 

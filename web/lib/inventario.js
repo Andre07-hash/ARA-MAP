@@ -6,7 +6,6 @@
  * in Node against the shared fixtures in tests/js/fixtures/inventario/.
  */
 
-import { MONEDAS } from "./format.js";
 
 /* The server's maximum page. Fewer round trips; the default (100) is the
  * server's business, and the assembly loop works with either. */
@@ -132,7 +131,6 @@ export const FILTROS_VACIOS = Object.freeze({
   municipios: [],
   superficieMin: null,
   superficieMax: null,
-  moneda: null,           // one explicit currency, never a mix
   precioBase: "total",    // total | per_m2
   precioMin: null,
   precioMax: null,
@@ -142,7 +140,8 @@ export const FILTROS_VACIOS = Object.freeze({
 
 /**
  * The server query for a filter state. Geography is repeated parameters
- * (estado=A&estado=B); a price range is only ever sent with its currency.
+ * (estado=A&estado=B). Every price is in pesos, so a price range is sent as MXN,
+ * the one currency the server filters on.
  */
 export function consultaDe(filtros, tipo) {
   const f = { ...FILTROS_VACIOS, ...filtros };
@@ -152,13 +151,11 @@ export function consultaDe(filtros, tipo) {
   for (const municipio of f.municipios) q.append("municipio", municipio);
   if (f.superficieMin != null) q.set("area_min_m2", String(f.superficieMin));
   if (f.superficieMax != null) q.set("area_max_m2", String(f.superficieMax));
-  if (MONEDAS.includes(f.moneda)) {
-    q.set("moneda", f.moneda);
-    if (f.precioMin != null || f.precioMax != null) {
-      q.set("price_basis", f.precioBase === "per_m2" ? "per_m2" : "total");
-      if (f.precioMin != null) q.set("price_min", String(f.precioMin));
-      if (f.precioMax != null) q.set("price_max", String(f.precioMax));
-    }
+  if (f.precioMin != null || f.precioMax != null) {
+    q.set("moneda", "MXN");
+    q.set("price_basis", f.precioBase === "per_m2" ? "per_m2" : "total");
+    if (f.precioMin != null) q.set("price_min", String(f.precioMin));
+    if (f.precioMax != null) q.set("price_max", String(f.precioMax));
   }
   if (tipo === "inventario") {
     if (f.publicacion) q.set("publication_state", f.publicacion);
@@ -182,8 +179,7 @@ export function contarFiltros(filtros, tipo) {
   if (f.estados.length) n += 1;
   if (f.municipios.length) n += 1;
   if (f.superficieMin != null || f.superficieMax != null) n += 1;
-  if (f.moneda) n += 1;
-  if (f.moneda && (f.precioMin != null || f.precioMax != null)) n += 1;
+  if (f.precioMin != null || f.precioMax != null) n += 1;
   if (tipo === "inventario") {
     if (f.publicacion) n += 1;
     if (f.disponibilidad) n += 1;
@@ -244,7 +240,6 @@ export function opcionesDeFacetas(facets = {}) {
   return {
     estados: opcionesDe(facets.estados ?? facets.estado),
     municipios: opcionesDe(facets.municipios ?? facets.municipio),
-    monedas: opcionesDe(facets.monedas ?? facets.moneda),
   };
 }
 
@@ -277,8 +272,6 @@ export const CAMPOS = Object.freeze([
     ayuda: "Valor registrado; no se calcula a partir de los m²." },
   { clave: "afectaciones_pct", seccion: "superficie", etiqueta: "Afectaciones (%)", tipo: "numero", escala: 100 },
   { clave: "afectaciones_m2", seccion: "superficie", etiqueta: "Afectaciones (m²)", tipo: "numero" },
-  { clave: "moneda", seccion: "comercial", etiqueta: "Moneda", tipo: "opcion",
-    opciones: [["", "Sin moneda registrada"], ...MONEDAS.map((m) => [m, m])] },
   { clave: "asking_price", seccion: "comercial", etiqueta: "Asking Price (total)", tipo: "numero" },
   { clave: "asking_m2", seccion: "comercial", etiqueta: "Asking $/m²", tipo: "numero",
     ayuda: "Valor registrado; no se recalcula con el total." },
@@ -363,6 +356,16 @@ export function cambiosDelFormulario(textos, iniciales) {
   }
 
   return { cambios, errores };
+}
+
+/**
+ * The changes with the currency the server requires to publish a price. Every
+ * price is in pesos, so a form that leaves an amount on a terrain not yet
+ * recorded as MXN also records MXN; the form has no currency field.
+ */
+export function conPesos(cambios, textos, draft = {}) {
+  const conMonto = textos.asking_price.trim() !== "" || textos.asking_m2.trim() !== "";
+  return conMonto && draft.moneda !== "MXN" ? { ...cambios, moneda: "MXN" } : cambios;
 }
 
 const iguales = (a, b) => (a ?? null) === (b ?? null);

@@ -11,8 +11,7 @@
  */
 
 import { priceBreaks, priceColor } from "./colors.js";
-import { applyFilters, EMPTY_FILTERS, sinFiltrosDePrecio } from "./filters.js";
-import { monedasDe } from "./format.js";
+import { applyFilters, EMPTY_FILTERS } from "./filters.js";
 import { ubicacionDe } from "./geometria.js";
 import { itemDeInventario } from "./inventario.js";
 import { COLUMNAS_BASICAS, textoDe, valorDe } from "./tabla.js";
@@ -35,16 +34,12 @@ export function filaDeMapa(registro) {
  * Apply the map's own filters to the view's set.
  *
  * `filas` are map rows (filaDeMapa). Options, ranges and colour thresholds
- * come from all of them; `visibles` are the ones the filters keep. With
- * prices in more than one currency (or with an unrecorded one) there is no
- * common scale: no price filtering and no graduated colour.
+ * come from all of them; `visibles` are the ones the filters keep.
  */
 export function filtrarMapa(filas, filtros = FILTROS_MAPA) {
-  const monedas = monedasDe(filas);
-  const comparables = monedas.length <= 1;
-  const visibles = applyFilters(filas, comparables ? filtros : sinFiltrosDePrecio(filtros));
-  const breaks = comparables ? priceBreaks(filas.map((t) => t.asking_m2)) : null;
-  return { visibles, monedas, comparables, breaks };
+  const visibles = applyFilters(filas, filtros);
+  const breaks = priceBreaks(filas.map((t) => t.asking_m2));
+  return { visibles, breaks };
 }
 
 /** A map row's colour: its price per m² on the view's ramp, grey without one. */

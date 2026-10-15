@@ -99,7 +99,7 @@ test("colour thresholds come from the whole set, so filtering never changes a co
   assert.equal(colorDeFila(filas[0], todo.breaks), PRICE_RAMP[0]);
 });
 
-test("fewer than five prices per m², missing prices and mixed currencies keep the fallback", () => {
+test("fewer than five prices per m² and missing prices keep the fallback", () => {
   const pocos = [10, 20, 30, 40].map((v) => filaDeMapa(registro({ asking_m2: v, moneda: "MXN" })));
   const r = filtrarMapa(pocos);
   assert.equal(r.breaks, null);
@@ -110,14 +110,14 @@ test("fewer than five prices per m², missing prices and mixed currencies keep t
   const f = filtrarMapa(conFaltante);
   assert.notEqual(f.breaks, null);
   assert.equal(colorDeFila(conFaltante[5], f.breaks), GRIS, "a missing price is grey, not the cheapest step");
+});
 
-  const mezcla = [...[1, 2, 3, 4, 5].map((v) => filaDeMapa(registro({ asking_m2: v, moneda: "MXN" }))),
-    filaDeMapa(registro({ asking_m2: 3, moneda: "USD" }))];
-  const m = filtrarMapa(mezcla, { ...FILTROS_MAPA, unitarioMin: 4 });
-  assert.deepEqual(m.monedas.sort(), ["MXN", "USD"]);
-  assert.equal(m.comparables, false);
-  assert.equal(m.breaks, null, "no common scale across currencies");
-  assert.equal(m.visibles.length, 6, "price ranges do not apply across currencies");
+test("every price shares one scale and one filter, whatever currency a row recorded", () => {
+  const filas = [...[1, 2, 3, 4, 5].map((v) => filaDeMapa(registro({ asking_m2: v, moneda: "MXN" }))),
+    filaDeMapa(registro({ asking_m2: 6, moneda: null }))];
+  const m = filtrarMapa(filas, { ...FILTROS_MAPA, unitarioMin: 4 });
+  assert.notEqual(m.breaks, null);
+  assert.equal(m.visibles.length, 3);
 });
 
 test("the record lists the table's fields as stored, with comments", () => {

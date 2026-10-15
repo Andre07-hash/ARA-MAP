@@ -100,18 +100,17 @@ export function createMapaPaneles({
     const antes = previa.seleccion;
     const filas = filasDe(registros);
     resultado = filtrarMapa(filas, filtros);
-    const { visibles, monedas, breaks } = resultado;
+    const { visibles, breaks } = resultado;
     previa.pintar(visibles.map((f) => f.registro), {
       nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
     });
-    rail.update({ terrenos: filas, filtros, visibles: visibles.length, monedas });
+    rail.update({ terrenos: filas, filtros, visibles: visibles.length });
     const activos = filtrosActivos();
     btnFiltros.textContent = activos ? `Filtros (${activos})` : "Filtros";
     const { ubicados, sinUbicacion } = conteoDeUbicacion(visibles);
     previa.capas(Legend({
-      modo: "precio", capas: [], breaks, monedas, conteo: ubicados, sinUbicacion,
+      modo: "precio", capas: [], breaks, conteo: ubicados, sinUbicacion,
       textos: {
-        mezcla: "No se convierten entre monedas: los terrenos se muestran en gris.",
         sinUbicacion: `${plural(sinUbicacion, "terreno")} fuera del mapa: sin contorno activo ni X/Y válidas.`,
       },
     }));
@@ -239,11 +238,11 @@ export function createMapaPaneles({
       el("div", { class: "detail-lead" },
         el("div", {},
           el("span", { class: "eyebrow" }, "Asking price"),
-          el("p", { class: "figure-lead" }, fmtPrice(d.asking_price, d.moneda)),
+          el("p", { class: "figure-lead" }, fmtPrice(d.asking_price)),
         ),
         el("div", { class: "detail-lead-sub" },
           el("span", { class: "eyebrow" }, "Asking $/m2"),
-          el("p", { class: "figure-sub" }, fmtUnitPrice(d.asking_m2, d.moneda)),
+          el("p", { class: "figure-sub" }, fmtUnitPrice(d.asking_m2)),
         ),
       ),
       Section("Datos", camposDeFicha(registro)),

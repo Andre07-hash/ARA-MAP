@@ -45,8 +45,6 @@ const mismoTexto = (left, right) => {
 const CAMPOS = [
   { campo: "asking_price",     etiqueta: "Asking Price" },
   { campo: "asking_m2",        etiqueta: "Asking $/m²" },
-  // The same amount in another currency is a different price.
-  { campo: "moneda",           etiqueta: "Moneda", compara: mismoTexto },
   { campo: "superficie_m2",    etiqueta: "Superficie" },
   { campo: "afectaciones_pct", etiqueta: "Afectaciones" },
   { campo: "lat",              etiqueta: "Ubicación", compara: cercaEnGrados, agrupa: "ubicacion" },

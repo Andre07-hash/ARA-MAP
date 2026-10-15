@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  analizarConflicto, avisoDisponibilidadPendiente, cambiosDelFormulario, consultaDe,
+  analizarConflicto, avisoDisponibilidadPendiente, cambiosDelFormulario, conPesos, consultaDe,
   consultaDePagina, contarFiltros, crearIntento, erroresDeCampo, estadoPublicacion,
   estadoUbicacion, itemDeInventario, itemPublico, leerNumero, normalizarEvento,
   opcionesDeFacetas, pickPublic, PUBLIC_FIELDS, reunirPaginas, textosIniciales,
@@ -77,20 +77,21 @@ test("an inventory row carries the record's active boundary descriptor and never
 
 /* ---------------------------------------------------------------- queries */
 
-test("geography is repeated parameters; price only travels with its currency", () => {
-  const sinMoneda = consultaDe({ estados: ["Jalisco", "Nuevo León"], municipios: ["Zapopan"],
-    precioMin: 100, busqueda: "  ánimas " }, "catalogo");
-  assert.deepEqual(sinMoneda.getAll("estado"), ["Jalisco", "Nuevo León"]);
-  assert.deepEqual(sinMoneda.getAll("municipio"), ["Zapopan"]);
-  assert.equal(sinMoneda.get("q"), "ánimas");
-  assert.equal(sinMoneda.has("price_min"), false);
-  assert.equal(sinMoneda.has("moneda"), false);
+test("geography is repeated parameters; a price range travels as pesos", () => {
+  const sinPrecio = consultaDe({ estados: ["Jalisco", "Nuevo León"], municipios: ["Zapopan"],
+    busqueda: "  ánimas " }, "catalogo");
+  assert.deepEqual(sinPrecio.getAll("estado"), ["Jalisco", "Nuevo León"]);
+  assert.deepEqual(sinPrecio.getAll("municipio"), ["Zapopan"]);
+  assert.equal(sinPrecio.get("q"), "ánimas");
+  assert.equal(sinPrecio.has("price_min"), false);
+  assert.equal(sinPrecio.has("moneda"), false);
 
-  const conMoneda = consultaDe({ moneda: "USD", precioBase: "per_m2", precioMin: 100, superficieMax: 5000 }, "catalogo");
-  assert.equal(conMoneda.get("moneda"), "USD");
-  assert.equal(conMoneda.get("price_basis"), "per_m2");
-  assert.equal(conMoneda.get("price_min"), "100");
-  assert.equal(conMoneda.get("area_max_m2"), "5000");
+  const conPrecio = consultaDe({ precioBase: "per_m2", precioMin: 100, superficieMax: 5000 }, "catalogo");
+  assert.equal(conPrecio.get("moneda"), "MXN");
+  assert.equal(conPrecio.get("price_basis"), "per_m2");
+  assert.equal(conPrecio.get("price_min"), "100");
+  assert.equal(conPrecio.get("area_max_m2"), "5000");
+  assert.equal(contarFiltros({ precioMin: 100, superficieMax: 5000 }, "catalogo"), 2);
 });
 
 test("internal-only filters never reach the public catalog query", () => {
@@ -184,7 +185,7 @@ test("an untouched form sends nothing; cents and unknown currency survive byte f
   assert.deepEqual(cambiosDelFormulario({ ...iniciales }, iniciales), { cambios: {}, errores: {} });
 
   const sinMoneda = textosIniciales({ ...draft, moneda: null, availability: null });
-  assert.equal(sinMoneda.moneda, "");
+  assert.equal("moneda" in sinMoneda, false, "the form has no currency field");
   assert.equal(sinMoneda.availability, "unknown");
 });
 
@@ -199,6 +200,15 @@ test("only edited fields are parsed and sent, in the server's units", () => {
   assert.deepEqual(cambios, {
     asking_price: 1600000, afectaciones_pct: 0.125, direccion: null, price_on_request: true,
   });
+});
+
+test("a form that leaves an amount records it as pesos", () => {
+  const textos = { ...textosIniciales({}), asking_m2: "122.5" };
+  assert.deepEqual(conPesos({ asking_m2: 122.5 }, textos, {}), { asking_m2: 122.5, moneda: "MXN" });
+  assert.deepEqual(conPesos({}, textos, { moneda: null }), { moneda: "MXN" }, "an unrecorded currency is filled");
+  assert.deepEqual(conPesos({ asking_m2: 122.5 }, textos, { moneda: "MXN" }), { asking_m2: 122.5 });
+  const sinMonto = textosIniciales({});
+  assert.deepEqual(conPesos({ terreno: "x" }, sinMonto, {}), { terreno: "x" });
 });
 
 test("half a coordinate pair saves as a draft (§9.1); a decimal comma is still refused", () => {

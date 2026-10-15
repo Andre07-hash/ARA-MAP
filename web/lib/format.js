@@ -1,27 +1,14 @@
 /* Display formatting, Spanish (Mexico).
  *
- * Every price carries its own currency ("USD" or "MXN"), recorded when it was
- * imported, and is shown with that code: a bare "$" means dollars and pesos
- * alike. Nothing is assumed from magnitudes or places, and nothing is
- * converted. A price whose currency was never recorded (data from before
- * prices carried one) says so rather than borrowing a currency.
+ * Every price is in Mexican pesos and is shown as MXN. Nothing is converted.
  */
 
 export const LOCALE = "es-MX";
-export const MONEDAS = ["USD", "MXN"];
 
-const formatosDinero = new Map();
-function dinero(moneda, decimales) {
-  const clave = `${moneda}:${decimales}`;
-  if (!formatosDinero.has(clave)) {
-    formatosDinero.set(clave, new Intl.NumberFormat(LOCALE, {
-      style: "currency", currency: moneda, currencyDisplay: "code",
-      minimumFractionDigits: decimales, maximumFractionDigits: decimales,
-    }));
-  }
-  return formatosDinero.get(clave);
-}
-const conMoneda = (texto, moneda) => (MONEDAS.includes(moneda) ? texto : `${texto} · sin moneda`);
+const pesos = [0, 2].map((decimales) => new Intl.NumberFormat(LOCALE, {
+  style: "currency", currency: "MXN", currencyDisplay: "code",
+  minimumFractionDigits: decimales, maximumFractionDigits: decimales,
+}));
 const integer = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 0 });
 const decimal = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 });
 const hectares = new Intl.NumberFormat(LOCALE, {
@@ -38,39 +25,17 @@ const EMPTY = "—";
 
 const isNumber = (v) => typeof v === "number" && Number.isFinite(v);
 
-/** An amount in its own currency: "USD 388,689,722". */
-export function fmtPrice(v, moneda) {
-  if (!isNumber(v)) return EMPTY;
-  return MONEDAS.includes(moneda) ? dinero(moneda, 0).format(v) : conMoneda(`$${integer.format(v)}`, moneda);
+/** An amount in pesos: "MXN 388,689,722". */
+export function fmtPrice(v) {
+  return isNumber(v) ? pesos[0].format(v) : EMPTY;
 }
 // Unit prices are small numbers where a rounded cent changes the meaning:
 // the real data has 122.5 per m², which must show as 122.50, not 123.
-export function fmtUnitPrice(v, moneda) {
+export function fmtUnitPrice(v) {
   if (!isNumber(v)) return EMPTY;
-  const decimales = Number.isInteger(v) ? 0 : 2;
-  if (MONEDAS.includes(moneda)) return `${dinero(moneda, decimales).format(v)}/m²`;
-  return conMoneda(`$${decimales ? decimal.format(v) : integer.format(v)}/m²`, moneda);
+  return `${pesos[Number.isInteger(v) ? 0 : 1].format(v)}/m²`;
 }
 
-/**
- * The currencies of the priced terrains in a list. An unrecorded currency
- * counts as its own value (null): it may be either, so it never shares a
- * price scale with a known one. More than one entry means the prices cannot
- * be ranked, filtered or banded together.
- */
-export function monedasDe(terrenos) {
-  const vistas = new Set();
-  for (const t of terrenos) {
-    if (isNumber(t.asking_price) || isNumber(t.asking_m2)) vistas.add(t.moneda ?? null);
-  }
-  return [...vistas];
-}
-
-/** "USD y MXN", "USD y precios sin moneda" -- for messages about a mix. */
-export function nombraMonedas(monedas) {
-  const nombres = monedas.map((m) => m ?? "precios sin moneda registrada");
-  return nombres.length > 1 ? `${nombres.slice(0, -1).join(", ")} y ${nombres.at(-1)}` : (nombres[0] ?? "");
-}
 export const fmtArea = (v) => (isNumber(v) ? `${integer.format(v)} m²` : EMPTY);
 export const fmtHectares = (v) => (isNumber(v) ? `${hectares.format(v)} ha` : EMPTY);
 export const fmtPercent = (v) => (isNumber(v) ? percent.format(v) : EMPTY);
@@ -92,10 +57,10 @@ export function plural(count, singular, pluralForm = `${singular}s`) {
   return `${integer.format(count)} ${count === 1 ? singular : pluralForm}`;
 }
 
-/** A compact price for dense contexts: USD 1.2 M, USD 388 M, USD 122.5. */
-export function fmtPriceShort(v, moneda) {
+/** A compact price for dense contexts: MXN 1.2 M, MXN 388 M, MXN 122.5. */
+export function fmtPriceShort(v) {
   if (!isNumber(v)) return EMPTY;
-  const signo = MONEDAS.includes(moneda) ? `${moneda} ` : "$";
+  const signo = "MXN ";
   if (Math.abs(v) >= 1_000_000) return `${signo}${decimal.format(v / 1_000_000)} M`;
   // Below ten thousand, keep a decimal: rounding 1,300 and 1,900 both to
   // "1 k" makes a legend show the same label for different bands.

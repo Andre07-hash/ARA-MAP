@@ -14,8 +14,8 @@ import { defaultDestination } from "../lib/carpetas.js";
 import { layerColor, layerDash, priceBreaks, priceColor } from "../lib/colors.js";
 import { compareLayers } from "../lib/comparar.js";
 import { append, clear, el } from "../lib/dom.js";
-import { activeCount, applyFilters, EMPTY_FILTERS, sinFiltrosDePrecio } from "../lib/filters.js";
-import { fmtCount, monedasDe, plural } from "../lib/format.js";
+import { activeCount, applyFilters, EMPTY_FILTERS } from "../lib/filters.js";
+import { fmtCount, plural } from "../lib/format.js";
 import { ubicacionDe } from "../lib/geometria.js";
 import {
   contarFiltros, FILTROS_VACIOS, itemDeInventario, itemPublico, opcionesDeFacetas,
@@ -685,10 +685,8 @@ function renderDatos(host, state, tipo) {
   const datos = state[tipo];
   const items = itemsDe(tipo, datos);
   itemsActuales = items;
-  const monedas = monedasDe(items);
-  const preciosComparables = monedas.length <= 1;
   const sinUbicacion = items.filter((t) => !t.ubicado);
-  const breaks = preciosComparables ? priceBreaks(items.map((t) => t.asking_m2)) : null;
+  const breaks = priceBreaks(items.map((t) => t.asking_m2));
   const seleccionado = state.ruta.id;
 
   const ws = ensureWorkspace();
@@ -698,7 +696,6 @@ function renderDatos(host, state, tipo) {
     terrenos: items,
     filtros: datos.filtros,
     visibles: items.length,
-    monedas,
     opciones: opcionesDeFacetas(datos.facets),
     cargando: datos.cargando,
   });
@@ -718,7 +715,6 @@ function renderDatos(host, state, tipo) {
             orden: tableSort.campo,
             direccion: tableSort.direccion,
             seleccionado,
-            preciosComparables,
             onSort: ordenarTabla,
             onSelect: (id) => selectTerreno(id, { pan: true }),
           })
@@ -733,7 +729,6 @@ function renderDatos(host, state, tipo) {
             modo: "precio",
             capas: [],
             breaks,
-            monedas,
             conteo: items.length - sinUbicacion.length,
             sinUbicacion: sinUbicacion.length,
             invalidas: sinUbicacion.filter((t) => t.ubicacion === "invalida").length,
@@ -829,16 +824,10 @@ function renderMapa(host, state) {
   }
 
   const visibles = visibleTerrenos(state);
-  // Prices in more than one currency (or with an unrecorded one) share no
-  // scale: no common colour bands, price filters or price sorting. Location
-  // and everything else still compare normally.
-  const monedas = monedasDe(visibles);
-  const preciosComparables = monedas.length <= 1;
-  const filtrados = applyFilters(visibles,
-    preciosComparables ? state.filtros : sinFiltrosDePrecio(state.filtros));
+  const filtrados = applyFilters(visibles, state.filtros);
   const ubicados = filtrados.filter((t) => t.ubicado);
   const sinUbicacion = filtrados.filter((t) => !t.ubicado);
-  const breaks = preciosComparables ? priceBreaks(visibles.map((t) => t.asking_m2)) : null;
+  const breaks = priceBreaks(visibles.map((t) => t.asking_m2));
   const seleccionado = filtrados.find((t) => t.id === state.seleccionado) ?? null;
 
   itemsActuales = state.terrenos;
@@ -850,7 +839,6 @@ function renderMapa(host, state) {
     terrenos: visibles,
     filtros: state.filtros,
     visibles: filtrados.length,
-    monedas,
   });
 
   replaceKeepingFocus(ws.toolbar, MapToolbar(state, filtrados));
@@ -864,7 +852,6 @@ function renderMapa(host, state) {
             direccion: tableSort.direccion,
             seleccionado: state.seleccionado,
             comparando: state.capas.length > 1,
-            preciosComparables,
             onSort: ordenarTabla,
             onSelect: (id) => selectTerreno(id, { pan: true }),
           })
@@ -881,7 +868,6 @@ function renderMapa(host, state) {
             modo: state.modoColor,
             capas: state.capas,
             breaks,
-            monedas,
             conteo: ubicados.length,
             sinUbicacion: sinUbicacion.length,
             invalidas: sinUbicacion.filter((t) => t.ubicacion === "invalida").length,

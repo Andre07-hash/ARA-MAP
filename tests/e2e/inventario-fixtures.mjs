@@ -120,7 +120,7 @@ function crearApi() {
           ? json(200, { terreno: s.registros.get(previa.id) })
           : json(409, fixture('error-409-idempotency'));
       }
-      if (datos.asking_price != null && !datos.moneda) {
+      if (datos.asking_price != null && datos.moneda !== 'MXN') {
         return json(422, { error: 'Revisa los campos marcados.', detalle: { code: 'validation_failed',
           fields: { moneda: 'Indica la moneda del precio: USD o MXN.' } } });
       }
@@ -336,7 +336,7 @@ await caso('edit: 409 keeps my input, shows their change, and saves only after r
   await context.close();
 });
 
-await caso('new draft: client and server field errors, and a lost response retried with the same key', async () => {
+await caso('new draft: a client field error, prices saved as MXN, and a lost response retried with the same key', async () => {
   const { context, page, api, errores } = await abrir();
   await entrar(page);
   await page.getByRole('link', { name: 'Nuevo terreno' }).first().click();
@@ -349,20 +349,15 @@ await caso('new draft: client and server field errors, and a lost response retri
   await page.getByText('Falta la longitud (Y)', { exact: false }).waitFor();   // a warning, not a block (§9.1)
   await page.getByLabel('Longitud (Y)').fill('-103.34');
   await page.getByLabel('Asking Price (total)').fill('900000');
-  await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.locator('#ed-moneda-error', { hasText: 'Indica la moneda' }).waitFor();
-  assert.equal(await page.getByLabel('Moneda').getAttribute('aria-invalid'), 'true');
-  await foto(page, 'editor-error-422-1440');
-  await page.getByLabel('Moneda').selectOption('MXN');
+  assert.equal(await page.getByLabel('Moneda').count(), 0, 'the form has no currency field');
   api.s.perderRespuestaDeCreacion = 1;
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.getByText('No se pudo confirmar si el borrador se creó', { exact: false }).waitFor();
   assert.equal(await page.getByLabel('Nombre').inputValue(), 'Predio de prueba');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.waitForURL(/#\/inventario\/3f1c/);
-  const [rechazada, perdida, reintento] = api.s.clavesEnviadas;
-  assert.equal(api.s.clavesEnviadas.length, 3);
-  assert.notEqual(rechazada, perdida, 'a changed body gets a new key');
+  const [perdida, reintento] = api.s.clavesEnviadas;
+  assert.equal(api.s.clavesEnviadas.length, 2);
   assert.equal(perdida, reintento, 'the uncertain retry reuses its key');
   assert.equal(api.s.registros.size, 4, 'the retry created nothing new');
   assert.deepEqual(errores, []);

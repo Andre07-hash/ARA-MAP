@@ -23,10 +23,9 @@ const BASE_COLUMNS = [
   { key: "superficie", titulo: "Superficie",   render: (t) => fmtArea(t.superficie_m2), num: true },
   { key: null,         titulo: "Ha",           render: (t) => fmtHectares(t.superficie_ha), num: true },
   { key: null,         titulo: "Afect.",       render: (t) => fmtPercent(t.afectaciones_pct), num: true },
-  { key: "precio",     titulo: "Asking Price", render: (t) => fmtPrice(t.asking_price, t.moneda), num: true },
-  { key: "unitario",   titulo: "Asking $/m²",  render: (t) => fmtUnitPrice(t.asking_m2, t.moneda), num: true },
+  { key: "precio",     titulo: "Asking Price", render: (t) => fmtPrice(t.asking_price), num: true },
+  { key: "unitario",   titulo: "Asking $/m²",  render: (t) => fmtUnitPrice(t.asking_m2), num: true },
 ];
-const PRECIOS = new Set(["precio", "unitario"]);
 
 /* Sorting by source and by change state, available only while comparing.
  * Change sorts by how much attention the row deserves, not alphabetically. */
@@ -43,16 +42,10 @@ export const COMPARISON_SORTS = {
 };
 
 export function TerrainTable({
-  terrenos, orden, direccion, seleccionado, comparando = false, preciosComparables = true, onSort, onSelect,
+  terrenos, orden, direccion, seleccionado, comparando = false, onSort, onSelect,
 }) {
-  // Prices in different currencies cannot be ranked against each other:
-  // 100 USD and 100 MXN are not equal. Their columns stop being sortable.
-  const ordenEfectivo = !preciosComparables && PRECIOS.has(orden) ? "orden" : orden;
   const sorts = comparando ? { ...SORTS, ...COMPARISON_SORTS } : SORTS;
-  const filas = sortTerrenos(terrenos, ordenEfectivo, direccion, sorts);
-  const base = preciosComparables
-    ? BASE_COLUMNS
-    : BASE_COLUMNS.map((c) => (PRECIOS.has(c.key) ? { ...c, key: null } : c));
+  const filas = sortTerrenos(terrenos, orden, direccion, sorts);
 
   const columnas = comparando
     ? [
@@ -64,9 +57,9 @@ export function TerrainTable({
           ),
         },
         { key: "cambio", titulo: "Cambio", clase: "col-cambio", render: (t) => ChangeCell(t) },
-        ...base,
+        ...BASE_COLUMNS,
       ]
-    : base;
+    : BASE_COLUMNS;
 
   return el("div", { class: "table-wrap", tabindex: "0" },
     el("table", { class: "table" },

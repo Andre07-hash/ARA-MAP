@@ -743,8 +743,8 @@ try {
     await dialogo().getByText(/Moneda de los precios: dólares estadounidenses \(USD\) — según tu respuesta/).waitFor();
     const fila = async (nombre) => (await dialogo().locator('.preview-table tbody tr')
       .filter({ hasText: nombre }).first().textContent()).replace(/\s/g, ' ');
-    assert.match(await fila('Marceñas'), /USD 388,689,722.*USD 600\/m²/);
-    assert.match(await fila('El Dorado'), /USD 122\.50\/m²/);
+    assert.match(await fila('Marceñas'), /MXN 388,689,722.*MXN 600\/m²/);
+    assert.match(await fila('El Dorado'), /MXN 122\.50\/m²/);
     await dialogo().locator('#recordar-formato').uncheck();
     await dialogo().locator('#nombre-base').fill('E2E Real USD');
     await botonImportar().click();
@@ -763,7 +763,7 @@ try {
     await page.getByRole('group', { name: 'Vista' }).getByRole('button', { name: 'Tabla' }).click();
     const celda = (await page.locator('.table tbody tr').filter({ hasText: 'El Dorado' }).first().textContent())
       .replace(/\s/g, ' ');
-    assert.match(celda, /USD 133,072,446.*USD 122\.50\/m²/);
+    assert.match(celda, /MXN 133,072,446.*MXN 122\.50\/m²/);
     await page.getByRole('group', { name: 'Vista' }).getByRole('button', { name: 'Mapa' }).click();
   });
 

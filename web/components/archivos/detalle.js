@@ -24,6 +24,9 @@ import { openDialog } from "../ui/dialog.js";
 import { ErrorArchivos, LIMITE_BYTES, TIPO_CONTENIDO, nuevaClave } from "../../lib/archivos.js";
 import { crearSubida, FASE, esTerminal, pierdeAcceso } from "./subida.js";
 import { describirResumen, nombreSeguro, tamanoLegible } from "./resumen.js";
+import {
+  abrirPdf, enlaceDeRespaldo, MENSAJE_BLOQUEADO, MENSAJE_CERRADA, reservarPestana, VIDA_URL_MS,
+} from "./abrirPdf.js";
 
 const PAGINA_ARCHIVOS = 20;
 const PAGINA_DETALLE = 10;
@@ -326,25 +329,38 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   /* ------------------------------------------------------- downloads */
 
   async function descargar(version, abrir = false) {
+    // Reserved in the click itself, before any await (see abrirPdf.js).
+    if (abrir) return abrirVersion(version, reservarPestana());
     try {
       avisar("Descargando…");
       const r = await ctx.cliente.descargar(version.id, tipo, { signal: senal() });
       if (!vivo) return;
       const url = URL.createObjectURL(new Blob([r.bytes], { type: TIPO_CONTENIDO[tipo] }));
       urls.add(url);
-      if (abrir) {
-        window.open(url, "_blank", "noopener");
-      } else {
-        const a = el("a", { href: url, download: nombreSeguro(version.nombre_original, tipo), hidden: true });
-        document.body.append(a);
-        a.click();
-        a.remove();
-        // Revoking in the same task can cancel the save in some browsers; destroy() revokes it anyway.
-        setTimeout(() => { if (urls.delete(url)) URL.revokeObjectURL(url); }, 30_000);
-      }
-      avisar(abrir ? "Archivo abierto en una pestaña nueva." : "Descarga lista.");
+      const a = el("a", { href: url, download: nombreSeguro(version.nombre_original, tipo), hidden: true });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      // Revoking in the same task can cancel the save in some browsers; destroy() revokes it anyway.
+      setTimeout(() => { if (urls.delete(url)) URL.revokeObjectURL(url); }, 30_000);
+      avisar("Descarga lista.");
     } catch (error) {
       fallo(error, "No se pudo descargar");
+    }
+  }
+
+  async function abrirVersion(version, pestana) {
+    try {
+      avisar("Abriendo…");
+      const r = await abrirPdf({ cliente: ctx.cliente, versionId: version.id, pestana, signal: senal(), urls: ctx.urls });
+      if (!vivo || fuera) return;
+      if (r.abierta) { avisar("Archivo abierto en una pestaña nueva."); return; }
+      avisar(`${r.cerrada ? MENSAJE_CERRADA : MENSAJE_BLOQUEADO} `, r.cerrada ? "info" : "error");
+      const enlace = enlaceDeRespaldo(r.url);
+      estado.append(enlace);
+      setTimeout(() => enlace.remove(), VIDA_URL_MS);
+    } catch (error) {
+      fallo(error, "No se pudo abrir");
     }
   }
 

@@ -71,6 +71,23 @@ cd tests/e2e && npm ci
 node tabla-mapa-paneles.mjs                 # MAPA_CAPTURAS=carpeta para capturas
 ```
 
+## Abrir PDF desde la celda de la tabla (#48)
+
+«1 PDF» abre ese PDF guardado en una pestaña nueva con los mismos bytes; con
+varios, el contador abre una lista pequeña (también más allá de los cinco
+recientes del resumen y con «Cargar más»). Sin PDF, subidas sin terminar,
+vencidas o rechazadas no son enlaces; un PDF guardado junto a un reemplazo
+vencido sigue abriéndose. Administrador, operador y modo de solo consulta;
+teclado sin editor ni cambio de selección; clics repetidos, pestaña bloqueada,
+documento y terreno borrados, cambio de vista, recarga y sesión perdida sin
+pestañas vacías. «Elegir PDF…», el «Abrir» del detalle y el KMZ siguen igual.
+Levanta y borra su propio servidor desechable con datos ficticios.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-abrir-pdf.mjs                    # ABRIR_CAPTURAS=carpeta para capturas
+```
+
 ## Subidas PDF ante recargas de la tabla
 
 Una subida de PDF no se interrumpe al recuperar foco o visibilidad, con una

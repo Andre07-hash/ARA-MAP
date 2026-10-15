@@ -31,6 +31,7 @@ import { crearClienteArchivos } from "../../lib/archivos.js";
 import { montarCelda } from "./celda.js";
 import { montarDetalle } from "./detalle.js";
 import { crearTurno } from "./subida.js";
+import { crearRegistroUrls } from "./abrirPdf.js";
 
 export const MAX_SUBIDAS_PENDIENTES = 5;
 
@@ -39,6 +40,9 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
   const montajes = new Set();
   const subidas = new Set();          // unfinished uploads across this factory's mounts
   const pipeline = crearTurno();       // one read/hash/upload at a time, across this factory's mounts
+  // PDFs opened in a new tab: their object URLs outlive the mount that opened
+  // them (a table repaint must not break a tab still loading) and end with the session.
+  const urls = crearRegistroUrls();
   let destruido = false;
 
   const contexto = {
@@ -52,6 +56,7 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
       agregar: (s) => subidas.add(s),
       quitar: (s) => subidas.delete(s),
     },
+    urls,
     vivo: () => !destruido,
   };
 
@@ -98,6 +103,7 @@ export function crearWidgetsArchivos({ peticionPrivada } = {}) {
       // A read or digest still running keeps its permit until it settles;
       // this factory accepts no new work anyway.
       subidas.clear();
+      urls.vaciar();
     },
   };
 }

@@ -114,6 +114,38 @@ export function describirResumen(resumen, tipo) {
   return { estado: ESTADO.SIN_ACTIVAR, texto: "KMZ sin contorno activo", nota: n };
 }
 
+/**
+ * What a PDF row (a summary row or a list item) offers to open: its saved
+ * version, or null when it has none (an upload that never finished, expired
+ * or was refused, or a retired attachment). When a newer upload of the same
+ * attachment did not finish, the saved version stays openable; its own name
+ * is not known then, so `nombre` is null and `nota` says what happened.
+ */
+export function opcionPdf(fila) {
+  if (!fila || typeof fila !== "object" || (fila.tipo !== undefined && fila.tipo !== "pdf")) return null;
+  if (fila.retirado || fila.retirado_en || typeof fila.version_actual_id !== "string") return null;
+  const v = fila.ultima_version ?? null;
+  const misma = v?.id === fila.version_actual_id;
+  return {
+    archivoId: fila.id,
+    versionId: fila.version_actual_id,
+    nombre: misma && typeof v.nombre_original === "string" && v.nombre_original ? v.nombre_original : null,
+    nota: misma ? null : nota(v, fila.version_actual_id),
+  };
+}
+
+/**
+ * The saved PDFs a cell summary names, or null while there is no summary.
+ * `completo` is false when the server listed only the most recent
+ * attachments: then nothing beyond `opciones` is known, and the authorized
+ * list must be asked.
+ */
+export function pdfsDelResumen(resumen) {
+  if (!resumen || typeof resumen !== "object" || !Number.isInteger(resumen.pdf_total)) return null;
+  const filas = Array.isArray(resumen.pdf_recientes) ? resumen.pdf_recientes : [];
+  return { completo: filas.length >= resumen.pdf_total, opciones: filas.map(opcionPdf).filter(Boolean) };
+}
+
 /** A size in bytes, for people. */
 export function tamanoLegible(bytes) {
   if (!Number.isFinite(bytes) || bytes < 0) return "";

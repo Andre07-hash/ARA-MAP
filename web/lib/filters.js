@@ -58,11 +58,6 @@ export function applyFilters(terrenos, filters) {
   return terrenos.filter((t) => matches(t, filters));
 }
 
-/** The same filters without the price ranges: for prices in mixed currencies. */
-export function sinFiltrosDePrecio(filters) {
-  return { ...filters, precioMin: null, precioMax: null, unitarioMin: null, unitarioMax: null };
-}
-
 /** How many filters the user has actually set, for the "limpiar (3)" affordance. */
 export function activeCount(filters) {
   const f = { ...EMPTY_FILTERS, ...filters };

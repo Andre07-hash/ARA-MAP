@@ -7,28 +7,24 @@
  * what changed, leaving the node the user is typing into untouched.
  *
  *   createFilterRail({ onChange, onReset, modo, conIncidencias, conTipo })
- *     -> { element, update({ terrenos, filtros, visibles, monedas, opciones, cargando }), destroy() }
+ *     -> { element, update({ terrenos, filtros, visibles, opciones, cargando }), destroy() }
  *
  * `modo` is "local" (a legacy base or saved map, filtered in the browser) or
  * "catalogo" / "inventario" (filtered by the server). In the server modes the
  * state/municipality options come from the server's facets for the whole
- * candidate set (`opciones`), and price filtering takes one explicit currency
- * and one basis, never a mix.
+ * candidate set (`opciones`), and price filtering takes one basis, total or
+ * per m².
  *
  * `conIncidencias: false` leaves out the "Solo con incidencias" toggle, for
  * rows that carry no import findings (the tables' map).
  *
  * `conTipo: true` adds a "Tipo de terreno" group (the `tipos` filter), with
  * options counted from the rows' own `tipo_terreno` values (the tables' map).
- *
- * `monedas` are the currencies of the priced terrains in view. With more than
- * one, the local price ranges are disabled: a range in one currency would
- * silently apply to amounts in another.
  */
 
 import { el } from "../../lib/dom.js";
 import { activeCount, deriveOptions } from "../../lib/filters.js";
-import { fmtCount, fmtPriceShort, MONEDAS, nombraMonedas, plural } from "../../lib/format.js";
+import { fmtCount, fmtPriceShort, plural } from "../../lib/format.js";
 import { contarFiltros, DISPONIBILIDAD, PUBLICACION } from "../../lib/inventario.js";
 
 const RANGOS = [
@@ -158,7 +154,7 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
   const toggles = el("div", { class: "rail-field rail-toggles" },
     soloUbicados.label, conIncidencias && soloIncidencias.label);
 
-  /* ---- server modes: one currency, one basis, one range ----------------- */
+  /* ---- server modes: one basis, one range -------------------------------- */
 
   function crearSelect(id, opciones, clave, vacioEsNull = true) {
     const select = el("select", { id, class: "input" },
@@ -168,25 +164,19 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
   }
 
   const precio = servidor && (() => {
-    const moneda = crearSelect("precio-moneda",
-      [["", "Cualquier moneda"], ...MONEDAS.map((m) => [m, m])], "moneda");
     const base = crearSelect("precio-base",
       [["total", "Precio total"], ["per_m2", "Precio por m²"]], "precioBase", false);
     const min = crearNumero("precio-min", "mín", "precioMin");
     const max = crearNumero("precio-max", "máx", "precioMax");
-    const pista = el("p", { class: "range-hint muted" });
     const fieldset = el("fieldset", { class: "rail-field" },
       el("legend", { class: "field-label" }, "Precio"),
-      el("label", { class: "visually-hidden", for: "precio-moneda" }, "Moneda"),
-      moneda,
       el("label", { class: "visually-hidden", for: "precio-base" }, "Base del precio"),
       base,
       el("div", { class: "range-row" },
         min, el("span", { class: "range-dash", "aria-hidden": "true" }, "–"), max),
-      pista,
     );
     fieldset.classList.add("rail-precio");
-    return { moneda, base, min, max, pista, fieldset };
+    return { base, min, max, fieldset };
   })();
 
   const internos = modo === "inventario" && (() => {
@@ -292,8 +282,7 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
 
   function update(siguiente) {
     estado = { ...estado, ...siguiente };
-    const { terrenos, filtros, visibles, monedas = [], cargando = false } = estado;
-    const mezcla = monedas.length > 1;
+    const { terrenos, filtros, visibles, cargando = false } = estado;
     const derivadas = deriveOptions(terrenos, filtros);
     const opciones = servidor ? { ...derivadas, ...estado.opciones } : derivadas;
     const activos = servidor ? contarFiltros(filtros, modo) : activeCount(filtros);
@@ -317,25 +306,14 @@ export function createFilterRail({ onChange, onReset, modo = "local", conInciden
       asignarSiOcioso(rango.min, filtros[`${rango.campo}Min`]);
       asignarSiOcioso(rango.max, filtros[`${rango.campo}Max`]);
       if (!extremos) { rango.pista.textContent = ""; continue; }
-      const bloqueado = rango.dinero && mezcla;
-      rango.min.disabled = bloqueado;
-      rango.max.disabled = bloqueado;
-      rango.pista.textContent = bloqueado
-        ? `Precios en ${nombraMonedas(monedas)}: no se filtran juntos.`
-        : `${rango.formato(extremos.min, monedas[0])} – ${rango.formato(extremos.max, monedas[0])}`;
+      rango.pista.textContent = `${rango.formato(extremos.min)} – ${rango.formato(extremos.max)}`;
     }
 
     if (precio) {
-      const moneda = MONEDAS.includes(filtros.moneda) ? filtros.moneda : "";
-      if (precio.moneda.value !== moneda) precio.moneda.value = moneda;
       const baseValor = filtros.precioBase === "per_m2" ? "per_m2" : "total";
       if (precio.base.value !== baseValor) precio.base.value = baseValor;
       asignarSiOcioso(precio.min, filtros.precioMin);
       asignarSiOcioso(precio.max, filtros.precioMax);
-      for (const control of [precio.base, precio.min, precio.max]) control.disabled = !moneda;
-      precio.pista.textContent = moneda
-        ? `Solo terrenos con precio en ${moneda}; los demás quedan fuera de este filtro.`
-        : "Elige una moneda para filtrar por precio. Los precios no se convierten entre monedas.";
     }
 
     if (internos) {

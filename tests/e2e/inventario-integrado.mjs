@@ -93,7 +93,7 @@ await caso('a private deep link offers sign-in; wrong password is generic; then 
   await context.close();
 });
 
-await caso('Ana creates a draft directly: server 422 on currency, then saved with an id', async () => {
+await caso('Ana creates a draft directly: its price saved as MXN, with an id', async () => {
   const { context, page, api, errores } = await contexto();
   await page.goto(`${URL_BASE}/`);
   await entrar(page, 'ana');
@@ -107,19 +107,15 @@ await caso('Ana creates a draft directly: server 422 on currency, then saved wit
   await page.getByLabel('Asking $/m²').fill('122.50');
   await page.getByLabel('Contacto').fill(`Contacto ${SENTINELA}`);
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.locator('#ed-moneda-error', { hasText: /moneda/i }).waitFor();   // server rule, no record created
-  await foto(page, 'integrado-editor-422-1440');
-  await page.getByLabel('Moneda').selectOption('USD');
-  await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.waitForURL(/#\/inventario\/[0-9a-f-]{36}$/);
   idTerreno = page.url().split('/').pop();
   await page.getByText(/Borrador creado · ID .* · versión 1/).waitFor();
   const detalle = page.locator('.detail');
   await detalle.getByText('Borrador · No publicado').waitFor();
-  await detalle.getByText('USD 122.50/m²').waitFor();
+  await detalle.getByText('MXN 122.50/m²').waitFor();
   assert.ok((await detalle.innerHTML()).includes('&lt;b&gt;Norte&lt;/b&gt;'), 'HTML-like text stays literal');
   const posts = api.filter((l) => l === 'POST /api/inventario/terrenos').length;
-  assert.equal(posts, 2, 'one rejected, one created');
+  assert.equal(posts, 1, 'created at once: the price goes as MXN');
   await foto(page, 'integrado-detalle-1440');
   await page.setViewportSize({ width: 390, height: 844 });
   await foto(page, 'integrado-detalle-390');

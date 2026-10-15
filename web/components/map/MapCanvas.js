@@ -655,7 +655,7 @@ function tooltipHtml(terreno, { sinContorno = false } = {}) {
   const place = escapeHtml(
     [terreno.municipio, terreno.estado].filter(Boolean).join(", ")
   );
-  const figures = [fmtArea(terreno.superficie_m2), fmtUnitPrice(terreno.asking_m2, terreno.moneda)]
+  const figures = [fmtArea(terreno.superficie_m2), fmtUnitPrice(terreno.asking_m2)]
     .filter((v) => v !== "—")
     .join(" · ");
 

@@ -21,11 +21,11 @@ export function TerrainFacts(publico) {
       el("div", {},
         el("span", { class: "eyebrow" }, "Asking Price"),
         el("p", { class: "figure-lead" },
-          consultar ? "Precio a consultar" : fmtPrice(publico.asking_price, publico.moneda)),
+          consultar ? "Precio a consultar" : fmtPrice(publico.asking_price)),
       ),
       !consultar && el("div", { class: "detail-lead-sub" },
         el("span", { class: "eyebrow" }, "Asking $/m²"),
-        el("p", { class: "figure-sub" }, fmtUnitPrice(publico.asking_m2, publico.moneda)),
+        el("p", { class: "figure-sub" }, fmtUnitPrice(publico.asking_m2)),
       ),
     ),
 

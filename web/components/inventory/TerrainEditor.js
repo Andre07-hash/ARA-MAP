@@ -14,7 +14,7 @@ import { api } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { googleMapsSearch } from "../../lib/format.js";
 import {
-  analizarConflicto, CAMPOS, cambiosDelFormulario, campo, CONFIRMABLES, crearIntento, erroresDeCampo,
+  analizarConflicto, CAMPOS, cambiosDelFormulario, campo, CONFIRMABLES, conPesos, crearIntento, erroresDeCampo,
   estadoPublicacion, estadoUbicacion, leerNumero, mostrarTexto, mostrarValor, SECCIONES,
   textosIniciales,
 } from "../../lib/inventario.js";
@@ -191,13 +191,9 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
 
     const consultar = leerUno("price_on_request");
     const conMonto = leerUno("asking_price").trim() !== "" || leerUno("asking_m2").trim() !== "";
-    const sinMoneda = conMonto && leerUno("moneda") === "";
-    comercialNota.hidden = !(consultar && conMonto) && !sinMoneda;
-    comercialNota.textContent = consultar && conMonto
-      ? "«Precio a consultar» y un monto no pueden publicarse juntos. Deja vacíos los montos " +
-        "o desmarca «Precio a consultar»; los precios anteriores quedan en el historial."
-      : "Este precio no tiene moneda registrada. Elige USD o MXN para poder publicarlo; " +
-        "no se asume ni se convierte.";
+    comercialNota.hidden = !(consultar && conMonto);
+    comercialNota.textContent = "«Precio a consultar» y un monto no pueden publicarse juntos. " +
+      "Deja vacíos los montos o desmarca «Precio a consultar»; los precios anteriores quedan en el historial.";
   }
 
   function rellenar() {
@@ -252,8 +248,9 @@ export function createTerrainEditor({ terreno, onSaved, onClose, onHistory }) {
     if (enVuelo || conflictoPendiente) return;
 
     const enviados = leer();
-    const { cambios, errores } = cambiosDelFormulario(enviados, iniciales);
-    if (Object.keys(errores).length) return mostrarErrores(errores);
+    const formulario = cambiosDelFormulario(enviados, iniciales);
+    if (Object.keys(formulario.errores).length) return mostrarErrores(formulario.errores);
+    const cambios = conPesos(formulario.cambios, enviados, base?.draft);
     limpiarErrores();
     const confirma = base ? confirmados() : [];
     if (!Object.keys(cambios).length && !confirma.length) return pintarEstado("No hay cambios que guardar.");

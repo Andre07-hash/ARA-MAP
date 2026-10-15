@@ -192,7 +192,7 @@ const conContorno = await crear(base, { terreno: 'Lote Panel Contorno Ficticio',
 const TODOS = [...puntos, ...sinUbicacion, conContorno];
 const elegido = puntos[7];
 await escribir(elegido, { changes: { notas_internas: 'Comentario ficticio vigente' }, custom: { [colBase.id]: 'Visita ficticia' } });
-// The other base: few prices, one in USD.
+// The other base: few prices, one with an older USD record.
 const deOtra = [];
 for (let i = 0; i < 4; i += 1) {
   deOtra.push(await crear(otra, { terreno: `Lote Otra ${i} Ficticio`, estado: 'Yucatán', lat: 20.5, lon: -89 + i * 0.3,
@@ -392,11 +392,11 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   igual(await ficha(ada.page).isVisible(), false, 'sin ficha de la vista anterior');
 });
 
-await revisar('monedas mezcladas y pocos precios: sin graduar, con el aviso existente', async () => {
+await revisar('pocos precios: sin graduar; todo precio es MXN y se filtra junto', async () => {
   const texto = await leyenda(ada.page).innerText();
-  cierto(/no se gradúan juntos/.test(texto) && /No se convierten entre monedas/.test(texto), `leyenda: ${texto}`);
+  cierto(/No hay suficientes precios/.test(texto) && !/moneda/i.test(texto), `leyenda: ${texto}`);
   igual(await ada.page.locator('.previa .legend .ramp-step').count(), 0, 'sin rampa');
-  igual(await ada.page.locator('#unitario-min').isDisabled(), true, 'sin filtro de precio entre monedas');
+  igual(await ada.page.locator('#unitario-min').isDisabled(), false, 'el filtro de precio sigue disponible');
 });
 
 await revisar('la ficha: valores y comentario vigentes, columnas de su base, archivos y sin escrituras', async () => {

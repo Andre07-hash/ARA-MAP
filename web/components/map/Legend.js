@@ -5,21 +5,20 @@
  * requires visible labels as relief rather than colour alone. Layers past the
  * validated colour range are marked as relying on their dashed ring too.
  *
- * `textos` lets a map say its own unplaced and mixed-currency notes: the
- * tables' map places a terrain by its active boundary too, so "no
+ * `textos` lets a map say its own unplaced note: the tables' map places a terrain by its active boundary too, so "no
  * coordinates" would not be true there.
  */
 
 import { CAPAS_SEGURAS, PRICE_RAMP, layerNeedsPattern } from "../../lib/colors.js";
 import { el } from "../../lib/dom.js";
-import { fmtPriceShort, nombraMonedas, plural } from "../../lib/format.js";
+import { fmtPriceShort, plural } from "../../lib/format.js";
 
 export function Legend({
-  modo, capas, breaks, monedas = [], conteo, sinUbicacion, invalidas = 0, escala, onToggleCapa, textos = {},
+  modo, capas, breaks, conteo, sinUbicacion, invalidas = 0, escala, onToggleCapa, textos = {},
 }) {
   const cuerpo = modo === "base"
     ? capasLegend(capas, onToggleCapa)
-    : priceLegend(breaks, monedas, textos.mezcla);
+    : priceLegend(breaks);
 
   const excede = modo === "base" && capas.length > CAPAS_SEGURAS;
   const huerfanas = capas.filter((c) => c.base_existe === false).length;
@@ -90,26 +89,19 @@ function capasLegend(capas, onToggleCapa) {
   );
 }
 
-function priceLegend(breaks, monedas, mezcla) {
-  if (monedas.length > 1) {
-    // One scale for two currencies would rank 100 USD and 100 MXN as equal.
-    return el("p", { class: "legend-note legend-aviso" },
-      `Los precios están en ${nombraMonedas(monedas)}; no se gradúan juntos. ` +
-      (mezcla ?? "Muestra una sola capa o colorea por capa; la ubicación se compara igual."));
-  }
+function priceLegend(breaks) {
   if (!breaks) {
     return el("p", { class: "legend-note" },
       "No hay suficientes precios por m² para graduar el color.");
   }
 
-  const moneda = monedas[0];
-  const etiquetas = ["menor", ...breaks.map((b) => fmtPriceShort(b, moneda))];
+  const etiquetas = ["menor", ...breaks.map((b) => fmtPriceShort(b))];
   return el("div", { class: "legend-ramp" },
     PRICE_RAMP.map((color, index) =>
       el("div", { class: "ramp-step" },
         el("span", { class: "ramp-swatch", style: { background: color } }),
         el("span", { class: "ramp-label figure" },
-          index === 0 ? `< ${fmtPriceShort(breaks[0], moneda)}` : `≥ ${etiquetas[index]}`),
+          index === 0 ? `< ${fmtPriceShort(breaks[0])}` : `≥ ${etiquetas[index]}`),
       )
     ),
     el("div", { class: "ramp-step ramp-step-unknown" },

@@ -1,0 +1,17 @@
+ok   foco de la ventana mientras se envía el PDF: la subida no se interrumpe
+ok   regreso del selector de archivos: el foco recarga la tabla antes de que llegue el archivo
+ok   crear otra fila durante la subida no la interrumpe
+ok   operador: volver a la pestaña mientras se verifica el PDF no interrumpe la subida
+ok   filtrar y Actualizar durante la subida: sigue, también fuera de la página, y lo dice
+ok   cambiar de vista pregunta antes de interrumpir; quedarse conserva la subida
+ok   cambiar de vista e interrumpir, confirmado: la vista cambia y no se guarda nada a medias
+ok   detalle: cerrar, Escape y el fondo preguntan durante la subida; el PDF guardado se descarga igual
+ok   una red caída a mitad del envío: se dice y «Reintentar» termina la misma subida
+ok   estados: subida vencida sin PDF previo, y con un PDF guardado que sigue disponible
+ok   operador: cerrar sesión durante la subida pregunta; al confirmar, nada más se pide ni se muestra
+ok   la sesión termina en otra pestaña durante la subida: la revalidación sigue y no se pide nada más
+ok   otra cuenta en la misma ventana durante la subida: lo anterior se retira y nada sigue bajo la nueva
+ok   sin errores de página
+
+todo bien
+RSS_MAX_HIJOS_MIB=202.5

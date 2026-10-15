@@ -1,0 +1,1 @@
+recorrido-completo-postgres rc=0 segundos=26 RSS_MAX_HIJOS_MIB=235.2

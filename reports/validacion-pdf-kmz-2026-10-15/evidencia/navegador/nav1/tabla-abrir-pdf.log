@@ -1,0 +1,21 @@
+ok   sin PDF, subida sin terminar, vencida y rechazada: texto sin enlace
+ok   administrador: «1 PDF» abre ese PDF en una pestaña nueva, con los mismos bytes, desde su fila
+ok   un PDF guardado junto a un reemplazo vencido sigue abriéndose; el vencido no
+ok   varios PDF: el contador abre una lista; cada elección abre el documento correcto
+ok   teclado: Enter abre; flechas, Enter y Escape en la lista; nunca un editor
+ok   más PDF que el resumen reciente: la lista autorizada, con su paginación
+ok   operador autorizado: abre «1 PDF» y elige entre varios
+ok   solo consulta: sin «Elegir PDF…», pero la lectura funciona
+ok   clics repetidos durante la descarga: una sola pestaña y una sola descarga
+ok   una pestaña rechazada por el navegador ofrece un enlace que abre el PDF
+ok   cerrar la lista mientras carga y cambiar de vista durante la descarga descartan lo atrasado
+ok   cerrar la lista durante la descarga (Escape, «Cerrar», clic fuera) cancela la apertura y cierra su pestaña
+ok   documento borrado (enlace viejo): el servidor real responde 404, la pestaña se cierra, la fila sigue y el resumen se actualiza
+ok   terreno borrado: el 404 se comprueba con su lista y la fila sale; sin pestaña vacía
+ok   recargar la página durante la descarga cierra la pestaña reservada
+ok   sesión perdida durante la descarga: sin pestaña vacía ni PDF
+ok   «Elegir PDF…» sigue igual y convierte «1 PDF» en lista; el detalle abre con el mismo flujo
+ok   sin errores de página
+
+todo bien
+RSS_MAX_HIJOS_MIB=214.8

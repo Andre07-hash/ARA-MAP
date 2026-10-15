@@ -1,0 +1,113 @@
+{
+  "fases": {
+    "grandes": {
+      "kmz_s": 1.17,
+      "pdf_s": 2.22,
+      "simultaneo_s": 2.22,
+      "rechazos_mas_uno": {
+        "pdf_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "pdf_cuerpo": [
+          "conexion_cerrada",
+          "BrokenPipeError"
+        ],
+        "kmz_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "kmz_cuerpo": [
+          413,
+          "tamano_excedido"
+        ]
+      }
+    }
+  },
+  "limite_memoria_mb": 512,
+  "bd": "sqlite",
+  "final": {
+    "terrenos": 1,
+    "versiones_esperadas": 1,
+    "objetos_temporales": 0,
+    "objetos_finales": 1,
+    "parciales_huerfanos": 0
+  },
+  "duracion_total_s": 3.3,
+  "rss_pico_servidor_mib": [
+    107.3
+  ],
+  "tiempos": {
+    "GET": {
+      "n": 2,
+      "p50_ms": 9.2,
+      "p95_ms": 12.7,
+      "max_ms": 12.7
+    },
+    "POST": {
+      "n": 2,
+      "p50_ms": 9.2,
+      "p95_ms": 10.0,
+      "max_ms": 10.0
+    },
+    "completar": {
+      "n": 3,
+      "p50_ms": 14.8,
+      "p95_ms": 329.2,
+      "max_ms": 329.2
+    },
+    "contenido_mas_uno": {
+      "n": 2,
+      "p50_ms": 18.3,
+      "p95_ms": 33.4,
+      "max_ms": 33.4
+    },
+    "contenido_pdf": {
+      "n": 1,
+      "p50_ms": 141.3,
+      "p95_ms": 141.3,
+      "max_ms": 141.3
+    },
+    "descarga_pdf": {
+      "n": 1,
+      "p50_ms": 302.3,
+      "p95_ms": 302.3,
+      "max_ms": 302.3
+    },
+    "iniciar": {
+      "n": 6,
+      "p50_ms": 9.9,
+      "p95_ms": 1118.2,
+      "max_ms": 1118.2
+    },
+    "listar": {
+      "n": 1,
+      "p50_ms": 9.2,
+      "p95_ms": 9.2,
+      "max_ms": 9.2
+    },
+    "login": {
+      "n": 6,
+      "p50_ms": 8.5,
+      "p95_ms": 444.4,
+      "max_ms": 444.4
+    },
+    "tabla": {
+      "n": 59,
+      "p50_ms": 35.4,
+      "p95_ms": 586.2,
+      "max_ms": 848.6
+    },
+    "verificacion_final": {
+      "n": 1,
+      "p50_ms": 129.9,
+      "p95_ms": 129.9,
+      "max_ms": 129.9
+    }
+  },
+  "conteos": {},
+  "fallos": [
+    "grande kmz: iniciar kmz alan: 500 {'error': 'Ocurrió un error inesperado. Inténtalo de nuevo; si se repite, avisa al equipo.', 'detalle': {'code': 'internal'}}"
+  ],
+  "servidor_stderr_tracebacks": 2
+}

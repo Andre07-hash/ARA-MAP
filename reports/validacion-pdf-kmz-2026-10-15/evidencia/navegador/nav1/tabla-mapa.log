@@ -1,0 +1,22 @@
+ok   administrador: entra a la tabla maestra y «Inventario» ya no está en el menú
+ok   administrador: los contornos se cargan con «Elegir KMZ…» desde las celdas (convivencia con #33)
+ok   administrador: el mapa reúne TODOS los terrenos de la base, más allá de la página, una sola vez
+ok   administrador: el círculo de un terreno sin X/Y carga su contorno activo; otro círculo, el suyo
+ok   administrador: KMZ grande del fixture, seleccionado desde el mapa (tiempo)
+ok   Tabla ⇄ Mapa conserva base, filtros, página y selección sin volver a reunir
+ok   los filtros acotan el mapa; un filtro sin resultados y «sin ubicación» se dicen
+ok   cambios rápidos de selección, filtros y base no dejan un contorno anterior
+ok   un error al reunir se dice y se puede reintentar; la carga parcial no se presenta como completa
+ok   una escritura hecha con otro filtro deja el conjunto anterior desactualizado: el mapa no muestra lo borrado
+ok   un cambio de filtro en el mapa limpia el mapa al instante y cancela la reunión anterior
+ok   misma consulta (estado): editar el estado de un terreno lo saca del mapa filtrado sin pulsar Actualizar
+ok   misma consulta (búsqueda): renombrar un terreno lo saca del mapa de la búsqueda
+ok   misma consulta: una fila en blanco creada con un filtro activo no entra al mapa; sin filtros sí, sin reunir de nuevo
+ok   operador: Tabla / Mapa en su base; nunca recibe filas ni contornos de otra base
+ok   direcciones antiguas de Inventario llevan al contexto equivalente
+ok   alternar muchas veces no acumula mapas, escuchas ni cuerpos
+ok   sin errores de página
+medidas: {"reunir_111_ms":337,"contorno_limite_ms":1748,"contorno_limite_a_escala_ms":1969,"heap_20_alternancias":{"antes":13937155,"despues":10701976}}
+
+todo bien
+RSS_MAX_HIJOS_MIB=259.9

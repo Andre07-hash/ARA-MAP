@@ -1,0 +1,17 @@
+ok   administrador: la base con contorno KMZ sin X/Y (desde la celda, sin cambios)
+ok   administrador: filtros a la izquierda, mapa con leyenda por precio y todo el conjunto (> una página)
+ok   el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni pie, Encuadrar todo sobre el mapa
+ok   los filtros del mapa acotan el mapa, conservan los colores y no tocan la tabla
+ok   Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toca la tabla
+ok   Limpiar no amplía el alcance de la tabla; otra vista empieza sin filtros del mapa
+ok   monedas mezcladas y pocos precios: sin graduar, con el aviso existente
+ok   la ficha: valores y comentario vigentes, columnas de su base, archivos y sin escrituras
+ok   contorno activo sin X/Y: ficha y cuerpo; cerrar no lo desactiva; un filtro que lo excluye limpia la ficha
+ok   desde la maestra: columnas de la base de cada terreno, cambios rápidos sin ficha atrasada
+ok   fondos Claro/Satélite/Calles con ficha abierta; la tabla sigue editable
+ok   pantalla estrecha: filtros en un cajón, ficha superpuesta, teclado
+ok   operador: su base, filtros y ficha con sus columnas; nunca otra base
+ok   sin errores de página
+
+todo bien
+RSS_MAX_HIJOS_MIB=210.2

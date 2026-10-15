@@ -1,0 +1,14 @@
+ok   administrador: celdas vacías muestran su resumen y los dos botones
+ok   administrador: un PDF elegido en la fila B queda en B, no en A
+ok   administrador: otro PDF en una celda que ya tiene archivos
+ok   administrador: KMZ de un contorno en A (regla existente del servidor: un único contorno válido queda activo)
+ok   administrador: un reemplazo KMZ inválido conserva el contorno anterior
+ok   operador: PDF en una celda vacía (A) y en una con archivos (B), cada uno en su fila
+ok   operador: KMZ con varios contornos en B no activa nada; se elige y activa en el detalle
+ok   cancelar el selector no envía nada ni cambia el resumen
+ok   teclado: Enter y Espacio abren el selector; ni teclas ni doble clic abren un editor
+ok   borrar un terreno desde su detalle: la fila sale y las demás conservan sus botones
+ok   sin errores de página
+
+todo bien
+RSS_MAX_HIJOS_MIB=182.8

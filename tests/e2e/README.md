@@ -95,12 +95,28 @@ recarga que ya estaba en vuelo, al crear otra fila, con Actualizar, filtros o
 páginas; cambiar de vista, cerrar el detalle (botón, Escape o fondo) y cerrar
 sesión preguntan antes. Reintentar, cancelar, sesión terminada y otra cuenta,
 descarga con los mismos bytes y estados de subidas vencidas con y sin un PDF
-guardado. Retiene peticiones con `page.route` para controlar el momento.
+guardado. También respuestas perdidas después de que el servidor
+registró o guardó (con doble clic en «Reintentar»), un envío que no responde,
+Tabla / Mapa durante la subida y 503/429 simulados. Retiene peticiones con `page.route` para controlar el momento.
 Levanta y borra su propio servidor desechable con datos ficticios.
 
 ```bash
 cd tests/e2e && npm ci
 node tabla-subidas.mjs                      # SUBIDAS_CAPTURAS=carpeta para capturas
+```
+
+## Ensayos repetidos y concurrentes de archivos (#51)
+
+Sin navegador: el servidor real sobre una carpeta desechable, HTTP real y una
+sesión por cuenta ficticia. 20 ciclos con PDF y KMZ pequeños, 2 y 5 sesiones a la
+vez, un PDF de 25 MiB y un KMZ de 20 MiB simultáneos y un byte de más, y
+reinicios con SIGKILL. Compara cada archivo por SHA-256, el listado de cada
+terreno con lo esperado y el almacén (sin temporales). Escribe tiempos, fallos
+y memoria del servidor.
+
+```bash
+python3 tests/e2e/ensayo_archivos.py --salida /tmp/ensayo.json
+MALLOC_ARENA_MAX=2 python3 tests/e2e/ensayo_archivos.py --fases grandes,sesiones --limite-memoria-mb 512
 ```
 
 ## Elegir PDF/KMZ desde las celdas de la tabla

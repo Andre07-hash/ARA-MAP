@@ -1,0 +1,9 @@
+ok   marcar filas y la página; seleccionar toda la vista
+ok   crear una base con la selección
+ok   transferir la selección
+ok   borrar la selección: cancelar no borra; confirmar sí
+ok   el operador sólo puede borrar
+ok   sin errores de página
+
+todo bien
+RSS_MAX_HIJOS_MIB=193.5

@@ -112,8 +112,8 @@
   text-align: left;
   cursor: pointer;
 }
-.archivos-opcion:hover:not(:disabled), .archivos-opcion:focus-visible { background: var(--paper-sunken); }
-.archivos-opcion:disabled { cursor: progress; color: var(--ink-muted); }
+.archivos-opcion:hover:not([aria-disabled="true"]), .archivos-opcion:focus-visible { background: var(--paper-sunken); }
+.archivos-opcion[aria-disabled="true"] { cursor: progress; color: var(--ink-muted); }
 .archivos-opcion-nombre { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 2px; }
 .archivos-opcion-nota { font-size: var(--text-micro); color: var(--ink-secondary); }
 .archivos-opciones-estado { margin: 0; font-size: var(--text-micro); color: var(--ink-secondary); }

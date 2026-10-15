@@ -165,7 +165,11 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   function marcarAbriendo(valor) {
     abriendo = valor;
     if (valor) enlace.setAttribute("aria-busy", "true"); else enlace.removeAttribute("aria-busy");
-    for (const b of selector?.querySelectorAll(".archivos-opcion") ?? []) b.disabled = Boolean(valor);
+    // aria-disabled, not disabled: a disabled button drops the focus, and the
+    // chooser must still take Escape while its choice downloads (abrir() ignores clicks).
+    for (const b of selector?.querySelectorAll(".archivos-opcion") ?? []) {
+      if (valor) b.setAttribute("aria-disabled", "true"); else b.removeAttribute("aria-disabled");
+    }
   }
 
   /* A 404 on one version may only mean someone deleted that file: only a 404
@@ -193,7 +197,11 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     try {
       const r = await abrirPdf({ cliente: ctx.cliente, versionId, pestana, signal: control.signal, urls: ctx.urls });
       if (!vivo || abriendo !== control) return;
-      if (r.abierta) { avisar(""); cerrarSelector(); }
+      if (r.abierta) {
+        marcarAbriendo(null);          // done: closing the chooser now cancels nothing
+        avisar("");
+        cerrarSelector();
+      }
       else {
         avisar(`${r.cerrada ? MENSAJE_CERRADA : MENSAJE_BLOQUEADO} `,
           { tipoAviso: r.cerrada ? "info" : "error", respaldo: enlaceDeRespaldo(r.url) });
@@ -253,10 +261,18 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     enfocarOpcion(0);
   }
 
+  /* Closing the chooser (Escape, «Cerrar», a click outside, a repaint) also
+   * cancels an opening chosen from it: its reserved tab closes and the PDF
+   * never arrives after the person dismissed the list. */
   function cerrarSelector({ enfocar = true } = {}) {
     if (!selector) return;
     listado?.abort();
     listado = null;
+    if (abriendo) {
+      abriendo.abort();
+      marcarAbriendo(null);
+      avisar("");
+    }
     document.removeEventListener("pointerdown", fueraDelSelector, true);
     window.removeEventListener("resize", colocarSelector);
     window.removeEventListener("scroll", colocarSelector, true);
@@ -314,7 +330,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     if (reiniciar) { listaOpciones.replaceChildren(); ocultasOpciones = 0; }
     ocultasOpciones += Math.max(0, ocultas);
     for (const o of opciones) {
-      const b = el("button", { type: "button", class: "archivos-opcion", disabled: Boolean(abriendo),
+      const b = el("button", { type: "button", class: "archivos-opcion", "aria-disabled": abriendo ? "true" : null,
         onclick: () => abrir(o.versionId) },
       el("span", { class: "archivos-opcion-nombre" }, nombreDe(o)),
       o.nota ? el("span", { class: "archivos-opcion-nota" }, o.nota) : null);

@@ -450,44 +450,83 @@ await revisar('cerrar la lista mientras carga y cambiar de vista durante la desc
   igual(pestanasAbiertas(ada).length, 0, 'ninguna pestaña');
 });
 
-/* The server keeps a retired attachment's versions readable, so a document
- * deleted after the summary was drawn is retired for real and its stale
- * version answers 404 here, as a version that is gone would. */
-const comoBorrada = (page, versionId) => page.route(`**/api/archivos/versiones/${versionId}/descarga`, (r) => r.fulfill({
-  status: 404, contentType: 'application/json',
-  body: JSON.stringify({ error: 'Este archivo ya no está disponible.', detalle: { code: 'not_found' } }) }));
+await revisar('cerrar la lista durante la descarga (Escape, «Cerrar», clic fuera) cancela la apertura y cierra su pestaña', async () => {
+  await irA(ada.page, base.id);
+  const formas = {
+    Escape: () => ada.page.keyboard.press('Escape'),
+    Cerrar: () => selector(ada.page).getByRole('button', { name: 'Cerrar la lista de PDF' }).click(),
+    fuera: () => ada.page.locator('#tabla-buscar').click(),
+  };
+  for (const [forma, cerrar] of Object.entries(formas)) {
+    const descarga = await retener(ada.page, '**/descarga');
+    await enlace(ada.page, T.varios).click();
+    await selector(ada.page).waitFor();
+    const popup = ada.page.waitForEvent('popup');
+    await selector(ada.page).locator('.archivos-opcion', { hasText: 'Varios A.pdf' }).click();
+    const p = await popup;
+    await hasta(async () => descarga.vistos.length === 1, `${forma}: la descarga no salió`);
+    await cerrar();
+    await hasta(async () => (await selector(ada.page).count()) === 0, `${forma}: la lista no se cerró`);
+    await hasta(() => p.isClosed(), `${forma}: la pestaña reservada quedó abierta`);
+    await descarga.soltar();          // the held response arrives after the dismissal
+    await esperar(800);
+    igual(pestanasAbiertas(ada).length, 0, `${forma}: el PDF se abrió después de cerrar la lista`);
+    igual(await aviso(ada.page, T.varios).isHidden(), true, `${forma}: sin aviso pendiente`);
+    igual(await enlace(ada.page, T.varios).getAttribute('aria-busy'), null, `${forma}: el enlace sigue ocupado`);
+  }
+  // A successful opening is untouched: choose and let it arrive.
+  await enlace(ada.page, T.varios).click();
+  igual(await pestanaDe(ada, () => selector(ada.page).locator('.archivos-opcion', { hasText: 'Varios A.pdf' }).click()),
+    S['Varios A.pdf'], 'la apertura normal sigue funcionando');
+  await hasta(async () => (await selector(ada.page).count()) === 0, 'la lista no se cerró tras abrir');
+});
 
-await revisar('documento borrado: avisa, actualiza el resumen y conserva la fila', async () => {
+/* «Borrar» deletes the attachment and every version for good, so a link
+ * drawn before the deletion meets the real server's 404 for that version. No
+ * route is intercepted: `respuestas` records what the server itself answered. */
+async function estadoDeDescarga(page, versionId) {
+  const r = await page.waitForResponse((res) => res.url().endsWith(`/api/archivos/versiones/${versionId}/descarga`));
+  return r.status();
+}
+
+await revisar('documento borrado (enlace viejo): el servidor real responde 404, la pestaña se cierra, la fila sigue y el resumen se actualiza', async () => {
   await irA(ada.page, base.id);
   igual(await resumen(ada.page, T.borrado), '1 PDF', 'resumen');
   const { archivo, version } = V['Borrado uno.pdf'];
   const rev = (await terreno(ada.page, T.borrado)).archivos.pdf_recientes[0].revision;
   igual((await admin('POST', `/api/archivos/${archivo}/borrar`, { expected_revision: rev })).status, 200, 'borrado en el servidor');
-  await comoBorrada(ada.page, version);
+  igual((await admin('GET', `/api/archivos/versiones/${version}/descarga`)).status, 404, 'la versión ya no existe en el servidor');
+  // The row still shows the summary drawn before the deletion.
+  igual(await resumen(ada.page, T.borrado), '1 PDF', 'enlace viejo');
   const popup = ada.page.waitForEvent('popup');
+  const respuesta = estadoDeDescarga(ada.page, version);
   await enlace(ada.page, T.borrado).click();
   const p = await popup;
+  igual(await respuesta, 404, 'respuesta real del servidor');
   await hasta(() => p.isClosed(), 'quedó una pestaña vacía');
   await hasta(async () => /ya no existe/.test(await aviso(ada.page, T.borrado).innerText()), 'sin aviso');
   await hasta(async () => (await resumen(ada.page, T.borrado)) === 'Sin PDF', 'el resumen no se actualizó');
   igual(await enlace(ada.page, T.borrado).count(), 0, 'ya no es un enlace');
   igual(await fila(ada.page, T.borrado).count(), 1, 'la fila sigue');
+  igual(pestanasAbiertas(ada).length, 0, 'ninguna pestaña');
   // In the list: a document deleted after the list was shown.
   await enlace(ada.page, T.varios).click();
   await selector(ada.page).waitFor();
   const b = V['Varios B.pdf'];
   const revB = (await terreno(ada.page, T.varios)).archivos.pdf_recientes.find((f) => f.id === b.archivo).revision;
   igual((await admin('POST', `/api/archivos/${b.archivo}/borrar`, { expected_revision: revB })).status, 200, 'borrado B');
-  await comoBorrada(ada.page, b.version);
   const otra = ada.page.waitForEvent('popup');
+  const respuestaB = estadoDeDescarga(ada.page, b.version);
   await selector(ada.page).locator('.archivos-opcion', { hasText: 'Varios B.pdf' }).click();
   const po = await otra;
+  igual(await respuestaB, 404, 'respuesta real del servidor (lista)');
   await hasta(() => po.isClosed(), 'quedó una pestaña vacía (lista)');
   await hasta(async () => (await resumen(ada.page, T.varios)) === '2 PDF', 'el resumen no se actualizó (lista)');
   await hasta(async () => !(await selector(ada.page).locator('.archivos-opcion', { hasText: 'Varios B.pdf' }).count()), 'la lista no se actualizó');
   igual(await selector(ada.page).locator('.archivos-opcion').count(), 2, 'quedan los otros dos');
   await ada.page.keyboard.press('Escape');
   igual(await fila(ada.page, T.varios).count(), 1, 'la fila sigue (lista)');
+  igual(pestanasAbiertas(ada).length, 0, 'ninguna pestaña (lista)');
 });
 
 await revisar('terreno borrado: el 404 se comprueba con su lista y la fila sale; sin pestaña vacía', async () => {

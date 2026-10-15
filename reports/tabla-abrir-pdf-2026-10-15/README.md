@@ -35,11 +35,19 @@ celda y los botones «Abrir» / «Abrir guardada» del detalle:
    al repintar la tabla, para no romper una pestaña que todavía carga.
 
 Lista y descarga se piden sólo al pulsar. Un segundo clic durante la descarga
-no abre otra pestaña. Cerrar la lista, desmontar la celda, cambiar de vista o
-de cuenta, perder la sesión o recargar la página cancelan lo pendiente y
-descartan respuestas atrasadas. Un 404 se comprueba con la lista del terreno
-(misma regla del detalle): si el terreno sigue, se avisa y se actualiza el
-resumen; si no, la tabla lo revalida y quita la fila.
+no abre otra pestaña. Cerrar la lista (Escape, «Cerrar» o un clic fuera)
+cancela también la apertura elegida en ella y cierra su pestaña reservada:
+el PDF no aparece después. Desmontar la celda, cambiar de vista o de cuenta,
+perder la sesión o recargar la página cancelan lo pendiente y descartan
+respuestas atrasadas. Un 404 se comprueba con la lista del terreno (misma
+regla del detalle): si el terreno sigue, se avisa y se actualiza el resumen;
+si no, la tabla lo revalida y quita la fila.
+
+«Borrar» (`/api/archivos/:id/borrar`) elimina el adjunto y todas sus
+versiones. Un enlace dibujado antes del borrado recibe el 404 real del
+servidor desechable (la prueba no intercepta la descarga): no se abre nada,
+la pestaña reservada se cierra, la fila sigue y su resumen pasa a «Sin PDF»
+(o de «3 PDF» a «2 PDF» desde la lista).
 
 ## Capturas
 
@@ -53,9 +61,6 @@ resumen; si no, la tabla lo revalida y quita la fila.
 
 ## Límites
 
-- El servidor conserva legibles las versiones de un adjunto retirado: un
-  resumen viejo puede abrir un PDF recién borrado si el servidor aún lo
-  autoriza. La prueba simula el 404 de un documento que ya no existe.
 - El nombre propio de una versión guardada anterior a una subida fallida del
   mismo adjunto no viene en el resumen ni en la lista: se muestra como «PDF
   guardado (versión anterior)» con la nota de lo que pasó.

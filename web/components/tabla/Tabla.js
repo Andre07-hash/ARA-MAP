@@ -57,7 +57,7 @@ import { fmtCount } from "../../lib/format.js";
 import { nuevaClave } from "../../lib/inventario.js";
 import {
   columnasDe, CONSULTA_VACIA, consultaDeLista, crearCola, cuerpoDeCelda, esEditable, esGlobal,
-  leerCelda, LIMITES, ORDENES, resolverIncierto, rutaDeLista, textoDe, valorDe, VISTA_MAESTRA,
+  escribirNumero, leerCelda, LIMITES, ORDENES, resolverIncierto, rutaDeLista, textoDe, valorDe, VISTA_MAESTRA,
   VISTA_SIN_ASIGNAR,
 } from "../../lib/tabla.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
@@ -1285,7 +1285,7 @@ export function createTabla({
     }
     const pendiente = celdas.get(clave(t.id, c.id));
     // A conflict shows the row as it is now; the person's own text waits in the tray.
-    const texto = pendiente && pendiente.estado !== "conflicto" ? pendiente.texto : textoDe(valorDe(t, c));
+    const texto = pendiente && pendiente.estado !== "conflicto" ? pendiente.texto : textoDe(valorDe(t, c), c);
     return el("td", {
       class: ["tabla-celda", `tabla-col-${c.tipo}`, pendiente && `is-${pendiente.estado}`,
         !editable && "is-lectura"],
@@ -1365,7 +1365,7 @@ export function createTabla({
       if (c.estado === "conflicto") {
         items.push(el("li", { class: "tabla-pendiente is-conflicto" },
           el("strong", {}, donde),
-          el("span", {}, ` — Otra persona guardó cambios en este terreno. Valor actual: «${textoDe(valorDe(t, col))}». `),
+          el("span", {}, ` — Otra persona guardó cambios en este terreno. Valor actual: «${textoDe(valorDe(t, col), col)}». `),
           tuyo,
           el("button", { type: "button", class: "btn btn-small", onclick: () => guardar(id, col, c.valor, c.texto) },
             "Guardar el mío"),
@@ -1398,7 +1398,7 @@ export function createTabla({
     if (!t || !col || !td || !esEditable(col) || !filaEditable(t)) return;
     if (celdas.get(clave(id, colId))?.estado === "pendiente") return;
     const previo = celdas.get(clave(id, colId));
-    const inicial = textoDe(valorDe(t, col));
+    const inicial = textoDe(valorDe(t, col), col);
     const texto = reemplazo ?? previo?.texto ?? inicial;
     const etiqueta = `${col.etiqueta}, ${t.draft?.terreno || "terreno sin nombre"}`;
     let campo;
@@ -1415,6 +1415,15 @@ export function createTabla({
         inputmode: col.tipo === "numero" ? "decimal" : null, autocomplete: "off", spellcheck: "false",
       });
       campo.value = texto;
+      if (col.tipo === "numero") {
+        // Commas and the $ or % appear as the number is typed.
+        const formatear = () => {
+          const { texto: nuevo, cursor } = escribirNumero(col, campo.value, campo.selectionStart ?? campo.value.length);
+          if (nuevo !== campo.value) { campo.value = nuevo; campo.setSelectionRange(cursor, cursor); }
+        };
+        campo.addEventListener("input", formatear);
+        if (reemplazo != null) formatear();
+      }
     }
     editando = { id, col, campo, inicial };
     td.classList.add("is-editando");
@@ -1424,7 +1433,7 @@ export function createTabla({
     campo.addEventListener("blur", () => setTimeout(() => { if (vivo && editando?.campo === campo) confirmar(); }, 0));
     campo.focus();
     if (reemplazo == null) campo.select?.();
-    else campo.setSelectionRange?.(texto.length, texto.length);
+    else if (col.tipo !== "numero") campo.setSelectionRange?.(texto.length, texto.length);
   }
 
   /** Leave the editor without saving. What was stored stays as it was. */
@@ -1452,14 +1461,14 @@ export function createTabla({
       alerta.textContent = `${col.etiqueta}: ${leido.error}`;
     } else if ((leido.valor ?? null) === (valorDe(t, col) ?? null)) {
       celdas.delete(k);
-    } else if (textoDe(valorDe(t, col)) !== inicial) {
+    } else if (textoDe(valorDe(t, col), col) !== inicial) {
       // The row was refreshed while this editor was open and THIS cell is no
       // longer what the person started from. Saving at the row's new version
       // would overwrite someone else's value unseen: show both and let them choose.
-      celdas.set(k, { estado: "conflicto", valor: leido.valor, texto: textoDe(leido.valor) });
+      celdas.set(k, { estado: "conflicto", valor: leido.valor, texto: textoDe(leido.valor, col) });
       alerta.textContent = `${col.etiqueta}: este valor cambió mientras lo editabas. El tuyo no se guardó ni se perdió.`;
     } else {
-      guardar(id, col, leido.valor, textoDe(leido.valor));
+      guardar(id, col, leido.valor, textoDe(leido.valor, col));
       return;
     }
     pintarFila(id);

@@ -109,7 +109,7 @@ export function abrirDetalle({
     el("dt", {}, "Base"), el("dd", {}, terreno.base_id ? (base?.nombre ?? "—") : "Sin asignar"),
     columnas.filter((c) => c.tipo !== "base").map((c) => [
       el("dt", {}, c.etiqueta),
-      c.tipo === "archivo" ? ranura(c.archivo) : el("dd", {}, textoDe(valorDe(terreno, c)) || "—"),
+      c.tipo === "archivo" ? ranura(c.archivo) : el("dd", {}, textoDe(valorDe(terreno, c), c) || "—"),
     ]),
     el("dt", {}, "Última edición"),
     el("dd", {}, `${terreno.updated_by?.display_name ?? "—"} · versión ${terreno.version}`),

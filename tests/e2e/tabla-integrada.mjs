@@ -243,11 +243,11 @@ await caso('operator: only her bases; blank create; every core and custom type e
   await listo(page);
   assert.equal(await textoDe(page, lote, 'core:terreno'), NOMBRE);
   assert.equal(await textoDe(page, lote, COL.Visita), '2026-03-15');
-  assert.equal(await textoDe(page, lote, 'core:superficie_m2'), '12500');
+  assert.equal(await textoDe(page, lote, 'core:superficie_m2'), '12,500');
 
   const otra = await abrir('omar');
   await irATabla(otra.page, B['Base Norte']);
-  assert.equal(await textoDe(otra.page, lote, 'core:asking_price'), '1470000');
+  assert.equal(await textoDe(otra.page, lote, 'core:asking_price'), '$1,470,000');
   assert.equal(await textoDe(otra.page, lote, COL.Etapa), 'Cerrado');
   assert.deepEqual(await otra.page.locator('#tabla-vista option').allInnerTexts(), ['Base Norte', 'Base Sur']);
   await otra.context.close();

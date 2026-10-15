@@ -66,7 +66,7 @@ const vacio = (texto) => (texto === "" ? "—" : texto);
 
 /** [etiqueta, texto] of the core fields, as the table shows them. */
 export function camposDeFicha(registro) {
-  return CAMPOS_DE_FICHA.map((c) => [c.etiqueta, vacio(textoDe(valorDe(registro, c)))]);
+  return CAMPOS_DE_FICHA.map((c) => [c.etiqueta, vacio(textoDe(valorDe(registro, c), c))]);
 }
 
 /**
@@ -75,7 +75,7 @@ export function camposDeFicha(registro) {
  */
 export function personalizadasDeFicha(registro, definiciones = []) {
   return definiciones.filter((d) => !d.retirada).map((d) =>
-    [d.nombre, vacio(textoDe(valorDe(registro, { id: d.id, custom: true })))]);
+    [d.nombre, vacio(textoDe(valorDe(registro, { id: d.id, custom: true }), d))]);
 }
 
 /**

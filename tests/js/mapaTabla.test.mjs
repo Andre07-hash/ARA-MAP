@@ -126,7 +126,7 @@ test("the record lists the table's fields as stored, with comments", () => {
   assert.deepEqual(CAMPOS_DE_FICHA.map((c) => c.etiqueta), ["Tipo de terreno", "Estado", "Municipio", "Superficie",
     "HA", "Afectaciones %", "Asking price", "Asking $/m2", "Comentarios"]);
   assert.equal(campos["Tipo de terreno"], "Rústico");
-  assert.equal(campos.Superficie, "12345.5", "as stored, not reformatted");
+  assert.equal(campos.Superficie, "12,345.5", "every stored digit, with thousands commas");
   assert.equal(campos["Asking price"], "—", "missing, not zero");
   assert.equal(campos.Comentarios, "Línea 1\nLínea 2");
 });

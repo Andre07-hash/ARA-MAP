@@ -4,8 +4,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  escribirNumero,
   COLUMNAS_BASICAS, columnasDe, consultaDeLista, crearCola, cuerpoDeCelda, esEditable, esFechaReal,
-  leerCelda, resolverIncierto, rutaDeLista, valorDe,
+  leerCelda, resolverIncierto, rutaDeLista, textoDe, valorDe,
 } from "../../web/lib/tabla.js";
 import { defaultRoute, parseRoute, routeAllowed, routeHash } from "../../web/lib/router.js";
 
@@ -123,4 +124,37 @@ test("routes: the table has an address; operators have the table and the catalog
     assert.equal(routeAllowed({ nombre }, "admin"), true, nombre);
   }
   assert.ok(routeAllowed({ nombre: "tabla" }, "operador") && routeAllowed({ nombre: "catalogo" }, "operador"));
+});
+
+test("numbers are written with commas and their $ or %, keeping every stored digit", () => {
+  const col = (id) => COLUMNAS_BASICAS.find((c) => c.id === id);
+  const [precio, pct, sup, x] = ["core:asking_price", "core:afectaciones_pct", "core:superficie_m2", "core:lat"].map(col);
+  assert.equal(textoDe(1234567.891, precio), "$1,234,567.891");
+  assert.equal(textoDe(-2500, precio), "-$2,500");
+  assert.equal(textoDe(12.5, pct), "12.5%");
+  assert.equal(textoDe(1234, sup), "1,234");
+  assert.equal(textoDe(796, sup), "796");
+  assert.equal(textoDe(-103.08, x), "-103.08", "coordinates as stored");
+  assert.equal(textoDe(null, precio), "", "missing is empty, never $0");
+  assert.equal(textoDe(7, { tipo: "numero", custom: true }), "7");
+  assert.equal(textoDe(12345, { tipo: "numero", custom: true }), "12,345");
+  // What is shown reads back as the same number.
+  for (const [c, v] of [[precio, 1234567.891], [precio, -2500], [pct, 12.5], [sup, 1234]]) {
+    assert.deepEqual(leerCelda(c, textoDe(v, c)), { valor: v });
+  }
+});
+
+test("a number being typed gets its commas and sign, the caret after the same digit", () => {
+  const col = (id) => COLUMNAS_BASICAS.find((c) => c.id === id);
+  const [precio, pct, sup, x] = ["core:asking_price", "core:afectaciones_pct", "core:superficie_m2", "core:lat"].map(col);
+  assert.deepEqual(escribirNumero(precio, "12345"), { texto: "$12,345", cursor: 7 });
+  assert.deepEqual(escribirNumero(precio, "$1,2345", 7), { texto: "$12,345", cursor: 7 });
+  assert.deepEqual(escribirNumero(precio, "$1,234", 2), { texto: "$1,234", cursor: 2 }, "caret mid-number stays put");
+  assert.deepEqual(escribirNumero(pct, "125"), { texto: "125%", cursor: 3 }, "before the %");
+  assert.deepEqual(escribirNumero(sup, "1234.5"), { texto: "1,234.5", cursor: 7 });
+  assert.deepEqual(escribirNumero(sup, "1234."), { texto: "1,234.", cursor: 6 }, "a trailing point waits for decimals");
+  assert.deepEqual(escribirNumero(precio, "$"), { texto: "", cursor: 0 }, "nothing typed is empty");
+  assert.deepEqual(escribirNumero(x, "20.08"), { texto: "20.08", cursor: 5 }, "coordinates untouched");
+  assert.deepEqual(escribirNumero(sup, "doce mil", 8), { texto: "doce mil", cursor: 8 }, "letters are kept for the error");
+  assert.deepEqual(leerCelda(sup, "doce mil"), { error: "Escribe un número." });
 });

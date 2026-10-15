@@ -1,9 +1,10 @@
 /* The employee table's rules, with no DOM: columns, cell values, list queries,
  * the per-row save queue and how an uncertain save is resolved.
  *
- * Nothing here converts or derives a value. A number is shown as stored and
- * sent as typed; X is latitude and Y is longitude; a missing value is empty,
- * never zero and never a default currency.
+ * Nothing here converts or derives a value. A number keeps every digit it
+ * was stored with; it is only written with thousands commas and its $ or %.
+ * X is latitude and Y is longitude, written as they are; a missing value is
+ * empty, never zero and never a default currency.
  */
 
 import { leerNumero } from "./inventario.js";
@@ -22,12 +23,12 @@ export const COLUMNAS_BASICAS = Object.freeze([
   { id: "core:municipio", campo: "municipio", etiqueta: "Municipio", tipo: "texto", max: 100, orden: "municipio" },
   { id: "core:superficie_m2", campo: "superficie_m2", etiqueta: "Superficie", tipo: "numero", orden: "superficie_m2" },
   { id: "core:superficie_ha", campo: "superficie_ha", etiqueta: "HA", tipo: "numero" },
-  { id: "core:afectaciones_pct", campo: "afectaciones_pct", etiqueta: "Afectaciones %", tipo: "numero" },
-  { id: "core:asking_price", campo: "asking_price", etiqueta: "Asking price", tipo: "numero", orden: "asking_price" },
-  { id: "core:asking_m2", campo: "asking_m2", etiqueta: "Asking $/m2", tipo: "numero" },
+  { id: "core:afectaciones_pct", campo: "afectaciones_pct", etiqueta: "Afectaciones %", tipo: "numero", formato: "pct" },
+  { id: "core:asking_price", campo: "asking_price", etiqueta: "Asking price", tipo: "numero", orden: "asking_price", formato: "precio" },
+  { id: "core:asking_m2", campo: "asking_m2", etiqueta: "Asking $/m2", tipo: "numero", formato: "precio" },
   { id: "core:notas_internas", campo: "notas_internas", etiqueta: "Comentarios", tipo: "largo", max: 10000 },
-  { id: "core:lat", campo: "lat", etiqueta: "X", ayuda: "X es la latitud", tipo: "numero" },
-  { id: "core:lon", campo: "lon", etiqueta: "Y", ayuda: "Y es la longitud", tipo: "numero" },
+  { id: "core:lat", campo: "lat", etiqueta: "X", ayuda: "X es la latitud", tipo: "numero", formato: "coordenada" },
+  { id: "core:lon", campo: "lon", etiqueta: "Y", ayuda: "Y es la longitud", tipo: "numero", formato: "coordenada" },
   { id: "core:archivos", etiqueta: "Archivos", tipo: "archivo", archivo: "pdf" },
   { id: "core:kmz", etiqueta: "KMZ", tipo: "archivo", archivo: "kmz" },
 ].map(Object.freeze));
@@ -57,8 +58,61 @@ export function valorDe(terreno, columna) {
   return null;
 }
 
-/** What a cell shows and what its editor starts with: the value as stored. */
-export const textoDe = (valor) => (valor == null ? "" : String(valor));
+/** A number's text with thousands commas in its whole part; decimals untouched. */
+const conComas = (texto) => texto.replace(/^(-?)(\d+)/, (_, signo, entero) =>
+  signo + entero.replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+
+/** $ before a price (after a minus sign), % after a percentage. */
+function conSigno(columna, texto) {
+  if (columna.formato === "precio") return texto.startsWith("-") ? `-$${texto.slice(1)}` : `$${texto}`;
+  if (columna.formato === "pct") return `${texto}%`;
+  return texto;
+}
+
+/**
+ * What a cell shows and what its editor starts with. A number column writes
+ * the stored digits with commas and its sign; coordinates and other values
+ * are shown exactly as stored.
+ */
+export function textoDe(valor, columna = null) {
+  if (valor == null) return "";
+  if (columna?.tipo !== "numero" || columna.formato === "coordenada" || typeof valor !== "number") {
+    return String(valor);
+  }
+  return conSigno(columna, conComas(String(valor)));
+}
+
+/**
+ * The editor's text while a number is being typed: commas and the column's
+ * sign added as the person writes, the caret kept after the same digit.
+ * Returns { texto, cursor }. Text with anything but digits, a point, a minus,
+ * commas, spaces, $ or % is left exactly as typed, so the save shows "Escribe
+ * un número." and keeps it instead of dropping a letter typed by mistake.
+ */
+export function escribirNumero(columna, texto, cursor = texto.length) {
+  if (columna.formato === "coordenada" || /[^\d.,\s$%-]/.test(texto)) return { texto, cursor };
+  const util = (c) => /[\d.-]/.test(c);
+  const antes = [...texto.slice(0, cursor)].filter(util).length;
+  let crudo = [...texto].filter(util).join("");
+  const negativo = crudo.startsWith("-");
+  crudo = crudo.replace(/-/g, "");
+  const punto = crudo.indexOf(".");
+  const entero = punto < 0 ? crudo : crudo.slice(0, punto);
+  const decimales = punto < 0 ? null : crudo.slice(punto + 1).replace(/\./g, "");
+  if (!negativo && entero === "" && decimales === null) return { texto: "", cursor: 0 };
+  const cuerpo = (negativo ? "-" : "") + conComas(entero) + (decimales === null ? "" : `.${decimales}`);
+  const salida = conSigno(columna, cuerpo);
+  // The caret goes after as many digits, points and minus signs as were before it.
+  let vistos = 0;
+  let nuevo = columna.formato === "precio" && !negativo ? 1 : 0;   // after a leading $
+  if (antes > 0) {
+    for (let i = 0; i < salida.length; i += 1) {
+      if (util(salida[i])) vistos += 1;
+      if (vistos === antes) { nuevo = i + 1; break; }
+    }
+  }
+  return { texto: salida, cursor: nuevo };
+}
 
 const FECHA = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -78,7 +132,7 @@ export function esFechaReal(texto) {
  */
 export function leerCelda(columna, texto) {
   const crudo = String(texto ?? "");
-  if (columna.tipo === "numero") return leerNumero(crudo);
+  if (columna.tipo === "numero") return leerNumero(crudo.replace(/%\s*$/, "").replace(/^(-?)\$/, "$1"));
   if (columna.tipo === "fecha") {
     const limpio = crudo.trim();
     if (limpio === "") return { valor: null };

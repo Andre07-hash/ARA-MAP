@@ -11,14 +11,28 @@
  * KMZ's contours, activating one, versions, history and retirement stay in
  * the detail. Choosing a file here activates nothing the detail would not.
  *
+ * Reading (issue #48). A PDF cell whose summary names saved PDFs turns its
+ * count into a link: "1 PDF" opens that saved version in a new tab; a larger
+ * count opens a small chooser of the terrain's saved PDFs, and a summary that
+ * lists only the most recent attachments asks the authorized list, page by
+ * page, when the chooser opens. Uploads that never finished, expired or were
+ * refused are not offered; a saved version whose newer upload failed is.
+ * Opening uses the detail's own flow (abrirPdf.js) and does not depend on the
+ * right to write. The chooser, the list and a download in flight end when the
+ * cell is destroyed or the chooser closes; late answers are dropped.
+ *
  * Its controls live inside a table cell that edits on double click and on
  * keys. Their clicks and keys stop here, so they never reach the row.
  */
 
 import { el } from "../../lib/dom.js";
 import { crearSubida, FASE, esTerminal } from "./subida.js";
-import { describirResumen } from "./resumen.js";
+import { describirResumen, pdfsDelResumen, opcionPdf } from "./resumen.js";
 import { EN_PROGRESO, FASE_TEXTO } from "./detalle.js";
+import {
+  abrirPdf, enlaceDeRespaldo, MENSAJE_BLOQUEADO, MENSAJE_CERRADA, reservarPestana, VIDA_URL_MS,
+} from "./abrirPdf.js";
+import { ErrorArchivos, LIMITE_PAGINA } from "../../lib/archivos.js";
 
 const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ" };
 
@@ -26,6 +40,9 @@ const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ" };
 const NOTA_CORTA = {
   [FASE.REQUIERE_SELECCION]: "Varios contornos: elige en el detalle (⋯). Nada se activó.",
 };
+
+const esAbort = (e) => e?.name === "AbortError";
+const nombreDe = (o) => o.nombre ?? "PDF guardado (versión anterior)";
 
 export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, onCambio, onError }, ctx) {
   let vivo = true;
@@ -37,15 +54,27 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   // reload the table) before the chosen file arrives. Until then this cell is
   // busy too, so a repaint keeps it instead of dropping the choice.
   let eligiendo = false;
+  // Reading (PDF only): the summary last shown, its link, an opening in
+  // flight (its AbortController) and the chooser with its list request.
+  let ultimoResumen = resumen;
+  let abriendo = null;
+  let selector = null, listaOpciones = null, estadoSelector = null, masOpciones = null;
+  let listado = null;
+  let cursorOpciones = null;
+  let ocultasOpciones = 0;
+  let avisoTimer = null;
 
   const texto = el("span", { class: "archivos-celda", dataset: { tipo } });
+  const enlace = el("button", { type: "button", class: "archivos-celda-abrir",
+    onclick: () => (enlace.dataset.modo === "directo" ? abrirDirecto() : alternarSelector()) });
   const entrada = el("input", { type: "file", class: "archivos-entrada", tabindex: "-1", "aria-hidden": "true",
     accept: tipo === "pdf" ? ".pdf,application/pdf" : ".kmz" });
   const elegir = el("button", { type: "button", class: "btn btn-quiet btn-small archivos-celda-elegir" },
     tipo === "pdf" ? "Elegir PDF…" : "Elegir KMZ…");
   const progreso = el("span", { class: "archivos-celda-subida", role: "status", "aria-live": "polite" });
+  const aviso = el("span", { class: "archivos-celda-aviso", role: "status", "aria-live": "polite", hidden: true });
   const raiz = el("span", { class: "archivos-celda-caja", dataset: { tipo } },
-    el("span", { class: "archivos-celda-linea" }, texto, elegir), entrada, progreso);
+    el("span", { class: "archivos-celda-linea" }, texto, elegir), entrada, progreso, aviso);
   container.replaceChildren(raiz);
 
   // A cell edits on double click and on Enter, F2 or a typed key; the row
@@ -70,6 +99,8 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     if (error.status === 404) {
       fuera = true;
       subida?.abortar();
+      detenerLectura();
+      pintarResumen(ultimoResumen);
       onError?.({ codigo: "no_encontrado", mensaje: "El archivo ya no está disponible." });
     } else {
       onError?.({ codigo: error.codigo, mensaje: error.message });
@@ -79,12 +110,274 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   }
 
   function pintarResumen(r) {
+    ultimoResumen = r;
     const d = describirResumen(r, tipo);
     texto.dataset.estado = d.estado;
-    texto.textContent = d.texto;
     const titulo = d.nota ? `${ETIQUETA[tipo]}: ${d.texto}. ${d.nota}.` : `${ETIQUETA[tipo]}: ${d.texto}`;
     texto.title = titulo;
-    texto.setAttribute("aria-label", titulo);
+    const modo = modoApertura(r);
+    if (modo !== "lista") cerrarSelector({ enfocar: false });
+    if (!modo) {
+      // Nothing to open: plain text, never something that looks like a link.
+      texto.textContent = d.texto;
+      texto.setAttribute("aria-label", titulo);
+      return;
+    }
+    // The same button across repaints, so a refreshed summary keeps its focus.
+    enlace.dataset.modo = modo;
+    enlace.textContent = d.texto;
+    enlace.title = modo === "directo" ? "Abrir el PDF en una pestaña nueva"
+      : "Elegir un PDF para abrirlo en una pestaña nueva";
+    enlace.setAttribute("aria-label", `${titulo}. ${enlace.title}`);
+    if (modo === "lista") {
+      enlace.setAttribute("aria-haspopup", "dialog");
+      enlace.setAttribute("aria-expanded", String(Boolean(selector)));
+    } else {
+      enlace.removeAttribute("aria-haspopup");
+      enlace.removeAttribute("aria-expanded");
+    }
+    texto.removeAttribute("aria-label");
+    if (texto.firstChild !== enlace || texto.childNodes.length !== 1) texto.replaceChildren(enlace);
+  }
+
+  /* "directo" (one saved PDF the summary names with certainty), "lista"
+   * (several, or a summary that lists only the most recent) or null (no saved
+   * PDF, nothing known yet, or the terrain left this account's scope). */
+  function modoApertura(r) {
+    if (tipo !== "pdf" || fuera) return null;
+    const g = pdfsDelResumen(r);
+    if (!g || g.opciones.length === 0 && g.completo) return null;
+    return g.completo && g.opciones.length === 1 ? "directo" : "lista";
+  }
+
+  /* ------------------------------------------------------------ reading */
+
+  /* A message under the summary: an opening in progress, its error, or the
+   * link offered when the browser refused the tab. */
+  function avisar(textoAviso, { tipoAviso = "info", respaldo = null } = {}) {
+    clearTimeout(avisoTimer);
+    aviso.dataset.tipo = tipoAviso;
+    aviso.replaceChildren(...[textoAviso, respaldo].filter(Boolean));
+    aviso.hidden = !textoAviso && !respaldo;
+    if (respaldo) avisoTimer = setTimeout(() => { if (vivo) avisar(""); }, VIDA_URL_MS);
+  }
+
+  function marcarAbriendo(valor) {
+    abriendo = valor;
+    if (valor) enlace.setAttribute("aria-busy", "true"); else enlace.removeAttribute("aria-busy");
+    for (const b of selector?.querySelectorAll(".archivos-opcion") ?? []) b.disabled = Boolean(valor);
+  }
+
+  /* A 404 on one version may only mean someone deleted that file: only a 404
+   * from the terrain's own list says the terrain left this account's scope. */
+  async function revalidar(signal) {
+    try {
+      await ctx.cliente.listar(terrenoId, { limite: 1, signal });
+    } catch (error) {
+      if (esAbort(error)) return;
+      if (error instanceof ErrorArchivos && error.status === 404) { accesoPerdido(error); return; }
+    }
+    if (!vivo || fuera) return;
+    avisar("Ese PDF ya no existe; alguien lo borró. La información se actualizó.", { tipoAviso: "error" });
+    notificarCambio();
+    if (selector) cargarOpciones({ reiniciar: true });
+  }
+
+  /* Open one saved version. The tab is reserved here, in the gesture. */
+  async function abrir(versionId) {
+    if (!vivo || fuera || abriendo || !ctx.vivo()) return;
+    const pestana = reservarPestana();
+    const control = new AbortController();
+    marcarAbriendo(control);
+    avisar("Abriendo el PDF…");
+    try {
+      const r = await abrirPdf({ cliente: ctx.cliente, versionId, pestana, signal: control.signal, urls: ctx.urls });
+      if (!vivo || abriendo !== control) return;
+      if (r.abierta) { avisar(""); cerrarSelector(); }
+      else {
+        avisar(`${r.cerrada ? MENSAJE_CERRADA : MENSAJE_BLOQUEADO} `,
+          { tipoAviso: r.cerrada ? "info" : "error", respaldo: enlaceDeRespaldo(r.url) });
+      }
+    } catch (error) {
+      if (!vivo || abriendo !== control || esAbort(error)) return;
+      // Still this opening's: destroying the cell cancels the check too.
+      if (error instanceof ErrorArchivos && error.status === 404) { await revalidar(control.signal); return; }
+      avisar(`No se pudo abrir el PDF: ${error?.message ?? "error"}`, { tipoAviso: "error" });
+      if (error instanceof ErrorArchivos && (error.status === 403 || error.status === 401)) notificarCambio();
+    } finally {
+      if (abriendo === control) marcarAbriendo(null);
+    }
+  }
+
+  function abrirDirecto() {
+    const unica = pdfsDelResumen(ultimoResumen)?.opciones;
+    if (unica?.length === 1) abrir(unica[0].versionId);
+  }
+
+  /* ----------------------------------------------------------- chooser */
+
+  function alternarSelector() {
+    if (selector) cerrarSelector();
+    else abrirSelector();
+  }
+
+  function abrirSelector() {
+    if (!vivo || fuera || selector) return;
+    listaOpciones = el("ul", { class: "archivos-opciones" });
+    estadoSelector = el("p", { class: "archivos-opciones-estado", role: "status", "aria-live": "polite" });
+    masOpciones = el("button", { type: "button", class: "btn btn-quiet btn-small", hidden: true,
+      onclick: () => cargarOpciones() }, "Cargar más");
+    selector = el("div", { class: "archivos-selector", role: "dialog", "aria-label": "PDF guardados de este terreno" },
+      el("div", { class: "archivos-selector-cabecera" },
+        el("strong", {}, "PDF guardados"),
+        el("button", { type: "button", class: "btn btn-quiet btn-small", "aria-label": "Cerrar la lista de PDF",
+          onclick: () => cerrarSelector() }, "Cerrar")),
+      listaOpciones, estadoSelector, masOpciones);
+    selector.addEventListener("keydown", teclaSelector);
+    selector.addEventListener("focusout", (e) => {
+      // Tab or a click elsewhere in the page; leaving the window keeps it open.
+      if (e.relatedTarget && selector && !selector.contains(e.relatedTarget) && e.relatedTarget !== enlace) {
+        cerrarSelector({ enfocar: false });
+      }
+    });
+    document.body.append(selector);
+    document.addEventListener("pointerdown", fueraDelSelector, true);
+    window.addEventListener("resize", colocarSelector);
+    window.addEventListener("scroll", colocarSelector, true);
+    enlace.setAttribute("aria-expanded", "true");
+    colocarSelector();
+    const g = pdfsDelResumen(ultimoResumen);
+    if (g?.completo) {
+      pintarOpciones(g.opciones, { reiniciar: true, ocultas: ultimoResumen.pdf_recientes.length - g.opciones.length });
+    } else cargarOpciones({ reiniciar: true });
+    enfocarOpcion(0);
+  }
+
+  function cerrarSelector({ enfocar = true } = {}) {
+    if (!selector) return;
+    listado?.abort();
+    listado = null;
+    document.removeEventListener("pointerdown", fueraDelSelector, true);
+    window.removeEventListener("resize", colocarSelector);
+    window.removeEventListener("scroll", colocarSelector, true);
+    const tenia = selector.contains(document.activeElement);
+    selector.remove();
+    selector = listaOpciones = estadoSelector = masOpciones = null;
+    cursorOpciones = null;
+    ocultasOpciones = 0;
+    if (enlace.hasAttribute("aria-expanded")) enlace.setAttribute("aria-expanded", "false");
+    if (enfocar && tenia && enlace.isConnected) enlace.focus();
+  }
+
+  function fueraDelSelector(e) {
+    if (selector && !selector.contains(e.target) && e.target !== enlace) cerrarSelector({ enfocar: false });
+  }
+
+  /* Fixed by the link, inside the window: a table cell clips what overflows
+   * it. Below the link when it fits, else on the side with more room; its
+   * height never passes the window's edge (the list scrolls instead). */
+  function colocarSelector() {
+    if (!selector) return;
+    const ancla = (enlace.isConnected ? enlace : texto).getBoundingClientRect();
+    const ancho = Math.min(360, window.innerWidth - 16);
+    selector.style.width = `${ancho}px`;
+    selector.style.left = `${Math.max(8, Math.min(ancla.left, window.innerWidth - ancho - 8))}px`;
+    const abajo = window.innerHeight - ancla.bottom - 12;
+    const arriba = ancla.top - 12;
+    selector.style.setProperty("--archivos-alto-libre", "none");
+    const alto = selector.offsetHeight;
+    const debajo = alto <= abajo || abajo >= arriba;
+    const libre = Math.max(96, debajo ? abajo : arriba);
+    selector.style.setProperty("--archivos-alto-libre", `${libre}px`);
+    selector.style.top = debajo ? `${ancla.bottom + 4}px` : `${Math.max(8, ancla.top - 4 - Math.min(alto, libre))}px`;
+  }
+
+  function teclaSelector(e) {
+    e.stopPropagation();
+    if (e.key === "Escape") { e.preventDefault(); cerrarSelector(); return; }
+    const opciones = [...selector.querySelectorAll(".archivos-opcion")];
+    const i = opciones.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!opciones.length) return;
+      const paso = e.key === "ArrowDown" ? 1 : -1;
+      opciones[(i + paso + opciones.length) % opciones.length].focus();
+    }
+  }
+
+  function enfocarOpcion(i) {
+    const opciones = selector?.querySelectorAll(".archivos-opcion");
+    (opciones?.[i] ?? selector?.querySelector("button"))?.focus();
+  }
+
+  function pintarOpciones(opciones, { reiniciar = false, ocultas = 0 } = {}) {
+    if (reiniciar) { listaOpciones.replaceChildren(); ocultasOpciones = 0; }
+    ocultasOpciones += Math.max(0, ocultas);
+    for (const o of opciones) {
+      const b = el("button", { type: "button", class: "archivos-opcion", disabled: Boolean(abriendo),
+        onclick: () => abrir(o.versionId) },
+      el("span", { class: "archivos-opcion-nombre" }, nombreDe(o)),
+      o.nota ? el("span", { class: "archivos-opcion-nota" }, o.nota) : null);
+      b.title = o.nota ? `${nombreDe(o)}. ${o.nota}` : nombreDe(o);
+      listaOpciones.append(el("li", {}, b));
+    }
+    const n = listaOpciones.children.length;
+    const partes = [];
+    if (!n && cursorOpciones == null) partes.push("Este terreno no tiene un PDF guardado que se pueda abrir.");
+    if (ocultasOpciones) {
+      partes.push(ocultasOpciones === 1 ? "1 adjunto sin PDF guardado no se muestra."
+        : `${ocultasOpciones} adjuntos sin PDF guardado no se muestran.`);
+    }
+    estadoSelector.dataset.tipo = "info";
+    estadoSelector.textContent = partes.join(" ");
+    masOpciones.hidden = cursorOpciones == null;
+    colocarSelector();
+  }
+
+  /* One page of the terrain's authorized list, kept to its PDFs. */
+  async function cargarOpciones({ reiniciar = false } = {}) {
+    if (!selector || !vivo || fuera) return;
+    listado?.abort();
+    const control = new AbortController();
+    listado = control;
+    if (reiniciar) cursorOpciones = null;
+    masOpciones.disabled = true;
+    estadoSelector.dataset.tipo = "info";
+    estadoSelector.textContent = "Cargando la lista…";
+    try {
+      const r = await ctx.cliente.listar(terrenoId,
+        { cursor: reiniciar ? null : cursorOpciones, limite: LIMITE_PAGINA, signal: control.signal });
+      if (!vivo || listado !== control || !selector) return;
+      const pdfs = (r.archivos ?? []).filter((a) => a?.tipo === "pdf");
+      const opciones = pdfs.map(opcionPdf).filter(Boolean);
+      cursorOpciones = r.cursor_siguiente ?? null;
+      const desde = reiniciar ? 0 : listaOpciones.children.length;
+      const conFoco = selector.contains(document.activeElement);
+      pintarOpciones(opciones, { reiniciar, ocultas: pdfs.length - opciones.length });
+      masOpciones.disabled = false;
+      if (conFoco) enfocarOpcion(desde);
+    } catch (error) {
+      if (!vivo || listado !== control || esAbort(error)) return;
+      if (error instanceof ErrorArchivos && error.status === 404) { accesoPerdido(error); return; }
+      masOpciones.disabled = false;
+      masOpciones.hidden = false;
+      masOpciones.textContent = "Reintentar";
+      estadoSelector.dataset.tipo = "error";
+      estadoSelector.textContent = `No se pudo cargar la lista: ${error?.message ?? "error"}`;
+      if (error instanceof ErrorArchivos && (error.status === 403 || error.status === 401)) notificarCambio();
+      return;
+    } finally {
+      if (listado === control) listado = null;
+    }
+    masOpciones.textContent = "Cargar más";
+  }
+
+  /* Everything this cell is reading: the chooser and its list, a download in
+   * flight (its reserved tab closes), and the message about it. */
+  function detenerLectura() {
+    cerrarSelector({ enfocar: false });
+    if (abriendo) { abriendo.abort(); marcarAbriendo(null); }
+    avisar("");
   }
 
   const boton = (etiqueta, onclick, peligro = false) => el("button", {
@@ -186,12 +479,15 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       pintarResumen(nuevo);
       pintar();
     },
-    /** Whether destroying this cell now would drop an unfinished upload. */
-    ocupado: () => vivo && (enCurso() || eligiendo),
+    /** Whether destroying this cell now would drop an unfinished upload, or
+     * the PDF chooser or an opening the person is waiting for. */
+    ocupado: () => vivo && (enCurso() || eligiendo || Boolean(abriendo) || Boolean(selector)),
     /** Whether that upload is being read, sent or verified right now. */
     activo: () => vivo && Boolean(subida) && EN_PROGRESO.has(subida.estado().fase),
     destroy() {
       if (!vivo) return;
+      detenerLectura();
+      clearTimeout(avisoTimer);
       vivo = false;
       if (subida) { subida.abortar(); ctx.subidas.quitar(subida); }
       subida = null;

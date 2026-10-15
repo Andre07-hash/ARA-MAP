@@ -49,6 +49,77 @@
 .archivos-celda-subida[data-fase="fallido"] .archivos-celda-nota,
 .archivos-celda-subida[data-fase="rechazado"] .archivos-celda-nota { color: var(--status-error); }
 
+/* Reading from the cell (issue #48): the count is a link-styled button; the
+   summary's state dot stays on the span around it. */
+.archivos-celda-abrir {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+.archivos-celda-abrir:hover { text-decoration-thickness: 2px; }
+/* The span clips what overflows it: room for the focus ring inside it. */
+.archivos-celda:has(> .archivos-celda-abrir) { padding: 2px; margin: -2px; }
+.archivos-celda-abrir:focus-visible { outline-offset: 0; }
+.archivos-celda-abrir[aria-busy="true"] { cursor: progress; color: var(--ink-secondary); }
+.archivos-celda-aviso {
+  width: 0;
+  min-width: 100%;
+  font-size: var(--text-micro);
+  white-space: normal;
+  color: var(--ink-secondary);
+}
+.archivos-celda-aviso[data-tipo="error"] { color: var(--status-error); }
+.archivos-respaldo { color: var(--ink); text-decoration: underline; }
+
+/* The chooser of several PDFs: fixed under its link, outside the table so no
+   cell clips it. Names are text. */
+.archivos-selector {
+  position: fixed;
+  z-index: var(--z-modal);
+  display: grid;
+  gap: var(--space-2);
+  max-height: min(22rem, 70vh, var(--archivos-alto-libre, 70vh));
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  overflow: auto;
+  background: var(--paper-overlay);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--text-small);
+}
+.archivos-selector [hidden] { display: none !important; }
+.archivos-selector-cabecera { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.archivos-opciones { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.archivos-opcion {
+  display: grid;
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.archivos-opcion:hover:not(:disabled), .archivos-opcion:focus-visible { background: var(--paper-sunken); }
+.archivos-opcion:disabled { cursor: progress; color: var(--ink-muted); }
+.archivos-opcion-nombre { overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 2px; }
+.archivos-opcion-nota { font-size: var(--text-micro); color: var(--ink-secondary); }
+.archivos-opciones-estado { margin: 0; font-size: var(--text-micro); color: var(--ink-secondary); }
+.archivos-opciones-estado:empty { display: none; }
+.archivos-opciones-estado[data-tipo="error"] { color: var(--status-error); }
+
 /* ---------------------------------------------------------------- detail */
 
 /* Every rule below sets `display`; the hidden attribute must still win. */

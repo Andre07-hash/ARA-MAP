@@ -131,9 +131,12 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
 
 - En los archivos de ARA, **X es la latitud e Y la longitud**, al revés de la
   convención de GIS. Nunca intercambiarlas en silencio.
-- **Nada se convierte ni se calcula.** Precio total y precio por m² son datos
-  distintos, igual que m² y hectáreas. Un precio que falta queda sin precio, no
-  en cero.
+- **Nada se convierte ni se calcula**, con una excepción. Precio total y precio
+  por m² son datos distintos, igual que m² y hectáreas. Un precio que falta
+  queda sin precio, no en cero. Excepción autorizada por el propietario: al
+  editar una celda de la tabla, se llenan solas las vacías de m² ⇄ HA y precio
+  total ⇄ precio por m² (`calculados` en `web/lib/tabla.js`). Nunca sobrescriben
+  un valor existente ni se aplican al importar.
 - **Los precios son en pesos (MXN).** Una columna en otra moneda se conserva
   como dato adicional y no puede usarse como precio.
 - **Los datos se guardan como vienen.** La validación avisa; no bloquea ni

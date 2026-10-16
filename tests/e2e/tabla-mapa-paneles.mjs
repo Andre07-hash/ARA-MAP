@@ -276,14 +276,22 @@ await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni
     && encuadre.y - (zoom.y + zoom.height) < 30, 'sobre el mapa, junto al zoom');
   cierto(separados(await leyenda(p).boundingBox(), creditos), 'la leyenda no tapa los créditos');
   // Encuadrar todo by keyboard; a click on it does not select anything on the map.
+  // From a close-up it goes back to the whole of Mexico, not to the rows' extent.
+  const acercar = p.locator('.previa-mapa .leaflet-control-zoom-in:not(.leaflet-disabled)');
+  for (let i = 0; i < 8 && (await previa(p)).zoom < 10; i += 1) {
+    if (await acercar.count()) await acercar.click();
+    await esperar(300);
+  }
+  await hasta(async () => (await previa(p)).zoom >= 10, `acercado: ${(await previa(p)).zoom}`);
   await p.getByRole('button', { name: 'Encuadrar todo' }).focus();
   await p.keyboard.press('Enter');
+  await hasta(async () => (await previa(p)).zoom <= 5, `todo México: ${(await previa(p)).zoom}`);
   igual((await mapa(p)).seleccion, null, 'sin selección accidental');
   // The info toggle opens and closes by keyboard.
   const info = p.locator('.previa-info > summary');
   await info.focus();
   await p.keyboard.press('Enter');
-  cierto(/Un KMZ subido sin activar no cambia el mapa/.test(await p.locator('.previa-nota').innerText()), 'explicación disponible');
+  cierto(/Un KMZ o KML subido sin activar no cambia el mapa/.test(await p.locator('.previa-nota').innerText()), 'explicación disponible');
   await p.keyboard.press('Escape');
   igual(await p.locator('.previa-nota').isVisible(), false, 'Escape la cierra');
 });
@@ -432,7 +440,7 @@ await revisar('contorno activo sin X/Y: ficha y cuerpo; cerrar no lo desactiva; 
   await elegirDesdeTabla(ada.page, conContorno, 'Lote Panel Contorno Ficticio');
   await hasta(async () => (await previa(ada.page)).cuerpos === 1, 'un cuerpo');
   const texto = await fichaTexto(ada.page);
-  cierto(/En el mapa por su contorno KMZ activo/.test(texto), `ficha: ${texto}`);
+  cierto(/En el mapa por su contorno KMZ \/ KML activo/.test(texto), `ficha: ${texto}`);
   cierto(/Contorno activo/.test(texto), 'resumen KMZ');
   cierto(!/círculo|Sin coordenadas|Buscar en Google/.test(texto), 'sin textos de X/Y faltantes');
   igual(await ficha(ada.page).locator('.detail-grid dd.mono').allInnerTexts(), ['—', '—'], 'X/Y almacenadas vacías, no del contorno');

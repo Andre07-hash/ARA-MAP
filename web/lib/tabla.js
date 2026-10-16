@@ -179,7 +179,8 @@ export function calculados(draft, campo, valor) {
     for (const [destino, desde, calcular] of REGLAS) {
       if (nuevos.has(destino) || !vacio(d[destino]) || !desde.some((c) => nuevos.has(c))) continue;
       const v = calcular(d);
-      if (Number.isFinite(v)) { d[destino] = v; extra[destino] = v; nuevos.add(destino); }
+      // A zero is never written: a missing price stays without a price.
+      if (Number.isFinite(v) && v > 0) { d[destino] = v; extra[destino] = v; nuevos.add(destino); }
     }
   }
   return extra;

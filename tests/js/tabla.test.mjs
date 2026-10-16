@@ -86,6 +86,7 @@ test("nothing is computed from a cleared cell, a zero area or an unrelated field
   assert.deepEqual(calculados({ asking_price: 5 }, "superficie_m2", null), {});
   assert.deepEqual(calculados({ asking_price: 5 }, "superficie_m2", 0), {});
   assert.deepEqual(calculados({}, "asking_price", 5), {}, "no area: no price per m²");
+  assert.deepEqual(calculados({ superficie_m2: 2000, superficie_ha: 0.2 }, "asking_price", 0), {}, "no zero price per m²");
   assert.deepEqual(calculados({ superficie_m2: 10 }, "lat", 20.5), {});
   assert.deepEqual(cuerpoDeCelda(col("core:estado"), "Jalisco", 4, { superficie_m2: 10 }),
     { expected_version: 4, changes: { estado: "Jalisco" } });

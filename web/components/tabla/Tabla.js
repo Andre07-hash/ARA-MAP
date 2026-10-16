@@ -1493,9 +1493,10 @@ export function createTabla({
         if (!vivo || gen !== generacion) return;
         celdas.delete(k);
         reemplazar(terreno);
-        const extra = columnas.filter((c) => c.campo && c !== col && cuerpo.changes && c.campo in cuerpo.changes);
-        decir(`Guardado · ${col.etiqueta}${extra.length ? ` (calculado: ${extra.map((c) => c.etiqueta).join(", ")})` : ""}` +
-          ` · versión ${terreno.version}.`);
+        const extra = columnas.filter((c) => c.campo && c !== col && cuerpo.changes && c.campo in cuerpo.changes)
+          .map((c) => c.etiqueta);
+        const calculado = extra.length ? ` (calculado: ${extra.join(", ")})` : "";
+        decir(`Guardado · ${col.etiqueta}${calculado} · versión ${terreno.version}.`);
       } catch (error) {
         if (!vivo || gen !== generacion) return;
         fallo(error, id, col, { valor, texto, version });

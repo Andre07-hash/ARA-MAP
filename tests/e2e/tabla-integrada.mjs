@@ -324,6 +324,66 @@ await caso('keyboard only: Tab and arrows move, typing replaces, Escape cancels,
   await context.close();
 });
 
+await caso('while editing, Enter saves and goes down; typing, the arrows save and move; after F2 they move the caret', async () => {
+  const { context, page, errores } = await abrir('olga');
+  await listo(page);
+  const enfocada = () => page.evaluate(() => {
+    const a = document.activeElement;
+    const td = a?.closest?.('td[data-col]');
+    return td ? `${td.closest('tr').dataset.id}|${td.dataset.col}${a === td ? '' : ':editor'}` : a?.tagName;
+  });
+  const otro = await agregar(page);
+  const filas = await page.locator('tr.tabla-fila').evaluateAll((trs) => trs.map((t) => t.dataset.id));
+  const i = filas.indexOf(otro);
+  const [cerca, dy] = i + 1 < filas.length ? [filas[i + 1], 'ArrowDown'] : [filas[i - 1], 'ArrowUp'];
+
+  await celda(page, otro, 'core:terreno').focus();
+  await page.keyboard.type('Lote Flechas');
+  await page.keyboard.press('ArrowRight');
+  await guardado(page, otro, 'core:terreno');
+  assert.equal(await enfocada(), `${otro}|core:estado`);
+  await page.keyboard.type('Jalisco');
+  await page.keyboard.press('Alt+ArrowLeft');                        // a modified arrow moves the caret only
+  assert.equal(await enfocada(), `${otro}|core:estado:editor`);
+  await page.keyboard.press('ArrowLeft');
+  await guardado(page, otro, 'core:estado');
+  assert.equal(await enfocada(), `${otro}|core:terreno`);
+  await page.keyboard.type('Lote Flechas Dos');
+  await page.keyboard.press(dy);
+  await guardado(page, otro, 'core:terreno');
+  assert.equal(await enfocada(), `${cerca}|core:terreno`);
+  await celda(page, otro, 'core:superficie_m2').focus();
+  await page.keyboard.type('500');
+  await page.keyboard.press('Enter');
+  await guardado(page, otro, 'core:superficie_m2');
+  if (dy === 'ArrowDown') assert.equal(await enfocada(), `${cerca}|core:superficie_m2`, 'Enter goes down');
+  const t = await terreno(page, otro);
+  assert.deepEqual([t.draft.terreno, t.draft.estado, t.draft.superficie_m2], ['Lote Flechas Dos', 'Jalisco', 500]);
+  // Opened with F2 or a double click, the arrows move the caret, as in a spreadsheet.
+  await celda(page, otro, 'core:estado').focus();
+  await page.keyboard.press('F2');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await enfocada(), `${otro}|core:estado:editor`, 'F2: caret');
+  await page.keyboard.press('Escape');
+  await celda(page, otro, 'core:estado').dblclick();
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await enfocada(), `${otro}|core:estado:editor`, 'double click: caret');
+  await page.keyboard.press('Escape');
+  // A comment keeps its arrows for its own lines.
+  await celda(page, otro, 'core:notas_internas').focus();
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('ab');
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await enfocada(), `${otro}|core:notas_internas:editor`);
+  await page.keyboard.press('Escape');
+
+  await borrarTerreno(page, otro, 'Lote Flechas Dos');
+  await page.locator(`tr[data-id="${otro}"]`).waitFor({ state: 'detached' });
+  assert.deepEqual(errores, []);
+  await context.close();
+});
+
 await caso('two users, one cell: the stale save is a conflict that keeps both values; reapply and discard are explicit', async () => {
   const a = await abrir('olga');
   const b = await abrir('omar');

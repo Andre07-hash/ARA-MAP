@@ -1,6 +1,6 @@
 # ARA Map
 
-Portal privado para registrar terrenos, editar su tabla y adjuntar PDF y KMZ.
+Portal privado para registrar terrenos, editar su tabla y adjuntar PDF y KMZ o KML.
 
 **Sitio vigente:** [ara-map-piloto.onrender.com](https://ara-map-piloto.onrender.com/).
 Este sitio es el proyecto definitivo; se mejora con cambios pequeños aunque su
@@ -26,13 +26,15 @@ No hay registro público ni restablecimiento de contraseña por el propio usuari
 
 1. Inicia sesión con tu cuenta.
 2. Elige una base y captura o edita las filas de terrenos.
-3. Adjunta archivos mediante **Elegir PDF…** y **Elegir KMZ…** en las celdas.
+3. Adjunta archivos mediante **Elegir PDF…** y **Elegir KMZ o KML…** en las celdas.
 4. Alterna **Tabla / Mapa** para ver los terrenos de la vista y sus filtros.
 5. En el mapa elige **Claro / Satélite / Calles**. El fondo se conserva al
    alternar Tabla / Mapa dentro de la misma tabla, no después de recargar.
 
 El detalle (⋯) contiene descargas, versiones, historial y selección de contornos.
-Un KMZ con un único contorno válido se activa al terminar. Con varios candidatos
+La columna **KMZ / KML** admite ambos formatos (KMZ hasta 20 MiB, KML hasta 16 MiB)
+y guarda y descarga el archivo original tal cual. Un KMZ o KML con un único contorno
+válido se activa al terminar. Con varios candidatos
 requiere elegir y activar en el detalle. Un reemplazo inválido conserva el
 contorno anterior. Un terreno con contorno activo puede verse sin X/Y.
 

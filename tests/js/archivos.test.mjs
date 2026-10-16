@@ -178,6 +178,50 @@ test("client: local validation happens before any byte is read", () => {
   assert.equal(A.validarArchivoLocal(justo, "kmz"), null);
 });
 
+test("client: a KML is chosen, staged and downloaded as a KML in the boundary kind", async () => {
+  const MiB = 1024 * 1024;
+  for (const nombre of ["lote.kml", "LOTE.KML", "Lote Ñandú.Kml", "plano.KMZ"]) {
+    assert.equal(A.validarArchivoLocal({ name: nombre, size: 10 }, "kmz"), null, nombre);
+  }
+  assert.equal(A.validarArchivoLocal({ name: "lote.kml", size: 10 }, "pdf").codigo, "tipo_no_permitido");
+  for (const nombre of ["lote.kml.txt", "lote.xml", "lote"]) {
+    const e = A.validarArchivoLocal({ name: nombre, size: 10 }, "kmz");
+    assert.equal(e.codigo, "tipo_no_permitido", nombre);
+    assert.match(e.message, /KMZ o KML/);
+  }
+  // A KML has the 16 MiB of the KML inside a KMZ; a KMZ keeps its 20 MiB.
+  assert.equal(A.LIMITE_KML_BYTES, 16 * MiB);
+  assert.equal(A.validarArchivoLocal({ name: "a.kml", size: 16 * MiB }, "kmz"), null);
+  const grande = A.validarArchivoLocal({ name: "a.kml", size: 16 * MiB + 1 }, "kmz");
+  assert.equal(grande.codigo, "archivo_grande");
+  assert.equal(grande.message, "El archivo supera el límite de 16 MiB para KML.");
+  assert.equal(A.validarArchivoLocal({ name: "a.kmz", size: 16 * MiB + 1 }, "kmz"), null);
+  assert.deepEqual([A.formatoDe("x.KML", "kmz"), A.formatoDe("x.kmz", "kmz"), A.formatoDe("x.kml", "pdf")],
+    ["kml", "kmz", "pdf"]);
+
+  const vistas = [];
+  const vid = randomUUID();
+  const KML = Buffer.from('<?xml version="1.0"?><kml/>');
+  const cliente = (headers) => A.crearClienteArchivos({ peticionPrivada: async (ruta, o) => {
+    vistas.push(o);
+    return { response: o.method === "PUT" ? json(200, {}) : new Response(KML, { status: 200, headers }) };
+  } });
+  const ok = { "Content-Type": "application/vnd.google-earth.kml+xml", "X-Archivo-Version-Id": vid,
+    "X-Archivo-Sha256": sha(KML) };
+  await cliente(ok).subir(vid, "kmz", new File([KML], "Lote.KML"));
+  assert.deepEqual(vistas[0].headers, { "Content-Type": "application/vnd.google-earth.kml+xml" });
+  const r = await cliente(ok).descargar(vid, "kmz");
+  assert.equal(r.tipoContenido, "application/vnd.google-earth.kml+xml");
+  assert.equal(Buffer.from(r.bytes).toString(), KML.toString());
+  assert.equal(A.formatoDeTipoContenido(r.tipoContenido, "kmz"), "kml");
+  // A boundary download is still refused under any other type, and a PDF never takes a KML type.
+  await assert.rejects(cliente({ ...ok, "Content-Type": "text/xml" }).descargar(vid, "kmz"),
+    (e) => e.codigo === "descarga_inconsistente");
+  await assert.rejects(cliente(ok).descargar(vid, "pdf"), (e) => e.codigo === "descarga_inconsistente");
+  await assert.rejects(cliente({ ...ok, "Content-Length": String(16 * MiB + 1) }).descargar(vid, "kmz"),
+    (e) => e.codigo === "respuesta_excesiva");
+});
+
 /* ---------------------------------------------------- upload pipeline */
 
 function subidaCon(servidor, opciones = {}) {
@@ -294,6 +338,23 @@ test("upload: KMZ outcomes are reported separately from the upload", async () =>
       archivo: archivoDe(PDF, "contorno.kmz") });
     await s.ejecutar();
     assert.equal(s.estado().fase, fase, resultado);
+  }
+});
+
+test("upload: a KML's outcomes name a KML, never a KMZ", async () => {
+  const KML = Buffer.from('<?xml version="1.0"?><kml/>');
+  const esperado = { listo: /^KML guardado; su contorno es el activo\.$/,
+    requiere_seleccion: /^El KML tiene varios contornos/, rechazado: /^El KML se guardó, pero no tiene un contorno utilizable/ };
+  for (const [resultado, patron] of Object.entries(esperado)) {
+    const srv = lifecycle({ kmzResultado: resultado });
+    const mensajes = [];
+    const s = crearSubida({ cliente: A.crearClienteArchivos(srv), terrenoId: TERRENO, tipo: "kmz",
+      archivo: archivoDe(KML, "Lote.KML"), alCambiar: (e) => mensajes.push(e.mensaje) });
+    await s.ejecutar();
+    assert.match(s.estado().mensaje, patron, resultado);
+    assert.ok(mensajes.includes("Verificando y procesando el KML (puede tardar unos segundos)…"));
+    assert.ok(mensajes.every((m) => !/KMZ/.test(m)), mensajes.join(" | "));
+    assert.equal([...srv.versiones.values()][0].nombre_original, "Lote.KML");
   }
 });
 
@@ -417,7 +478,7 @@ test("summary: undefined is loading, not zero; zero is said as such", () => {
   assert.equal(R.describirResumen(undefined, "pdf").estado, R.ESTADO.CARGANDO);
   assert.equal(R.describirResumen(undefined, "kmz").texto, "…");
   assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "pdf").texto, "Sin PDF");
-  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "kmz").texto, "Sin KMZ");
+  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "kmz").texto, "Sin KMZ / KML");
   assert.equal(R.describirResumen({ pdf_recientes: [] }, "pdf").estado, R.ESTADO.CARGANDO);   // no count: not zero
 });
 
@@ -467,7 +528,7 @@ test("summary: a truncated PDF list is never totalled as saved PDFs (#39)", () =
 });
 
 test("summary: an expired KMZ upload is not shown as in progress, nor hides what is saved", () => {
-  const vencida = { id: randomUUID(), estado: "expirado", propia: true };
+  const vencida = { id: randomUUID(), estado: "expirado", propia: true, nombre_original: "plano.kmz" };
   const sola = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz" }, vencida) }, "kmz");
   assert.deepEqual([sola.texto, sola.estado], ["Subida KMZ vencida", R.ESTADO.FALLIDO]);
   const guardado = R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: fila({ tipo: "kmz",
@@ -477,6 +538,21 @@ test("summary: an expired KMZ upload is not shown as in progress, nor hides what
     version_actual_id: randomUUID(), geometria_activa_id: randomUUID() }, vencida) }, "kmz");
   assert.deepEqual([activo.texto, activo.estado], ["Contorno activo", R.ESTADO.LISTO]);
   assert.match(activo.nota, /subida vencida/i);
+});
+
+test("summary: a boundary file is named by its own format, KML never shown as KMZ", () => {
+  const k = (ultima, extra = {}) => R.describirResumen({ pdf_total: 0, pdf_recientes: [],
+    kmz: fila({ tipo: "kmz", ...extra }, ultima) }, "kmz").texto;
+  const v = (estado, nombre_original) => ({ id: randomUUID(), estado, propia: true, nombre_original });
+  assert.equal(k(v("disponible", "Lote Ñandú.KML"), { version_actual_id: randomUUID() }), "KML sin contorno activo");
+  assert.equal(k(v("subiendo", "lote.kml")), "KML en curso");
+  assert.equal(k(v("fallido", "lote.kml")), "KML falló");
+  assert.equal(k(v("expirado", "lote.kml")), "Subida KML vencida");
+  assert.equal(k(v("fallido", "lote.kmz")), "KMZ falló");
+  // Another account's pending upload has no name: a generic boundary file.
+  assert.equal(k({ estado: "subiendo", propia: false }), "Archivo de contorno en curso");
+  assert.equal(k(v("disponible", "x.kml"), { version_actual_id: randomUUID(), geometria_activa_id: randomUUID() }),
+    "Contorno activo");
 });
 
 test("summary: KMZ keeps the active boundary while a replacement is pending or failed", () => {

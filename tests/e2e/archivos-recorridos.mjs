@@ -123,7 +123,7 @@ paginaActual = olga.page;
 
 await revisar("los widgets montan con el resumen real: sin archivos no es 'cargando'", async () => {
   await textoCelda(olga.page, T.uno.id, "pdf", "Sin PDF");
-  await textoCelda(olga.page, T.uno.id, "kmz", "Sin KMZ");
+  await textoCelda(olga.page, T.uno.id, "kmz", "Sin KMZ / KML");
   return { modo: await olga.page.evaluate(() => window.__arnes.modo), puente: await olga.page.evaluate(() => window.__arnes.puente) };
 });
 

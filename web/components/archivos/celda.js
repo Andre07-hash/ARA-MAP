@@ -1,7 +1,7 @@
 /* The compact file cell of the table, for one terrain and one kind (pdf | kmz).
  *
  * It shows the caller-aware summary as before and, when the row may be
- * changed, an "Elegir PDF…" / "Elegir KMZ…" button that runs the same upload
+ * changed, an "Elegir PDF…" / "Elegir KMZ o KML…" button that runs the same upload
  * as the record detail (subida.js, with the factory's shared client, pipeline
  * turn and count of unfinished uploads). The cell never fetches on its own:
  * once the server has the upload it tells the host (onCambio), which hands
@@ -34,7 +34,7 @@ import {
 } from "./abrirPdf.js";
 import { ErrorArchivos, LIMITE_PAGINA } from "../../lib/archivos.js";
 
-const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ" };
+const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ / KML" };
 
 /* What a cell can say in a few words after the upload; the full message goes in the title. */
 const NOTA_CORTA = {
@@ -68,9 +68,9 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   const enlace = el("button", { type: "button", class: "archivos-celda-abrir",
     onclick: () => (enlace.dataset.modo === "directo" ? abrirDirecto() : alternarSelector()) });
   const entrada = el("input", { type: "file", class: "archivos-entrada", tabindex: "-1", "aria-hidden": "true",
-    accept: tipo === "pdf" ? ".pdf,application/pdf" : ".kmz" });
+    accept: tipo === "pdf" ? ".pdf,application/pdf" : ".kmz,.kml" });
   const elegir = el("button", { type: "button", class: "btn btn-quiet btn-small archivos-celda-elegir" },
-    tipo === "pdf" ? "Elegir PDF…" : "Elegir KMZ…");
+    tipo === "pdf" ? "Elegir PDF…" : "Elegir KMZ o KML…");
   const progreso = el("span", { class: "archivos-celda-subida", role: "status", "aria-live": "polite" });
   const aviso = el("span", { class: "archivos-celda-aviso", role: "status", "aria-live": "polite", hidden: true });
   const raiz = el("span", { class: "archivos-celda-caja", dataset: { tipo } },

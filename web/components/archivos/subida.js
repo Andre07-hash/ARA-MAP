@@ -25,18 +25,18 @@
  *   (R3-B2).
  */
 
-import { ErrorArchivos, LIMITE_BYTES, comprobar, mensajeDe, nuevaClave, sha256Hex,
-  validarArchivoLocal } from "../../lib/archivos.js";
+import { ErrorArchivos, comprobar, formatoDe, limiteArchivo, mensajeDe, nombreFormato, nuevaClave,
+  sha256Hex, validarArchivoLocal } from "../../lib/archivos.js";
 
 export const FASE = Object.freeze({
   LEYENDO: "leyendo",            // reading the file and computing its SHA-256
   INICIANDO: "iniciando",
   SUBIENDO: "subiendo",          // the PUT is in flight (no byte progress available)
-  COMPLETANDO: "completando",    // verification and, for KMZ, the parser (may take seconds)
-  LISTO: "listo",                // stored; PDF current, or KMZ boundary active
+  COMPLETANDO: "completando",    // verification and, for KMZ/KML, the parser (may take seconds)
+  LISTO: "listo",                // stored; PDF current, or KMZ/KML boundary active
   REQUIERE_SELECCION: "requiere_seleccion",
   NO_APLICADA: "no_aplicada",    // stored, but another change won (superada / retirado)
-  RECHAZADO: "rechazado",        // KMZ stored, parser found no usable boundary
+  RECHAZADO: "rechazado",        // KMZ/KML stored, parser found no usable boundary
   FALLIDO: "fallido",            // a known failure; `codigo` says which
   INTERRUMPIDO: "interrumpido",  // a step failed; the server version is still pending
   INCIERTO: "incierto",          // the last reply never arrived: retry resolves it safely
@@ -167,22 +167,24 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
       return poner({ ...comun, fase: FASE.LISTO, codigo: null, mensaje: "PDF guardado." });
     }
     const resultado = r?.intento?.resultado;
+    // The file's real format (KMZ or KML), never a KML presented as a KMZ.
+    const f = nombreFormato(formatoDe(version.nombre_original ?? estado.nombre, tipo));
     if (resultado === "listo" && r?.aplicada) {
-      return poner({ ...comun, fase: FASE.LISTO, codigo: null, mensaje: "KMZ guardado; su contorno es el activo." });
+      return poner({ ...comun, fase: FASE.LISTO, codigo: null, mensaje: `${f} guardado; su contorno es el activo.` });
     }
     if (resultado === "listo") {
       const motivo = r?.motivo_no_aplicada;
       return poner({ ...comun, fase: FASE.NO_APLICADA, codigo: motivo ?? "no_aplicada",
         mensaje: motivo === "retirado"
-          ? "KMZ guardado, pero el archivo fue retirado mientras se procesaba; no se activó."
-          : "KMZ guardado, pero otro cambio llegó antes; el contorno activo no cambió. Puedes activarlo desde las versiones." });
+          ? `${f} guardado, pero el archivo fue retirado mientras se procesaba; no se activó.`
+          : `${f} guardado, pero otro cambio llegó antes; el contorno activo no cambió. Puedes activarlo desde las versiones.` });
     }
     if (resultado === "requiere_seleccion") {
       return poner({ ...comun, fase: FASE.REQUIERE_SELECCION, codigo: null,
-        mensaje: "El KMZ tiene varios contornos. Elige cuáles forman el terreno y luego actívalo." });
+        mensaje: `El ${f} tiene varios contornos. Elige cuáles forman el terreno y luego actívalo.` });
     }
     return poner({ ...comun, fase: FASE.RECHAZADO, codigo: r?.intento?.resultado ?? "rechazado",
-      mensaje: "El KMZ se guardó, pero no tiene un contorno utilizable. El contorno activo no cambió." });
+      mensaje: `El ${f} se guardó, pero no tiene un contorno utilizable. El contorno activo no cambió.` });
   }
 
   /* Map a failed step to a state. `donde` is the step that failed. A version
@@ -251,7 +253,7 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
     if (invalido) throw invalido;
     let bytes = await archivo.arrayBuffer();
     comprobar(senal);
-    if (bytes.byteLength !== archivo.size || bytes.byteLength > LIMITE_BYTES[tipo]) {
+    if (bytes.byteLength !== archivo.size || bytes.byteLength > limiteArchivo(archivo, tipo)) {
       throw new ErrorArchivos("archivo_grande", mensajeDe("archivo_grande"));
     }
     const sha = await sha256Hex(bytes);
@@ -280,7 +282,8 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
 
   async function paso_completar(senal) {
     poner({ fase: FASE.COMPLETANDO, mensaje: tipo === "kmz"
-      ? "Verificando y procesando el KMZ (puede tardar unos segundos)…" : "Verificando el archivo…",
+      ? `Verificando y procesando el ${nombreFormato(formatoDe(estado.nombre, tipo))} (puede tardar unos segundos)…`
+      : "Verificando el archivo…",
     reintentable: false, cancelable: false });
     const r = await cliente.completar(inicio.version_id, { signal: senal });
     comprobar(senal);

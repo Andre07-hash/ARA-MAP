@@ -44,7 +44,7 @@ FabricaAlmacen = Callable[[], Almacen]
 
 # Raw upload media types. Multipart or JSON/base64 bodies are refused: the
 # body must be exactly the file's bytes.
-TIPOS_CONTENIDO = {"application/pdf", "application/vnd.google-earth.kmz",
+TIPOS_CONTENIDO = {"application/pdf", archivos.TIPO_KMZ, archivos.TIPO_KML,
                    "application/octet-stream"}
 METADATOS_MAX_BYTES = 16 * 1024
 _SIN_CACHE = "private, no-store"
@@ -299,7 +299,7 @@ def descarga(request: Request) -> RespuestaBinaria:
     """The finalized version's exact bytes, as a download (never inline)."""
     r = archivos.descargar(request.sesion, _parametro(request, "vid"), _DIFERIDO)
     return RespuestaBinaria(r["contenido"], r["tipo_contenido"], {
-        "Content-Disposition": disposicion(r["nombre_original"], r["tipo"]),
+        "Content-Disposition": disposicion(r["nombre_original"], r["formato"]),
         "Cache-Control": _SIN_CACHE, "Content-Security-Policy": _AISLADO,
         "X-Archivo-Version-Id": r["version_id"], "X-Archivo-Sha256": r["sha256"],
     })

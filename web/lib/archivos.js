@@ -17,16 +17,39 @@
 
 export const TIPOS = Object.freeze(["pdf", "kmz"]);
 
-/* Declared-size limits, equal to the server's (1B lifecycle). */
+/* Declared-size limits, equal to the server's (1B lifecycle). The boundary
+ * kind ("kmz") takes KMZ packages and bare KML documents; a KML has the cap of
+ * the KML inside a KMZ. */
 export const LIMITE_BYTES = Object.freeze({ pdf: 25 * 1024 * 1024, kmz: 20 * 1024 * 1024 });
+export const LIMITE_KML_BYTES = 16 * 1024 * 1024;
 
-/* The content type each kind is staged with (route 3 accepts these). */
+/* The content type each format is staged with and downloaded as (route 3
+ * accepts these). Keys are formats: "pdf", "kmz" or "kml". */
 export const TIPO_CONTENIDO = Object.freeze({
   pdf: "application/pdf",
   kmz: "application/vnd.google-earth.kmz",
+  kml: "application/vnd.google-earth.kml+xml",
 });
 
-const EXTENSION = Object.freeze({ pdf: /\.pdf$/i, kmz: /\.kmz$/i });
+const EXTENSION = Object.freeze({ pdf: /\.pdf$/i, kmz: /\.km[zl]$/i });
+
+/* The format of a file of kind `tipo`, by its name: the server applies the
+ * same rule and then checks the bytes against it. */
+export function formatoDe(nombre, tipo) {
+  if (tipo === "pdf") return "pdf";
+  return /\.kml$/i.test(String(nombre ?? "")) ? "kml" : "kmz";
+}
+
+/* The format a downloaded version declares through its content type. */
+export function formatoDeTipoContenido(tipoContenido, tipo) {
+  if (tipo === "pdf") return "pdf";
+  return tipoContenido === TIPO_CONTENIDO.kml ? "kml" : "kmz";
+}
+
+/* Upper-case name of a boundary file's format, for messages ("KMZ", "KML"). */
+export const nombreFormato = (formato) => String(formato).toUpperCase();
+
+const limiteDe = (formato) => (formato === "kml" ? LIMITE_KML_BYTES : LIMITE_BYTES[formato]);
 
 /* Bounds for what this client is willing to read. JSON pages hold at most 100
  * items (an attempt detail at most the parser's 500 candidate descriptions);
@@ -225,10 +248,12 @@ export function crearClienteArchivos({ peticionPrivada }) {
     iniciar: async (terrenoId, datos, clave, { signal } = {}) =>
       json(`/api/inventario/terrenos/${id(terrenoId)}/archivos`, { method: "POST", datos, clave, signal }),
 
-    /* Route 3: the exact bytes as the body. The browser sets Content-Length. */
+    /* Route 3: the exact bytes as the body. The browser sets Content-Length.
+     * `tipo` is the kind; the content type follows the file's own format. */
     async subir(versionId, tipo, blob, { signal } = {}) {
+      const formato = formatoDe(blob?.name, tipo);
       const { response, signal: alcance } = await llamar(`/api/archivos/versiones/${id(versionId)}/contenido`, {
-        method: "PUT", headers: { "Content-Type": TIPO_CONTENIDO[tipo] }, body: blob, signal,
+        method: "PUT", headers: { "Content-Type": TIPO_CONTENIDO[formato] }, body: blob, signal,
       });
       try {
         comprobar(alcance, signal);
@@ -289,12 +314,12 @@ export function crearClienteArchivos({ peticionPrivada }) {
         if (!response.ok) throw await errorDeRespuesta(response);
         const tipoContenido = (response.headers.get("Content-Type") ?? "").split(";")[0].trim();
         const firma = response.headers.get("X-Archivo-Sha256") ?? "";
-        if (tipoContenido !== TIPO_CONTENIDO[tipo] || !HEX64.test(firma)
+        if (tipoContenido !== TIPO_CONTENIDO[formatoDeTipoContenido(tipoContenido, tipo)] || !HEX64.test(firma)
             || (response.headers.get("X-Archivo-Version-Id") ?? "").toLowerCase() !== versionId.toLowerCase()) {
           await cancelarCuerpo(response);
           throw new ErrorArchivos("descarga_inconsistente", mensajeDe("descarga_inconsistente"));
         }
-        const bytes = await leerBytes(response, LIMITE_BYTES[tipo]);
+        const bytes = await leerBytes(response, limiteDe(formatoDeTipoContenido(tipoContenido, tipo)));
         comprobar(alcance, signal);
         const calculado = await sha256Hex(bytes);
         comprobar(alcance, signal);
@@ -311,9 +336,15 @@ export function crearClienteArchivos({ peticionPrivada }) {
   };
 }
 
+/** The size limit, in bytes, of one chosen file of kind `tipo`. */
+export function limiteArchivo(archivo, tipo) {
+  return limiteDe(formatoDe(archivo?.name, tipo));
+}
+
 /**
  * Check a chosen file before reading a byte of it: its kind (by extension,
- * since browsers report KMZ inconsistently), emptiness and the kind's limit.
+ * since browsers report KMZ and KML inconsistently), emptiness and its
+ * format's limit. The server checks the content itself.
  * Returns null when acceptable, else an ErrorArchivos.
  */
 export function validarArchivoLocal(archivo, tipo) {
@@ -322,12 +353,14 @@ export function validarArchivoLocal(archivo, tipo) {
   }
   if (!EXTENSION[tipo].test(String(archivo.name ?? ""))) {
     return new ErrorArchivos("tipo_no_permitido",
-      tipo === "pdf" ? "Elige un archivo PDF (.pdf)." : "Elige un archivo KMZ (.kmz).");
+      tipo === "pdf" ? "Elige un archivo PDF (.pdf)." : "Elige un archivo KMZ o KML (.kmz, .kml).");
   }
   if (archivo.size === 0) return new ErrorArchivos("archivo_vacio", mensajeDe("archivo_vacio"));
-  if (archivo.size > LIMITE_BYTES[tipo]) {
-    const mb = LIMITE_BYTES[tipo] / 1024 / 1024;
-    return new ErrorArchivos("archivo_grande", `El archivo supera el límite de ${mb} MB para ${tipo.toUpperCase()}.`);
+  const formato = formatoDe(archivo.name, tipo);
+  if (archivo.size > limiteDe(formato)) {
+    const mib = limiteDe(formato) / 1024 / 1024;
+    return new ErrorArchivos("archivo_grande",
+      `El archivo supera el límite de ${mib} MiB para ${nombreFormato(formato)}.`);
   }
   return null;
 }

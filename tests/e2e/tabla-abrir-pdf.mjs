@@ -591,8 +591,8 @@ await revisar('«Elegir PDF…» sigue igual y convierte «1 PDF» en lista; el 
   igual(await pestanaDe(ada, () => item.getByRole('button', { name: /^Abrir Uno ficticio/ }).click()), S['Uno ficticio.pdf'], 'detalle');
   await d.locator('.archivos-mensaje', { hasText: 'Archivo abierto en una pestaña nueva.' }).waitFor();
   await d.getByRole('button', { name: 'Cerrar' }).last().click();
-  igual(await resumen(ada.page, T.uno, 'core:kmz'), 'Sin KMZ', 'KMZ intacto');
-  igual(await celda(ada.page, T.uno, 'core:kmz').locator('.archivos-celda-elegir').innerText(), 'Elegir KMZ…', 'botón KMZ');
+  igual(await resumen(ada.page, T.uno, 'core:kmz'), 'Sin KMZ / KML', 'KMZ intacto');
+  igual(await celda(ada.page, T.uno, 'core:kmz').locator('.archivos-celda-elegir').innerText(), 'Elegir KMZ o KML…', 'botón KMZ');
 });
 
 await revisar('sin errores de página', async () => {

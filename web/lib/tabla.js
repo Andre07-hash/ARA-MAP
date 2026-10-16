@@ -30,7 +30,7 @@ export const COLUMNAS_BASICAS = Object.freeze([
   { id: "core:lat", campo: "lat", etiqueta: "X", ayuda: "X es la latitud", tipo: "numero", formato: "coordenada" },
   { id: "core:lon", campo: "lon", etiqueta: "Y", ayuda: "Y es la longitud", tipo: "numero", formato: "coordenada" },
   { id: "core:archivos", etiqueta: "Archivos", tipo: "archivo", archivo: "pdf" },
-  { id: "core:kmz", etiqueta: "KMZ", tipo: "archivo", archivo: "kmz" },
+  { id: "core:kmz", etiqueta: "KMZ / KML", tipo: "archivo", archivo: "kmz" },
 ].map(Object.freeze));
 
 const COLUMNA_BASE = Object.freeze({ id: "base", etiqueta: "Base", tipo: "base" });

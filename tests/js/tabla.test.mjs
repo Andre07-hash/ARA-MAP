@@ -21,7 +21,7 @@ const CUSTOM = [
 test("the fourteen core columns, in order; X is latitude and Y is longitude", () => {
   assert.deepEqual(COLUMNAS_BASICAS.map((c) => c.etiqueta), ["Tipo de terreno", "Nombre de terreno", "Estado",
     "Municipio", "Superficie", "HA", "Afectaciones %", "Asking price", "Asking $/m2", "Comentarios", "X", "Y",
-    "Archivos", "KMZ"]);
+    "Archivos", "KMZ / KML"]);
   assert.equal(col("core:lat").etiqueta, "X");
   assert.equal(col("core:lon").etiqueta, "Y");
   assert.deepEqual(COLUMNAS_BASICAS.filter((c) => !esEditable(c)).map((c) => c.id), ["core:archivos", "core:kmz"]);

@@ -9,13 +9,15 @@
  * Undefined means "not available yet", never zero files.
  */
 
+import { formatoDe, nombreFormato } from "../../lib/archivos.js";
+
 export const ESTADO = Object.freeze({
   CARGANDO: "cargando",      // no summary yet
   VACIO: "vacio",            // known: no file of this kind
   LISTO: "listo",            // current usable content
   PENDIENTE: "pendiente",    // an upload is in progress (own or another account's)
   FALLIDO: "fallido",        // the latest upload failed or expired
-  SIN_ACTIVAR: "sin_activar", // KMZ stored without an active boundary
+  SIN_ACTIVAR: "sin_activar", // KMZ/KML stored without an active boundary
 });
 
 const pendienteDe = (v) => v?.estado === "subiendo";
@@ -100,18 +102,22 @@ export function describirResumen(resumen, tipo) {
   }
   if (tipo === "pdf") return describirPdf(resumen);
   const k = resumen.kmz;
-  if (!k) return { estado: ESTADO.VACIO, texto: "Sin KMZ", nota: null };
+  if (!k) return { estado: ESTADO.VACIO, texto: "Sin KMZ / KML", nota: null };
   const ultima = k.ultima_version ?? null;
   const n = nota(ultima, k.version_actual_id);
+  // The latest version's own format (KMZ or KML); another account's pending
+  // upload carries no name, so it is just a boundary file.
+  const f = typeof ultima?.nombre_original === "string" && ultima.nombre_original
+    ? nombreFormato(formatoDe(ultima.nombre_original, "kmz")) : null;
   if (k.geometria_activa_id) {
     // An expired attempt changes nothing: the active boundary is as good as before.
     return { estado: pendienteDe(ultima) ? ESTADO.PENDIENTE : ultima?.estado === "fallido" ? ESTADO.FALLIDO
       : ESTADO.LISTO, texto: "Contorno activo", nota: n };
   }
-  if (pendienteDe(ultima)) return { estado: ESTADO.PENDIENTE, texto: "KMZ en curso", nota: n };
-  if (vencidaDe(ultima) && !k.version_actual_id) return { estado: ESTADO.FALLIDO, texto: "Subida KMZ vencida", nota: n };
-  if (ultima?.estado === "fallido") return { estado: ESTADO.FALLIDO, texto: "KMZ falló", nota: n };
-  return { estado: ESTADO.SIN_ACTIVAR, texto: "KMZ sin contorno activo", nota: n };
+  if (pendienteDe(ultima)) return { estado: ESTADO.PENDIENTE, texto: `${f ?? "Archivo de contorno"} en curso`, nota: n };
+  if (vencidaDe(ultima) && !k.version_actual_id) return { estado: ESTADO.FALLIDO, texto: f ? `Subida ${f} vencida` : "Subida de contorno vencida", nota: n };
+  if (ultima?.estado === "fallido") return { estado: ESTADO.FALLIDO, texto: `${f ?? "Archivo de contorno"} falló`, nota: n };
+  return { estado: ESTADO.SIN_ACTIVAR, texto: `${f ?? "Archivo"} sin contorno activo`, nota: n };
 }
 
 /**

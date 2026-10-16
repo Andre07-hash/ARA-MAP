@@ -1,10 +1,14 @@
-"""KMZ layout files -> one validated terrain boundary.
+"""KMZ and KML layout files -> one validated terrain boundary.
 
-A pure function over bytes: no database, network, filesystem, identity or UI.
-Nothing in the application imports this module yet; wiring it to uploads, the
-attachment tables and the map is later work under the shared contract.
+Pure functions over bytes: no database, network, filesystem, identity or UI.
+server.archivos calls them when a boundary file is completed or reprocessed.
 
-    procesar_kmz(datos, seleccion=None) -> dict
+    procesar_kmz(datos, seleccion=None) -> dict        # a KMZ package
+    procesar_kml(datos, seleccion=None) -> dict        # a bare KML document
+    procesar_contorno(datos, seleccion=None) -> dict   # either, by content
+
+A KMZ is unpacked to its one KML document; a bare KML is that document
+already. From there both share one reader, one validation and one result.
 
 The result's ``estado`` is a PROCESSING outcome, kept apart from any future
 attachment/persistence state:
@@ -30,6 +34,7 @@ Invalid shapes are rejected, never repaired.
 
 Bounded work, by stage:
 
+- Bare KML: MAX_KML_BYTES on the document as uploaded, then as below.
 - Package: MAX_KMZ_BYTES; the central directory is walked header by header
   and refused past MAX_ENTRADAS (directories included) before zipfile reads
   it; only the one KML member is decompressed, up to MAX_KML_BYTES.
@@ -57,7 +62,7 @@ import struct
 import xml.parsers.expat
 import zipfile
 import zlib
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -141,10 +146,39 @@ def procesar_kmz(datos: bytes, seleccion: object = None) -> dict[str, Any]:
     programming errors and resource failures of the process itself (such as
     MemoryError) would propagate.
     """
+    return _procesar(datos, seleccion, leer_paquete)
+
+
+def procesar_kml(datos: bytes, seleccion: object = None) -> dict[str, Any]:
+    """Process one bare KML document under the same rules as a KMZ's KML.
+
+    The document gets the byte cap a KMZ's decompressed KML gets; everything
+    after that (parsing limits, candidates, selection, validation, results)
+    is the same code path as procesar_kmz.
+    """
+    return _procesar(datos, seleccion, leer_documento)
+
+
+def procesar_contorno(datos: bytes, seleccion: object = None) -> dict[str, Any]:
+    """Process a boundary file of either format, told apart by its content.
+
+    A ZIP signature is a KMZ package; anything else is read as a KML
+    document. Old KMZ versions therefore keep exactly procesar_kmz.
+    """
+    return (procesar_kmz if es_paquete(datos) else procesar_kml)(datos, seleccion)
+
+
+def es_paquete(datos: bytes) -> bool:
+    """Whether the bytes start like a ZIP archive (a KMZ), not an XML document."""
+    return datos[:4] in (b"PK\x03\x04", b"PK\x05\x06")
+
+
+def _procesar(datos: bytes, seleccion: object,
+              leer: Callable[[bytes], tuple[bytes, bool]]) -> dict[str, Any]:
     avisos: list[dict[str, str]] = []
     presupuesto = Presupuesto()
     try:
-        kml, adicionales = leer_paquete(datos)
+        kml, adicionales = leer(datos)
         lectura = _leer_kml(kml, presupuesto)
         candidatos = [_describir(c, presupuesto) for c in lectura.candidatos]
     except KmzError as exc:
@@ -301,6 +335,20 @@ def leer_paquete(datos: bytes) -> tuple[bytes, bool]:
     except (zipfile.BadZipFile, zipfile.LargeZipFile, zlib.error, EOFError, OSError,
             ValueError, struct.error, NotImplementedError, RuntimeError) as exc:
         raise _danado() from exc
+
+
+def leer_documento(datos: bytes) -> tuple[bytes, bool]:
+    """Return (the KML document, False) for a bare KML file.
+
+    The same byte cap as a KMZ's decompressed KML. A ZIP is refused here so a
+    package is never parsed as XML under a .kml name.
+    """
+    if len(datos) > MAX_KML_BYTES:
+        raise KmzError("KML_DEMASIADO_GRANDE", "El documento KML es demasiado grande.")
+    if es_paquete(datos):
+        raise KmzError("KML_ES_PAQUETE",
+                       "El archivo es un paquete comprimido (KMZ), no un documento KML.")
+    return datos, False
 
 
 def _revisar_directorio(datos: bytes) -> None:

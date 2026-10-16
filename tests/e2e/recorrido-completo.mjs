@@ -283,7 +283,7 @@ await revisar('el operador crea un terreno en blanco: los campos de negocio qued
   }
   // Real widgets in the file cells: an honest "none yet", not a placeholder.
   await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === 'Sin PDF', 'celda PDF');
-  igual(await textoCelda(olga.page, lote, 'core:kmz'), 'Sin KMZ', 'celda KMZ');
+  igual(await textoCelda(olga.page, lote, 'core:kmz'), 'Sin KMZ / KML', 'celda KMZ');
   const t = await terreno(olga.page, lote);
   igual([t.draft.lat, t.draft.lon, t.draft.asking_price, t.ubicacion.modo], [null, null, null, 'ninguna'], 'en blanco');
 });
@@ -454,8 +454,8 @@ if (!FOCALIZADO) {
     const d = await abrirDetalle(olga.page, vecino, VECINO);
     const k = d.locator('.archivos-detalle[data-tipo="kmz"]');
     await k.getByRole('button', { name: /^Borrar/ }).first().click();
-    await olga.page.getByRole('dialog', { name: /¿Borrar este KMZ\?/ }).getByRole('button', { name: 'Borrar definitivamente' }).click();
-    await hasta(async () => (await textoCelda(olga.page, vecino, 'core:kmz')) === 'Sin KMZ', 'celda tras borrar');
+    await olga.page.getByRole('dialog', { name: /¿Borrar este KMZ \/ KML\?/ }).getByRole('button', { name: 'Borrar definitivamente' }).click();
+    await hasta(async () => (await textoCelda(olga.page, vecino, 'core:kmz')) === 'Sin KMZ / KML', 'celda tras borrar');
     await cerrarDetalle(olga.page, d);
     const t = await terreno(olga.page, vecino);
     igual([t.ubicacion.modo, t.ubicacion.geometria, t.draft.lat], ['punto', null, 20.6015], 'ubicación por X/Y');

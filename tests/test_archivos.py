@@ -50,6 +50,11 @@ def kmz(name: str) -> bytes:
     return output.getvalue()
 
 
+def kml(name: str) -> bytes:
+    """A fixture KML document as a bare file, byte for byte."""
+    return (FIXTURES / "kmz" / f"{name}.kml").read_bytes()
+
+
 def leaves(value, path="$"):
     """Every scalar of a JSON-like value, with its path."""
     if isinstance(value, dict):
@@ -1408,7 +1413,220 @@ class LifecycleChecks:
         self.assertEqual(self.rows("archivo_version")[0]["estado"], "subiendo")
 
 
-class AttachmentLifecycleSQLite(LifecycleChecks, unittest.TestCase):
+class KmlChecks:
+    """Bare KML in the boundary slot, with the helpers of LifecycleChecks."""
+
+    def reprocess(self, version_id, selection=None, key=None, user="ana"):
+        return archivos.reprocesar(
+            self.sessions[user], version_id, self.store, seleccion=selection,
+            idempotency_key=key or str(uuid.uuid4()), bd=self.database, reloj=self.clock)
+
+    def download(self, version_id, user="ana"):
+        return archivos.descargar(self.sessions[user], version_id, self.store, bd=self.database)
+
+    def test_kml_cycle_for_an_authorized_operator_and_none_for_another(self):
+        data = kml("poligono_con_hueco")
+        name = "Lote Ñandú.KML"
+        started = self.upload(data, "kmz", user="olga", name=name)
+        result = self.complete(started, user="olga")
+        self.assertEqual(result["version"]["estado"], "disponible")
+        self.assertEqual(result["version"]["tipo_detectado"], archivos.TIPO_KML)
+        self.assertEqual(result["intento"]["resultado"], "listo")
+        self.assertTrue(result["aplicada"])
+        geometry = self.rows("geometria")[0]
+        self.assertEqual(result["archivo"]["geometria_activa_id"], geometry["id"])
+        self.assertEqual(geometry["huecos"], 1)
+        # One slot: the same column and kind a KMZ uses.
+        attachment = self.rows("archivo")[0]
+        self.assertEqual((attachment["columna_id"], attachment["tipo"]), ("core:kmz", "kmz"))
+        # A repeated completion replays; nothing is duplicated or re-activated.
+        counts = [len(self.rows(t)) for t in ("archivo_version", "archivo_intento", "geometria",
+                                              "archivo_evento")]
+        replay = self.complete(started, user="olga")
+        self.assertTrue(replay["replay"])
+        self.assertEqual(replay["archivo"]["revision"], result["archivo"]["revision"])
+        self.assertEqual(counts, [len(self.rows(t)) for t in (
+            "archivo_version", "archivo_intento", "geometria", "archivo_evento")])
+        got = self.download(started["version_id"], user="olga")
+        self.assertEqual((bytes(got["contenido"]), got["nombre_original"], got["formato"],
+                          got["tipo_contenido"], got["tipo"]),
+                         (data, name, "kml", archivos.TIPO_KML, "kmz"))
+        self.assertEqual(bytes(self.download(started["version_id"], user="ana")["contenido"]), data)
+        # omar has no access to this base: every route is the missing-resource answer.
+        for call in (lambda: self.download(started["version_id"], user="omar"),
+                     lambda: self.start(data, "kmz", user="omar", name="x.kml"),
+                     lambda: self.complete(started, user="omar"),
+                     lambda: self.reprocess(started["version_id"], user="omar")):
+            self.assertEqual(self.assert_code("not_found", call).status, 404)
+        self.assert_terrain_untouched()
+
+    def test_kml_with_several_contours_needs_selection_and_explicit_activation(self):
+        started = self.upload(kml("ambiguo_tres_lotes"), "kmz", name="tres.kml")
+        completed = self.complete(started)
+        self.assertEqual(completed["intento"]["resultado"], "requiere_seleccion")
+        self.assertFalse(completed["aplicada"])
+        self.assertIsNone(completed["archivo"]["geometria_activa_id"])
+        selected = self.reprocess(started["version_id"], [0, 2], key="kml-sel")
+        self.assertEqual(selected["intento"]["resultado"], "listo")
+        self.assertTrue(self.reprocess(started["version_id"], [0, 2], key="kml-sel")["replay"])
+        self.assertIsNone(self.rows("archivo")[0]["geometria_activa_id"])
+        activated = archivos.activar(
+            self.sessions["ana"], started["archivo_id"], version_id=started["version_id"],
+            geometria_id=selected["geometria_id"], expected_revision=1,
+            idempotency_key="kml-act", bd=self.database, reloj=self.clock)
+        self.assertEqual(activated["archivo"]["geometria_activa_id"], selected["geometria_id"])
+        self.assertEqual(self.rows("geometria", "id = ?", (selected["geometria_id"],))[0]["partes"], 2)
+        again = self.reprocess(started["version_id"], key="kml-retry")
+        self.assertEqual(again["intento"]["resultado"], "requiere_seleccion")
+        self.assertEqual(self.rows("archivo")[0]["geometria_activa_id"], selected["geometria_id"])
+
+    def test_mixed_history_kmz_kml_kmz_keeps_each_original(self):
+        files = [(kmz("poligono_simple"), "uno.kmz", archivos.TIPO_KMZ),
+                 (kml("multiparte"), "dos.kml", archivos.TIPO_KML),
+                 (kmz("poligono_con_hueco"), "tres.KMZ", archivos.TIPO_KMZ)]
+        versions = []
+        for data, name, detected in files:
+            started = self.upload(data, "kmz", name=name)
+            result = self.complete(started)
+            self.assertTrue(result["aplicada"], name)
+            self.assertEqual(result["version"]["tipo_detectado"], detected)
+            versions.append(started)
+        self.assertEqual(len({v["archivo_id"] for v in versions}), 1)
+        listed = archivos.versiones(self.sessions["ana"], versions[0]["archivo_id"],
+                                    bd=self.database, reloj=self.clock)["versiones"]
+        self.assertEqual(sorted((v["numero"], v["nombre_original"], v["tipo_detectado"])
+                                for v in listed),
+                         [(n + 1, name, detected) for n, (_, name, detected) in enumerate(files)])
+        for started, (data, name, detected) in zip(versions, files):
+            got = self.download(started["version_id"])
+            self.assertEqual((bytes(got["contenido"]), got["nombre_original"], got["tipo_contenido"]),
+                             (data, name, detected))
+            # Reprocessing an older version reads it in its own format.
+            self.assertEqual(self.reprocess(started["version_id"])["intento"]["resultado"], "listo")
+
+    def test_rejected_or_mismatched_kml_keeps_the_previous_boundary(self):
+        initial = self.complete(self.upload(kmz("poligono_simple"), "kmz", name="bueno.kmz"))
+        active = initial["archivo"]["geometria_activa_id"]
+        self.assertTrue(active)
+        parsed = {"solo_lineas.kml": kml("solo_lineas"), "roto.kml": kml("xml_roto"),
+                  "dtd.kml": kml("entidades_dtd"), "fuera.kml": kml("fuera_de_mexico")}
+        for name, data in parsed.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual(result["version"]["estado"], "disponible")
+                self.assertFalse(result["aplicada"])
+                self.assertEqual(result["archivo"]["geometria_activa_id"], active)
+        mismatched = {"paquete.kml": (kmz("poligono_simple"), "un KMZ"),
+                      "informe.kml": (PDF, "no es un KML"),
+                      "documento.kmz": (kml("poligono_simple"), "no es un KMZ")}
+        for name, (data, message) in mismatched.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual(result["version"]["estado"], "fallido")
+                self.assertEqual(result["version"]["error"]["codigo"], "firma_invalida")
+                self.assertIn(message, result["version"]["error"]["mensaje"])
+                self.assertEqual(result["archivo"]["geometria_activa_id"], active)
+        self.assertEqual(self.rows("archivo")[0]["geometria_activa_id"], active)
+
+    def test_kml_leading_space_bom_and_encoding_never_hit_a_fixed_prefix(self):
+        """Regression (#54 review): the XML gate used to read only 256 bytes."""
+        raw = kml("poligono_simple").split(b"?>", 1)[1].lstrip()
+        cases = {f"espacios-{n}.kml": b" " * n + raw for n in (255, 256, 64 * 1024)}
+        cases["saltos.kml"] = b"\r\n\t " * 70_000 + raw
+        cases["bom-espacios.kml"] = b"\xef\xbb\xbf" + b" " * 300 + raw
+        texto = raw.decode()
+        cases["utf16le.kml"] = b"\xff\xfe" + (" " * 300 + texto).encode("utf-16-le")
+        cases["utf16be.kml"] = b"\xfe\xff" + (" " * 300 + texto).encode("utf-16-be")
+        for name, data in cases.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual(result["version"]["estado"], "disponible", result["version"]["error"])
+                self.assertEqual(result["intento"]["resultado"], "listo")
+                self.assertTrue(result["aplicada"])
+        # The same documents in a KMZ are accepted too, and both sides of the
+        # old 256-byte edge give the same outcome.
+        packed = io.BytesIO()
+        with zipfile.ZipFile(packed, "w") as archive:
+            archive.writestr("doc.kml", cases["espacios-256.kml"])
+        self.assertTrue(self.complete(self.upload(packed.getvalue(), "kmz", name="mismo.kmz"))["aplicada"])
+        active = self.rows("archivo")[0]["geometria_activa_id"]
+        # Whitespace followed by anything but markup is still not a KML, at any depth.
+        for name, data in {"espacios-texto.kml": b" " * 300 + b"no es xml",
+                           "solo-espacios.kml": b" " * 1000,
+                           "espacios-pdf.kml": b" " * 300 + PDF}.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual((result["version"]["estado"], result["version"]["error"]["codigo"]),
+                                 ("fallido", "firma_invalida"))
+                self.assertEqual(result["archivo"]["geometria_activa_id"], active)
+
+    def test_kml_limit_is_16_mib_declared_written_and_parsed(self):
+        self.assertEqual((archivos.KML_MAX, archivos.KMZ_MAX), (16 * 1024 * 1024, 20 * 1024 * 1024))
+        digest = hashlib.sha256(b"").hexdigest()
+
+        def declare(name, size):
+            return archivos.iniciar(
+                self.sessions["ana"], self.terrain, tipo="kmz", nombre_original=name,
+                tamano_declarado=size, sha256_declarado=digest,
+                idempotency_key=str(uuid.uuid4()), bd=self.database, reloj=self.clock)
+
+        self.assert_code("tamano_invalido", lambda: declare("grande.KML", archivos.KML_MAX + 1))
+        self.assertTrue(declare("grande.kmz", archivos.KML_MAX + 1)["version_id"])
+        # Exactly at the limit: a real document padded inside its Document.
+        base = kml("poligono_simple")
+        exact = base.replace(b"</Document>",
+                             b" " * (archivos.KML_MAX - len(base)) + b"</Document>")
+        self.assertEqual(len(exact), archivos.KML_MAX)
+        mib = 1024 * 1024
+
+        def chunks(data):
+            return [data[i:i + mib] for i in range(0, len(data), mib)]
+
+        started = self.start(exact, "kmz", name="limite.kml")
+        archivos.escribir_temporal(self.sessions["ana"], started["version_id"], chunks(exact),
+                                   self.store, bd=self.database, reloj=self.clock)
+        result = self.complete(started)
+        self.assertTrue(result["aplicada"])
+        # One byte more never reaches storage, even when less was declared.
+        small = self.start(base, "kmz", name="mentira.kml")
+        error = self.assert_code("tamano_excedido", lambda: archivos.escribir_temporal(
+            self.sessions["ana"], small["version_id"], chunks(exact) + [b" "], self.store,
+            bd=self.database, reloj=self.clock))
+        self.assertEqual((error.status, error.detalle["limite"]), (413, archivos.KML_MAX))
+
+    def test_stored_type_decides_the_format_of_old_versions(self):
+        data = kmz("poligono_simple")
+        started = self.upload(data, "kmz", name="viejo.kmz")
+        self.complete(started)
+        # A KMZ stored under any name stays a KMZ: tipo_detectado is the record.
+        with db.escritura(self.database) as conn:
+            conn.execute("UPDATE archivo_version SET nombre_original = 'viejo.kml' WHERE id = ?",
+                         (started["version_id"],))
+        self.assertEqual(self.reprocess(started["version_id"])["intento"]["resultado"], "listo")
+        got = self.download(started["version_id"])
+        self.assertEqual((got["formato"], got["tipo_contenido"], bytes(got["contenido"])),
+                         ("kmz", archivos.TIPO_KMZ, data))
+
+    def test_deleted_kml_is_gone_and_a_new_upload_starts_over(self):
+        started = self.upload(kml("poligono_simple"), "kmz", name="borrar.kml")
+        done = self.complete(started)
+        version = self.rows("archivo_version", "id = ?", (started["version_id"],))[0]
+        deleted = archivos.borrar(self.sessions["ana"], started["archivo_id"],
+                                  expected_revision=done["archivo"]["revision"],
+                                  almacen=self.store, bd=self.database)
+        self.assertEqual(deleted, {"borrado": True, "limpieza_pendiente": False})
+        for table in ("archivo", "archivo_version", "archivo_evento", "geometria"):
+            self.assertEqual(self.rows(table, "archivo_id = ?" if table != "archivo" else "id = ?",
+                                       (started["archivo_id"],)), [])
+        self.assertIsNone(self.store.tamano_de(version["clave_final"]))
+        self.assert_code("not_found", lambda: self.download(started["version_id"]))
+        again = self.complete(self.upload(kml("poligono_simple"), "kmz", name="borrar.kml"))
+        self.assertNotEqual(again["archivo"]["id"], started["archivo_id"])
+        self.assertEqual(again["version"]["numero"], 1)
+        self.assertTrue(again["aplicada"])
+
+
+class AttachmentLifecycleSQLite(LifecycleChecks, KmlChecks, unittest.TestCase):
     def prepare_database(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -1416,7 +1634,7 @@ class AttachmentLifecycleSQLite(LifecycleChecks, unittest.TestCase):
 
 
 @unittest.skipUnless(URL, "No Postgres test connection configured")
-class AttachmentLifecyclePostgres(LifecycleChecks, unittest.TestCase):
+class AttachmentLifecyclePostgres(LifecycleChecks, KmlChecks, unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         import psycopg

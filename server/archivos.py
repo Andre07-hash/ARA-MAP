@@ -28,12 +28,13 @@ from .almacen import (
     ResultadoInciertoError,
 )
 from .errors import ApiError
-from .kmz import procesar_kmz
+from .kmz import MAX_KML_BYTES, es_paquete, procesar_contorno
 from .protocols import DatabaseConnection
 from .repo import archivos as repo
 
 PDF_MAX = 25 * 1024 * 1024
 KMZ_MAX = 20 * 1024 * 1024
+KML_MAX = MAX_KML_BYTES       # a bare KML: the cap of the KML inside a KMZ
 UPLOAD_SECONDS = 15 * 60
 COMPLETE_SECONDS = 60 * 60
 LEASE_SECONDS = 180
@@ -43,6 +44,17 @@ HISTORY_MAX = 100
 ANALYZER = "server.kmz/v1"
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+
+# The boundary slot (tipo 'kmz', column core:kmz) holds KMZ and KML versions.
+# A version's format is its name's extension until completion verifies the
+# bytes against it and records the MIME type in tipo_detectado; from then on
+# (reprocess, download) tipo_detectado decides. Older versions are all KMZ.
+TIPO_KMZ = "application/vnd.google-earth.kmz"
+TIPO_KML = "application/vnd.google-earth.kml+xml"
+LIMITES = {"pdf": PDF_MAX, "kmz": KMZ_MAX, "kml": KML_MAX}
+_BOM = (b"\xef\xbb\xbf", b"\xff\xfe", b"\xfe\xff")
+# Leading XML whitespace, in UTF-8 or (with its zero bytes) UTF-16.
+_LEADING_SPACE = re.compile(rb"[ \t\r\n\x00]*")
 
 Clock = Callable[[], Union[datetime, str]]
 Processor = Callable[[bytes, object], dict[str, Any]]
@@ -231,12 +243,24 @@ def _digest(value: object) -> str:
     return digest
 
 
-def _kind(value: object) -> tuple[str, int]:
-    if value == "pdf":
-        return "pdf", PDF_MAX
-    if value == "kmz":
-        return "kmz", KMZ_MAX
+def _kind(value: object) -> str:
+    if value in ("pdf", "kmz"):
+        return str(value)
     raise _error("tipo_invalido", "El tipo debe ser pdf o kmz.")
+
+
+def _format(kind: str, name: str, detected: object = None) -> str:
+    """'pdf', 'kmz' or 'kml': the format one version is checked and read as."""
+    if kind == "pdf":
+        return "pdf"
+    if detected:
+        return "kml" if detected == TIPO_KML else "kmz"
+    return "kml" if name.lower().endswith(".kml") else "kmz"
+
+
+def _format_of(resource: Mapping[str, Any]) -> str:
+    return _format(str(resource["archivo_tipo"]), str(resource["nombre_original"]),
+                   resource.get("tipo_detectado"))
 
 
 def _hook(hooks: object | None, name: str, *args: Any) -> None:
@@ -259,9 +283,9 @@ def iniciar(sesion: auth.Sesion, terreno_id: str, *, tipo: str,
     (building a store may import its SDK).
     """
     _valid_session(sesion)
-    kind, maximum = _kind(tipo)
+    kind = _kind(tipo)
     name = _safe_name(nombre_original)
-    size = _size(tamano_declarado, maximum)
+    size = _size(tamano_declarado, LIMITES[_format(kind, name)])
     digest = _digest(sha256_declarado)
     key = _key(idempotency_key)
     payload = {"tipo": kind, "nombre_original": name, "tamano_declarado": size,
@@ -311,7 +335,7 @@ def escribir_temporal(sesion: auth.Sesion, version_id: str,
         raise _conflict("subida_no_pendiente", "La subida ya no está pendiente.")
     if resource["subida_vence_en"] <= now:
         raise _conflict("subida_expirada", "El plazo para subir contenido terminó.")
-    maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    maximum = LIMITES[_format_of(resource)]
     try:
         written = almacen.guardar_temporal(str(resource["clave_temporal"]), bloques, maximum)
     except LimiteExcedidoError as exc:
@@ -381,29 +405,55 @@ def _release_lease(sesion: auth.Sesion, version_id: str, terrain_id: str,
         return
 
 
+def _looks_like_xml(body: bytes) -> bool:
+    """A cheap gate before the parser: optional BOM and whitespace, then '<'.
+
+    It scans the whole (already bounded, already read) document, so leading
+    whitespace of any length is allowed; nothing is copied or parsed. UTF-16
+    shows as '<' next to a zero byte. The parser still decides whether the
+    document is valid KML.
+    """
+    start = next((len(bom) for bom in _BOM if body.startswith(bom)), 0)
+    space = _LEADING_SPACE.match(body, start)
+    end = space.end() if space else start
+    return body[end:end + 1] == b"<"
+
+
 def _verify_final(almacen: Almacen, final_key: str, maximum: int,
                   kind: str) -> tuple[int, str, str, bytes | None]:
+    """Read the final object once; `kind` is the format ('pdf', 'kmz', 'kml')."""
     digest = hashlib.sha256()
     total = 0
     prefix = bytearray()
-    kmz = bytearray() if kind == "kmz" else None
+    body = bytearray() if kind != "pdf" else None
     with almacen.leer(final_key, maximum) as reading:
         for chunk in reading:
             total += len(chunk)
             digest.update(chunk)
-            if len(prefix) < 8:
+            if len(prefix) < 8:          # the PDF and ZIP signatures
                 prefix.extend(chunk[:8 - len(prefix)])
-            if kmz is not None:
-                kmz.extend(chunk)
+            if body is not None:
+                body.extend(chunk)
+    head = bytes(prefix)
+    content = bytes(body) if body is not None else None
     if kind == "pdf":
-        if not bytes(prefix).startswith(b"%PDF-"):
+        if not head.startswith(b"%PDF-"):
             raise _error("firma_invalida", "El contenido no es un PDF válido.")
         detected = "application/pdf"
+    elif kind == "kml":
+        # The name says KML: a package or a non-XML body is a mismatch, not a KML.
+        if es_paquete(head):
+            raise _error("firma_invalida",
+                         "El archivo se llama .kml pero su contenido es un KMZ (comprimido).")
+        assert content is not None
+        if not _looks_like_xml(content):
+            raise _error("firma_invalida", "El contenido no es un KML válido.")
+        detected = TIPO_KML
     else:
-        if not bytes(prefix).startswith(b"PK\x03\x04"):
+        if not head.startswith(b"PK\x03\x04"):
             raise _error("firma_invalida", "El contenido no es un KMZ válido.")
-        detected = "application/vnd.google-earth.kmz"
-    return total, digest.hexdigest(), detected, bytes(kmz) if kmz is not None else None
+        detected = TIPO_KMZ
+    return total, digest.hexdigest(), detected, content
 
 
 def _attempt(result: Mapping[str, Any], selection: Sequence[int] | None = None
@@ -508,7 +558,7 @@ def _report_cleanup(error: BaseException, pending: bool) -> None:
 
 def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
               bd: Path | str | None = None, reloj: Clock | None = None,
-              procesador: Processor = procesar_kmz,
+              procesador: Processor = procesar_contorno,
               ganchos: object | None = None) -> dict[str, Any]:
     """Finalize, verify and optionally parse one pending upload."""
     _valid_session(sesion)
@@ -528,7 +578,7 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
     terrain_id = str(resource["inventory_id"])
     staging = [str(resource["clave_temporal"])]
     _hook(ganchos, "despues_lease", version_id)
-    maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    maximum = LIMITES[_format_of(resource)]
     final_key = _final_prefix(version_id) + uuid.uuid4().hex
     copied = False
     verification: ApiError | None
@@ -537,7 +587,7 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         copied = True
         _hook(ganchos, "despues_copia", version_id)
         actual, digest, detected, body = _verify_final(
-            almacen, final_key, maximum, str(resource["archivo_tipo"]))
+            almacen, final_key, maximum, _format_of(resource))
     except ObjetoAusenteError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
         if copied:
@@ -605,7 +655,7 @@ def completar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         except Exception:
             parsed = {"estado": "error_interno", "error": {
                 "codigo": "ANALIZADOR_FALLO",
-                "mensaje": "No fue posible analizar el KMZ."}}
+                "mensaje": "No fue posible analizar el archivo de contorno."}}
         attempt, geometry = _attempt(parsed)
         _hook(ganchos, "despues_parseo", version_id)
     _hook(ganchos, "antes_commit", version_id)
@@ -659,7 +709,7 @@ def cancelar(sesion: auth.Sesion, version_id: str, almacen: Almacen | None = Non
 def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
                seleccion: Sequence[int] | None = None, idempotency_key: str,
                bd: Path | str | None = None, reloj: Clock | None = None,
-               procesador: Processor = procesar_kmz,
+               procesador: Processor = procesar_contorno,
                ganchos: object | None = None) -> dict[str, Any]:
     _valid_session(sesion)
     key = _key(idempotency_key)
@@ -688,9 +738,10 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
             raise _conflict("procesamiento_en_curso", "El archivo ya se está procesando.",
                             reintentar=True, reintentar_despues_de=leased["expires_at"])
         final_key = str(current["clave_final"])
+        fmt = _format_of(current)
     _hook(ganchos, "despues_lease", version_id)
     try:
-        actual, digest, _, body = _verify_final(almacen, final_key, KMZ_MAX, "kmz")
+        actual, digest, _, body = _verify_final(almacen, final_key, LIMITES[fmt], fmt)
         assert body is not None
     except AlmacenError as exc:
         _release_lease(sesion, version_id, terrain_id, work_id, bd)
@@ -711,8 +762,8 @@ def reprocesar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         raise
     except Exception:
         attempt, geometry = _attempt({"estado": "error_interno", "error": {
-            "codigo": "ANALIZADOR_FALLO", "mensaje": "No fue posible analizar el KMZ."}},
-            normalized)
+            "codigo": "ANALIZADOR_FALLO",
+            "mensaje": "No fue posible analizar el archivo de contorno."}}, normalized)
     with db.escritura(bd) as conn:
         scope = _reverify(conn, sesion, terrain_id, "archivos.subir")
         current = repo.resource_for_version(conn, version_id, lock=True)
@@ -987,7 +1038,7 @@ def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
 
     resource = cast(dict[str, Any], _in_scope_read(sesion, lookup, "archivos.ver", bd,
                                                    lambda _c, r: r))
-    maximum = PDF_MAX if resource["archivo_tipo"] == "pdf" else KMZ_MAX
+    maximum = LIMITES[_format_of(resource)]
     content = bytearray()
     digest = hashlib.sha256()
     try:
@@ -1004,7 +1055,8 @@ def descargar(sesion: auth.Sesion, version_id: str, almacen: Almacen, *,
         raise _error("objeto_final_inconsistente",
                      "El archivo guardado no coincide con la versión registrada.", 503)
     return {"version_id": str(resource["id"]), "archivo_id": str(resource["archivo_id"]),
-            "tipo": str(resource["archivo_tipo"]), "tipo_contenido": str(resource["tipo_detectado"]),
+            "tipo": str(resource["archivo_tipo"]), "formato": _format_of(resource),
+            "tipo_contenido": str(resource["tipo_detectado"]),
             "nombre_original": str(resource["nombre_original"]), "tamano": len(content),
             "sha256": digest.hexdigest(), "contenido": content}
 

@@ -468,6 +468,43 @@ class HTTPChecks:
         s, propia = self.j("GET", f"/api/archivos/{pendiente['archivo_id']}/versiones", "olga")
         self.assertEqual(propia["versiones"][0]["nombre_original"], secreto)
 
+    # -- bare KML in the boundary slot -----------------------------------------------
+
+    def test_kml_over_http_keeps_its_bytes_name_and_type(self):
+        contenido = (FIXTURES / "kmz" / "poligono_con_hueco.kml").read_bytes()
+        nombre = "Polígono Ñandú.KML"
+        s, inicio = self.iniciar(contenido, "kmz", nombre=nombre)
+        self.assertEqual(s, 200, inicio)
+        s, r = self.subir(inicio["version_id"], contenido, tipo_contenido=archivos.TIPO_KML)
+        self.assertEqual(s, 200, r)
+        s, r = self.completar(inicio["version_id"])
+        self.assertEqual((s, r["version"]["tipo_detectado"], r["intento"]["resultado"], r["aplicada"]),
+                         (200, archivos.TIPO_KML, "listo", True))
+        s, h, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga")
+        self.assertEqual((s, cuerpo), (200, contenido))
+        self.assertEqual(h["Content-Type"], archivos.TIPO_KML)
+        self.assertEqual(h["Content-Disposition"],
+                         "attachment; filename=\"Poligono Nandu.KML\"; filename*=UTF-8''"
+                         + quote(nombre, safe=""))
+        self.assertEqual(h["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(h["Content-Security-Policy"], "default-src 'none'; sandbox")
+        self.assertEqual(h["X-Archivo-Sha256"], hashlib.sha256(contenido).hexdigest())
+        # Another operator without the base gets the missing answer, not the bytes.
+        s, _, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga", "omar")
+        self.assertEqual((s, json.loads(cuerpo)["detalle"]["code"]), (404, "not_found"))
+
+    def test_kml_limit_through_the_api(self):
+        cero = hashlib.sha256(b"").hexdigest()
+        s, ok = self.iniciar(b"", "kmz", nombre="limite.kml", tamano=archivos.KML_MAX, sha=cero)
+        self.assertEqual(s, 200, ok)
+        s, err = self.iniciar(b"", "kmz", nombre="limite.kml", tamano=archivos.KML_MAX + 1, sha=cero)
+        self.assertEqual((s, err["detalle"]["code"], err["detalle"]["limite"]),
+                         (400, "tamano_invalido", archivos.KML_MAX))
+        s, inicio = self.iniciar(b"x", "kmz", nombre="poco.kml", tamano=1)
+        s, err = self.subir(inicio["version_id"], b" " * (archivos.KML_MAX + 1),
+                            tipo_contenido=archivos.TIPO_KML)
+        self.assertEqual((s, err["detalle"]["code"]), (413, "tamano_excedido"))
+
     # -- upload boundaries -----------------------------------------------------------
 
     def test_declared_and_actual_size_type_and_hash_boundaries(self):
@@ -1166,6 +1203,9 @@ class Disposicion(unittest.TestCase):
                          "attachment; filename=\"archivo.pdf\"; filename*=UTF-8''...")
         self.assertTrue(api.disposicion("Plano.KMZ", "kmz").startswith('attachment; filename="Plano.KMZ";'))
         self.assertTrue(api.disposicion("reporte", "pdf").startswith('attachment; filename="reporte.pdf";'))
+        self.assertTrue(api.disposicion("Plano.kml", "kml").startswith('attachment; filename="Plano.kml";'))
+        self.assertTrue(api.disposicion("sin extension", "kml").startswith(
+            'attachment; filename="sin extension.kml";'))
 
 
 class HTTPSQLite(HTTPChecks, unittest.TestCase):

@@ -20,7 +20,7 @@
 
 import { el } from "../../lib/dom.js";
 
-const ETIQUETA = { pdf: "Archivos", kmz: "KMZ" };
+const ETIQUETA = { pdf: "Archivos", kmz: "KMZ / KML" };
 
 /* The placeholder widget: the same contract, showing an honest "not yet". */
 function sinIntegrar({ container, tipo }) {

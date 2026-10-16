@@ -82,7 +82,7 @@ export function ubicacionDeFicha(registro) {
   const { modo, xy } = ubicacionDe(fila);
   const d = registro.draft ?? {};
   let texto;
-  if (modo === "geometria") texto = "En el mapa por su contorno KMZ activo.";
+  if (modo === "geometria") texto = "En el mapa por su contorno KMZ / KML activo.";
   else if (modo === "punto") texto = "En el mapa por sus coordenadas X/Y; no tiene contorno activo.";
   else if (xy === "invalida") texto = "Fuera del mapa: sus X/Y no son coordenadas válidas en México y no tiene contorno activo.";
   else texto = "Fuera del mapa: no tiene contorno activo ni coordenadas X/Y.";

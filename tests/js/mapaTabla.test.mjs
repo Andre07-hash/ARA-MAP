@@ -146,7 +146,7 @@ test("custom columns are the terrain's own base's, without retired ones", () => 
 test("the location says what places it and shows the stored X/Y, never the boundary's point", () => {
   const contorno = ubicacionDeFicha(registro({}, { ubicacion: { geometria: CONTORNO } }));
   assert.equal(contorno.modo, "geometria");
-  assert.match(contorno.texto, /contorno KMZ activo/);
+  assert.match(contorno.texto, /contorno KMZ \/ KML activo/);
   assert.deepEqual([contorno.x, contorno.y], ["—", "—"]);
   assert.doesNotMatch(contorno.texto, /círculo|sin coordenadas/i);
 

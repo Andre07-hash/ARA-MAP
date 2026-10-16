@@ -143,9 +143,11 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   La identidad de un terreno es nombre + estado + municipio + superficie.
 - En Tabla / Mapa, un terreno con contorno activo puede aparecer sin X/Y;
   con X/Y válidas y sin contorno aparece como punto. Sin ambos no se dibuja.
-- Los terrenos existen primero como filas; después se adjuntan PDF y KMZ.
-  Un KMZ con un contorno válido se activa al completar; con varios candidatos
-  se elige y activa en el detalle; uno inválido conserva el contorno anterior.
+- Los terrenos existen primero como filas; después se adjuntan PDF y KMZ o KML.
+  Un KMZ o KML con un contorno válido se activa al completar; con varios
+  candidatos se elige y activa en el detalle; uno inválido conserva el contorno
+  anterior. KMZ y KML comparten la ranura `core:kmz` (tipo `kmz`); el formato
+  de cada versión lo fija `tipo_detectado`, no un nombre interno nuevo.
 - La importación Excel/CSV heredada no carga la tabla maestra. La carga inicial
   de filas se hace con `scripts/cargar_maestra.py`.
 - El fallo del mapa de «Base Terrenos 09.26 copy» sigue pendiente por decisión

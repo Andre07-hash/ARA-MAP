@@ -123,7 +123,7 @@ await caso('administrator: role-aware navigation, master table columns, bases, g
   assert.match(page.url(), /#\/tabla\/maestra$/);
   const cabeceras = await page.locator('thead th[data-col]').allInnerTexts();
   assert.deepEqual(cabeceras, ['Tipo de terreno', 'Nombre de terreno', 'Estado', 'Municipio', 'Superficie', 'HA',
-    'Afectaciones %', 'Asking price', 'Asking $/m2', 'Comentarios', 'X', 'Y', 'Archivos', 'KMZ', 'Base']);
+    'Afectaciones %', 'Asking price', 'Asking $/m2', 'Comentarios', 'X', 'Y', 'Archivos', 'KMZ / KML', 'Base']);
 
   await page.getByRole('button', { name: 'Bases y accesos' }).click();
   const bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
@@ -233,7 +233,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
   // The file columns show Team B's compact cells with the real summary: no
   // files yet, said as such (not a placeholder, not a zero), and, on a row she
   // may change, one "Elegir…" button that picks a file for this row.
-  for (const [col, texto, boton] of [['core:archivos', 'Sin PDF', 'Elegir PDF…'], ['core:kmz', 'Sin KMZ', 'Elegir KMZ…']]) {
+  for (const [col, texto, boton] of [['core:archivos', 'Sin PDF', 'Elegir PDF…'], ['core:kmz', 'Sin KMZ / KML', 'Elegir KMZ o KML…']]) {
     assert.equal((await celda(page, lote, col).locator('.archivos-celda').innerText()).trim(), texto);
     assert.deepEqual(await celda(page, lote, col).locator('button:visible, a').allInnerTexts(), [boton]);
   }

@@ -121,7 +121,7 @@ MALLOC_ARENA_MAX=2 python3 tests/e2e/ensayo_archivos.py --fases grandes,sesiones
 
 ## Elegir PDF/KMZ desde las celdas de la tabla
 
-Botones «Elegir PDF…» y «Elegir KMZ…» de la tabla con los widgets reales:
+Botones «Elegir PDF…» y «Elegir KMZ o KML…» de la tabla con los widgets reales:
 administrador y operador, asociación a la fila, selección y activación
 explícitas del KMZ, reemplazo inválido, selector cancelado, teclado y filas
 sin permiso. Levanta y borra su propio servidor desechable.
@@ -129,6 +129,21 @@ sin permiso. Levanta y borra su propio servidor desechable.
 ```bash
 cd tests/e2e && npm ci
 node tabla-elegir.mjs                       # ELEGIR_CAPTURAS=carpeta para capturas
+```
+
+## KMZ y KML en la misma columna
+
+KML directo en la columna «KMZ / KML», en tabla y detalle: contorno único
+activado y dibujado en el mapa, KML sin contorno y `.kml` que en realidad es un
+KMZ conservan el contorno anterior, KMZ que reemplaza a un KML en el mismo
+historial, varios contornos con elección y activación explícitas (operador),
+subida desde el detalle ante la recarga por foco, descarga del original y, como
+regresión, apertura de un PDF desde su contador. Levanta y borra su propio
+servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-kml.mjs                          # KML_CAPTURAS=carpeta para capturas
 ```
 
 ## Tabla de empleados (2A)

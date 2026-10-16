@@ -61,7 +61,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     el("p", { class: "previa-nota", tabindex: "-1" },
       "Muestra todos los terrenos de esta vista con los filtros actuales, no sólo la página de la tabla. " +
       "El contorno activo de un terreno se carga al seleccionarlo; los demás se muestran como un símbolo " +
-      "en su punto interior. Un KMZ subido sin activar no cambia el mapa."));
+      "en su punto interior. Un KMZ o KML subido sin activar no cambia el mapa."));
   info.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && info.open) { e.stopPropagation(); info.open = false; info.querySelector("summary").focus(); }
   });

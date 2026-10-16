@@ -255,7 +255,7 @@ export function createMapaPaneles({
         ),
       ),
       personalizadas,
-      Section("Archivos", [["PDF", archivo("pdf")], ["KMZ", archivo("kmz")]]),
+      Section("Archivos", [["PDF", archivo("pdf")], ["KMZ / KML", archivo("kmz")]]),
       el("p", { class: "detail-nota muted" },
         "Ficha de solo lectura. Para editar, subir, activar o retirar archivos usa la tabla."),
       el("footer", { class: "detail-footer muted" },

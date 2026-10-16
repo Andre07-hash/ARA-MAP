@@ -166,9 +166,9 @@ await revisar('administrador: celdas vacías muestran su resumen y los dos boton
   await irA(ada.page, base.id);
   for (const id of [A, B]) {
     await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === 'Sin PDF', 'resumen PDF');
-    igual(await resumen(ada.page, id, COL.kmz), 'Sin KMZ', 'resumen KMZ');
+    igual(await resumen(ada.page, id, COL.kmz), 'Sin KMZ / KML', 'resumen KMZ');
     igual(await elegirEn(ada.page, id, COL.pdf).innerText(), 'Elegir PDF…', 'botón PDF');
-    igual(await elegirEn(ada.page, id, COL.kmz).innerText(), 'Elegir KMZ…', 'botón KMZ');
+    igual(await elegirEn(ada.page, id, COL.kmz).innerText(), 'Elegir KMZ o KML…', 'botón KMZ');
     igual(await botonesVisibles(ada.page, id), 2, 'dos botones visibles');
   }
 });
@@ -193,7 +193,7 @@ await revisar('administrador: KMZ de un contorno en A (regla existente del servi
   await elegir(ada.page, A, 'kmz', F.kmz_simple);
   igual(await faseFinal(ada.page, A, 'kmz', ['listo', 'requiere_seleccion', 'rechazado', 'fallido', 'interrumpido']), 'listo', 'fase');
   await hasta(async () => (await resumen(ada.page, A, COL.kmz)) === 'Contorno activo', 'A sin contorno activo');
-  igual(await resumen(ada.page, B, COL.kmz), 'Sin KMZ', 'B no cambia');
+  igual(await resumen(ada.page, B, COL.kmz), 'Sin KMZ / KML', 'B no cambia');
   const t = await terreno(ada.page, A);
   igual(t.ubicacion.modo, 'geometria', 'ubicación');
   geometriaA = t.ubicacion.geometria.id;

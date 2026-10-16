@@ -1,0 +1,211 @@
+{
+  "fases": {
+    "ciclos": {
+      "ciclos": 20,
+      "duracion_ciclo_s": [
+        0.295,
+        0.298,
+        0.468,
+        0.31,
+        0.272,
+        0.41,
+        0.325,
+        0.406,
+        0.349,
+        0.341,
+        0.25,
+        0.398,
+        0.427,
+        0.359,
+        0.364,
+        0.349,
+        0.29,
+        0.531,
+        0.326,
+        0.353
+      ]
+    },
+    "sesiones": [
+      {
+        "sesiones": 2,
+        "ciclos_por_sesion": 4,
+        "duracion_s": 1.94
+      },
+      {
+        "sesiones": 5,
+        "ciclos_por_sesion": 4,
+        "duracion_s": 4.95
+      }
+    ],
+    "grandes": {
+      "pdf_s": 1.32,
+      "kmz_s": 1.36,
+      "simultaneo_s": 1.36,
+      "rechazos_mas_uno": {
+        "pdf_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "pdf_cuerpo": [
+          "conexion_cerrada",
+          "BrokenPipeError"
+        ],
+        "kmz_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "kmz_cuerpo": [
+          413,
+          "tamano_excedido"
+        ]
+      }
+    },
+    "reinicio": {
+      "resumen_pdf_tras_reinicio": {
+        "pdf_total": 3,
+        "estados_recientes": [
+          "disponible",
+          "subiendo",
+          "subiendo"
+        ]
+      },
+      "corte_a_la_mitad_completar": [
+        409,
+        "contenido_temporal_ausente"
+      ]
+    }
+  },
+  "limite_memoria_mb": 0,
+  "bd": "postgres",
+  "final": {
+    "terrenos": 33,
+    "versiones_esperadas": 89,
+    "objetos_temporales": 0,
+    "objetos_finales": 89,
+    "parciales_huerfanos": 0
+  },
+  "duracion_total_s": 21.9,
+  "rss_pico_servidor_mib": [
+    120.8,
+    58.5,
+    98.2
+  ],
+  "memoria_virtual_pico_servidor_mib": [
+    815.3,
+    214.8,
+    286.9
+  ],
+  "tiempos": {
+    "GET": {
+      "n": 11,
+      "p50_ms": 30.9,
+      "p95_ms": 42.5,
+      "max_ms": 42.5
+    },
+    "POST": {
+      "n": 2,
+      "p50_ms": 27.6,
+      "p95_ms": 28.4,
+      "max_ms": 28.4
+    },
+    "borrar": {
+      "n": 13,
+      "p50_ms": 37.9,
+      "p95_ms": 89.5,
+      "max_ms": 89.5
+    },
+    "cancelar": {
+      "n": 11,
+      "p50_ms": 45.8,
+      "p95_ms": 99.0,
+      "max_ms": 99.0
+    },
+    "completar": {
+      "n": 164,
+      "p50_ms": 63.1,
+      "p95_ms": 220.9,
+      "max_ms": 420.8
+    },
+    "contenido_kmz": {
+      "n": 49,
+      "p50_ms": 37.7,
+      "p95_ms": 105.7,
+      "max_ms": 226.1
+    },
+    "contenido_mas_uno": {
+      "n": 2,
+      "p50_ms": 24.3,
+      "p95_ms": 41.5,
+      "max_ms": 41.5
+    },
+    "contenido_pdf": {
+      "n": 64,
+      "p50_ms": 33.1,
+      "p95_ms": 107.2,
+      "max_ms": 229.1
+    },
+    "descarga_404": {
+      "n": 24,
+      "p50_ms": 21.0,
+      "p95_ms": 62.8,
+      "max_ms": 63.7
+    },
+    "descarga_kmz": {
+      "n": 49,
+      "p50_ms": 28.1,
+      "p95_ms": 101.1,
+      "max_ms": 288.6
+    },
+    "descarga_pdf": {
+      "n": 54,
+      "p50_ms": 20.8,
+      "p95_ms": 80.6,
+      "max_ms": 283.5
+    },
+    "detalle_terreno": {
+      "n": 13,
+      "p50_ms": 31.0,
+      "p95_ms": 78.4,
+      "max_ms": 78.4
+    },
+    "iniciar": {
+      "n": 138,
+      "p50_ms": 37.3,
+      "p95_ms": 138.9,
+      "max_ms": 163.0
+    },
+    "listar": {
+      "n": 33,
+      "p50_ms": 16.9,
+      "p95_ms": 22.2,
+      "max_ms": 22.6
+    },
+    "login": {
+      "n": 17,
+      "p50_ms": 13.5,
+      "p95_ms": 17.4,
+      "max_ms": 17.4
+    },
+    "tabla": {
+      "n": 87,
+      "p50_ms": 88.4,
+      "p95_ms": 130.4,
+      "max_ms": 154.8
+    },
+    "verificacion_final": {
+      "n": 102,
+      "p50_ms": 16.3,
+      "p95_ms": 21.4,
+      "max_ms": 150.1
+    }
+  },
+  "conteos": {
+    "replay_inicio": 21,
+    "doble_completar": 24,
+    "cancelada": 11,
+    "borrado_enlace_viejo": 13,
+    "kmz_superada": 12
+  },
+  "fallos": [],
+  "servidor_stderr_tracebacks": 0
+}

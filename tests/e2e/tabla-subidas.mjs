@@ -212,7 +212,8 @@ const ops = Object.fromEntries((await admin('GET', '/api/maestra/operadores?limi
 igual((await admin('PUT', `/api/maestra/bases/${base.id}/acceso`, { expected_version: base.version, usuarios: [ops.olga] })).status, 200, 'acceso');
 const crear = async (nombre) => (await admin('POST', `/api/maestra/bases/${base.id}/terrenos`, { terreno: nombre })).datos.terreno.id;
 const T = {};
-for (const k of ['foco', 'recarga', 'completar', 'otraFila', 'filtro', 'detalle', 'cancelar', 'operador', 'salida', 'previo', 'vencida', 'selector']) {
+for (const k of ['foco', 'recarga', 'completar', 'otraFila', 'filtro', 'detalle', 'cancelar', 'operador', 'salida', 'previo', 'vencida', 'selector',
+  'respIniciar', 'respCompletar', 'colgado', 'r503', 'r429', 'tablaMapa']) {
   T[k] = await crear(`Lote Subida ${k} Ficticio`);
 }
 // The table read its bases when the session opened: read them again.
@@ -525,6 +526,164 @@ await revisar('otra cuenta en la misma ventana durante la subida: lo anterior se
     'nada de la subida anterior bajo la cuenta nueva');
   igual(await celda(ada.page, T.recarga, COL.pdf).locator('.archivos-celda-subida[data-fase]').count(), 0,
     'la cuenta nueva no ve la subida de la anterior');
+});
+
+/* ------------------------------------- lost replies and refusals (#51) */
+
+const INICIAR = '**/api/inventario/terrenos/*/archivos';
+/** The server's own list of a terrain's attachments (the same private route the widgets use). */
+const adjuntos = async (page, id) => (await llamar(page, 'GET', `/api/inventario/terrenos/${id}/archivos`)).datos?.archivos ?? [];
+/** Let the request reach the real server, then drop its reply: the server acted, the page never learns it. */
+async function perderRespuesta(page, patron, metodo) {
+  const vistos = [];
+  let perdida = false;
+  const manejador = async (route) => {
+    if (route.request().method() !== metodo) return route.fallback();
+    vistos.push({ url: route.request().url(), clave: route.request().headers()['idempotency-key'] ?? null });
+    if (perdida) return route.fallback();
+    perdida = true;
+    const respuesta = await route.fetch();            // the real server answers...
+    vistos.at(-1).status = respuesta.status();
+    await route.abort('connectionreset');             // ...and the page sees a dropped connection
+  };
+  await page.route(patron, manejador);
+  return { vistos, quitar: () => page.unroute(patron, manejador) };
+}
+const s4 = await abrir('ada');
+vigilar(s4);
+
+await revisar('registrar: se pierde la respuesta después de que el servidor la registró; «Reintentar» (doble clic) usa la misma subida', async () => {
+  await irA(s4.page, base.id);
+  const desde = marca(s4);
+  const red = await perderRespuesta(s4.page, INICIAR, 'POST');
+  try {
+    await elegir(s4.page, T.respIniciar, 'pdf', F.pdf);
+    igual(await faseFinal(s4.page, T.respIniciar, 'pdf', ['incierto', 'interrumpido', 'fallido', 'listo']), 'incierto', 'se dice sin confirmar');
+    igual(red.vistos[0].status, 200, 'el servidor sí registró la subida');
+    await celda(s4.page, T.respIniciar, COL.pdf).getByRole('button', { name: 'Reintentar' }).dblclick();
+    igual(await faseFinal(s4.page, T.respIniciar, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'el reintento termina');
+  } finally {
+    await red.quitar();
+  }
+  igual(red.vistos.length, 2, 'un registro y una sola repetición');
+  cierto(red.vistos[0].clave && red.vistos[0].clave === red.vistos[1].clave, 'la repetición usa la misma clave');
+  igual(contenidos(s4, desde), [], 'los bytes se enviaron una sola vez');
+  const lista = await adjuntos(s4.page, T.respIniciar);
+  igual(lista.map((a) => a.ultima_version?.estado), ['disponible'], 'un solo adjunto, guardado');
+  igual((await shaDescarga(s4.page, lista[0].version_actual_id)).sha, sha(F.pdf), 'mismos bytes');
+});
+
+await revisar('completar: se pierde la respuesta después de guardar; «Reintentar» muestra lo guardado, sin otra versión', async () => {
+  await irA(s4.page, base.id);
+  const desde = marca(s4);
+  const red = await perderRespuesta(s4.page, COMPLETAR, 'POST');
+  try {
+    await elegir(s4.page, T.respCompletar, 'pdf', F.pdf2);
+    igual(await faseFinal(s4.page, T.respCompletar, 'pdf', ['incierto', 'interrumpido', 'fallido', 'listo']), 'incierto', 'se dice sin confirmar');
+    igual(red.vistos[0].status, 200, 'el servidor sí guardó el PDF');
+    cierto(!/PDF guardado/.test(await celda(s4.page, T.respCompletar, COL.pdf).locator('.archivos-celda-subida').innerText()), 'sin falso éxito');
+    await celda(s4.page, T.respCompletar, COL.pdf).getByRole('button', { name: 'Reintentar' }).dblclick();
+    igual(await faseFinal(s4.page, T.respCompletar, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'el reintento termina');
+  } finally {
+    await red.quitar();
+  }
+  igual(red.vistos.length, 2, 'una verificación y una sola repetición');
+  igual(contenidos(s4, desde), [], 'los bytes se enviaron una sola vez');
+  const lista = await adjuntos(s4.page, T.respCompletar);
+  igual(lista.map((a) => a.ultima_version?.estado), ['disponible'], 'un solo adjunto, guardado');
+  igual((await shaDescarga(s4.page, lista[0].version_actual_id)).sha, sha(F.pdf2), 'mismos bytes');
+  await hasta(async () => (await resumen(s4.page, T.respCompletar, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+});
+
+await revisar('un envío que nunca responde se puede cancelar: el servidor lo cancela y no queda PDF', async () => {
+  await irA(s4.page, base.id);
+  const put = await retener(s4.page, PUT_CONTENIDO, 'PUT');
+  try {
+    await elegir(s4.page, T.colgado, 'pdf', F.pdf);
+    await hasta(async () => put.vistos.length === 1, 'el PUT no salió');
+    igual(await fase(s4.page, T.colgado, 'pdf'), 'subiendo', 'sigue enviando');
+    await celda(s4.page, T.colgado, COL.pdf).getByRole('button', { name: 'Cancelar' }).click();
+    igual(await faseFinal(s4.page, T.colgado, 'pdf', ['cancelado', 'incierto', 'interrumpido', 'fallido', 'listo']), 'cancelado', 'cancelada');
+  } finally {
+    await put.soltar();          // the held request was aborted by the page: nothing reaches the server
+  }
+  await esperar(800);
+  igual((await adjuntos(s4.page, T.colgado)).map((a) => a.ultima_version?.estado), ['cancelado'], 'cancelada en el servidor');
+  cierto(!(await pdfGuardado(s4.page, T.colgado)), 'ningún PDF guardado');
+});
+
+await revisar('alternar Tabla / Mapa mientras se envía el PDF: la subida termina y la celda lo dice al volver', async () => {
+  await irA(s4.page, base.id);
+  const desde = marca(s4);
+  const modo = (nombre) => s4.page.locator('.tabla-modo').getByRole('button', { name: nombre, exact: true });
+  const put = await retener(s4.page, PUT_CONTENIDO, 'PUT');
+  try {
+    await elegir(s4.page, T.tablaMapa, 'pdf', F.pdf);
+    await hasta(async () => put.vistos.length === 1, 'el PUT no salió');
+    await modo('Mapa').click();
+    const pregunta = dialogo(s4.page, '¿Interrumpir la subida de archivos?');
+    await esperar(500);
+    if (await pregunta.count()) {
+      console.log('     nota: Tabla / Mapa preguntó antes de interrumpir; se eligió seguir');
+      await pregunta.getByRole('button', { name: /Seguir/ }).click();
+    } else {
+      igual(await modo('Mapa').getAttribute('aria-pressed'), 'true', 'el mapa se mostró');
+      console.log('     nota: Tabla / Mapa cambió sin preguntar; la subida siguió en segundo plano');
+    }
+    await put.soltar();
+    await esperar(800);
+    await modo('Tabla').click();
+    igual(await faseFinal(s4.page, T.tablaMapa, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto', 'cancelado']), 'listo', 'fase final');
+  } finally {
+    await put.soltar();
+  }
+  igual(contenidos(s4, desde), [], 'los bytes se enviaron una sola vez');
+  cierto(await pdfGuardado(s4.page, T.tablaMapa), 'el servidor no tiene el PDF guardado');
+  await hasta(async () => (await resumen(s4.page, T.tablaMapa, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+});
+
+/** Answer the first PUT with a fictional refusal (SIMULATED: the local server does not produce it). */
+async function rechazarPut(page, status, detalle) {
+  let hecho = false;
+  const manejador = (route) => {
+    if (route.request().method() !== 'PUT' || hecho) return route.fallback();
+    hecho = true;
+    return route.fulfill({ status, contentType: 'application/json',
+      body: JSON.stringify({ error: 'Respuesta ficticia de prueba.', detalle }) });
+  };
+  await page.route(PUT_CONTENIDO, manejador);
+  return () => page.unroute(PUT_CONTENIDO, manejador);
+}
+
+await revisar('503 «almacén no disponible» SIMULADO en el envío: se dice y «Reintentar» termina la misma subida', async () => {
+  await irA(s4.page, base.id);
+  const quitar = await rechazarPut(s4.page, 503, { code: 'almacen_no_disponible', reintentar: true });
+  try {
+    await elegir(s4.page, T.r503, 'pdf', F.pdf);
+    igual(await faseFinal(s4.page, T.r503, 'pdf', ['interrumpido', 'incierto', 'fallido', 'listo']), 'interrumpido', 'interrumpida');
+    await celda(s4.page, T.r503, COL.pdf).getByRole('button', { name: 'Reintentar' }).click();
+    igual(await faseFinal(s4.page, T.r503, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'el reintento termina');
+  } finally {
+    await quitar();
+  }
+  igual((await adjuntos(s4.page, T.r503)).map((a) => a.ultima_version?.estado), ['disponible'], 'un solo adjunto');
+});
+
+await revisar('429 SIMULADO en el envío: sin falso éxito y con salida (cancelar), aunque no ofrece reintentar', async () => {
+  await irA(s4.page, base.id);
+  const quitar = await rechazarPut(s4.page, 429, { code: 'demasiadas_solicitudes' });
+  try {
+    await elegir(s4.page, T.r429, 'pdf', F.pdf);
+    igual(await faseFinal(s4.page, T.r429, 'pdf', ['interrumpido', 'incierto', 'fallido', 'listo']), 'interrumpido', 'interrumpida');
+    const c = celda(s4.page, T.r429, COL.pdf);
+    // Observed contract: a 4xx other than the known codes is not retryable (subida.js «reintentable: status >= 500»).
+    igual(await c.getByRole('button', { name: 'Reintentar' }).count(), 0, 'sin Reintentar');
+    await c.getByRole('button', { name: 'Cancelar' }).click();
+    igual(await faseFinal(s4.page, T.r429, 'pdf', ['cancelado', 'incierto', 'interrumpido', 'fallido', 'listo']), 'cancelado', 'cancelada');
+  } finally {
+    await quitar();
+  }
+  igual((await adjuntos(s4.page, T.r429)).map((a) => a.ultima_version?.estado), ['cancelado'], 'cancelada en el servidor');
 });
 
 /* ---------------------------------------------------------------- end */

@@ -1,0 +1,126 @@
+{
+  "fases": {
+    "grandes": {
+      "pdf_s": 1.87,
+      "kmz_s": 1.93,
+      "simultaneo_s": 1.94,
+      "rechazos_mas_uno": {
+        "pdf_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "pdf_cuerpo": [
+          "conexion_cerrada",
+          "BrokenPipeError"
+        ],
+        "kmz_declarado": [
+          400,
+          "tamano_invalido"
+        ],
+        "kmz_cuerpo": [
+          413,
+          "tamano_excedido"
+        ]
+      }
+    }
+  },
+  "limite_memoria_mb": 0,
+  "bd": "sqlite",
+  "final": {
+    "terrenos": 2,
+    "versiones_esperadas": 2,
+    "objetos_temporales": 0,
+    "objetos_finales": 2,
+    "parciales_huerfanos": 0
+  },
+  "duracion_total_s": 3.2,
+  "rss_pico_servidor_mib": [
+    127.8
+  ],
+  "memoria_virtual_pico_servidor_mib": [
+    417.1
+  ],
+  "tiempos": {
+    "GET": {
+      "n": 2,
+      "p50_ms": 11.2,
+      "p95_ms": 16.3,
+      "max_ms": 16.3
+    },
+    "POST": {
+      "n": 2,
+      "p50_ms": 11.6,
+      "p95_ms": 11.9,
+      "max_ms": 11.9
+    },
+    "completar": {
+      "n": 4,
+      "p50_ms": 379.1,
+      "p95_ms": 794.0,
+      "max_ms": 794.0
+    },
+    "contenido_kmz": {
+      "n": 1,
+      "p50_ms": 235.9,
+      "p95_ms": 235.9,
+      "max_ms": 235.9
+    },
+    "contenido_mas_uno": {
+      "n": 2,
+      "p50_ms": 20.2,
+      "p95_ms": 36.0,
+      "max_ms": 36.0
+    },
+    "contenido_pdf": {
+      "n": 1,
+      "p50_ms": 217.3,
+      "p95_ms": 217.3,
+      "max_ms": 217.3
+    },
+    "descarga_kmz": {
+      "n": 1,
+      "p50_ms": 321.2,
+      "p95_ms": 321.2,
+      "max_ms": 321.2
+    },
+    "descarga_pdf": {
+      "n": 1,
+      "p50_ms": 313.4,
+      "p95_ms": 313.4,
+      "max_ms": 313.4
+    },
+    "iniciar": {
+      "n": 6,
+      "p50_ms": 16.2,
+      "p95_ms": 282.7,
+      "max_ms": 282.7
+    },
+    "listar": {
+      "n": 2,
+      "p50_ms": 7.5,
+      "p95_ms": 8.5,
+      "max_ms": 8.5
+    },
+    "login": {
+      "n": 6,
+      "p50_ms": 9.8,
+      "p95_ms": 41.9,
+      "max_ms": 41.9
+    },
+    "tabla": {
+      "n": 48,
+      "p50_ms": 107.3,
+      "p95_ms": 233.2,
+      "max_ms": 258.0
+    },
+    "verificacion_final": {
+      "n": 2,
+      "p50_ms": 105.0,
+      "p95_ms": 120.7,
+      "max_ms": 120.7
+    }
+  },
+  "conteos": {},
+  "fallos": [],
+  "servidor_stderr_tracebacks": 0
+}

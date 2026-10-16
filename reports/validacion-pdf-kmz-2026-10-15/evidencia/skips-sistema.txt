@@ -1,0 +1,4 @@
+    237 skipped 'No Postgres test connection configured'
+     46 skipped 'storage3 is not installed'
+     10 skipped 'No disposable Postgres configured (ARA_MAP_TEST_DATABASE_URL)'
+      4 skipped 'needs the hosted lock: pip install -r requirements-hosted.txt'

@@ -1,0 +1,4 @@
+tabla-elegir rc=0 segundos=11 RSS_MAX_HIJOS_MIB=190.3
+tabla-subidas rc=0 segundos=69 RSS_MAX_HIJOS_MIB=215.6
+tabla-abrir-pdf rc=0 segundos=23 RSS_MAX_HIJOS_MIB=207.7
+recorrido-completo rc=0 segundos=79 RSS_MAX_HIJOS_MIB=238.7

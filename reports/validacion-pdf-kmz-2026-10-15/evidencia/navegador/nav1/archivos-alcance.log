@@ -1,0 +1,13 @@
+Archivos: /tmp/tmpccajbmj8/almacen
+servidor en modo montado, almacén local-disk
+ok   revocar el acceso mientras se completa: 404 limpia el detalle y llega al host
+ok   revocar el acceso durante el PUT: 404 del contenido limpia y llega al host
+ok   transferir el terreno a otra base mientras se completa: 404 limpia y llega al host
+ok   cancelar después de perder el acceso: el 404 de la cancelación también limpia
+ok   borrar el terreno mientras se completa: 404 limpia el detalle y llega al host
+ok   cerrar el detalle mientras la cancelación espera: no sale ninguna petición después
+ok   control: con el acceso intacto una subida termina y una cancelación viva llega al servidor
+ok   sin errores de página
+
+8/8 recorridos de alcance correctos (modo montado)
+RSS_MAX_HIJOS_MIB=179.9

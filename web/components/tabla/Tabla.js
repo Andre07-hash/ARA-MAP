@@ -1488,11 +1488,14 @@ export function createTabla({
       if (!vivo || gen !== generacion || !t) return;
       const version = t.version;
       try {
-        const { terreno } = await api.guardarCelda(id, cuerpoDeCelda(col, valor, version));
+        const cuerpo = cuerpoDeCelda(col, valor, version, t.draft);
+        const { terreno } = await api.guardarCelda(id, cuerpo);
         if (!vivo || gen !== generacion) return;
         celdas.delete(k);
         reemplazar(terreno);
-        decir(`Guardado · ${col.etiqueta} · versión ${terreno.version}.`);
+        const extra = columnas.filter((c) => c.campo && c !== col && cuerpo.changes && c.campo in cuerpo.changes);
+        decir(`Guardado · ${col.etiqueta}${extra.length ? ` (calculado: ${extra.map((c) => c.etiqueta).join(", ")})` : ""}` +
+          ` · versión ${terreno.version}.`);
       } catch (error) {
         if (!vivo || gen !== generacion) return;
         fallo(error, id, col, { valor, texto, version });

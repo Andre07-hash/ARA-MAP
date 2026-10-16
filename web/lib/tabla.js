@@ -149,11 +149,48 @@ export function leerCelda(columna, texto) {
   return { valor: limpio === "" ? null : limpio };
 }
 
-/** The PATCH body for one cell. */
-export function cuerpoDeCelda(columna, valor, expectedVersion) {
+/* Fields the table fills in by itself (owner's decision, 2026-10-16): m² ⇄ HA
+ * and total price ⇄ price per m², each only while that field is empty, so a
+ * value someone entered or imported is never overwritten. */
+const M2_POR_HA = 10000;
+const redondear = (n, decimales) => Number(n.toFixed(decimales));
+const vacio = (v) => v === null || v === undefined || v === "";
+const REGLAS = [
+  ["superficie_ha", ["superficie_m2"], (d) => d.superficie_m2 > 0 && redondear(d.superficie_m2 / M2_POR_HA, 4)],
+  ["superficie_m2", ["superficie_ha"], (d) => d.superficie_ha > 0 && redondear(d.superficie_ha * M2_POR_HA, 2)],
+  ["asking_m2", ["superficie_m2", "asking_price"], (d) => d.superficie_m2 > 0
+    && Number.isFinite(d.asking_price) && redondear(d.asking_price / d.superficie_m2, 2)],
+  ["asking_price", ["superficie_m2", "asking_m2"], (d) => d.superficie_m2 > 0
+    && Number.isFinite(d.asking_m2) && redondear(d.asking_m2 * d.superficie_m2, 2)],
+];
+
+/**
+ * What saving `valor` in `campo` fills in by itself on a row whose stored
+ * values are `draft`: { campo: valor } of the empty fields computed from the
+ * edited one (or from one computed here). Clearing a cell computes nothing.
+ */
+export function calculados(draft, campo, valor) {
+  if (!Number.isFinite(valor)) return {};
+  const d = { ...draft, [campo]: valor };
+  const nuevos = new Set([campo]);
+  const extra = {};
+  // Twice, so HA typed into a row with a price also yields the price per m².
+  for (let vuelta = 0; vuelta < 2; vuelta += 1) {
+    for (const [destino, desde, calcular] of REGLAS) {
+      if (nuevos.has(destino) || !vacio(d[destino]) || !desde.some((c) => nuevos.has(c))) continue;
+      const v = calcular(d);
+      if (Number.isFinite(v)) { d[destino] = v; extra[destino] = v; nuevos.add(destino); }
+    }
+  }
+  return extra;
+}
+
+/** The PATCH body for one cell, with what it fills in by itself (see calculados). */
+export function cuerpoDeCelda(columna, valor, expectedVersion, draft = {}) {
   return columna.custom
     ? { expected_version: expectedVersion, custom: { [columna.id]: valor } }
-    : { expected_version: expectedVersion, changes: { [columna.campo]: valor } };
+    : { expected_version: expectedVersion,
+        changes: { ...calculados(draft, columna.campo, valor), [columna.campo]: valor } };
 }
 
 /* ------------------------------------------------------------------ lists */

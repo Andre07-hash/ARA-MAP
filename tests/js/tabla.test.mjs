@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 
 import {
   escribirNumero,
-  COLUMNAS_BASICAS, columnasDe, consultaDeLista, crearCola, cuerpoDeCelda, esEditable, esFechaReal,
+  calculados, COLUMNAS_BASICAS, columnasDe, consultaDeLista, crearCola, cuerpoDeCelda, esEditable, esFechaReal,
   leerCelda, resolverIncierto, rutaDeLista, textoDe, valorDe,
 } from "../../web/lib/tabla.js";
 import { defaultRoute, parseRoute, routeAllowed, routeHash } from "../../web/lib/router.js";
@@ -63,6 +63,32 @@ test("a cell's body names one field and the version it was edited at", () => {
     { expected_version: 4, changes: { estado: "Jalisco" } });
   assert.deepEqual(cuerpoDeCelda({ id: "custom:a", custom: true }, null, 2),
     { expected_version: 2, custom: { "custom:a": null } });
+});
+
+test("saving m² fills HA, and the price per m² from a total price, only where empty", () => {
+  assert.deepEqual(calculados({ asking_price: 1000000 }, "superficie_m2", 12345),
+    { superficie_ha: 1.2345, asking_m2: 81 });
+  assert.deepEqual(cuerpoDeCelda(col("core:superficie_m2"), 12345, 3, { superficie_ha: 9, asking_m2: 5, asking_price: 7 }),
+    { expected_version: 3, changes: { superficie_m2: 12345 } }, "never overwrites what is there");
+  assert.deepEqual(calculados({ asking_m2: 5 }, "superficie_m2", 12345), { superficie_ha: 1.2345, asking_price: 61725 });
+});
+
+test("each direction: HA → m², total ⇄ per m², and a chain HA → m² → $/m²", () => {
+  assert.deepEqual(calculados({}, "superficie_ha", 1.5), { superficie_m2: 15000 });
+  assert.deepEqual(calculados({ superficie_m2: 2000 }, "asking_price", 300000), { asking_m2: 150 });
+  assert.deepEqual(calculados({ superficie_m2: 2000 }, "asking_m2", 150.5), { asking_price: 301000 });
+  assert.deepEqual(calculados({ asking_price: 300000 }, "superficie_ha", 0.2),
+    { superficie_m2: 2000, asking_m2: 150 });
+  assert.equal(calculados({ superficie_m2: 3 }, "asking_price", 10).asking_m2, 3.33, "2 decimals");
+});
+
+test("nothing is computed from a cleared cell, a zero area or an unrelated field", () => {
+  assert.deepEqual(calculados({ asking_price: 5 }, "superficie_m2", null), {});
+  assert.deepEqual(calculados({ asking_price: 5 }, "superficie_m2", 0), {});
+  assert.deepEqual(calculados({}, "asking_price", 5), {}, "no area: no price per m²");
+  assert.deepEqual(calculados({ superficie_m2: 10 }, "lat", 20.5), {});
+  assert.deepEqual(cuerpoDeCelda(col("core:estado"), "Jalisco", 4, { superficie_m2: 10 }),
+    { expected_version: 4, changes: { estado: "Jalisco" } });
 });
 
 test("a list query is one bounded page; filters and order are the server's", () => {

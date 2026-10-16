@@ -204,7 +204,12 @@ await caso('operator: only her bases; blank create; every core and custom type e
     ['core:municipio', 'Zapopan'], ['core:superficie_m2', '12,500'], ['core:superficie_ha', '1.3'],
     ['core:afectaciones_pct', '0.125'], ['core:asking_price', '1470000'], ['core:asking_m2', '99.5'],
     ['core:lat', '20.7'], ['core:lon', '-103.4']];
-  for (const [col, valor] of basicos) await escribir(page, lote, col, valor);
+  for (const [col, valor] of basicos) {
+    await escribir(page, lote, col, valor);
+    // Area and price fill in their empty counterparts by themselves, in the same version.
+    if (col === 'core:superficie_m2') assert.equal(await textoDe(page, lote, 'core:superficie_ha'), '1.25', 'HA calculada');
+    if (col === 'core:asking_price') assert.equal(await textoDe(page, lote, 'core:asking_m2'), '$117.6', '$/m² calculado');
+  }
   // Comentarios: Shift+Enter is a line break, Enter saves.
   await celda(page, lote, 'core:notas_internas').focus();
   await page.keyboard.press('Enter');
@@ -227,7 +232,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
     notas_internas: 'Primera línea\nsegunda línea', lat: 20.7, lon: -103.4, moneda: null,
     direccion: undefined, public_description: undefined, contacto: undefined, afectaciones_m2: undefined,
     price_on_request: undefined, availability: undefined,
-  });   // X is latitude, Y longitude; no currency assumed; 1.3 ha and 99.5 $/m2 stay as typed, not derived
+  });   // X is latitude, Y longitude; no currency assumed; 1.3 ha and 99.5 $/m2 typed over the computed values stay as typed
   assert.deepEqual(t.custom, { [COL.Nota]: 'Junto al río', [COL.Avance]: 42.5, [COL.Etapa]: 'Cerrado', [COL.Visita]: '2026-03-15' });
   assert.equal(t.version, 17);   // one version per saved cell: 16 cells after the create
   // The file columns show Team B's compact cells with the real summary: no

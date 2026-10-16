@@ -95,7 +95,8 @@ Reporta SHA, comandos, resultados y lo que no verificaste. Datos siempre fictici
 2. Sube la rama y abre el PR contra **`main`**, con el problema, el comportamiento
    resultante y las pruebas. Nunca hagas push directo a `main`.
 3. Corrige hallazgos que puedan romper el uso, permisos o datos; espera CI verde.
-4. El responsable integra lo revisado y, con autorización de publicación para
+4. El responsable integra lo revisado (jp7ao también puede fusionar sus propios
+   PRs con CI en verde; ver `AGENTS.md`) y, con autorización de publicación para
    esa tarea, despliega manualmente el SHA exacto desde `main` en Render.
 5. Comprueba en el sitio el recorrido afectado. Para cambios del operador,
    incluye su rol. Una comprobación alojada no certifica todos los flujos.

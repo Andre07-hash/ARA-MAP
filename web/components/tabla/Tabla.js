@@ -1591,6 +1591,8 @@ export function createTabla({
     }
   }
 
+  const FLECHAS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] };
+
   function alTeclear(e) {
     const td = e.target.closest("td[data-col]");
     if (!td) return;
@@ -1599,9 +1601,16 @@ export function createTabla({
     if (editando && e.target === editando.campo) {
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); cancelar(); }
       else if (e.key === "Enter" && !(editando.col.tipo === "largo" && e.shiftKey)) {
+        // Saves and goes down a row, as in a spreadsheet.
         e.preventDefault();
         confirmar();
-        enfocar(id, colId);
+        mover(id, colId, 0, 1) || enfocar(id, colId);
+      } else if (FLECHAS[e.key] && !e.shiftKey && !["opcion", "fecha", "largo"].includes(editando.col.tipo)) {
+        // In a one-line text or number editor the arrows save and move; a
+        // choice, a date and a comment keep them for their own control.
+        e.preventDefault();
+        confirmar();
+        mover(id, colId, ...FLECHAS[e.key]) || enfocar(id, colId);
       } else if (e.key === "Tab") {
         e.preventDefault();
         confirmar();
@@ -1610,7 +1619,7 @@ export function createTabla({
       return;
     }
     if (e.target !== td) return;
-    const pasos = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowUp: [0, -1] }[e.key];
+    const pasos = FLECHAS[e.key];
     if (pasos) { e.preventDefault(); mover(id, colId, pasos[0], pasos[1]); return; }
     if (e.key === "Enter" || e.key === "F2") { e.preventDefault(); editar(id, colId); return; }
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key !== " ") {

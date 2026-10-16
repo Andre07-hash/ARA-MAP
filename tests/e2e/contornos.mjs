@@ -244,7 +244,7 @@ await paso('doble clic en contorno: zoomToScale encuadra y reporta a_escala', as
   assert.equal((await pos('t-simple')).contorno, true);
 });
 
-await paso('cuerpo no cargado: símbolo distinto, nunca contorno, aviso escapado', async () => {
+await paso('cuerpo no cargado: símbolo relleno, nunca contorno, aviso escapado', async () => {
   const r = await h(() => __harness.canvas.zoomToScale('t-sin-cuerpo'));
   assert.equal(r.estado, 'contorno_no_disponible');
   const p = await pos('t-sin-cuerpo');

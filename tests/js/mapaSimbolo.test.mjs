@@ -7,14 +7,12 @@ import assert from "node:assert/strict";
 import { simboloStyle } from "../../web/components/map/MapCanvas.js";
 
 test("a boundary symbol is a filled dot whether or not its outline is loaded", () => {
-  for (const disponible of [true, false]) {
-    const estilo = simboloStyle({ fill: "#1f6feb", dash: null, disponible });
-    assert.equal(estilo.dashArray, null);
-    assert.ok(estilo.fillOpacity >= 0.8, `filled (disponible=${disponible})`);
-    const elegido = simboloStyle({ fill: "#1f6feb", dash: null, disponible, selected: true });
-    assert.equal(elegido.dashArray, null);
-    assert.equal(elegido.fillOpacity, 1);
-  }
+  const estilo = simboloStyle({ dash: null });
+  assert.equal(estilo.dashArray, null);
+  assert.ok(estilo.fillOpacity >= 0.8, "filled");
+  const elegido = simboloStyle({ dash: null, selected: true });
+  assert.equal(elegido.dashArray, null);
+  assert.equal(elegido.fillOpacity, 1);
 });
 
 test("a layer's dash past the colour range still marks the symbol", () => {

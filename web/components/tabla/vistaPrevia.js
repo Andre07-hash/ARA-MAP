@@ -128,8 +128,8 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
   }
 
   /**
-   * Back to the whole map (Mexico), the view the map opens with -- not the
-   * rows' extent, which with one or a few terrains is a close-up of them.
+   * Back to the whole of Mexico -- not the rows' extent, which with one or a
+   * few terrains is a close-up of them.
    * Like encuadrarSeleccion, it waits for a zoom step that is running.
    */
   function encuadrarTodo() {

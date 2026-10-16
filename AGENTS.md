@@ -99,6 +99,11 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   que esta regla depende de quien trabaja.
 - Abrir un pull request y esperar los checks de GitHub Actions en verde antes
   de fusionar. Marcar como draft lo que no está probado.
+- Quién fusiona: Andre07-hash integra los PRs. Además, jp7ao puede fusionar
+  sus propios PRs a `main` sin esperarlo, con los checks en verde y la revisión
+  hecha, por merge commit (`gh pr merge N --merge --delete-branch`), nunca con
+  push directo. Fusionar no publica: desplegar en Render sigue siendo del
+  responsable, con autorización de publicación.
 - Correr `./verificar.sh` antes de cada push.
 - Commits pequeños con mensaje en inglés que diga qué cambia y por qué.
 - Al terminar, reportar el PR, SHA, comportamiento cambiado, pruebas afectadas

@@ -32,10 +32,6 @@ import { BASEMAPS, MEXICO_BOUNDS } from "./basemaps.js";
 const SIMBOLO = { fillOpacity: 0.82, weight: 2, ring: MARK_RING };
 const HUELLA  = { fillOpacity: 0.20, weight: 2 };
 
-/* A boundary whose body has not loaded (or failed validation) keeps its place
- * with a hollow, dashed symbol, so it never passes for a loaded outline. */
-const SIN_CONTORNO = { fillOpacity: 0.18, weight: 2, dashArray: "3 3" };
-
 /* How long a second activation on the same terrain still counts as a double.
  * An interaction choice, not a geometry constant: kept here so both the mouse
  * and touch paths use one value. */
@@ -259,7 +255,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
       opacity: 1,
       fillColor: fill,
       bubblingMouseEvents: false,
-      ...simboloStyle({ fill, dash, disponible }),
+      ...simboloStyle({ dash }),
     });
     simbolo.bindTooltip(html, {
       direction: "top", offset: [0, -symbolic - 2], opacity: 1, className: "mark-tooltip",
@@ -630,16 +626,13 @@ function contextoConTrazo(ctx, trazo) {
   });
 }
 
-/** A boundary symbol: solid when its outline is loaded, hollow and dashed when not. */
-function simboloStyle({ fill, dash, disponible, selected = false }) {
-  if (selected) {
-    return { color: "#111111", weight: 3, dashArray: disponible ? null : SIN_CONTORNO.dashArray,
-             fillOpacity: disponible ? 1 : 0.32 };
-  }
-  if (!disponible) {
-    return { color: fill, weight: SIN_CONTORNO.weight, dashArray: SIN_CONTORNO.dashArray,
-             fillOpacity: SIN_CONTORNO.fillOpacity };
-  }
+/**
+ * A boundary symbol: always a filled dot, like an XY symbol, whether or not its
+ * outline is loaded -- a hollow, dashed one was hard to see on satellite
+ * basemaps. The tooltip still says when the outline is not loaded.
+ */
+export function simboloStyle({ dash, selected = false }) {
+  if (selected) return { color: "#111111", weight: 3, dashArray: null, fillOpacity: 1 };
   return { color: SIMBOLO.ring, weight: dash ? 2.5 : SIMBOLO.weight, dashArray: dash,
            fillOpacity: SIMBOLO.fillOpacity };
 }

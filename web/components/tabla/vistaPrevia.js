@@ -30,6 +30,7 @@ import { ubicacionDe } from "../../lib/geometria.js";
 import { itemDeInventario } from "../../lib/inventario.js";
 import { createMapCanvas } from "../map/MapCanvas.js";
 import { BasemapSwitcher } from "../map/BasemapSwitcher.js";
+import { MEXICO_BOUNDS } from "../map/basemaps.js";
 
 const COLOR = "#1f6feb";
 
@@ -54,7 +55,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
   }, "Reintentar");
   const encuadre = el("button", {
     type: "button", class: "btn btn-small previa-encuadre", onclick: () => encuadrarTodo(),
-    title: "Encuadrar todos los terrenos que el mapa muestra",
+    title: "Volver a la vista de todo México",
   }, "Encuadrar todo");
   const info = el("details", { class: "previa-info" },
     el("summary", { "aria-label": "Cómo funciona este mapa", title: "Cómo funciona este mapa" }, "i"),
@@ -126,11 +127,15 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     canvas.select(seleccion);
   }
 
-  /** Frame every row; like encuadrarSeleccion, it waits for a zoom step that is running. */
+  /**
+   * Back to the whole map (Mexico), the view the map opens with -- not the
+   * rows' extent, which with one or a few terrains is a close-up of them.
+   * Like encuadrarSeleccion, it waits for a zoom step that is running.
+   */
   function encuadrarTodo() {
     if (!canvas) return;
     const { map } = canvas;
-    const ir = () => { if (vivo && canvas) canvas.fitTo(filas); };
+    const ir = () => { if (vivo && canvas) map.fitBounds(MEXICO_BOUNDS); };
     if (map._animatingZoom) map.once("zoomend", ir); else ir();
   }
 

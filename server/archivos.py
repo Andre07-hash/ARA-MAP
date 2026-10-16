@@ -53,6 +53,8 @@ TIPO_KMZ = "application/vnd.google-earth.kmz"
 TIPO_KML = "application/vnd.google-earth.kml+xml"
 LIMITES = {"pdf": PDF_MAX, "kmz": KMZ_MAX, "kml": KML_MAX}
 _BOM = (b"\xef\xbb\xbf", b"\xff\xfe", b"\xfe\xff")
+# Leading XML whitespace, in UTF-8 or (with its zero bytes) UTF-16.
+_LEADING_SPACE = re.compile(rb"[ \t\r\n\x00]*")
 
 Clock = Callable[[], Union[datetime, str]]
 Processor = Callable[[bytes, object], dict[str, Any]]
@@ -403,18 +405,18 @@ def _release_lease(sesion: auth.Sesion, version_id: str, terrain_id: str,
         return
 
 
-def _looks_like_xml(prefix: bytes) -> bool:
+def _looks_like_xml(body: bytes) -> bool:
     """A cheap gate before the parser: optional BOM and whitespace, then '<'.
 
-    UTF-16 without a BOM shows as '<' next to a zero byte. The parser still
-    decides whether the document is valid KML.
+    It scans the whole (already bounded, already read) document, so leading
+    whitespace of any length is allowed; nothing is copied or parsed. UTF-16
+    shows as '<' next to a zero byte. The parser still decides whether the
+    document is valid KML.
     """
-    for bom in _BOM:
-        if prefix.startswith(bom):
-            prefix = prefix[len(bom):]
-            break
-    texto = prefix.replace(b"\x00", b"").lstrip(b" \t\r\n")
-    return texto.startswith(b"<")
+    start = next((len(bom) for bom in _BOM if body.startswith(bom)), 0)
+    space = _LEADING_SPACE.match(body, start)
+    end = space.end() if space else start
+    return body[end:end + 1] == b"<"
 
 
 def _verify_final(almacen: Almacen, final_key: str, maximum: int,
@@ -428,11 +430,12 @@ def _verify_final(almacen: Almacen, final_key: str, maximum: int,
         for chunk in reading:
             total += len(chunk)
             digest.update(chunk)
-            if len(prefix) < 256:
-                prefix.extend(chunk[:256 - len(prefix)])
+            if len(prefix) < 8:          # the PDF and ZIP signatures
+                prefix.extend(chunk[:8 - len(prefix)])
             if body is not None:
                 body.extend(chunk)
     head = bytes(prefix)
+    content = bytes(body) if body is not None else None
     if kind == "pdf":
         if not head.startswith(b"%PDF-"):
             raise _error("firma_invalida", "El contenido no es un PDF válido.")
@@ -442,14 +445,15 @@ def _verify_final(almacen: Almacen, final_key: str, maximum: int,
         if es_paquete(head):
             raise _error("firma_invalida",
                          "El archivo se llama .kml pero su contenido es un KMZ (comprimido).")
-        if not _looks_like_xml(head):
+        assert content is not None
+        if not _looks_like_xml(content):
             raise _error("firma_invalida", "El contenido no es un KML válido.")
         detected = TIPO_KML
     else:
         if not head.startswith(b"PK\x03\x04"):
             raise _error("firma_invalida", "El contenido no es un KMZ válido.")
         detected = TIPO_KMZ
-    return total, digest.hexdigest(), detected, bytes(body) if body is not None else None
+    return total, digest.hexdigest(), detected, content
 
 
 def _attempt(result: Mapping[str, Any], selection: Sequence[int] | None = None

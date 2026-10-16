@@ -64,3 +64,37 @@ Pruebas nuevas: `tests/test_kml.py` (lector), `KmlChecks` en
   Supabase, cuentas o datos reales.
 - Un KML con imágenes, modelos, rutas o enlaces de red sigue las reglas
   actuales: se ignora lo que no es contorno y no se descarga nada externo.
+
+## Corrección tras la revisión del supervisor (SHA 0d795040)
+
+**Problema.** `_verify_final` decidía si un `.kml` era XML con sólo los
+primeros 256 bytes. Un KML válido con 256 o más bytes de espacio inicial
+quedaba `fallido` / `firma_invalida`, aunque `procesar_kml` lo aceptaba y el
+mismo documento dentro de un KMZ se activaba.
+
+**Reproducción (ficticia).** Se toma `poligono_simple.kml`, se le quita la
+declaración XML y se le anteponen 256 espacios; luego se sube como `.kml` y se
+completa. Con 255 espacios pasaba y con 256 fallaba.
+
+**Corrección.** La comprobación revisa el documento completo, que ya está leído
+en memoria dentro del límite de 16 MiB. Salta el BOM y luego cualquier espacio
+XML, incluidos los bytes cero de UTF-16, y exige `<`. No hay un prefijo fijo
+nuevo, ni copias adicionales, ni un segundo parseo. Los 8 bytes de cabecera se
+usan sólo para las firmas de PDF y ZIP, como en `main`. Se mantienen el límite,
+las protecciones XML, la comprobación de formato y la conservación del contorno
+anterior.
+
+**Regresión.** `test_kml_leading_space_bom_and_encoding_never_hit_a_fixed_prefix`,
+en el servicio, sobre SQLite y Postgres. Sube y completa:
+
+- documentos con 255, 256 y 64 KiB de espacios;
+- un documento con unos 280 KB de saltos de línea;
+- BOM UTF-8 con espacios, y UTF-16 LE y BE con BOM y espacios;
+- el mismo documento dentro de un KMZ.
+
+También comprueba que espacios seguidos de texto, sólo espacios o espacios con
+un PDF siguen dando `firma_invalida` y conservan el contorno activo.
+
+**Textos.** Las confirmaciones de borrado de terrenos (`Tabla.js`,
+`dialogos.js`) dicen ahora «sus archivos adjuntos (PDF, KMZ y KML)». La
+operación no cambia.

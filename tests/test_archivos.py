@@ -1528,6 +1528,38 @@ class KmlChecks:
                 self.assertEqual(result["archivo"]["geometria_activa_id"], active)
         self.assertEqual(self.rows("archivo")[0]["geometria_activa_id"], active)
 
+    def test_kml_leading_space_bom_and_encoding_never_hit_a_fixed_prefix(self):
+        """Regression (#54 review): the XML gate used to read only 256 bytes."""
+        raw = kml("poligono_simple").split(b"?>", 1)[1].lstrip()
+        cases = {f"espacios-{n}.kml": b" " * n + raw for n in (255, 256, 64 * 1024)}
+        cases["saltos.kml"] = b"\r\n\t " * 70_000 + raw
+        cases["bom-espacios.kml"] = b"\xef\xbb\xbf" + b" " * 300 + raw
+        texto = raw.decode()
+        cases["utf16le.kml"] = b"\xff\xfe" + (" " * 300 + texto).encode("utf-16-le")
+        cases["utf16be.kml"] = b"\xfe\xff" + (" " * 300 + texto).encode("utf-16-be")
+        for name, data in cases.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual(result["version"]["estado"], "disponible", result["version"]["error"])
+                self.assertEqual(result["intento"]["resultado"], "listo")
+                self.assertTrue(result["aplicada"])
+        # The same documents in a KMZ are accepted too, and both sides of the
+        # old 256-byte edge give the same outcome.
+        packed = io.BytesIO()
+        with zipfile.ZipFile(packed, "w") as archive:
+            archive.writestr("doc.kml", cases["espacios-256.kml"])
+        self.assertTrue(self.complete(self.upload(packed.getvalue(), "kmz", name="mismo.kmz"))["aplicada"])
+        active = self.rows("archivo")[0]["geometria_activa_id"]
+        # Whitespace followed by anything but markup is still not a KML, at any depth.
+        for name, data in {"espacios-texto.kml": b" " * 300 + b"no es xml",
+                           "solo-espacios.kml": b" " * 1000,
+                           "espacios-pdf.kml": b" " * 300 + PDF}.items():
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "kmz", name=name))
+                self.assertEqual((result["version"]["estado"], result["version"]["error"]["codigo"]),
+                                 ("fallido", "firma_invalida"))
+                self.assertEqual(result["archivo"]["geometria_activa_id"], active)
+
     def test_kml_limit_is_16_mib_declared_written_and_parsed(self):
         self.assertEqual((archivos.KML_MAX, archivos.KMZ_MAX), (16 * 1024 * 1024, 20 * 1024 * 1024))
         digest = hashlib.sha256(b"").hexdigest()

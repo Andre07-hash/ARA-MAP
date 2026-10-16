@@ -338,6 +338,8 @@ await caso('while editing, Enter saves and goes down; the arrows save and move t
   await guardado(page, otro, 'core:terreno');
   assert.equal(await enfocada(), `${otro}|core:estado`);
   await page.keyboard.type('Jalisco');
+  await page.keyboard.press('Alt+ArrowLeft');                        // a modified arrow moves the caret only
+  assert.equal(await enfocada(), `${otro}|core:estado:editor`);
   await page.keyboard.press('ArrowLeft');
   await guardado(page, otro, 'core:estado');
   assert.equal(await enfocada(), `${otro}|core:terreno`);

@@ -1599,15 +1599,18 @@ export function createTabla({
     const id = td.parentNode.dataset.id;
     const colId = td.dataset.col;
     if (editando && e.target === editando.campo) {
+      if (e.isComposing || e.keyCode === 229) return;   // an accent or IME still composing
       if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); cancelar(); }
       else if (e.key === "Enter" && !(editando.col.tipo === "largo" && e.shiftKey)) {
         // Saves and goes down a row, as in a spreadsheet.
         e.preventDefault();
         confirmar();
         mover(id, colId, 0, 1) || enfocar(id, colId);
-      } else if (FLECHAS[e.key] && !e.shiftKey && !["opcion", "fecha", "largo"].includes(editando.col.tipo)) {
+      } else if (FLECHAS[e.key] && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey
+        && !["opcion", "fecha", "largo"].includes(editando.col.tipo)) {
         // In a one-line text or number editor the arrows save and move; a
-        // choice, a date and a comment keep them for their own control.
+        // choice, a date and a comment keep them for their own control, and
+        // Option/Cmd/Ctrl+arrow still move the caret by word or line.
         e.preventDefault();
         confirmar();
         mover(id, colId, ...FLECHAS[e.key]) || enfocar(id, colId);

@@ -441,11 +441,14 @@ await revisar('contorno activo sin X/Y: ficha y cuerpo; cerrar no lo desactiva; 
   await ada.page.locator('#tabla-buscar').fill('Lote Panel Contorno Ficticio');
   await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) === 1, 'búsqueda del contorno');
   await aMapa(ada.page);
-  const p0 = await hasta(async () => posicion(ada.page, conContorno), 'el contorno no está en el mapa');
   const caja = await ada.page.locator('.previa-mapa').boundingBox();
-  await ada.page.mouse.move(caja.x + p0.x, caja.y + p0.y);
-  await hasta(async () => /Haz clic para ver el contorno/.test(
-    await ada.page.locator('.leaflet-tooltip.mark-tooltip').innerText().catch(() => '')), 'aviso de clic');
+  await hasta(async () => {   // the position is read again if the map is still framing
+    const p0 = await posicion(ada.page, conContorno);
+    if (!p0) return false;
+    await ada.page.mouse.move(caja.x + p0.x, caja.y + p0.y);
+    return /Haz clic para ver el contorno/.test(
+      await ada.page.locator('.leaflet-tooltip.mark-tooltip').innerText({ timeout: 500 }).catch(() => ''));
+  }, 'aviso de clic');
   await ada.page.mouse.move(caja.x + 5, caja.y + 5);
   await aTabla(ada.page);
   await elegirDesdeTabla(ada.page, conContorno, 'Lote Panel Contorno Ficticio');

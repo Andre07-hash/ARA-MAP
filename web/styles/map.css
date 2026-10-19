@@ -205,8 +205,8 @@
 .mark-tooltip span { display: block; opacity: 0.75; }
 .mark-tooltip::before { border-top-color: var(--ink) !important; }
 
-/* A boundary whose outline has not loaded: said in words, not only by the
- * hollow dashed symbol. */
+/* A boundary whose outline is not drawn says why in words: click to load it
+ * (the tables' map) or that it could not be shown. */
 .mark-tooltip span.mark-tooltip-aviso {
   margin-top: 2px;
   font-style: italic;

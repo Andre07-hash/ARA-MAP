@@ -115,6 +115,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
       // Only once it is on screen: Leaflet cannot measure a hidden container.
       if (!lienzo.isConnected || lienzo.offsetParent === null || typeof L === "undefined") return;
       canvas = createMapCanvas(lienzo, {
+        cargaAlSeleccionar: true,
         onSelect: (id) => { seleccionar(id, { desdeMapa: true }); },
         onDoubleSelect: (id) => { canvas.zoomToScale(id); },
       });

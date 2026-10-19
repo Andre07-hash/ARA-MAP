@@ -41,7 +41,11 @@ const DOBLE_ACTIVACION_PX = 28;
 
 export const ZOOM_MAXIMO = 20;
 
-export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSelect } = {}) {
+/* `cargaAlSeleccionar`: the host loads a boundary's outline when it is
+ * selected (the tables' map), so its symbol can say to click for it. */
+export function createMapCanvas(container, {
+  onSelect, onScaleChange, onDoubleSelect, cargaAlSeleccionar = false,
+} = {}) {
   const map = L.map(container, {
     zoomControl: false,
     attributionControl: true,
@@ -248,7 +252,7 @@ export function createMapCanvas(container, { onSelect, onScaleChange, onDoubleSe
     const fill = colorFor(terreno);
     const dash = dashFor?.(terreno) ?? null;
     const symbolic = SYMBOL_RADIUS + extra;
-    const html = tooltipHtml(terreno, { sinContorno: !disponible });
+    const html = tooltipHtml(terreno, { aviso: avisoDeContorno(cuerpo.estado, cargaAlSeleccionar) });
 
     const simbolo = L.circleMarker(puntoLeaflet(descriptor.punto_interior), {
       radius: symbolic,
@@ -643,7 +647,14 @@ function contornoStyle({ fill, dash, selected = false }) {
   return { color: fill, weight: HUELLA.weight, dashArray: dash, fillOpacity: HUELLA.fillOpacity };
 }
 
-function tooltipHtml(terreno, { sinContorno = false } = {}) {
+/** What a boundary symbol's tooltip says while its outline is not drawn. */
+export function avisoDeContorno(estado, cargaAlSeleccionar) {
+  if (estado === "cargado") return "";
+  if (estado === "invalido") return "No se pudo mostrar el contorno";
+  return cargaAlSeleccionar ? "Haz clic para ver el contorno" : "Contorno no disponible";
+}
+
+function tooltipHtml(terreno, { aviso = "" } = {}) {
   const name = escapeHtml(terreno.terreno);
   const place = escapeHtml(
     [terreno.municipio, terreno.estado].filter(Boolean).join(", ")
@@ -656,7 +667,7 @@ function tooltipHtml(terreno, { sinContorno = false } = {}) {
     `<strong>${name}</strong>` +
     (place ? `<span>${place}</span>` : "") +
     (figures ? `<span class="figure">${escapeHtml(figures)}</span>` : "") +
-    (sinContorno ? `<span class="mark-tooltip-aviso">Contorno no disponible</span>` : "")
+    (aviso ? `<span class="mark-tooltip-aviso">${escapeHtml(aviso)}</span>` : "")
   );
 }
 

@@ -436,6 +436,20 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
 });
 
 await revisar('contorno activo sin X/Y: ficha y cuerpo; cerrar no lo desactiva; un filtro que lo excluye limpia la ficha', async () => {
+  // Before it is selected, its symbol says that a click shows the outline.
+  await aTabla(ada.page);
+  await ada.page.locator('#tabla-buscar').fill('Lote Panel Contorno Ficticio');
+  await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) === 1, 'búsqueda del contorno');
+  await aMapa(ada.page);
+  const caja = await ada.page.locator('.previa-mapa').boundingBox();
+  await hasta(async () => {   // the position is read again if the map is still framing
+    const p0 = await posicion(ada.page, conContorno);
+    if (!p0) return false;
+    await ada.page.mouse.move(caja.x + p0.x, caja.y + p0.y);
+    return /Haz clic para ver el contorno/.test(
+      await ada.page.locator('.leaflet-tooltip.mark-tooltip').innerText({ timeout: 500 }).catch(() => ''));
+  }, 'aviso de clic');
+  await ada.page.mouse.move(caja.x + 5, caja.y + 5);
   await aTabla(ada.page);
   await elegirDesdeTabla(ada.page, conContorno, 'Lote Panel Contorno Ficticio');
   await hasta(async () => (await previa(ada.page)).cuerpos === 1, 'un cuerpo');

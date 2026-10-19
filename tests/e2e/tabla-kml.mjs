@@ -315,6 +315,27 @@ await revisar('operador: un KML con varios contornos se elige y activa en la mis
   igual(await geometriaDe(olga.page, A), geometriaA, 'A no cambia');
 });
 
+await revisar('operador: reemplazar un contorno activo también se elige en la celda', async () => {
+  const antes = await geometriaDe(olga.page, B);
+  cierto(antes, 'B ya tiene un contorno activo');
+  await elegir(olga.page, B, 'kmz', F.kml_varios);
+  igual(await faseFinal(olga.page, B), 'requiere_seleccion', 'fase');
+  const lista = celda(olga.page, B, COL.kmz).locator('.archivos-celda-contornos');
+  const casillas = lista.locator('input[type=checkbox]:not([disabled])');
+  await casillas.first().waitFor();
+  // The refreshed summary still says "Contorno activo" (the old one): the list stays.
+  await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'Contorno activo', 'resumen');
+  await esperar(500);
+  igual(await lista.count(), 1, 'la lista sigue abierta');
+  igual(await geometriaDe(olga.page, B), antes, 'nada cambia antes de Listo');
+  await casillas.nth(1).check();
+  await lista.getByRole('button', { name: 'Listo' }).click();
+  await hasta(async () => { const g = await geometriaDe(olga.page, B); return g && g !== antes; }, 'el contorno no se reemplazó');
+  await hasta(async () => (await lista.count()) === 0, 'la lista se cierra');
+  igual(await celda(olga.page, B, COL.kmz).getByRole('button', { name: 'Elegir contorno…' }).count(), 0,
+    'sin botón cuando la versión ya es la actual');
+});
+
 await revisar('operador: un KML elegido en el detalle sobrevive a la recarga de la tabla por foco', async () => {
   await irA(olga.page, base.id);
   await fila(olga.page, C).getByRole('button', { name: /Abrir terreno/ }).click();

@@ -29,7 +29,7 @@
 
 import { el } from "../../lib/dom.js";
 import { crearSubida, FASE, esTerminal } from "./subida.js";
-import { describirResumen, ESTADO, pdfsDelResumen, opcionPdf } from "./resumen.js";
+import { describirResumen, pdfsDelResumen, opcionPdf } from "./resumen.js";
 import { candidatosDe, intentoPorElegir, montarSelectorContornos } from "./elegirContorno.js";
 import { EN_PROGRESO, FASE_TEXTO } from "./detalle.js";
 import {
@@ -70,6 +70,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   // request for an earlier upload's candidates in flight.
   let eleccion = null;
   let buscandoContornos = null;
+  const sinEleccion = new Set();   // versions whose latest attempt has nothing to choose
 
   const texto = el("span", { class: "archivos-celda", dataset: { tipo } });
   const enlace = el("button", { type: "button", class: "archivos-celda-abrir",
@@ -465,12 +466,17 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
 
   /* ------------------------------------------------ contour choice (KMZ) */
 
-  /** The latest version of the summary's boundary file, when it waits for a contour. */
+  /**
+   * The latest version of the summary's boundary file when it is stored but
+   * not the current one: it may wait for a contour, also when it would
+   * replace a boundary that is already active.
+   */
   function versionSinActivar() {
     const k = ultimoResumen?.kmz;
     const v = k?.ultima_version;
-    if (tipo !== "kmz" || !k || k.geometria_activa_id || v?.estado !== "disponible") return null;
-    return describirResumen(ultimoResumen, tipo).estado === ESTADO.SIN_ACTIVAR ? { archivo: k, version: v } : null;
+    if (tipo !== "kmz" || !k || k.retirado || v?.estado !== "disponible" || !v.id) return null;
+    if (v.id === k.version_actual_id || sinEleccion.has(v.id)) return null;
+    return { archivo: k, version: v };
   }
 
   function pintarContornos() {
@@ -478,10 +484,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     const sinEscritura = solo || fuera;
     let e = subida?.estado();
     const porElegir = e?.fase === FASE.REQUIERE_SELECCION;
-    // Activated elsewhere (the detail, another tab): this version needs no choice any more.
+    // Activated elsewhere (the detail, another tab): this version is the current one now.
     const k = ultimoResumen?.kmz;
     const versionId = eleccion?.versionId ?? (porElegir ? e.versionId : null);
-    if (sinEscritura || (versionId && k?.geometria_activa_id && k?.ultima_version?.id === versionId)) {
+    if (sinEscritura || (versionId && k?.version_actual_id === versionId)) {
       cerrarContornos();
       if (porElegir) { ctx.subidas.quitar(subida); subida = null; e = null; pintarSubida(); }
     } else if (porElegir && !eleccion && e.resultado?.archivo && candidatosDe(e.resultado.intento).length > 1) {
@@ -499,7 +505,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       onListo: () => {
         cerrarContornos();
         if (subida && !enCurso()) { ctx.subidas.quitar(subida); subida = null; }
+        // Shown as current until the refreshed summary says so itself.
+        sinEleccion.add(versionId);
         avisar("Contorno activado.");
+        clearTimeout(avisoTimer);
         avisoTimer = setTimeout(() => { if (vivo) avisar(""); }, 5000);
         notificarCambio();
         pintar();
@@ -510,6 +519,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
         if (subida && !enCurso()) { ctx.subidas.quitar(subida); subida = null; }
         pintar();
         (elegirContorno.hidden ? elegir : elegirContorno).focus();
+      },
+      onError: (error) => {
+        if (error instanceof ErrorArchivos && (error.status === 404 || error.status === 403)) accesoPerdido(error);
+        else if (error?.codigo === "revision_conflictiva") notificarCambio();
       },
     });
     eleccion = { versionId, selector };
@@ -535,6 +548,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       if (!vivo || buscandoContornos !== control) return;
       const candidatos = candidatosDe(intento);
       if (candidatos.length < 2) {
+        sinEleccion.add(pendiente.version.id);
         avisar("Este archivo no tiene varios contornos para elegir. Abre el detalle (⋯) para ver por qué no se activó.",
           { tipoAviso: "error" });
         return;

@@ -49,7 +49,13 @@ export async function intentoPorElegir(cliente, versionId, { signal } = {}) {
  * Process `seleccion` (candidate indices) of `versionId` and activate the
  * boundary it yields. Resolves with the activation's reply; rejects with an
  * ErrorArchivos (the selection's own message when it is not usable).
- * `claves` keeps one idempotency key per logical step until it succeeds.
+ *
+ * The activation is at `revision`, the attachment's revision when the list
+ * was shown, never a fresher one: if someone changed the file since, the
+ * server answers revision_conflictiva instead of replacing their boundary.
+ * `claves` keeps one idempotency key per logical step until it succeeds, and
+ * a processed selection's boundary, so a retry after a failed activation
+ * does not process it again.
  */
 export async function elegirYActivar(cliente, { versionId, archivoId, revision, seleccion, claves, signal }) {
   const clave = (operacion) => {
@@ -57,17 +63,21 @@ export async function elegirYActivar(cliente, { versionId, archivoId, revision, 
     return claves.get(operacion);
   };
   const paso1 = `procesar|${versionId}|${JSON.stringify(seleccion)}`;
-  const r = await cliente.procesar(versionId, seleccion, clave(paso1), { signal });
-  claves.delete(paso1);
-  if (!r?.geometria_id || r?.intento?.resultado !== "listo") {
-    throw new ErrorArchivos("seleccion_invalida",
-      r?.intento?.resultado_detalle?.error?.mensaje ?? "La selección no produjo un contorno utilizable.");
+  const hecho = `geometria|${paso1}`;
+  if (!claves.has(hecho)) {
+    const r = await cliente.procesar(versionId, seleccion, clave(paso1), { signal });
+    claves.delete(paso1);
+    if (!r?.geometria_id || r?.intento?.resultado !== "listo") {
+      throw new ErrorArchivos("seleccion_invalida",
+        r?.intento?.resultado_detalle?.error?.mensaje ?? "La selección no produjo un contorno utilizable.");
+    }
+    claves.set(hecho, r.geometria_id);
   }
-  const vigente = r?.archivo?.revision ?? revision;
-  const paso2 = `activar|${archivoId}|${versionId}|${r.geometria_id}|${vigente}`;
-  const activado = await cliente.activar(archivoId,
-    { versionId, geometriaId: r.geometria_id, revision: vigente }, clave(paso2), { signal });
+  const geometriaId = claves.get(hecho);
+  const paso2 = `activar|${archivoId}|${versionId}|${geometriaId}|${revision}`;
+  const activado = await cliente.activar(archivoId, { versionId, geometriaId, revision }, clave(paso2), { signal });
   claves.delete(paso2);
+  claves.delete(hecho);
   return activado;
 }
 
@@ -75,7 +85,9 @@ export async function elegirYActivar(cliente, { versionId, archivoId, revision, 
  * The inline list. `onListo` runs after a successful activation; `onCerrar`
  * when the person closes the list. Returns {element, destroy}.
  */
-export function montarSelectorContornos({ cliente, versionId, archivoId, revision, candidatos, onListo, onCerrar }) {
+export function montarSelectorContornos({
+  cliente, versionId, archivoId, revision, candidatos, onListo, onCerrar, onError,
+}) {
   let vivo = true;
   let control = null;
   const claves = new Map();
@@ -114,14 +126,18 @@ export function montarSelectorContornos({ cliente, versionId, archivoId, revisio
     } catch (error) {
       if (!vivo || error?.name === "AbortError") return;
       estado.textContent = error?.codigo === "revision_conflictiva"
-        ? "El archivo cambió mientras tanto. Actualiza la tabla y vuelve a elegir."
+        ? "El archivo cambió mientras tanto (otra persona lo actualizó). La tabla se actualiza; revisa antes de volver a elegir."
         : (error instanceof ErrorArchivos ? error.message : "No se pudo activar el contorno.");
+      onError?.(error);
     } finally {
       control = null;
       if (vivo) listo.disabled = false;
     }
   });
   cerrar.addEventListener("click", () => onCerrar?.());
+  element.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { e.preventDefault(); onCerrar?.(); }
+  });
   queueMicrotask(() => { if (vivo) (validas[0] ?? listo).focus(); });
 
   return {

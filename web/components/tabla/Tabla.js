@@ -193,9 +193,17 @@ export function createTabla({
       pintar(valores, actual) {
         elegidos = [...actual];
         const lista = [...new Set([...(valores ?? []), ...elegidos])];
+        const actuales = [...panel.querySelectorAll("input")].map((c) => c.value);
+        if (actuales.length && actuales.join("\u0000") === lista.join("\u0000")) {
+          // Same types: only the checks change, so focus and the open panel stay put.
+          this.valor = elegidos;
+          return;
+        }
+        const enfocado = panel.contains(document.activeElement) ? document.activeElement.value : null;
         panel.replaceChildren(...(lista.length ? lista.map((v, i) => el("label", { class: "check" },
           el("input", { type: "checkbox", id: `${id}-${i}`, value: v, checked: elegidos.includes(v) }), v))
           : [el("span", { class: "secondary" }, "Sin tipos en esta vista")]));
+        if (enfocado != null) [...panel.querySelectorAll("input")].find((c) => c.value === enfocado)?.focus();
         escribirResumen();
       },
       set valor(actual) {
@@ -244,7 +252,7 @@ export function createTabla({
     campoDe(buscar, "Buscar"),
     campoDe(selEstado, "Estado"),
     campoDe(selMunicipio, "Municipio"),
-    el("div", { class: "tabla-campo" }, el("span", { class: "field-label", id: "tabla-tipo-etiqueta" }, "Tipo"),
+    el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Tipo"),
       selTipo.element),
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),

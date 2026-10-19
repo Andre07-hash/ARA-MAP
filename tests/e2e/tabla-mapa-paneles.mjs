@@ -407,6 +407,21 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await marcarTipo(ada.page, 'Industrial Ficticio', false);
   await marcarTipo(ada.page, 'Habitacional Ficticio', false);
   igual(await tipoTabla(ada.page), 'Todos', 'sin tipos');
+  // By keyboard: Space checks a type, the table reloads, and focus and the open panel stay.
+  await ada.page.locator('#tabla-tipo > summary').focus();
+  await ada.page.keyboard.press('Enter');
+  await ada.page.keyboard.press('Tab');
+  await ada.page.keyboard.press('Space');
+  await hasta(async () => (await tipoTabla(ada.page)) !== 'Todos', 'Espacio no marcó un tipo');
+  await listo(ada.page);
+  igual(await ada.page.evaluate(() => {
+    const d = document.getElementById('tabla-tipo');
+    return d.open && d.contains(document.activeElement) && document.activeElement.type === 'checkbox';
+  }), true, 'el foco y el panel siguen tras recargar');
+  await ada.page.keyboard.press('Space');
+  await hasta(async () => (await tipoTabla(ada.page)) === 'Todos', 'Espacio no desmarcó');
+  await ada.page.keyboard.press('Escape');
+  igual(await ada.page.locator('#tabla-tipo').evaluate((d) => d.open), false, 'Escape cierra');
   await aMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await ada.page.locator('#tabla-vista').selectOption(otra.id);

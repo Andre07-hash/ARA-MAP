@@ -227,6 +227,27 @@
 }
 .archivos-candidato { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
 
+/* The contour chooser inside a table cell: compact, and a long list scrolls. */
+.archivos-celda-contornos {
+  box-sizing: border-box;
+  width: 0;
+  min-width: 100%;          /* as wide as the cell, never wider: long names wrap */
+  font-size: var(--text-micro);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.archivos-celda-contornos legend { font-weight: 600; }
+.archivos-celda-contornos-lista { display: grid; gap: var(--space-1); max-height: 12rem; overflow-y: auto; }
+.archivos-celda-contornos .archivos-candidato {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0 var(--space-2);
+  cursor: pointer;
+}
+.archivos-celda-contornos .archivos-candidato .archivos-error { grid-column: 2; }
+.archivos-celda-contornos .archivos-candidato[data-valido="0"] { cursor: default; color: var(--ink-secondary); }
+
 .archivos-mensaje { margin: 0; min-height: 1.2em; }
 .archivos-mensaje[data-tipo="error"],
 .archivos-error { color: var(--status-error); }

@@ -24,32 +24,35 @@ export const LIMITE_BYTES = Object.freeze({ pdf: 25 * 1024 * 1024, kmz: 20 * 102
 export const LIMITE_KML_BYTES = 16 * 1024 * 1024;
 
 /* The content type each format is staged with and downloaded as (route 3
- * accepts these). Keys are formats: "pdf", "kmz" or "kml". */
+ * accepts these). Keys are formats: "pdf", "jpg", "kmz" or "kml". The
+ * attachments kind ("pdf") takes PDF and JPG files. */
 export const TIPO_CONTENIDO = Object.freeze({
   pdf: "application/pdf",
+  jpg: "image/jpeg",
   kmz: "application/vnd.google-earth.kmz",
   kml: "application/vnd.google-earth.kml+xml",
 });
 
-const EXTENSION = Object.freeze({ pdf: /\.pdf$/i, kmz: /\.km[zl]$/i });
+const EXTENSION = Object.freeze({ pdf: /\.(pdf|jpe?g)$/i, kmz: /\.km[zl]$/i });
 
 /* The format of a file of kind `tipo`, by its name: the server applies the
  * same rule and then checks the bytes against it. */
 export function formatoDe(nombre, tipo) {
-  if (tipo === "pdf") return "pdf";
+  if (tipo === "pdf") return /\.jpe?g$/i.test(String(nombre ?? "")) ? "jpg" : "pdf";
   return /\.kml$/i.test(String(nombre ?? "")) ? "kml" : "kmz";
 }
 
 /* The format a downloaded version declares through its content type. */
 export function formatoDeTipoContenido(tipoContenido, tipo) {
-  if (tipo === "pdf") return "pdf";
+  if (tipo === "pdf") return tipoContenido === TIPO_CONTENIDO.jpg ? "jpg" : "pdf";
   return tipoContenido === TIPO_CONTENIDO.kml ? "kml" : "kmz";
 }
 
 /* Upper-case name of a boundary file's format, for messages ("KMZ", "KML"). */
 export const nombreFormato = (formato) => String(formato).toUpperCase();
 
-const limiteDe = (formato) => (formato === "kml" ? LIMITE_KML_BYTES : LIMITE_BYTES[formato]);
+const limiteDe = (formato) => (formato === "kml" ? LIMITE_KML_BYTES
+  : formato === "jpg" ? LIMITE_BYTES.pdf : LIMITE_BYTES[formato]);
 
 /* Bounds for what this client is willing to read. JSON pages hold at most 100
  * items (an attempt detail at most the parser's 500 candidate descriptions);
@@ -353,7 +356,7 @@ export function validarArchivoLocal(archivo, tipo) {
   }
   if (!EXTENSION[tipo].test(String(archivo.name ?? ""))) {
     return new ErrorArchivos("tipo_no_permitido",
-      tipo === "pdf" ? "Elige un archivo PDF (.pdf)." : "Elige un archivo KMZ o KML (.kmz, .kml).");
+      tipo === "pdf" ? "Elige un archivo PDF o JPG (.pdf, .jpg)." : "Elige un archivo KMZ o KML (.kmz, .kml).");
   }
   if (archivo.size === 0) return new ErrorArchivos("archivo_vacio", mensajeDe("archivo_vacio"));
   const formato = formatoDe(archivo.name, tipo);

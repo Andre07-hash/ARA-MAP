@@ -235,7 +235,7 @@ await revisar('foco de la ventana mientras se envía el PDF: la subida no se int
   igual(await faseFinal(ada.page, T.foco, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']).catch(() => null), 'listo', 'fase final');
   igual(contenidos(ada, desde), [], 'los bytes se enviaron una sola vez');
   cierto(await pdfGuardado(ada.page, T.foco), 'el servidor no tiene el PDF guardado');
-  await hasta(async () => (await resumen(ada.page, T.foco, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+  await hasta(async () => (await resumen(ada.page, T.foco, COL.pdf)) === '1 archivo', 'la celda no dice 1 PDF');
 });
 
 await revisar('regreso del selector de archivos: el foco recarga la tabla antes de que llegue el archivo', async () => {
@@ -323,7 +323,7 @@ await revisar('filtrar y Actualizar durante la subida: sigue, también fuera de 
   await hasta(async () => !(await aviso(ada.page).isVisible()), 'el aviso no se quitó');
   igual(contenidos(ada, desde), [], 'los bytes se enviaron una sola vez');
   await ada.page.locator('#tabla-buscar').fill('');
-  await hasta(async () => (await resumen(ada.page, T.filtro, COL.pdf)) === '1 PDF', 'al volver, 1 PDF');
+  await hasta(async () => (await resumen(ada.page, T.filtro, COL.pdf)) === '1 archivo', 'al volver, 1 PDF');
 });
 
 await revisar('cambiar de vista pregunta antes de interrumpir; quedarse conserva la subida', async () => {
@@ -441,9 +441,9 @@ await revisar('estados: subida vencida sin PDF previo, y con un PDF guardado que
     vencer(v);
   }
   await irA(ada.page, base.id);
-  igual(await resumen(ada.page, T.vencida, COL.pdf), 'Sin PDF guardado', 'sin PDF previo');
+  igual(await resumen(ada.page, T.vencida, COL.pdf), 'Sin archivo guardado', 'sin PDF previo');
   cierto(/subida vencida/i.test(await celda(ada.page, T.vencida, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'dice subida vencida');
-  igual(await resumen(ada.page, T.previo, COL.pdf), '1 PDF', 'el PDF guardado sigue contando');
+  igual(await resumen(ada.page, T.previo, COL.pdf), '1 archivo', 'el PDF guardado sigue contando');
   cierto(/subida vencida/i.test(await celda(ada.page, T.previo, COL.pdf).locator('.archivos-celda').getAttribute('title')), 'con nota de la subida vencida');
   const texto = await ada.page.locator('.tabla-lienzo').innerText();
   cierto(!/PDF vencido/.test(texto), 'nunca «PDF vencido»');
@@ -451,14 +451,14 @@ await revisar('estados: subida vencida sin PDF previo, y con un PDF guardado que
   await fila(ada.page, T.vencida).getByRole('button', { name: /Abrir terreno/ }).click();
   let det = dialogo(ada.page, 'Lote Subida vencida Ficticio');
   await hasta(async () => /Subida vencida/.test(await det.innerText()), 'el detalle no dice subida vencida');
-  cierto(/Sin PDF guardado/.test(await det.innerText()), 'chip sin PDF guardado');
+  cierto(/Sin archivo guardado/.test(await det.innerText()), 'chip sin archivo guardado');
   igual(await det.getByRole('button', { name: /^Descargar|^Abrir$/ }).count(), 0, 'nada que descargar');
   await det.getByRole('button', { name: 'Cerrar', exact: true }).click();
   await fila(ada.page, T.previo).getByRole('button', { name: /Abrir terreno/ }).click();
   det = dialogo(ada.page, 'Lote Subida previo Ficticio');
   // Each PDF chosen is its own attachment: the saved one and the expired attempt side by side.
   const guardado = det.locator('.archivos-item').filter({ has: ada.page.locator('.archivos-chip-actual') });
-  const vencido = det.locator('.archivos-item').filter({ hasText: 'Sin PDF guardado' });
+  const vencido = det.locator('.archivos-item').filter({ hasText: 'Sin archivo guardado' });
   await hasta(async () => (await guardado.count()) === 1 && (await vencido.count()) === 1, 'el detalle no muestra los dos adjuntos');
   cierto(/Subida vencida/.test(await vencido.innerText()), 'el intento dice subida vencida');
   igual(await vencido.getByRole('button', { name: /^Descargar|^Abrir/ }).count(), 0, 'el intento no se descarga');
@@ -581,7 +581,7 @@ await revisar('completar: se pierde la respuesta después de guardar; «Reintent
     await elegir(s4.page, T.respCompletar, 'pdf', F.pdf2);
     igual(await faseFinal(s4.page, T.respCompletar, 'pdf', ['incierto', 'interrumpido', 'fallido', 'listo']), 'incierto', 'se dice sin confirmar');
     igual(red.vistos[0].status, 200, 'el servidor sí guardó el PDF');
-    cierto(!/PDF guardado/.test(await celda(s4.page, T.respCompletar, COL.pdf).locator('.archivos-celda-subida').innerText()), 'sin falso éxito');
+    cierto(!/Archivo guardado/.test(await celda(s4.page, T.respCompletar, COL.pdf).locator('.archivos-celda-subida').innerText()), 'sin falso éxito');
     await celda(s4.page, T.respCompletar, COL.pdf).getByRole('button', { name: 'Reintentar' }).dblclick();
     igual(await faseFinal(s4.page, T.respCompletar, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'el reintento termina');
   } finally {
@@ -592,7 +592,7 @@ await revisar('completar: se pierde la respuesta después de guardar; «Reintent
   const lista = await adjuntos(s4.page, T.respCompletar);
   igual(lista.map((a) => a.ultima_version?.estado), ['disponible'], 'un solo adjunto, guardado');
   igual((await shaDescarga(s4.page, lista[0].version_actual_id)).sha, sha(F.pdf2), 'mismos bytes');
-  await hasta(async () => (await resumen(s4.page, T.respCompletar, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+  await hasta(async () => (await resumen(s4.page, T.respCompletar, COL.pdf)) === '1 archivo', 'la celda no dice 1 PDF');
 });
 
 await revisar('un envío que nunca responde se puede cancelar: el servidor lo cancela y no queda PDF', async () => {
@@ -639,7 +639,7 @@ await revisar('alternar Tabla / Mapa mientras se envía el PDF: la subida termin
   }
   igual(contenidos(s4, desde), [], 'los bytes se enviaron una sola vez');
   cierto(await pdfGuardado(s4.page, T.tablaMapa), 'el servidor no tiene el PDF guardado');
-  await hasta(async () => (await resumen(s4.page, T.tablaMapa, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF');
+  await hasta(async () => (await resumen(s4.page, T.tablaMapa, COL.pdf)) === '1 archivo', 'la celda no dice 1 PDF');
 });
 
 /** Answer the first PUT with a fictional refusal (SIMULATED: the local server does not produce it). */

@@ -282,7 +282,7 @@ await revisar('el operador crea un terreno en blanco: los campos de negocio qued
     igual(await textoCelda(olga.page, lote, col), '', `celda ${col} en blanco`);
   }
   // Real widgets in the file cells: an honest "none yet", not a placeholder.
-  await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === 'Sin PDF', 'celda PDF');
+  await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === 'Sin archivos', 'celda PDF');
   igual(await textoCelda(olga.page, lote, 'core:kmz'), 'Sin KMZ / KML', 'celda KMZ');
   const t = await terreno(olga.page, lote);
   igual([t.draft.lat, t.draft.lon, t.draft.asking_price, t.ubicacion.modo], [null, null, null, 'ninguna'], 'en blanco');
@@ -300,7 +300,7 @@ await revisar('sube un PDF desde el detalle y lo descarga byte por byte idéntic
   const d = await abrirDetalle(olga.page, lote, NOMBRE);
   await subirEnDetalle(d, 'pdf', F.pdf);
   igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'incierto']), 'listo', 'fase');
-  await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === '1 PDF', 'la celda no llegó a 1 PDF');
+  await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === '1 archivo', 'la celda no llegó a 1 PDF');
   const item = d.locator('.archivos-detalle[data-tipo="pdf"] .archivos-item', { hasText: 'Avalúo ficticio.pdf' });
   await item.waitFor();
   const [descarga] = await Promise.all([olga.page.waitForEvent('download'), item.getByRole('button', { name: /^Descargar/ }).click()]);
@@ -431,7 +431,7 @@ if (!FOCALIZADO) {
       await olga.page.keyboard.press('Shift+ArrowLeft');
       await olga.page.keyboard.press('Shift+ArrowLeft');
       liberar();
-      await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === '2 PDF', 'la celda no llegó a 2 PDF');
+      await hasta(async () => (await textoCelda(olga.page, lote, 'core:archivos')) === '2 archivos', 'la celda no llegó a 2 PDF');
       await esperar(300);
       const e = await olga.page.evaluate(() => {
         const x = document.activeElement;
@@ -527,7 +527,7 @@ await irATabla(omar.page);
 
 await revisar('otra sesión autorizada lee los mismos archivos guardados y el mismo contorno', async () => {
   await fila(omar.page, lote).waitFor();
-  await hasta(async () => /PDF/.test(await textoCelda(omar.page, lote, 'core:archivos')), 'celda PDF');
+  await hasta(async () => /archivo/.test(await textoCelda(omar.page, lote, 'core:archivos')), 'celda PDF');
   igual(await textoCelda(omar.page, lote, 'core:kmz'), 'Contorno activo', 'celda KMZ');
   const d = await abrirDetalle(omar.page, lote, NOMBRE);
   const item = d.locator('.archivos-detalle[data-tipo="pdf"] .archivos-item', { hasText: 'Avalúo ficticio.pdf' });
@@ -772,7 +772,7 @@ if (!FOCALIZADO) {
     await subirEnDetalle(d, 'pdf', F.pdf);
     igual(await faseFinal(d, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'subida en el detalle reabierto');
     await cerrarDetalle(oscar.page, d);
-    await hasta(async () => /PDF/.test(await textoCelda(oscar.page, t, 'core:archivos')), 'la celda no refleja el PDF');
+    await hasta(async () => /archivo/.test(await textoCelda(oscar.page, t, 'core:archivos')), 'la celda no refleja el PDF');
   });
 
   await revisar('R3-B5: la sesión termina durante el resumen final del contorno: no se instala y nada queda', async () => {

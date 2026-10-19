@@ -413,7 +413,7 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
   await elegirDesdeTabla(ada.page, elegido, 'Lote Panel 007 Ficticio');
   const texto = await fichaTexto(ada.page);
   for (const esperado of ['Lote Panel 007 Ficticio', 'Base Paneles Ficticia', 'Comentario ficticio vigente', 'Seguimiento Ficticio',
-    'Visita ficticia', 'Sin PDF', 'Sin KMZ / KML', 'X (latitud)', 'En el mapa por sus coordenadas X/Y']) {
+    'Visita ficticia', 'Sin archivos', 'Sin KMZ / KML', 'X (latitud)', 'En el mapa por sus coordenadas X/Y']) {
     cierto(texto.includes(esperado), `falta «${esperado}» en la ficha: ${texto}`);
   }
   igual(await ficha(ada.page).locator('input, select, textarea, [contenteditable="true"]').count(), 0, 'sin controles de edición');

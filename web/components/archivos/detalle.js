@@ -81,7 +81,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   let cambioPendiente = false;
   let listaGen = 0;
 
-  const ETIQUETA = tipo === "pdf" ? "PDF" : "KMZ / KML";
+  const ETIQUETA = tipo === "pdf" ? "PDF o JPG" : "KMZ / KML";
   const MIB = 1024 * 1024;
   const maximo = tipo === "pdf" ? `Máximo ${LIMITE_BYTES.pdf / MIB} MiB.`
     : `Máximo ${LIMITE_BYTES.kmz / MIB} MiB para KMZ y ${LIMITE_KML_BYTES / MIB} MiB para KML.`;
@@ -90,10 +90,10 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
 
   const resumenLinea = el("p", { class: "archivos-resumen secondary" });
   const estado = el("p", { class: "archivos-mensaje", role: "status", "aria-live": "polite" });
-  const entrada = el("input", { type: "file", class: "archivos-entrada", accept: tipo === "pdf" ? ".pdf,application/pdf" : ".kmz,.kml",
+  const entrada = el("input", { type: "file", class: "archivos-entrada", accept: tipo === "pdf" ? ".pdf,.jpg,.jpeg,application/pdf,image/jpeg" : ".kmz,.kml",
     tabindex: "-1", "aria-hidden": "true" });
   const botonElegir = el("button", { type: "button", class: "btn btn-quiet btn-small archivos-elegir" },
-    tipo === "pdf" ? "Elegir PDF…" : "Elegir KMZ o KML…");
+    tipo === "pdf" ? "Elegir PDF o JPG…" : "Elegir KMZ o KML…");
   const zona = el("div", { class: "archivos-zona" },
     botonElegir,
     el("span", { class: "secondary" }, ` o arrastra un archivo aquí. ${maximo}`),
@@ -104,7 +104,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
   const avisoLista = el("button", { type: "button", class: "btn btn-quiet btn-small", hidden: true },
     "La lista cambió: actualizar");
   const raiz = el("section", { class: "archivos-detalle", dataset: { tipo } },
-    el("h3", { class: "archivos-titulo" }, tipo === "pdf" ? "Archivos PDF" : "KMZ / KML del terreno"),
+    el("h3", { class: "archivos-titulo" }, tipo === "pdf" ? "Archivos PDF y JPG" : "KMZ / KML del terreno"),
     resumenLinea, zona, listaSubidas, estado, avisoLista, lista, masArchivos);
   container.replaceChildren(raiz);
 
@@ -593,7 +593,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       el("span", { class: "archivos-item-nombre" }, nombre),
       archivo.retirado_en ? el("span", { class: "archivos-chip archivos-chip-retirado" }, "Retirado")
         : archivo.version_actual_id ? el("span", { class: "archivos-chip archivos-chip-actual" }, "Actual")
-          : el("span", { class: "archivos-chip" }, tipo === "pdf" ? "Sin PDF guardado" : "Sin versión actual"),
+          : el("span", { class: "archivos-chip" }, tipo === "pdf" ? "Sin archivo guardado" : "Sin versión actual"),
       tipo === "kmz" && archivo.geometria_activa_id && !archivo.retirado_en
         ? el("span", { class: "archivos-chip archivos-chip-actual" }, "Contorno activo") : null,
       v ? el("span", { class: "secondary" }, v.propia === false
@@ -688,7 +688,7 @@ export function montarDetalle({ container, terrenoId, tipo, soloLectura, resumen
       if (!siguiente) lista.replaceChildren();
       for (const a of propios) lista.append(lineaArchivo(a));
       if (!siguiente && lista.children.length === 0 && !r.cursor_siguiente) {
-        lista.append(el("li", { class: "secondary" }, tipo === "pdf" ? "Este terreno no tiene PDF." : "Este terreno no tiene KMZ ni KML."));
+        lista.append(el("li", { class: "secondary" }, tipo === "pdf" ? "Este terreno no tiene PDF ni JPG." : "Este terreno no tiene KMZ ni KML."));
       }
       cursorLista = r.cursor_siguiente;
       masArchivos.hidden = cursorLista == null;

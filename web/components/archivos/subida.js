@@ -164,7 +164,7 @@ export function crearSubida({ cliente, terrenoId, tipo, archivo = null, pendient
     if (version.estado === "cancelado") return poner({ ...comun, fase: FASE.CANCELADO, codigo: null, mensaje: "Subida cancelada." });
     if (version.estado === "expirado") return poner({ ...comun, fase: FASE.EXPIRADO, codigo: "subida_expirada", mensaje: "El plazo de esta subida venció." });
     if (tipo === "pdf") {
-      return poner({ ...comun, fase: FASE.LISTO, codigo: null, mensaje: "PDF guardado." });
+      return poner({ ...comun, fase: FASE.LISTO, codigo: null, mensaje: "Archivo guardado." });
     }
     const resultado = r?.intento?.resultado;
     // The file's real format (KMZ or KML), never a KML presented as a KMZ.

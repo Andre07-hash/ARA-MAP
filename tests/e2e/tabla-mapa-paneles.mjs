@@ -124,6 +124,13 @@ const foto = async (page, nombre) => { if (SHOTS) { await esperar(400); await pa
 const ficha = (page) => page.locator('.mapa-tabla-ficha');
 const fichaTexto = (page) => ficha(page).textContent();
 const leyenda = (page) => page.locator('.previa .legend');
+/* The table's Tipo filter takes several types: its summary says which, its panel checks them. */
+const tipoTabla = async (page) => (await page.locator('#tabla-tipo > summary').innerText()).trim();
+async function marcarTipo(page, tipo, marcado = true) {
+  await page.locator('#tabla-tipo > summary').click();
+  await page.locator('#tabla-tipo').getByLabel(tipo, { exact: true }).setChecked(marcado);
+  await page.keyboard.press('Escape');
+}
 
 async function irA(page, vista, modo = null) {
   await page.goto(`${URLBASE}/?test=1#/tabla/${vista}${modo ? '/mapa' : ''}`);
@@ -340,7 +347,7 @@ await revisar('Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toc
   igual(ada.api.filter((l) => /\/terrenos\?/.test(l)).length, listas, 'filtrar por tipo no pide listas');
   igual(await p.locator('#mapa-tabla-filtros').textContent(), 'Filtros (1)', 'cuenta como un filtro');
   await aTabla(p);
-  igual(await p.locator('#tabla-tipo').inputValue(), '', 'el tipo de la tabla no cambia');
+  igual(await tipoTabla(p), 'Todos', 'el tipo de la tabla no cambia');
   // Actualizar on the map left the grid to be read again: it reloads the same page.
   await hasta(async () => (await p.locator('tr.tabla-fila').count()) === paginaTabla.filas, 'misma página');
   igual(await p.locator('.tabla-cuenta').innerText(), paginaTabla.cuenta, 'misma cuenta');
@@ -377,7 +384,7 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await hasta(async () => (await previa(ada.page)).filas === jalisco, 'Limpiar vuelve al alcance, no a toda la base');
   // The table's type filter: kept, said, and never offered as a map control.
   await aTabla(ada.page);
-  await ada.page.locator('#tabla-tipo').selectOption('Industrial Ficticio');
+  await marcarTipo(ada.page, 'Industrial Ficticio');
   await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && /tipo_terreno=Industrial/.test(x.clave); }, 'reunión con el tipo');
   igual(await resumen.innerText(), 'Filtros de la tabla (2)', 'dos filtros heredados');
@@ -388,9 +395,18 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   const tipos = await ada.page.locator('.mapa-tabla-rail [id^="tipos-"]').evaluateAll((n) => n.map((c) => c.value));
   igual(tipos, ['Industrial Ficticio'], 'el Tipo local sólo ofrece los tipos del conjunto');
   await aTabla(ada.page);
-  igual([await ada.page.locator('#tabla-estado').inputValue(), await ada.page.locator('#tabla-tipo').inputValue()],
+  igual([await ada.page.locator('#tabla-estado').inputValue(), await tipoTabla(ada.page)],
     ['Jalisco', 'Industrial Ficticio'], 'la tabla conserva sus filtros');
-  await ada.page.locator('#tabla-tipo').selectOption('');
+  // Several types at once: both are sent and both are said.
+  await marcarTipo(ada.page, 'Habitacional Ficticio');
+  igual(await tipoTabla(ada.page), 'Habitacional Ficticio, Industrial Ficticio', 'dos tipos, en el orden de la lista');
+  await aMapa(ada.page);
+  await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo
+    && /tipo_terreno=Industrial/.test(x.clave) && /tipo_terreno=Habitacional/.test(x.clave); }, 'reunión con los dos tipos');
+  await aTabla(ada.page);
+  await marcarTipo(ada.page, 'Industrial Ficticio', false);
+  await marcarTipo(ada.page, 'Habitacional Ficticio', false);
+  igual(await tipoTabla(ada.page), 'Todos', 'sin tipos');
   await aMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await ada.page.locator('#tabla-vista').selectOption(otra.id);

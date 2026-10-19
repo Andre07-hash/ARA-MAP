@@ -97,6 +97,10 @@ test("a list query is one bounded page; filters and order are the server's", () 
   assert.equal(consultaDeLista("sin_asignar", { q: " lote ", sort: "-terreno", estado: "Jalisco", limit: 200 }, "CUR"),
   "q=lote&estado=Jalisco&base=sin_asignar&sort=-terreno&limit=200&cursor=CUR");
   assert.equal(consultaDeLista(BASE, { limit: 5000 }), "limit=100");               // never more than the maximum
+  // Several terrain types: one repeated parameter, matched as "any of them".
+  assert.equal(consultaDeLista(BASE, { tipo_terreno: ["Industrial", "Agrícola"] }),
+    "tipo_terreno=Industrial&tipo_terreno=Agr%C3%ADcola&limit=100");
+  assert.equal(consultaDeLista(BASE, { tipo_terreno: [] }), "limit=100");
   assert.equal(rutaDeLista("maestra"), "/inventario/terrenos");
   assert.equal(rutaDeLista(BASE), `/maestra/bases/${BASE}/terrenos`);
 });

@@ -26,6 +26,24 @@
 .tabla-campo { display: grid; gap: var(--space-1); min-width: 8rem; }
 .tabla-campo .input { min-width: 0; }
 .tabla-casilla { padding-bottom: var(--space-2); }
+
+/* Tipo: several values at once. Looks like the other selects; its checks
+   open in a small panel under it. */
+.tabla-varios { position: relative; }
+.tabla-varios-resumen {
+  display: block; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  cursor: pointer; list-style: none;
+}
+.tabla-varios-resumen::-webkit-details-marker { display: none; }
+.tabla-varios-resumen::after { content: " ▾"; color: var(--ink-secondary); }
+.tabla-varios[data-bloqueado] .tabla-varios-resumen { opacity: 0.45; cursor: not-allowed; }
+.tabla-varios-panel {
+  position: absolute; top: calc(100% + var(--space-1)); left: 0; z-index: var(--z-panel);
+  display: grid; gap: var(--space-1); min-width: 100%; max-height: 18rem; overflow-y: auto;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper-overlay); border: 1px solid var(--rule-strong); border-radius: var(--radius);
+  box-shadow: var(--shadow-pop); font-size: var(--text-small); white-space: nowrap;
+}
 .tabla-acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-left: auto; }
 
 .tabla-aviso {

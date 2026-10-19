@@ -714,7 +714,7 @@ export function createTabla({
     const n = marcados.size;
     if (!(await confirmarBorrado({
       titulo: `¿Borrar ${terrenos(n)}?`,
-      mensaje: `Se borran ${n === 1 ? "ese terreno" : `esos ${fmtCount(n)} terrenos`} con todos sus datos, su historial y sus archivos adjuntos (PDF, KMZ y KML).`,
+      mensaje: `Se borran ${n === 1 ? "ese terreno" : `esos ${fmtCount(n)} terrenos`} con todos sus datos, su historial y sus archivos adjuntos (PDF, JPG, KMZ y KML).`,
     }))) return;
     informar(await enLoteHacer("Borrando", (id, version) => api.borrarTerreno(id, version)),
       n === 1 ? "borrado" : "borrados");

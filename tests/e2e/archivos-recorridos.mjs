@@ -122,7 +122,7 @@ const olga = await sesion("olga");
 paginaActual = olga.page;
 
 await revisar("los widgets montan con el resumen real: sin archivos no es 'cargando'", async () => {
-  await textoCelda(olga.page, T.uno.id, "pdf", "Sin PDF");
+  await textoCelda(olga.page, T.uno.id, "pdf", "Sin archivos");
   await textoCelda(olga.page, T.uno.id, "kmz", "Sin KMZ / KML");
   return { modo: await olga.page.evaluate(() => window.__arnes.modo), puente: await olga.page.evaluate(() => window.__arnes.puente) };
 });
@@ -131,7 +131,7 @@ await revisar("un PDF sube (huella → inicio → PUT → completar) y la celda 
   await seleccionar(olga.page, T.uno.id);
   await subir(olga.page, "pdf", F.pdf);
   igual(await faseFinal(olga.page, "pdf", ["listo", "fallido", "incierto"]), "listo", "fase");
-  await textoCelda(olga.page, T.uno.id, "pdf", "1 PDF");
+  await textoCelda(olga.page, T.uno.id, "pdf", "1 archivo");
   const cambios = await olga.page.evaluate(() => window.__arnes.cambios.length);
   cierto(cambios >= 1, "onCambio no se llamó");
   await detalle(olga.page, "pdf").locator(".archivos-item", { hasText: "Avalúo ficticio.pdf" }).waitFor();
@@ -216,7 +216,7 @@ const omar = await sesion("omar");
 paginaActual = omar.page;
 
 await revisar("una segunda sesión autorizada lee los archivos guardados y el contorno real", async () => {
-  await textoCelda(omar.page, T.uno.id, "pdf", "1 PDF");
+  await textoCelda(omar.page, T.uno.id, "pdf", "1 archivo");
   await textoCelda(omar.page, T.uno.id, "kmz", "Contorno activo");
   await omar.page.waitForFunction(() => window.__arnes.cargas.at(-1)?.resultado === "cargado", null, { timeout: 30000 });
   const item = detalle(omar.page, "pdf").locator(".archivos-item", { hasText: "Avalúo ficticio.pdf" });
@@ -335,11 +335,11 @@ await revisar("borrar exige confirmación y es definitivo", async () => {
   const [aid] = await pdfs();
   await d.getByRole("button", { name: /^Borrar/ }).first().click();
   await olga.page.getByRole("dialog").getByRole("button", { name: "Cancelar" }).click();
-  await textoCelda(olga.page, T.uno.id, "pdf", "1 PDF");
+  await textoCelda(olga.page, T.uno.id, "pdf", "1 archivo");
   igual(await pdfs(), [aid], "cancelar conserva el PDF");
   await d.getByRole("button", { name: /^Borrar/ }).first().click();
   await olga.page.getByRole("dialog").getByRole("button", { name: "Borrar definitivamente" }).click();
-  await textoCelda(olga.page, T.uno.id, "pdf", "Sin PDF");
+  await textoCelda(olga.page, T.uno.id, "pdf", "Sin archivos");
   await olga.page.waitForFunction(() => !document.querySelector('[data-detalle="pdf"] .archivos-item'));
   igual(await pdfs(), [], "el PDF sigue en la lista del servidor");
   // Nothing is retained: its versions are gone with it.

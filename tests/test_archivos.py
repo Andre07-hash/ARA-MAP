@@ -27,6 +27,8 @@ from tests.support import TEST_PASSWORD
 URL = os.environ.get("ARA_MAP_TEST_DATABASE_URL")
 FIXTURES = Path(__file__).parent / "fixtures"
 PDF = (FIXTURES / "archivos" / "ficticio.pdf").read_bytes()
+# A fictional JPEG: its signature, a JFIF header, filler and the end marker.
+JPG = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00" + bytes(64) + b"\xff\xd9"
 
 
 class Clock:
@@ -1625,6 +1627,37 @@ class KmlChecks:
         self.assertEqual(again["version"]["numero"], 1)
         self.assertTrue(again["aplicada"])
 
+
+    # -- JPG in the attachments slot ------------------------------------------------
+
+    def test_jpg_goes_in_the_pdf_slot_and_downloads_as_itself(self):
+        for name, data, detected in (("Foto Ñandú.JPG", JPG, archivos.TIPO_JPG),
+                                     ("plano.jpeg", JPG, archivos.TIPO_JPG),
+                                     ("informe.pdf", PDF, "application/pdf")):
+            with self.subTest(name):
+                started = self.upload(data, "pdf", name=name)
+                result = self.complete(started)
+                self.assertEqual(result["version"]["estado"], "disponible")
+                self.assertEqual(result["version"]["tipo_detectado"], detected)
+                got = self.download(started["version_id"])
+                self.assertEqual((bytes(got["contenido"]), got["nombre_original"],
+                                  got["tipo_contenido"], got["tipo"]), (data, name, detected, "pdf"))
+                self.assertEqual(got["formato"], "pdf" if detected == "application/pdf" else "jpg")
+        self.assertEqual({(a["columna_id"], a["tipo"]) for a in self.rows("archivo")},
+                         {("core:archivos", "pdf")})
+        self.assert_terrain_untouched()
+
+    def test_a_name_that_does_not_match_its_bytes_fails_in_the_pdf_slot(self):
+        for name, data, message in (("foto.jpg", PDF, "no es un JPG"),
+                                    ("informe.pdf", JPG, "no es un PDF")):
+            with self.subTest(name):
+                result = self.complete(self.upload(data, "pdf", name=name))
+                self.assertEqual(result["version"]["estado"], "fallido")
+                self.assertEqual(result["version"]["error"]["codigo"], "firma_invalida")
+                self.assertIn(message, result["version"]["error"]["mensaje"])
+
+    def test_jpg_limit_is_the_pdf_limit(self):
+        self.assertEqual(archivos.LIMITES["jpg"], archivos.PDF_MAX)
 
 class AttachmentLifecycleSQLite(LifecycleChecks, KmlChecks, unittest.TestCase):
     def prepare_database(self) -> None:

@@ -1,6 +1,6 @@
 # ARA Map
 
-Portal privado para registrar terrenos, editar su tabla y adjuntar PDF y KMZ o KML.
+Portal privado para registrar terrenos, editar su tabla y adjuntar PDF o JPG y KMZ o KML.
 
 **Sitio vigente:** [ara-map-piloto.onrender.com](https://ara-map-piloto.onrender.com/).
 Este sitio es el proyecto definitivo; se mejora con cambios pequeños aunque su
@@ -26,7 +26,7 @@ No hay registro público ni restablecimiento de contraseña por el propio usuari
 
 1. Inicia sesión con tu cuenta.
 2. Elige una base y captura o edita las filas de terrenos.
-3. Adjunta archivos mediante **Elegir PDF…** y **Elegir KMZ o KML…** en las celdas.
+3. Adjunta archivos mediante **Elegir PDF o JPG…** y **Elegir KMZ o KML…** en las celdas.
 4. Alterna **Tabla / Mapa** para ver los terrenos de la vista y sus filtros.
 5. En el mapa elige **Claro / Satélite / Calles**. El fondo se conserva al
    alternar Tabla / Mapa dentro de la misma tabla, no después de recargar.
@@ -48,7 +48,7 @@ La evidencia local y alojada de las mejoras está en los PR
 
 - **Render Free** ejecuta `python -m server.hosted`.
 - **Neon Postgres** guarda cuentas, accesos, filas, revisiones y metadatos.
-- **Supabase Storage privado** guarda los bytes de PDF y KMZ.
+- **Supabase Storage privado** guarda los bytes de PDF, JPG, KMZ y KML.
 - Los datos y archivos alojados no dependen del disco de Render.
 - La ejecución local usa SQLite y almacenamiento local, separados del sitio.
 

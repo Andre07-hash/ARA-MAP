@@ -5,7 +5,7 @@
  *
  *   cd tests/e2e && node tabla-abrir-pdf.mjs
  *
- * What it checks: "1 PDF" opens that saved PDF in a new tab with the same
+ * What it checks: "1 archivo" opens that saved PDF in a new tab with the same
  * bytes, from the right row; several PDFs open a chooser whose every choice
  * opens the right document, also beyond the summary's five recent ones and
  * across list pages; no PDF, unfinished, expired and rejected uploads are not
@@ -14,7 +14,7 @@
  * a deleted document and a lost session are handled without empty tabs;
  * clicks and keys never open a cell editor nor change the row selection;
  * closing the chooser or leaving the view drops late answers; repeated clicks
- * open one tab; a refused tab offers a link. "Elegir PDF…", uploads, the
+ * open one tab; a refused tab offers a link. "Elegir PDF o JPG…", uploads, the
  * detail's "Abrir" and the KMZ cell keep working.
  * Optional: ABRIR_CAPTURAS=dir (screenshots), CHROMIUM=/path, ABRIR_PUERTO.
  */
@@ -159,7 +159,7 @@ const celda = (page, id, col = 'core:archivos') => page.locator(`tr[data-id="${i
 const resumen = async (page, id, col) => (await celda(page, id, col).locator('.archivos-celda').innerText().catch(() => '')).trim();
 const enlace = (page, id) => celda(page, id).locator('.archivos-celda-abrir');
 const aviso = (page, id) => celda(page, id).locator('.archivos-celda-aviso');
-const selector = (page) => page.getByRole('dialog', { name: 'PDF guardados de este terreno' });
+const selector = (page) => page.getByRole('dialog', { name: 'Archivos guardados de este terreno' });
 const editorAbierto = (page) => page.locator('.tabla-editor, td.is-editando').count();
 const marcada = (page, id) => fila(page, id).locator('input.tabla-marca').isChecked();
 
@@ -268,7 +268,7 @@ await sembrar(T.borrado, 'Borrado uno.pdf');
 
 await revisar('sin PDF, subida sin terminar, vencida y rechazada: texto sin enlace', async () => {
   await irA(ada.page, base.id);
-  const casos = [[T.vacio, 'Sin PDF'], [T.vencida, 'Sin PDF guardado'], [T.rechazada, 'Sin PDF guardado'], [T.curso, 'Sin PDF guardado']];
+  const casos = [[T.vacio, 'Sin archivos'], [T.vencida, 'Sin archivo guardado'], [T.rechazada, 'Sin archivo guardado'], [T.curso, 'Sin archivo guardado']];
   for (const [id, texto] of casos) {
     await hasta(async () => (await resumen(ada.page, id)) === texto, `resumen de ${texto}`);
     igual(await enlace(ada.page, id).count(), 0, `${texto}: no debe ser un enlace`);
@@ -280,7 +280,7 @@ await revisar('sin PDF, subida sin terminar, vencida y rechazada: texto sin enla
 
 await revisar('administrador: «1 PDF» abre ese PDF en una pestaña nueva, con los mismos bytes, desde su fila', async () => {
   await irA(ada.page, base.id);
-  igual(await resumen(ada.page, T.uno), '1 PDF', 'resumen');
+  igual(await resumen(ada.page, T.uno), '1 archivo', 'resumen');
   igual(await enlace(ada.page, T.uno).getAttribute('data-modo'), 'directo', 'modo');
   igual(await enlace(ada.page, T.uno).getAttribute('aria-haspopup'), null, 'sin selector');
   const antes = await marcada(ada.page, T.uno);
@@ -294,7 +294,7 @@ await revisar('administrador: «1 PDF» abre ese PDF en una pestaña nueva, con 
 });
 
 await revisar('un PDF guardado junto a un reemplazo vencido sigue abriéndose; el vencido no', async () => {
-  igual(await resumen(ada.page, T.previo), '1 PDF', 'resumen');
+  igual(await resumen(ada.page, T.previo), '1 archivo', 'resumen');
   const titulo = await celda(ada.page, T.previo).locator('.archivos-celda').getAttribute('title');
   cierto(/subida vencida/i.test(titulo), `nota: ${titulo}`);
   igual(await pestanaDe(ada, () => enlace(ada.page, T.previo).click()), S['Previo guardado.pdf'], 'abre el guardado');
@@ -302,7 +302,7 @@ await revisar('un PDF guardado junto a un reemplazo vencido sigue abriéndose; e
 
 await revisar('varios PDF: el contador abre una lista; cada elección abre el documento correcto', async () => {
   await irA(ada.page, base.id);
-  igual(await resumen(ada.page, T.varios), '3 PDF', 'resumen');
+  igual(await resumen(ada.page, T.varios), '3 archivos', 'resumen');
   const desde = ada.descargas.length;
   await enlace(ada.page, T.varios).click();
   await selector(ada.page).waitFor();
@@ -354,7 +354,7 @@ await revisar('teclado: Enter abre; flechas, Enter y Escape en la lista; nunca u
 
 await revisar('más PDF que el resumen reciente: la lista autorizada, con su paginación', async () => {
   await irA(ada.page, base.id);
-  igual(await resumen(ada.page, T.muchos), '22 adjuntos PDF', 'resumen truncado');
+  igual(await resumen(ada.page, T.muchos), '22 adjuntos', 'resumen truncado');
   await enlace(ada.page, T.muchos).click();
   const sel = selector(ada.page);
   await hasta(async () => (await sel.locator('.archivos-opcion').count()) === 20, 'primera página');
@@ -373,8 +373,8 @@ const olga = await abrirSesion('olga');
 
 await revisar('operador autorizado: abre «1 PDF» y elige entre varios', async () => {
   await irA(olga.page, base.id);
-  await hasta(async () => (await resumen(olga.page, T.uno)) === '1 PDF', 'resumen');
-  igual(await pestanaDe(olga, () => enlace(olga.page, T.uno).click()), S['Uno ficticio.pdf'], '1 PDF');
+  await hasta(async () => (await resumen(olga.page, T.uno)) === '1 archivo', 'resumen');
+  igual(await pestanaDe(olga, () => enlace(olga.page, T.uno).click()), S['Uno ficticio.pdf'], '1 archivo');
   await enlace(olga.page, T.varios).click();
   igual(await pestanaDe(olga, () => selector(olga.page).locator('.archivos-opcion', { hasText: 'Varios B.pdf' }).click()),
     S['Varios B.pdf'], 'varios');
@@ -383,7 +383,7 @@ await revisar('operador autorizado: abre «1 PDF» y elige entre varios', async 
 await revisar('solo consulta: sin «Elegir PDF…», pero la lectura funciona', async () => {
   const lectora = await abrirSesion('olga', { soloLectura: true });
   await irA(lectora.page, base.id);
-  await hasta(async () => (await resumen(lectora.page, T.uno)) === '1 PDF', 'resumen');
+  await hasta(async () => (await resumen(lectora.page, T.uno)) === '1 archivo', 'resumen');
   igual(await celda(lectora.page, T.uno).locator('.archivos-celda-elegir:visible').count(), 0, 'sin botón de subir');
   igual(await pestanaDe(lectora, () => enlace(lectora.page, T.uno).click()), S['Uno ficticio.pdf'], 'abre');
   await enlace(lectora.page, T.varios).click();
@@ -417,7 +417,7 @@ await revisar('una pestaña rechazada por el navegador ofrece un enlace que abre
   await irA(ada.page, base.id);
   await ada.page.evaluate(() => { window.__open = window.open; window.open = () => null; });
   await enlace(ada.page, T.uno).click();
-  const respaldo = aviso(ada.page, T.uno).getByRole('link', { name: 'Abrir el PDF' });
+  const respaldo = aviso(ada.page, T.uno).getByRole('link', { name: 'Abrir el archivo' });
   await respaldo.waitFor();
   cierto(/no permitió abrir una pestaña nueva/.test(await aviso(ada.page, T.uno).innerText()), 'mensaje');
   await foto(ada.page, '04-pestana-bloqueada');
@@ -454,7 +454,7 @@ await revisar('cerrar la lista durante la descarga (Escape, «Cerrar», clic fue
   await irA(ada.page, base.id);
   const formas = {
     Escape: () => ada.page.keyboard.press('Escape'),
-    Cerrar: () => selector(ada.page).getByRole('button', { name: 'Cerrar la lista de PDF' }).click(),
+    Cerrar: () => selector(ada.page).getByRole('button', { name: 'Cerrar la lista de archivos' }).click(),
     fuera: () => ada.page.locator('#tabla-buscar').click(),
   };
   for (const [forma, cerrar] of Object.entries(formas)) {
@@ -491,13 +491,13 @@ async function estadoDeDescarga(page, versionId) {
 
 await revisar('documento borrado (enlace viejo): el servidor real responde 404, la pestaña se cierra, la fila sigue y el resumen se actualiza', async () => {
   await irA(ada.page, base.id);
-  igual(await resumen(ada.page, T.borrado), '1 PDF', 'resumen');
+  igual(await resumen(ada.page, T.borrado), '1 archivo', 'resumen');
   const { archivo, version } = V['Borrado uno.pdf'];
   const rev = (await terreno(ada.page, T.borrado)).archivos.pdf_recientes[0].revision;
   igual((await admin('POST', `/api/archivos/${archivo}/borrar`, { expected_revision: rev })).status, 200, 'borrado en el servidor');
   igual((await admin('GET', `/api/archivos/versiones/${version}/descarga`)).status, 404, 'la versión ya no existe en el servidor');
   // The row still shows the summary drawn before the deletion.
-  igual(await resumen(ada.page, T.borrado), '1 PDF', 'enlace viejo');
+  igual(await resumen(ada.page, T.borrado), '1 archivo', 'enlace viejo');
   const popup = ada.page.waitForEvent('popup');
   const respuesta = estadoDeDescarga(ada.page, version);
   await enlace(ada.page, T.borrado).click();
@@ -505,7 +505,7 @@ await revisar('documento borrado (enlace viejo): el servidor real responde 404, 
   igual(await respuesta, 404, 'respuesta real del servidor');
   await hasta(() => p.isClosed(), 'quedó una pestaña vacía');
   await hasta(async () => /ya no existe/.test(await aviso(ada.page, T.borrado).innerText()), 'sin aviso');
-  await hasta(async () => (await resumen(ada.page, T.borrado)) === 'Sin PDF', 'el resumen no se actualizó');
+  await hasta(async () => (await resumen(ada.page, T.borrado)) === 'Sin archivos', 'el resumen no se actualizó');
   igual(await enlace(ada.page, T.borrado).count(), 0, 'ya no es un enlace');
   igual(await fila(ada.page, T.borrado).count(), 1, 'la fila sigue');
   igual(pestanasAbiertas(ada).length, 0, 'ninguna pestaña');
@@ -521,7 +521,7 @@ await revisar('documento borrado (enlace viejo): el servidor real responde 404, 
   const po = await otra;
   igual(await respuestaB, 404, 'respuesta real del servidor (lista)');
   await hasta(() => po.isClosed(), 'quedó una pestaña vacía (lista)');
-  await hasta(async () => (await resumen(ada.page, T.varios)) === '2 PDF', 'el resumen no se actualizó (lista)');
+  await hasta(async () => (await resumen(ada.page, T.varios)) === '2 archivos', 'el resumen no se actualizó (lista)');
   await hasta(async () => !(await selector(ada.page).locator('.archivos-opcion', { hasText: 'Varios B.pdf' }).count()), 'la lista no se actualizó');
   igual(await selector(ada.page).locator('.archivos-opcion').count(), 2, 'quedan los otros dos');
   await ada.page.keyboard.press('Escape');
@@ -533,7 +533,7 @@ await revisar('terreno borrado: el 404 se comprueba con su lista y la fila sale;
   const id = await crear('Lote Abrir Terreno Borrado Ficticio');
   await sembrar(id, 'Terreno borrado.pdf');
   await irA(ada.page, base.id);
-  await hasta(async () => (await resumen(ada.page, id)) === '1 PDF', 'resumen');
+  await hasta(async () => (await resumen(ada.page, id)) === '1 archivo', 'resumen');
   const t = await terreno(ada.page, id);
   igual((await admin('POST', `/api/inventario/terrenos/${id}/borrar`, { expected_version: t.version })).status, 200, 'borrado');
   const popup = ada.page.waitForEvent('popup');
@@ -579,7 +579,7 @@ await revisar('«Elegir PDF…» sigue igual y convierte «1 PDF» en lista; el 
   const boton = celda(ada.page, T.uno).locator('.archivos-celda-elegir');
   const [chooser] = await Promise.all([ada.page.waitForEvent('filechooser'), boton.click()]);
   await chooser.setFiles({ name: 'Segundo ficticio.pdf', buffer: readFileSync(F.pdf2), mimeType: 'application/pdf' });
-  await hasta(async () => (await resumen(ada.page, T.uno)) === '2 PDF', 'no llegó a 2 PDF', 60000);
+  await hasta(async () => (await resumen(ada.page, T.uno)) === '2 archivos', 'no llegó a 2 PDF', 60000);
   igual(await enlace(ada.page, T.uno).getAttribute('data-modo'), 'lista', 'ahora es lista');
   await enlace(ada.page, T.uno).click();
   igual(await pestanaDe(ada, () => selector(ada.page).locator('.archivos-opcion', { hasText: 'Segundo ficticio.pdf' }).click()),

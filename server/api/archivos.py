@@ -44,7 +44,7 @@ FabricaAlmacen = Callable[[], Almacen]
 
 # Raw upload media types. Multipart or JSON/base64 bodies are refused: the
 # body must be exactly the file's bytes.
-TIPOS_CONTENIDO = {"application/pdf", archivos.TIPO_KMZ, archivos.TIPO_KML,
+TIPOS_CONTENIDO = {"application/pdf", archivos.TIPO_JPG, archivos.TIPO_KMZ, archivos.TIPO_KML,
                    "application/octet-stream"}
 METADATOS_MAX_BYTES = 16 * 1024
 _SIN_CACHE = "private, no-store"
@@ -198,9 +198,9 @@ def disposicion(nombre: str, tipo: str) -> str:
     """
     sin_control = "".join(c for c in nombre if unicodedata.category(c)[0] != "C")
     fallback = _ascii(sin_control)
-    extension = "." + tipo
-    if not fallback.lower().endswith(extension):
-        fallback += extension
+    extensiones = (".jpg", ".jpeg") if tipo == "jpg" else ("." + tipo,)
+    if not fallback.lower().endswith(extensiones):
+        fallback += extensiones[0]
     utf8 = quote(sin_control or fallback, safe="")
     return f"attachment; filename=\"{fallback}\"; filename*=UTF-8''{utf8}"
 

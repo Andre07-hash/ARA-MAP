@@ -34,7 +34,7 @@ import {
 } from "./abrirPdf.js";
 import { ErrorArchivos, LIMITE_PAGINA } from "../../lib/archivos.js";
 
-const ETIQUETA = { pdf: "Archivos PDF", kmz: "KMZ / KML" };
+const ETIQUETA = { pdf: "Archivos PDF o JPG", kmz: "KMZ / KML" };
 
 /* What a cell can say in a few words after the upload; the full message goes in the title. */
 const NOTA_CORTA = {
@@ -42,7 +42,7 @@ const NOTA_CORTA = {
 };
 
 const esAbort = (e) => e?.name === "AbortError";
-const nombreDe = (o) => o.nombre ?? "PDF guardado (versión anterior)";
+const nombreDe = (o) => o.nombre ?? "Archivo guardado (versión anterior)";
 
 export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, onCambio, onError }, ctx) {
   let vivo = true;
@@ -68,9 +68,9 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   const enlace = el("button", { type: "button", class: "archivos-celda-abrir",
     onclick: () => (enlace.dataset.modo === "directo" ? abrirDirecto() : alternarSelector()) });
   const entrada = el("input", { type: "file", class: "archivos-entrada", tabindex: "-1", "aria-hidden": "true",
-    accept: tipo === "pdf" ? ".pdf,application/pdf" : ".kmz,.kml" });
+    accept: tipo === "pdf" ? ".pdf,.jpg,.jpeg,application/pdf,image/jpeg" : ".kmz,.kml" });
   const elegir = el("button", { type: "button", class: "btn btn-quiet btn-small archivos-celda-elegir" },
-    tipo === "pdf" ? "Elegir PDF…" : "Elegir KMZ o KML…");
+    tipo === "pdf" ? "Elegir PDF o JPG…" : "Elegir KMZ o KML…");
   const progreso = el("span", { class: "archivos-celda-subida", role: "status", "aria-live": "polite" });
   const aviso = el("span", { class: "archivos-celda-aviso", role: "status", "aria-live": "polite", hidden: true });
   const raiz = el("span", { class: "archivos-celda-caja", dataset: { tipo } },
@@ -126,8 +126,8 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     // The same button across repaints, so a refreshed summary keeps its focus.
     enlace.dataset.modo = modo;
     enlace.textContent = d.texto;
-    enlace.title = modo === "directo" ? "Abrir el PDF en una pestaña nueva"
-      : "Elegir un PDF para abrirlo en una pestaña nueva";
+    enlace.title = modo === "directo" ? "Abrir el archivo en una pestaña nueva"
+      : "Elegir un archivo para abrirlo en una pestaña nueva";
     enlace.setAttribute("aria-label", `${titulo}. ${enlace.title}`);
     if (modo === "lista") {
       enlace.setAttribute("aria-haspopup", "dialog");
@@ -182,7 +182,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       if (error instanceof ErrorArchivos && error.status === 404) { accesoPerdido(error); return; }
     }
     if (!vivo || fuera) return;
-    avisar("Ese PDF ya no existe; alguien lo borró. La información se actualizó.", { tipoAviso: "error" });
+    avisar("Ese archivo ya no existe; alguien lo borró. La información se actualizó.", { tipoAviso: "error" });
     notificarCambio();
     if (selector) cargarOpciones({ reiniciar: true });
   }
@@ -193,7 +193,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     const pestana = reservarPestana();
     const control = new AbortController();
     marcarAbriendo(control);
-    avisar("Abriendo el PDF…");
+    avisar("Abriendo el archivo…");
     try {
       const r = await abrirPdf({ cliente: ctx.cliente, versionId, pestana, signal: control.signal, urls: ctx.urls });
       if (!vivo || abriendo !== control) return;
@@ -210,7 +210,7 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       if (!vivo || abriendo !== control || esAbort(error)) return;
       // Still this opening's: destroying the cell cancels the check too.
       if (error instanceof ErrorArchivos && error.status === 404) { await revalidar(control.signal); return; }
-      avisar(`No se pudo abrir el PDF: ${error?.message ?? "error"}`, { tipoAviso: "error" });
+      avisar(`No se pudo abrir el archivo: ${error?.message ?? "error"}`, { tipoAviso: "error" });
       if (error instanceof ErrorArchivos && (error.status === 403 || error.status === 401)) notificarCambio();
     } finally {
       if (abriendo === control) marcarAbriendo(null);
@@ -235,10 +235,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     estadoSelector = el("p", { class: "archivos-opciones-estado", role: "status", "aria-live": "polite" });
     masOpciones = el("button", { type: "button", class: "btn btn-quiet btn-small", hidden: true,
       onclick: () => cargarOpciones() }, "Cargar más");
-    selector = el("div", { class: "archivos-selector", role: "dialog", "aria-label": "PDF guardados de este terreno" },
+    selector = el("div", { class: "archivos-selector", role: "dialog", "aria-label": "Archivos guardados de este terreno" },
       el("div", { class: "archivos-selector-cabecera" },
-        el("strong", {}, "PDF guardados"),
-        el("button", { type: "button", class: "btn btn-quiet btn-small", "aria-label": "Cerrar la lista de PDF",
+        el("strong", {}, "Archivos guardados"),
+        el("button", { type: "button", class: "btn btn-quiet btn-small", "aria-label": "Cerrar la lista de archivos",
           onclick: () => cerrarSelector() }, "Cerrar")),
       listaOpciones, estadoSelector, masOpciones);
     selector.addEventListener("keydown", teclaSelector);
@@ -339,10 +339,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     }
     const n = listaOpciones.children.length;
     const partes = [];
-    if (!n && cursorOpciones == null) partes.push("Este terreno no tiene un PDF guardado que se pueda abrir.");
+    if (!n && cursorOpciones == null) partes.push("Este terreno no tiene un archivo guardado que se pueda abrir.");
     if (ocultasOpciones) {
-      partes.push(ocultasOpciones === 1 ? "1 adjunto sin PDF guardado no se muestra."
-        : `${ocultasOpciones} adjuntos sin PDF guardado no se muestran.`);
+      partes.push(ocultasOpciones === 1 ? "1 adjunto sin archivo guardado no se muestra."
+        : `${ocultasOpciones} adjuntos sin archivo guardado no se muestran.`);
     }
     estadoSelector.dataset.tipo = "info";
     estadoSelector.textContent = partes.join(" ");

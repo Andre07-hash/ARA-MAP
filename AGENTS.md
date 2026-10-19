@@ -151,7 +151,9 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   La identidad de un terreno es nombre + estado + municipio + superficie.
 - En Tabla / Mapa, un terreno con contorno activo puede aparecer sin X/Y;
   con X/Y válidas y sin contorno aparece como punto. Sin ambos no se dibuja.
-- Los terrenos existen primero como filas; después se adjuntan PDF y KMZ o KML.
+- Los terrenos existen primero como filas; después se adjuntan PDF o JPG y KMZ o
+  KML. PDF y JPG comparten la ranura `core:archivos` (tipo `pdf`), con la misma
+  regla de `tipo_detectado` que KMZ y KML.
   Un KMZ o KML con un contorno válido se activa al completar; con varios
   candidatos se elige y activa en el detalle; uno inválido conserva el contorno
   anterior. KMZ y KML comparten la ranura `core:kmz` (tipo `kmz`); el formato

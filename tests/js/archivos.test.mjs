@@ -184,6 +184,16 @@ test("client: a KML is chosen, staged and downloaded as a KML in the boundary ki
     assert.equal(A.validarArchivoLocal({ name: nombre, size: 10 }, "kmz"), null, nombre);
   }
   assert.equal(A.validarArchivoLocal({ name: "lote.kml", size: 10 }, "pdf").codigo, "tipo_no_permitido");
+  // The attachments kind takes JPG photos too, by name; the server checks the bytes.
+  for (const nombre of ["foto.jpg", "FOTO.JPEG", "plano.jpeg"]) {
+    assert.equal(A.validarArchivoLocal({ name: nombre, size: 10 }, "pdf"), null, nombre);
+    assert.equal(A.formatoDe(nombre, "pdf"), "jpg", nombre);
+  }
+  assert.equal(A.formatoDe("informe.pdf", "pdf"), "pdf");
+  assert.equal(A.validarArchivoLocal({ name: "foto.png", size: 10 }, "pdf").codigo, "tipo_no_permitido");
+  assert.equal(A.validarArchivoLocal({ name: "foto.jpg", size: 25 * MiB + 1 }, "pdf").codigo, "archivo_grande");
+  assert.equal(A.formatoDeTipoContenido("image/jpeg", "pdf"), "jpg");
+  assert.equal(A.formatoDeTipoContenido("application/pdf", "pdf"), "pdf");
   for (const nombre of ["lote.kml.txt", "lote.xml", "lote"]) {
     const e = A.validarArchivoLocal({ name: nombre, size: 10 }, "kmz");
     assert.equal(e.codigo, "tipo_no_permitido", nombre);
@@ -477,7 +487,7 @@ const fila = (extra = {}, ultima = null) => ({ id: randomUUID(), tipo: "pdf", re
 test("summary: undefined is loading, not zero; zero is said as such", () => {
   assert.equal(R.describirResumen(undefined, "pdf").estado, R.ESTADO.CARGANDO);
   assert.equal(R.describirResumen(undefined, "kmz").texto, "…");
-  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "pdf").texto, "Sin PDF");
+  assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "pdf").texto, "Sin archivos");
   assert.equal(R.describirResumen({ pdf_total: 0, pdf_recientes: [], kmz: null }, "kmz").texto, "Sin KMZ / KML");
   assert.equal(R.describirResumen({ pdf_recientes: [] }, "pdf").estado, R.ESTADO.CARGANDO);   // no count: not zero
 });
@@ -489,7 +499,7 @@ test("summary: another account's pending upload stays generic; own states are na
   const vid = randomUUID();
   const lista = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({ version_actual_id: vid },
     { id: vid, numero: 1, estado: "disponible", nombre_original: "a.pdf" })], kmz: null }, "pdf");
-  assert.deepEqual([lista.estado, lista.texto, lista.nota], [R.ESTADO.LISTO, "1 PDF", null]);
+  assert.deepEqual([lista.estado, lista.texto, lista.nota], [R.ESTADO.LISTO, "1 archivo", null]);
   const fallida = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({}, { id: vid, estado: "fallido" })], kmz: null }, "pdf");
   assert.equal(fallida.estado, R.ESTADO.FALLIDO);
 });
@@ -501,19 +511,19 @@ test("summary: a PDF counts only with a saved version; unfinished uploads say wh
   const enCurso = fila({}, { id: randomUUID(), estado: "subiendo", propia: true });
   // One saved, three expired and one still within its deadline (the diagnosed base, fictional).
   const mezcla = R.describirResumen({ pdf_total: 5, pdf_recientes: [guardado, vencida(), vencida(), vencida(), enCurso] }, "pdf");
-  assert.deepEqual([mezcla.texto, mezcla.estado], ["1 PDF", R.ESTADO.PENDIENTE]);
+  assert.deepEqual([mezcla.texto, mezcla.estado], ["1 archivo", R.ESTADO.PENDIENTE]);
   assert.equal(mezcla.nota, "3 subidas vencidas · 1 subida sin terminar");
-  // Never finished and nothing saved: not "1 PDF", and "vencida" is the upload's deadline.
+  // Never finished and nothing saved: not "1 archivo", and "vencida" is the upload's deadline.
   const sola = R.describirResumen({ pdf_total: 1, pdf_recientes: [vencida()] }, "pdf");
-  assert.deepEqual([sola.texto, sola.estado], ["Sin PDF guardado", R.ESTADO.FALLIDO]);
+  assert.deepEqual([sola.texto, sola.estado], ["Sin archivo guardado", R.ESTADO.FALLIDO]);
   assert.match(sola.nota, /subida vencida/i);
   assert.doesNotMatch(`${sola.texto} ${sola.nota}`, /PDF vencido/);
   const rechazada = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({}, { id: randomUUID(), estado: "fallido" })] }, "pdf");
-  assert.deepEqual([rechazada.texto, rechazada.nota], ["Sin PDF guardado", "La última subida fue rechazada"]);
+  assert.deepEqual([rechazada.texto, rechazada.nota], ["Sin archivo guardado", "La última subida fue rechazada"]);
   // A saved PDF whose new attempt failed is still a saved PDF.
   const conPrevio = R.describirResumen({ pdf_total: 1, pdf_recientes: [fila({ version_actual_id: vid },
     { id: randomUUID(), numero: 2, estado: "expirado", propia: true })] }, "pdf");
-  assert.deepEqual([conPrevio.texto, conPrevio.estado], ["1 PDF", R.ESTADO.LISTO]);
+  assert.deepEqual([conPrevio.texto, conPrevio.estado], ["1 archivo", R.ESTADO.LISTO]);
   assert.match(conPrevio.nota, /subida vencida/i);
 });
 
@@ -522,7 +532,7 @@ test("summary: a truncated PDF list is never totalled as saved PDFs (#39)", () =
   const filas = [fila({ version_actual_id: vid }, { id: vid, estado: "disponible" }),
     ...[1, 2, 3, 4].map(() => fila({}, { id: randomUUID(), estado: "expirado", propia: true }))];
   const r = R.describirResumen({ pdf_total: 6, pdf_recientes: filas }, "pdf");
-  assert.equal(r.texto, "6 adjuntos PDF");
+  assert.equal(r.texto, "6 adjuntos");
   assert.equal(r.nota, "Se resumen los 5 más recientes · 4 subidas vencidas");
   assert.doesNotMatch(r.texto, /^\d+ PDF$/);
 });
@@ -572,6 +582,8 @@ test("summary: KMZ keeps the active boundary while a replacement is pending or f
 test("summary: download names lose separators and control characters", () => {
   assert.equal(R.nombreSeguro("../../etc/passwd", "pdf"), ".._.._etc_passwd.pdf");
   assert.equal(R.nombreSeguro("Avalúo\r\n\"final\".PDF", "pdf"), "Avalúo_final_.PDF");
+  assert.equal(R.nombreSeguro("Foto.JPEG", "jpg"), "Foto.JPEG");
+  assert.equal(R.nombreSeguro("foto", "jpg"), "foto.jpg");
   assert.equal(R.nombreSeguro("", "kmz"), "archivo.kmz");
   assert.equal(R.tamanoLegible(1536), "1.5 KB");
   assert.equal(R.tamanoLegible(undefined), "");

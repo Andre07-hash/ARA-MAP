@@ -1623,7 +1623,7 @@ export function createTabla({
       } else if (e.key === "Tab") {
         e.preventDefault();
         confirmar();
-        mover(id, colId, e.shiftKey ? -1 : 1, 0) || enfocar(id, colId);
+        mover(id, colId, e.shiftKey ? -1 : 1, 0, { saltar: true }) || enfocar(id, colId);
       }
       return;
     }
@@ -1641,8 +1641,11 @@ export function createTabla({
     }
   }
 
-  /** Move the focus by cells; sideways moves wrap to the next or previous row. */
-  function mover(id, colId, dx, dy) {
+  /**
+   * Move the focus by cells. Sideways the arrows stop at the row's first and
+   * last cell; only Tab (`saltar`) wraps to the next or previous row.
+   */
+  function mover(id, colId, dx, dy, { saltar = false } = {}) {
     const celdasDeFila = (tr) => [...tr.querySelectorAll("td[tabindex]")];
     let tr = tbody.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
     if (!tr) return false;
@@ -1658,6 +1661,7 @@ export function createTabla({
     }
     i += dx;
     if (i < 0 || i >= lista.length) {
+      if (!saltar) return false;
       tr = dx > 0 ? tr.nextElementSibling : tr.previousElementSibling;
       if (!tr) return false;
       lista = celdasDeFila(tr);

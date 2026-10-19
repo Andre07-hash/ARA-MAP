@@ -359,6 +359,15 @@ await caso('while editing, Enter saves and goes down; typing, the arrows save an
   if (dy === 'ArrowDown') assert.equal(await enfocada(), `${cerca}|core:superficie_m2`, 'Enter goes down');
   const t = await terreno(page, otro);
   assert.deepEqual([t.draft.terreno, t.draft.estado, t.draft.superficie_m2], ['Lote Flechas Dos', 'Jalisco', 500]);
+  // Sideways the arrows stop at the row's ends; they never wrap to another row.
+  const extremos = await page.locator(`tr[data-id="${otro}"] td[tabindex]`)
+    .evaluateAll((tds) => [tds[0].dataset.col, tds.at(-1).dataset.col]);
+  await celda(page, otro, extremos[0]).focus();
+  await page.keyboard.press('ArrowLeft');
+  assert.equal(await enfocada(), `${otro}|${extremos[0]}`, 'first cell: ArrowLeft stays');
+  await celda(page, otro, extremos[1]).focus();
+  await page.keyboard.press('ArrowRight');
+  assert.equal(await enfocada(), `${otro}|${extremos[1]}`, 'last cell: ArrowRight stays');
   // Opened with F2 or a double click, the arrows move the caret, as in a spreadsheet.
   await celda(page, otro, 'core:estado').focus();
   await page.keyboard.press('F2');

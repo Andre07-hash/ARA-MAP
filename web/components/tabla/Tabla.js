@@ -969,6 +969,31 @@ export function createTabla({
     return recargar();
   }
 
+  /**
+   * Run a background reload of this same page and put the grid back where
+   * the person has it. The reload empties the rows while the answer is on its
+   * way, so the browser clamps the grid's scroll (to the top, and to an empty
+   * table's width) and drops the focus: an upload that finishes meanwhile
+   * looked like a jump to the start. Taken just before the rows go and given
+   * back once the fresh page is painted, only if the view, query and page are
+   * still the same and the focus was not put elsewhere in between.
+   */
+  async function enSuSitio(recarga) {
+    const donde = `${vista}|${JSON.stringify(consulta)}|${cursor}`;
+    const { scrollTop: top, scrollLeft: left } = lienzo;
+    const activo = tbody.contains(document.activeElement) ? document.activeElement : null;
+    const celdaActiva = activo && foco ? { ...foco } : null;
+    await recarga();
+    if (!vivo || modo !== "tabla" || donde !== `${vista}|${JSON.stringify(consulta)}|${cursor}`) return;
+    lienzo.scrollTop = top;
+    lienzo.scrollLeft = left;
+    const libre = !document.activeElement || document.activeElement === document.body;
+    if (!activo || !libre) return;
+    // The same node when it survived (a busy file cell is put back as it was), else its cell.
+    const destino = activo.isConnected ? activo : celdaActiva && celdaDom(celdaActiva.id, celdaActiva.colId);
+    destino?.focus({ preventScroll: true });
+  }
+
   /** Whether a row, as it is now, still belongs in this view's list. */
   function fueraDeLaVista(fila) {
     return vista === VISTA_SIN_ASIGNAR ? Boolean(fila.base_id) : !esGlobal(vista) && fila.base_id !== vista;
@@ -1826,7 +1851,7 @@ export function createTabla({
     revalidar() {
       if (!vivo || !vista || sucio() || editando || document.querySelector("dialog[open]")) return;
       if (modo === "mapa") actualizarMapa();
-      else actualizarTabla();
+      else enSuSitio(actualizarTabla);
     },
     get modo() { return modo; },
     mostrarComo,

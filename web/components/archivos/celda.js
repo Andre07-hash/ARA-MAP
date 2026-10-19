@@ -522,7 +522,15 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
       },
       onError: (error) => {
         if (error instanceof ErrorArchivos && (error.status === 404 || error.status === 403)) accesoPerdido(error);
-        else if (error?.codigo === "revision_conflictiva") notificarCambio();
+        else if (error?.codigo === "revision_conflictiva") {
+          // The list holds the old revision: close it; reopening reads the fresh one.
+          cerrarContornos();
+          if (subida && !enCurso()) { ctx.subidas.quitar(subida); subida = null; }
+          avisar("El archivo cambió mientras elegías (otra persona lo actualizó). Revisa y vuelve a elegir.",
+            { tipoAviso: "error" });
+          notificarCambio();
+          pintar();
+        }
       },
     });
     eleccion = { versionId, selector };

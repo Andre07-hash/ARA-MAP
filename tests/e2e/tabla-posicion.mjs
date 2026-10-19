@@ -211,7 +211,7 @@ await revisar('administrador: un PDF elegido lejos del inicio, con foco al volve
   const [selector] = await Promise.all([ada.page.waitForEvent('filechooser'), elegirEn(ada.page, id, COL.pdf).click()]);
   await enfocar(ada);                                          // the picker closing gives the window focus first
   await selector.setFiles({ name: 'Avalúo ficticio.pdf', buffer: readFileSync(F.pdf), mimeType: 'application/pdf' });
-  await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === '1 PDF', 'la celda no llegó a 1 PDF', 90000);
+  await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === '1 archivo', 'la celda no llegó a 1 archivo', 90000);
   await ada.page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
   await esperar(500);
   mismaPosicion(antes, await posicion(ada.page), 'al terminar el PDF');
@@ -256,7 +256,7 @@ await revisar('administrador: sin revalidación, terminar la subida (refrescarAr
   const listasAntes = listas(ada);
   const [selector] = await Promise.all([ada.page.waitForEvent('filechooser'), elegirEn(ada.page, id, COL.pdf).click()]);
   await selector.setFiles({ name: 'Escritura ficticia.pdf', buffer: readFileSync(F.pdf2), mimeType: 'application/pdf' });
-  await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === '1 PDF', 'la celda no llegó a 1 PDF', 90000);
+  await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === '1 archivo', 'la celda no llegó a 1 archivo', 90000);
   await esperar(500);
   mismaPosicion(antes, await posicion(ada.page), 'al terminar sin revalidación');
   igual(listas(ada), listasAntes, 'terminar una subida no recarga la página de la tabla');

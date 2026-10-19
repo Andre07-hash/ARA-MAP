@@ -232,10 +232,11 @@ await revisar('operador: PDF en una celda vacía (A) y en una con archivos (B), 
   igual([(await terreno(olga.page, A)).archivos.pdf_total, (await terreno(olga.page, B)).archivos.pdf_total], [1, 4], 'servidor');
 });
 
-await revisar('operador: KMZ con varios contornos en B no activa nada; se elige y activa en el detalle', async () => {
+await revisar('operador: KMZ con varios contornos en B no activa nada; también se elige y activa en el detalle', async () => {
   await elegir(olga.page, B, 'kmz', F.kmz_varios);
   igual(await faseFinal(olga.page, B, 'kmz', ['listo', 'requiere_seleccion', 'rechazado', 'fallido', 'interrumpido']), 'requiere_seleccion', 'fase');
-  cierto(/Varios contornos: elige en el detalle/.test(await celda(olga.page, B, COL.kmz).innerText()), 'indicación');
+  cierto(/Varios contornos: elige cuál es el del terreno/.test(await celda(olga.page, B, COL.kmz).innerText()), 'indicación');
+  await celda(olga.page, B, COL.kmz).locator('.archivos-celda-contornos input[type=checkbox]').first().waitFor();
   await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'KMZ sin contorno activo', 'resumen');
   igual((await terreno(olga.page, B)).ubicacion.modo, 'ninguna', 'no se activa solo');
   igual((await terreno(olga.page, A)).ubicacion.geometria?.id, geometriaA, 'A no cambia');
@@ -258,6 +259,9 @@ await revisar('operador: KMZ con varios contornos en B no activa nada; se elige 
   await d.getByRole('button', { name: 'Cerrar' }).last().click();
   await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'Contorno activo', 'la celda no llegó a activo');
   igual((await terreno(olga.page, B)).ubicacion.modo, 'geometria', 'activado');
+  // Activated from the detail: the cell's own list is no longer offered.
+  await hasta(async () => (await celda(olga.page, B, COL.kmz).locator('.archivos-celda-contornos').count()) === 0,
+    'la lista de la celda sigue abierta');
 });
 
 await revisar('cancelar el selector no envía nada ni cambia el resumen', async () => {

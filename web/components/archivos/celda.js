@@ -7,9 +7,11 @@
  * once the server has the upload it tells the host (onCambio), which hands
  * back the fresh summary through update().
  *
- * What the cell does not do is everything after the upload: choosing among a
- * KMZ's contours, activating one, versions, history and retirement stay in
- * the detail. Choosing a file here activates nothing the detail would not.
+ * When a KMZ/KML holds several contours, the cell lists them right away and
+ * activates the one chosen (elegirContorno.js); a file uploaded earlier gets
+ * the same list from "Elegir contorno…". Versions, history and retirement
+ * stay in the detail. Choosing a file here activates nothing the detail
+ * would not.
  *
  * Reading (issue #48). A PDF cell whose summary names saved PDFs turns its
  * count into a link: "1 PDF" opens that saved version in a new tab; a larger
@@ -27,7 +29,8 @@
 
 import { el } from "../../lib/dom.js";
 import { crearSubida, FASE, esTerminal } from "./subida.js";
-import { describirResumen, pdfsDelResumen, opcionPdf } from "./resumen.js";
+import { describirResumen, ESTADO, pdfsDelResumen, opcionPdf } from "./resumen.js";
+import { candidatosDe, intentoPorElegir, montarSelectorContornos } from "./elegirContorno.js";
 import { EN_PROGRESO, FASE_TEXTO } from "./detalle.js";
 import {
   abrirPdf, enlaceDeRespaldo, MENSAJE_BLOQUEADO, MENSAJE_CERRADA, reservarPestana, VIDA_URL_MS,
@@ -38,7 +41,7 @@ const ETIQUETA = { pdf: "Archivos PDF o JPG", kmz: "KMZ / KML" };
 
 /* What a cell can say in a few words after the upload; the full message goes in the title. */
 const NOTA_CORTA = {
-  [FASE.REQUIERE_SELECCION]: "Varios contornos: elige en el detalle (⋯). Nada se activó.",
+  [FASE.REQUIERE_SELECCION]: "Varios contornos: elige cuál es el del terreno.",
 };
 
 const esAbort = (e) => e?.name === "AbortError";
@@ -63,6 +66,10 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
   let cursorOpciones = null;
   let ocultasOpciones = 0;
   let avisoTimer = null;
+  // KMZ: the contour chooser shown in the cell ({versionId, selector}) and a
+  // request for an earlier upload's candidates in flight.
+  let eleccion = null;
+  let buscandoContornos = null;
 
   const texto = el("span", { class: "archivos-celda", dataset: { tipo } });
   const enlace = el("button", { type: "button", class: "archivos-celda-abrir",
@@ -73,8 +80,11 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     tipo === "pdf" ? "Elegir PDF o JPG…" : "Elegir KMZ o KML…");
   const progreso = el("span", { class: "archivos-celda-subida", role: "status", "aria-live": "polite" });
   const aviso = el("span", { class: "archivos-celda-aviso", role: "status", "aria-live": "polite", hidden: true });
+  const elegirContorno = el("button", { type: "button", class: "btn btn-quiet btn-small archivos-celda-elegir-contorno",
+    hidden: true, onclick: () => buscarContornos() }, "Elegir contorno…");
+  const contornos = el("span", { class: "archivos-celda-contornos-caja" });
   const raiz = el("span", { class: "archivos-celda-caja", dataset: { tipo } },
-    el("span", { class: "archivos-celda-linea" }, texto, elegir), entrada, progreso, aviso);
+    el("span", { class: "archivos-celda-linea" }, texto, elegir), entrada, progreso, elegirContorno, contornos, aviso);
   container.replaceChildren(raiz);
 
   // A cell edits on double click and on Enter, F2 or a typed key; the row
@@ -450,6 +460,95 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     elegir.hidden = sinEscritura;
     elegir.disabled = sinEscritura || enCurso();
     pintarSubida();
+    pintarContornos();
+  }
+
+  /* ------------------------------------------------ contour choice (KMZ) */
+
+  /** The latest version of the summary's boundary file, when it waits for a contour. */
+  function versionSinActivar() {
+    const k = ultimoResumen?.kmz;
+    const v = k?.ultima_version;
+    if (tipo !== "kmz" || !k || k.geometria_activa_id || v?.estado !== "disponible") return null;
+    return describirResumen(ultimoResumen, tipo).estado === ESTADO.SIN_ACTIVAR ? { archivo: k, version: v } : null;
+  }
+
+  function pintarContornos() {
+    if (tipo !== "kmz") return;
+    const sinEscritura = solo || fuera;
+    let e = subida?.estado();
+    const porElegir = e?.fase === FASE.REQUIERE_SELECCION;
+    // Activated elsewhere (the detail, another tab): this version needs no choice any more.
+    const k = ultimoResumen?.kmz;
+    const versionId = eleccion?.versionId ?? (porElegir ? e.versionId : null);
+    if (sinEscritura || (versionId && k?.geometria_activa_id && k?.ultima_version?.id === versionId)) {
+      cerrarContornos();
+      if (porElegir) { ctx.subidas.quitar(subida); subida = null; e = null; pintarSubida(); }
+    } else if (porElegir && !eleccion && e.resultado?.archivo && candidatosDe(e.resultado.intento).length > 1) {
+      abrirContornos({ versionId: e.versionId, archivo: e.resultado.archivo, candidatos: candidatosDe(e.resultado.intento) });
+    }
+    elegirContorno.hidden = sinEscritura || Boolean(eleccion) || enCurso() || !versionSinActivar()
+      || e?.fase === FASE.REQUIERE_SELECCION;
+    elegirContorno.disabled = Boolean(buscandoContornos);
+  }
+
+  function abrirContornos({ versionId, archivo, candidatos }) {
+    cerrarContornos();
+    const selector = montarSelectorContornos({
+      cliente: ctx.cliente, versionId, archivoId: archivo.id, revision: archivo.revision, candidatos,
+      onListo: () => {
+        cerrarContornos();
+        if (subida && !enCurso()) { ctx.subidas.quitar(subida); subida = null; }
+        avisar("Contorno activado.");
+        avisoTimer = setTimeout(() => { if (vivo) avisar(""); }, 5000);
+        notificarCambio();
+        pintar();
+        elegir.focus();
+      },
+      onCerrar: () => {
+        cerrarContornos();
+        if (subida && !enCurso()) { ctx.subidas.quitar(subida); subida = null; }
+        pintar();
+        (elegirContorno.hidden ? elegir : elegirContorno).focus();
+      },
+    });
+    eleccion = { versionId, selector };
+    contornos.replaceChildren(selector.element);
+  }
+
+  function cerrarContornos() {
+    eleccion?.selector.destroy();
+    eleccion = null;
+    contornos.replaceChildren();
+  }
+
+  /** "Elegir contorno…" for a file uploaded earlier: its latest attempt's candidates. */
+  async function buscarContornos() {
+    const pendiente = versionSinActivar();
+    if (!pendiente || buscandoContornos || !vivo) return;
+    const control = new AbortController();
+    buscandoContornos = control;
+    pintarContornos();
+    avisar("Cargando los contornos…");
+    try {
+      const intento = await intentoPorElegir(ctx.cliente, pendiente.version.id, { signal: control.signal });
+      if (!vivo || buscandoContornos !== control) return;
+      const candidatos = candidatosDe(intento);
+      if (candidatos.length < 2) {
+        avisar("Este archivo no tiene varios contornos para elegir. Abre el detalle (⋯) para ver por qué no se activó.",
+          { tipoAviso: "error" });
+        return;
+      }
+      avisar("");
+      abrirContornos({ versionId: pendiente.version.id, archivo: pendiente.archivo, candidatos });
+    } catch (error) {
+      if (!vivo || esAbort(error)) return;
+      if (error instanceof ErrorArchivos && (error.status === 404 || error.status === 403)) accesoPerdido(error);
+      else avisar(`No se pudieron cargar los contornos: ${error?.message ?? "error"}`, { tipoAviso: "error" });
+    } finally {
+      if (buscandoContornos === control) buscandoContornos = null;
+      if (vivo) pintarContornos();
+    }
   }
 
   function empezar(archivo) {
@@ -497,13 +596,16 @@ export function montarCelda({ container, terrenoId, tipo, soloLectura, resumen, 
     },
     /** Whether destroying this cell now would drop an unfinished upload, or
      * the PDF chooser or an opening the person is waiting for. */
-    ocupado: () => vivo && (enCurso() || eligiendo || Boolean(abriendo) || Boolean(selector)),
+    ocupado: () => vivo && (enCurso() || eligiendo || Boolean(abriendo) || Boolean(selector)
+      || Boolean(eleccion) || Boolean(buscandoContornos)),
     /** Whether that upload is being read, sent or verified right now. */
     activo: () => vivo && Boolean(subida) && EN_PROGRESO.has(subida.estado().fase),
     destroy() {
       if (!vivo) return;
       detenerLectura();
       clearTimeout(avisoTimer);
+      buscandoContornos?.abort();
+      cerrarContornos();
       vivo = false;
       if (subida) { subida.abortar(); ctx.subidas.quitar(subida); }
       subida = null;

@@ -285,32 +285,33 @@ await revisar('administrador: el detalle descarga el KML original con su nombre 
 
 const olga = await abrir('olga');
 
-await revisar('operador: un KML con varios contornos espera la elección y activación en el detalle', async () => {
+await revisar('operador: un KML con varios contornos se elige y activa en la misma celda', async () => {
   await irA(olga.page, base.id);
   await elegir(olga.page, B, 'kmz', F.kml_varios);
   igual(await faseFinal(olga.page, B), 'requiere_seleccion', 'fase');
-  cierto(/Varios contornos: elige en el detalle/.test(await celda(olga.page, B, COL.kmz).innerText()), 'indicación');
+  cierto(/Varios contornos: elige cuál es el del terreno/.test(await celda(olga.page, B, COL.kmz).innerText()), 'indicación');
   cierto(/El KML tiene varios contornos/.test(await textoSubida(olga.page, B)), 'mensaje KML');
+  // The list is right there in the cell; nothing is active until "Listo".
+  const lista = celda(olga.page, B, COL.kmz).locator('.archivos-celda-contornos');
+  const casillas = lista.locator('input[type=checkbox]:not([disabled])');
+  await casillas.first().waitFor();
+  cierto((await casillas.count()) >= 2, 'candidatos en la celda');
+  cierto(/m²/.test(await lista.innerText()), 'cada contorno dice su área');
   await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'KML sin contorno activo', 'resumen');
   igual((await terreno(olga.page, B)).ubicacion.modo, 'ninguna', 'no se activa solo');
-  await fila(olga.page, B).getByRole('button', { name: /Abrir terreno/ }).click();
-  const d = olga.page.getByRole('dialog', { name: 'Lote KML Dos Ficticio' });
-  const k = d.locator('.archivos-detalle[data-tipo="kmz"]');
-  await k.locator('.archivos-item').first().getByRole('button', { name: 'Versiones' }).click();
-  await k.getByRole('button', { name: /Contornos de la versión 1/ }).click();
-  await k.getByRole('button', { name: 'Elegir contornos…' }).click();
-  const casillas = k.locator('.archivos-candidatos input[type=checkbox]:not([disabled])');
+  await foto(olga.page, '02-operador-kml-elegir-en-celda');
+  // After a reload the same list is one click away: "Elegir contorno…".
+  await olga.page.reload();
+  olga.ultimoFoco = Date.now();            // a fresh page starts its own focus throttle (see enfocar)
+  await olga.page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
+  await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'KML sin contorno activo', 'resumen tras recargar');
+  await celda(olga.page, B, COL.kmz).getByRole('button', { name: 'Elegir contorno…' }).click();
   await casillas.first().waitFor();
-  cierto((await casillas.count()) >= 2, 'candidatos');
   await casillas.first().check();
-  await k.getByRole('button', { name: 'Procesar selección' }).click();
-  await k.locator('.archivos-mensaje', { hasText: 'Todavía no está activa' }).waitFor({ timeout: 60000 });
-  igual((await terreno(olga.page, B)).ubicacion.modo, 'ninguna', 'procesar no activa');
-  await k.locator('.archivos-intento', { hasText: 'Contorno válido' }).getByRole('button', { name: 'Activar este contorno' }).click();
+  await lista.getByRole('button', { name: 'Listo' }).click();
   await hasta(async () => (await terreno(olga.page, B)).ubicacion.modo === 'geometria', 'no se activó');
-  await foto(olga.page, '02-operador-kml-detalle');
-  await d.getByRole('button', { name: 'Cerrar' }).last().click();
   await hasta(async () => (await resumen(olga.page, B, COL.kmz)) === 'Contorno activo', 'la celda no llegó a activo');
+  igual(await lista.count(), 0, 'la lista se cierra');
   igual(await geometriaDe(olga.page, A), geometriaA, 'A no cambia');
 });
 

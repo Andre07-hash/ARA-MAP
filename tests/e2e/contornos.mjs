@@ -300,7 +300,7 @@ for (const [caso, alterar] of [
     await page.mouse.move(r.p.x, r.p.y);
     await page.waitForTimeout(300);
     const aviso = await h(() => document.querySelector('.leaflet-tooltip.mark-tooltip')?.textContent ?? '');
-    assert.match(aviso, /Contorno no disponible/);
+    assert.match(aviso, /No se pudo mostrar el contorno/);
     await foto(`09-inconsistente-${caso.split(' ')[0]}`);
     await page.mouse.move(5, 5);
     // Nothing is drawn where the inconsistent coordinates actually are.

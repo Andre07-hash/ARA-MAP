@@ -164,9 +164,63 @@ export function createTabla({
   const filtro = (id, campo) => el("select", {
     id, class: "input", onchange: (e) => consultar({ [campo]: e.target.value }),
   });
+  /**
+   * A filter that takes several values: a native disclosure with one checkbox
+   * per value, shown like the other selects. `pintar` lists the values in
+   * view plus the chosen ones; `valor` keeps the checks; `disabled` locks it.
+   */
+  function filtroVarios(id, campo, nombre) {
+    const resumen = el("summary", { class: "input tabla-varios-resumen" }, "Todos");
+    const panel = el("div", { class: "tabla-varios-panel", role: "group", "aria-label": nombre });
+    const element = el("details", { id, class: "tabla-varios" }, resumen, panel);
+    let elegidos = [];
+    const escribirResumen = () => {
+      resumen.textContent = elegidos.length ? elegidos.join(", ") : "Todos";
+      resumen.setAttribute("aria-label", `${nombre}: ${resumen.textContent}`);
+    };
+    panel.addEventListener("change", () => {
+      elegidos = [...panel.querySelectorAll("input:checked")].map((x) => x.value);
+      escribirResumen();
+      consultar({ [campo]: elegidos });
+    });
+    element.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && element.open) { e.stopPropagation(); element.open = false; resumen.focus(); }
+    });
+    element.addEventListener("focusout", (e) => { if (!element.contains(e.relatedTarget)) element.open = false; });
+    resumen.addEventListener("click", (e) => { if (element.dataset.bloqueado) e.preventDefault(); });
+    return {
+      element, id,
+      pintar(valores, actual) {
+        elegidos = [...actual];
+        const lista = [...new Set([...(valores ?? []), ...elegidos])];
+        const actuales = [...panel.querySelectorAll("input")].map((c) => c.value);
+        if (actuales.length && actuales.join("\u0000") === lista.join("\u0000")) {
+          // Same types: only the checks change, so focus and the open panel stay put.
+          this.valor = elegidos;
+          return;
+        }
+        const enfocado = panel.contains(document.activeElement) ? document.activeElement.value : null;
+        panel.replaceChildren(...(lista.length ? lista.map((v, i) => el("label", { class: "check" },
+          el("input", { type: "checkbox", id: `${id}-${i}`, value: v, checked: elegidos.includes(v) }), v))
+          : [el("span", { class: "secondary" }, "Sin tipos en esta vista")]));
+        if (enfocado != null) [...panel.querySelectorAll("input")].find((c) => c.value === enfocado)?.focus();
+        escribirResumen();
+      },
+      set valor(actual) {
+        elegidos = [...actual];
+        for (const c of panel.querySelectorAll("input")) c.checked = elegidos.includes(c.value);
+        escribirResumen();
+      },
+      set disabled(v) {
+        if (v) { element.dataset.bloqueado = "1"; element.open = false; } else delete element.dataset.bloqueado;
+        resumen.setAttribute("aria-disabled", String(Boolean(v)));
+      },
+      replaceChildren() { panel.replaceChildren(); },
+    };
+  }
   const selEstado = filtro("tabla-estado", "estado");
   const selMunicipio = filtro("tabla-municipio", "municipio");
-  const selTipo = filtro("tabla-tipo", "tipo_terreno");
+  const selTipo = filtroVarios("tabla-tipo", "tipo_terreno", "Tipo de terreno");
   const selOrden = el("select", { id: "tabla-orden", class: "input", onchange: () => ordenar() },
     ORDENES.map(([valor, etiqueta]) => el("option", { value: valor }, etiqueta)));
   const chkDesc = el("input", { id: "tabla-desc", type: "checkbox", onchange: () => ordenar() });
@@ -198,7 +252,8 @@ export function createTabla({
     campoDe(buscar, "Buscar"),
     campoDe(selEstado, "Estado"),
     campoDe(selMunicipio, "Municipio"),
-    campoDe(selTipo, "Tipo"),
+    el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Tipo"),
+      selTipo.element),
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
   ];
@@ -470,9 +525,10 @@ export function createTabla({
     selOrden.value = consulta.sort.replace(/^-/, "");
     chkDesc.checked = consulta.sort.startsWith("-");
     selLimite.value = String(consulta.limit);
-    for (const [control, campo] of [[selEstado, "estado"], [selMunicipio, "municipio"], [selTipo, "tipo_terreno"]]) {
+    for (const [control, campo] of [[selEstado, "estado"], [selMunicipio, "municipio"]]) {
       control.value = consulta[campo];
     }
+    selTipo.valor = consulta.tipo_terreno;
   }
 
   async function cargar() {
@@ -579,7 +635,7 @@ export function createTabla({
     pintarMarco();
     facetas(selEstado, pagina.facets.estados, consulta.estado, "Todos");
     facetas(selMunicipio, pagina.facets.municipios, consulta.municipio, "Todos");
-    facetas(selTipo, pagina.facets.tipos, consulta.tipo_terreno, "Todos");
+    selTipo.pintar(pagina.facets.tipos, consulta.tipo_terreno);
 
     thead.replaceChildren(el("tr", {},
       el("th", { scope: "col", class: "tabla-th tabla-th-fila" }, casillaDePagina(),
@@ -838,7 +894,7 @@ export function createTabla({
       consulta.q.trim() && ["Búsqueda", `«${consulta.q.trim()}»`],
       consulta.estado && ["Estado", consulta.estado],
       consulta.municipio && ["Municipio", consulta.municipio],
-      consulta.tipo_terreno && ["Tipo de terreno", consulta.tipo_terreno],
+      consulta.tipo_terreno.length > 0 && ["Tipo de terreno", consulta.tipo_terreno.join(", ")],
     ].filter(Boolean);
   }
 
@@ -1007,7 +1063,7 @@ export function createTabla({
    * table's: such a write drops the set, and it is gathered again when the
    * map is shown. Without those, only the base decides. */
   const filtraPorCampos = () =>
-    Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno);
+    Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno.length);
   function descartarConjunto() {
     olvidarConjunto();
     pintarMapa();

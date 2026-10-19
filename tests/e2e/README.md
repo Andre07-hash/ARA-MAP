@@ -131,6 +131,22 @@ cd tests/e2e && npm ci
 node tabla-elegir.mjs                       # ELEGIR_CAPTURAS=carpeta para capturas
 ```
 
+## Posición de la tabla al terminar una subida
+
+45 filas en una ventana de 1100 × 650 px, con desplazamiento real en las dos
+direcciones. Mide en píxeles el lienzo de la tabla y la página. Comprueba que
+no se mueven al terminar un PDF elegido lejos del inicio con el foco que vuelve
+del selector, que un KML retenido mientras la persona se desplaza termina en su
+posición nueva, que una subida sin revalidación no recarga la página y que un
+KMZ subido desde el detalle (operador) no mueve nada al cerrarlo, con el foco
+de vuelta en la fila y las flechas funcionando. Levanta y borra su propio
+servidor desechable.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-posicion.mjs                     # POSICION_CAPTURAS=carpeta para capturas
+```
+
 ## KMZ y KML en la misma columna
 
 KML directo en la columna «KMZ / KML», en tabla y detalle: contorno único

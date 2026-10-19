@@ -79,6 +79,8 @@ def escribir_fixtures(carpeta: Path) -> dict[str, str]:
         "kmz_reemplazo": ("Forma U ficticia.kmz", kmz_de((KML / "forma_u.kml").read_bytes())),
         "kmz_invalido": ("Sin contorno.kmz", kmz_de((KML / "documento_vacio.kml").read_bytes())),
         "kmz_limite": ("Límite ficticio.kmz", kmz_de(kml_limite())),
+        "jpg": ("Foto ficticia.jpg",
+                b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00" + bytes(64) + b"\xff\xd9"),
         "no_pdf": ("notas.txt", b"no es un pdf"),
     }
     rutas = {}

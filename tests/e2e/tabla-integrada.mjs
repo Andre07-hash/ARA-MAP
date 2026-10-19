@@ -238,7 +238,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
   // The file columns show Team B's compact cells with the real summary: no
   // files yet, said as such (not a placeholder, not a zero), and, on a row she
   // may change, one "Elegir…" button that picks a file for this row.
-  for (const [col, texto, boton] of [['core:archivos', 'Sin PDF', 'Elegir PDF…'], ['core:kmz', 'Sin KMZ / KML', 'Elegir KMZ o KML…']]) {
+  for (const [col, texto, boton] of [['core:archivos', 'Sin archivos', 'Elegir PDF o JPG…'], ['core:kmz', 'Sin KMZ / KML', 'Elegir KMZ o KML…']]) {
     assert.equal((await celda(page, lote, col).locator('.archivos-celda').innerText()).trim(), texto);
     assert.deepEqual(await celda(page, lote, col).locator('button:visible, a').allInnerTexts(), [boton]);
   }

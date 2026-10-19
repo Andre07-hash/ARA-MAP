@@ -1,4 +1,4 @@
-/* "Elegir PDF…" / "Elegir KMZ…" in the table's file cells, with the REAL
+/* "Elegir PDF o JPG…" / "Elegir KMZ…" in the table's file cells, with the REAL
  * widgets (web/components/archivos/celda.js), the real local server
  * (tests/e2e/tabla_servidor.py on a folder it creates and deletes), real
  * sessions and Chromium. Fictional accounts and files only.
@@ -127,7 +127,8 @@ async function elegir(page, id, tipo, ruta, { teclado = null } = {}) {
   ]);
   if (ruta) {
     await selector.setFiles({ name: ruta.split('/').at(-1), buffer: readFileSync(ruta),
-      mimeType: ruta.endsWith('.pdf') ? 'application/pdf' : 'application/vnd.google-earth.kmz' });
+      mimeType: ruta.endsWith('.pdf') ? 'application/pdf' : ruta.endsWith('.jpg') ? 'image/jpeg'
+        : 'application/vnd.google-earth.kmz' });
   } else {
     await selector.setFiles([]);
   }
@@ -165,9 +166,9 @@ const C = await crear(base, 'Lote Celda Borrado Ficticio');
 await revisar('administrador: celdas vacías muestran su resumen y los dos botones', async () => {
   await irA(ada.page, base.id);
   for (const id of [A, B]) {
-    await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === 'Sin PDF', 'resumen PDF');
+    await hasta(async () => (await resumen(ada.page, id, COL.pdf)) === 'Sin archivos', 'resumen PDF');
     igual(await resumen(ada.page, id, COL.kmz), 'Sin KMZ / KML', 'resumen KMZ');
-    igual(await elegirEn(ada.page, id, COL.pdf).innerText(), 'Elegir PDF…', 'botón PDF');
+    igual(await elegirEn(ada.page, id, COL.pdf).innerText(), 'Elegir PDF o JPG…', 'botón PDF');
     igual(await elegirEn(ada.page, id, COL.kmz).innerText(), 'Elegir KMZ o KML…', 'botón KMZ');
     igual(await botonesVisibles(ada.page, id), 2, 'dos botones visibles');
   }
@@ -176,16 +177,23 @@ await revisar('administrador: celdas vacías muestran su resumen y los dos boton
 await revisar('administrador: un PDF elegido en la fila B queda en B, no en A', async () => {
   await elegir(ada.page, B, 'pdf', F.pdf);
   igual(await faseFinal(ada.page, B, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'fase');
-  await hasta(async () => (await resumen(ada.page, B, COL.pdf)) === '1 PDF', 'B no llegó a 1 PDF');
-  igual(await resumen(ada.page, A, COL.pdf), 'Sin PDF', 'A no cambia');
+  await hasta(async () => (await resumen(ada.page, B, COL.pdf)) === '1 archivo', 'B no llegó a 1 PDF');
+  igual(await resumen(ada.page, A, COL.pdf), 'Sin archivos', 'A no cambia');
   igual([(await terreno(ada.page, A)).archivos.pdf_total, (await terreno(ada.page, B)).archivos.pdf_total], [0, 1], 'servidor');
 });
 
 await revisar('administrador: otro PDF en una celda que ya tiene archivos', async () => {
   await elegir(ada.page, B, 'pdf', F.pdf2);
   igual(await faseFinal(ada.page, B, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'fase');
-  await hasta(async () => (await resumen(ada.page, B, COL.pdf)) === '2 PDF', 'B no llegó a 2 PDF');
+  await hasta(async () => (await resumen(ada.page, B, COL.pdf)) === '2 archivos', 'B no llegó a 2 PDF');
   igual((await terreno(ada.page, A)).archivos.pdf_total, 0, 'A sigue sin PDF');
+});
+
+await revisar('administrador: una foto JPG entra en la misma celda de archivos', async () => {
+  await elegir(ada.page, B, 'pdf', F.jpg);
+  igual(await faseFinal(ada.page, B, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'fase');
+  await hasta(async () => (await resumen(ada.page, B, COL.pdf)) === '3 archivos', 'B no llegó a 3 archivos');
+  igual((await terreno(ada.page, B)).archivos.pdf_total, 3, 'servidor');
 });
 
 let geometriaA = null;
@@ -213,15 +221,15 @@ const olga = await abrir('olga');
 
 await revisar('operador: PDF en una celda vacía (A) y en una con archivos (B), cada uno en su fila', async () => {
   await irA(olga.page, base.id);
-  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === 'Sin PDF', 'resumen');
+  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === 'Sin archivos', 'resumen');
   igual(await botonesVisibles(olga.page, A), 2, 'botones');
   await elegir(olga.page, A, 'pdf', F.pdf2);
   igual(await faseFinal(olga.page, A, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'fase A');
-  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === '1 PDF', 'A no llegó a 1 PDF');
+  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === '1 archivo', 'A no llegó a 1 PDF');
   await elegir(olga.page, B, 'pdf', F.pdf);
   igual(await faseFinal(olga.page, B, 'pdf', ['listo', 'fallido', 'interrumpido', 'incierto']), 'listo', 'fase B');
-  await hasta(async () => (await resumen(olga.page, B, COL.pdf)) === '3 PDF', 'B no llegó a 3 PDF');
-  igual([(await terreno(olga.page, A)).archivos.pdf_total, (await terreno(olga.page, B)).archivos.pdf_total], [1, 3], 'servidor');
+  await hasta(async () => (await resumen(olga.page, B, COL.pdf)) === '4 archivos', 'B no llegó a 4 archivos');
+  igual([(await terreno(olga.page, A)).archivos.pdf_total, (await terreno(olga.page, B)).archivos.pdf_total], [1, 4], 'servidor');
 });
 
 await revisar('operador: KMZ con varios contornos en B no activa nada; se elige y activa en el detalle', async () => {
@@ -260,7 +268,7 @@ await revisar('cancelar el selector no envía nada ni cambia el resumen', async 
   await elegir(olga.page, A, 'kmz', null);
   await esperar(500);
   igual(olga.escrituras.slice(antes), [], 'escrituras');
-  igual([await resumen(olga.page, A, COL.pdf), await resumen(olga.page, A, COL.kmz)], ['1 PDF', 'Contorno activo'], 'resúmenes');
+  igual([await resumen(olga.page, A, COL.pdf), await resumen(olga.page, A, COL.kmz)], ['1 archivo', 'Contorno activo'], 'resúmenes');
   igual(await estado(), estadoAntes, 'el estado de la última subida no cambia');
 });
 

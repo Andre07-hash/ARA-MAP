@@ -349,7 +349,7 @@ await revisar('regresión: un PDF sigue abriéndose desde su contador', async ()
   const boton = elegirEn(olga.page, A, COL.pdf);
   const [selector] = await Promise.all([olga.page.waitForEvent('filechooser'), boton.click()]);
   await selector.setFiles({ name: 'Avalúo ficticio.pdf', buffer: readFileSync(F.pdf), mimeType: 'application/pdf' });
-  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === '1 PDF', 'la celda no dice 1 PDF', 90000);
+  await hasta(async () => (await resumen(olga.page, A, COL.pdf)) === '1 archivo', 'la celda no dice 1 PDF', 90000);
   const [popup] = await Promise.all([olga.page.waitForEvent('popup'),
     celda(olga.page, A, COL.pdf).locator('.archivos-celda-abrir').click()]);
   await hasta(() => popup.url().startsWith('blob:'), `la pestaña no recibió el PDF (${popup.url()})`);

@@ -493,6 +493,22 @@ class HTTPChecks:
         s, _, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga", "omar")
         self.assertEqual((s, json.loads(cuerpo)["detalle"]["code"]), (404, "not_found"))
 
+    def test_jpg_over_http_keeps_its_bytes_name_and_type(self):
+        contenido = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00" + bytes(32) + b"\xff\xd9"
+        nombre = "Foto Ñandú.jpeg"
+        s, inicio = self.iniciar(contenido, "pdf", nombre=nombre)
+        self.assertEqual(s, 200, inicio)
+        s, r = self.subir(inicio["version_id"], contenido, tipo_contenido=archivos.TIPO_JPG)
+        self.assertEqual(s, 200, r)
+        s, r = self.completar(inicio["version_id"])
+        self.assertEqual((s, r["version"]["tipo_detectado"]), (200, archivos.TIPO_JPG))
+        s, h, cuerpo = self.bajar(f"/api/archivos/versiones/{inicio['version_id']}/descarga")
+        self.assertEqual((s, cuerpo, h["Content-Type"]), (200, contenido, archivos.TIPO_JPG))
+        self.assertEqual(h["Content-Disposition"],
+                         "attachment; filename=\"Foto Nandu.jpeg\"; filename*=UTF-8''"
+                         + quote(nombre, safe=""))
+        self.assertEqual(h["Content-Security-Policy"], "default-src 'none'; sandbox")
+
     def test_kml_limit_through_the_api(self):
         cero = hashlib.sha256(b"").hexdigest()
         s, ok = self.iniciar(b"", "kmz", nombre="limite.kml", tamano=archivos.KML_MAX, sha=cero)

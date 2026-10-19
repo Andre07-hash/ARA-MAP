@@ -64,7 +64,7 @@ test("summary: one saved PDF is certain; several, none or a truncated list are s
   const r1 = R.pdfsDelResumen({ pdf_total: 2, pdf_recientes: [pendiente, uno] });
   assert.equal(r1.completo, true);
   assert.deepEqual(r1.opciones.map((o) => o.versionId), [uno.version_actual_id], "the saved one, not the newest row");
-  assert.equal(R.describirResumen({ pdf_total: 2, pdf_recientes: [pendiente, uno] }, "pdf").texto, "1 PDF");
+  assert.equal(R.describirResumen({ pdf_total: 2, pdf_recientes: [pendiente, uno] }, "pdf").texto, "1 archivo");
 
   const varios = [guardado("a.pdf"), guardado("b.pdf"), guardado("c.pdf")];
   const r3 = R.pdfsDelResumen({ pdf_total: 3, pdf_recientes: varios });

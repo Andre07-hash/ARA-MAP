@@ -67,8 +67,8 @@ export function reservarPestana() {
   vigilarSalida();
   try {
     pestana.opener = null;
-    pestana.document.title = "Abriendo PDF…";
-    pestana.document.body.textContent = "Abriendo el PDF…";
+    pestana.document.title = "Abriendo archivo…";
+    pestana.document.body.textContent = "Abriendo el archivo…";
   } catch { /* the tab is still usable without the wait text */ }
   return pestana;
 }
@@ -94,7 +94,7 @@ export async function abrirPdf({ cliente, versionId, pestana, signal, urls }) {
     cerrarPestana(pestana);
     throw error;
   }
-  const url = urls.agregar(URL.createObjectURL(new Blob([r.bytes], { type: "application/pdf" })));
+  const url = urls.agregar(URL.createObjectURL(new Blob([r.bytes], { type: r.tipoContenido || "application/pdf" })));
   enEspera.delete(pestana);
   if (pestana && !pestana.closed) {
     try {
@@ -108,9 +108,9 @@ export async function abrirPdf({ cliente, versionId, pestana, signal, urls }) {
 }
 
 /** The link offered when the tab was refused: a plain new-tab link, valid while its URL lives. */
-export function enlaceDeRespaldo(url, texto = "Abrir el PDF") {
+export function enlaceDeRespaldo(url, texto = "Abrir el archivo") {
   return el("a", { href: url, target: "_blank", rel: "noopener noreferrer", class: "archivos-respaldo" }, texto);
 }
 
 export const MENSAJE_BLOQUEADO = "El navegador no permitió abrir una pestaña nueva.";
-export const MENSAJE_CERRADA = "La pestaña se cerró antes de recibir el PDF.";
+export const MENSAJE_CERRADA = "La pestaña se cerró antes de recibir el archivo.";

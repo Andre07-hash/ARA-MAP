@@ -66,7 +66,7 @@ function describirPdf(resumen) {
   const total = Number.isInteger(resumen.pdf_total) ? resumen.pdf_total : null;
   const filas = Array.isArray(resumen.pdf_recientes) ? resumen.pdf_recientes : [];
   if (total === null) return { estado: ESTADO.CARGANDO, texto: "…", nota: "Cargando la información de archivos" };
-  if (total === 0) return { estado: ESTADO.VACIO, texto: "Sin PDF", nota: null };
+  if (total === 0) return { estado: ESTADO.VACIO, texto: "Sin archivos", nota: null };
   const completo = filas.length >= total;
   const guardados = filas.filter((f) => f.version_actual_id);
   const pendientes = filas.filter((f) => !f.version_actual_id);
@@ -81,9 +81,9 @@ function describirPdf(resumen) {
   const estado = enCurso ? ESTADO.PENDIENTE : guardados.length ? ESTADO.LISTO : fallo ? ESTADO.FALLIDO
     : ESTADO.VACIO;
   let texto;
-  if (!completo) texto = `${total} adjuntos PDF`;
-  else if (guardados.length) texto = guardados.length === 1 ? "1 PDF" : `${guardados.length} PDF`;
-  else texto = "Sin PDF guardado";
+  if (!completo) texto = `${total} adjuntos`;
+  else if (guardados.length) texto = guardados.length === 1 ? "1 archivo" : `${guardados.length} archivos`;
+  else texto = "Sin archivo guardado";
   const unica = notas.length ? notas.join(" · ") : null;
   // The single-attachment wording the cell has always used, when it fits.
   if (completo && filas.length === 1 && !guardados.length && ultima) {
@@ -164,5 +164,6 @@ export function tamanoLegible(bytes) {
 export function nombreSeguro(nombre, tipo) {
   const limpio = String(nombre ?? "").replace(/[\u0000-\u001f\u007f/\\:*?"<>|]+/g, "_").trim().slice(0, 200);
   const base = limpio || "archivo";
-  return new RegExp(`\\.${tipo}$`, "i").test(base) ? base : `${base}.${tipo}`;
+  const extension = tipo === "jpg" ? "jpe?g" : tipo;
+  return new RegExp(`\\.${extension}$`, "i").test(base) ? base : `${base}.${tipo}`;
 }

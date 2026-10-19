@@ -51,7 +51,10 @@ _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 # (reprocess, download) tipo_detectado decides. Older versions are all KMZ.
 TIPO_KMZ = "application/vnd.google-earth.kmz"
 TIPO_KML = "application/vnd.google-earth.kml+xml"
-LIMITES = {"pdf": PDF_MAX, "kmz": KMZ_MAX, "kml": KML_MAX}
+# The attachments slot (tipo 'pdf', column core:archivos) holds PDF and JPG
+# versions by the same rule: name first, then the verified bytes.
+TIPO_JPG = "image/jpeg"
+LIMITES = {"pdf": PDF_MAX, "jpg": PDF_MAX, "kmz": KMZ_MAX, "kml": KML_MAX}
 _BOM = (b"\xef\xbb\xbf", b"\xff\xfe", b"\xfe\xff")
 # Leading XML whitespace, in UTF-8 or (with its zero bytes) UTF-16.
 _LEADING_SPACE = re.compile(rb"[ \t\r\n\x00]*")
@@ -250,9 +253,11 @@ def _kind(value: object) -> str:
 
 
 def _format(kind: str, name: str, detected: object = None) -> str:
-    """'pdf', 'kmz' or 'kml': the format one version is checked and read as."""
+    """'pdf', 'jpg', 'kmz' or 'kml': the format one version is checked and read as."""
     if kind == "pdf":
-        return "pdf"
+        if detected:
+            return "jpg" if detected == TIPO_JPG else "pdf"
+        return "jpg" if name.lower().endswith((".jpg", ".jpeg")) else "pdf"
     if detected:
         return "kml" if detected == TIPO_KML else "kmz"
     return "kml" if name.lower().endswith(".kml") else "kmz"
@@ -421,16 +426,16 @@ def _looks_like_xml(body: bytes) -> bool:
 
 def _verify_final(almacen: Almacen, final_key: str, maximum: int,
                   kind: str) -> tuple[int, str, str, bytes | None]:
-    """Read the final object once; `kind` is the format ('pdf', 'kmz', 'kml')."""
+    """Read the final object once; `kind` is the format ('pdf', 'jpg', 'kmz', 'kml')."""
     digest = hashlib.sha256()
     total = 0
     prefix = bytearray()
-    body = bytearray() if kind != "pdf" else None
+    body = bytearray() if kind in ("kmz", "kml") else None
     with almacen.leer(final_key, maximum) as reading:
         for chunk in reading:
             total += len(chunk)
             digest.update(chunk)
-            if len(prefix) < 8:          # the PDF and ZIP signatures
+            if len(prefix) < 8:          # the PDF, JPEG and ZIP signatures
                 prefix.extend(chunk[:8 - len(prefix)])
             if body is not None:
                 body.extend(chunk)
@@ -440,6 +445,10 @@ def _verify_final(almacen: Almacen, final_key: str, maximum: int,
         if not head.startswith(b"%PDF-"):
             raise _error("firma_invalida", "El contenido no es un PDF válido.")
         detected = "application/pdf"
+    elif kind == "jpg":
+        if not head.startswith(b"\xff\xd8\xff"):
+            raise _error("firma_invalida", "El contenido no es un JPG válido.")
+        detected = TIPO_JPG
     elif kind == "kml":
         # The name says KML: a package or a non-XML body is a mismatch, not a KML.
         if es_paquete(head):

@@ -112,8 +112,9 @@ export function montarAsistente({ terreno }) {
     aviso.replaceChildren(
       "Al consultar, el servidor envía a Claude (Anthropic) tu pregunta y sólo estos campos registrados: ",
       CAMPOS_ENVIADOS.join(", "),
-      ". No se envían el nombre, la ubicación, contactos, notas ni archivos. Evita escribir información " +
-      "sensible en la pregunta. Cada consulta es independiente: no se reenvían las anteriores.",
+      ". No se envían el nombre, la dirección exacta ni las coordenadas, ni contactos, notas o archivos. " +
+      "Evita escribir información sensible en la pregunta. Cada consulta es independiente: no se reenvían " +
+      "las anteriores.",
     );
     pregunta.maxLength = ajustes.max_pregunta;
     pregunta.value = "";

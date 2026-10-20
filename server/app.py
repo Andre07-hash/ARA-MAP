@@ -23,6 +23,7 @@ from urllib.parse import unquote, urlparse, urlsplit
 from . import almacen, auth, db, postgres
 from .api import archivos as api_archivos
 from .api import asistente as api_asistente
+from .api import asistente_terreno as api_asistente_terreno
 from .api import bases as api_bases
 from .api import carpetas as api_carpetas
 from .api import columnas as api_columnas
@@ -117,6 +118,11 @@ router.add("GET", "/api/carpetas", api_carpetas.listing, "derivados.ver")
 router.add("POST", "/api/carpetas", api_carpetas.create, "derivados.gestionar")
 router.add("PATCH", "/api/carpetas/:id", api_carpetas.rename, "derivados.gestionar")
 router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove, "derivados.gestionar")
+# The terrain assistant: read-only questions about one terrain, administrators
+# only. Each consultation also checks the terrain (auth.require_terreno).
+router.add("GET", "/api/asistente-terreno/config", api_asistente_terreno.config, "maestra.global")
+router.add("POST", "/api/asistente-terreno/:id/consultar", api_asistente_terreno.consultar,
+           "maestra.global")
 # Terrain attachments (server/api/archivos.py owns the table): all private,
 # each with its capability, the literal segments ahead of the :aid patterns.
 for _metodo, _ruta, _handler, _capacidad in api_archivos.RUTAS:

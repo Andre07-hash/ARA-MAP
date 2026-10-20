@@ -193,11 +193,17 @@ Levanta y borra su propio servidor desechable con datos ficticios.
 
 Por omisión, el propio script responde en el navegador las dos rutas del
 asistente con respuestas ficticias del contrato; esas respuestas sólo existen
-aquí. Con `ASISTENTE_CONECTADO=1` no intercepta nada y omite las comprobaciones
-que necesitan respuestas guionizadas (el servidor debe tener el asistente
-encendido con su proveedor de prueba).
+aquí. Con `ASISTENTE_CONECTADO=1` no intercepta nada, omite las comprobaciones
+que necesitan respuestas guionizadas y levanta `asistente_servidor.py`: el
+servidor real con el asistente encendido, variables `ARA_MAP_CHAT_*` ficticias
+y el adaptador real de Anthropic con un transporte ficticio que nunca se
+conecta. Ese transporte guarda lo que recibió, y la prueba comprueba que no
+contiene el nombre, el id ni la base del terreno. Sin clave, sin red y sin
+gasto: **no es una prueba de Claude real**.
 
 ```bash
 cd tests/e2e && npm ci
-node tabla-asistente.mjs                    # ASISTENTE_CAPTURAS=carpeta para capturas
+node tabla-asistente.mjs                            # respuestas simuladas en el navegador
+ASISTENTE_CONECTADO=1 node tabla-asistente.mjs      # servidor real + proveedor ficticio
+# ASISTENTE_CAPTURAS=carpeta para capturas
 ```

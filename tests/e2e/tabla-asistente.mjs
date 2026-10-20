@@ -9,10 +9,11 @@
  * script with fictional answers that follow the contract of #65, so the
  * interface can be checked without the server half or any provider. Those
  * answers exist only here. With ASISTENTE_CONECTADO=1 nothing is intercepted
- * and the checks that need a scripted answer are skipped: the server must
- * have the assistant on, with its own test provider. ASISTENTE_REGISTRO names
- * a file where that provider writes what it was sent, to check that the
- * terrain's name, id and base never leave the server.
+ * and the checks that need a scripted answer are skipped: the script starts
+ * asistente_servidor.py instead, the real server with the assistant on and a
+ * fictional provider that never connects. That provider writes what it was
+ * sent to a file (ASISTENTE_REGISTRO, or one in the temporary folder), to
+ * check that the terrain's name, id and base never leave the server.
  *
  * Checks: who sees the entry point (operator, administrator with it off, on
  * but unconfigured, on); the three actions and a question, sending one query
@@ -49,7 +50,12 @@ const F = JSON.parse(execFileSync(PY, ['-c',
   'd = Path(sys.argv[1]); d.mkdir()\nprint(json.dumps(escribir_fixtures(d)))', join(CARPETA, 'fixtures')],
   { cwd: RAIZ, encoding: 'utf8' }));
 
-const servidor = spawn(PY, [join(AQUI, 'tabla_servidor.py'), '--puerto', String(PUERTO), '--carpeta', join(CARPETA, 'instalacion')],
+// Connected: the real server with the assistant on and its fictional provider
+// (asistente_servidor.py), which records what it was sent.
+const REGISTRO = CONECTADO ? (process.env.ASISTENTE_REGISTRO ?? join(CARPETA, 'enviado.jsonl')) : null;
+const servidor = spawn(PY, CONECTADO
+  ? [join(AQUI, 'asistente_servidor.py'), '--puerto', String(PUERTO), '--carpeta', join(CARPETA, 'instalacion'), '--registro', REGISTRO]
+  : [join(AQUI, 'tabla_servidor.py'), '--puerto', String(PUERTO), '--carpeta', join(CARPETA, 'instalacion')],
   { cwd: RAIZ, stdio: ['ignore', 'pipe', 'ignore'] });
 await new Promise((resolve, reject) => {
   let texto = '';
@@ -274,6 +280,7 @@ await revisar('administrador: el panel muestra el terreno, el aviso de datos y t
   const texto = await panel.innerText();
   cierto(/Lote Asistente \d+ Ficticio · versión \d+/.test(texto), `sin contexto: ${texto}`);
   cierto(/Claude/.test(texto) && /Evita escribir información sensible/.test(texto), 'sin aviso de datos enviados');
+  cierto(/dirección exacta ni las coordenadas/.test(texto) && !/ubicación/.test(texto), 'el aviso no precisa qué parte de la ubicación no se envía');
   cierto(/Precio total/.test(texto) && /No se envían el nombre/.test(texto), 'sin lista de campos enviados');
   igual(await ada.page.evaluate(() => document.activeElement?.textContent), 'Asistente IA', 'foco en el título del panel');
   igual(await d.getByRole('button', { name: 'Asistente IA' }).getAttribute('aria-expanded'), 'true', 'aria-expanded');
@@ -415,8 +422,8 @@ await revisar('conectado: las cuatro acciones pasan por el servidor y muestran s
   await respuestas(panel).last().getByText(/Campos consultados/).click();
   cierto(/Estado Ficticio/.test(await respuestas(panel).last().innerText()), 'el servidor no usó el estado registrado');
   igual(await panel.locator('b').count(), 0, 'HTML del proveedor interpretado');
-  if (process.env.ASISTENTE_REGISTRO) {
-    const enviado = readFileSync(process.env.ASISTENTE_REGISTRO, 'utf8');
+  {
+    const enviado = readFileSync(REGISTRO, 'utf8');
     cierto(enviado.includes('Estado Ficticio') && enviado.includes('¿Qué superficie tiene registrada?'), 'lo enviado no tiene los campos');
     cierto(!enviado.includes(nombre) && !enviado.includes(id) && !enviado.includes(base.id), 'nombre, id o base enviados al proveedor');
   }

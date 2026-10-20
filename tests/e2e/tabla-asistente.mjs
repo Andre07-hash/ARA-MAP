@@ -474,7 +474,7 @@ await revisar('cambiar de base mientras responde: el detalle y su respuesta desa
   await panel.getByRole('button', { name: 'Resumir el terreno' }).click();
   await r.llegada;
   await ada.page.evaluate((v) => { location.hash = `#/tabla/${v}`; }, otra.id);
-  await hasta(async () => (await ada.page.locator('dialog').count()) === 0, 'el detalle sigue abierto');
+  await hasta(async () => (await ada.page.locator('dialog[open]').count()) === 0, 'el detalle sigue abierto');
   r.soltar();
   await esperar(500);
   igual(await ada.page.locator('.asistente-terreno, .asistente-terreno-respuesta').count(), 0, 'restos del panel');

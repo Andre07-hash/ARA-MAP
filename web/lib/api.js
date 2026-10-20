@@ -270,13 +270,37 @@ export async function exportXlsx({ base_id, mapa_id, ids, nombre }) {
     throw new Error(payload.error || "No se pudo exportar.");
   }
 
-  const blob = await response.blob();
+  guardar(await response.blob(), nombre);
+}
+
+/** Download the .xlsx a GET route builds (the table's export), letting the browser save it. */
+export async function descargarXlsx(path, nombre) {
+  const response = await fetch(`${BASE}${path}`, { signal: privado.signal });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error || "No se pudo exportar.");
+  }
+  guardar(await response.blob(), nombre);
+}
+
+function guardar(blob, nombre) {
   const url = URL.createObjectURL(blob);
   const link = Object.assign(document.createElement("a"), {
-    href: url, download: `${nombre || "terrenos"}.xlsx`,
+    href: url, download: `${(nombre || "terrenos").replace(/[\\/:*?"<>|]/g, "-")}.xlsx`,
   });
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+/** A spreadsheet into a work base: `simular` only reports what loading it would do. */
+export function importarEnBase(baseId, file, { simular }) {
+  if (file.size > maxUploadBytes) {
+    return Promise.reject(new Error(`El archivo supera el límite de ${maxUploadBytes / 1024 / 1024} MB.`));
+  }
+  return request(`/maestra/bases/${encodeURIComponent(baseId)}/importar${simular ? "?simular=1" : ""}`, {
+    method: "POST", raw: true, body: file,
+    headers: { "Content-Type": "application/octet-stream", "X-Archivo": encodeURIComponent(file.name) },
+  });
 }

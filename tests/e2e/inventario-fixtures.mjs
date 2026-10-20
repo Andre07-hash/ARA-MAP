@@ -18,6 +18,14 @@ import { chromium } from 'playwright-core';
 
 import { fixture, paginate, publicTerrains } from '../js/fixtures/inventario/index.mjs';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const WEB = fileURLToPath(new URL('../../web/', import.meta.url));
 const SHOTS = process.argv[2] ?? null;
 const SENTINELA = 'SENTINELA-PRIVADO-7731';
@@ -388,7 +396,7 @@ await caso('leaving a dirty editor asks first; cancelling keeps the input', asyn
   await entrar(page);
   await page.goto(`${BASE}/#/inventario/${id}/editar`);
   await page.getByLabel('Nombre').fill('Cambio sin guardar');
-  await page.getByRole('link', { name: 'Bases' }).click();
+  await page.evaluate(() => { location.hash = '#/bases'; });
   await page.getByRole('dialog', { name: '¿Descartar cambios?' }).waitFor();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await page.waitForURL(new RegExp(`#/inventario/${id}/editar$`));
@@ -423,7 +431,7 @@ await caso('logout cancels pending private loads, clears private DOM, and Back s
   await page.locator('.filtros-btn').evaluate(() => {});      // no-op; keep desktop rail
   await page.getByLabel('Buscar').fill('Rancho');             // starts a slow private query
   await page.waitForTimeout(400);
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.waitForURL(/#\/catalogo$/);
   await page.waitForTimeout(1800);                            // the slow response lands now
   for (const contenido of [await texto(page), await html(page)]) {

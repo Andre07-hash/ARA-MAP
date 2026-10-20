@@ -87,7 +87,6 @@ export function createSession({ onSignedIn, onSignedOut, hasUnsavedWork }) {
         entro = true;
         dialogoAbierto?.close();
         setState({ sesion: respuesta.user, sesionLista: true });
-        toast(`Hola, ${respuesta.user.display_name}.`);
         onSignedIn(respuesta.user, { returnTo, startup: false });
       } catch (e) {
         error.textContent = e.status === 429

@@ -25,6 +25,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -205,7 +213,7 @@ async function cerrarDetalle(page, d, { interrumpir = false } = {}) {
   // A closed <dialog> leaves the accessibility tree at once, but its `close`
   // event (which removes it and hands focus back to the table) is a later
   // task. Wait for that, or the focus return lands on whatever comes next.
-  await hasta(async () => (await page.locator('dialog').count()) === 0, 'el diálogo no terminó de cerrarse');
+  await hasta(async () => (await page.locator('dialog:not(#tabla-filtros)').count()) === 0, 'el diálogo no terminó de cerrarse');
 }
 async function subirEnDetalle(d, tipo, ruta) {
   const nombre = ruta.split('/').at(-1);
@@ -374,7 +382,7 @@ if (!FOCALIZADO) {
       { terreno: VECINO, lat: 20.6015, lon: -100.398, superficie_m2: 1200 }, crypto.randomUUID());
     vecino = r.datos.terreno.id;
     await aTabla(olga.page);
-    await olga.page.getByRole('button', { name: 'Actualizar' }).click();
+    await enMenu(olga.page, 'Actualizar');
     await listo(olga.page);
     await fila(olga.page, vecino).waitFor();
     const d = await abrirDetalle(olga.page, vecino, VECINO);
@@ -469,7 +477,7 @@ if (!FOCALIZADO) {
     const r = await llamar(olga.page, 'POST', `/api/maestra/bases/${base.id}/terrenos`, { terreno: 'Lote Límite Ficticio' }, crypto.randomUUID());
     const limite = r.datos.terreno.id;
     await aTabla(olga.page);
-    await olga.page.getByRole('button', { name: 'Actualizar' }).click();
+    await enMenu(olga.page, 'Actualizar');
     await listo(olga.page);
     const d = await abrirDetalle(olga.page, limite, 'Lote Límite Ficticio');
     const t0 = Date.now();
@@ -731,7 +739,7 @@ if (!FOCALIZADO) {
       tras.dejar();
       await paso.quitar();
       if (quien !== 'oscar') {                                   // back to oscar for what follows
-        await oscar.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+        await enCuenta(oscar.page, 'Cerrar sesión');
         await entrar(oscar.page, 'oscar');
       }
       // The server never received a cancel from the abandoned mount: the version is still the owner's pending one.
@@ -794,7 +802,7 @@ if (!FOCALIZADO) {
     await seleccionarEnTabla(oscar.page, t);
     await hasta(() => oscar.page.evaluate(() => window.__resumenes > 0), 'no se llegó al resumen final');
     cierto(oscar.api.some((l) => /GET \/api\/archivos\/geometrias\/[^/]+\/contenido 200/.test(l)), 'el cuerpo no se leyó completo antes');
-    await oscar.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+    await enCuenta(oscar.page, 'Cerrar sesión');
     await oscar.page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
     await oscar.page.evaluate(() => {
       window.__mutaciones = 0;

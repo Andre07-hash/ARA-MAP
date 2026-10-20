@@ -1,8 +1,9 @@
 """Load a terrain CSV into one work base of the editable master table.
 
-A trusted operations command, like scripts/cuentas.py: the web app has no bulk
-load into the master table (the legacy import only fills the old `base` /
-`terreno` workspace). It refuses to run without an explicitly named target and
+A trusted operations command, like scripts/cuentas.py, for loads outside the
+app; administrators also load files from the table («Importar Excel»), through
+the same server/carga_maestra.py, which also loads the «Tipo de terreno» and
+«Comentarios» columns (validated like the table's own cells). It refuses to run without an explicitly named target and
 never reads .env.local:
 
     python3 scripts/cargar_maestra.py --sqlite RUTA/ara_map.db \
@@ -31,14 +32,10 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-import hashlib
-import json
 import os
 import sys
-import uuid
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -77,11 +74,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not sqlite_path.exists():
             raise SystemExit(f"No existe {sqlite_path}.")
 
-    from server import auth, db, inventario, postgres
+    from server import auth, carga_maestra, db, postgres
     from server.csv_importer import read_csv_bytes
     from server.errors import WorkbookError
-    from server.matching import Disposition, classify
-    from server.repo import inventario as repo
     from server.repo import maestra as repo_maestra
 
     try:
@@ -91,19 +86,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         raise SystemExit(f"No se pudo leer el CSV: {exc}") from None
 
     # The same validation as a row saved from the table, for every row, before
-    # the database is touched. TerrainRecord and the draft share field names.
-    # The declared currency goes on the rows that carry a price, and nowhere else.
+    # the database is touched. The declared currency goes on the rows that
+    # carry a price, and nowhere else.
     records = [dataclasses.replace(r, moneda=args.moneda)
                if args.moneda and (r.asking_price is not None or r.asking_m2 is not None) else r
                for r in leido.records]
-    filas: list[dict[str, Any]] = []
-    errores: list[str] = []
-    for record in records:
-        crudos = {n: getattr(record, n) for n in inventario.EDITABLE if hasattr(record, n)}
-        campos, malos = inventario.clean_changes({n: v for n, v in crudos.items() if v is not None})
-        errores.extend(f"línea {record.fila} ({record.terreno}): {campo}: {mensaje}"
-                       for campo, mensaje in malos.items())
-        filas.append(campos)
+    filas, errores = carga_maestra.validar(records)
     if errores:
         raise SystemExit("\n".join(["El CSV tiene valores no admitidos; no se escribió nada.",
                                     *errores]))
@@ -129,25 +117,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                              + ("no existe" if not bases else "no es única; usa su id")
                              + "; no se escribió nada.")
         base = bases[0]
-
-        decisiones = classify(records, _existentes(conn, base["id"]))
-        nuevas = 0
-        omitidas: list[str] = []
-        for decision in decisiones:
-            record = records[decision.incoming_index]
-            if decision.disposition is not Disposition.NUEVA:
-                donde = (f"terreno {decision.existing_id}" if decision.existing_id
-                         else "otra línea de este archivo")
-                omitidas.append(f"línea {record.fila} ({record.terreno}): ya existe en {donde}"
-                                + (f" · {decision.reason}" if decision.reason else ""))
-                continue
-            nuevas += 1
-            if not args.dry_run:
-                campos = filas[decision.incoming_index]
-                pedido = hashlib.sha256(json.dumps(
-                    {"base": base["id"], "campos": campos}, sort_keys=True,
-                    ensure_ascii=False).encode("utf-8")).hexdigest()
-                repo.crear(conn, campos, actor, f"carga-{uuid.uuid4()}", pedido, base["id"])
+        nuevas, omitidas = carga_maestra.cargar(conn, base["id"], records, filas, actor,
+                                                simular=args.dry_run)
 
     print(("SIMULACIÓN: no se escribió nada. " if args.dry_run else "")
           + f"Base «{base['nombre']}» ({base['id']}), a nombre de {actor['display_name']}.")
@@ -163,31 +134,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         for nota in record.notes:
             print(f"  AVISO línea {record.fila} ({record.terreno}): «{nota.valor}» en"
                   f" {nota.campo} no es un número; el campo queda vacío")
-    if leido.columnas_no_reconocidas:
+    if carga_maestra.no_cargadas(leido):
         print("  AVISO columnas no cargadas (la tabla maestra no las tiene): "
-              + ", ".join(leido.columnas_no_reconocidas))
+              + ", ".join(carga_maestra.no_cargadas(leido)))
     return 0
-
-
-def _existentes(conn: Any, base_id: str) -> list[dict[str, Any]]:
-    """Every terrain of the base, shaped for classify()."""
-    from server import inventario
-    from server.matching import dedupe_key
-    from server.repo import inventario as repo
-
-    consulta = inventario.parse_query(
-        {"limit": [str(inventario.MAX_LIST_LIMIT)]},
-        inventario.SCOPED_QUERY)
-    existentes: list[dict[str, Any]] = []
-    while True:
-        pagina, _, cursor, _ = repo.listar(conn, consulta, base_id)
-        existentes.extend(
-            {**t["draft"], "id": t["id"], "clave_dedupe": dedupe_key(
-                t["draft"]["terreno"] or "", t["draft"]["estado"], t["draft"]["municipio"])}
-            for t in pagina)
-        if cursor is None:
-            return existentes
-        consulta = {**consulta, "cursor": cursor}
 
 
 if __name__ == "__main__":

@@ -27,7 +27,9 @@ from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .. import db
+from .. import auth, db, inventario
+from ..repo import inventario as repo_inventario
+from ..repo import maestra as repo_maestra
 from ..repo import mapas as repo_mapas
 from ..repo import terrenos as repo_terrenos
 from ..router import Request
@@ -52,6 +54,28 @@ COLUMNS = (
     # Last, so the source workbook's own columns keep their positions.
     ("Moneda", "moneda", None),
 )
+
+# The master table's columns, in its own order. It shows no currency (its
+# prices are pesos); a currency a load did set (cargar_maestra --moneda) shows
+# only in the price cells' format and is not read back on import. The headers are ones the
+# importer reads back (Tipo de terreno and Comentarios through
+# server/carga_maestra.py). Afectaciones % is stored as typed (12 means 12 %),
+# so it gets no percent format, which would show 1200 %.
+COLUMNAS_MAESTRA = (
+    ("Tipo de terreno", "tipo_terreno", None),
+    ("Terreno", "terreno", None),
+    ("Estado", "estado", None),
+    ("Municipio", "municipio", None),
+    ("Superficie m2", "superficie_m2", "#,##0.00"),
+    ("Superficie Ha", "superficie_ha", "0.0000"),
+    ("Afectaciones %", "afectaciones_pct", "0.00"),
+    ("Asking Price", "asking_price", "#,##0"),
+    ("Asking $/m2", "asking_m2", "#,##0.00"),
+    ("Comentarios", "notas_internas", None),
+    ("X", "lat", None),
+    ("Y", "lon", None),
+)
+COLUMNA_BASE = ("Base", "base", None)
 
 HOJA_SIMPLE = "Registro Análisis"
 SIN_CONFIRMAR = "sin confirmar"
@@ -93,12 +117,13 @@ def sheet_title(nombre: str | None, usados: set[str], indice: int) -> str:
     raise ApiError("No se pudo generar un nombre de hoja único.")
 
 
-def write_terrain_sheet(book: Workbook, titulo: str, filas: list[dict[str, Any]]) -> Worksheet:
+def write_terrain_sheet(book: Workbook, titulo: str, filas: list[dict[str, Any]],
+                        columnas: tuple[tuple[str, str, str | None], ...] = COLUMNS) -> Worksheet:
     """Write one terrain table. An empty list still produces its header row."""
     sheet = book.create_sheet(title=titulo)
     sheet.freeze_panes = "A2"
 
-    for index, (etiqueta, _, _) in enumerate(COLUMNS, start=1):
+    for index, (etiqueta, _, _) in enumerate(columnas, start=1):
         cell = sheet.cell(row=1, column=index, value=etiqueta)
         cell.font = Font(bold=True)
         cell.alignment = Alignment(vertical="center")
@@ -107,7 +132,7 @@ def write_terrain_sheet(book: Workbook, titulo: str, filas: list[dict[str, Any]]
     for row_index, fila in enumerate(filas, start=2):
         moneda = fila.get("moneda")
         con_precio = any(fila.get(p) is not None for p in PRECIOS)
-        for col_index, (_, campo, formato) in enumerate(COLUMNS, start=1):
+        for col_index, (_, campo, formato) in enumerate(columnas, start=1):
             valor = fila.get(campo)
             if campo == "moneda":
                 valor = moneda or (SIN_CONFIRMAR if con_precio else None)
@@ -124,7 +149,7 @@ def write_terrain_sheet(book: Workbook, titulo: str, filas: list[dict[str, Any]]
             if formato:
                 cell.number_format = formato
 
-    sheet.auto_filter.ref = f"A1:{get_column_letter(len(COLUMNS))}{max(len(filas) + 1, 1)}"
+    sheet.auto_filter.ref = f"A1:{get_column_letter(len(columnas))}{max(len(filas) + 1, 1)}"
     return sheet
 
 
@@ -156,6 +181,63 @@ def export(request: Request) -> tuple[bytes, str]:
     book.save(buffer)
     nombre = (data.get("nombre") or "terrenos").replace("/", "-")
     return buffer.getvalue(), f"{nombre}.xlsx"
+
+
+def maestra(request: Request) -> tuple[bytes, str]:
+    """The administrators' table as they see it: every page of the same query."""
+    return _exportar_vista(request, inventario.INTERNAL_QUERY, None)
+
+
+def de_base(request: Request) -> tuple[bytes, str]:
+    """One work base as its reader sees it, for whoever may open it."""
+    return _exportar_vista(request, inventario.SCOPED_QUERY, request.uuid_param("bid"))
+
+
+def _exportar_vista(request: Request, permitidos: tuple[str, ...],
+                    base_id: str | None) -> tuple[bytes, str]:
+    """The same filters and order as the table's list route, without paging."""
+    with db.session() as conn:
+        if base_id is not None:
+            auth.require_base(request, base_id, "maestra.ver", conn)
+        crudo = {k: v for k, v in request.query.items() if k not in ("limit", "cursor")}
+        try:
+            consulta = inventario.parse_query(
+                {**crudo, "limit": [str(inventario.MAX_LIST_LIMIT)]}, permitidos)
+        except inventario.QueryError as exc:
+            raise ApiError("Filtros inválidos.", 422,
+                           {"code": "validation_failed", "fields": exc.errors}) from None
+        nombres = {b["id"]: b["nombre"] for b in repo_maestra.listar(conn, None)}
+        filas: list[dict[str, Any]] = []
+        # ponytail: listar also counts and gathers facets on every 200-row page;
+        # a count-free variant in server/repo if exports get slow.
+        while True:
+            pagina, _, cursor, _ = repo_inventario.listar(conn, consulta, base_id)
+            filas.extend({**t["draft"], "base_id": t.get("base_id"),
+                          "base": nombres.get(t.get("base_id") or "")} for t in pagina)
+            if cursor is None:
+                break
+            consulta = {**consulta, "cursor": cursor}
+    book = Workbook()
+    book.remove(book.active)
+    if base_id is not None or not filas:
+        write_terrain_sheet(book, HOJA_SIMPLE, filas, COLUMNAS_MAESTRA)
+    else:
+        # The master table: one sheet per base, by name, and the unassigned
+        # rows last. Each row still names its base, so a sheet copied
+        # elsewhere keeps saying where it came from.
+        # By base id, not name: two bases may share a name and stay two sheets.
+        por_base: dict[str | None, list[dict[str, Any]]] = {}
+        for fila in filas:
+            por_base.setdefault(fila["base_id"], []).append(fila)
+        usados: set[str] = set()
+        orden = sorted(por_base, key=lambda b: (b is None, (nombres.get(b or "") or "").casefold()))
+        for indice, base in enumerate(orden):
+            titulo = nombres.get(base or "") or "Sin asignar" if base else "Sin asignar"
+            write_terrain_sheet(book, sheet_title(titulo, usados, indice),
+                                por_base[base], (*COLUMNAS_MAESTRA, COLUMNA_BASE))
+    buffer = io.BytesIO()
+    book.save(buffer)
+    return buffer.getvalue(), "terrenos.xlsx"
 
 
 def _seleccionar(filas: list[dict[str, Any]], ids: Any) -> list[dict[str, Any]]:

@@ -30,6 +30,26 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
+const verFiltros = async (page) => {
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
+};
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -123,13 +143,32 @@ const modoBoton = (page, nombre) => page.locator('.tabla-modo').getByRole('butto
 const foto = async (page, nombre) => { if (SHOTS) { await esperar(400); await page.screenshot({ path: join(SHOTS, `${nombre}.png`) }); } };
 const ficha = (page) => page.locator('.mapa-tabla-ficha');
 const fichaTexto = (page) => ficha(page).textContent();
-const leyenda = (page) => page.locator('.previa .legend');
-/* The table's Tipo filter takes several types: its summary says which, its panel checks them. */
-const tipoTabla = async (page) => (await page.locator('#tabla-tipo > summary').innerText()).trim();
+// The colour legend sits at the foot of the map's own filters.
+const leyenda = (page) => page.locator('.mapa-tabla-leyenda .legend');
+/* The table's Tipo filter takes several types: the checked ones, in the list's order. */
+const marcados = (page, id) => page.locator(`#${id} input:checked`).evaluateAll((n) => n.map((c) => c.value));
+const tipoTabla = async (page) => (await marcados(page, 'tabla-tipo')).join(', ') || 'Todos';
 async function marcarTipo(page, tipo, marcado = true) {
-  await page.locator('#tabla-tipo > summary').click();
-  await page.locator('#tabla-tipo').getByLabel(tipo, { exact: true }).setChecked(marcado);
-  await page.keyboard.press('Escape');
+  await verFiltros(page);
+  await page.locator(`#tabla-tipo input[value="${tipo}"]`).setChecked(marcado);
+  await listo(page);
+  await cerrarFiltros(page);
+}
+// The map's own filters open from the filters panel («Más filtros del mapa»), as a drawer.
+const filtrosMapa = (page) => page.locator('dialog.drawer[open]');
+async function abrirFiltrosMapa(page) {
+  if (await filtrosMapa(page).count()) return;
+  await verFiltros(page);
+  await page.locator('.cajon-mapa').click();
+  await filtrosMapa(page).waitFor();
+}
+async function cerrarFiltrosMapa(page) {
+  if (await filtrosMapa(page).count()) await filtrosMapa(page).getByRole('button', { name: 'Cerrar filtros' }).click();
+}
+async function limpiarMapa(page) {
+  await abrirFiltrosMapa(page);
+  await filtrosMapa(page).locator('.rail-header').getByRole('button', { name: /Limpiar/ }).click();
+  await cerrarFiltrosMapa(page);
 }
 
 async function irA(page, vista, modo = null) {
@@ -232,61 +271,64 @@ await revisar('administrador: filtros a la izquierda, mapa con leyenda por preci
   const m = await mapa(ada.page);
   igual([m.filas.length, m.incompleto], [TODOS.length, false], 'conjunto completo');
   igual((await previa(ada.page)).filas, TODOS.length, 'el mapa dibuja todo sin filtros');
-  cierto(await ada.page.locator('.mapa-tabla-rail .rail').isVisible(), 'filtros a la izquierda');
-  const caja = { rail: await ada.page.locator('.mapa-tabla-rail').boundingBox(), mapa: await ada.page.locator('.previa-mapa').boundingBox() };
-  cierto(caja.rail.x + caja.rail.width <= caja.mapa.x + 1, 'el panel de filtros queda a la izquierda del mapa');
+  igual(await ada.page.locator('.mapa-tabla-rail .rail').isVisible(), false, 'sin panel de filtros al lado del mapa');
+  cierto(await ada.page.locator('[aria-controls="tabla-filtros"]').isVisible(), 'los filtros se abren desde la barra');
   // A row chosen in the grid (the KMZ cell above may have chosen one) is the map's selection too.
   const seleccion = (await mapa(ada.page)).seleccion;
   igual(await ficha(ada.page).isVisible(), Boolean(seleccion), 'ficha sólo con selección');
   if (seleccion) await ficha(ada.page).getByRole('button', { name: 'Cerrar detalle' }).click();
   igual([await ficha(ada.page).isVisible(), (await mapa(ada.page)).seleccion], [false, null], 'sin ficha sin selección');
-  igual(await ada.page.locator('.previa .legend .ramp-step:not(.ramp-step-unknown)').count(), 5, 'cinco pasos de precio');
-  cierto(/asking \$\/m²/i.test(await leyenda(ada.page).innerText()), 'leyenda por precio por m²');
-  cierto(/4 terrenos fuera del mapa: sin contorno activo ni X\/Y válidas/.test(await leyenda(ada.page).innerText()), 'sin ubicación referida al mapa');
-  cierto(!/falta de coordenadas|círculos/.test(await leyenda(ada.page).innerText()), 'sin textos heredados');
+  igual(await leyenda(ada.page).locator('.ramp-step:not(.ramp-step-unknown)').count(), 5, 'cinco pasos de precio');
+  cierto(/asking \$\/m²/i.test(await leyenda(ada.page).textContent()), 'leyenda por precio por m²');
+  cierto(/4 terrenos fuera del mapa: sin contorno activo ni X\/Y válidas/.test(await leyenda(ada.page).textContent()), 'sin ubicación referida al mapa');
+  cierto(!/falta de coordenadas|círculos/.test(await leyenda(ada.page).textContent()), 'sin textos heredados');
   await foto(ada.page, '01-administrador-mapa');
 });
 
-await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni pie, Encuadrar todo sobre el mapa', async () => {
+await revisar('la barra es la misma que en Tabla; sobre el mapa sólo Encuadrar todo y los fondos', async () => {
   const p = ada.page;
-  // Only the view, Tabla / Mapa and Actualizar: the grid's query controls are hidden, not cleared.
-  for (const id of ['tabla-buscar', 'tabla-estado', 'tabla-municipio', 'tabla-tipo', 'tabla-orden', 'tabla-desc']) {
-    igual(await p.locator(`#${id}`).isVisible(), false, `#${id} oculto en el mapa`);
+  const lugares = async () => {
+    const r = [];
+    // The bar; the area under it is shorter in Tabla only by the grid's own pager.
+    for (const sel of ['#tabla-vista', '.tabla-busqueda', '.tabla-acciones']) r.push(await p.locator(sel).boundingBox());
+    const area = await p.locator('.tabla-cuerpo').boundingBox();
+    r.push([area.x, area.y, area.width]);
+    return JSON.stringify(r);
+  };
+  // Switching starts each screen at its top, so the bar is measured right after a switch.
+  await aTabla(p);
+  await aMapa(p);
+  const enMapa = await lugares();
+  await aTabla(p);
+  igual(await lugares(), enMapa, 'cambiar entre Tabla y Mapa no mueve la barra ni el inicio del área');
+  await aMapa(p);
+  for (const visible of ['#tabla-buscar', '[aria-controls="tabla-filtros"]']) {
+    cierto(await p.locator(visible).isVisible(), `${visible} visible también en el mapa`);
   }
-  for (const nombre of ['Agregar terreno', 'Columnas', 'Bases y accesos']) {
-    igual(await p.locator('.tabla-barra').getByRole('button', { name: nombre }).isVisible(), false, `${nombre} oculto`);
-  }
-  cierto(await p.locator('#tabla-vista').isVisible() && await modoBoton(p, 'Tabla').isVisible()
-    && await p.getByRole('button', { name: 'Actualizar' }).isVisible(), 'vista, Tabla/Mapa y Actualizar');
-  const barra = await p.locator('.tabla-barra').boundingBox();
-  cierto(barra.height <= 48, `una fila delgada (${barra.height}px)`);
-  igual(await p.locator('.tabla-heredados').isVisible(), false, 'sin filtros heredados no hay nota');
-  for (const quitado of ['.mapa-tabla-alcance', '.previa-cuenta', '.previa-titulo', '.previa-pie', '.mapa-tabla-cabecera']) {
+  // Inside the closed "⋯" menu nothing is visible, so the hidden attribute is what tells.
+  igual(await p.locator('.menu-panel .menu-item', { hasText: 'Columnas' }).getAttribute('hidden'), '', 'Columnas oculto en el mapa');
+  for (const quitado of ['.mapa-tabla-alcance', '.previa-cuenta', '.previa-titulo', '.previa-pie', '.mapa-tabla-cabecera', '.tabla-heredados']) {
     igual(await p.locator(quitado).count(), 0, `sin ${quitado}`);
   }
   igual(await p.locator('.tabla-pie').isVisible(), false, 'sin el pie que repite «N terrenos»');
-  igual(await p.locator('.previa-nota').isVisible(), false, 'la explicación queda tras el botón de información');
-  // The map reaches the bottom of the screen and starts right under the bar.
+  // Over the map: only "Encuadrar todo" (top right) and the basemaps; no zoom buttons, no info toggle.
+  igual(await p.locator('.previa-mapa .leaflet-control-zoom').isVisible(), false, 'sin botones de zoom');
+  igual(await p.locator('.previa-info').isVisible(), false, 'sin botón de información');
+  igual(await leyenda(p).isVisible(), false, 'la leyenda está en los filtros del mapa, no encima');
   const lienzo = await p.locator('.previa-mapa').boundingBox();
-  cierto(Math.abs(lienzo.y - (barra.y + barra.height)) <= 2, `el mapa empieza bajo la barra (${lienzo.y})`);
-  cierto(Math.abs(lienzo.y + lienzo.height - 900) <= 2, `el mapa llega al borde inferior (${lienzo.y + lienzo.height})`);
-  // Counts: filtered in the rail, placed / not placed in the legend.
-  cierto(/125 terrenos de 125/.test(await p.locator('.mapa-tabla-rail .rail-result').innerText()), 'cuenta de filtrados en el panel');
-  cierto(/121 terrenos/.test(await leyenda(p).locator('.legend-count').innerText()), 'ubicados en la leyenda');
-  // "Encuadrar todo" over the map, under the zoom control, overlapping neither it nor the credits.
   const encuadre = await p.getByRole('button', { name: 'Encuadrar todo' }).boundingBox();
-  const zoom = await p.locator('.previa-mapa .leaflet-control-zoom').boundingBox();
   const creditos = await p.locator('.previa-mapa .leaflet-control-attribution').boundingBox();
   const separados = (a, b) => a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y;
-  cierto(separados(encuadre, zoom) && separados(encuadre, creditos), 'sin tapar zoom ni créditos');
-  cierto(encuadre.y >= lienzo.y && encuadre.y + encuadre.height <= lienzo.y + lienzo.height
-    && encuadre.y - (zoom.y + zoom.height) < 30, 'sobre el mapa, junto al zoom');
-  cierto(separados(await leyenda(p).boundingBox(), creditos), 'la leyenda no tapa los créditos');
-  // Encuadrar todo by keyboard; a click on it does not select anything on the map.
-  // From a close-up it goes back to the whole of Mexico, not to the rows' extent.
-  const acercar = p.locator('.previa-mapa .leaflet-control-zoom-in:not(.leaflet-disabled)');
-  for (let i = 0; i < 8 && (await previa(p)).zoom < 10; i += 1) {
-    if (await acercar.count()) await acercar.click();
+  cierto(separados(encuadre, creditos), 'sin tapar los créditos');
+  cierto(encuadre.y - lienzo.y < 30 && lienzo.x + lienzo.width - (encuadre.x + encuadre.width) < 30, 'arriba a la derecha del mapa');
+  cierto(await p.getByRole('radio', { name: 'Satélite', exact: true }).isVisible(), 'fondos abajo');
+  // Counts: filtered in the map's own filters, placed / not placed in its legend.
+  cierto(/125 terrenos de 125/.test(await p.locator('.mapa-tabla-rail .rail-result').textContent()), 'cuenta de filtrados en el panel');
+  cierto(/121 terrenos/.test(await leyenda(p).locator('.legend-count').textContent()), 'ubicados en la leyenda');
+  // From a close-up (the wheel still zooms), Encuadrar todo by keyboard goes back to the whole of Mexico.
+  for (let i = 0; i < 12 && (await previa(p)).zoom < 10; i += 1) {
+    await p.mouse.move(lienzo.x + lienzo.width / 2, lienzo.y + lienzo.height / 2);
+    await p.mouse.wheel(0, -400);
     await esperar(300);
   }
   await hasta(async () => (await previa(p)).zoom >= 10, `acercado: ${(await previa(p)).zoom}`);
@@ -294,19 +336,13 @@ await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni
   await p.keyboard.press('Enter');
   await hasta(async () => (await previa(p)).zoom <= 5, `todo México: ${(await previa(p)).zoom}`);
   igual((await mapa(p)).seleccion, null, 'sin selección accidental');
-  // The info toggle opens and closes by keyboard.
-  const info = p.locator('.previa-info > summary');
-  await info.focus();
-  await p.keyboard.press('Enter');
-  cierto(/Un KMZ o KML subido sin activar no cambia el mapa/.test(await p.locator('.previa-nota').innerText()), 'explicación disponible');
-  await p.keyboard.press('Escape');
-  igual(await p.locator('.previa-nota').isVisible(), false, 'Escape la cierra');
 });
 
 await revisar('los filtros del mapa acotan el mapa, conservan los colores y no tocan la tabla', async () => {
   const umbrales = await leyenda(ada.page).locator('.ramp-label').allInnerTexts();
   const listas = ada.api.filter((l) => /\/terrenos\?/.test(l)).length;
   // Continuous typing in the search box keeps focus and every character.
+  await abrirFiltrosMapa(ada.page);
   await ada.page.locator('#buscar').click();
   await ada.page.keyboard.type('Lote Panel 01', { delay: 25 });
   igual(await ada.page.locator('#buscar').inputValue(), 'Lote Panel 01', 'escritura continua');
@@ -319,33 +355,36 @@ await revisar('los filtros del mapa acotan el mapa, conservan los colores y no t
   igual(await leyenda(ada.page).locator('.ramp-label').allInnerTexts(), umbrales, 'los umbrales no cambian al filtrar');
   igual((await mapa(ada.page)).filas.length, TODOS.length, 'el conjunto de la vista no cambia');
   igual(ada.api.filter((l) => /\/terrenos\?/.test(l)).length, listas, 'filtrar el mapa no pide listas');
-  cierto(/Limpiar \(3\)/.test(await ada.page.locator('.mapa-tabla-rail .rail-header').innerText()), 'tres filtros activos');
+  cierto(/Limpiar \(3\)/.test(await filtrosMapa(ada.page).locator('.rail-header').innerText()), 'tres filtros activos');
+  await cerrarFiltrosMapa(ada.page);
   await aTabla(ada.page);
   igual(await ada.page.locator('#tabla-buscar').inputValue(), '', 'búsqueda de la tabla intacta');
-  igual(await ada.page.locator('#tabla-estado').inputValue(), '', 'estado de la tabla intacto');
+  igual(await marcados(ada.page, 'tabla-estado'), [], 'estado de la tabla intacto');
   igual(await ada.page.locator('.tabla-cuenta').innerText(), paginaTabla.cuenta, 'misma página');
   igual(await ada.page.locator('tr.tabla-fila').count(), paginaTabla.filas, 'mismas filas');
   await aMapa(ada.page);
   igual(await ada.page.locator('#buscar').inputValue(), 'Lote Panel 01', 'los filtros del mapa se conservan al alternar');
   igual((await previa(ada.page)).filas, 3, 'mismo resultado');
   // Actualizar gathers the set again and keeps the map's filters.
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo; }, 'actualizado');
   igual([await ada.page.locator('#buscar').inputValue(), (await previa(ada.page)).filas], ['Lote Panel 01', 3], 'Actualizar conserva los filtros');
   // Limpiar clears only the map's filters.
-  await ada.page.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
+  await limpiarMapa(ada.page);
   await hasta(async () => (await previa(ada.page)).filas === TODOS.length, 'Limpiar');
   igual(await ada.page.locator('#tabla-buscar').inputValue(), '', 'Limpiar no toca la tabla');
 });
 
 await revisar('Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toca la tabla', async () => {
   const p = ada.page;
-  cierto(await p.locator('.mapa-tabla-rail').getByRole('group', { name: 'Tipo de terreno' }).isVisible(), 'Tipo en el panel izquierdo');
+  await abrirFiltrosMapa(p);
+  cierto(await filtrosMapa(p).getByRole('group', { name: 'Tipo de terreno' }).isVisible(), 'Tipo en los filtros del mapa');
   const listas = ada.api.filter((l) => /\/terrenos\?/.test(l)).length;
   await p.locator('[id="tipos-Habitacional Ficticio"]').check();
   await hasta(async () => (await previa(p)).filas === 40, `tipo en el mapa: ${(await previa(p)).filas}`);
   igual(ada.api.filter((l) => /\/terrenos\?/.test(l)).length, listas, 'filtrar por tipo no pide listas');
-  igual(await p.locator('#mapa-tabla-filtros').textContent(), 'Filtros (1)', 'cuenta como un filtro');
+  cierto(/Limpiar \(1\)/.test(await filtrosMapa(p).locator('.rail-header').innerText()), 'cuenta como un filtro');
+  await cerrarFiltrosMapa(p);
   await aTabla(p);
   igual(await tipoTabla(p), 'Todos', 'el tipo de la tabla no cambia');
   // Actualizar on the map left the grid to be read again: it reloads the same page.
@@ -353,49 +392,40 @@ await revisar('Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toc
   igual(await p.locator('.tabla-cuenta').innerText(), paginaTabla.cuenta, 'misma cuenta');
   await aMapa(p);
   igual(await p.locator('[id="tipos-Habitacional Ficticio"]').isChecked(), true, 'se conserva al alternar');
-  await p.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
+  await limpiarMapa(p);
   await hasta(async () => (await previa(p)).filas === TODOS.length, 'Limpiar quita el tipo');
   igual(await p.locator('[id="tipos-Habitacional Ficticio"]').isChecked(), false, 'casilla limpia');
 });
 
 await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin filtros del mapa', async () => {
   await aTabla(ada.page);
-  await ada.page.locator('#tabla-estado').selectOption('Jalisco');
+  await verFiltros(ada.page);
+  await ada.page.locator('#tabla-estado input[value="Jalisco"]').check();
+  await listo(ada.page);
+  await cerrarFiltros(ada.page);
   await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('estado=Jalisco'); }, 'reunión con el estado');
   const jalisco = (await mapa(ada.page)).filas.length;
-  // A small note says the table's filter; it opens by click and keyboard and closes with Escape.
-  const nota = ada.page.locator('.tabla-heredados');
-  const resumen = nota.locator('summary');
-  igual(await resumen.innerText(), 'Filtros de la tabla (1)', 'nota de filtros heredados');
-  await resumen.click();
-  cierto(/Estado: Jalisco/.test(await nota.locator('.tabla-heredados-panel').innerText()), 'dice el filtro de la tabla');
-  await nota.locator('.tabla-heredados-lista li').first().click();
-  cierto(await nota.locator('.tabla-heredados-panel').isVisible(), 'un clic en su texto no la cierra');
-  await ada.page.keyboard.press('Escape');
-  igual(await nota.locator('.tabla-heredados-panel').isVisible(), false, 'Escape cierra');
-  await resumen.focus();
-  await ada.page.keyboard.press('Enter');
-  cierto(await nota.locator('.tabla-heredados-panel').isVisible(), 'abre con el teclado');
-  await ada.page.keyboard.press('Escape');
+  // The bar is the same on the map: its chips say the table's filter.
+  cierto(await ada.page.locator('.tabla-chips').isVisible(), 'las etiquetas siguen en el mapa');
+  cierto(/Estado: Jalisco/.test(await ada.page.locator('.tabla-chips').innerText()), 'dice el filtro de la tabla');
+  await abrirFiltrosMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await hasta(async () => (await previa(ada.page)).filas < jalisco, 'búsqueda dentro del alcance');
-  await ada.page.locator('.mapa-tabla-rail .rail-header').getByRole('button', { name: /Limpiar/ }).click();
+  await cerrarFiltrosMapa(ada.page);
+  await limpiarMapa(ada.page);
   await hasta(async () => (await previa(ada.page)).filas === jalisco, 'Limpiar vuelve al alcance, no a toda la base');
   // The table's type filter: kept, said, and never offered as a map control.
   await aTabla(ada.page);
   await marcarTipo(ada.page, 'Industrial Ficticio');
   await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && /tipo_terreno=Industrial/.test(x.clave); }, 'reunión con el tipo');
-  igual(await resumen.innerText(), 'Filtros de la tabla (2)', 'dos filtros heredados');
-  await resumen.click();
-  const panel = await nota.locator('.tabla-heredados-panel').innerText();
-  cierto(/Estado: Jalisco/.test(panel) && /Tipo de terreno: Industrial Ficticio/.test(panel), `nota: ${panel}`);
-  await ada.page.keyboard.press('Escape');
+  const etiquetas = await ada.page.locator('.tabla-chips').innerText();
+  cierto(/Estado: Jalisco/.test(etiquetas) && /Tipo de terreno: Industrial Ficticio/.test(etiquetas), `etiquetas: ${etiquetas}`);
   const tipos = await ada.page.locator('.mapa-tabla-rail [id^="tipos-"]').evaluateAll((n) => n.map((c) => c.value));
   igual(tipos, ['Industrial Ficticio'], 'el Tipo local sólo ofrece los tipos del conjunto');
   await aTabla(ada.page);
-  igual([await ada.page.locator('#tabla-estado').inputValue(), await tipoTabla(ada.page)],
+  igual([(await marcados(ada.page, 'tabla-estado')).join(', '), await tipoTabla(ada.page)],
     ['Jalisco', 'Industrial Ficticio'], 'la tabla conserva sus filtros');
   // Several types at once: both are sent and both are said.
   await marcarTipo(ada.page, 'Habitacional Ficticio');
@@ -408,22 +438,21 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await marcarTipo(ada.page, 'Habitacional Ficticio', false);
   igual(await tipoTabla(ada.page), 'Todos', 'sin tipos');
   // By keyboard: Space checks a type, the table reloads, and focus and the open panel stay.
-  await ada.page.locator('#tabla-tipo > summary').focus();
-  await ada.page.keyboard.press('Enter');
-  await ada.page.keyboard.press('Tab');
+  await verFiltros(ada.page);
+  await ada.page.locator('#tabla-tipo input').first().focus();
   await ada.page.keyboard.press('Space');
   await hasta(async () => (await tipoTabla(ada.page)) !== 'Todos', 'Espacio no marcó un tipo');
   await listo(ada.page);
-  igual(await ada.page.evaluate(() => {
-    const d = document.getElementById('tabla-tipo');
-    return d.open && d.contains(document.activeElement) && document.activeElement.type === 'checkbox';
-  }), true, 'el foco y el panel siguen tras recargar');
+  igual(await ada.page.evaluate(() => document.getElementById('tabla-filtros').open
+    && document.getElementById('tabla-tipo').contains(document.activeElement)), true, 'el foco y el panel siguen tras recargar');
   await ada.page.keyboard.press('Space');
   await hasta(async () => (await tipoTabla(ada.page)) === 'Todos', 'Espacio no desmarcó');
   await ada.page.keyboard.press('Escape');
-  igual(await ada.page.locator('#tabla-tipo').evaluate((d) => d.open), false, 'Escape cierra');
+  igual(await ada.page.locator('#tabla-filtros').evaluate((d) => d.open), false, 'Escape cierra');
   await aMapa(ada.page);
+  await abrirFiltrosMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
+  await cerrarFiltrosMapa(ada.page);
   await ada.page.locator('#tabla-vista').selectOption(otra.id);
   await hasta(async () => { const x = await mapa(ada.page); return x && !x.reuniendo && x.clave?.startsWith(otra.id); }, 'otra vista');
   igual(await ada.page.locator('#buscar').inputValue(), '', 'los filtros del mapa empiezan vacíos');
@@ -432,9 +461,9 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
 });
 
 await revisar('pocos precios: sin graduar; todo precio es MXN y se filtra junto', async () => {
-  const texto = await leyenda(ada.page).innerText();
+  const texto = await leyenda(ada.page).textContent();
   cierto(/No hay suficientes precios/.test(texto) && !/moneda/i.test(texto), `leyenda: ${texto}`);
-  igual(await ada.page.locator('.previa .legend .ramp-step').count(), 0, 'sin rampa');
+  igual(await leyenda(ada.page).locator('.ramp-step').count(), 0, 'sin rampa');
   igual(await ada.page.locator('#unitario-min').isDisabled(), false, 'el filtro de precio sigue disponible');
 });
 
@@ -451,7 +480,7 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
   igual((await ficha(ada.page).getByRole('button').allInnerTexts()).sort(), ['Ver a escala', '×'].sort(), 'sólo cerrar y ver a escala');
   // A change made elsewhere arrives with Actualizar; the record follows.
   await escribir(elegido, { changes: { notas_internas: 'Comentario ficticio nuevo' } });
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => (await fichaTexto(ada.page)).includes('Comentario ficticio nuevo'), 'valor actual en la ficha');
   // A table search that still includes the selected terrain keeps the selection and its record.
   await aTabla(ada.page);
@@ -490,10 +519,12 @@ await revisar('contorno activo sin X/Y: ficha y cuerpo; cerrar no lo desactiva; 
   cierto(!/círculo|Sin coordenadas|Buscar en Google/.test(texto), 'sin textos de X/Y faltantes');
   igual(await ficha(ada.page).locator('.detail-grid dd.mono').allInnerTexts(), ['—', '—'], 'X/Y almacenadas vacías, no del contorno');
   // A map filter that leaves it out clears the record, the selection and the body.
+  await abrirFiltrosMapa(ada.page);
   await ada.page.locator('#unitario-max').fill('500');
   await hasta(async () => !(await ficha(ada.page).isVisible()), 'ficha limpia');
   igual([(await mapa(ada.page)).seleccion, (await previa(ada.page)).cuerpos], [null, 0], 'sin selección ni cuerpo');
   await ada.page.locator('#unitario-max').fill('');
+  await cerrarFiltrosMapa(ada.page);
   const t = await terreno(ada.page, conContorno);
   igual(t.ubicacion.modo, 'geometria', 'el contorno sigue activo en el servidor');
 });
@@ -525,7 +556,7 @@ await revisar('fondos Claro/Satélite/Calles con ficha abierta; la tabla sigue e
     await ada.page.getByRole('radio', { name: nombre, exact: true }).click();
     igual(await ada.page.getByRole('radio', { name: nombre, exact: true }).getAttribute('aria-checked'), 'true', nombre);
   }
-  cierto(await ficha(ada.page).isVisible() && await leyenda(ada.page).isVisible(), 'ficha y leyenda siguen');
+  cierto(await ficha(ada.page).isVisible(), 'la ficha sigue');
   await aTabla(ada.page);
   const celda = ada.page.locator(`tr[data-id="${elegido}"] td[data-col="core:notas_internas"]`);
   await celda.dblclick();
@@ -546,34 +577,33 @@ await revisar('pantalla estrecha: filtros en un cajón, ficha superpuesta, tecla
   await ada.page.setViewportSize({ width: 800, height: 900 });
   await esperar(300);
   igual(await ada.page.locator('.mapa-tabla-rail').isVisible(), false, 'el panel se oculta');
-  const boton = ada.page.locator('#mapa-tabla-filtros');
+  const boton = ada.page.locator('[aria-controls="tabla-filtros"]');
   cierto(await boton.isVisible(), 'botón Filtros');
-  await boton.focus();
-  await ada.page.keyboard.press('Enter');
-  const cajon = ada.page.getByRole('dialog', { name: 'Filtros' });
-  await cajon.waitFor();
+  await abrirFiltrosMapa(ada.page);
+  const cajon = filtrosMapa(ada.page);
   await cajon.locator('#buscar').click();
   await ada.page.keyboard.type('Lote Panel 11', { delay: 20 });
   await hasta(async () => (await previa(ada.page)).filas === 10, 'filtro desde el cajón');
   await cajon.getByRole('button', { name: 'Ver resultados' }).focus();
   await ada.page.keyboard.press('Enter');
-  await hasta(async () => !(await cajon.isVisible()), 'cajón cerrado');
-  igual(await ada.page.evaluate(() => document.activeElement?.id), 'mapa-tabla-filtros', 'el foco vuelve al botón');
+  await hasta(async () => !(await cajon.count()), 'cajón cerrado');
+  igual(await ada.page.evaluate(() => document.activeElement?.getAttribute('aria-controls')), 'tabla-filtros', 'el foco vuelve al botón');
   igual(await ada.page.locator('#buscar').inputValue(), 'Lote Panel 11', 'el valor se conserva');
-  igual(await boton.innerText(), 'Filtros (1)', 'el botón cuenta los filtros');
   const ancho = await ada.page.evaluate(() => document.documentElement.scrollWidth);
   cierto(ancho <= 800, `sin desplazamiento horizontal (${ancho})`);
   await foto(ada.page, '03-estrecha');
   // A phone: the bar wraps without clipping, the map takes the rest, and the record opens over it and closes.
   await ada.page.setViewportSize({ width: 390, height: 844 });
   await esperar(300);
-  for (const control of [ada.page.locator('#tabla-vista'), modoBoton(ada.page, 'Mapa'), ada.page.getByRole('button', { name: 'Actualizar' }), boton]) {
+  for (const control of [ada.page.locator('#tabla-vista'), modoBoton(ada.page, 'Mapa'), ada.page.locator('.tabla-acciones .menu-mas > summary'), boton]) {
     const c = await control.boundingBox();
     cierto(c && c.x >= 0 && c.x + c.width <= 390, 'control esencial dentro de la pantalla');
   }
   cierto(await ada.page.evaluate(() => document.documentElement.scrollWidth) <= 390, 'sin desplazamiento horizontal en 390px');
   const lienzo = await ada.page.locator('.previa-mapa').boundingBox();
-  cierto(lienzo.width >= 388 && lienzo.y + lienzo.height >= 842, `el mapa ocupa el resto (${JSON.stringify(lienzo)})`);
+  // A card under the same bar as the grid's, with the page's margins.
+  cierto(lienzo.x >= 0 && lienzo.x + lienzo.width <= 390 && lienzo.width >= 340 && lienzo.y + lienzo.height >= 800,
+    `el mapa ocupa el resto (${JSON.stringify(lienzo)})`);
   await aTabla(ada.page);
   // One the drawer's search ("Lote Panel 11") keeps on the map.
   await elegirDesdeTabla(ada.page, puntos[110], 'Lote Panel 110 Ficticio');
@@ -597,9 +627,11 @@ await revisar('operador: su base, filtros y ficha con sus columnas; nunca otra b
   await aMapa(olga.page);
   const m = await mapa(olga.page);
   igual(m.filas.length, TODOS.length, 'todo su conjunto, más de una página');
+  await abrirFiltrosMapa(olga.page);
   await olga.page.locator('#estados-Sonora').check();
   await hasta(async () => (await previa(olga.page)).filas === 61, `filtro del operador: ${(await previa(olga.page)).filas}`);
   await olga.page.locator('#estados-Sonora').uncheck();
+  await cerrarFiltrosMapa(olga.page);
   await aTabla(olga.page);
   await elegirDesdeTabla(olga.page, elegido, 'Lote Panel 007 Ficticio');
   const texto = await fichaTexto(olga.page);

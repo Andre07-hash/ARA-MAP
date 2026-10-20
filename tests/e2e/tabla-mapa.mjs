@@ -27,6 +27,26 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
+const verFiltros = async (page) => {
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
+};
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -154,13 +174,29 @@ async function alCentro(page, caja, id) {
   }
   return movido;
 }
+/* A selected terrain's boundary can cover the whole view, and a click inside it
+ * picks that terrain again: start from no selection and the whole country. */
+async function desdeCero(page) {
+  const cerrar = page.locator('.mapa-tabla-ficha').getByRole('button', { name: 'Cerrar detalle' });
+  if (await cerrar.isVisible()) await cerrar.click();
+  await page.getByRole('button', { name: 'Encuadrar todo' }).click();
+  await esperar(500);
+}
 async function clicEnMapa(page, id) {
-  const caja = await page.locator('.previa-mapa').boundingBox();
+  // The page scrolls on the map screen: measure the map again after anything that may move it.
+  const medir = () => page.locator('.previa-mapa').boundingBox();
+  let caja = await medir();
   for (let i = 0; ; i += 1) {
     let p = await hasta(async () => posicion(page, id), `el terreno ${id} no está en el mapa`);
     if (await alCentro(page, caja, id)) p = await hasta(async () => posicion(page, id), `el terreno ${id} no está en el mapa`);
+    caja = await medir();
     const otros = (await Promise.all(cercanos.filter((o) => o !== id).map((o) => posicion(page, o)))).filter(Boolean);
     if (i >= 12 || otros.every((o) => Math.hypot(o.x - p.x, o.y - p.y) > 24)) {
+      // Leaflet ignores a click while a zoom or pan is still animating: let the map settle.
+      await page.waitForFunction(() => !document.querySelector('.previa-mapa .leaflet-zoom-anim, .previa-mapa .leaflet-pan-anim'));
+      await esperar(300);
+      ({ x: p.x, y: p.y } = await posicion(page, id));
+      caja = await medir();
       await page.mouse.click(caja.x + p.x, caja.y + p.y);
       return;
     }
@@ -200,8 +236,21 @@ async function enLaTabla(page, fn) {
 }
 async function filtrar(page, selector, valor) {
   await enLaTabla(page, async () => {
-    await page.locator(selector).selectOption(valor);
-    await listo(page);
+    if (await page.locator(selector).evaluate((e) => e.tagName === 'SELECT')) {   // the page size
+      await page.locator(selector).selectOption(valor);
+      await listo(page);
+      return;
+    }
+    await verFiltros(page);
+    // The filter takes several values: leave only `valor` checked (none for '').
+    for (const caja of await page.locator(`${selector} input:checked`).all()) { await caja.uncheck(); await listo(page); }
+    if (valor) {
+      const caja = page.locator(`${selector} input[value="${valor}"]`);
+      if (!(await caja.count())) await page.locator(`${selector} .check-more`).click();
+      await caja.check();
+      await listo(page);
+    }
+    await cerrarFiltros(page);
   });
 }
 const buscarEnTabla = (page, texto) => enLaTabla(page, () => page.locator('#tabla-buscar').fill(texto));
@@ -251,7 +300,7 @@ await revisar('administrador: entra a la tabla maestra y «Inventario» ya no es
   await hasta(async () => /#\/tabla\/maestra$/.test(ada.page.url()), `dirección ${ada.page.url()}`);
   const menu = await ada.page.locator('nav.nav .nav-item').allInnerTexts();
   cierto(!menu.includes('Inventario'), `menú: ${menu}`);
-  cierto(menu.includes('Tabla maestra'), `menú: ${menu}`);
+  cierto(menu.includes('Terrenos'), `menú: ${menu}`);
   igual(await modoBoton(ada.page, 'Tabla').getAttribute('aria-pressed'), 'true', 'Tabla activo');
   igual(await ada.page.getByRole('button', { name: 'Mapa de esta página' }).count(), 0, 'botón anterior');
 });
@@ -287,7 +336,7 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
   igual(reuniones(ada) - antes, 1, 'una reunión (111 < 200 por página)');
   // The counts live in the filters panel (filtered) and the legend (placed / not placed), once.
   cierto(/111 terrenos de 111/.test(await ada.page.locator('.mapa-tabla-rail .rail-result').innerText()), 'filtrados en el panel');
-  const leyenda = await ada.page.locator('.previa .legend').innerText();
+  const leyenda = await ada.page.locator('.mapa-tabla-leyenda .legend').innerText();
   cierto(/103 terrenos/.test(leyenda) && /8 terrenos fuera del mapa/.test(leyenda), `leyenda: ${leyenda}`);
   igual(await ada.page.locator('.previa-cuenta, .previa-pie, .tabla-pie:visible').count(), 0, 'sin cuentas repetidas arriba ni abajo');
   igual((await previa(ada.page)).cuerpos, 0, 'ningún cuerpo sin selección');
@@ -301,6 +350,7 @@ await revisar('administrador: el círculo de un terreno sin X/Y carga su contorn
   // be on its way: count only what the click asks for.
   await hasta(async () => !(await previa(ada.page)).cargando, 'la carga anterior no terminó', 120000);
   const antes = cuerposPedidos(ada).length;
+  await desdeCero(ada.page);
   await clicEnMapa(ada.page, conContorno);
   await hasta(async () => (await posicion(ada.page, conContorno))?.contorno === true, 'sin contorno');
   igual((await mapa(ada.page)).seleccion, conContorno, 'selección');
@@ -308,8 +358,7 @@ await revisar('administrador: el círculo de un terreno sin X/Y carga su contorn
   cierto(cuerposPedidos(ada).slice(antes).every((l) => l.includes(`/geometrias/${g1}/`)), 'sólo su cuerpo');
   await foto(ada.page, '02-administrador-contorno-seleccionado');
   await comprobarFondos(ada, conContorno);
-  await ada.page.getByRole('button', { name: 'Encuadrar todo' }).click();
-  await esperar(500);
+  await desdeCero(ada.page);
   await clicEnMapa(ada.page, conContorno2);
   await hasta(async () => (await posicion(ada.page, conContorno2))?.contorno === true, 'sin el segundo contorno');
   igual((await posicion(ada.page, conContorno))?.contorno, false, 'el anterior no retiene contorno');
@@ -369,7 +418,7 @@ await revisar('los filtros acotan el mapa; un filtro sin resultados y «sin ubic
   if (!esperados.includes(conLimite)) igual((await posicion(ada.page, conLimite)), null, 'el de Jalisco ya no está');
   cierto((await previa(ada.page)).cuerpos === 0 || esperados.includes(m.seleccion), 'sin cuerpo de fuera del filtro');
   await aTabla(ada.page);
-  igual(await ada.page.locator('#tabla-estado').inputValue(), 'Sonora', 'el filtro sigue en la tabla');
+  igual(await ada.page.locator('#tabla-estado input:checked').evaluateAll((n) => n.map((c) => c.value)), ['Sonora'], 'el filtro sigue en la tabla');
   await aMapa(ada.page);
   await buscarEnTabla(ada.page, 'nada coincide con esto');
   await hasta(async () => (await mapa(ada.page)).filas.length === 0 && /Ningún terreno coincide/.test(await ada.page.locator('.tabla-mapa-aviso').innerText()), 'estado vacío');
@@ -441,7 +490,7 @@ await revisar('un error al reunir se dice y se puede reintentar; la carga parcia
     }
     return r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"fallo simulado"}' });
   });
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => /No se pudo actualizar el mapa: muestra lo que se reunió antes/.test(await ada.page.locator('.tabla-mapa-aviso').innerText().catch(() => '')), 'aviso de actualización fallida');
   igual((await mapa(ada.page)).filas.length, TODOS.length, 'conserva el conjunto completo anterior, no el parcial');
   await ada.page.unroute(/\/terrenos\?.*limit=200/);
@@ -474,7 +523,9 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   // The filter is changed in Tabla and the map shown again at once, before the grid's page arrives.
   await aTabla(ada.page);
   await ada.page.route(/\/terrenos\?(?!.*limit=200)/, async (r) => { await esperar(1500); await r.continue(); });
-  await ada.page.locator('#tabla-estado').selectOption('Sonora');
+  await verFiltros(ada.page);
+  await ada.page.locator('#tabla-estado input[value="Sonora"]').check();
+  await cerrarFiltros(ada.page);
   await modoBoton(ada.page, 'Mapa').click();
   await esperar(300);                          // well before the grid's page (1.5 s)
   // Never the old query's 110 rows: either nothing yet or already the 52 of Sonora.
@@ -585,7 +636,7 @@ await revisar('operador: Tabla / Mapa en su base; nunca recibe filas ni contorno
   igual(await olga.page.locator('#tabla-vista').inputValue(), base.id, 'su base');
   const opciones = await olga.page.locator('#tabla-vista option').evaluateAll((o) => o.map((x) => x.value));
   igual(opciones, [base.id], 'sólo su base en el selector');
-  igual(await olga.page.locator('nav.nav .nav-item').allInnerTexts(), ['Tabla', 'Catálogo público'], 'menú del operador');
+  igual(await olga.page.locator('nav.nav .nav-item').allInnerTexts(), ['Terrenos'], 'menú del operador');
   await aMapa(olga.page);
   const m = await mapa(olga.page);
   igual([...m.filas].sort(), [...activos].sort(), 'su base completa');
@@ -594,6 +645,7 @@ await revisar('operador: Tabla / Mapa en su base; nunca recibe filas ni contorno
   const privadas = olga.api.filter((l) => l.includes('/terrenos?') && !l.includes('/api/publico/'));
   cierto(privadas.length && privadas.every((l) => l.includes(`/maestra/bases/${base.id}/terrenos?`)),
     `sólo la ruta de su base: ${privadas}`);
+  await desdeCero(olga.page);
   await clicEnMapa(olga.page, conContorno);
   await hasta(async () => (await posicion(olga.page, conContorno))?.contorno === true, 'contorno en el operador');
   await comprobarFondos(olga, conContorno);

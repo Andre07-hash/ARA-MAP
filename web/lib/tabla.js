@@ -197,7 +197,10 @@ export function cuerpoDeCelda(columna, valor, expectedVersion, draft = {}) {
 /* ------------------------------------------------------------------ lists */
 
 export const CONSULTA_VACIA = Object.freeze({
-  q: "", sort: "id", estado: "", municipio: "", tipo_terreno: Object.freeze([]),   // several types at once
+  q: "", sort: "id",
+  // Several states, municipalities and types at once.
+  estado: Object.freeze([]), municipio: Object.freeze([]), tipo_terreno: Object.freeze([]),
+  area_min_m2: "", area_max_m2: "",   // the area range, as typed
   limit: LIMITE_INICIAL,
 });
 
@@ -212,9 +215,11 @@ export function consultaDeLista(vista, consulta, cursor = null) {
   const c = { ...CONSULTA_VACIA, ...consulta };
   const q = new URLSearchParams();
   if (c.q.trim()) q.set("q", c.q.trim());
-  for (const campo of ["estado", "municipio"]) if (c[campo]) q.set(campo, c[campo]);
-  // Several types are one repeated parameter; the server matches any of them.
-  for (const tipo of [].concat(c.tipo_terreno || [])) q.append("tipo_terreno", tipo);
+  // Several values are one repeated parameter; the server matches any of them.
+  for (const campo of ["estado", "municipio", "tipo_terreno"]) {
+    for (const valor of [].concat(c[campo] || [])) q.append(campo, valor);
+  }
+  for (const campo of ["area_min_m2", "area_max_m2"]) if (c[campo]) q.set(campo, c[campo]);
   if (vista === VISTA_SIN_ASIGNAR) q.set("base", VISTA_SIN_ASIGNAR);
   if (c.sort && c.sort !== "id") q.set("sort", c.sort);
   q.set("limit", String(LIMITES.includes(c.limit) ? c.limit : LIMITE_INICIAL));

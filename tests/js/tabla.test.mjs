@@ -189,3 +189,18 @@ test("a number being typed gets its commas and sign, the caret after the same di
   assert.deepEqual(escribirNumero(sup, "doce mil", 8), { texto: "doce mil", cursor: 8 }, "letters are kept for the error");
   assert.deepEqual(leerCelda(sup, "doce mil"), { error: "Escribe un número." });
 });
+
+test("consultaDeLista: several states, municipalities and types are repeated parameters", () => {
+  const q = new URLSearchParams(consultaDeLista("maestra", {
+    estado: ["Jalisco", "Nuevo León"], municipio: ["Zapopan"], tipo_terreno: ["Industrial", "Agrícola"],
+    area_min_m2: "500",
+  }));
+  assert.deepEqual(q.getAll("estado"), ["Jalisco", "Nuevo León"]);
+  assert.deepEqual(q.getAll("municipio"), ["Zapopan"]);
+  assert.deepEqual(q.getAll("tipo_terreno"), ["Industrial", "Agrícola"]);
+  assert.equal(q.get("area_min_m2"), "500");
+  assert.equal(q.get("area_max_m2"), null);
+  // The same selection is the same query (the map's set key is built from it).
+  assert.equal(consultaDeLista("maestra", { estado: ["Jalisco"] }), consultaDeLista("maestra", { estado: ["Jalisco"] }));
+  assert.equal(consultaDeLista("maestra", {}), "limit=100");
+});

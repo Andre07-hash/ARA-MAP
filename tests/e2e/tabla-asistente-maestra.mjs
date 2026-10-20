@@ -9,10 +9,13 @@
  *
  * On the global master table (with terrains in no base, and matches outside
  * the table's current page): a clarification lists nothing; a search shows
- * its criteria, the real total and pages of ten; a result outside the page
- * opens its detail; three results are compared; closing leaves the table as
- * it was; the map of the master table still works. Also: an operator never
- * sees it, and the provider never receives a name, id, base or note.
+ * its criteria, the real total and pages of ten, with every spelling of a
+ * type and «más de» as a strict bound; a result outside the page opens its
+ * detail; three results are compared, and a comparison refused for a change
+ * (409) or a deletion (404) leaves no old table on screen; closing leaves the
+ * table as it was, and a detail still loading opens nothing after closing;
+ * the map of the master table still works. Also: an operator never sees it,
+ * and the provider never receives a name, id, base or note.
  * Optional: ASISTENTE_CAPTURAS=dir, CHROMIUM=/path, ASISTENTE_PUERTO, PYTHON.
  */
 
@@ -133,14 +136,20 @@ for (let n = 0; n < 20; n += 1) {
   const extra = n === 0 ? { asking_price: 2500000, moneda: 'MXN', availability: 'available' }
     : n === 1 ? { asking_price: 150000, moneda: 'USD' } : {};
   coinciden.push((await crear({ terreno: `Lote Maestra ${String(n).padStart(2, '0')} Ficticio`,
-    superficie_m2: 10000 + n * 250, ...extra }, n >= 14)).id);
+    superficie_m2: 10250 + n * 250, ...extra }, n >= 14)).id);
 }
+// Other spellings of the same type are found too (and are not in a base).
+for (const tipo of ['industrial', 'Indústrial']) {
+  coinciden.push((await crear({ terreno: `Lote Grafía ${tipo} Ficticio`, tipo_terreno: tipo, superficie_m2: 15000 })).id);
+}
+// «más de 10,000 m²» is strict: exactly 10,000 m² is not a match.
+const frontera = (await crear({ terreno: 'Lote Frontera Ficticio', superficie_m2: 10000 })).id;
 for (let n = 0; n < 45; n += 1) {                                     // filler: other states and types
   await crear({ terreno: `Lote Relleno ${n} Ficticio`, estado: n % 2 ? 'Colima' : 'Yucatán',
     tipo_terreno: n % 3 ? 'Agrícola' : 'Industrial', superficie_m2: 20000 });
 }
 await crear({ terreno: 'Lote Pequeño Ficticio', superficie_m2: 5000 });  // Jalisco, industrial, too small
-const SIN_BASE = coinciden.slice(0, 14);
+const SIN_BASE = [...coinciden.slice(0, 14), ...coinciden.slice(20)];
 await ada.page.reload();          // the table reads the bases created above
 await ada.page.locator('.tabla-pantalla').waitFor();
 
@@ -184,14 +193,18 @@ await revisar('buscar: criterios, total real, diez por página y más resultados
   const d = dialogo(ada.page);
   await preguntar(d, 'Busca terrenos industriales en Jalisco de más de 10,000 m²');
   igual(await d.locator('.asistente-maestra-criterios li').allInnerTexts(), [
-    'Estado: Jalisco', 'Tipo de terreno: Industrial', 'Superficie registrada: al menos 10,000 m²'], 'criterios');
-  cierto(/20 terrenos coinciden\. Mostrando 10\./.test(await d.locator('.asistente-maestra-total').innerText()), 'total');
+    'Estado: Jalisco', 'Tipo de terreno: Industrial (con sus variantes de mayúsculas y acentos)',
+    'Superficie registrada: más de 10,000 m²'], 'criterios');
+  cierto(/22 terrenos coinciden\. Mostrando 10\./.test(await d.locator('.asistente-maestra-total').innerText()), 'total');
   igual(await resultados(d).count(), 10, 'primera página');
-  await d.getByRole('button', { name: 'Más resultados' }).click();
-  await hasta(async () => (await resultados(d).count()) === 20, 'la segunda página no llegó');
+  for (const n of [20, 22]) {
+    await d.getByRole('button', { name: 'Más resultados' }).click();
+    await hasta(async () => (await resultados(d).count()) === n, `no llegaron ${n} resultados`);
+  }
   igual(await d.getByRole('button', { name: 'Más resultados' }).count(), 0, 'sobra «Más resultados»');
   const ids = await resultados(d).evaluateAll((li) => li.map((x) => x.dataset.id));
   igual([...ids].sort(), [...coinciden].sort(), 'el conjunto encontrado');
+  cierto(!ids.includes(frontera), '«más de 10,000 m²» incluyó uno de 10,000 m²');
   const sinBase = await resultados(d).filter({ hasText: 'Sin base asignada' }).count();
   igual(sinBase, SIN_BASE.length, 'terrenos sin base entre los resultados');
   igual(await resultados(d).filter({ hasText: 'Base Maestra Ficticia' }).count(), coinciden.length - SIN_BASE.length,
@@ -239,6 +252,22 @@ await revisar('comparar tres: tabla registrada, advertencias y resumen rotulado'
   if (SHOTS) await ada.page.screenshot({ path: join(SHOTS, 'comparacion.png') });
 });
 
+await revisar('una comparación rechazada (cambio o borrado) no deja la anterior como vigente', async () => {
+  const d = dialogo(ada.page);
+  const actual = (await admin('GET', `/api/inventario/terrenos/${coinciden[0]}`)).datos.terreno;
+  igual((await admin('PATCH', `/api/inventario/terrenos/${coinciden[0]}`,
+    { expected_version: actual.version, changes: { asking_price: 2600000 } })).status, 200, 'cambio de precio');
+  for (const [paso, patron] of [['cambio', /cambió mientras se comparaba/], ['borrado', /ya no existe/]]) {
+    if (paso === 'borrado') {          // the server reports a missing terrain before a stale version
+      const t = (await admin('GET', `/api/inventario/terrenos/${coinciden[0]}`)).datos.terreno;
+      igual((await admin('POST', `/api/inventario/terrenos/${coinciden[0]}/borrar`, { expected_version: t.version })).status, 200, 'borrado');
+    }
+    await d.getByRole('button', { name: 'Comparar seleccionados' }).click();
+    await hasta(async () => patron.test(await d.locator('.asistente-terreno-estado').innerText()), `sin aviso de ${paso}`);
+    igual(await d.locator('.asistente-maestra-tabla, .asistente-maestra-resumen').count(), 0, `comparación vieja tras ${paso}`);
+  }
+});
+
 await revisar('cerrar: la tabla queda como estaba y el panel olvida todo', async () => {
   const d = dialogo(ada.page);
   await d.getByRole('button', { name: 'Cerrar', exact: true }).last().click();
@@ -250,8 +279,38 @@ await revisar('cerrar: la tabla queda como estaba y el panel olvida todo', async
   await dialogo(ada.page).waitFor();
   igual(await resultados(dialogo(ada.page)).count(), 0, 'el panel conservó resultados');
   igual(await dialogo(ada.page).locator('.asistente-maestra-comparacion > *').count(), 0, 'el panel conservó la comparación');
-  await ada.page.keyboard.press('Escape');
-  await dialogo(ada.page).waitFor({ state: 'detached' });
+});
+
+await revisar('un detalle que todavía carga no se abre después de cerrar el asistente', async () => {
+  const d = dialogo(ada.page);
+  await preguntar(d, 'Busca terrenos industriales en Jalisco de más de 10,000 m²');
+  // A result outside the table's page: only those are read from the server.
+  let fuera;
+  for (;;) {
+    fuera = (await resultados(d).evaluateAll((li) => li.map((x) => x.dataset.id))).find((id) => !tablaAntes.ids.includes(id));
+    if (fuera) break;
+    const n = await resultados(d).count();
+    await d.getByRole('button', { name: 'Más resultados' }).click();
+    await hasta(async () => (await resultados(d).count()) > n, 'no llegó otra página');
+  }
+  let soltar;
+  const retenida = new Promise((r) => { soltar = r; });
+  let llego = false;
+  await ada.page.route(`**/api/inventario/terrenos/${fuera}`, async (ruta) => {
+    llego = true;
+    await retenida;
+    await ruta.continue().catch(() => {});
+  });
+  const nombre = await d.locator(`.asistente-maestra-fila[data-id="${fuera}"] .asistente-maestra-nombre`).innerText();
+  await d.locator(`.asistente-maestra-fila[data-id="${fuera}"]`).getByRole('button', { name: 'Ver detalle' }).click();
+  await hasta(async () => llego, 'el detalle no se pidió');
+  await d.getByRole('button', { name: 'Cerrar', exact: true }).last().click();
+  await d.waitFor({ state: 'detached' });
+  soltar();
+  await esperar(800);
+  igual(await ada.page.getByRole('dialog', { name: nombre }).count(), 0, 'el detalle se abrió tras cerrar el asistente');
+  igual(await ada.page.locator('.toast-error, [role="alert"]:visible').filter({ hasText: /terreno/ }).count(), 0, 'error tardío');
+  await ada.page.unroute(`**/api/inventario/terrenos/${fuera}`);
 });
 
 await revisar('mapa maestra después del asistente, sin segunda entrada', async () => {
@@ -261,9 +320,9 @@ await revisar('mapa maestra después del asistente, sin segunda entrada', async 
     return m && m.modo === 'mapa' && !m.reuniendo && m.total > 0;
   }), 'el mapa no reunió su conjunto');
   const mapa = await ada.page.evaluate(() => window.__araTabla.mapa());
-  igual(mapa.total, 66, 'terrenos de la tabla maestra en el mapa');
+  igual(mapa.total, 68, 'terrenos de la tabla maestra en el mapa');      // 69 created, one deleted
   igual(await botonAsistente(ada.page).isVisible(), false, 'el asistente global aparece en el mapa');
-  cierto(await ada.page.evaluate((id) => Boolean(window.__araTabla.posicion(id)), coinciden[0]), 'un terreno con X/Y no se dibuja');
+  cierto(await ada.page.evaluate((id) => Boolean(window.__araTabla.posicion(id)), coinciden[3]), 'un terreno con X/Y no se dibuja');
   await ada.page.getByRole('button', { name: 'Tabla', exact: true }).click();
   await botonAsistente(ada.page).waitFor();
 });

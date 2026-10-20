@@ -153,3 +153,26 @@ test("errors keep their code; the session's end and destroy drop everything", as
   s = b.estado;
   assert.equal(s.busqueda, null);
 });
+
+test("a refused new comparison never leaves the previous one as current", async () => {
+  for (const [status, code] of [[409, "conflict"], [404, "not_found"]]) {
+    responder = () => json(200, pagina(0, 10, null));
+    const b = crearBusqueda();
+    b.buscar("algo");
+    await listo(b);
+    b.alternar(id(0));
+    b.alternar(id(1));
+    responder = () => json(200, comparacion([0, 1]));
+    b.comparar();
+    assert.ok((await listo(b)).comparacion, "first comparison");
+    const r = retenida();
+    responder = () => r.espera;
+    b.comparar();
+    assert.equal(b.estado.comparacion, null, "dropped as soon as the new one starts");
+    r.soltar(json(status, { error: "x", detalle: { code } }));
+    const s = await listo(b);
+    assert.equal(s.comparacion, null);
+    assert.equal(s.error.status, status);
+    assert.equal(s.error.de, "comparando");
+  }
+});

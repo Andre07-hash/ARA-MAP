@@ -332,7 +332,7 @@ export function createTabla({
   // «Asistente IA» of the master table (issue #69): administrators, master
   // table as a grid only. It is a dialog of its own and never touches the grid.
   const asistenteMaestra = admin ? montarAsistenteMaestra({
-    abrirDetalle: (id) => detalleDesdeAsistente(id),
+    abrirDetalle: (id, signal) => detalleDesdeAsistente(id, signal),
     nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
   }) : null;
   if (asistenteMaestra) selectorModo.before(asistenteMaestra.boton);
@@ -1843,17 +1843,21 @@ export function createTabla({
 
   /** A result of the assistant: the row's own detail when it is on this
    * page, else the terrain as the server has it now, to read (the row's
-   * actions belong to the grid that shows it). */
-  async function detalleDesdeAsistente(id) {
+   * actions belong to the grid that shows it). Nothing opens, and no error
+   * shows, once the assistant's panel has closed (`signal` aborted). */
+  async function detalleDesdeAsistente(id, signal) {
+    if (signal?.aborted) return;
     if (filaDe(id)) { detalle(id); return; }
     let t;
     try {
-      ({ terreno: t } = await api.inventarioTerreno(id));
+      ({ terreno: t } = await api.inventarioTerreno(id, signal));
     } catch (error) {
-      if (vivo) toastError(error.status === 404 ? "Ese terreno ya no está disponible." : error.message);
+      if (vivo && !signal?.aborted && error?.name !== "AbortError") {
+        toastError(error.status === 404 ? "Ese terreno ya no está disponible." : error.message);
+      }
       return;
     }
-    if (!vivo || !t) return;
+    if (!vivo || signal?.aborted || !t) return;
     abrirDetalle({
       terreno: t, columnas, base: t.base_id ? baseDe(t.base_id) : null, admin, puedeCambiar: false,
       // Read-only and not a row of this page: no row to refresh or mark.

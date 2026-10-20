@@ -32,8 +32,9 @@ const RESUMEN_FALLIDO = {
 };
 
 /**
- * `abrirDetalle(id)` opens a result's detail; `nombreDeBase(id)` names a base
- * locally. Returns { boton, mostrar(visible), cerrar(), destroy() }.
+ * `abrirDetalle(id, signal)` opens a result's detail, and must open nothing
+ * once `signal` is aborted (the panel closed meanwhile); `nombreDeBase(id)`
+ * names a base locally. Returns { boton, mostrar(visible), cerrar(), destroy() }.
  */
 export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null }) {
   const config = new AbortController();
@@ -71,6 +72,8 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
 
   function construir() {
     const busqueda = crearBusqueda({ onCambio: pintar });
+    // A detail asked for from this panel opens only while the panel is open.
+    const detalles = new AbortController();
     const aviso = el("p", { class: "asistente-terreno-aviso" },
       "Al buscar, el servidor envía a Claude (Anthropic) sólo tu pregunta y la lista fija de filtros " +
       "admitidos, ningún terreno. Al comparar, envía sólo estos campos registrados de los terrenos elegidos, " +
@@ -171,7 +174,7 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
           onchange: (e) => { if (!busqueda.alternar(t.terreno_id)) e.target.checked = !e.target.checked; } }),
         el("label", { for: id, class: "asistente-maestra-nombre" }, t.nombre),
         el("span", { class: "secondary asistente-maestra-datos" }, `${base}${datos ? ` · ${datos}` : ""}`),
-        el("button", { type: "button", class: "btn btn-small btn-quiet", onclick: () => abrirDetalle(t.terreno_id) },
+        el("button", { type: "button", class: "btn btn-small btn-quiet", onclick: () => abrirDetalle(t.terreno_id, detalles.signal) },
           "Ver detalle"));
     }
 
@@ -228,7 +231,7 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
     return {
       nodo,
       enfocar: () => (ajustes.disponible ? pregunta : nodo).focus?.(),
-      destroy: () => busqueda.destroy(),
+      destroy: () => { detalles.abort(); busqueda.destroy(); },
     };
   }
 

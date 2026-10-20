@@ -61,7 +61,7 @@ def interpretar_ficticio(pregunta: str) -> str:
     minimo = re.search(r"más de ([\d,.]+) ?m", texto)
     if minimo:
         condiciones.append({"texto": minimo.group(0), "filtro": "superficie"})
-        filtros["superficie_m2_min"] = float(minimo.group(1).replace(",", ""))
+        filtros["superficie_m2_mayor_que"] = float(minimo.group(1).replace(",", ""))
     cerca = re.search(r"cerca de[^,.]*", texto)
     if cerca:
         condiciones.append({"texto": cerca.group(0), "filtro": None})

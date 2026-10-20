@@ -197,9 +197,15 @@ export function crearBusqueda({ onCambio = () => {}, api = { buscar, resultados,
       cambiar({ seleccion: Object.freeze([...estado.seleccion, t]), comparacion: null });
       return true;
     },
+    /** Compare the selection. The previous comparison is dropped first, so
+     * a refused one (409, 404, any error) never leaves an old table or
+     * summary on screen as if it were current. */
     comparar() {
       const sel = estado.seleccion;
-      if (sel.length < MIN_SELECCION || sel.length > MAX_SELECCION) return false;
+      if (!vivo || estado.fase !== "inactivo" || sel.length < MIN_SELECCION || sel.length > MAX_SELECCION) {
+        return false;
+      }
+      cambiar({ comparacion: null });
       return pedir("comparando", (s) => api.comparar(sel, s), (datos) => {
         cambiar({ fase: "inactivo", comparacion: validarComparacion(datos, sel) ?? invalida() });
       });

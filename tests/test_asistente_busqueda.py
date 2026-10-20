@@ -340,8 +340,7 @@ class Casos(Escenario):
             with self.subTest(cambio=nombre):
                 a, b = self.coinciden[10 + 2 * n], self.coinciden[11 + 2 * n]
                 cuerpo = self.elegir(a, b)
-                cambio = (lambda f, b: lambda: f(b))(cambio, b)
-                self.guion(durante=cambio)
+                self.guion(durante=lambda cambio=cambio, b=b: cambio(b))
                 respuesta = self.call("POST", COMPARAR, cuerpo)
                 self.assertEqual(respuesta[0], status, respuesta)
                 self.assertNotIn("simulado", json.dumps(respuesta[1]))

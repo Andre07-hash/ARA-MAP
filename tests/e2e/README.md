@@ -207,3 +207,21 @@ node tabla-asistente.mjs                            # respuestas simuladas en el
 ASISTENTE_CONECTADO=1 node tabla-asistente.mjs      # servidor real + proveedor ficticio
 # ASISTENTE_CAPTURAS=carpeta para capturas
 ```
+
+## Asistente IA de la tabla maestra (#69)
+
+Búsqueda y comparación desde la **Tabla maestra global**, siempre conectada:
+levanta `asistente_servidor.py` (servidor real, variables `ARA_MAP_CHAT_*`
+ficticias, adaptador real de Anthropic con un transporte ficticio que nunca se
+conecta). Para interpretar búsquedas, ese transporte usa una lectura rudimentaria
+por palabras clave (`interpretar_ficticio`), que no es Claude. Con datos
+ficticios: terrenos sin base y coincidencias fuera de la página de la tabla,
+una aclaración sin listado, criterios, total real y páginas de diez, detalle
+de un resultado, comparación de tres con monedas distintas, nada excluido
+enviado al proveedor, la tabla intacta al cerrar y el mapa maestra después.
+Sin clave, sin red y sin gasto: **no es una prueba de Claude real**.
+
+```bash
+cd tests/e2e && npm ci
+node tabla-asistente-maestra.mjs            # ASISTENTE_CAPTURAS=carpeta para capturas
+```

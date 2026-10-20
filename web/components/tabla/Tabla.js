@@ -70,6 +70,7 @@ import {
   abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia, pedirDestino, pedirNombreDeBase,
 } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
+import { montarAsistenteMaestra } from "./asistenteMaestra.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
 
 const BUSCAR_MS = 300;
@@ -327,6 +328,14 @@ export function createTabla({
     if (celda && !editando) editar(celda.parentNode.dataset.id, celda.dataset.col);
   });
   tbody.addEventListener("keydown", alTeclear);
+
+  // «Asistente IA» of the master table (issue #69): administrators, master
+  // table as a grid only. It is a dialog of its own and never touches the grid.
+  const asistenteMaestra = admin ? montarAsistenteMaestra({
+    abrirDetalle: (id) => detalleDesdeAsistente(id),
+    nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
+  }) : null;
+  if (asistenteMaestra) selectorModo.before(asistenteMaestra.boton);
 
   /* --------------------------------------------------------------- scope */
 
@@ -858,6 +867,7 @@ export function createTabla({
     }
     const sinAcceso = !vista;
     selectorModo.hidden = sinAcceso;
+    asistenteMaestra?.mostrar(vista === VISTA_MAESTRA && !mapa);
     lienzo.hidden = sinAcceso || mapa;
     panelMapa.hidden = sinAcceso || !mapa;
     cuerpo.classList.toggle("modo-mapa", mapa);
@@ -1831,6 +1841,28 @@ export function createTabla({
     detalleAbierto = abierto;
   }
 
+  /** A result of the assistant: the row's own detail when it is on this
+   * page, else the terrain as the server has it now, to read (the row's
+   * actions belong to the grid that shows it). */
+  async function detalleDesdeAsistente(id) {
+    if (filaDe(id)) { detalle(id); return; }
+    let t;
+    try {
+      ({ terreno: t } = await api.inventarioTerreno(id));
+    } catch (error) {
+      if (vivo) toastError(error.status === 404 ? "Ese terreno ya no está disponible." : error.message);
+      return;
+    }
+    if (!vivo || !t) return;
+    abrirDetalle({
+      terreno: t, columnas, base: t.base_id ? baseDe(t.base_id) : null, admin, puedeCambiar: false,
+      // Read-only and not a row of this page: no row to refresh or mark.
+      onArchivos: () => {},
+      onErrorDeArchivos: (e) => toastError(e.mensaje || "No se pudo completar la operación con el archivo."),
+      onHistorial: () => openTerrainHistory({ id: t.id, nombre: t.draft?.terreno }),
+    });
+  }
+
   async function borrar(id) {
     const t = filaDe(id);
     const gen = generacion;
@@ -1921,6 +1953,7 @@ export function createTabla({
     destroy() {
       vivo = false;
       limpiarAlcance();
+      asistenteMaestra?.destroy();
       previa.destroy();
       archivos.destroy();          // widgets, loader, their requests and object URLs
       delete window.__araTabla;

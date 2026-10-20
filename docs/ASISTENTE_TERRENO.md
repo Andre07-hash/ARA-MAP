@@ -14,6 +14,24 @@ id, la base, la dirección, las coordenadas, contactos, notas, descripción,
 columnas personalizadas, historial ni adjuntos. `faltantes` se calcula en el
 servidor y no llama al modelo.
 
+## Búsqueda y comparación en la tabla maestra (#69)
+
+Botón «Asistente IA» de la **Tabla maestra** (sólo administradores, sólo en
+vista de tabla). Contrato HTTP en el issue #69.
+
+- **Buscar:** a Claude sólo van la pregunta y la especificación fija de
+  filtros, ningún terreno. Su JSON se valida en `server/asistente/busqueda.py`
+  contra una lista cerrada. Los valores de texto deben coincidir con valores
+  registrados. Después se usan `parse_query` y `repo.listar` sobre todo el
+  inventario, incluidos los terrenos sin base. Lo que no se puede ejecutar
+  exactamente pide aclaración y no muestra ningún listado. Las páginas
+  siguientes no vuelven a llamar al modelo.
+- **Comparar 2–3:** la tabla la construye el servidor con los mismos 10
+  campos, sin cálculos ni conversiones. Claude sólo escribe un resumen de las
+  fichas A/B/C; si falla, la tabla se muestra con el error del resumen.
+- Interpretación y resumen comparten los límites, la concurrencia y el gasto
+  de arriba.
+
 ## Configuración (sólo servidor; apagado por defecto)
 
 | Variable | Valor |
@@ -72,6 +90,10 @@ revisar en `uso_ia` estado, tokens y costo. No registrar prompts ni respuestas.
 
 ## Pruebas
 
-`tests/test_asistente_terreno.py` (SQLite y, con `ARA_MAP_TEST_DATABASE_URL`,
-Postgres desechable) usa un transporte simulado del adaptador real: sin red,
-sin clave, sin gasto. No demuestra que una llamada real funcione.
+`tests/test_asistente_terreno.py` y `tests/test_asistente_busqueda.py` (SQLite
+y, con `ARA_MAP_TEST_DATABASE_URL`, Postgres desechable) usan un transporte
+simulado del adaptador real: sin red, sin clave, sin gasto. Las e2e conectadas
+(`tests/e2e/tabla-asistente.mjs` con `ASISTENTE_CONECTADO=1` y
+`tests/e2e/tabla-asistente-maestra.mjs`) usan el servidor real con el
+proveedor ficticio de `tests/e2e/asistente_servidor.py`. Nada de esto
+demuestra que una llamada real funcione.

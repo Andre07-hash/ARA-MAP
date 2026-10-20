@@ -234,11 +234,24 @@ def _registrados(valor: str, registrados: list[str]) -> list[str]:
     return []
 
 
-def validar(conn: DatabaseConnection, filtros: Mapping[str, Any]) -> dict[str, Any]:
+def _nombre(valor: str, variantes: list[str]) -> str:
+    """The spelling that names a value: as asked if registered so, else the
+    capitalized one if there is one, else the first."""
+    if valor in variantes:
+        return valor
+    return next((v for v in variantes if v[:1].isupper() and v[1:] == v[1:].lower()), variantes[0])
+
+
+def validar(conn: DatabaseConnection, filtros: Mapping[str, Any]
+            ) -> tuple[dict[str, Any], dict[str, Any]]:
     """The meaning of structurally valid filters, against the inventory.
 
-    Returns the canonical filters (registered spellings). Raises AclaracionError
-    for anything that cannot be run exactly as asked.
+    Returns (canonical, expanded). The canonical filters name each value asked
+    once, by one registered spelling: they are what the client gets and sends
+    back for the next page, so they stay within the input limits whatever the
+    data holds. The expanded filters name every registered spelling of each
+    value, and are only ever turned into the query. Raises AclaracionError for
+    anything that cannot be run exactly as asked.
     """
     if not any(k != "descendente" and k != "orden" for k in filtros):
         raise AclaracionError("Indica al menos un criterio: estado, municipio, tipo de terreno,"
@@ -248,18 +261,21 @@ def validar(conn: DatabaseConnection, filtros: Mapping[str, Any]) -> dict[str, A
     registrados = {"estado": facetas["estados"], "municipio": facetas["municipios"],
                    "tipo_terreno": facetas["tipos"]}
     canon: dict[str, Any] = dict(filtros)
+    expandidos: dict[str, Any] = dict(filtros)
     for campo in TEXTOS:
         if campo not in filtros:
             continue
-        valores = []
+        nombres, valores = [], []
         for valor in filtros[campo]:
             encontrado = _registrados(valor, registrados[campo])
             if not encontrado:
                 cerca = _parecidos(valor, registrados[campo])
                 raise AclaracionError(f"No hay terrenos con {ETIQUETAS[campo].lower()} «{valor}» registrado."
                                  + (f" Valores registrados parecidos: {', '.join(cerca)}." if cerca else ""))
+            nombres.append(_nombre(valor, encontrado))
             valores.extend(encontrado)
-        canon[campo] = list(dict.fromkeys(valores))
+        canon[campo] = list(dict.fromkeys(nombres))
+        expandidos[campo] = list(dict.fromkeys(valores))
     for desde, mas_de, hasta, menos_de in LIMITES.values():
         inferior = [k for k in (desde, mas_de) if k in filtros]
         superior = [k for k in (hasta, menos_de) if k in filtros]
@@ -277,7 +293,7 @@ def validar(conn: DatabaseConnection, filtros: Mapping[str, Any]) -> dict[str, A
         raise AclaracionError("¿El precio es total o por m²?")
     if not hay_precio and ("moneda" in filtros or "precio_base" in filtros):
         raise AclaracionError("Indica el precio mínimo o máximo que buscas.")
-    return canon
+    return canon, expandidos
 
 
 def consulta(filtros: Mapping[str, Any], cursor: str | None) -> dict[str, Any]:
@@ -308,17 +324,14 @@ def consulta(filtros: Mapping[str, Any], cursor: str | None) -> dict[str, Any]:
     return q
 
 
-def criterios(filtros: Mapping[str, Any]) -> list[dict[str, str]]:
+def criterios(filtros: Mapping[str, Any], expandidos: Mapping[str, Any]) -> list[dict[str, str]]:
     """The interpreted criteria, in words, as the search will run them."""
     salida = []
     for campo in TEXTOS:
         if campo in filtros:
             # One name per value asked; the other spellings of it are searched too.
-            grupos: dict[str | None, list[str]] = {}
-            for v in filtros[campo]:
-                grupos.setdefault(db.plegar(v), []).append(v)
-            texto = " o ".join(g[0] for g in grupos.values())
-            if any(len(g) > 1 for g in grupos.values()):
+            texto = " o ".join(filtros[campo])
+            if len(expandidos[campo]) > len(filtros[campo]):
                 texto += " (con sus variantes de mayúsculas y acentos)"
             salida.append({"campo": campo, "texto": f"{ETIQUETAS[campo]}: {texto}"})
     rango = _rango(filtros, LIMITES["superficie"], " m²", "")
@@ -355,8 +368,12 @@ def resultado(t: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def pagina(conn: DatabaseConnection, filtros: Mapping[str, Any], cursor: str | None) -> dict[str, Any]:
-    terrenos, total, siguiente, _ = repo.listar(conn, consulta(filtros, cursor))
-    return {"estado": "resultados", "criterios": criterios(filtros), "filtros": dict(filtros),
+    """One page for filters as the client holds them: validated and expanded
+    again here, on every page, so the first and the next pages run the same
+    query (each spelling registered at the time of the page)."""
+    canon, expandidos = validar(conn, filtros)
+    terrenos, total, siguiente, _ = repo.listar(conn, consulta(expandidos, cursor))
+    return {"estado": "resultados", "criterios": criterios(canon, expandidos), "filtros": canon,
             "total": total, "terrenos": [resultado(t) for t in terrenos], "next_cursor": siguiente}
 
 

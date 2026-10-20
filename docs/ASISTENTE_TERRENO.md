@@ -22,7 +22,9 @@ vista de tabla). Contrato HTTP en el issue #69.
 - **Buscar:** a Claude sólo van la pregunta y la especificación fija de
   filtros, ningún terreno. Su JSON se valida en `server/asistente/busqueda.py`
   contra una lista cerrada. Cada valor de texto se busca con todas sus
-  grafías registradas (mayúsculas, acentos, plural simple). «Al menos» y
+  grafías registradas (mayúsculas, acentos, plural simple); el cliente sólo
+  guarda un nombre por valor pedido y el servidor vuelve a ampliar las
+  grafías en cada página. «Al menos» y
   «hasta» son límites inclusivos (`>=`, `<=`); «más de» y «menos de», estrictos
   (`>`, `<`), sin redondear. Después se usan `parse_query` y `repo.listar`
   sobre todo el inventario, incluidos los terrenos sin base. Lo que no se puede ejecutar

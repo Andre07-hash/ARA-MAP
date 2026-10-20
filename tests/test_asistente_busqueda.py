@@ -63,10 +63,12 @@ class Casos(Escenario):
         self.entorno(ENTORNO)
         # 23 matches: 8 unassigned, 15 in Base Uno; and others that must not match.
         self.coinciden = [self.nuevo_terreno(i, base=None if i < 8 else self.b1) for i in range(23)]
-        self.nuevo_terreno(90, superficie_m2=9999)                         # too small
-        self.nuevo_terreno(91, estado="Colima")                            # elsewhere
-        self.nuevo_terreno(92, tipo_terreno="Agrícola")                    # another type
-        self.nuevo_terreno(93, superficie_m2=None, superficie_ha=5)        # area only in ha
+        self.extra = {
+            90: self.nuevo_terreno(90, superficie_m2=9999),                    # too small
+            91: self.nuevo_terreno(91, estado="Colima"),                       # elsewhere
+            92: self.nuevo_terreno(92, tipo_terreno="Agrícola"),               # another type
+            93: self.nuevo_terreno(93, superficie_m2=None, superficie_ha=5),   # area only in ha
+        }
 
     def entorno(self, valores):
         entorno = patch.dict(os.environ, valores)
@@ -147,9 +149,9 @@ class Casos(Escenario):
                                    "superficie_m2_min": 10000}))
         primera = self.ok(self.buscar())
         self.assertEqual(primera["total"], 26)
-        self.assertEqual(sorted(primera["filtros"]["tipo_terreno"]),
-                         sorted(["Industrial", "industrial", "Indústrial", "INDUSTRIAL"]))
-        self.assertIn("Tipo de terreno: INDUSTRIAL (con sus variantes de mayúsculas y acentos)",
+        # One name per value asked goes back and forth; every spelling is searched.
+        self.assertEqual(primera["filtros"]["tipo_terreno"], ["Industrial"])
+        self.assertIn("Tipo de terreno: Industrial (con sus variantes de mayúsculas y acentos)",
                       [c["texto"] for c in primera["criterios"]])
         vistos, pagina = [t["terreno_id"] for t in primera["terrenos"]], primera
         while pagina["next_cursor"]:
@@ -158,6 +160,26 @@ class Casos(Escenario):
             self.assertEqual(pagina["total"], 26)
             vistos += [t["terreno_id"] for t in pagina["terrenos"]]
         self.assertEqual(sorted(vistos), sorted(self.coinciden + variantes))
+
+    def test_more_spellings_than_the_input_limit_still_page_to_the_end(self):
+        grafias = ("industrial", "INDUSTRIAL", "Indústrial", "Industríal", "IndustriaL", "iNdustrial",
+                   "inDustrial", "indUstrial", "induStrial", "indusTrial", "industRial")
+        variantes = [self.nuevo_terreno(60 + i, tipo_terreno=t) for i, t in enumerate(grafias)]
+        guion = self.guion(interpretacion({"estado": ["Jalisco"], "tipo_terreno": ["Industrial"]}))
+        pagina = self.ok(self.buscar())
+        esperados = sorted([*self.coinciden, *variantes, self.extra[90], self.extra[93]])
+        self.assertEqual(pagina["total"], len(esperados))           # 12 spellings, one asked
+        self.assertEqual(pagina["filtros"]["tipo_terreno"], ["Industrial"])
+        vistos, paginas = [t["terreno_id"] for t in pagina["terrenos"]], 1
+        while pagina["next_cursor"]:
+            pagina = self.ok(self.call("POST", RESULTADOS, {"filtros": pagina["filtros"],
+                                                            "cursor": pagina["next_cursor"]}))
+            self.assertEqual(pagina["total"], len(esperados))
+            vistos += [t["terreno_id"] for t in pagina["terrenos"]]
+            paginas += 1
+        self.assertEqual(sorted(vistos), esperados)
+        self.assertEqual(paginas, 4)
+        self.assertEqual(len(guion.peticiones), 1)
 
     def test_strict_and_inclusive_bounds_run_as_asked(self):
         # coinciden[0] has exactly 10,000 m²; coinciden[22] has exactly 12,200 m².

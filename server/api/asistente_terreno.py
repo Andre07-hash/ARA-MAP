@@ -167,10 +167,9 @@ def buscar(request: Request) -> Respuesta:
     with db.session() as conn:
         auth.require(request, CAPACIDAD, conn)
         try:
-            canon = busqueda.validar(conn, filtros)
+            return {**busqueda.pagina(conn, filtros, None), "origen": "modelo"}
         except busqueda.AclaracionError as aclara:
             return {"estado": "aclaracion", "aclaracion": str(aclara), "origen": "reglas"}
-        return {**busqueda.pagina(conn, canon, None), "origen": "modelo"}
 
 
 def resultados(request: Request) -> Respuesta:
@@ -187,8 +186,7 @@ def resultados(request: Request) -> Respuesta:
     with db.session() as conn:
         auth.require(request, CAPACIDAD, conn)
         try:
-            canon = busqueda.validar(conn, filtros)
-            return {**busqueda.pagina(conn, canon, cursor), "origen": "reglas"}
+            return {**busqueda.pagina(conn, filtros, cursor), "origen": "reglas"}
         except busqueda.AclaracionError:
             # The registered values changed since the search: start again.
             raise _invalida({"filtros": "Los criterios ya no coinciden con el inventario."}) from None

@@ -1,6 +1,8 @@
-/* The tables' map as the old map screen was laid out: filters on the left,
- * the map in the middle with its legend and basemaps over it, and the
- * selected terrain's read-only record on the right.
+/* The tables' map: the map takes the whole screen with only "Encuadrar todo"
+ * and the basemaps over it. Its filters (and the price legend, at their foot)
+ * open as a drawer from the table bar's "Filtros" (abrirFiltros), and the
+ * selected terrain's read-only record floats over the map's right side.
+ * (The host opens them from its own filters panel: «Más filtros del mapa».)
  *
  * It wraps the table's map (vistaPrevia.js) and keeps its contract: the table
  * hands it every terrain of the view and query (the set), and this narrows
@@ -10,10 +12,10 @@
  * or the account changes. The terrain type is one of them (the table's own
  * type filter, when set, already bounds the set it hands over).
  *
- * The map takes the whole centre: no header strip above it. The "Filtros"
- * button (narrow screens) and the host's notices (avisos) float in its
- * top-left corner. The count of filtered terrains is the rail's, the placed /
- * not placed ones the legend's.
+ * The map takes the whole centre: no header strip above it. The host's
+ * notices (avisos) float in its top-left corner. The count of filtered
+ * terrains is the rail's, the placed / not placed ones the legend's;
+ * `onFiltros` tells the host the map's own filters changed, so it can say how many.
  *
  * The record is read-only. It shows the row as the table holds it now, the
  * live custom columns of the terrain's OWN base (the current base's, or, from
@@ -44,7 +46,7 @@ function filasDe(registros) {
 }
 
 export function createMapaPaneles({
-  cargador, onSeleccion, onDeseleccion, onError, nombreDeBase, definicionesDe,
+  cargador, onSeleccion, onDeseleccion, onError, nombreDeBase, definicionesDe, onFiltros,
 }) {
   let vivo = true;
   let filtros = FILTROS_MAPA;
@@ -66,13 +68,12 @@ export function createMapaPaneles({
     onChange: (cambio) => { filtros = { ...filtros, ...cambio }; aplicarFiltros(); },
     onReset: () => { filtros = FILTROS_MAPA; aplicarFiltros(); },
   });
+  // The legend explains the dots' colours; it sits at the foot of the filters.
+  const leyenda = el("div", { class: "mapa-tabla-leyenda" });
+  rail.element.append(leyenda);
   const railSlot = el("div", { class: "mapa-tabla-rail rail-slot" }, rail.element);
-  const btnFiltros = el("button", {
-    type: "button", id: "mapa-tabla-filtros", class: "btn btn-small filtros-btn", "aria-haspopup": "dialog",
-    onclick: () => abrirFiltros(),
-  }, "Filtros");
   let avisos = [];
-  const pintarArriba = () => previa.arriba(btnFiltros, ...avisos);
+  const pintarArriba = () => previa.arriba(...avisos);
   pintarArriba();
   const ficha = el("aside", {
     class: "mapa-tabla-ficha detail-slot", "aria-label": "Ficha del terreno", hidden: true,
@@ -80,10 +81,11 @@ export function createMapaPaneles({
   const centro = el("div", { class: "mapa-tabla-centro" }, previa.element);
   const element = el("div", { class: "mapa-tabla" }, railSlot, centro, ficha);
 
-  function abrirFiltros() {
+  function abrirFiltros(onCerrado) {
+    if (rail.element.closest("dialog")) return;
     openFiltersDrawer({
       rail, slot: railSlot,
-      onClosed: () => { btnFiltros.focus(); previa.mostrar(); },
+      onClosed: () => { onCerrado?.(); previa.mostrar(); },
     });
   }
 
@@ -105,10 +107,9 @@ export function createMapaPaneles({
       nuevaPagina, colorFor: (fila) => colorDeFila(fila, breaks),
     });
     rail.update({ terrenos: filas, filtros, visibles: visibles.length });
-    const activos = filtrosActivos();
-    btnFiltros.textContent = activos ? `Filtros (${activos})` : "Filtros";
+    onFiltros?.(filtrosActivos());
     const { ubicados, sinUbicacion } = conteoDeUbicacion(visibles);
-    previa.capas(Legend({
+    leyenda.replaceChildren(Legend({
       modo: "precio", capas: [], breaks, conteo: ubicados, sinUbicacion,
       textos: {
         sinUbicacion: `${plural(sinUbicacion, "terreno")} fuera del mapa: sin contorno activo ni X/Y válidas.`,
@@ -282,6 +283,10 @@ export function createMapaPaneles({
       pintarFicha();
     },
     get seleccion() { return previa.seleccion; },
+    /** The map's filters as a drawer; `onCerrado` gives the focus back to the opener. */
+    abrirFiltros,
+    /** Clear the map's own filters (the host's chip and its "Limpiar"). */
+    limpiarFiltros() { filtros = FILTROS_MAPA; aplicarFiltros(); },
     get estado() { return { ...previa.estado, filtros: filtrosActivos(), ficha: ficha.hidden ? null : previa.seleccion }; },
     mostrar() { previa.mostrar(); },
     posicionDe: (id) => previa.posicionDe(id),

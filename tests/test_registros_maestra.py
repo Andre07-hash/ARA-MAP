@@ -350,7 +350,9 @@ class Registros(Escenario):
                          (200, 3, ["Lote 1", "Lote a", "Uno A"]))
         self.assertEqual({t["base_id"] for t in body["terrenos"]}, {self.b1})
         self.assertEqual(body["facets"], {"estados": ["Jalisco"], "municipios": ["Zapopan"],
-                                          "monedas": ["USD"], "tipos": ["Industrial"]})
+                                          "monedas": ["USD"], "tipos": ["Industrial"],
+                                          "conteos": {"estados": {"Jalisco": 1}, "municipios": {"Zapopan": 1},
+                                                      "monedas": {"USD": 1}, "tipos": {"Industrial": 1}}})
         self.assertEqual(set(body), {"terrenos", "total", "next_cursor", "facets"})
         # Nothing is archived: the old filters are unknown now.
         for query in ("include_archived=true", "publication_state=archived"):
@@ -1005,7 +1007,8 @@ class RegistrosSqlite(Registros, unittest.TestCase):
             self.assertEqual((len(pagina), total, bool(siguiente)),
                              (5, 12, True) if valor == "true" else (0, 0, False))
             # One COUNT and one page of limit + 1 rows: no statement reads the base's records unbounded.
-            registros = [c for c in contadas if "FROM inventory_terrain t" in c and "DISTINCT" not in c]
+            # The facet queries are aggregates (one row per distinct value), not records.
+            registros = [c for c in contadas if "FROM inventory_terrain t" in c and "GROUP BY" not in c]
             self.assertEqual(len(registros), 2, contadas)
             self.assertTrue(registros[0].startswith("SELECT COUNT(*)"))
             self.assertTrue(registros[1].endswith("LIMIT 6"), registros[1][-40:])

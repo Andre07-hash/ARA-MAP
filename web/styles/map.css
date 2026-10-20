@@ -63,28 +63,29 @@
 
 /* ------------------------------------------------------- basemap switcher */
 
+/* A pill group like the Tabla / Mapa switch, sized for a finger. */
 .basemap-switcher {
   display: inline-flex;
   padding: 3px;
-  background: oklch(100% 0 0 / 0.94);
+  background: oklch(93% 0.003 270 / 0.94);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-pop);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
 }
 .basemap-option {
-  padding: var(--space-1) var(--space-3);
+  min-height: 32px;
+  padding: 0 var(--space-4);
   background: none;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-micro);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
   font-weight: 500;
   color: var(--ink-secondary);
   cursor: pointer;
   transition: background var(--duration-fast), color var(--duration-fast);
 }
-.basemap-option:hover { background: var(--paper-sunken); color: var(--ink); }
-.basemap-option.is-active { background: var(--ink); color: var(--ink-inverse); }
+.basemap-option:hover { color: var(--ink); }
+.basemap-option.is-active { background: var(--paper-overlay); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / 0.14); }
 
 /* --------------------------------------------------------------- unplaced */
 

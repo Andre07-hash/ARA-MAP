@@ -213,7 +213,7 @@ await caso('without Team B\'s modules the table works, says the files are unavai
   await page.locator('.previa-mapa .leaflet-container, .previa-mapa.leaflet-container').waitFor();
   // Counts: filtered in the filters panel, placed / not placed in the legend; the explanation behind the info toggle.
   await hasta(async () => /3 terrenos de 3/.test(await page.locator('.mapa-tabla-rail .rail-result').innerText()));
-  const leyenda = await page.locator('.previa .legend').innerText();
+  const leyenda = await page.locator('.mapa-tabla-leyenda .legend').innerText();
   assert.match(leyenda, /2 terrenos/);
   assert.match(leyenda, /1 terreno fuera del mapa/);
   assert.match(await page.locator('.previa-nota').textContent(), /Muestra todos los terrenos de esta vista con los filtros actuales/);

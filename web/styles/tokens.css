@@ -10,21 +10,21 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces -- warm neutrals, subtly layered rather than card-shadowed. */
-  --paper:          oklch(97.2% 0.004 85);
-  --paper-raised:   oklch(99.3% 0.002 85);
-  --paper-sunken:   oklch(94.6% 0.005 85);
-  --paper-overlay:  oklch(100% 0 0);
+  /* Surfaces -- cool, quiet neutrals: a grey ground and white cards. */
+  --paper:          #f5f5f7;
+  --paper-raised:   #fbfbfd;
+  --paper-sunken:   #ebebf0;
+  --paper-overlay:  #ffffff;
 
   /* Ink */
-  --ink:            oklch(19% 0.006 60);
-  --ink-secondary:  oklch(44% 0.006 60);
-  --ink-muted:      oklch(61% 0.006 60);
+  --ink:            #1d1d1f;
+  --ink-secondary:  #515154;
+  --ink-muted:      #6e6e73;
   --ink-inverse:    oklch(99% 0 0);
 
   /* Hairlines. Rules, not borders: structure without weight. */
-  --rule:           oklch(88% 0.005 85);
-  --rule-strong:    oklch(78% 0.006 85);
+  --rule:           #e5e5ea;
+  --rule-strong:    #d2d2d7;
 
   /* Status. Fixed, never themed; always paired with an icon and a label. */
   --status-error:   #d03b3b;
@@ -55,9 +55,10 @@
   --space-6: 2rem;
   --space-7: 3rem;
 
-  --radius-sm: 3px;
-  --radius:    5px;
-  --radius-lg: 8px;
+  --radius-sm: 4px;
+  --radius:    8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
 
   /* Elevation. Used only where something genuinely floats above the map. */
   --shadow-panel: 0 1px 2px oklch(19% 0.006 60 / 0.06),
@@ -72,7 +73,7 @@
 
   --rail-width: 16.5rem;
   --panel-width: 24rem;
-  --header-height: 3.25rem;
+  --header-height: 3.5rem;
 
   --z-map: 1;
   --z-overlay: 500;

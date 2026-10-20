@@ -83,6 +83,17 @@ const ESTADOS = {
  * may still be read (server codes): not a scope loss, a permission change. */
 const SIN_ESCRITURA = new Set(["forbidden"]);
 
+/** A disclosure that closes on Escape (focus back on its summary) and when the focus leaves it. */
+function cerrarAlSalir(details) {
+  details.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !details.open) return;
+    e.stopPropagation();
+    details.open = false;
+    details.querySelector("summary").focus();
+  });
+  details.addEventListener("focusout", (e) => { if (!details.contains(e.relatedTarget)) details.open = false; });
+}
+
 export function createTabla({
   sesion, soloConsulta = () => false, vistaInicial = null, modoInicial = null, onVista, onPermisos, onRevalidar,
 }) {
@@ -230,13 +241,28 @@ export function createTabla({
 
   const btnAgregar = el("button", { type: "button", class: "btn btn-principal", onclick: () => agregar() },
     "Agregar terreno");
-  const btnColumnas = el("button", { type: "button", class: "btn btn-quiet", onclick: () => columnasDialogo() },
-    "Columnas");
-  const btnBases = admin && el("button", { type: "button", class: "btn btn-quiet", onclick: () => basesDialogo() },
-    "Bases y accesos");
-  const btnRecargar = el("button", {
-    type: "button", class: "btn btn-quiet", onclick: () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()),
-  }, "Actualizar");
+  // The less frequent actions live in the "⋯" menu; choosing one closes it.
+  const deMenu = (etiqueta, accion) => el("button", {
+    type: "button", class: "menu-item",
+    onclick: () => { menuMas.open = false; accion(); },
+  }, etiqueta);
+  const btnColumnas = deMenu("Columnas", () => columnasDialogo());
+  const btnBases = admin && deMenu("Bases y accesos", () => basesDialogo());
+  const btnRecargar = deMenu("Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
+  // The Excel bases of the legacy workspace keep their import and export.
+  const lnkExcel = admin && el("a", {
+    class: "menu-item", href: "#/bases", onclick: () => { menuMas.open = false; },
+  }, "Bases de Excel importadas");
+  const menuMas = el("details", { class: "menu-mas" },
+    el("summary", { class: "btn btn-quiet btn-icono", "aria-label": "Más acciones", title: "Más acciones" }, "⋯"),
+    el("div", { class: "menu-panel" }, btnColumnas, btnBases, btnRecargar, lnkExcel));
+  cerrarAlSalir(menuMas);
+  const btnFiltros = el("button", {
+    type: "button", class: "btn btn-quiet", "aria-expanded": "false", "aria-controls": "tabla-filtros",
+    onclick: () => { filtrosAbiertos = !filtrosAbiertos; pintarModo(); },
+  }, "Filtros");
+  let filtrosAbiertos = false;
+  const chips = el("div", { class: "tabla-chips", role: "group", "aria-label": "Filtros activos" });
   const btnModoTabla = segment("Tabla", modo === "tabla", () => mostrarComo("tabla"));
   const btnModoMapa = segment("Mapa", modo === "mapa", () => mostrarComo("mapa"));
   const selectorModo = el("div", { class: "segmented tabla-modo", role: "group", "aria-label": "Mostrar como" },
@@ -248,15 +274,17 @@ export function createTabla({
 
   // The grid's query controls. The map does not show them: it keeps their
   // values (they bound its set) and says so in the inherited-filters note.
-  const deLaConsulta = [
-    campoDe(buscar, "Buscar"),
+  const filtrosFila = el("div", { id: "tabla-filtros", class: "tabla-filtros", hidden: true },
     campoDe(selEstado, "Estado"),
     campoDe(selMunicipio, "Municipio"),
     el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Tipo"),
       selTipo.element),
     campoDe(selOrden, "Ordenar por"),
     casilla(chkDesc, "Descendente"),
-  ];
+  );
+  const busqueda = el("div", { class: "tabla-busqueda" },
+    el("label", { class: "sr-only", for: buscar.id }, "Buscar"), buscar, chips);
+  const deLaConsulta = [busqueda, btnFiltros];
   const listaHeredados = el("ul", { class: "tabla-heredados-lista" });
   const heredados = el("details", { class: "tabla-heredados", hidden: true },
     el("summary", { class: "btn btn-small" }),
@@ -268,19 +296,17 @@ export function createTabla({
       el("p", { class: "muted" }, "Los filtros del mapa se aplican dentro de este conjunto. " +
         "Para cambiar estos, vuelve a Tabla."),
     ));
-  heredados.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape" || !heredados.open) return;
-    e.stopPropagation();
-    heredados.open = false;
-    heredados.querySelector("summary").focus();
-  });
-  // Closes when the focus leaves it; the panel takes the focus of a click on its text.
-  heredados.addEventListener("focusout", (e) => { if (!heredados.contains(e.relatedTarget)) heredados.open = false; });
+  // The panel takes the focus of a click on its text, so it stays open then.
+  cerrarAlSalir(heredados);
+  // The view is the screen's title; its label stays for screen readers.
+  selVista.classList.add("tabla-titulo");
   const barra = el("div", { class: "tabla-barra" },
-    campoDe(selVista, "Vista"),
-    heredados,
-    ...deLaConsulta,
-    el("div", { class: "tabla-acciones" }, selectorModo, btnAgregar, btnColumnas, btnBases, btnRecargar),
+    el("div", { class: "tabla-cabeza" },
+      el("label", { class: "sr-only", for: selVista.id }, "Vista"), selVista,
+      heredados,
+      el("div", { class: "tabla-acciones" }, selectorModo, btnFiltros, btnAgregar, menuMas)),
+    busqueda,
+    filtrosFila,
   );
 
   const aviso = el("p", { class: "tabla-aviso", hidden: true });
@@ -613,6 +639,9 @@ export function createTabla({
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
     btnRecargar.hidden = !vista;
+    // Without a view an operator has nothing to do in the menu, and nothing to filter.
+    menuMas.hidden = !vista && !admin;
+    btnFiltros.hidden = !vista || modo === "mapa";
     aviso.hidden = !(vista && lectura);
     aviso.textContent = soloConsulta() ? "ARA Map está en modo de solo consulta: no se puede editar." : "";
   }
@@ -866,6 +895,9 @@ export function createTabla({
     for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
     // Hidden, never cleared: the grid finds its query as it left it.
     for (const nodo of deLaConsulta) nodo.hidden = mapa;
+    filtrosFila.hidden = mapa || !vista || !filtrosAbiertos;
+    btnFiltros.setAttribute("aria-expanded", String(!filtrosFila.hidden));
+    pintarChips();
     if (btnBases) btnBases.hidden = mapa;
     pintarHeredados();
     pintarPermisos();
@@ -896,6 +928,19 @@ export function createTabla({
       consulta.municipio && ["Municipio", consulta.municipio],
       consulta.tipo_terreno.length > 0 && ["Tipo de terreno", consulta.tipo_terreno.join(", ")],
     ].filter(Boolean);
+  }
+
+  /** On the grid, the active filters as chips, each removable; the search box shows its own. */
+  function pintarChips() {
+    const quitar = { Estado: { estado: "" }, Municipio: { municipio: "" }, "Tipo de terreno": { tipo_terreno: [] } };
+    const activos = modo === "mapa" ? [] : filtrosHeredados().filter(([etiqueta]) => quitar[etiqueta]);
+    btnFiltros.textContent = activos.length ? `Filtros (${activos.length})` : "Filtros";
+    chips.replaceChildren(...activos.map(([etiqueta, valor]) => el("span", { class: "chip tabla-filtro-chip" },
+      `${etiqueta}: ${valor}`,
+      el("button", {
+        type: "button", class: "tabla-chip-quitar", "aria-label": `Quitar el filtro ${etiqueta}`,
+        disabled: !vista, onclick: () => { buscar.focus(); consultar(quitar[etiqueta]); },
+      }, "×"))));
   }
 
   /** On the map, a small note of the table's filters, only when there are any. */

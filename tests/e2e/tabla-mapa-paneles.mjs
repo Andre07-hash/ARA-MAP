@@ -30,6 +30,20 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
+// The grid's filters open under the "Filtros" button.
+const verFiltros = async (page) => {
+  const boton = page.locator('[aria-controls="tabla-filtros"]');
+  if (await boton.getAttribute('aria-expanded') !== 'true') await boton.click();
+};
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -127,6 +141,7 @@ const leyenda = (page) => page.locator('.previa .legend');
 /* The table's Tipo filter takes several types: its summary says which, its panel checks them. */
 const tipoTabla = async (page) => (await page.locator('#tabla-tipo > summary').innerText()).trim();
 async function marcarTipo(page, tipo, marcado = true) {
+  await verFiltros(page);
   await page.locator('#tabla-tipo > summary').click();
   await page.locator('#tabla-tipo').getByLabel(tipo, { exact: true }).setChecked(marcado);
   await page.keyboard.press('Escape');
@@ -253,11 +268,13 @@ await revisar('el mapa ocupa el espacio: una fila delgada arriba, sin franjas ni
   for (const id of ['tabla-buscar', 'tabla-estado', 'tabla-municipio', 'tabla-tipo', 'tabla-orden', 'tabla-desc']) {
     igual(await p.locator(`#${id}`).isVisible(), false, `#${id} oculto en el mapa`);
   }
-  for (const nombre of ['Agregar terreno', 'Columnas', 'Bases y accesos']) {
-    igual(await p.locator('.tabla-barra').getByRole('button', { name: nombre }).isVisible(), false, `${nombre} oculto`);
+  igual(await p.locator('.tabla-barra').getByRole('button', { name: 'Agregar terreno' }).isVisible(), false, 'Agregar terreno oculto');
+  // Inside the closed "⋯" menu nothing is visible, so the hidden attribute is what tells.
+  for (const nombre of ['Columnas', 'Bases y accesos']) {
+    igual(await p.locator('.menu-panel .menu-item', { hasText: nombre }).getAttribute('hidden'), '', `${nombre} oculto`);
   }
   cierto(await p.locator('#tabla-vista').isVisible() && await modoBoton(p, 'Tabla').isVisible()
-    && await p.getByRole('button', { name: 'Actualizar' }).isVisible(), 'vista, Tabla/Mapa y Actualizar');
+    && await p.locator('.tabla-acciones .menu-mas > summary').isVisible(), 'vista, Tabla/Mapa y el menú ⋯');
   const barra = await p.locator('.tabla-barra').boundingBox();
   cierto(barra.height <= 48, `una fila delgada (${barra.height}px)`);
   igual(await p.locator('.tabla-heredados').isVisible(), false, 'sin filtros heredados no hay nota');
@@ -329,7 +346,7 @@ await revisar('los filtros del mapa acotan el mapa, conservan los colores y no t
   igual(await ada.page.locator('#buscar').inputValue(), 'Lote Panel 01', 'los filtros del mapa se conservan al alternar');
   igual((await previa(ada.page)).filas, 3, 'mismo resultado');
   // Actualizar gathers the set again and keeps the map's filters.
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo; }, 'actualizado');
   igual([await ada.page.locator('#buscar').inputValue(), (await previa(ada.page)).filas], ['Lote Panel 01', 3], 'Actualizar conserva los filtros');
   // Limpiar clears only the map's filters.
@@ -360,6 +377,7 @@ await revisar('Tipo de terreno: filtro local del mapa; Limpiar lo quita y no toc
 
 await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin filtros del mapa', async () => {
   await aTabla(ada.page);
+  await verFiltros(ada.page);
   await ada.page.locator('#tabla-estado').selectOption('Jalisco');
   await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('estado=Jalisco'); }, 'reunión con el estado');
@@ -408,6 +426,7 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await marcarTipo(ada.page, 'Habitacional Ficticio', false);
   igual(await tipoTabla(ada.page), 'Todos', 'sin tipos');
   // By keyboard: Space checks a type, the table reloads, and focus and the open panel stay.
+  await verFiltros(ada.page);
   await ada.page.locator('#tabla-tipo > summary').focus();
   await ada.page.keyboard.press('Enter');
   await ada.page.keyboard.press('Tab');
@@ -451,7 +470,7 @@ await revisar('la ficha: valores y comentario vigentes, columnas de su base, arc
   igual((await ficha(ada.page).getByRole('button').allInnerTexts()).sort(), ['Ver a escala', '×'].sort(), 'sólo cerrar y ver a escala');
   // A change made elsewhere arrives with Actualizar; the record follows.
   await escribir(elegido, { changes: { notas_internas: 'Comentario ficticio nuevo' } });
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => (await fichaTexto(ada.page)).includes('Comentario ficticio nuevo'), 'valor actual en la ficha');
   // A table search that still includes the selected terrain keeps the selection and its record.
   await aTabla(ada.page);
@@ -567,7 +586,7 @@ await revisar('pantalla estrecha: filtros en un cajón, ficha superpuesta, tecla
   // A phone: the bar wraps without clipping, the map takes the rest, and the record opens over it and closes.
   await ada.page.setViewportSize({ width: 390, height: 844 });
   await esperar(300);
-  for (const control of [ada.page.locator('#tabla-vista'), modoBoton(ada.page, 'Mapa'), ada.page.getByRole('button', { name: 'Actualizar' }), boton]) {
+  for (const control of [ada.page.locator('#tabla-vista'), modoBoton(ada.page, 'Mapa'), ada.page.locator('.tabla-acciones .menu-mas > summary'), boton]) {
     const c = await control.boundingBox();
     cierto(c && c.x >= 0 && c.x + c.width <= 390, 'control esencial dentro de la pantalla');
   }

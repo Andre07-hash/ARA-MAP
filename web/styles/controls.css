@@ -8,7 +8,7 @@
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   font-size: var(--text-small);
   font-weight: 500;
   text-decoration: none;
@@ -19,7 +19,7 @@
 .btn:active { transform: translateY(1px); }
 
 .btn-principal { background: var(--ink); color: var(--ink-inverse); }
-.btn-principal:hover { background: oklch(28% 0.006 60); }
+.btn-principal:hover { background: #000; }
 
 .btn-quiet {
   background: var(--paper-overlay);
@@ -137,3 +137,25 @@
 .range-hint { margin-top: var(--space-1); font-size: var(--text-micro); }
 
 .rail-toggles { padding-top: var(--space-4); border-top: 1px solid var(--rule); }
+
+/* ------------------------------------------------------------ menus */
+
+/* A small menu on a native disclosure: the summary is its button. */
+.menu-mas { position: relative; }
+.menu-mas > summary { list-style: none; cursor: pointer; }
+.menu-mas > summary::-webkit-details-marker { display: none; }
+.btn-icono { width: 36px; height: 36px; padding: 0; justify-content: center; font-size: 1.125rem; line-height: 1; }
+.menu-panel {
+  position: absolute; top: calc(100% + var(--space-2)); right: 0; z-index: var(--z-modal);
+  display: grid; min-width: 15rem; max-width: calc(100vw - 2rem); padding: 6px;
+  background: var(--paper-overlay); border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.14);
+}
+.menu-item {
+  display: block; width: 100%; padding: 10px 12px;
+  background: none; border: 0; border-radius: var(--radius);
+  font-size: var(--text-body); color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
+}
+.menu-item:hover { background: var(--paper); }
+.menu-item + a.menu-item { border-top: 1px solid var(--rule); border-radius: 0 0 var(--radius) var(--radius); }
+

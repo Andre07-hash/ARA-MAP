@@ -15,6 +15,14 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8433').replace(/\/$/, '');
 const SHOTS = process.argv[2] ?? null;
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
@@ -118,14 +126,15 @@ await caso('administrator: role-aware navigation, master table columns, bases, g
   const { context, page, errores } = await abrir('ada');
   const nav = await page.locator('nav .nav-item').allInnerTexts();
   // "Inventario" left the menu: its map is the master table's Tabla / Mapa now.
-  assert.deepEqual(nav, ['Tabla maestra', 'Bases', 'Mapas guardados', 'Catálogo público']);
+  assert.deepEqual(nav, ['Terrenos', 'Mapas guardados']);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 2);
   await irATabla(page);
   assert.match(page.url(), /#\/tabla\/maestra$/);
   const cabeceras = await page.locator('thead th[data-col]').allInnerTexts();
   assert.deepEqual(cabeceras, ['Tipo de terreno', 'Nombre de terreno', 'Estado', 'Municipio', 'Superficie', 'HA',
     'Afectaciones %', 'Asking price', 'Asking $/m2', 'Comentarios', 'X', 'Y', 'Archivos', 'KMZ / KML', 'Base']);
 
-  await page.getByRole('button', { name: 'Bases y accesos' }).click();
+  await enMenu(page, 'Bases y accesos');
   const bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
   for (const nombre of ['Base Norte', 'Base Sur']) {
     await bases.getByLabel('Nombre', { exact: true }).fill(nombre);
@@ -154,7 +163,7 @@ await caso('administrator: role-aware navigation, master table columns, bases, g
   await page.locator('#tabla-vista').selectOption(B['Base Norte']);
   await page.waitForURL(new RegExp(`#/tabla/${B['Base Norte']}$`));
   await listo(page);
-  await page.getByRole('button', { name: 'Columnas' }).click();
+  await enMenu(page, 'Columnas');
   const columnas = page.getByRole('dialog', { name: 'Columnas de la base' });
   for (const [nombre, tipo, opciones] of [['Nota', 'texto'], ['Avance', 'numero'],
     ['Etapa', 'opcion', 'En curso\nCerrado'], ['Visita', 'fecha']]) {
@@ -186,9 +195,9 @@ await caso('operator: only her bases; blank create; every core and custom type e
   const { context, page, api, errores } = await abrir('olga');
   await page.waitForURL(new RegExp(`#/tabla/${B['Base Norte']}$`));   // the operator's entry point
   await listo(page);
-  assert.deepEqual(await page.locator('nav .nav-item').allInnerTexts(), ['Tabla', 'Catálogo público']);
+  assert.deepEqual(await page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
   assert.deepEqual(await page.locator('#tabla-vista option').allInnerTexts(), ['Base Norte']);
-  assert.equal(await page.getByRole('button', { name: 'Bases y accesos' }).count(), 0);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 0);
   assert.ok(!api.some((l) => / (401|403|500)$/.test(l)), `no refused or failed call: ${api.filter((l) => / (401|403|500)$/.test(l))}`);
   assert.ok(!api.some((l) => /\/api\/(bases|mapas|carpetas|inventario\/terrenos) /.test(l)), 'no legacy or master-table call');
 
@@ -576,7 +585,7 @@ await caso('transfer: real preview, explicit confirmation, the row leaves; the s
 await caso('custom columns: rename and reorder keep ids, values and history; delete removes column and values', async () => {
   const { context, page, errores } = await abrir('ada');
   await irATabla(page, B['Base Norte']);
-  await page.getByRole('button', { name: 'Columnas' }).click();
+  await enMenu(page, 'Columnas');
   const columnas = page.getByRole('dialog', { name: 'Columnas de la base' });
   const item = (nombre) => columnas.locator('li', { has: page.getByLabel(`Nombre de la columna ${nombre}`) });
   await columnas.getByLabel('Nombre de la columna Nota').fill('Observación');
@@ -625,7 +634,7 @@ await caso('grants: a concurrent change is shown, not overwritten; losing the gr
   const ada = await abrir('ada');
   const alan = await abrir('alan');
   await irATabla(ada.page);
-  await ada.page.getByRole('button', { name: 'Bases y accesos' }).click();
+  await enMenu(ada.page, 'Bases y accesos');
   const bases = ada.page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
   await bases.locator('li', { has: ada.page.getByLabel('Nombre de la base Base Norte') })
     .getByRole('button', { name: 'Accesos…' }).click();
@@ -650,7 +659,7 @@ await caso('grants: a concurrent change is shown, not overwritten; losing the gr
   await accesos.getByRole('button', { name: 'Cancelar' }).click();
 
   // Olga looks again: the base is gone for her, and so is everything it showed.
-  await olga.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(olga.page, 'Actualizar');
   await olga.page.getByRole('dialog', { name: '¿Descartar cambios sin guardar?' }).getByRole('button', { name: 'Descartar' }).click();
   await olga.page.getByRole('heading', { name: 'Todavía no tienes una base de trabajo' }).waitFor();
   const visible = await olga.page.locator('body').innerText();
@@ -703,7 +712,7 @@ await caso('session loss: logout clears the table; the next account on the same 
   });
   await page.locator('#tabla-buscar').fill('Lote');
   await page.waitForTimeout(400);
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.getByRole('button', { name: 'Iniciar sesión' }).waitFor();
   await page.waitForTimeout(2000);
   assert.equal(await page.locator('.tabla-pantalla').count(), 0);
@@ -741,7 +750,7 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
   const enSur = await agregar(page);
   await escribir(page, enSur, 'core:terreno', 'Lote del Sur');
   const sur = (dialogo) => dialogo.locator('li', { has: page.getByLabel('Nombre de la base Base Sur') });
-  await page.getByRole('button', { name: 'Bases y accesos' }).click();
+  await enMenu(page, 'Bases y accesos');
   let bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
   await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
   // Earlier journeys (the transfer) may have left terrains in Base Sur too: the server says how many.
@@ -761,7 +770,7 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
     assert.equal(r.status, 200, `borrar ${t.id}`);
   }
   await irATabla(page, B['Base Norte']);             // not standing in the base that goes away
-  await page.getByRole('button', { name: 'Bases y accesos' }).click();
+  await enMenu(page, 'Bases y accesos');
   bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
   await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
   await page.getByRole('dialog', { name: '¿Borrar la base «Base Sur»?' }).getByRole('button', { name: 'Borrar definitivamente' }).click();
@@ -794,12 +803,12 @@ await caso('public and legacy administrator journeys still work', async () => {
   await page.waitForURL(/#\/tabla\/maestra\/mapa$/);
   await page.locator('.previa-mapa').waitFor();
   assert.ok(!api.some((l) => / (4\d\d|500)$/.test(l) ), `no failing call: ${api.filter((l) => / (4\d\d|500)$/.test(l))}`);
-  await page.getByRole('link', { name: 'Bases', exact: true }).click();
+  await enMenu(page, 'Bases de Excel importadas');
   await page.waitForURL(/#\/bases$/);
   await page.locator('.screen').first().waitFor();
   await page.getByRole('link', { name: 'Mapas guardados' }).click();
   await page.waitForURL(/#\/mapas$/);
-  await page.getByRole('link', { name: 'Catálogo público' }).click();
+  await enCuenta(page, 'Catálogo público');
   await page.getByText('Todavía no hay terrenos publicados').waitFor();
   await foto(page, '20-administrador-catalogo');
   assert.ok(!api.some((l) => / (4\d\d|500)$/.test(l)));

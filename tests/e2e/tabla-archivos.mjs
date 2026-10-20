@@ -23,6 +23,14 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8435').replace(/\/$/, '');
 const SHOTS = process.argv[2] ?? null;
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
@@ -227,7 +235,7 @@ await caso('without Team B\'s modules the table works, says the files are unavai
   await page.keyboard.type('Lote Nombrado Ficticio');
   await page.keyboard.press('Enter');
   await hasta(async () => (await celda(page, enBlanco, 'core:terreno').innerText()).trim() === 'Lote Nombrado Ficticio');
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
   assert.deepEqual(errores, []);
   await context.close();
@@ -344,7 +352,7 @@ await caso('logout during a boundary load tears everything down; the next accoun
   await seleccionar(page, soloKmz);
   await hasta(async () => /Cargando el contorno/.test(await estadoMapa(page).innerText()));
   const antes = await page.evaluate(() => ({ ...window.__doble }));
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.locator('.tabla-pantalla').waitFor({ state: 'detached' });
   const d = await page.evaluate(() => ({ ...window.__doble }));
   assert.equal(d.fabricasDestruidas, antes.fabricasDestruidas + 1);

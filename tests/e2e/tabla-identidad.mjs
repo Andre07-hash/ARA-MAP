@@ -18,6 +18,14 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8435').replace(/\/$/, '');
 const BD = process.env.ARA_BD;
 const SHOTS = process.argv[2] ?? null;
@@ -241,7 +249,7 @@ for (const [nombre, abrir] of [
     await page.locator('dialog[open] .historial-evento', { hasText: GUARDADA }).first().waitFor();
   }],
   ['the columns of the base', async (page) => {
-    await page.getByRole('button', { name: 'Columnas' }).click();
+    await enMenu(page, 'Columnas');
     await page.getByLabel('Nombre de la columna Nota privada').waitFor();
   }],
   ['an unsaved editor and a clean table', async (page, id) => {
@@ -278,7 +286,7 @@ await caso('administrator dialogs (bases, grants, transfer preview) do not outli
   const id = fila();
   for (const abrir of [
     async (page) => {
-      await page.getByRole('button', { name: 'Bases y accesos' }).click();
+      await enMenu(page, 'Bases y accesos');
       const bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
       await bases.locator('li', { has: page.getByLabel('Nombre de la base Base Grande') }).getByRole('button', { name: 'Accesos…' }).click();
       await page.getByRole('dialog', { name: 'Accesos · Base Grande' }).getByLabel(/^Olivia Ficticia/).waitFor();
@@ -302,7 +310,7 @@ await caso('administrator dialogs (bases, grants, transfer preview) do not outli
     await cargada(p.page);
     const queda = await loQueQueda(p.page, ['Olivia Ficticia', 'Oriol Ficticia', 'Base 01', 'Bases y accesos', 'Tabla maestra']);
     assert.deepEqual([queda.marcas, queda.dialogosPrivados], [[], 0], JSON.stringify({ ...queda, donde: queda.donde.map((d) => d.slice(100, 220)) }));
-    assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Tabla', 'Catálogo público']);
+    assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
     assert.deepEqual(await p.page.locator('#tabla-vista option').allInnerTexts(), ['Base Grande']);
     assert.deepEqual(p.errores, []);
     await p.context.close();
@@ -314,7 +322,7 @@ await caso('a role change ends the session; signing in again shows the new role 
   await p.entrarPorApi('alan');
   await p.page.goto(`${URL_BASE}/#/tabla/maestra`);
   await cargada(p.page);
-  await p.page.getByRole('button', { name: 'Bases y accesos' }).click();
+  await enMenu(p.page, 'Bases y accesos');
   await p.page.getByLabel('Nombre de la base Base 01').waitFor();
   execFileSync('/usr/bin/python3', [join(RAIZ, 'scripts/cuentas.py'), '--sqlite', BD, 'rol', 'alan', 'operador'], { stdio: 'pipe' });
   await revalidar(p.page);
@@ -323,8 +331,8 @@ await caso('a role change ends the session; signing in again shows the new role 
   assert.deepEqual(sinTabla(queda), LIMPIO);
   await entrarEnDialogo(p.page, 'alan');
   await p.page.getByRole('heading', { name: 'Todavía no tienes una base de trabajo' }).waitFor();
-  assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Tabla', 'Catálogo público']);
-  assert.equal(await p.page.getByRole('button', { name: 'Bases y accesos' }).count(), 0);
+  assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
+  assert.equal(await p.page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 0);
   assert.equal((await p.api('GET', '/api/inventario/terrenos?limit=1')).status, 403);
   await foto(p.page, 'c1-05-cambio-de-rol');
   assert.deepEqual(p.errores, []);
@@ -402,7 +410,7 @@ await caso('logout with a save in flight and a dialog open leaves nothing, and t
   await page.locator('.tabla-editor').fill('Durango');
   await page.keyboard.press('Enter');
   await paso.enviada;
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.getByRole('dialog', { name: '¿Descartar cambios?' }).getByRole('button', { name: 'Descartar cambios' }).click();
   await page.getByRole('button', { name: 'Iniciar sesión' }).waitFor();
   await paso.soltar();

@@ -57,15 +57,14 @@ import { clearToasts, toast, toastError } from "./ui/toast.js";
 
 /* Operators get the table of their work bases and the public catalog. The
  * unscoped inventory and the legacy workspace are the administrators'. */
-const NAV_OPERADOR = [["tabla", "Tabla"], ["catalogo", "Catálogo público"]];
+const NAV_OPERADOR = [["tabla", "Terrenos"]];
 /* "Inventario" left the menu: its map is the master table's "Mapa" view now.
- * Its old addresses still work (see aplicarRuta). */
+ * Its old addresses still work (see aplicarRuta). The Excel bases are reached
+ * from the table's "⋯" menu, and the public catalog from the account menu. */
 const NAV_EQUIPO = [
-  ["tabla", "Tabla maestra"],
+  ["tabla", "Terrenos"],
   ["mapa", "Mapa"],
-  ["bases", "Bases"],
   ["mapas", "Mapas guardados"],
-  ["catalogo", "Catálogo público"],
 ];
 const NAV_PUBLICO = [["catalogo", "Catálogo"]];
 const REVALIDAR_MS = 10_000;   // focus/visibility revalidation, at most this often
@@ -79,7 +78,6 @@ const SORT_COMPARACION = { campo: "cambio", direccion: "asc" };
 
 let readOnly = true;        // legacy workspace actions: signed in only
 let configReadOnly = false;
-let cloud = false;
 
 let session = null;
 let tabla = null;           // the employee table of the signed-in account, kept alive
@@ -95,7 +93,6 @@ export async function mount(root) {
   try {
     const config = await api.config();
     configReadOnly = config.readOnly === true;
-    cloud = config.cloud === true;
     configureApi(config);
   } catch (error) {
     root.textContent = `No se pudo cargar la aplicación: ${error.message}`;
@@ -129,6 +126,12 @@ export async function mount(root) {
   });
 
   window.addEventListener("hashchange", aplicarRuta);
+  // A click outside an open menu closes it (Safari does not move the focus on a click).
+  document.addEventListener("pointerdown", (event) => {
+    for (const menu of document.querySelectorAll("details.menu-mas[open]")) {
+      if (!menu.contains(event.target)) menu.open = false;
+    }
+  });
   window.addEventListener("beforeunload", (event) => {
     // Unsaved cells, or an upload a reload would interrupt.
     if (editor?.dirty || tabla?.dirty || tabla?.subiendo) { event.preventDefault(); event.returnValue = ""; }
@@ -464,7 +467,6 @@ function renderHeader(host) {
         decoding: "async",
       }),
       el("span", { class: "brand-name" }, "ARA Map"),
-      cloud && sesion && el("span", { class: "chip" }, "Espacio compartido"),
     ),
     el("nav", { class: "nav", "aria-label": "Secciones" },
       items.map(([key, etiqueta]) =>
@@ -476,14 +478,31 @@ function renderHeader(host) {
       )
     ),
     sesionLista && el("div", { class: "session" },
-      sesion && el("span", { class: "session-user truncate", title: `Sesión de ${sesion.display_name}` },
-        sesion.display_name),
-      el("button", {
-        type: "button", class: "btn btn-quiet",
-        onclick: sesion ? cerrarSesion : () => session.signIn({ returnTo: null }),
-      }, sesion ? "Cerrar sesión" : "Iniciar sesión"),
+      sesion ? menuDeCuenta(sesion) : el("button", {
+        type: "button", class: "btn btn-quiet", onclick: () => session.signIn({ returnTo: null }),
+      }, "Iniciar sesión"),
     ),
   ]);
+}
+
+/* The account: who is signed in, the public catalog and signing out. */
+function menuDeCuenta(sesion) {
+  const iniciales = sesion.display_name.split(/\s+/).filter(Boolean).slice(0, 2)
+    .map((p) => [...p][0].toUpperCase()).join("");
+  const cerrar = () => { menu.open = false; };
+  const menu = el("details", { class: "menu-mas cuenta" },
+    el("summary", { class: "cuenta-boton", title: `Sesión de ${sesion.display_name}` },
+      el("span", { class: "cuenta-avatar", "aria-hidden": "true" }, iniciales),
+      el("span", { class: "session-user truncate" }, sesion.display_name)),
+    el("div", { class: "menu-panel" },
+      el("a", { class: "menu-item", href: routeHash({ nombre: "catalogo" }), onclick: cerrar }, "Catálogo público"),
+      el("button", { type: "button", class: "menu-item", onclick: () => { cerrar(); cerrarSesion(); } },
+        "Cerrar sesión")));
+  menu.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && menu.open) { e.stopPropagation(); cerrar(); menu.querySelector("summary").focus(); }
+  });
+  menu.addEventListener("focusout", (e) => { if (!menu.contains(e.relatedTarget)) cerrar(); });
+  return menu;
 }
 
 /* ------------------------------------------------------------------ views */

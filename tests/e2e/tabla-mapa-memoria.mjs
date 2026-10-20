@@ -23,6 +23,14 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8434').replace(/\/$/, '');
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
 const RAIZ = new URL('../..', import.meta.url).pathname;
@@ -80,7 +88,7 @@ await hastaOtra(() => page.getByRole('button', { name: 'Siguiente' }).click());
 const pagina2 = await ids();
 await subirKmz(pagina2[0]);
 await hastaOtra(() => page.getByRole('button', { name: 'Anterior' }).click());
-await page.getByRole('button', { name: 'Actualizar' }).click();
+await enMenu(page, 'Actualizar');
 await lista();
 await page.getByRole('button', { name: 'Mapa de esta página' }).click();
 await page.locator('.previa-mapa.leaflet-container').waitFor();

@@ -27,6 +27,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -176,7 +184,7 @@ async function irA(page, vista) {
     await page.goto(destino);
   } else if (misma) {
     // Same address: nothing reloads by itself; the page's own button does.
-    await page.getByRole('button', { name: 'Actualizar' }).click();
+    await enMenu(page, 'Actualizar');
   }
   await page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
   await hasta(async () => (await page.locator('#tabla-vista').inputValue()) === vista, 'la vista no es la pedida');

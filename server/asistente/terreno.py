@@ -280,6 +280,9 @@ class ProveedorAnthropic:
             raise ia.FallaIAError("tiempo", "sin respuesta a tiempo") from None
         except (urllib.error.URLError, OSError) as error:
             estado = "tiempo" if "timed out" in str(error) else "error"
+            # The error's class only (e.g. a certificate failure), never its text.
+            log.warning("no se pudo contactar al proveedor del asistente: %s",
+                        type(getattr(error, "reason", error)).__name__)
             raise ia.FallaIAError(estado, "no se pudo contactar al proveedor") from None
         try:
             datos = json.loads(crudo)

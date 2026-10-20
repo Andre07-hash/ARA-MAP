@@ -10,7 +10,9 @@
  * interface can be checked without the server half or any provider. Those
  * answers exist only here. With ASISTENTE_CONECTADO=1 nothing is intercepted
  * and the checks that need a scripted answer are skipped: the server must
- * have the assistant on, with its own test provider.
+ * have the assistant on, with its own test provider. ASISTENTE_REGISTRO names
+ * a file where that provider writes what it was sent, to check that the
+ * terrain's name, id and base never leave the server.
  *
  * Checks: who sees the entry point (operator, administrator with it off, on
  * but unconfigured, on); the three actions and a question, sending one query
@@ -60,8 +62,9 @@ await new Promise((resolve, reject) => {
 let fallos = 0;
 let omitidas = 0;
 const sesiones = [];
-async function revisar(nombre, fn, { simulado = false } = {}) {
+async function revisar(nombre, fn, { simulado = false, conectado = false } = {}) {
   if (simulado && CONECTADO) { omitidas += 1; console.log(`--   ${nombre} (omitida: necesita respuestas guionizadas)`); return; }
+  if (conectado && !CONECTADO) { omitidas += 1; console.log(`--   ${nombre} (omitida: sólo con ASISTENTE_CONECTADO=1)`); return; }
   try {
     await fn();
     console.log(`ok   ${nombre}`);
@@ -392,6 +395,33 @@ await revisar('errores: mensajes propios, reintento manual sólo cuando sirve', 
   igual(await respuestas(panel).count(), 1, 'ninguna respuesta errónea se muestra');
   await cerrarDetalle(d);
 }, { simulado: true });
+
+/* --------------------------------------------- against the real server */
+
+await revisar('conectado: las cuatro acciones pasan por el servidor y muestran sus campos', async () => {
+  const id = filas[15];
+  const d = await abrirDetalle(ada, id);
+  const panel = await abrirPanel(ada, d);
+  const nombre = await d.getByRole('heading', { level: 2 }).innerText();
+  for (const [boton, n] of [['Resumir el terreno', 1], ['Campos sin información', 2], ['Redactar descripción breve', 3]]) {
+    await panel.getByRole('button', { name: boton }).click();
+    await hasta(async () => (await respuestas(panel).count()) === n, `${boton} no llegó`);
+  }
+  await panel.getByLabel('Pregunta sobre este terreno').fill('¿Qué superficie tiene registrada?');
+  await panel.getByRole('button', { name: 'Preguntar' }).click();
+  await hasta(async () => (await respuestas(panel).count()) === 4, 'la pregunta no llegó');
+  const origenes = await respuestas(panel).evaluateAll((li) => li.map((x) => `${x.dataset.accion}:${x.dataset.origen}`));
+  igual(origenes, ['pregunta:modelo', 'descripcion:modelo', 'faltantes:reglas', 'resumen:modelo'], 'orígenes');
+  await respuestas(panel).last().getByText(/Campos consultados/).click();
+  cierto(/Estado Ficticio/.test(await respuestas(panel).last().innerText()), 'el servidor no usó el estado registrado');
+  igual(await panel.locator('b').count(), 0, 'HTML del proveedor interpretado');
+  if (process.env.ASISTENTE_REGISTRO) {
+    const enviado = readFileSync(process.env.ASISTENTE_REGISTRO, 'utf8');
+    cierto(enviado.includes('Estado Ficticio') && enviado.includes('¿Qué superficie tiene registrada?'), 'lo enviado no tiene los campos');
+    cierto(!enviado.includes(nombre) && !enviado.includes(id) && !enviado.includes(base.id), 'nombre, id o base enviados al proveedor');
+  }
+  await cerrarDetalle(d);
+}, { conectado: true });
 
 /* ------------------------------------------------- late answers / scope */
 

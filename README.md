@@ -52,10 +52,13 @@ La evidencia local y alojada de las mejoras está en los PR
 - Los datos y archivos alojados no dependen del disco de Render.
 - La ejecución local usa SQLite y almacenamiento local, separados del sitio.
 
-Los PDF y KMZ se adjuntan a filas existentes. La importación Excel/CSV antigua
-alimenta bases heredadas y **no** la tabla maestra. Para una carga inicial de
-filas existe `scripts/cargar_maestra.py`; es una operación del responsable con
-un destino explícito, no un comando para ejecutar contra el sitio por defecto.
+Los PDF y KMZ se adjuntan a filas existentes. En la tabla, el menú ⋯ ofrece
+«Exportar a Excel» (la vista con sus filtros) y, para administradores,
+«Importar Excel», que agrega filas nuevas a una base tras una revisión previa.
+La importación Excel/CSV antigua alimenta bases heredadas y **no** la tabla
+maestra. `scripts/cargar_maestra.py` hace la misma carga desde la terminal; es
+una operación del responsable con un destino explícito, no un comando para
+ejecutar contra el sitio por defecto.
 
 En los archivos de ARA, **X es latitud e Y longitud**. Los valores se guardan
 como vienen; superficies y precios no se convierten ni se calculan. Los precios

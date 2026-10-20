@@ -213,7 +213,7 @@ async function cerrarDetalle(page, d, { interrumpir = false } = {}) {
   // A closed <dialog> leaves the accessibility tree at once, but its `close`
   // event (which removes it and hands focus back to the table) is a later
   // task. Wait for that, or the focus return lands on whatever comes next.
-  await hasta(async () => (await page.locator('dialog').count()) === 0, 'el diálogo no terminó de cerrarse');
+  await hasta(async () => (await page.locator('dialog:not(#tabla-filtros)').count()) === 0, 'el diálogo no terminó de cerrarse');
 }
 async function subirEnDetalle(d, tipo, ruta) {
   const nombre = ruta.split('/').at(-1);

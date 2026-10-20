@@ -280,7 +280,7 @@ await caso('signed in, legacy bases and saved maps stay reachable and editable',
   await page.locator('.toolbar-title h1', { hasText: 'Base legado integración' }).waitFor();
   await page.getByRole('link', { name: 'Mapa', exact: true }).waitFor();             // nav offers the open base
   await foto(page, 'integrado-base-legado-1440');
-  await page.getByRole('link', { name: 'Mapas guardados' }).click();
+  await page.evaluate(() => { location.hash = '#/mapas'; });
   await page.getByRole('heading', { name: /Mapas/ }).first().waitFor();
   await page.getByRole('link', { name: 'Inventario' }).click();
   await page.locator('.toolbar-estado', { hasText: /terrenos/ }).waitFor();

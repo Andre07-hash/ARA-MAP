@@ -14,10 +14,16 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
-// The grid's filters open under the "Filtros" button.
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
 const verFiltros = async (page) => {
-  const boton = page.locator('[aria-controls="tabla-filtros"]');
-  if (await boton.getAttribute('aria-expanded') !== 'true') await boton.click();
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
 };
 
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8434').replace(/\/$/, '');
@@ -188,6 +194,7 @@ async function hastaOtraPagina(page, accion) {
   assert.equal(await filas(page), 100, 'pages replace each other; rows never accumulate');
   await verFiltros(page);
   const ordenar = await hastaOtraPagina(page, () => page.locator('#tabla-orden').selectOption('terreno'));
+  await cerrarFiltros(page);
   const buscar = await hastaOtraPagina(page, () => page.locator('#tabla-buscar').fill('nandu 12'));
   const coincidencias = (await page.locator('.tabla-cuenta').innerText()).trim();
   await page.locator('#tabla-buscar').fill('');

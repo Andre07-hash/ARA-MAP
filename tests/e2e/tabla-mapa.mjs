@@ -35,10 +35,16 @@ const enMenuDe = async (page, menu, nombre) => {
 const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
 const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
 
-// The grid's filters open under the "Filtros" button.
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
 const verFiltros = async (page) => {
-  const boton = page.locator('[aria-controls="tabla-filtros"]');
-  if (await boton.getAttribute('aria-expanded') !== 'true') await boton.click();
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
 };
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -217,6 +223,7 @@ async function filtrar(page, selector, valor) {
     await verFiltros(page);
     await page.locator(selector).selectOption(valor);
     await listo(page);
+    await cerrarFiltros(page);
   });
 }
 const buscarEnTabla = (page, texto) => enLaTabla(page, () => page.locator('#tabla-buscar').fill(texto));
@@ -491,6 +498,7 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   await ada.page.route(/\/terrenos\?(?!.*limit=200)/, async (r) => { await esperar(1500); await r.continue(); });
   await verFiltros(ada.page);
   await ada.page.locator('#tabla-estado').selectOption('Sonora');
+  await cerrarFiltros(ada.page);
   await modoBoton(ada.page, 'Mapa').click();
   await esperar(300);                          // well before the grid's page (1.5 s)
   // Never the old query's 110 rows: either nothing yet or already the 52 of Sonora.

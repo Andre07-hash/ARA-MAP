@@ -152,10 +152,36 @@
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.06), 0 12px 32px rgb(0 0 0 / 0.14);
 }
 .menu-item {
-  display: block; width: 100%; padding: 10px 12px;
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px 12px;
   background: none; border: 0; border-radius: var(--radius);
   font-size: var(--text-body); color: var(--ink); text-align: left; text-decoration: none; cursor: pointer;
 }
 .menu-item:hover { background: var(--paper); }
-.menu-item + a.menu-item { border-top: 1px solid var(--rule); border-radius: 0 0 var(--radius) var(--radius); }
+.menu-item .icono { margin-top: 2px; }
+.menu-item-texto { display: grid; gap: 2px; }
+.menu-item-nota { font-size: var(--text-small); color: var(--ink-muted); }
+.menu-separador { margin: 6px 4px; border: 0; border-top: 1px solid var(--rule); }
+.menu-separador:last-child, .menu-separador:first-child { display: none; }
+
+.icono { display: inline-flex; flex-shrink: 0; }
+.insignia {
+  display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px;
+  border-radius: var(--radius-pill); background: var(--ink); color: var(--ink-inverse);
+  font-size: var(--text-micro); font-weight: 600;
+}
+
+/* A side panel on a native modal <dialog>: focus trap, Escape and backdrop come with it. */
+dialog.cajon {
+  position: fixed; inset: 0 0 0 auto; width: min(24rem, 100vw); height: 100%; max-height: none;
+  margin: 0; padding: 0; border: 0; background: var(--paper-overlay); color: var(--ink);
+  box-shadow: -12px 0 40px rgb(0 0 0 / 0.12);
+}
+dialog.cajon[open] { display: flex; flex-direction: column; }
+dialog.cajon::backdrop { background: rgb(0 0 0 / 0.18); }
+.cajon-cabeza { display: flex; align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--rule); }
+.cajon-cabeza h2 { margin: 0; font-size: var(--text-lead); font-weight: 600; }
+.cajon-cabeza .icon-btn { margin-left: auto; }
+.cajon-cuerpo { flex: 1; overflow-y: auto; display: grid; align-content: start; gap: var(--space-5); padding: var(--space-5); }
+.cajon-pie { display: flex; gap: var(--space-2); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--rule); }
+.cajon-pie .btn { flex: 1; justify-content: center; }
 

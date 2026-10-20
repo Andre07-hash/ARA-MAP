@@ -198,6 +198,7 @@ export function cuerpoDeCelda(columna, valor, expectedVersion, draft = {}) {
 
 export const CONSULTA_VACIA = Object.freeze({
   q: "", sort: "id", estado: "", municipio: "", tipo_terreno: Object.freeze([]),   // several types at once
+  area_min_m2: "", area_max_m2: "",   // the area range, as typed
   limit: LIMITE_INICIAL,
 });
 
@@ -212,7 +213,7 @@ export function consultaDeLista(vista, consulta, cursor = null) {
   const c = { ...CONSULTA_VACIA, ...consulta };
   const q = new URLSearchParams();
   if (c.q.trim()) q.set("q", c.q.trim());
-  for (const campo of ["estado", "municipio"]) if (c[campo]) q.set(campo, c[campo]);
+  for (const campo of ["estado", "municipio", "area_min_m2", "area_max_m2"]) if (c[campo]) q.set(campo, c[campo]);
   // Several types are one repeated parameter; the server matches any of them.
   for (const tipo of [].concat(c.tipo_terreno || [])) q.append("tipo_terreno", tipo);
   if (vista === VISTA_SIN_ASIGNAR) q.set("base", VISTA_SIN_ASIGNAR);

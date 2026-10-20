@@ -38,10 +38,16 @@ const enMenuDe = async (page, menu, nombre) => {
 const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
 const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
 
-// The grid's filters open under the "Filtros" button.
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
 const verFiltros = async (page) => {
-  const boton = page.locator('[aria-controls="tabla-filtros"]');
-  if (await boton.getAttribute('aria-expanded') !== 'true') await boton.click();
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
 };
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
@@ -145,6 +151,7 @@ async function marcarTipo(page, tipo, marcado = true) {
   await page.locator('#tabla-tipo > summary').click();
   await page.locator('#tabla-tipo').getByLabel(tipo, { exact: true }).setChecked(marcado);
   await page.keyboard.press('Escape');
+  await cerrarFiltros(page);
 }
 
 async function irA(page, vista, modo = null) {
@@ -379,6 +386,7 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await aTabla(ada.page);
   await verFiltros(ada.page);
   await ada.page.locator('#tabla-estado').selectOption('Jalisco');
+  await cerrarFiltros(ada.page);
   await aMapa(ada.page);
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('estado=Jalisco'); }, 'reunión con el estado');
   const jalisco = (await mapa(ada.page)).filas.length;
@@ -441,6 +449,7 @@ await revisar('Limpiar no amplía el alcance de la tabla; otra vista empieza sin
   await hasta(async () => (await tipoTabla(ada.page)) === 'Todos', 'Espacio no desmarcó');
   await ada.page.keyboard.press('Escape');
   igual(await ada.page.locator('#tabla-tipo').evaluate((d) => d.open), false, 'Escape cierra');
+  await cerrarFiltros(ada.page);
   await aMapa(ada.page);
   await ada.page.locator('#buscar').fill('Lote Panel 00');
   await ada.page.locator('#tabla-vista').selectOption(otra.id);

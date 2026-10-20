@@ -488,7 +488,7 @@ await revisar('operador: cerrar sesión durante la subida pregunta; al confirmar
   await d.getByRole('button', { name: 'Seguir en la sesión' }).click();
   cierto(await olga.page.locator('.session-user').isVisible(), 'sigue la sesión');
   await enCuenta(olga.page, 'Cerrar sesión');
-  await enCuenta(d, 'Cerrar sesión');
+  await d.getByRole('button', { name: 'Cerrar sesión' }).click();
   await hasta(async () => (await olga.page.locator('.session-user').count()) === 0, 'no cerró sesión');
   const antes = olga.lecturas.length;
   await put.soltar();

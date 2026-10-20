@@ -51,9 +51,9 @@
  * footer shows only alerts and unfinished uploads.
  */
 
-import { api } from "../../lib/api.js";
+import { api, descargarXlsx } from "../../lib/api.js";
 import { clear, el } from "../../lib/dom.js";
-import { fmtCount } from "../../lib/format.js";
+import { fmtCount, plural } from "../../lib/format.js";
 import { nuevaClave } from "../../lib/inventario.js";
 import {
   columnasDe, CONSULTA_VACIA, consultaDeLista, crearCola, cuerpoDeCelda, esEditable, esGlobal,
@@ -66,8 +66,9 @@ import { toast, toastError } from "../ui/toast.js";
 import { conectarArchivos } from "./archivosAnfitrion.js";
 import { reunirPaginas } from "../../lib/inventario.js";
 import { segment } from "../inventory/DatosView.js";
+import { icono } from "../ui/iconos.js";
 import {
-  abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia, pedirDestino, pedirNombreDeBase,
+  abrirBases, abrirColumnas, abrirDetalle, abrirImportar, abrirTransferencia, pedirDestino, pedirNombreDeBase,
 } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
@@ -195,7 +196,12 @@ export function createTabla({
       consultar({ [campo]: elegidos });
     });
     element.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && element.open) { e.stopPropagation(); element.open = false; resumen.focus(); }
+      if (e.key !== "Escape" || !element.open) return;
+      // Only the panel closes, not the filters dialog it sits in.
+      e.preventDefault();
+      e.stopPropagation();
+      element.open = false;
+      resumen.focus();
     });
     element.addEventListener("focusout", (e) => { if (!element.contains(e.relatedTarget)) element.open = false; });
     resumen.addEventListener("click", (e) => { if (element.dataset.bloqueado) e.preventDefault(); });
@@ -240,50 +246,93 @@ export function createTabla({
   }, LIMITES.map((n) => el("option", { value: n, selected: n === consulta.limit }, String(n))));
 
   const btnAgregar = el("button", { type: "button", class: "btn btn-principal", onclick: () => agregar() },
-    "Agregar terreno");
+    icono("mas"), "Agregar terreno");
   // The less frequent actions live in the "⋯" menu; choosing one closes it.
-  const deMenu = (etiqueta, accion) => el("button", {
+  const deMenu = (nombre, etiqueta, accion, nota = null) => el("button", {
     type: "button", class: "menu-item",
     onclick: () => { menuMas.open = false; accion(); },
-  }, etiqueta);
-  const btnColumnas = deMenu("Columnas", () => columnasDialogo());
-  const btnBases = admin && deMenu("Bases y accesos", () => basesDialogo());
-  const btnRecargar = deMenu("Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
-  // The Excel bases of the legacy workspace keep their import and export.
-  const lnkExcel = admin && el("a", {
-    class: "menu-item", href: "#/bases", onclick: () => { menuMas.open = false; },
-  }, "Bases de Excel importadas");
+  }, icono(nombre), el("span", { class: "menu-item-texto" }, etiqueta,
+    nota && el("span", { class: "menu-item-nota" }, nota)));
+  const btnExportar = deMenu("bajar", "Exportar a Excel", () => exportar(), "La vista actual, con sus filtros");
+  const btnImportar = admin && deMenu("subir", "Importar Excel…", () => importar(), "Agrega filas a una base");
+  const btnBases = admin && deMenu("personas", "Bases y accesos", () => basesDialogo());
+  const btnColumnas = deMenu("columnas", "Columnas", () => columnasDialogo());
+  const btnRecargar = deMenu("actualizar", "Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
   const menuMas = el("details", { class: "menu-mas" },
-    el("summary", { class: "btn btn-quiet btn-icono", "aria-label": "Más acciones", title: "Más acciones" }, "⋯"),
-    el("div", { class: "menu-panel" }, btnColumnas, btnBases, btnRecargar, lnkExcel));
+    el("summary", { class: "btn btn-quiet btn-icono", "aria-label": "Más acciones", title: "Más acciones" },
+      icono("puntos")),
+    el("div", { class: "menu-panel" }, btnExportar, btnImportar,
+      el("hr", { class: "menu-separador" }), btnBases, btnColumnas, btnRecargar));
   cerrarAlSalir(menuMas);
+  const cuentaFiltros = el("span", { class: "insignia", hidden: true });
   const btnFiltros = el("button", {
     type: "button", class: "btn btn-quiet", "aria-expanded": "false", "aria-controls": "tabla-filtros",
-    onclick: () => { filtrosAbiertos = !filtrosAbiertos; pintarModo(); },
-  }, "Filtros");
-  let filtrosAbiertos = false;
+    "aria-haspopup": "dialog", onclick: () => abrirFiltros(),
+  }, icono("filtros"), "Filtros", cuentaFiltros);
   const chips = el("div", { class: "tabla-chips", role: "group", "aria-label": "Filtros activos" });
-  const btnModoTabla = segment("Tabla", modo === "tabla", () => mostrarComo("tabla"));
-  const btnModoMapa = segment("Mapa", modo === "mapa", () => mostrarComo("mapa"));
+  const btnLimpiar = el("button", { type: "button", class: "link-btn tabla-limpiar", onclick: () => limpiarFiltros() },
+    "Limpiar filtros");
+  const btnModoTabla = segment([icono("tabla"), "Tabla"], modo === "tabla", () => mostrarComo("tabla"));
+  const btnModoMapa = segment([icono("mapa"), "Mapa"], modo === "mapa", () => mostrarComo("mapa"));
   const selectorModo = el("div", { class: "segmented tabla-modo", role: "group", "aria-label": "Mostrar como" },
     btnModoTabla, btnModoMapa);
 
   const campoDe = (control, etiqueta) => el("div", { class: "tabla-campo" },
     el("label", { class: "field-label", for: control.id }, etiqueta), control);
   const casilla = (control, etiqueta) => el("label", { class: "check tabla-casilla", for: control.id }, control, etiqueta);
+  const area = (id, campo, etiqueta) => el("input", {
+    id, class: "input input-num", type: "number", min: "0", inputmode: "decimal", placeholder: etiqueta,
+    "aria-label": `Superficie ${etiqueta}`,
+    onchange: (e) => consultar({ [campo]: e.target.value.trim() }),
+  });
+  const areaMin = area("tabla-area-min", "area_min_m2", "mín");
+  const areaMax = area("tabla-area-max", "area_max_m2", "máx");
 
-  // The grid's query controls. The map does not show them: it keeps their
-  // values (they bound its set) and says so in the inherited-filters note.
-  const filtrosFila = el("div", { id: "tabla-filtros", class: "tabla-filtros", hidden: true },
-    campoDe(selEstado, "Estado"),
-    campoDe(selMunicipio, "Municipio"),
-    el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Tipo"),
-      selTipo.element),
-    campoDe(selOrden, "Ordenar por"),
-    casilla(chkDesc, "Descendente"),
+  // The grid's query controls, in a side panel. The map does not offer them:
+  // it keeps their values (they bound its set) and says so in the inherited-filters note.
+  const btnVerFiltrados = el("button", { type: "button", class: "btn btn-principal", onclick: () => cerrarFiltros() },
+    "Ver terrenos");
+  const filtrosFila = el("dialog", {
+    id: "tabla-filtros", class: "tabla-filtros cajon", "aria-labelledby": "tabla-filtros-titulo",
+  },
+    el("header", { class: "cajon-cabeza" },
+      el("h2", { id: "tabla-filtros-titulo" }, "Filtros"),
+      el("button", { type: "button", class: "icon-btn", "aria-label": "Cerrar filtros", onclick: () => cerrarFiltros() },
+        icono("cerrar"))),
+    el("div", { class: "cajon-cuerpo" },
+      campoDe(selEstado, "Estado"),
+      campoDe(selMunicipio, "Municipio"),
+      el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Tipo de terreno"),
+        selTipo.element),
+      el("div", { class: "tabla-campo" }, el("span", { class: "field-label" }, "Superficie (m²)"),
+        el("div", { class: "range-row" }, areaMin, el("span", { class: "range-dash" }, "–"), areaMax)),
+      campoDe(selOrden, "Ordenar por"),
+      casilla(chkDesc, "Descendente"),
+    ),
+    el("footer", { class: "cajon-pie" },
+      el("button", { type: "button", class: "btn btn-quiet", onclick: () => limpiarFiltros() }, "Limpiar"),
+      btnVerFiltrados),
   );
+  // A click on the backdrop closes it; however it closes, the button says so.
+  filtrosFila.addEventListener("click", (e) => { if (e.target === filtrosFila) cerrarFiltros(); });
+  filtrosFila.addEventListener("close", () => {
+    btnFiltros.setAttribute("aria-expanded", "false");
+    if (btnFiltros.isConnected && !btnFiltros.hidden) btnFiltros.focus();
+  });
+  function abrirFiltros() {
+    if (filtrosFila.open || !vista || modo === "mapa") return;
+    filtrosFila.showModal();
+    btnFiltros.setAttribute("aria-expanded", "true");
+  }
+  function cerrarFiltros() { if (filtrosFila.open) filtrosFila.close(); }
+  function limpiarFiltros() {
+    consultar({ estado: "", municipio: "", tipo_terreno: [], area_min_m2: "", area_max_m2: "" });
+  }
+
   const busqueda = el("div", { class: "tabla-busqueda" },
-    el("label", { class: "sr-only", for: buscar.id }, "Buscar"), buscar, chips);
+    el("label", { class: "tabla-buscar" }, icono("buscar"),
+      el("span", { class: "sr-only" }, "Buscar"), buscar),
+    chips, btnLimpiar);
   const deLaConsulta = [busqueda, btnFiltros];
   const listaHeredados = el("ul", { class: "tabla-heredados-lista" });
   const heredados = el("details", { class: "tabla-heredados", hidden: true },
@@ -298,11 +347,14 @@ export function createTabla({
     ));
   // The panel takes the focus of a click on its text, so it stays open then.
   cerrarAlSalir(heredados);
-  // The view is the screen's title; its label stays for screen readers.
+  // The view is the screen's title, with what it holds under it; its label
+  // stays for screen readers.
   selVista.classList.add("tabla-titulo");
+  const subtitulo = el("p", { class: "tabla-subtitulo" });
   const barra = el("div", { class: "tabla-barra" },
     el("div", { class: "tabla-cabeza" },
-      el("label", { class: "sr-only", for: selVista.id }, "Vista"), selVista,
+      el("div", { class: "tabla-encabezado" },
+        el("label", { class: "sr-only", for: selVista.id }, "Vista"), selVista, subtitulo),
       heredados,
       el("div", { class: "tabla-acciones" }, selectorModo, btnFiltros, btnAgregar, menuMas)),
     busqueda,
@@ -555,6 +607,8 @@ export function createTabla({
       control.value = consulta[campo];
     }
     selTipo.valor = consulta.tipo_terreno;
+    areaMin.value = consulta.area_min_m2 ?? "";
+    areaMax.value = consulta.area_max_m2 ?? "";
   }
 
   async function cargar() {
@@ -604,7 +658,7 @@ export function createTabla({
   function pintarMarco() {
     const opciones = [];
     if (admin) {
-      opciones.push(opcion(VISTA_MAESTRA, "Tabla maestra (todas las bases)", vista === VISTA_MAESTRA),
+      opciones.push(opcion(VISTA_MAESTRA, "Tabla maestra", vista === VISTA_MAESTRA),
         opcion(VISTA_SIN_ASIGNAR, "Sin asignar", vista === VISTA_SIN_ASIGNAR));
     }
     const deTrabajo = bases.map((b) => opcion(b.id, b.nombre, b.id === vista));
@@ -614,7 +668,7 @@ export function createTabla({
 
     const sinAcceso = !vista;
     for (const nodo of [pie, bandeja]) nodo.hidden = sinAcceso || (nodo === bandeja && !bandeja.childElementCount);
-    for (const control of [buscar, selEstado, selMunicipio, selTipo, selOrden, chkDesc, selVista]) {
+    for (const control of [buscar, selEstado, selMunicipio, selTipo, areaMin, areaMax, selOrden, chkDesc, selVista]) {
       control.disabled = sinAcceso;
     }
     vacio.hidden = !sinAcceso;
@@ -639,6 +693,8 @@ export function createTabla({
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
     btnRecargar.hidden = !vista;
+    btnExportar.hidden = !vista;
+    if (btnImportar) btnImportar.hidden = soloConsulta();
     // Without a view an operator has nothing to do in the menu, and nothing to filter.
     menuMas.hidden = !vista && !admin;
     btnFiltros.hidden = !vista || modo === "mapa";
@@ -656,6 +712,13 @@ export function createTabla({
     cuenta.textContent = errorDeCarga ?? (pagina.total
       ? `${fmtCount(desde)}–${fmtCount(desde + pagina.filas.length - 1)} de ${fmtCount(pagina.total)}`
       : "Sin terrenos en esta vista");
+    // Under the title: what the view holds and how many of its terrains are shown.
+    const donde = vista === VISTA_MAESTRA ? "Todas las bases" : vista === VISTA_SIN_ASIGNAR
+      ? "Terrenos sin base" : "Base de trabajo";
+    const filtrada = filtrosHeredados().length > 0;
+    subtitulo.textContent = !vista || errorDeCarga ? "" : `${donde} · ${plural(pagina.total, "terreno")}`
+      + (filtrada ? " con estos filtros" : "");
+    btnVerFiltrados.textContent = `Ver ${plural(pagina.total, "terreno")}`;
   }
 
   function pintarTodo() {
@@ -895,8 +958,7 @@ export function createTabla({
     for (const nodo of [cuenta, campoLimite, btnAnterior, btnSiguiente]) nodo.hidden = mapa;
     // Hidden, never cleared: the grid finds its query as it left it.
     for (const nodo of deLaConsulta) nodo.hidden = mapa;
-    filtrosFila.hidden = mapa || !vista || !filtrosAbiertos;
-    btnFiltros.setAttribute("aria-expanded", String(!filtrosFila.hidden));
+    if (mapa || !vista) cerrarFiltros();
     pintarChips();
     if (btnBases) btnBases.hidden = mapa;
     pintarHeredados();
@@ -927,14 +989,22 @@ export function createTabla({
       consulta.estado && ["Estado", consulta.estado],
       consulta.municipio && ["Municipio", consulta.municipio],
       consulta.tipo_terreno.length > 0 && ["Tipo de terreno", consulta.tipo_terreno.join(", ")],
+      (consulta.area_min_m2 || consulta.area_max_m2) && ["Superficie",
+        `${consulta.area_min_m2 || "0"}–${consulta.area_max_m2 || "…"} m²`],
     ].filter(Boolean);
   }
 
   /** On the grid, the active filters as chips, each removable; the search box shows its own. */
   function pintarChips() {
-    const quitar = { Estado: { estado: "" }, Municipio: { municipio: "" }, "Tipo de terreno": { tipo_terreno: [] } };
+    const quitar = {
+      Estado: { estado: "" }, Municipio: { municipio: "" }, "Tipo de terreno": { tipo_terreno: [] },
+      Superficie: { area_min_m2: "", area_max_m2: "" },
+    };
     const activos = modo === "mapa" ? [] : filtrosHeredados().filter(([etiqueta]) => quitar[etiqueta]);
-    btnFiltros.textContent = activos.length ? `Filtros (${activos.length})` : "Filtros";
+    cuentaFiltros.textContent = String(activos.length);
+    cuentaFiltros.hidden = !activos.length;
+    btnLimpiar.hidden = !activos.length;
+    btnFiltros.setAttribute("aria-label", activos.length ? `Filtros, ${activos.length} activos` : "Filtros");
     chips.replaceChildren(...activos.map(([etiqueta, valor]) => el("span", { class: "chip tabla-filtro-chip" },
       `${etiqueta}: ${valor}`,
       el("button", {
@@ -1904,6 +1974,30 @@ export function createTabla({
     else quitarFila(terreno.id);
   }
 
+  /** The view as an .xlsx: its filters and order, every page (not only this one). */
+  async function exportar() {
+    if (!vista) return;
+    const nombre = baseActual()?.nombre ?? (vista === VISTA_SIN_ASIGNAR ? "Terrenos sin base" : "Tabla maestra");
+    const ruta = esGlobal(vista) ? "/maestra/exportar" : `/maestra/bases/${encodeURIComponent(vista)}/exportar`;
+    const q = new URLSearchParams(consultaDeLista(vista, consulta));
+    q.delete("limit");
+    try {
+      await descargarXlsx(`${ruta}?${q}`, nombre);
+      toast(`Se exportaron ${plural(pagina.total, "terreno")}.`);
+    } catch (error) { toastError(error.message); }
+  }
+
+  function importar() {
+    abrirImportar({
+      bases, baseInicial: baseActual()?.id ?? null,
+      onHecho: (baseId) => {
+        if (!vivo) return;
+        if (vista === baseId || vista === VISTA_MAESTRA) recargar();
+        else abrir(baseId);
+      },
+    });
+  }
+
   function columnasDialogo() {
     const base = baseActual();
     if (!base) return;
@@ -1961,7 +2055,12 @@ export function createTabla({
     get modo() { return modo; },
     mostrarComo,
     /** The shell put the table back on screen: the map measures its area again. */
-    alMostrar() { if (vivo && modo === "mapa") previa.mostrar(); },
+    alMostrar() {
+      // Detached while open (another screen was shown), a modal dialog comes back
+      // non-modal and still marked open: close it instead.
+      cerrarFiltros();
+      if (vivo && modo === "mapa") previa.mostrar();
+    },
     /** The account is leaving (logout, expiry, another user): forget it all. */
     destroy() {
       vivo = false;

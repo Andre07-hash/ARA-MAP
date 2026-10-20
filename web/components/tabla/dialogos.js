@@ -6,11 +6,12 @@
  * looks, then decides.
  */
 
-import { api } from "../../lib/api.js";
+import { api, importarEnBase } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
 import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
+import { toast } from "../ui/toast.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];
@@ -533,4 +534,122 @@ function abrirAccesos({ base, onCerrar }) {
   });
   dialog.addEventListener("close", () => onCerrar?.(cambio));
   cargar();
+}
+
+/* ---------------------------------------------------------- import Excel */
+
+/**
+ * An Excel or CSV file into one work base. "Revisar filas" asks the server
+ * what a load would do (nothing is written); only then "Agregar" loads it,
+ * all or nothing. A row already in the base is skipped and said so.
+ */
+export function abrirImportar({ bases, baseInicial, onHecho }) {
+  const aviso = Aviso();
+  let archivo = null;
+  let revisado = null;          // the dry run's answer for this file and base
+  let boton = null;             // the dialog's main button, once it exists
+  const selBase = el("select", { id: "importar-base", class: "input", onchange: () => olvidar() },
+    bases.map((b) => el("option", { value: b.id, selected: b.id === baseInicial }, b.nombre)));
+  const nombreArchivo = el("p", { class: "importar-archivo", hidden: true });
+  const entrada = el("input", {
+    type: "file", class: "sr-only", accept: ".xlsx,.xlsm,.csv",
+    onchange: () => elegir(entrada.files[0] ?? null),
+  });
+  const zona = el("label", { class: "importar-zona" }, entrada,
+    el("span", { class: "importar-zona-titulo" }, "Arrastra un archivo .xlsx o .csv"),
+    el("span", { class: "importar-zona-boton" }, "o elígelo en tu equipo"), nombreArchivo);
+  zona.addEventListener("dragover", (e) => { e.preventDefault(); zona.classList.add("is-encima"); });
+  zona.addEventListener("dragleave", () => zona.classList.remove("is-encima"));
+  zona.addEventListener("drop", (e) => {
+    e.preventDefault();
+    zona.classList.remove("is-encima");
+    if (!entrada.disabled) elegir(e.dataTransfer?.files?.[0] ?? null);
+  });
+  const resumen = el("div", { class: "importar-resumen", role: "status" });
+
+  function elegir(f) {
+    archivo = f;
+    nombreArchivo.textContent = f ? f.name : "";
+    nombreArchivo.hidden = !f;
+    olvidar();
+  }
+  function olvidar() {
+    revisado = null;
+    resumen.replaceChildren();
+    aviso.decir("");
+    pintarBoton();
+  }
+  const lista = (titulo, lineas, total = lineas.length) => lineas.length > 0 && el("details", {},
+    el("summary", {}, `${titulo} (${total})`),
+    el("ul", {}, lineas.map((l) => el("li", {}, l))));
+
+  function pintarBoton() {
+    if (!boton) return;
+    boton.disabled = !archivo || !selBase.value || (revisado && revisado.nuevas === 0);
+    boton.textContent = revisado ? `Agregar ${terrenos(revisado.nuevas)}` : "Revisar filas";
+  }
+
+  // While a request is out, nothing that it is about can change: the base,
+  // the file and the button wait for its answer.
+  function ocupado(si) {
+    selBase.disabled = si;
+    entrada.disabled = si;
+    zona.classList.toggle("is-ocupada", si);
+    if (si) boton.disabled = true;
+  }
+
+  async function siguiente(close) {
+    const baseId = selBase.value;
+    const nombreBase = selBase.selectedOptions[0]?.textContent ?? "";
+    const confirmar = Boolean(revisado);
+    ocupado(true);
+    aviso.decir("");
+    try {
+      const r = await importarEnBase(baseId, archivo, { simular: !confirmar });
+      if (confirmar) {
+        toast(`Se agregaron ${terrenos(r.nuevas)} a «${nombreBase}».`);
+        close();
+        onHecho?.(baseId);
+        return;
+      }
+      revisado = r;
+      resumen.replaceChildren(...[
+        el("p", {}, r.nuevas
+          ? `${r.nuevas} de ${r.leidas} filas leídas son nuevas y se agregarán a la base.`
+          : `Ninguna de las ${r.leidas} filas leídas es nueva: no hay nada que agregar.`),
+        lista("Ya existen y se omiten", r.duplicadas, r.total_duplicadas),
+        lista("Sin nombre, no se cargan", r.sin_nombre, r.total_sin_nombre),
+        lista("Avisos", r.avisos, r.total_avisos),
+        r.no_cargadas.length > 0 && el("p", { class: "secondary" },
+          `Columnas que la tabla no tiene y no se cargan: ${r.no_cargadas.join(", ")}.`),
+      ].filter(Boolean));
+    } catch (error) {
+      revisado = null;
+      const errores = error.detalle?.errores ?? [];
+      aviso.decir(error.message);
+      resumen.replaceChildren(lista("Valores por corregir", errores, error.detalle?.total_errores)
+        || el("span"));
+    }
+    ocupado(false);
+    pintarBoton();
+  }
+
+  const { dialog } = openDialog({
+    titulo: "Importar Excel",
+    descripcion: "Las filas se agregan a la base que elijas. Antes de guardar verás cuántas entran " +
+      "y cuáles traen avisos.",
+    ancho: "34rem",
+    contenido: bases.length
+      ? el("div", { class: "importar" },
+        el("div", { class: "tabla-campo" },
+          el("label", { class: "field-label", for: selBase.id }, "Base de destino"), selBase),
+        zona, resumen, aviso.nodo)
+      : el("p", { class: "secondary" }, "Primero crea una base de trabajo en «Bases y accesos»."),
+    acciones: [
+      { etiqueta: "Cancelar", onClick: (c) => c() },
+      { etiqueta: "Revisar filas", variante: "principal", onClick: (c) => siguiente(c) },
+    ],
+  });
+  boton = dialog.querySelector(".dialog-footer").lastElementChild;
+  pintarBoton();
 }

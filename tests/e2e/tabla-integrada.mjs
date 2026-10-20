@@ -126,8 +126,8 @@ await caso('administrator: role-aware navigation, master table columns, bases, g
   const { context, page, errores } = await abrir('ada');
   const nav = await page.locator('nav .nav-item').allInnerTexts();
   // "Inventario" left the menu: its map is the master table's Tabla / Mapa now.
-  assert.deepEqual(nav, ['Terrenos', 'Mapas guardados']);
-  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 2);
+  assert.deepEqual(nav, ['Terrenos']);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 2);
   await irATabla(page);
   assert.match(page.url(), /#\/tabla\/maestra$/);
   const cabeceras = await page.locator('thead th[data-col]').allInnerTexts();
@@ -197,7 +197,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
   await listo(page);
   assert.deepEqual(await page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
   assert.deepEqual(await page.locator('#tabla-vista option').allInnerTexts(), ['Base Norte']);
-  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 0);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 0);
   assert.ok(!api.some((l) => / (401|403|500)$/.test(l)), `no refused or failed call: ${api.filter((l) => / (401|403|500)$/.test(l))}`);
   assert.ok(!api.some((l) => /\/api\/(bases|mapas|carpetas|inventario\/terrenos) /.test(l)), 'no legacy or master-table call');
 
@@ -787,6 +787,35 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
   await context.close();
 });
 
+await caso('Importar Excel reviews first and adds to the chosen base; Exportar a Excel downloads the view', async () => {
+  const { context, page, errores } = await abrir('ada');
+  await irATabla(page, B['Base Norte']);
+  const delMenu = async (texto) => {
+    await page.locator('.tabla-acciones .menu-mas > summary').click();
+    await page.locator('.tabla-acciones .menu-item', { hasText: texto }).click();
+  };
+  await delMenu('Importar Excel');
+  const dialogo = page.getByRole('dialog', { name: 'Importar Excel' });
+  assert.equal(await dialogo.getByLabel('Base de destino').inputValue(), B['Base Norte'], 'the open base is preselected');
+  assert.equal(await dialogo.getByRole('button', { name: 'Revisar filas' }).isDisabled(), true, 'no file, nothing to review');
+  await dialogo.locator('input[type=file]').setInputFiles({
+    name: 'importar.csv', mimeType: 'text/csv',
+    buffer: Buffer.from('Terreno,Estado,Municipio,Tipo de terreno\nLote Importado Ficticio,Jalisco,Zapopan,Industrial\n'),
+  });
+  await dialogo.getByRole('button', { name: 'Revisar filas' }).click();
+  await dialogo.getByText('1 de 1 filas leídas son nuevas y se agregarán a la base.').waitFor();
+  assert.equal((await pedir(page, `/api/maestra/bases/${B['Base Norte']}/terrenos?q=Importado`)).body.total, 0,
+    'the review writes nothing');
+  await foto(page, '21-importar-revision');
+  await dialogo.getByRole('button', { name: 'Agregar 1 terreno' }).click();
+  await dialogo.waitFor({ state: 'detached' });
+  await page.locator('tr.tabla-fila', { hasText: 'Lote Importado Ficticio' }).waitFor();
+  const [descarga] = await Promise.all([page.waitForEvent('download'), delMenu('Exportar a Excel')]);
+  assert.equal(descarga.suggestedFilename(), 'Base Norte.xlsx');
+  assert.deepEqual(errores, []);
+  await context.close();
+});
+
 await caso('public and legacy administrator journeys still work', async () => {
   const anon = await abrir(null);
   await anon.page.getByText('Todavía no hay terrenos publicados').waitFor();
@@ -803,12 +832,12 @@ await caso('public and legacy administrator journeys still work', async () => {
   await page.waitForURL(/#\/tabla\/maestra\/mapa$/);
   await page.locator('.previa-mapa').waitFor();
   assert.ok(!api.some((l) => / (4\d\d|500)$/.test(l) ), `no failing call: ${api.filter((l) => / (4\d\d|500)$/.test(l))}`);
-  await enMenu(page, 'Bases de Excel importadas');
+  await page.evaluate(() => { location.hash = '#/bases'; });      // the legacy workspace keeps its address
   await page.waitForURL(/#\/bases$/);
   await page.locator('.screen').first().waitFor();
-  await page.getByRole('link', { name: 'Mapas guardados' }).click();
+  await page.evaluate(() => { location.hash = '#/mapas'; });
   await page.waitForURL(/#\/mapas$/);
-  await enCuenta(page, 'Catálogo público');
+  await enCuenta(page, 'Ver catálogo público');
   await page.getByText('Todavía no hay terrenos publicados').waitFor();
   await foto(page, '20-administrador-catalogo');
   assert.ok(!api.some((l) => / (4\d\d|500)$/.test(l)));

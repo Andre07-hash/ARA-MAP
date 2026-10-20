@@ -53,18 +53,19 @@ import { TerrainDetail } from "./terrain/TerrainDetail.js";
 import { TerrainTable } from "./terrain/TerrainTable.js";
 import { UnplacedList } from "./terrain/UnplacedList.js";
 import { closeAllDialogs, confirmDialog, openDialog } from "./ui/dialog.js";
+import { icono } from "./ui/iconos.js";
 import { clearToasts, toast, toastError } from "./ui/toast.js";
 
 /* Operators get the table of their work bases and the public catalog. The
  * unscoped inventory and the legacy workspace are the administrators'. */
 const NAV_OPERADOR = [["tabla", "Terrenos"]];
-/* "Inventario" left the menu: its map is the master table's "Mapa" view now.
- * Its old addresses still work (see aplicarRuta). The Excel bases are reached
- * from the table's "⋯" menu, and the public catalog from the account menu. */
+/* One section: the terrains, as a table or a map. Export and import live in
+ * the table's "⋯" menu and the public catalog in the account menu. The legacy
+ * workspace (#/bases, #/mapas) and "Inventario" keep their addresses; "Mapa"
+ * shows up only while that workspace has a base or map open. */
 const NAV_EQUIPO = [
   ["tabla", "Terrenos"],
   ["mapa", "Mapa"],
-  ["mapas", "Mapas guardados"],
 ];
 const NAV_PUBLICO = [["catalogo", "Catálogo"]];
 const REVALIDAR_MS = 10_000;   // focus/visibility revalidation, at most this often
@@ -493,9 +494,14 @@ function menuDeCuenta(sesion) {
   const menu = el("details", { class: "menu-mas cuenta" },
     el("summary", { class: "cuenta-boton", title: `Sesión de ${sesion.display_name}` },
       el("span", { class: "cuenta-avatar", "aria-hidden": "true" }, iniciales),
-      el("span", { class: "session-user truncate" }, sesion.display_name)),
+      el("span", { class: "session-user truncate" }, sesion.display_name),
+      icono("abajo")),
     el("div", { class: "menu-panel" },
-      el("a", { class: "menu-item", href: routeHash({ nombre: "catalogo" }), onclick: cerrar }, "Catálogo público"),
+      el("div", { class: "cuenta-quien" },
+        el("strong", {}, sesion.display_name),
+        el("span", {}, sesion.rol === "admin" ? "Rol: administrador" : "Rol: operador")),
+      el("a", { class: "menu-item", href: routeHash({ nombre: "catalogo" }), onclick: cerrar },
+        "Ver catálogo público"),
       el("button", { type: "button", class: "menu-item", onclick: () => { cerrar(); cerrarSesion(); } },
         "Cerrar sesión")));
   menu.addEventListener("keydown", (e) => {

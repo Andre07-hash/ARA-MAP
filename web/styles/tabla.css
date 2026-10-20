@@ -28,19 +28,39 @@
   border: 0; background: transparent no-repeat right center / 1.1rem
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   appearance: none; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.022em; cursor: pointer;
+  field-sizing: content;   /* as wide as the chosen view, where supported */
 }
 .tabla-titulo.input:disabled { cursor: default; background-image: none; }
+.tabla-encabezado { display: grid; gap: var(--space-1); margin-right: auto; min-width: 0; }
+.tabla-subtitulo { margin: 0; font-size: var(--text-small); color: var(--ink-muted); }
+.tabla-subtitulo:empty { display: none; }
 .tabla-busqueda { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
-.tabla-busqueda > .input { flex: 1 1 16rem; max-width: 26rem; border-radius: var(--radius-pill); padding-inline: var(--space-4); }
+.tabla-buscar { position: relative; flex: 1 1 16rem; max-width: 26rem; }
+.tabla-buscar > .icono { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); }
+.tabla-buscar > .input { border-radius: var(--radius-pill); padding-left: 2.5rem; }
+.tabla-limpiar { color: #0066cc; text-decoration: none; }
 .tabla-chips { display: contents; }
 .tabla-filtro-chip { gap: var(--space-1); }
 .tabla-chip-quitar { border: 0; background: none; padding: 0 2px; color: var(--ink-muted); cursor: pointer; font-size: 1rem; line-height: 1; }
 .tabla-chip-quitar:hover { color: var(--ink); }
-.tabla-filtros {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3);
-  padding: var(--space-4); background: var(--paper-overlay); border-radius: var(--radius-lg);
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05);
+.tabla-filtros .tabla-campo { min-width: 0; }
+.tabla-filtros .tabla-varios-resumen { max-width: none; }
+
+/* Importar Excel: the destination, a drop zone and the dry run's summary. */
+.importar { display: grid; gap: var(--space-4); }
+.importar-zona {
+  display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-4);
+  border: 1.5px dashed var(--rule-strong); border-radius: var(--radius-lg); background: var(--paper-raised);
+  text-align: center; cursor: pointer;
 }
+.importar-zona.is-encima, .importar-zona:focus-within { border-color: var(--ink); }
+.importar-zona-titulo { font-weight: 500; }
+.importar-zona-boton { color: #0066cc; font-size: var(--text-small); }
+.importar-archivo { margin: 0; font-size: var(--text-small); color: var(--ink-secondary); overflow-wrap: anywhere; }
+.importar-resumen:empty { display: none; }
+.importar-resumen p { margin: 0 0 var(--space-2); }
+.importar-resumen details { font-size: var(--text-small); margin-top: var(--space-1); }
+.importar-resumen ul { margin: var(--space-1) 0 0; padding-left: var(--space-5); max-height: 10rem; overflow: auto; }
 .tabla-campo { display: grid; gap: var(--space-1); min-width: 8rem; }
 .tabla-campo .input { min-width: 0; }
 .tabla-casilla { padding-bottom: var(--space-2); }
@@ -322,3 +342,7 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 }
 
 .detalle-nota { margin: 0 0 var(--space-3); color: var(--ink-secondary); font-size: var(--text-small); }
+
+/* On the map the bar stays one slim row: the subtitle is the grid's. */
+.tabla-pantalla.modo-mapa .tabla-subtitulo { display: none; }
+.importar-zona.is-ocupada { opacity: 0.6; cursor: progress; }

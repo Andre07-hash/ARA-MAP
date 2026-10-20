@@ -90,7 +90,10 @@ async function loQueQueda(page, marcas) {
       marcas: ms.filter((m) => todo.includes(m)),
       donde: ms.filter((m) => todo.includes(m)).map((m) => todo.slice(Math.max(0, todo.indexOf(m) - 160), todo.indexOf(m) + 60)),
       filas: document.querySelectorAll('tr[data-id]').length,
-      dialogosPrivados: [...document.querySelectorAll('dialog')].filter((d) => !d.querySelector('#login-usuario')).length,
+      // The table's filters panel is a <dialog> that is part of the table itself, built and removed
+      // with it; its text is checked with the rest of the page (marcas).
+      dialogosPrivados: [...document.querySelectorAll('dialog')]
+        .filter((d) => !d.querySelector('#login-usuario') && d.id !== 'tabla-filtros').length,
       editores: document.querySelectorAll('.tabla-editor').length,
       tabla: document.querySelectorAll('.tabla-pantalla').length,
     };
@@ -332,7 +335,7 @@ await caso('a role change ends the session; signing in again shows the new role 
   await entrarEnDialogo(p.page, 'alan');
   await p.page.getByRole('heading', { name: 'Todavía no tienes una base de trabajo' }).waitFor();
   assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
-  assert.equal(await p.page.locator('.menu-panel .menu-item', { hasText: /^(Bases y accesos|Bases de Excel importadas)$/ }).count(), 0);
+  assert.equal(await p.page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 0);
   assert.equal((await p.api('GET', '/api/inventario/terrenos?limit=1')).status, 403);
   await foto(p.page, 'c1-05-cambio-de-rol');
   assert.deepEqual(p.errores, []);

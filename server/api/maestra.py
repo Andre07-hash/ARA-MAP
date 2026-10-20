@@ -11,11 +11,12 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from .. import auth, db
+from .. import auth, carga_maestra, db
 from ..protocols import DatabaseConnection
 from ..repo import maestra as repo
 from ..router import Request
 from ..web_util import ApiError, parse_json, texto_seguro
+from .importar import _read_upload
 
 Respuesta = dict[str, Any]
 
@@ -111,6 +112,52 @@ def create(request: Request) -> Respuesta:
     with db.escritura() as conn:
         alcance = auth.reverificar(conn, request.sesion, "bases.gestionar")
         return _respuesta(conn, repo.crear(conn, nombre, alcance.actor))
+
+
+def importar(request: Request) -> Respuesta:
+    """The raw bytes of an Excel or CSV file (name in X-Archivo) into a work base.
+
+    With ?simular=1 it only reports what a load would do. Otherwise it creates
+    the new rows, all or nothing; duplicates are skipped and reported, and an
+    invalid value anywhere is a 422 that writes nothing (server/carga_maestra.py).
+    """
+    base_id = request.uuid_param("bid")
+    simular = request.q("simular") == "1"
+    # Parsed before any transaction: the write lock is never held while a file
+    # is read (the router already refused anyone without bases.gestionar).
+    leido = _read_upload(request).resultado
+    filas, errores = carga_maestra.validar(leido.records)
+    if errores:
+        raise ApiError("El archivo tiene valores no admitidos; no se guardó nada.", 422,
+                       {"code": "validation_failed", "errores": errores[:LISTA_MAXIMA],
+                        "total_errores": len(errores)})
+    if simular:
+        with db.session() as conn:
+            auth.require_base(request, base_id, "bases.gestionar", conn)
+            nuevas, duplicadas = carga_maestra.cargar(conn, base_id, leido.records, filas,
+                                                      {}, simular=True)
+    else:
+        with db.escritura() as conn:
+            alcance = auth.reverificar_base(conn, request.sesion, base_id, "bases.gestionar")
+            nuevas, duplicadas = carga_maestra.cargar(conn, base_id, leido.records, filas,
+                                                      alcance.actor, simular=False)
+    avisos = [f"línea {r.fila} ({r.terreno}): «{n.valor}» en {n.campo} no es un número;"
+              " el campo queda vacío" for r in leido.records for n in r.notes]
+    return {
+        "simulacion": simular,
+        "leidas": len(leido.records),
+        "nuevas": nuevas,
+        "duplicadas": duplicadas[:LISTA_MAXIMA],
+        "total_duplicadas": len(duplicadas),
+        "sin_nombre": [f"línea {r.fila}: {r.resumen}" for r in leido.rechazadas][:LISTA_MAXIMA],
+        "total_sin_nombre": len(leido.rechazadas),
+        "avisos": avisos[:LISTA_MAXIMA],
+        "total_avisos": len(avisos),
+        "no_cargadas": carga_maestra.no_cargadas(leido),
+    }
+
+
+LISTA_MAXIMA = 200      # lines of each kind sent back; the totals say the rest
 
 
 def rename(request: Request) -> Respuesta:

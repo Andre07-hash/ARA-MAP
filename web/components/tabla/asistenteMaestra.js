@@ -10,7 +10,7 @@
  * Claude's summary.
  */
 
-import { el } from "../../lib/dom.js";
+import { append, el } from "../../lib/dom.js";
 import { CAMPOS_ENVIADOS, largo, leerConfig } from "../../lib/asistenteTerreno.js";
 import { MAX_SELECCION, MIN_SELECCION, crearBusqueda } from "../../lib/asistenteMaestra.js";
 import { openDialog } from "../ui/dialog.js";
@@ -158,7 +158,10 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
         return;
       }
       const lista = el("ol", { class: "asistente-maestra-lista" }, b.terrenos.map((t) => fila(t)));
-      resultadosNodo.replaceChildren(
+      // append(), not replaceChildren(), skips the false and null of the
+      // conditional parts instead of writing them as text.
+      resultadosNodo.replaceChildren();
+      append(resultadosNodo, [
         el("div", { class: "asistente-maestra-criterios" },
           el("p", { class: "field-label" }, "Criterios interpretados por Claude"),
           el("ul", {}, b.criterios.map((c) => el("li", {}, c)))),
@@ -171,7 +174,7 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
         b.total > 0 && el("p", { class: "secondary asistente-terreno-nota" },
           "Cada página se lee del inventario al pedirla: si otras personas editan, la lista puede cambiar."),
         b.total > 0 && barraComparar(),
-      );
+      ]);
       marcarSeleccion(s);
     }
 
@@ -230,14 +233,15 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
         : el("p", { class: "field-error", role: "alert" },
           `No se pudo generar el resumen: ${RESUMEN_FALLIDO[c.resumen.codigo] ?? "el servicio de IA no está disponible"}. ` +
           "La tabla muestra los datos registrados.");
-      comparacionNodo.replaceChildren(
+      comparacionNodo.replaceChildren();
+      append(comparacionNodo, [
         el("h3", { class: "asistente-terreno-titulo" }, "Comparación"),
         el("ul", { class: "asistente-maestra-leyenda" }, c.terrenos.map((t) =>
           el("li", {}, el("strong", {}, `Terreno ${t.alias}: `), nombre(t)))),
         tabla,
         c.advertencias.length > 0 && el("ul", { class: "asistente-terreno-advertencias" },
           c.advertencias.map((a) => el("li", {}, a))),
-        resumen);
+        resumen]);
     }
 
     return {

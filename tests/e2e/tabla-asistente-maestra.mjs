@@ -93,7 +93,8 @@ async function abrir(usuario, { viewport = { width: 1200, height: 800 }, apagado
   await page.getByLabel('Usuario').fill(usuario);
   await page.getByLabel('Contraseña').fill(CLAVE);
   await page.getByRole('button', { name: 'Entrar' }).click();
-  await page.locator('.session-user').waitFor();
+  // Signed in: the name sits in the account menu, hidden on a phone until it opens.
+  await page.locator('.session-user').waitFor({ state: 'attached' });
   sesiones.push(s);
   return s;
 }
@@ -237,6 +238,8 @@ await revisar('buscar: criterios, total real, diez por página y más resultados
   igual(await d.getByRole('button', { name: 'Más resultados' }).count(), 0, 'sobra «Más resultados»');
   const ids = await resultados(d).evaluateAll((li) => li.map((x) => x.dataset.id));
   igual([...ids].sort(), [...coinciden].sort(), 'el conjunto encontrado');
+  // The last page has no cursor: no stray «null» or «false» written as text.
+  cierto(!/\b(null|false|undefined)\b/.test(await d.innerText()), 'texto «null»/«false» en el panel');
   cierto(!ids.includes(frontera), '«más de 10,000 m²» incluyó uno de 10,000 m²');
   const sinBase = await resultados(d).filter({ hasText: 'Sin base asignada' }).count();
   igual(sinBase, SIN_BASE.length, 'terrenos sin base entre los resultados');
@@ -273,6 +276,7 @@ await revisar('comparar tres: tabla registrada, advertencias y resumen rotulado'
   const resumen = await d.locator('.asistente-maestra-resumen').innerText();
   cierto(/proveedor ficticio/.test(resumen) && /Claude/.test(resumen), 'resumen o su rótulo');
   igual(await d.locator('.asistente-maestra-comparacion b').count(), 0, 'HTML del proveedor interpretado');
+  cierto(!/\b(null|false|undefined)\b/.test(await d.innerText()), 'texto «null»/«false» en la comparación');
   const enviado = readFileSync(REGISTRO, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
   const comparacion = JSON.stringify(enviado.at(-1));
   cierto(comparacion.includes('Terreno A') && comparacion.includes('USD 150,000'), 'la comparación no llevaba las fichas');

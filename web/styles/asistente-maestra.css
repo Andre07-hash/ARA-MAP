@@ -1,0 +1,40 @@
+/* «Asistente IA» of the master table (issue #69). The one-terrain panel's
+ * classes (asistente-terreno-*) are reused for the notice, the question,
+ * the waiting state and the answer text. */
+.asistente-maestra-dialogo .dialog-body { max-height: min(70vh, 48rem); overflow: auto; }
+.asistente-maestra-criterios ul, .asistente-maestra-leyenda { margin: var(--space-1) 0 var(--space-2); padding-left: var(--space-5); }
+.asistente-maestra-total { margin: var(--space-2) 0; font-weight: 600; }
+.asistente-maestra-lista { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); }
+.asistente-maestra-fila {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-1) var(--space-2);
+  padding: var(--space-2); border: 1px solid var(--rule); background: var(--paper-raised);
+}
+.asistente-maestra-nombre { font-weight: 600; overflow-wrap: anywhere; }
+.asistente-maestra-datos { grid-column: 2 / 3; font-size: var(--text-small); overflow-wrap: anywhere; }
+.asistente-maestra-fila > .btn { grid-column: 3; grid-row: 1 / span 2; }
+.asistente-maestra-mas { margin-top: var(--space-2); }
+.asistente-maestra-barra {
+  position: sticky; bottom: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+  gap: var(--space-2); margin-top: var(--space-3); padding: var(--space-2) 0; background: var(--paper);
+}
+.asistente-maestra-barra [aria-disabled="true"], .asistente-maestra [aria-disabled="true"] { opacity: 0.5; }
+.asistente-maestra-aclaracion { padding: var(--space-3); border: 1px solid var(--rule); background: var(--paper-sunken); }
+.asistente-maestra-aclaracion p { margin: 0 0 var(--space-1); white-space: pre-wrap; }
+.asistente-maestra-comparacion h3 { margin-top: var(--space-4); }
+.asistente-maestra-tabla { width: 100%; border-collapse: collapse; font-size: var(--text-small); }
+.asistente-maestra-tabla caption { text-align: left; padding-bottom: var(--space-1); }
+.asistente-maestra-tabla th, .asistente-maestra-tabla td {
+  padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.asistente-maestra-resumen { margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--rule); }
+
+/* «Próximamente» (issue #69): one compact line, wraps on narrow screens. */
+.aviso-proximamente {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2);
+  margin: var(--space-2) 0; padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule); background: var(--paper-sunken); font-size: var(--text-small);
+}
+.aviso-proximamente[hidden] { display: none; }
+.aviso-proximamente-etiqueta { font-size: var(--text-micro); text-transform: uppercase; letter-spacing: 0.04em; }
+.asistente-maestra > .aviso-proximamente { margin-top: 0; }

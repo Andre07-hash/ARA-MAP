@@ -28,3 +28,13 @@
   overflow-wrap: anywhere;
 }
 .asistente-maestra-resumen { margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--rule); }
+
+/* «Próximamente» (issue #69): one compact line, wraps on narrow screens. */
+.aviso-proximamente {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2);
+  margin: var(--space-2) 0; padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule); background: var(--paper-sunken); font-size: var(--text-small);
+}
+.aviso-proximamente[hidden] { display: none; }
+.aviso-proximamente-etiqueta { font-size: var(--text-micro); text-transform: uppercase; letter-spacing: 0.04em; }
+.asistente-maestra > .aviso-proximamente { margin-top: 0; }

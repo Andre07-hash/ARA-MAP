@@ -32,6 +32,18 @@ const RESUMEN_FALLIDO = {
 };
 
 /**
+ * «Próximamente»: a compact note that more AI features are on the way
+ * (issue #69). Information only: it asks nothing of the server, needs no
+ * configuration or key, and turns nothing on.
+ */
+export function avisoProximamente() {
+  return el("aside", { class: "aviso-proximamente", "aria-label": "Próximamente" },
+    el("span", { class: "chip aviso-proximamente-etiqueta" }, "Próximamente"),
+    el("strong", {}, "ARA MAP sigue creciendo"),
+    el("span", { class: "secondary" }, "Estamos preparando nuevas funciones de IA. Mantente atento."));
+}
+
+/**
  * `abrirDetalle(id, signal)` opens a result's detail, and must open nothing
  * once `signal` is aborted (the panel closed meanwhile); `nombreDeBase(id)`
  * names a base locally. Returns { boton, mostrar(visible), cerrar(), destroy() }.
@@ -103,7 +115,7 @@ export function montarAsistenteMaestra({ abrirDetalle, nombreDeBase = () => null
     const estadoNodo = el("div", { class: "asistente-terreno-estado", role: "status", "aria-live": "polite" });
     const resultadosNodo = el("section", { class: "asistente-maestra-resultados", "aria-label": "Resultados" });
     const comparacionNodo = el("section", { class: "asistente-maestra-comparacion", "aria-label": "Comparación" });
-    const nodo = el("div", { class: "asistente-maestra" }, aviso,
+    const nodo = el("div", { class: "asistente-maestra" }, avisoProximamente(), aviso,
       ...(ajustes.disponible ? [formulario] : []), estadoNodo, resultadosNodo, comparacionNodo);
     if (!ajustes.disponible) decir("El asistente no está configurado en el servidor.");
 

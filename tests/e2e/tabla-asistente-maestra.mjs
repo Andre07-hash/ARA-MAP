@@ -75,14 +75,19 @@ async function hasta(fn, mensaje = 'no ocurrió a tiempo', ms = 30000) {
 }
 
 const navegador = await chromium.launch({ executablePath: process.env.CHROMIUM ?? '/opt/pw-browsers/chromium' });
-async function abrir(usuario) {
-  const contexto = await navegador.newContext({ viewport: { width: 1200, height: 800 }, locale: 'es-MX' });
+async function abrir(usuario, { viewport = { width: 1200, height: 800 }, apagado = false } = {}) {
+  const contexto = await navegador.newContext({ viewport, locale: 'es-MX' });
   contexto.setDefaultTimeout(20000);
   const page = await contexto.newPage();
   const s = { usuario, page, errores: [], lecturas: [] };
   page.on('pageerror', (e) => s.errores.push(String(e)));
   page.on('request', (r) => { if (r.url().includes('/api/')) s.lecturas.push(`${r.method()} ${new URL(r.url()).pathname}`); });
   await page.route(/arcgisonline|tile\.openstreetmap\.org|cartocdn/, (r) => r.fulfill({ status: 204, body: '' }));
+  // «Assistant off» for this page only: the config answer is replaced in the browser.
+  if (apagado) {
+    await page.route('**/api/asistente-terreno/config', (r) => r.fulfill({ status: 200, contentType: 'application/json',
+      body: JSON.stringify({ habilitado: false, disponible: false, max_pregunta: 500 }) }));
+  }
   await page.goto(`${URLBASE}/?test=1`);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click().catch(() => {});
   await page.getByLabel('Usuario').fill(usuario);
@@ -106,6 +111,8 @@ const filasDeTabla = (page) => page.locator('tr.tabla-fila').evaluateAll((trs) =
 const dialogo = (page) => page.getByRole('dialog', { name: 'Asistente IA de la tabla maestra' });
 const resultados = (d) => d.locator('.asistente-maestra-fila');
 const botonAsistente = (page) => page.locator('.tabla-barra').getByRole('button', { name: 'Asistente IA' });
+const proximamente = (raiz) => raiz.locator('aside.aviso-proximamente');
+const TEXTO_PROXIMAMENTE = /Próximamente\s*ARA MAP sigue creciendo\s*Estamos preparando nuevas funciones de IA\. Mantente atento\./i;   // the label is uppercased by CSS
 
 async function irAMaestra(page) {
   await page.goto(`${URLBASE}/?test=1#/tabla/maestra`);
@@ -176,6 +183,32 @@ await revisar('tabla maestra: página de 50, con coincidencias fuera de ella', a
   cierto(coinciden.some((id) => !ids.includes(id)), 'todas las coincidencias caben en la página');
   tablaAntes = { ids, posicion: await posicion(ada.page), listas: listas(ada) };
   await botonAsistente(ada.page).waitFor();
+});
+
+await revisar('«Próximamente» en la tabla maestra y en el panel, sin abrirlo solo', async () => {
+  cierto(TEXTO_PROXIMAMENTE.test(await proximamente(ada.page.locator('.tabla-pantalla')).innerText()), 'aviso de la tabla');
+  igual(await dialogo(ada.page).count(), 0, 'el aviso abrió el panel');
+  await botonAsistente(ada.page).click();
+  await dialogo(ada.page).waitFor();
+  cierto(TEXTO_PROXIMAMENTE.test(await proximamente(dialogo(ada.page)).innerText()), 'aviso del panel');
+  if (SHOTS) await ada.page.screenshot({ path: join(SHOTS, 'proximamente-escritorio.png') });
+  await dialogo(ada.page).getByRole('button', { name: 'Cerrar', exact: true }).last().click();
+  await dialogo(ada.page).waitFor({ state: 'detached' });
+});
+
+await revisar('asistente apagado: el aviso sigue, sin botón ni consultas de IA (móvil)', async () => {
+  const alan = await abrir('alan', { viewport: { width: 390, height: 844 }, apagado: true });
+  await irAMaestra(alan.page);
+  await proximamente(alan.page.locator('.tabla-pantalla')).waitFor();
+  cierto(TEXTO_PROXIMAMENTE.test(await proximamente(alan.page.locator('.tabla-pantalla')).innerText()), 'aviso');
+  await esperar(300);
+  igual(await botonAsistente(alan.page).count(), 0, 'botón con el asistente apagado');
+  igual(alan.lecturas.filter((l) => /asistente-terreno\/(buscar|resultados|comparar)/.test(l)), [], 'consultas de IA');
+  const ancho = await alan.page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
+  cierto(ancho[0] <= ancho[1], `el aviso desborda en móvil: ${ancho}`);
+  if (SHOTS) await alan.page.screenshot({ path: join(SHOTS, 'proximamente-movil-apagado.png') });
+  await alan.page.context().close();
+  sesiones.splice(sesiones.indexOf(alan), 1);
 });
 
 await revisar('una condición no admitida pide aclaración y no lista nada', async () => {
@@ -322,6 +355,7 @@ await revisar('mapa maestra después del asistente, sin segunda entrada', async 
   const mapa = await ada.page.evaluate(() => window.__araTabla.mapa());
   igual(mapa.total, 68, 'terrenos de la tabla maestra en el mapa');      // 69 created, one deleted
   igual(await botonAsistente(ada.page).isVisible(), false, 'el asistente global aparece en el mapa');
+  igual(await proximamente(ada.page.locator('.tabla-pantalla')).isVisible(), false, 'el aviso ocupa la cabecera del mapa');
   cierto(await ada.page.evaluate((id) => Boolean(window.__araTabla.posicion(id)), coinciden[3]), 'un terreno con X/Y no se dibuja');
   await ada.page.getByRole('button', { name: 'Tabla', exact: true }).click();
   await botonAsistente(ada.page).waitFor();

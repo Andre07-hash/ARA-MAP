@@ -70,7 +70,7 @@ import {
   abrirBases, abrirColumnas, abrirDetalle, abrirTransferencia, pedirDestino, pedirNombreDeBase,
 } from "./dialogos.js";
 import { montarRanura } from "./ranuraArchivos.js";
-import { montarAsistenteMaestra } from "./asistenteMaestra.js";
+import { avisoProximamente, montarAsistenteMaestra } from "./asistenteMaestra.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
 
 const BUSCAR_MS = 300;
@@ -336,6 +336,10 @@ export function createTabla({
     nombreDeBase: (id) => baseDe(id)?.nombre ?? null,
   }) : null;
   if (asistenteMaestra) selectorModo.before(asistenteMaestra.boton);
+  // «Próximamente» under the toolbar of the master table as a grid, whether
+  // or not the assistant is configured: information only, no request.
+  const proximamente = admin ? avisoProximamente() : null;
+  if (proximamente) { proximamente.hidden = true; barra.after(proximamente); }
 
   /* --------------------------------------------------------------- scope */
 
@@ -868,6 +872,7 @@ export function createTabla({
     const sinAcceso = !vista;
     selectorModo.hidden = sinAcceso;
     asistenteMaestra?.mostrar(vista === VISTA_MAESTRA && !mapa);
+    if (proximamente) proximamente.hidden = !(vista === VISTA_MAESTRA && !mapa);
     lienzo.hidden = sinAcceso || mapa;
     panelMapa.hidden = sinAcceso || !mapa;
     cuerpo.classList.toggle("modo-mapa", mapa);

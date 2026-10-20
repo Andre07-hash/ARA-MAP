@@ -123,6 +123,13 @@ router.add("DELETE", "/api/carpetas/:id", api_carpetas.remove, "derivados.gestio
 router.add("GET", "/api/asistente-terreno/config", api_asistente_terreno.config, "maestra.global")
 router.add("POST", "/api/asistente-terreno/:id/consultar", api_asistente_terreno.consultar,
            "maestra.global")
+# Search and compare over the master table (issue #69). ":id/consultar" above
+# never matches these literal paths.
+router.add("POST", "/api/asistente-terreno/buscar", api_asistente_terreno.buscar, "maestra.global")
+router.add("POST", "/api/asistente-terreno/resultados", api_asistente_terreno.resultados,
+           "maestra.global")
+router.add("POST", "/api/asistente-terreno/comparar", api_asistente_terreno.comparar,
+           "maestra.global")
 # Terrain attachments (server/api/archivos.py owns the table): all private,
 # each with its capability, the literal segments ahead of the :aid patterns.
 for _metodo, _ruta, _handler, _capacidad in api_archivos.RUTAS:

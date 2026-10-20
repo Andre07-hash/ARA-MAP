@@ -341,10 +341,18 @@ def respuesta_de_reglas(faltantes: list[dict[str, str]]) -> str:
 
 def consultar_modelo(accion: str, usados: list[dict[str, str]], faltantes: list[dict[str, str]],
                      pregunta: str, reloj: Callable[[], float] = time.monotonic) -> tuple[str, bool]:
+    """One bounded question about one terrain: (plain text, was_cut)."""
+    return llamar_modelo(SISTEMA, mensaje_usuario(accion, usados, faltantes, pregunta), reloj)
+
+
+def llamar_modelo(sistema: str, usuario: str,
+                  reloj: Callable[[], float] = time.monotonic) -> tuple[str, bool]:
     """One bounded model call: (plain text, was_cut). Raises FallaChatError.
 
-    Holds no database connection while the provider answers: the usage row is
-    reserved and settled in their own short sessions.
+    Every use of the model goes through here, so all of them share the one
+    call at a time, the hourly count and the monthly cap. Holds no database
+    connection while the provider answers: the usage row is reserved and
+    settled in their own short sessions.
     """
     config, _ = configuracion()
     if config is None:
@@ -352,9 +360,8 @@ def consultar_modelo(accion: str, usados: list[dict[str, str]], faltantes: list[
     if not _en_curso.acquire(blocking=False):
         raise falla("chat_limite")
     try:
-        usuario = mensaje_usuario(accion, usados, faltantes, pregunta)
         contable = config.contable()
-        maximo = ia.costo_maximo(SISTEMA, usuario, contable)
+        maximo = ia.costo_maximo(sistema, usuario, contable)
         try:
             reserva = ia.reservar(contable, maximo)
         except ia.FallaIAError as error:
@@ -364,7 +371,7 @@ def consultar_modelo(accion: str, usados: list[dict[str, str]], faltantes: list[
         respuesta: ia.Respuesta | None = None
         estado, sin_cargo = "error", False
         try:
-            respuesta = _proveedor().responder(SISTEMA, usuario, config)
+            respuesta = _proveedor().responder(sistema, usuario, config)
             estado = "ok"
         except ia.FallaIAError as error:
             estado, respuesta, sin_cargo = error.estado, error.respuesta, error.sin_cargo

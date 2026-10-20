@@ -48,7 +48,7 @@ async function lote() {
     await page.locator('.tabla-abrir').first().click();
     await page.locator('dialog[open] .detalle-datos').waitFor();
     await page.locator('dialog[open]').getByRole('button', { name: 'Cerrar' }).click();
-    await page.locator('dialog').waitFor({ state: 'detached' });
+    await page.locator('dialog:not(#tabla-filtros)').waitFor({ state: 'detached' });
   }
 }
 
@@ -64,7 +64,7 @@ async function medir() {
   const m = Object.fromEntries(metrics.map((x) => [x.name, x.value]));
   return {
     heap_kb: Math.round(m.JSHeapUsedSize / 1024), nodos_dom: m.Nodes, listeners: m.JSEventListeners,
-    filas: await page.locator('tr.tabla-fila').count(), dialogos: await page.locator('dialog').count(),
+    filas: await page.locator('tr.tabla-fila').count(), dialogos: await page.locator('dialog:not(#tabla-filtros)').count(),
   };
 }
 

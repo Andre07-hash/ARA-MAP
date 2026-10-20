@@ -57,7 +57,8 @@ y concede acceso a `dev_operador`. Crea filas ficticias y adjunta PDF/KMZ de
 prueba. El almacén local pertenece a este entorno, no a Supabase.
 
 **Dos recorridos distintos:** importar Excel/CSV alimenta bases heredadas.
-Para cargar muchas filas de la tabla maestra existe `scripts/cargar_maestra.py`.
+Para cargar muchas filas de la tabla maestra usa «Importar Excel» del menú ⋯
+(administradores) o `scripts/cargar_maestra.py`.
 Para probar un cambio pequeño suelen bastar unas filas creadas en la interfaz.
 
 ## Comprobar el cambio

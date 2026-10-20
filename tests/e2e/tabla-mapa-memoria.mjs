@@ -23,6 +23,14 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8434').replace(/\/$/, '');
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
 const RAIZ = new URL('../..', import.meta.url).pathname;
@@ -80,7 +88,7 @@ await hastaOtra(() => page.getByRole('button', { name: 'Siguiente' }).click());
 const pagina2 = await ids();
 await subirKmz(pagina2[0]);
 await hastaOtra(() => page.getByRole('button', { name: 'Anterior' }).click());
-await page.getByRole('button', { name: 'Actualizar' }).click();
+await enMenu(page, 'Actualizar');
 await lista();
 await page.getByRole('button', { name: 'Mapa de esta página' }).click();
 await page.locator('.previa-mapa.leaflet-container').waitFor();
@@ -106,7 +114,7 @@ async function lote() {
     await page.locator('.tabla-abrir').first().click();
     await page.locator('dialog[open] .archivos-detalle[data-tipo="kmz"]').waitFor();
     await page.locator('dialog[open]').getByRole('button', { name: 'Cerrar' }).last().click();
-    await page.locator('dialog').waitFor({ state: 'detached' });
+    await page.locator('dialog:not(#tabla-filtros)').waitFor({ state: 'detached' });
   }
 }
 
@@ -122,7 +130,7 @@ async function medir() {
   const previa = await page.evaluate(() => window.__araTabla.previa());
   return {
     heap_kb: Math.round(m.JSHeapUsedSize / 1024), nodos_dom: m.Nodes, listeners: m.JSEventListeners,
-    filas: await page.locator('tr.tabla-fila').count(), dialogos: await page.locator('dialog').count(),
+    filas: await page.locator('tr.tabla-fila').count(), dialogos: await page.locator('dialog:not(#tabla-filtros)').count(),
     cuerpos_retenidos: previa.cuerpos, cargando: previa.cargando, peticiones_de_cuerpo: pedidas.cuerpo,
   };
 }

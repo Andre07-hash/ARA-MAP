@@ -116,7 +116,10 @@ class Escenario:
             data=json.dumps(body).encode() if body is not None else None, headers=cabeceras)
         try:
             with urllib.request.urlopen(peticion, timeout=20) as respuesta:
-                return respuesta.status, json.loads(respuesta.read())
+                cuerpo = respuesta.read()
+                # A download (the table's .xlsx export) is bytes, not JSON.
+                es_json = respuesta.headers.get_content_type() == "application/json"
+                return respuesta.status, json.loads(cuerpo) if es_json else cuerpo
         except urllib.error.HTTPError as error:
             with error:
                 return error.code, json.loads(error.read())

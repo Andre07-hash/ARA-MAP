@@ -27,6 +27,26 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
+const verFiltros = async (page) => {
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
+};
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -200,8 +220,10 @@ async function enLaTabla(page, fn) {
 }
 async function filtrar(page, selector, valor) {
   await enLaTabla(page, async () => {
+    await verFiltros(page);
     await page.locator(selector).selectOption(valor);
     await listo(page);
+    await cerrarFiltros(page);
   });
 }
 const buscarEnTabla = (page, texto) => enLaTabla(page, () => page.locator('#tabla-buscar').fill(texto));
@@ -251,7 +273,7 @@ await revisar('administrador: entra a la tabla maestra y «Inventario» ya no es
   await hasta(async () => /#\/tabla\/maestra$/.test(ada.page.url()), `dirección ${ada.page.url()}`);
   const menu = await ada.page.locator('nav.nav .nav-item').allInnerTexts();
   cierto(!menu.includes('Inventario'), `menú: ${menu}`);
-  cierto(menu.includes('Tabla maestra'), `menú: ${menu}`);
+  cierto(menu.includes('Terrenos'), `menú: ${menu}`);
   igual(await modoBoton(ada.page, 'Tabla').getAttribute('aria-pressed'), 'true', 'Tabla activo');
   igual(await ada.page.getByRole('button', { name: 'Mapa de esta página' }).count(), 0, 'botón anterior');
 });
@@ -441,7 +463,7 @@ await revisar('un error al reunir se dice y se puede reintentar; la carga parcia
     }
     return r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"fallo simulado"}' });
   });
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await hasta(async () => /No se pudo actualizar el mapa: muestra lo que se reunió antes/.test(await ada.page.locator('.tabla-mapa-aviso').innerText().catch(() => '')), 'aviso de actualización fallida');
   igual((await mapa(ada.page)).filas.length, TODOS.length, 'conserva el conjunto completo anterior, no el parcial');
   await ada.page.unroute(/\/terrenos\?.*limit=200/);
@@ -474,7 +496,9 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   // The filter is changed in Tabla and the map shown again at once, before the grid's page arrives.
   await aTabla(ada.page);
   await ada.page.route(/\/terrenos\?(?!.*limit=200)/, async (r) => { await esperar(1500); await r.continue(); });
+  await verFiltros(ada.page);
   await ada.page.locator('#tabla-estado').selectOption('Sonora');
+  await cerrarFiltros(ada.page);
   await modoBoton(ada.page, 'Mapa').click();
   await esperar(300);                          // well before the grid's page (1.5 s)
   // Never the old query's 110 rows: either nothing yet or already the 52 of Sonora.
@@ -585,7 +609,7 @@ await revisar('operador: Tabla / Mapa en su base; nunca recibe filas ni contorno
   igual(await olga.page.locator('#tabla-vista').inputValue(), base.id, 'su base');
   const opciones = await olga.page.locator('#tabla-vista option').evaluateAll((o) => o.map((x) => x.value));
   igual(opciones, [base.id], 'sólo su base en el selector');
-  igual(await olga.page.locator('nav.nav .nav-item').allInnerTexts(), ['Tabla', 'Catálogo público'], 'menú del operador');
+  igual(await olga.page.locator('nav.nav .nav-item').allInnerTexts(), ['Terrenos'], 'menú del operador');
   await aMapa(olga.page);
   const m = await mapa(olga.page);
   igual([...m.filas].sort(), [...activos].sort(), 'su base completa');

@@ -18,11 +18,49 @@
 }
 
 .tabla-barra {
-  display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  border-bottom: 1px solid var(--rule);
-  background: var(--paper-raised);
+  display: grid; gap: var(--space-3);
+  padding: var(--space-5) var(--space-6) var(--space-4);
 }
+.tabla-cabeza { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+/* The view selector is the screen's title. */
+.tabla-titulo.input {
+  width: auto; max-width: 100%; padding: 0 1.75rem 0 0;
+  border: 0; background: transparent no-repeat right center / 1.1rem
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  appearance: none; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.022em; cursor: pointer;
+  field-sizing: content;   /* as wide as the chosen view, where supported */
+}
+.tabla-titulo.input:disabled { cursor: default; background-image: none; }
+.tabla-encabezado { display: grid; gap: var(--space-1); margin-right: auto; min-width: 0; }
+.tabla-subtitulo { margin: 0; font-size: var(--text-small); color: var(--ink-muted); }
+.tabla-subtitulo:empty { display: none; }
+.tabla-busqueda { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.tabla-buscar { position: relative; flex: 1 1 16rem; max-width: 26rem; }
+.tabla-buscar > .icono { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); }
+.tabla-buscar > .input { border-radius: var(--radius-pill); padding-left: 2.5rem; }
+.tabla-limpiar { color: #0066cc; text-decoration: none; }
+.tabla-chips { display: contents; }
+.tabla-filtro-chip { gap: var(--space-1); }
+.tabla-chip-quitar { border: 0; background: none; padding: 0 2px; color: var(--ink-muted); cursor: pointer; font-size: 1rem; line-height: 1; }
+.tabla-chip-quitar:hover { color: var(--ink); }
+.tabla-filtros .tabla-campo { min-width: 0; }
+.tabla-filtros .tabla-varios-resumen { max-width: none; }
+
+/* Importar Excel: the destination, a drop zone and the dry run's summary. */
+.importar { display: grid; gap: var(--space-4); }
+.importar-zona {
+  display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-6) var(--space-4);
+  border: 1.5px dashed var(--rule-strong); border-radius: var(--radius-lg); background: var(--paper-raised);
+  text-align: center; cursor: pointer;
+}
+.importar-zona.is-encima, .importar-zona:focus-within { border-color: var(--ink); }
+.importar-zona-titulo { font-weight: 500; }
+.importar-zona-boton { color: #0066cc; font-size: var(--text-small); }
+.importar-archivo { margin: 0; font-size: var(--text-small); color: var(--ink-secondary); overflow-wrap: anywhere; }
+.importar-resumen:empty { display: none; }
+.importar-resumen p { margin: 0 0 var(--space-2); }
+.importar-resumen details { font-size: var(--text-small); margin-top: var(--space-1); }
+.importar-resumen ul { margin: var(--space-1) 0 0; padding-left: var(--space-5); max-height: 10rem; overflow: auto; }
 .tabla-campo { display: grid; gap: var(--space-1); min-width: 8rem; }
 .tabla-campo .input { min-width: 0; }
 .tabla-casilla { padding-bottom: var(--space-2); }
@@ -44,7 +82,7 @@
   background: var(--paper-overlay); border: 1px solid var(--rule-strong); border-radius: var(--radius);
   box-shadow: var(--shadow-pop); font-size: var(--text-small); white-space: nowrap;
 }
-.tabla-acciones { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-left: auto; }
+.tabla-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-left: auto; }
 
 .tabla-aviso {
   margin: 0; padding: var(--space-2) var(--space-5);
@@ -76,6 +114,15 @@
 
 /* Tabla / Mapa: the grid, or the map of the whole view in the same area. */
 .tabla-cuerpo { flex: 1 1 auto; display: flex; min-height: 0; }
+/* The grid sits on a white card; the map keeps the full width. */
+.tabla-pantalla:not(.modo-mapa) .tabla-cuerpo {
+  margin: 0 var(--space-6); background: var(--paper-overlay); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05); overflow: hidden;
+}
+.tabla-pantalla:not(.modo-mapa) .tabla-pie {
+  margin: 0 var(--space-6) var(--space-5); background: var(--paper-overlay);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05);
+}
 .tabla-lienzo { flex: 1 1 0; min-width: 0; overflow: auto; min-height: 0; outline: none; }
 .tabla-previa { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .tabla-mapa-estado:has(> [hidden] + [hidden]) { display: none; }
@@ -90,12 +137,8 @@
 
 /* Map mode: one slim row (the view, Tabla / Mapa, Actualizar) and the map
  * takes the rest. The grid's query controls are hidden there (Tabla.js). */
-.tabla-pantalla.modo-mapa .tabla-barra {
-  align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-1) var(--space-4);
-}
-.tabla-pantalla.modo-mapa .tabla-barra .tabla-campo { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.tabla-pantalla.modo-mapa .tabla-barra .tabla-campo .field-label { margin: 0; }
-.tabla-pantalla.modo-mapa .tabla-barra .tabla-campo .input { width: auto; max-width: 22rem; padding-block: var(--space-1); }
+.tabla-pantalla.modo-mapa .tabla-barra { padding: var(--space-1) var(--space-4); }
+.tabla-pantalla.modo-mapa .tabla-titulo.input { font-size: var(--text-lead); }
 .tabla-pantalla.modo-mapa .tabla-acciones { align-items: center; }
 .tabla-pantalla.modo-mapa .tabla-acciones > .btn { padding-block: var(--space-1); }
 .tabla-pantalla.modo-mapa .segment { padding-block: 2px; }
@@ -214,10 +257,10 @@
 .tabla-grid { border-collapse: separate; border-spacing: 0; font-size: var(--text-small); }
 .tabla-th, .tabla-grid th[scope="row"] {
   position: sticky; top: 0; z-index: 2;
-  padding: var(--space-2) var(--space-3);
-  background: var(--paper-sunken);
-  border-bottom: 1px solid var(--rule-strong); border-right: 1px solid var(--rule);
-  text-align: left; white-space: nowrap; font-weight: 600;
+  padding: var(--space-3);
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--rule); border-right: 1px solid var(--paper-sunken);
+  text-align: left; white-space: nowrap; font-weight: 500; color: var(--ink-secondary);
 }
 .tabla-grid th[scope="row"] { position: sticky; left: 0; top: auto; z-index: 1; background: var(--paper-raised); font-weight: 400; }
 .tabla-grid thead .tabla-th-fila { left: 0; z-index: 3; }
@@ -229,9 +272,9 @@
 }
 
 .tabla-celda {
-  height: 2rem; min-width: 7rem; max-width: 18rem;
+  height: 2.5rem; min-width: 7rem; max-width: 18rem;
   padding: var(--space-1) var(--space-3);
-  border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--paper-sunken); border-right: 1px solid var(--paper-sunken);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   cursor: cell;
 }
@@ -264,7 +307,7 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 .tabla-pie {
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3);
   padding: var(--space-2) var(--space-5);
-  border-top: 1px solid var(--rule); background: var(--paper-raised);
+  border-top: 1px solid var(--rule); background: var(--paper-overlay); color: var(--ink-secondary);
   font-size: var(--text-small);
 }
 .tabla-pie .tabla-campo { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
@@ -292,7 +335,14 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 
 @media (max-width: 720px) {
   .tabla-barra, .tabla-pie, .tabla-bandeja, .tabla-lote { padding-inline: var(--space-3); }
-  .tabla-acciones { margin-left: 0; }
+  /* The "⋯" menu opens leftwards, so it stays at the right of its row. */
+  .tabla-acciones { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .tabla-pantalla:not(.modo-mapa) .tabla-cuerpo, .tabla-pantalla:not(.modo-mapa) .tabla-pie { margin-inline: var(--space-3); }
+  .tabla-titulo.input { font-size: 1.375rem; }
 }
 
 .detalle-nota { margin: 0 0 var(--space-3); color: var(--ink-secondary); font-size: var(--text-small); }
+
+/* On the map the bar stays one slim row: the subtitle is the grid's. */
+.tabla-pantalla.modo-mapa .tabla-subtitulo { display: none; }
+.importar-zona.is-ocupada { opacity: 0.6; cursor: progress; }

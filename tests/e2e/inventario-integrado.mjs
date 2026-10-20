@@ -15,6 +15,14 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8432').replace(/\/$/, '');
 const SHOTS = process.argv[2] ?? null;
 const CLAVES = { ana: process.env.ARA_PW_ANA, beto: process.env.ARA_PW_BETO, carla: process.env.ARA_PW_CARLA };
@@ -263,7 +271,7 @@ await caso('signed in, legacy bases and saved maps stay reachable and editable',
     headers: { Origin: URL_BASE }, data: { token: previa.token, nombre: 'Base legado integración' },
   });
   assert.equal(r.status(), 200, await r.text());
-  await page.getByRole('link', { name: 'Bases' }).click();
+  await page.evaluate(() => { location.hash = '#/bases'; });
   await page.waitForURL(/#\/bases$/);
   await page.getByText('Base legado integración').waitFor();
   assert.equal(await page.getByRole('button', { name: 'Importar archivo' }).count(), 1);   // not read-only
@@ -272,7 +280,7 @@ await caso('signed in, legacy bases and saved maps stay reachable and editable',
   await page.locator('.toolbar-title h1', { hasText: 'Base legado integración' }).waitFor();
   await page.getByRole('link', { name: 'Mapa', exact: true }).waitFor();             // nav offers the open base
   await foto(page, 'integrado-base-legado-1440');
-  await page.getByRole('link', { name: 'Mapas guardados' }).click();
+  await page.evaluate(() => { location.hash = '#/mapas'; });
   await page.getByRole('heading', { name: /Mapas/ }).first().waitFor();
   await page.getByRole('link', { name: 'Inventario' }).click();
   await page.locator('.toolbar-estado', { hasText: /terrenos/ }).waitFor();
@@ -287,7 +295,7 @@ await caso('a reload keeps the session; logout revokes it, clears private DOM, a
   await page.goto(`${URL_BASE}/#/inventario/${idTerreno}`);
   await page.reload();
   await page.locator('.detail', { hasText: SENTINELA }).waitFor();
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(page, 'Cerrar sesión');
   await page.waitForURL(/#\/catalogo$/);
   await page.getByText('Todavía no hay terrenos publicados').waitFor();
   let contenido = await html(page);

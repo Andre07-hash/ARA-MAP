@@ -14,6 +14,18 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
+// The grid's filters open in a side panel (a modal dialog): open it to use them, close it after.
+const verFiltros = async (page) => {
+  if (!(await page.locator('#tabla-filtros').evaluate((d) => d.open))) {
+    await page.locator('[aria-controls="tabla-filtros"]').click();
+  }
+};
+const cerrarFiltros = async (page) => {
+  if (await page.locator('#tabla-filtros').evaluate((d) => d.open)) {
+    await page.getByRole('button', { name: 'Cerrar filtros' }).click();
+  }
+};
+
 const URL_BASE = (process.env.ARA_URL ?? 'http://localhost:8434').replace(/\/$/, '');
 if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(URL_BASE)) throw new Error('Solo contra un servidor local desechable.');
 const CLAVE = /TEST_PASSWORD = "([^"]+)"/.exec(readFileSync(new URL('../support.py', import.meta.url), 'utf8'))[1];
@@ -180,7 +192,9 @@ async function hastaOtraPagina(page, accion) {
   }
   const trasPaginar = await memoria(page);
   assert.equal(await filas(page), 100, 'pages replace each other; rows never accumulate');
+  await verFiltros(page);
   const ordenar = await hastaOtraPagina(page, () => page.locator('#tabla-orden').selectOption('terreno'));
+  await cerrarFiltros(page);
   const buscar = await hastaOtraPagina(page, () => page.locator('#tabla-buscar').fill('nandu 12'));
   const coincidencias = (await page.locator('.tabla-cuenta').innerText()).trim();
   await page.locator('#tabla-buscar').fill('');

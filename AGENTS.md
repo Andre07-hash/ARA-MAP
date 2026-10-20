@@ -158,8 +158,10 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   candidatos se elige y activa en el detalle; uno inválido conserva el contorno
   anterior. KMZ y KML comparten la ranura `core:kmz` (tipo `kmz`); el formato
   de cada versión lo fija `tipo_detectado`, no un nombre interno nuevo.
-- La importación Excel/CSV heredada no carga la tabla maestra. La carga inicial
-  de filas se hace con `scripts/cargar_maestra.py`.
+- La importación Excel/CSV heredada no carga la tabla maestra. Las filas de la
+  tabla maestra se cargan con «Importar Excel» del menú ⋯ de la tabla
+  (administradores) o con `scripts/cargar_maestra.py`; ambos usan
+  `server/carga_maestra.py`.
 - El fallo del mapa de «Base Terrenos 09.26 copy» sigue pendiente por decisión
   del propietario. No retomarlo sin una tarea nueva.
 

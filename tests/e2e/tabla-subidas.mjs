@@ -23,6 +23,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-core';
 
+// The table's "⋯" menu and the account menu hold these actions.
+const enMenuDe = async (page, menu, nombre) => {
+  await page.locator(`${menu} > summary`).click();
+  await page.locator(`${menu} .menu-panel`).getByText(nombre, { exact: true }).click();
+};
+const enMenu = (page, nombre) => enMenuDe(page, '.tabla-acciones .menu-mas', nombre);
+const enCuenta = (page, nombre) => enMenuDe(page, '.menu-mas.cuenta', nombre);
+
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const RAIZ = join(AQUI, '..', '..');
 const PY = process.env.PYTHON ?? 'python3';
@@ -311,7 +319,7 @@ await revisar('filtrar y Actualizar durante la subida: sigue, también fuera de 
   const put = await retener(ada.page, PUT_CONTENIDO, 'PUT');
   await elegir(ada.page, T.filtro, 'pdf', F.pdf);
   await hasta(async () => put.vistos.length === 1, 'el PUT no salió');
-  await ada.page.getByRole('button', { name: 'Actualizar' }).click();
+  await enMenu(ada.page, 'Actualizar');
   await ada.page.locator('.tabla-lienzo:not([aria-busy])').waitFor();
   igual(await fase(ada.page, T.filtro, 'pdf'), 'subiendo', 'Actualizar conserva la celda');
   await ada.page.locator('#tabla-buscar').fill('Lote Subida foco Ficticio');      // its row leaves the page
@@ -474,12 +482,12 @@ await revisar('operador: cerrar sesión durante la subida pregunta; al confirmar
   const put = await retener(olga.page, PUT_CONTENIDO, 'PUT');
   await elegir(olga.page, T.salida, 'pdf', F.pdf);
   await hasta(async () => put.vistos.length === 1, 'el PUT no salió');
-  await olga.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(olga.page, 'Cerrar sesión');
   const d = dialogo(olga.page, '¿Cerrar sesión e interrumpir la subida?');
   await d.waitFor();
   await d.getByRole('button', { name: 'Seguir en la sesión' }).click();
   cierto(await olga.page.locator('.session-user').isVisible(), 'sigue la sesión');
-  await olga.page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await enCuenta(olga.page, 'Cerrar sesión');
   await d.getByRole('button', { name: 'Cerrar sesión' }).click();
   await hasta(async () => (await olga.page.locator('.session-user').count()) === 0, 'no cerró sesión');
   const antes = olga.lecturas.length;

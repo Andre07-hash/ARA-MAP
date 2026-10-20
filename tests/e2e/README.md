@@ -180,3 +180,24 @@ Medición local (25,000 terrenos sintéticos, 3,000 en una base, cinco sesiones)
 python3 tests/e2e/tabla_servidor.py --puerto 8434 --registros 25000   # terminal 1
 ARA_URL=http://localhost:8434 node tests/e2e/tabla-medicion.mjs [salida.json]
 ```
+
+## Asistente IA en el detalle de la tabla (#65)
+
+Botón «Asistente IA» del detalle del terreno con la tabla, el detalle y los
+widgets reales: visibilidad por rol y configuración, las tres acciones y la
+pregunta, una consulta por clic, errores y reintento manual, respuestas
+tardías al dejar de esperar, cerrar, cambiar de base o terminar la sesión,
+texto seguro, nada guardado en almacenamiento ni URL, y la tabla con su
+desplazamiento, foco, teclado y una subida de PDF en el mismo detalle.
+Levanta y borra su propio servidor desechable con datos ficticios.
+
+Por omisión, el propio script responde en el navegador las dos rutas del
+asistente con respuestas ficticias del contrato; esas respuestas sólo existen
+aquí. Con `ASISTENTE_CONECTADO=1` no intercepta nada y omite las comprobaciones
+que necesitan respuestas guionizadas (el servidor debe tener el asistente
+encendido con su proveedor de prueba).
+
+```bash
+cd tests/e2e && npm ci
+node tabla-asistente.mjs                    # ASISTENTE_CAPTURAS=carpeta para capturas
+```

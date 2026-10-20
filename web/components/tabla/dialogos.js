@@ -611,6 +611,9 @@ export function abrirImportar({ bases, baseInicial, onHecho }) {
     aviso.decir("");
     try {
       const r = await importarEnBase(baseId, archivo, { simular: !confirmar });
+      // Closed meanwhile (Cancelar, Escape, a logout): this answer changes
+      // nothing on screen. What the server saved stays saved.
+      if (!dialog.isConnected) return;
       if (confirmar) {
         toast(`Se agregaron ${terrenos(r.nuevas)} a «${nombreBase}».`);
         close();
@@ -629,6 +632,7 @@ export function abrirImportar({ bases, baseInicial, onHecho }) {
           `Columnas que la tabla no tiene y no se cargan: ${r.no_cargadas.join(", ")}.`),
       ].filter(Boolean));
     } catch (error) {
+      if (!dialog.isConnected) return;
       revisado = null;
       const errores = error.detalle?.errores ?? [];
       aviso.decir(error.message);

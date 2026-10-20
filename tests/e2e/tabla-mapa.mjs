@@ -568,6 +568,47 @@ await revisar('misma consulta (búsqueda): renombrar un terreno lo saca del mapa
   await listo(ada.page);
 });
 
+await revisar('misma consulta (superficie): bajar la superficie de un terreno lo saca del mapa con superficie mínima', async () => {
+  await aTabla(ada.page);
+  const grandes = puntos.filter((id) => activos.includes(id)).slice(0, 3);   // one was deleted above
+  for (const id of grandes) {
+    const t = await terreno(ada.page, id);
+    igual((await llamar(ada.page, 'PATCH', `/api/inventario/terrenos/${id}`,
+      { expected_version: t.version, changes: { superficie_m2: 20000 } })).status, 200, 'superficie');
+  }
+  await ada.page.reload();
+  await irA(ada.page, base.id);
+  await enLaTabla(ada.page, async () => {
+    await verFiltros(ada.page);
+    await ada.page.locator('#tabla-area-min').fill('10000');
+    await ada.page.locator('#tabla-area-min').dispatchEvent('change');
+    await listo(ada.page);
+    await cerrarFiltros(ada.page);
+  });
+  await hasta(async () => (await ada.page.locator('tr.tabla-fila').count()) === 3, 'el filtro de superficie');
+  await aMapa(ada.page);
+  igual((await reunido(ada.page, 'area_min_m2=10000')).filas.length, 3, 'tres con 10,000 m² o más');
+  await aTabla(ada.page);
+  const id = await primeraFila(ada.page);
+  const td = ada.page.locator(`tr[data-id="${id}"] td[data-col="core:superficie_m2"]`);
+  await td.focus();
+  await ada.page.keyboard.press('Enter');
+  await td.locator('.tabla-editor').fill('500');
+  await ada.page.keyboard.press('Enter');
+  await hasta(async () => (await terreno(ada.page, id))?.draft?.superficie_m2 === 500, 'no se guardó');   // a number
+  await aMapa(ada.page);
+  const m = await reunido(ada.page, 'area_min_m2=10000');
+  cierto(!m.filas.includes(id), 'el terreno de 500 m² sigue en el mapa con superficie mínima');
+  igual(m.filas.length, 2, 'dos siguen coincidiendo');
+  await enLaTabla(ada.page, async () => {
+    await verFiltros(ada.page);
+    await ada.page.locator('#tabla-area-min').fill('');
+    await ada.page.locator('#tabla-area-min').dispatchEvent('change');
+    await listo(ada.page);
+    await cerrarFiltros(ada.page);
+  });
+});
+
 await revisar('misma consulta: una fila en blanco creada con un filtro activo no entra al mapa; sin filtros sí, sin reunir de nuevo', async () => {
   await filtrar(ada.page, '#tabla-estado', 'Jalisco');
   await aMapa(ada.page);

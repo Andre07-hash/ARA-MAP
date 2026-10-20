@@ -254,7 +254,9 @@ export function createTabla({
     onclick: () => { menuMas.open = false; accion(); },
   }, icono(nombre), el("span", { class: "menu-item-texto" }, etiqueta,
     nota && el("span", { class: "menu-item-nota" }, nota)));
-  const btnExportar = deMenu("bajar", "Exportar a Excel", () => exportar(), "La vista actual, con sus filtros");
+  // From the grid only: the map narrows its set with filters of its own,
+  // which the export does not know, so it is not offered there.
+  const btnExportar = deMenu("bajar", "Exportar a Excel", () => exportar(), "La tabla, con sus filtros");
   const btnImportar = admin && deMenu("subir", "Importar Excel…", () => importar(), "Agrega filas a una base");
   const btnBases = admin && deMenu("personas", "Bases y accesos", () => basesDialogo());
   const btnColumnas = deMenu("columnas", "Columnas", () => columnasDialogo());
@@ -706,7 +708,7 @@ export function createTabla({
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
     btnRecargar.hidden = !vista;
-    btnExportar.hidden = !vista;
+    btnExportar.hidden = !vista || modo === "mapa";
     if (btnImportar) btnImportar.hidden = soloConsulta();
     // Without a view an operator has nothing to do in the menu, and nothing to filter.
     menuMas.hidden = !vista && !admin;
@@ -1193,7 +1195,8 @@ export function createTabla({
    * table's: such a write drops the set, and it is gathered again when the
    * map is shown. Without those, only the base decides. */
   const filtraPorCampos = () =>
-    Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno.length);
+    Boolean(consulta.q.trim() || consulta.estado || consulta.municipio || consulta.tipo_terreno.length
+      || consulta.area_min_m2 || consulta.area_max_m2);
   function descartarConjunto() {
     olvidarConjunto();
     pintarMapa();
@@ -2017,7 +2020,7 @@ export function createTabla({
 
   /** The view as an .xlsx: its filters and order, every page (not only this one). */
   async function exportar() {
-    if (!vista) return;
+    if (!vista || modo === "mapa") return;
     const nombre = baseActual()?.nombre ?? (vista === VISTA_SIN_ASIGNAR ? "Terrenos sin base" : "Tabla maestra");
     const ruta = esGlobal(vista) ? "/maestra/exportar" : `/maestra/bases/${encodeURIComponent(vista)}/exportar`;
     const q = new URLSearchParams(consultaDeLista(vista, consulta));

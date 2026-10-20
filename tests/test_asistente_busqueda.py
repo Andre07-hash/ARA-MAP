@@ -140,6 +140,63 @@ class Casos(Escenario):
                      self.coinciden[0], self.b1, CLAVE):
             self.assertNotIn(nada, todo)
 
+    def test_every_spelling_of_a_value_is_searched_across_pages(self):
+        variantes = [self.nuevo_terreno(70 + i, tipo_terreno=t, superficie_m2=30000)
+                     for i, t in enumerate(("industrial", "Indústrial", "INDUSTRIAL"))]
+        self.guion(interpretacion({"tipo_terreno": ["industriales"], "estado": ["jalisco"],
+                                   "superficie_m2_min": 10000}))
+        primera = self.ok(self.buscar())
+        self.assertEqual(primera["total"], 26)
+        self.assertEqual(sorted(primera["filtros"]["tipo_terreno"]),
+                         sorted(["Industrial", "industrial", "Indústrial", "INDUSTRIAL"]))
+        self.assertIn("Tipo de terreno: INDUSTRIAL (con sus variantes de mayúsculas y acentos)",
+                      [c["texto"] for c in primera["criterios"]])
+        vistos, pagina = [t["terreno_id"] for t in primera["terrenos"]], primera
+        while pagina["next_cursor"]:
+            pagina = self.ok(self.call("POST", RESULTADOS, {"filtros": pagina["filtros"],
+                                                            "cursor": pagina["next_cursor"]}))
+            self.assertEqual(pagina["total"], 26)
+            vistos += [t["terreno_id"] for t in pagina["terrenos"]]
+        self.assertEqual(sorted(vistos), sorted(self.coinciden + variantes))
+
+    def test_strict_and_inclusive_bounds_run_as_asked(self):
+        # coinciden[0] has exactly 10,000 m²; coinciden[22] has exactly 12,200 m².
+        casos = [
+            ({"superficie_m2_mayor_que": 10000}, 22, "más de 10,000 m²", self.coinciden[0], False),
+            ({"superficie_m2_min": 10000}, 23, "al menos 10,000 m²", self.coinciden[0], True),
+            # Without a lower bound the 9,999 m² terrain matches too.
+            ({"superficie_m2_menor_que": 12200}, 23, "menos de 12,200 m²", self.coinciden[22], False),
+            ({"superficie_m2_max": 12200}, 24, "como máximo 12,200 m²", self.coinciden[22], True),
+            ({"superficie_m2_mayor_que": 10000, "superficie_m2_menor_que": 12200}, 21,
+             "más de 10,000 m² y menos de 12,200 m²", self.coinciden[0], False),
+        ]
+        for filtros, total, texto, frontera, incluida in casos:
+            with self.subTest(texto=texto):
+                self.guion(interpretacion({"tipo_terreno": ["Industrial"], "estado": ["Jalisco"], **filtros}))
+                cuerpo = self.ok(self.buscar())
+                self.assertEqual(cuerpo["total"], total)
+                self.assertIn(f"Superficie registrada: {texto}", [c["texto"] for c in cuerpo["criterios"]])
+                ids = []
+                pagina = cuerpo
+                while True:
+                    ids += [t["terreno_id"] for t in pagina["terrenos"]]
+                    if not pagina["next_cursor"]:
+                        break
+                    pagina = self.ok(self.call("POST", RESULTADOS, {"filtros": pagina["filtros"],
+                                                                    "cursor": pagina["next_cursor"]}))
+                self.assertEqual(frontera in ids, incluida)
+        self.ok(self.patch(self.coinciden[1], {"moneda": "MXN", "asking_price": 500000}, "ada"))
+        self.ok(self.patch(self.coinciden[2], {"moneda": "MXN", "asking_price": 499999.99}, "ada"))
+        for filtros, esperados, texto in (
+                ({"precio_menor_que": 500000}, [self.coinciden[2]], "menos de MXN 500,000"),
+                ({"precio_max": 500000}, [self.coinciden[1], self.coinciden[2]], "como máximo MXN 500,000"),
+                ({"precio_mayor_que": 499999.99}, [self.coinciden[1]], "más de MXN 499,999.99")):
+            with self.subTest(texto=texto):
+                self.guion(interpretacion({"moneda": "MXN", "precio_base": "total", **filtros}))
+                cuerpo = self.ok(self.buscar())
+                self.assertEqual(sorted(t["terreno_id"] for t in cuerpo["terrenos"]), sorted(esperados))
+                self.assertIn(f"Precio total: {texto}", [c["texto"] for c in cuerpo["criterios"]])
+
     def test_combined_filters_price_order_and_zero_results(self):
         self.ok(self.patch(self.coinciden[0], {"moneda": "MXN", "asking_m2": 900,
                                                "availability": "available"}, "ada"))
@@ -174,7 +231,11 @@ class Casos(Escenario):
             (interpretacion({"precio_max": 5, "precio_base": "total"}), "reglas", "moneda"),
             (interpretacion({"precio_max": 5, "moneda": "MXN"}), "reglas", "total o por m²"),
             (interpretacion({"moneda": "MXN"}), "reglas", "precio mínimo o máximo"),
-            (interpretacion({"superficie_m2_min": 9, "superficie_m2_max": 1}), "reglas", "mínimo es mayor"),
+            (interpretacion({"superficie_m2_min": 9, "superficie_m2_max": 1}), "reglas", "ningún valor posible"),
+            (interpretacion({"superficie_m2_mayor_que": 5, "superficie_m2_max": 5}), "reglas", "ningún valor posible"),
+            (interpretacion({"superficie_m2_min": 5, "superficie_m2_menor_que": 5}), "reglas", "ningún valor posible"),
+            (interpretacion({"superficie_m2_min": 1, "superficie_m2_mayor_que": 2}), "reglas", "un solo límite"),
+            (interpretacion({"precio_menor_que": 5, "precio_base": "total"}), "reglas", "moneda"),
         ]
         antes = self.negocio()
         for texto, origen, frase in casos:

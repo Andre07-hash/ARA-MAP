@@ -21,9 +21,11 @@ vista de tabla). Contrato HTTP en el issue #69.
 
 - **Buscar:** a Claude sólo van la pregunta y la especificación fija de
   filtros, ningún terreno. Su JSON se valida en `server/asistente/busqueda.py`
-  contra una lista cerrada. Los valores de texto deben coincidir con valores
-  registrados. Después se usan `parse_query` y `repo.listar` sobre todo el
-  inventario, incluidos los terrenos sin base. Lo que no se puede ejecutar
+  contra una lista cerrada. Cada valor de texto se busca con todas sus
+  grafías registradas (mayúsculas, acentos, plural simple). «Al menos» y
+  «hasta» son límites inclusivos (`>=`, `<=`); «más de» y «menos de», estrictos
+  (`>`, `<`), sin redondear. Después se usan `parse_query` y `repo.listar`
+  sobre todo el inventario, incluidos los terrenos sin base. Lo que no se puede ejecutar
   exactamente pide aclaración y no muestra ningún listado. Las páginas
   siguientes no vuelven a llamar al modelo.
 - **Comparar 2–3:** la tabla la construye el servidor con los mismos 10

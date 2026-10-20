@@ -139,8 +139,11 @@ def _filtros(conn: DatabaseConnection, q: Mapping[str, Any]) -> tuple[list[str],
         if q[campo]:
             partes.append(f"d.{campo} IN ({', '.join('?' for _ in q[campo])})")
             params.extend(q[campo])
-    for limite, signo in (("area_min_m2", ">="), ("area_max_m2", "<=")):
-        if q[limite] is not None:
+    # The strict bounds (> and <) come only from the assistant's search
+    # (asistente/busqueda.py), not from the URL: hence .get().
+    for limite, signo in (("area_min_m2", ">="), ("area_max_m2", "<="),
+                          ("area_gt_m2", ">"), ("area_lt_m2", "<")):
+        if q.get(limite) is not None:
             partes.append(f"d.superficie_m2 {signo} ?")
             params.append(q[limite])
     if q["moneda"]:
@@ -148,8 +151,9 @@ def _filtros(conn: DatabaseConnection, q: Mapping[str, Any]) -> tuple[list[str],
         partes.append("d.moneda = ?")
         params.append(q["moneda"])
         monto = "d.asking_price" if q["price_basis"] == "total" else "d.asking_m2"
-        for limite, signo in (("price_min", ">="), ("price_max", "<=")):
-            if q[limite] is not None:
+        for limite, signo in (("price_min", ">="), ("price_max", "<="),
+                              ("price_gt", ">"), ("price_lt", "<")):
+            if q.get(limite) is not None:
                 partes.append(f"{monto} {signo} ?")
                 params.append(q[limite])
     if q["publication_state"]:

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B · Mesa dividida — Lista y mapa</title><style>
+:root{
+  --paper:#f7f6f3;--raised:#fdfdfc;--sunken:#efede9;--overlay:#ffffff;
+  --ink:#1d1b19;--ink-2:#55524f;--ink-3:#6b6764;--rule:#e2dfda;--rule-2:#cbc7c1;
+  --sel-bg:#e8e5df;--hover-bg:#f1efeb;
+  --err:#b42f2f;--err-bg:#fbeaea;--warn:#7a5b16;--warn-bg:#fbf3e3;--ok:#2f7d32;--ok-bg:#eaf4ea;
+  --map:#ecebe6;--borde-campo:#8d8984;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#d9d6cf}
+body{font:13px/1.4 var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss03"}
+.lienzo{position:relative;overflow:hidden;background:var(--paper);margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+.ic{width:16px;height:16px;flex:none;vertical-align:-3px}
+.num,td.n,.n{font-variant-numeric:tabular-nums}
+.sd{color:var(--ink-3)}
+.sd-t{color:var(--ink-3);font-style:italic}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--rule-2);border-radius:6px;background:var(--raised);font-size:13px;white-space:nowrap;cursor:default}
+.btn.prim{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.quiet{border-color:transparent;background:transparent}
+.btn.sm{height:24px;padding:0 8px;font-size:12px}
+.btn.icono{width:28px;padding:0;justify-content:center}
+.btn.peligro{color:var(--err);border-color:#e4b9b9}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:7px;padding:2px;background:var(--sunken);gap:2px}
+.seg span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:5px;color:var(--ink-2)}
+.seg span.on{background:var(--overlay);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:500}
+.campo{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--borde-campo);border-radius:7px;background:var(--overlay);color:var(--ink-3)}
+.campo b{font-weight:400;color:var(--ink)}
+.kbd{font:11px var(--mono);color:var(--ink-2);border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--raised)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 4px 0 9px;border-radius:12px;background:var(--overlay);border:1px solid var(--rule-2);font-size:12px;white-space:nowrap}
+.chip b{font-weight:600}
+.chip .ic{width:14px;height:14px;color:var(--ink-2)}
+.chip.sug{border-style:dashed;padding-right:9px;color:var(--ink-2);background:transparent}
+.ubic,.docs{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:var(--ink-2)}
+.ubic-contorno .ic{color:var(--ink)}
+.ubic-elegir{color:var(--warn);font-weight:500}
+.ubic-ninguna{color:var(--ink-3)}
+.docs-0{color:var(--ink-3)}
+.etq{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.nota-mock{position:absolute;z-index:50;background:#fffbe6;border:1px solid #e6d58a;color:#4d4211;font-size:11.5px;line-height:1.35;padding:7px 9px;border-radius:6px;max-width:260px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.nota-mock b{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.nota-mock .n{display:inline-flex;width:18px;height:18px;border-radius:9px;background:#4d4211;color:#fffbe6;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:4px}
+.foco{outline:2px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 5px rgba(255,255,255,.9)}
+.estado-guardado{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.estado-guardado.ok .ic{color:var(--ok)}
+.estado-guardado.trabajando .ic{color:var(--ink-2)}
+.estado-guardado.alerta{color:var(--err);font-weight:600}
+.mapa-svg{display:block}
+.mapa-ciudad{font:11px var(--font);fill:#55524f;paint-order:stroke;stroke:#ecebe6;stroke-width:3px}
+.mapa-ciudad.mayor{font-weight:600;fill:#3d3a37}
+.mapa-ctrl{position:absolute;display:flex;flex-direction:column;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapa-ctrl span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--ink)}
+.mapa-ctrl span+span{border-top:1px solid var(--rule)}
+.flota{position:absolute;background:rgba(253,253,252,.94);border:1px solid var(--rule-2);border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.10)}
+.leyenda{width:228px;padding:10px 12px;font-size:12px}
+.leyenda .ley-titulo{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.leyenda .ley-titulo span{color:var(--ink-2);font-size:11px}
+.ley-rampa{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:3px}
+.ley-rampa li{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.ley-rampa i{width:14px;height:10px;border-radius:2px;display:inline-block}
+.ley-rampa i.hueco{background:#fff;border:2px solid #5b5754;border-radius:6px;width:12px}
+.ley-formas{display:flex;gap:12px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:7px}
+.ley-formas .ic{width:14px;height:14px;color:var(--ink)}
+.ley-fuera{display:flex;gap:6px;align-items:center;margin-top:7px;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.ley-fuera .ic{width:14px;height:14px}
+.leyenda.compacta .ley-rampa{grid-template-columns:1fr 1fr}
+.base-mapa{position:absolute;display:flex;gap:2px;padding:2px;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;font-size:12px}
+.base-mapa span{padding:4px 9px;border-radius:6px;color:var(--ink-2)}
+.base-mapa span.on{background:var(--ink);color:#fff}
+.ilustrativo{position:absolute;font-size:10px;color:var(--ink-2);background:rgba(236,235,230,.85);padding:1px 5px;border-radius:3px}
+
+.grid-envoltura{overflow:hidden;position:relative;height:100%;background:var(--raised)}
+.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;font-size:13px}
+.grid th{position:sticky;top:0;height:32px;padding:0 10px;text-align:left;font-weight:600;font-size:12px;color:var(--ink-2);background:var(--paper);border-bottom:1px solid var(--rule-2);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden}
+.grid th.n{text-align:right}
+.grid th.ordenada{color:var(--ink)}
+.grid th .ord{width:12px;height:12px;margin-left:3px;vertical-align:-1px}
+.grid th .th-custom{border-bottom:1px dashed var(--ink-3)}
+.grid td{height:34px;padding:0 10px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+.grid td.n{text-align:right;font-variant-numeric:tabular-nums}
+.grid td.c-nom,.grid th.c-nom{position:sticky;left:34px;background:inherit;z-index:1;border-right:1px solid var(--rule-2)}
+.grid th.c-nom{background:var(--paper);z-index:2}
+.grid .c-check{width:34px;padding:0 0 0 10px;position:sticky;left:0;background:inherit;z-index:1}
+.grid th.c-check{background:var(--paper);z-index:2}
+.grid tbody tr{background:var(--raised)}
+.grid tbody tr:nth-child(even){background:#faf9f7}
+.grid tr.sel{background:var(--sel-bg)!important}
+.grid tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--ink)}
+.grid tr.sel .nom{font-weight:600}
+.grid tr.marcada{background:#eceae5!important}
+.grid tr.hover{background:var(--hover-bg)!important}
+.cb{display:inline-block;width:14px;height:14px;border:1.4px solid var(--ink-3);border-radius:3px;vertical-align:-2px;background:#fff;position:relative}
+.cb.on{background:var(--ink);border-color:var(--ink)}
+.cb.on::after{content:"";position:absolute;left:3.5px;top:1px;width:4px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+.cb.mixto{background:var(--ink);border-color:var(--ink)}
+.cb.mixto::after{content:"";position:absolute;left:2px;top:5px;width:7px;height:1.6px;background:#fff}
+.foco-celda{outline:2px solid var(--ink);outline-offset:-2px}
+.celda-edit{background:#fff!important;box-shadow:inset 0 0 0 2px var(--ink)}
+.celda-guardando{color:var(--ink-2)}
+.celda-guardando i,.celda-conflicto i,.celda-incierta i{font-style:normal;font-size:11px;margin-left:4px}
+.celda-conflicto{background:var(--err-bg)!important;box-shadow:inset 0 0 0 1.5px var(--err)}
+.celda-conflicto i{color:var(--err);font-weight:600}
+.celda-incierta{background:var(--warn-bg)!important}
+.celda-incierta i{color:var(--warn);font-weight:600}
+
+.dl{margin:0;display:grid;gap:10px 16px}
+.dl.dos{grid-template-columns:1fr 1fr}
+.dl.tres{grid-template-columns:1fr 1fr 1fr}
+.dl-f dt{font-size:11.5px;color:var(--ink-2);margin-bottom:2px}
+.dl-f dt small{font-size:10.5px;color:var(--ink-3);margin-left:3px}
+.dl-f dd{margin:0;font-size:13px}
+.dl-f dd .grande{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.dl-f.editable dd{border-radius:5px;margin:-3px -6px;padding:3px 6px;background:var(--hover-bg)}
+.mono{font-family:var(--mono);font-size:12px}
+.sec{padding:14px 18px;border-top:1px solid var(--rule)}
+.sec h3{margin:0 0 10px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.sec h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-3)}
+.ubic-ficha p{margin:6px 0 10px;color:var(--ink-2);font-size:12.5px}
+.ubic-ficha .ubic{font-size:13px;color:var(--ink);font-weight:500}
+.archivos{display:grid;gap:12px}
+.arch-cab{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.archivos ul{list-style:none;margin:0;padding:0;border:1px solid var(--rule);border-radius:8px;background:var(--overlay)}
+.arch{display:flex;align-items:center;gap:10px;padding:8px 10px}
+.arch+.arch{border-top:1px solid var(--rule)}
+.arch div{flex:1;min-width:0}
+.arch b{display:block;font-weight:500;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch span:not(.btn){display:block;font-size:11.5px;color:var(--ink-2)}
+.arch.vacio{color:var(--ink-3);font-size:12px;font-style:italic}
+.arch.subiendo{background:#fafaf8}
+.barra{display:block;height:4px;border-radius:2px;background:var(--rule);margin-top:5px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--ink)}
+.arch-ayuda{margin:0;font-size:11.5px;color:var(--ink-2)}
+.campo-edit{display:flex;align-items:center;gap:6px;height:32px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.campo-edit small{font-size:11px;font-weight:500;color:var(--ink-2);margin-left:auto}
+.campo-edit .cursor{display:inline-block;width:1.5px;height:17px;background:var(--ink);margin-left:-4px}
+.ayuda-campo{display:block;font-size:11px;color:var(--ink-2);margin-top:4px}
+.guardado-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ok);margin-left:6px}
+.guardado-campo .ic{width:13px;height:13px}
+.guardando-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);margin-left:6px}
+.select-edit{display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff}
+
+.hoja{display:flex;align-items:stretch;width:max-content}
+.hoja-ui{flex:none}
+.notas{width:330px;flex:none;background:#26231f;color:#efede9;padding:22px 22px 18px;font-size:12.5px;line-height:1.45;position:relative}
+.notas h1{font-size:19px;line-height:1.2;margin:0 0 16px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.notas-dir{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#c4bfb6}
+.notas ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.notas li{display:flex;gap:10px}
+.notas li div{flex:1}
+.notas li b{color:#fff}
+.notas-pie{position:absolute;bottom:14px;left:22px;right:22px;margin:0;font-size:11px;color:#a9a399}
+.pin{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:10px;background:#e8562a;color:#fff;font:700 11px/1 var(--font);font-style:normal;flex:none;box-shadow:0 0 0 2px #fff}
+.lienzo>.pin{position:absolute;z-index:60}
+.notas .pin{box-shadow:none;margin-top:1px}
+
+.side{position:absolute;left:0;top:0;bottom:0;width:232px;background:#f0eee9;border-right:1px solid var(--rule-2);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.side .logo{padding:2px 8px 12px}
+.side h4{margin:14px 8px 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between}
+.side a{display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:13px}
+.side a span.c{margin-left:auto;color:var(--ink-2);font-size:12px;font-variant-numeric:tabular-nums}
+.side a.on{background:var(--ink);color:#fff}
+.side a.on span.c{color:#d9d6cf}
+.side a.sec{color:var(--ink-2)}
+.side .pie{margin-top:auto;border-top:1px solid var(--rule-2);padding-top:10px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);padding-left:8px}
+.side .pie em{font-style:normal;font-size:11px;padding:1px 6px;border-radius:9px;background:var(--sunken)}
+.cont-b{position:absolute;left:232px;right:0;top:0;bottom:0}
+.tb{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--raised);border-bottom:1px solid var(--rule)}
+.tb h1{margin:0;font-size:16px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.tb h1 small{font-weight:400;color:var(--ink-2);font-size:12px;margin-left:6px}
+.tb .der{margin-left:auto;display:flex;align-items:center;gap:8px}
+.chips{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--paper);border-bottom:1px solid var(--rule-2)}
+.chips .alc{font-size:12.5px;color:var(--ink-2)}
+.chips .alc b{color:var(--ink)}
+.cont{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:0 5px}
+.panes{position:absolute;top:90px;left:0;right:0;bottom:0;display:flex}
+.lista{width:520px;flex:none;background:var(--raised);border-right:1px solid var(--rule-2);position:relative;overflow:hidden}
+.lista-cab{height:34px;display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-2);background:var(--paper)}
+.lista-cab .der{margin-left:auto;display:flex;gap:6px;align-items:center}
+.lista ul{list-style:none;margin:0;padding:0}
+.lista li{display:grid;grid-template-columns:22px 1fr auto;gap:2px 10px;padding:8px 14px 8px 12px;border-bottom:1px solid var(--rule);position:relative}
+.lista li .cb{margin-top:2px;opacity:0}
+.lista li.marcada .cb,.lista li.hover .cb,.lista li.sel .cb{opacity:1}
+.lista li .nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lista li .pm{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.lista li .pm small{font-weight:400;color:var(--ink-2);font-size:11px}
+.lista li .ln2{grid-column:2;color:var(--ink-2);font-size:12px;display:flex;gap:10px;white-space:nowrap;overflow:hidden}
+.lista li .ln2r{grid-column:3;display:flex;gap:10px;justify-content:flex-end}
+.lista li.sel{background:var(--sel-bg);box-shadow:inset 3px 0 0 var(--ink)}
+.lista li.hover{background:var(--hover-bg)}
+.lista li.marcada{background:#eceae5}
+.lote{position:absolute;left:0;right:0;top:0;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;background:var(--ink);color:#fff;font-size:12.5px;z-index:3}
+.lote .btn{height:24px;font-size:12px;background:transparent;border-color:#6b6764;color:#fff}
+.lote .der{margin-left:auto;display:flex;gap:6px}
+.mapa-p{flex:1;position:relative;overflow:hidden}
+.tarjeta{position:absolute;width:350px;z-index:5;background:var(--overlay);border:1px solid var(--rule-2);border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,.06),0 14px 34px rgba(0,0,0,.16);overflow:hidden}
+.tarjeta .t-cab{padding:14px 16px 10px}
+.tarjeta h2{margin:0;font-size:15.5px;line-height:1.3;font-weight:650}
+.tarjeta .sub{margin:3px 0 0;color:var(--ink-2);font-size:12px}
+.tarjeta .t-datos{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 16px;border-top:1px solid var(--rule)}
+.tarjeta .t-datos dt{font-size:11px;color:var(--ink-2)}
+.tarjeta .t-datos dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.tarjeta .t-pie{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--rule)}
+.tarjeta .t-arch{padding:8px 16px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.tarjeta .t-arch div{display:flex;gap:8px;align-items:center}
+.tarjeta .t-arch div span{margin-left:auto}
+.etq-sel{position:absolute;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;background:var(--ink);color:#fff;font-size:12px;font-weight:500;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.etq-sel .ic{width:13px;height:13px}
+.etq-hover{position:absolute;padding:2px 7px;border-radius:5px;background:var(--overlay);border:1px solid var(--rule-2);font-size:12px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.det{position:absolute;inset:0;background:var(--raised);overflow:hidden}
+.det-cab{height:44px;display:flex;align-items:center;gap:8px;padding:0 10px 0 8px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.det-cab .der{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.det h2{margin:14px 18px 2px;font-size:18px;line-height:1.3;font-weight:650;letter-spacing:-.01em}
+.det .sub{margin:0 18px 10px;color:var(--ink-2);font-size:12.5px}
+.form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 14px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--ink-2)}
+.form label.ancho2{grid-column:span 2}
+.form label.ancho3{grid-column:span 3}
+.form .in{height:32px;display:flex;align-items:center;padding:0 9px;border:1px solid var(--borde-campo);border-radius:6px;background:#fff;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums;gap:6px}
+.form .in small{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.form .in.vacio{color:var(--ink-3);font-style:italic}
+.form .in.foco{border:2px solid var(--ink);padding:0 8px}
+.form .in.ok{border-color:#9cc59e}
+.form .est{font-size:11px;display:flex;align-items:center;gap:4px}
+.form .est.ok{color:var(--ok)}
+.form .est .ic{width:12px;height:12px}
+.form .in.area{height:52px;align-items:flex-start;padding-top:7px}
+.hoja-b .side{width:56px;padding:12px 8px;align-items:center}
+.hoja-b .cont-b{left:56px}
+.seg span{white-space:nowrap}
+.form .tag{display:inline-block;font-size:10px;padding:0 5px;border-radius:7px;background:var(--sunken);color:var(--ink-2);margin-left:4px;vertical-align:1px}
+.tels .tel-pantalla{background:var(--map)}
+.hoja-sheet{position:absolute;left:0;right:0;bottom:0;background:var(--raised);border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.14)}
+.agarre{width:38px;height:5px;border-radius:3px;background:var(--rule-2);margin:8px auto 6px}
+.pop-b{position:absolute;z-index:20;background:var(--overlay);border:1px solid var(--rule-2);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.16)}
+
+.tels{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:22px 0 0}
+.tel{margin:0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.tel-pantalla{width:390px;height:844px;border-radius:38px;border:10px solid #1d1b19;overflow:hidden;position:relative;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.tel figcaption{font-size:12px;color:var(--ink-2)}
+.tel-estado{height:44px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600}
+
+</style></head><body><div class="hoja">
+  <div class="hoja-ui"><div class="lienzo" style="width:1440px;height:900px"><nav class="side" aria-label="Bases"><span class="logo"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 1.5 22.5 12 12 22.5 1.5 12z" fill="#233fc4"/><path d="M12 7 17 12l-5 5-5-5z" fill="#fff"/><path d="M12 9.6 14.4 12 12 14.4 9.6 12z" fill="#233fc4"/></svg><b>ARA Map</b></span>
+  <h4>Tabla maestra</h4><a><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="11" height="10" rx="1"/><path d="M2.5 6.5h11M2.5 10h11M6.5 3v10"/></svg>Todas las bases<span class="c">54</span></a><a><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4.5" stroke-dasharray="2 2"/></svg>Sin asignar<span class="c">2</span></a>
+  <h4>Bases de trabajo<span><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg></span></h4>
+  <a class="on"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2.5 5.5 3L8 8.5l-5.5-3z"/><path d="m2.5 8.5 5.5 3 5.5-3M2.5 11 8 14l5.5-3"/></svg>Bajío Industrial 2026<span class="c">48</span></a>
+  <a><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2.5 5.5 3L8 8.5l-5.5-3z"/><path d="m2.5 8.5 5.5 3 5.5-3M2.5 11 8 14l5.5-3"/></svg>Península y Sureste<span class="c">4</span></a>
+  <h4>Consulta</h4><a class="sec"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 8S4 3.8 8 3.8 14.2 8 14.2 8 12 12.2 8 12.2 1.8 8 1.8 8z"/><circle cx="8" cy="8" r="2"/></svg>Catálogo público</a>
+  <h4>Herramientas</h4><a class="sec"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg>Bases importadas</a><a class="sec"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.2 6 2.8l4 1.6 3.5-1.4v9l-3.5 1.4-4-1.6-3.5 1.4z"/><path d="M6 2.8v9M10 4.4v9"/></svg>Mapas guardados</a>
+  <div class="pie"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5.5" r="2.6"/><path d="M3 13.5c.8-2.6 2.8-3.8 5-3.8s4.2 1.2 5 3.8"/></svg>Ada Ficticia <em>Admin.</em></div></nav><div class="cont-b"><div class="tb"><h1>Bajío Industrial 2026<small>2 con acceso</small></h1>
+  <span class="campo" style="width:230px;margin-left:8px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>Buscar en esta base</span>
+  <span class="btn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M4.5 8h7M6.5 12h3"/></svg>Filtros <span class="cont">2</span></span>
+  <div class="der"><span class="estado-guardado ok"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>Todo guardado</span><span class="seg"><span class="on"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="11" height="10" rx="1"/><path d="M6 3v10"/></svg>Lista y mapa</span><span class=""><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="11" height="10" rx="1"/><path d="M2.5 6.5h11M2.5 10h11M6.5 3v10"/></svg>Hoja</span></span>
+  <span class="btn icono" title="Accesos y columnas de la base"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="3.5" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12.5" cy="8" r="1" fill="currentColor"/></svg></span><span class="btn prim"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>Agregar</span></div></div><div class="chips"><span class="alc"><b>22</b> de 48 · 20 en el mapa · 2 sin ubicación</span>
+  <span class="chip">Estado: <b>Guanajuato, Querétaro</b><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 8 8M12 4l-8 8"/></svg></span><span class="chip">Tipo: <b>Industrial, Comercial</b><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 8 8M12 4l-8 8"/></svg></span>
+  <span style="font-size:12px;text-decoration:underline;text-underline-offset:2px">Quitar filtros</span></div>
+  <div class="panes"><section class="lista" aria-label="Lista de terrenos"><div class="lote"><b>2 seleccionados</b><div class="der"><span class="btn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5h9.5M10 3l2.5 2.5L10 8M13 10.5H3.5M6 8l-2.5 2.5L6 13"/></svg>Transferir…</span><span class="btn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg>Borrar…</span><span class="btn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 8 8M12 4l-8 8"/></svg></span></div></div><div class="lista-cab"><span class="cb mixto"></span><span>22 terrenos</span><div class="der"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v10M2.8 10.8 5 13l2.2-2.2M11 13V3M8.8 5.2 11 3l2.2 2.2"/></svg><b style="color:var(--ink)">Asking $/m²</b>, mayor primero <svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></div></div><ul><li class="  ">
+    <span class="cb"></span><span class="nm" title="Reserva Santa Teresa 8">Reserva Santa Teresa 8</span><span class="pm">$955<small>/m²</small></span>
+    <span class="ln2">Industrial · San Juan del Río · <span class="n">54,595 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Predio La Purísima 29">Predio La Purísima 29</span><span class="pm">$906<small>/m²</small></span>
+    <span class="ln2">Comercial · San Juan del Río · <span class="n">220,894 m²</span></span><span class="ln2r"><span class="ubic ubic-ninguna"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4.5" stroke-dasharray="2 2"/></svg><span>Sin ubicación</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Silao Puerto Interior, ampliación sur">Silao Puerto Interior, ampliación sur</span><span class="pm">$900<small>/m²</small></span>
+    <span class="ln2">Industrial · Silao de la Victoria · <span class="n">72,300 m²</span></span><span class="ln2r"><span class="ubic ubic-contorno"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><span>Contorno</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Parcela Santa Teresa 18">Parcela Santa Teresa 18</span><span class="pm">$865<small>/m²</small></span>
+    <span class="ln2">Industrial · Querétaro · <span class="n">133,785 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Polígono El Pueblito – frente a vialidad primaria, con servidumbre de paso">Polígono El Pueblito – frente a vialidad primaria, con servidumbre de paso</span><span class="pm">$824<small>/m²</small></span>
+    <span class="ln2">Industrial · León · <span class="n">46,676 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="León Norte, Parque Santa Fe III">León Norte, Parque Santa Fe III</span><span class="pm">$800<small>/m²</small></span>
+    <span class="ln2">Industrial · León · <span class="n">67,000 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Lote Santa Teresa 28">Lote Santa Teresa 28</span><span class="pm">$775<small>/m²</small></span>
+    <span class="ln2">Industrial · León · <span class="n">212,975 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class=" hover marcada">
+    <span class="cb on"></span><span class="nm" title="Corredor 57 – Santa Rosa Jáuregui">Corredor 57 – Santa Rosa Jáuregui</span><span class="pm">$750<small>/m²</small></span>
+    <span class="ln2">Industrial · Querétaro · <span class="n">205,000 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Predio El Pueblito 17">Predio El Pueblito 17</span><span class="pm">$734<small>/m²</small></span>
+    <span class="ln2">Industrial · Celaya · <span class="n">125,866 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="El Marqués – Polígono sin coordenadas capturadas">El Marqués – Polígono sin coordenadas capturadas</span><span class="pm">$700<small>/m²</small></span>
+    <span class="ln2">Industrial · El Marqués · <span class="n">128,000 m²</span></span><span class="ln2r"><span class="ubic ubic-contorno"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><span>Contorno</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  marcada">
+    <span class="cb on"></span><span class="nm" title="San José Iturbide – Parque Opción">San José Iturbide – Parque Opción</span><span class="pm">$600<small>/m²</small></span>
+    <span class="ln2">Industrial · San José Iturbide · <span class="n">99,000 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Irapuato – Castro del Río, fracción B">Irapuato – Castro del Río, fracción B</span><span class="pm">$550<small>/m²</small></span>
+    <span class="ln2">Industrial · Irapuato · <span class="n">143,000 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="sel  ">
+    <span class="cb"></span><span class="nm" title="Polígono Apaseo El Grande – Fracción Norte del Rancho San Bartolo">Polígono Apaseo El Grande – Fracción Norte del Rancho San Bartolo</span><span class="pm">$500<small>/m²</small></span>
+    <span class="ln2">Industrial · Apaseo el Grande · <span class="n">184,500 m²</span></span><span class="ln2r"><span class="ubic ubic-contorno"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><span>Contorno</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Colón km 12 – Lote A">Colón km 12 – Lote A</span><span class="pm">$450<small>/m²</small></span>
+    <span class="ln2">Industrial · Colón · <span class="n">250,000 m²</span></span><span class="ln2r"><span class="ubic ubic-contorno"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><span>Contorno</span></span><span class="docs"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>1 PDF</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Lote La Estancia 4">Lote La Estancia 4</span><span class="pm">$431<small>/m²</small></span>
+    <span class="ln2">Comercial · Querétaro · <span class="n">22,919 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li><li class="  ">
+    <span class="cb"></span><span class="nm" title="Reserva La Estancia 14">Reserva La Estancia 14</span><span class="pm">$341<small>/m²</small></span>
+    <span class="ln2">Comercial · León · <span class="n">102,109 m²</span></span><span class="ln2r"><span class="ubic ubic-punto"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg><span>Punto X/Y</span></span><span class="docs docs-0"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><span>0</span></span></span></li></ul></section>
+  <div class="mapa-p"><svg class="mapa-svg" viewBox="0 0 688 810" width="688" height="810" role="img" aria-label="Mapa ilustrativo de terrenos"><defs><pattern id="b1-rel" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M0 22 22 0" stroke="#e4e2db" stroke-width=".6"/></pattern></defs><rect width="688" height="810" fill="#ecebe6"/><ellipse cx="271.9238095238089" cy="180.61619055109435" rx="147.42857142857142" ry="103.19999999999999" fill="url(#b1-rel)" opacity=".9"/><ellipse cx="615.923809523808" cy="408.5059970226379" rx="98.28571428571428" ry="68.79999999999998" fill="url(#b1-rel)" opacity=".9"/><ellipse cx="534.0190476190461" cy="40.376309645529275" rx="163.8095238095238" ry="114.66666666666664" fill="url(#b1-rel)" opacity=".9"/><ellipse cx="140.8761904761927" cy="548.7458779282042" rx="114.66666666666666" ry="80.26666666666665" fill="url(#b1-rel)" opacity=".9"/><ellipse cx="353.82857142857085" cy="489.14392854333823" rx="39.31428571428571" ry="27.519999999999996" fill="url(#b1-rel)" opacity=".9"/><ellipse cx="484.8761904761917" cy="468.10794640750385" rx="29.48571428571428" ry="20.639999999999993" fill="url(#b1-rel)" opacity=".9"/><polyline points="536.6,498.6 520.9,517.2 440.3,515.1 398.1,523.2 338.8,526.0 275.2,506.7 221.5,469.5 197.6,375.5 113.7,312.8 32.1,230.8 -87.1,46.7 -101.6,19.3" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="536.6,498.6 520.9,517.2 440.3,515.1 398.1,523.2 338.8,526.0 275.2,506.7 221.5,469.5 197.6,375.5 113.7,312.8 32.1,230.8 -87.1,46.7 -101.6,19.3" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="666.4,570.1 619.2,531.2 536.6,498.6 539.3,355.9 360.4,75.4 345.3,-47.6" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="666.4,570.1 619.2,531.2 536.6,498.6 539.3,355.9 360.4,75.4 345.3,-47.6" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="536.6,498.6 573.3,478.6 648.7,433.0" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="536.6,498.6 573.3,478.6 648.7,433.0" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="536.6,498.6 421.3,386.1 359.1,300.9 345.3,-47.6" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="536.6,498.6 421.3,386.1 359.1,300.9 345.3,-47.6" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="398.1,523.2 339.7,481.1 421.3,386.1" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="398.1,523.2 339.7,481.1 421.3,386.1" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="398.1,523.2 461.9,545.9 666.4,570.1" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="398.1,523.2 461.9,545.9 666.4,570.1" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="221.5,469.5 -242.4,583.8" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="221.5,469.5 -242.4,583.8" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="113.7,312.8 359.1,300.9" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="113.7,312.8 359.1,300.9" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polyline points="275.2,506.7 339.7,481.1" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="275.2,506.7 339.7,481.1" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polygon points="441.6,515.3 435.7,518.7 429.8,515.3 429.8,508.5 435.7,505.1 441.6,508.5" fill="#4384d4" stroke="#ffffff" stroke-width="1.6"/><polygon points="441.6,515.3 435.7,518.7 429.8,515.3 429.8,508.5 435.7,505.1 441.6,508.5" fill="none" stroke="#1d1b19" stroke-opacity=".35" stroke-width=".8" transform="translate(0 0)"/><polygon points="422.0,392.6 416.1,396.0 410.2,392.6 410.2,385.8 416.1,382.4 422.0,385.8" fill="#ffffff" stroke="#5b5754" stroke-width="2"/><polygon points="422.0,392.6 416.1,396.0 410.2,392.6 410.2,385.8 416.1,382.4 422.0,385.8" fill="none" stroke="#1d1b19" stroke-opacity=".35" stroke-width=".8" transform="translate(0 0)"/><polygon points="654.6,436.4 648.7,439.8 642.8,436.4 642.8,429.6 648.7,426.2 654.6,429.6" fill="#4384d4" stroke="#ffffff" stroke-width="1.6"/><polygon points="654.6,436.4 648.7,439.8 642.8,436.4 642.8,429.6 648.7,426.2 654.6,429.6" fill="none" stroke="#1d1b19" stroke-opacity=".35" stroke-width=".8" transform="translate(0 0)"/><polygon points="205.7,373.3 199.8,376.7 194.0,373.3 194.0,366.5 199.8,363.1 205.7,366.5" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><polygon points="205.7,373.3 199.8,376.7 194.0,373.3 194.0,366.5 199.8,363.1 205.7,366.5" fill="none" stroke="#1d1b19" stroke-opacity=".35" stroke-width=".8" transform="translate(0 0)"/><polygon points="572.7,485.5 566.8,488.9 560.9,485.5 560.9,478.7 566.8,475.3 572.7,478.7" fill="#2f6fc4" stroke="#ffffff" stroke-width="1.6"/><polygon points="572.7,485.5 566.8,488.9 560.9,485.5 560.9,478.7 566.8,475.3 572.7,478.7" fill="none" stroke="#1d1b19" stroke-opacity=".35" stroke-width=".8" transform="translate(0 0)"/><circle cx="517.6380952380946" cy="445.318965760349" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="517.6380952380946" cy="445.318965760349" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="519.276190476193" cy="457.5899553395861" r="5.6" fill="#0d2f5e" stroke="#ffffff" stroke-width="1.6"/><circle cx="519.276190476193" cy="457.5899553395861" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="127.77142857142874" cy="292.8080952755469" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="127.77142857142874" cy="292.8080952755469" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="219.50476190476246" cy="464.60194938486416" r="5.6" fill="#2f6fc4" stroke="#ffffff" stroke-width="1.6"/><circle cx="219.50476190476246" cy="464.60194938486416" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="537.2952380952382" cy="352.41004466041164" r="5.6" fill="#2f6fc4" stroke="#ffffff" stroke-width="1.6"/><circle cx="537.2952380952382" cy="352.41004466041164" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="525.8285714285727" cy="466.3549478961846" r="5.6" fill="#4384d4" stroke="#ffffff" stroke-width="1.6"/><circle cx="525.8285714285727" cy="466.3549478961846" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="101.56190476190551" cy="299.82008932082505" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="101.56190476190551" cy="299.82008932082505" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="676.5333333333325" cy="561.0168675074412" r="5.6" fill="#164382" stroke="#ffffff" stroke-width="1.6"/><circle cx="676.5333333333325" cy="561.0168675074412" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="119.58095238095069" cy="336.63305805853616" r="5.6" fill="#4384d4" stroke="#ffffff" stroke-width="1.6"/><circle cx="119.58095238095069" cy="336.63305805853616" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="399.69523809523764" cy="492.6499255659779" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="399.69523809523764" cy="492.6499255659779" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="561.8666666666677" cy="469.86094491882307" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="561.8666666666677" cy="469.86094491882307" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="647.0476190476171" cy="564.5228645300797" r="5.6" fill="#0d2f5e" stroke="#ffffff" stroke-width="1.6"/><circle cx="647.0476190476171" cy="564.5228645300797" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="417.7142857142876" cy="529.462894303689" r="5.6" fill="#0d2f5e" stroke="#ffffff" stroke-width="1.6"/><circle cx="417.7142857142876" cy="529.462894303689" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="90.09523809523995" cy="340.1390550811746" r="5.6" fill="#1f58a6" stroke="#ffffff" stroke-width="1.6"/><circle cx="90.09523809523995" cy="340.1390550811746" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><circle cx="532.3809523809523" cy="473.36694194146276" r="5.6" fill="#164382" stroke="#ffffff" stroke-width="1.6"/><circle cx="532.3809523809523" cy="473.36694194146276" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><text x="543.6400000000017" y="492.6101205044643" class="mapa-ciudad mayor">Querétaro</text><text x="405.05714285714396" y="517.1520996629384" class="mapa-ciudad mayor">Celaya</text><text x="228.4704761904768" y="463.51034521656" class="mapa-ciudad mayor">Irapuato</text><text x="204.55428571428388" y="369.54962500983083" class="mapa-ciudad">Silao</text><text x="120.68380952380761" y="306.7922783045895" class="mapa-ciudad mayor">León</text><text x="39.10666666666633" y="224.75194797483428" class="mapa-ciudad">Lagos de Moreno</text><text x="428.3180952380957" y="380.0676160777474" class="mapa-ciudad">San Miguel de Allende</text><text x="366.0704761904774" y="294.87188842761685" class="mapa-ciudad">Dolores Hidalgo</text><text x="546.2609523809526" y="349.91604168305133" class="mapa-ciudad">San José Iturbide</text><text x="282.2000000000011" y="500.67391365653424" class="mapa-ciudad">Salamanca</text><circle cx="435.7333333333328" cy="511.9329091904931" r="12" fill="none" stroke="#ffffff" stroke-width="5"/><circle cx="435.7333333333328" cy="511.9329091904931" r="12" fill="none" stroke="#1d1b19" stroke-width="2.5"/><circle cx="517.6380952380946" cy="445.318965760349" r="11" fill="none" stroke="#1d1b19" stroke-width="1.5" stroke-dasharray="3 2"/></svg><span class="etq-hover" style="right:184.3619047619054px;top:415.318965760349px">Corredor 57 – Santa Rosa Jáuregui · $750/m²</span>
+  <div class="base-mapa" style="left:12px;top:12px"><span class="on">Claro</span><span>Satélite</span><span>Calles</span></div>
+  <div class="mapa-ctrl" style="right:12px;top:12px"><span>+</span><span>−</span><span style="font-size:13px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg></span></div>
+  <div class="flota" style="left:12px;bottom:12px"><div class="leyenda">
+    <div class="ley-titulo"><b>Asking $/m²</b> <span>MXN · 20 en el mapa</span></div>
+    <ul class="ley-rampa"><li><i style="background:#4384d4"></i>&lt; 513</li><li><i style="background:#2f6fc4"></i>513 – 733</li><li><i style="background:#1f58a6"></i>734 – 905</li><li><i style="background:#164382"></i>906 – 1,347</li><li><i style="background:#0d2f5e"></i>≥ 1,348</li><li><i class="hueco"></i>Sin precio por m²</li></ul>
+    <div class="ley-formas"><span><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg> Contorno KMZ/KML</span><span><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2" fill="currentColor"/></svg> Punto X/Y</span></div>
+    <a class="ley-fuera" href="#"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4.5" stroke-dasharray="2 2"/></svg> 2 sin ubicación — ver en la lista</a>
+  </div></div>
+  <span class="chip sug" style="position:absolute;right:12px;bottom:12px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg>Limitar la lista al área visible</span>
+  <span class="ilustrativo" style="right:12px;bottom:44px">Mapa base ilustrativo</span></div></div></div><i class="pin" style="left:180px;top:64px">1</i><i class="pin" style="left:1086px;top:4px">2</i><i class="pin" style="left:732px;top:132px">3</i><i class="pin" style="left:1239.6380952380946px;top:513.318965760349px">4</i><i class="pin" style="left:1210px;top:838px">5</i></div></div>
+  <aside class="notas"><p class="notas-dir">B · Mesa dividida — reorganización</p><h1>1 · Lista y mapa a la vez</h1><ol><li><i class="pin">1</i><div><b>Las bases son lugares, no un filtro.</b> Barra lateral con las bases de trabajo y sus conteos. La administradora ve además «Todas» y «Sin asignar»; la operadora sólo «Mis bases». La barra se puede ocultar.</div></li><li><i class="pin">2</i><div><b>Lista y mapa en pantalla al mismo tiempo.</b> Se elimina el cambio Tabla / Mapa para consultar; «Hoja» queda para la edición masiva.</div></li><li><i class="pin">3</i><div><b>Renglón de dos líneas pensado para comparar:</b> nombre, Asking $/m², tipo, municipio, superficie, ubicación y PDF. La selección múltiple activa una barra de acciones por rol.</div></li><li><i class="pin">4</i><div><b>Pasar el puntero por un renglón lo señala en el mapa</b> (y viceversa) con anillo punteado y etiqueta: la relación entre fila y lugar es inmediata.</div></li><li><i class="pin">5</i><div><b>Exploración futura:</b> limitar la lista al área visible del mapa. Es un filtro nuevo sobre datos existentes; no cambia reglas de negocio.</div></li></ol>
+  <p class="notas-pie">Mockup estático con datos ficticios. Las notas no forman parte de la interfaz.</p></aside></div></body></html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B · Mesa dividida — Ficha en edición</title><style>
+:root{
+  --paper:#f7f6f3;--raised:#fdfdfc;--sunken:#efede9;--overlay:#ffffff;
+  --ink:#1d1b19;--ink-2:#55524f;--ink-3:#6b6764;--rule:#e2dfda;--rule-2:#cbc7c1;
+  --sel-bg:#e8e5df;--hover-bg:#f1efeb;
+  --err:#b42f2f;--err-bg:#fbeaea;--warn:#7a5b16;--warn-bg:#fbf3e3;--ok:#2f7d32;--ok-bg:#eaf4ea;
+  --map:#ecebe6;--borde-campo:#8d8984;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#d9d6cf}
+body{font:13px/1.4 var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss03"}
+.lienzo{position:relative;overflow:hidden;background:var(--paper);margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+.ic{width:16px;height:16px;flex:none;vertical-align:-3px}
+.num,td.n,.n{font-variant-numeric:tabular-nums}
+.sd{color:var(--ink-3)}
+.sd-t{color:var(--ink-3);font-style:italic}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--rule-2);border-radius:6px;background:var(--raised);font-size:13px;white-space:nowrap;cursor:default}
+.btn.prim{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.quiet{border-color:transparent;background:transparent}
+.btn.sm{height:24px;padding:0 8px;font-size:12px}
+.btn.icono{width:28px;padding:0;justify-content:center}
+.btn.peligro{color:var(--err);border-color:#e4b9b9}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:7px;padding:2px;background:var(--sunken);gap:2px}
+.seg span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:5px;color:var(--ink-2)}
+.seg span.on{background:var(--overlay);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:500}
+.campo{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--borde-campo);border-radius:7px;background:var(--overlay);color:var(--ink-3)}
+.campo b{font-weight:400;color:var(--ink)}
+.kbd{font:11px var(--mono);color:var(--ink-2);border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--raised)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 4px 0 9px;border-radius:12px;background:var(--overlay);border:1px solid var(--rule-2);font-size:12px;white-space:nowrap}
+.chip b{font-weight:600}
+.chip .ic{width:14px;height:14px;color:var(--ink-2)}
+.chip.sug{border-style:dashed;padding-right:9px;color:var(--ink-2);background:transparent}
+.ubic,.docs{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:var(--ink-2)}
+.ubic-contorno .ic{color:var(--ink)}
+.ubic-elegir{color:var(--warn);font-weight:500}
+.ubic-ninguna{color:var(--ink-3)}
+.docs-0{color:var(--ink-3)}
+.etq{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.nota-mock{position:absolute;z-index:50;background:#fffbe6;border:1px solid #e6d58a;color:#4d4211;font-size:11.5px;line-height:1.35;padding:7px 9px;border-radius:6px;max-width:260px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.nota-mock b{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.nota-mock .n{display:inline-flex;width:18px;height:18px;border-radius:9px;background:#4d4211;color:#fffbe6;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:4px}
+.foco{outline:2px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 5px rgba(255,255,255,.9)}
+.estado-guardado{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.estado-guardado.ok .ic{color:var(--ok)}
+.estado-guardado.trabajando .ic{color:var(--ink-2)}
+.estado-guardado.alerta{color:var(--err);font-weight:600}
+.mapa-svg{display:block}
+.mapa-ciudad{font:11px var(--font);fill:#55524f;paint-order:stroke;stroke:#ecebe6;stroke-width:3px}
+.mapa-ciudad.mayor{font-weight:600;fill:#3d3a37}
+.mapa-ctrl{position:absolute;display:flex;flex-direction:column;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapa-ctrl span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--ink)}
+.mapa-ctrl span+span{border-top:1px solid var(--rule)}
+.flota{position:absolute;background:rgba(253,253,252,.94);border:1px solid var(--rule-2);border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.10)}
+.leyenda{width:228px;padding:10px 12px;font-size:12px}
+.leyenda .ley-titulo{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.leyenda .ley-titulo span{color:var(--ink-2);font-size:11px}
+.ley-rampa{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:3px}
+.ley-rampa li{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.ley-rampa i{width:14px;height:10px;border-radius:2px;display:inline-block}
+.ley-rampa i.hueco{background:#fff;border:2px solid #5b5754;border-radius:6px;width:12px}
+.ley-formas{display:flex;gap:12px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:7px}
+.ley-formas .ic{width:14px;height:14px;color:var(--ink)}
+.ley-fuera{display:flex;gap:6px;align-items:center;margin-top:7px;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.ley-fuera .ic{width:14px;height:14px}
+.leyenda.compacta .ley-rampa{grid-template-columns:1fr 1fr}
+.base-mapa{position:absolute;display:flex;gap:2px;padding:2px;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;font-size:12px}
+.base-mapa span{padding:4px 9px;border-radius:6px;color:var(--ink-2)}
+.base-mapa span.on{background:var(--ink);color:#fff}
+.ilustrativo{position:absolute;font-size:10px;color:var(--ink-2);background:rgba(236,235,230,.85);padding:1px 5px;border-radius:3px}
+
+.grid-envoltura{overflow:hidden;position:relative;height:100%;background:var(--raised)}
+.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;font-size:13px}
+.grid th{position:sticky;top:0;height:32px;padding:0 10px;text-align:left;font-weight:600;font-size:12px;color:var(--ink-2);background:var(--paper);border-bottom:1px solid var(--rule-2);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden}
+.grid th.n{text-align:right}
+.grid th.ordenada{color:var(--ink)}
+.grid th .ord{width:12px;height:12px;margin-left:3px;vertical-align:-1px}
+.grid th .th-custom{border-bottom:1px dashed var(--ink-3)}
+.grid td{height:34px;padding:0 10px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+.grid td.n{text-align:right;font-variant-numeric:tabular-nums}
+.grid td.c-nom,.grid th.c-nom{position:sticky;left:34px;background:inherit;z-index:1;border-right:1px solid var(--rule-2)}
+.grid th.c-nom{background:var(--paper);z-index:2}
+.grid .c-check{width:34px;padding:0 0 0 10px;position:sticky;left:0;background:inherit;z-index:1}
+.grid th.c-check{background:var(--paper);z-index:2}
+.grid tbody tr{background:var(--raised)}
+.grid tbody tr:nth-child(even){background:#faf9f7}
+.grid tr.sel{background:var(--sel-bg)!important}
+.grid tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--ink)}
+.grid tr.sel .nom{font-weight:600}
+.grid tr.marcada{background:#eceae5!important}
+.grid tr.hover{background:var(--hover-bg)!important}
+.cb{display:inline-block;width:14px;height:14px;border:1.4px solid var(--ink-3);border-radius:3px;vertical-align:-2px;background:#fff;position:relative}
+.cb.on{background:var(--ink);border-color:var(--ink)}
+.cb.on::after{content:"";position:absolute;left:3.5px;top:1px;width:4px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+.cb.mixto{background:var(--ink);border-color:var(--ink)}
+.cb.mixto::after{content:"";position:absolute;left:2px;top:5px;width:7px;height:1.6px;background:#fff}
+.foco-celda{outline:2px solid var(--ink);outline-offset:-2px}
+.celda-edit{background:#fff!important;box-shadow:inset 0 0 0 2px var(--ink)}
+.celda-guardando{color:var(--ink-2)}
+.celda-guardando i,.celda-conflicto i,.celda-incierta i{font-style:normal;font-size:11px;margin-left:4px}
+.celda-conflicto{background:var(--err-bg)!important;box-shadow:inset 0 0 0 1.5px var(--err)}
+.celda-conflicto i{color:var(--err);font-weight:600}
+.celda-incierta{background:var(--warn-bg)!important}
+.celda-incierta i{color:var(--warn);font-weight:600}
+
+.dl{margin:0;display:grid;gap:10px 16px}
+.dl.dos{grid-template-columns:1fr 1fr}
+.dl.tres{grid-template-columns:1fr 1fr 1fr}
+.dl-f dt{font-size:11.5px;color:var(--ink-2);margin-bottom:2px}
+.dl-f dt small{font-size:10.5px;color:var(--ink-3);margin-left:3px}
+.dl-f dd{margin:0;font-size:13px}
+.dl-f dd .grande{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.dl-f.editable dd{border-radius:5px;margin:-3px -6px;padding:3px 6px;background:var(--hover-bg)}
+.mono{font-family:var(--mono);font-size:12px}
+.sec{padding:14px 18px;border-top:1px solid var(--rule)}
+.sec h3{margin:0 0 10px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.sec h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-3)}
+.ubic-ficha p{margin:6px 0 10px;color:var(--ink-2);font-size:12.5px}
+.ubic-ficha .ubic{font-size:13px;color:var(--ink);font-weight:500}
+.archivos{display:grid;gap:12px}
+.arch-cab{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.archivos ul{list-style:none;margin:0;padding:0;border:1px solid var(--rule);border-radius:8px;background:var(--overlay)}
+.arch{display:flex;align-items:center;gap:10px;padding:8px 10px}
+.arch+.arch{border-top:1px solid var(--rule)}
+.arch div{flex:1;min-width:0}
+.arch b{display:block;font-weight:500;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch span:not(.btn){display:block;font-size:11.5px;color:var(--ink-2)}
+.arch.vacio{color:var(--ink-3);font-size:12px;font-style:italic}
+.arch.subiendo{background:#fafaf8}
+.barra{display:block;height:4px;border-radius:2px;background:var(--rule);margin-top:5px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--ink)}
+.arch-ayuda{margin:0;font-size:11.5px;color:var(--ink-2)}
+.campo-edit{display:flex;align-items:center;gap:6px;height:32px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.campo-edit small{font-size:11px;font-weight:500;color:var(--ink-2);margin-left:auto}
+.campo-edit .cursor{display:inline-block;width:1.5px;height:17px;background:var(--ink);margin-left:-4px}
+.ayuda-campo{display:block;font-size:11px;color:var(--ink-2);margin-top:4px}
+.guardado-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ok);margin-left:6px}
+.guardado-campo .ic{width:13px;height:13px}
+.guardando-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);margin-left:6px}
+.select-edit{display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff}
+
+.hoja{display:flex;align-items:stretch;width:max-content}
+.hoja-ui{flex:none}
+.notas{width:330px;flex:none;background:#26231f;color:#efede9;padding:22px 22px 18px;font-size:12.5px;line-height:1.45;position:relative}
+.notas h1{font-size:19px;line-height:1.2;margin:0 0 16px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.notas-dir{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#c4bfb6}
+.notas ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.notas li{display:flex;gap:10px}
+.notas li div{flex:1}
+.notas li b{color:#fff}
+.notas-pie{position:absolute;bottom:14px;left:22px;right:22px;margin:0;font-size:11px;color:#a9a399}
+.pin{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:10px;background:#e8562a;color:#fff;font:700 11px/1 var(--font);font-style:normal;flex:none;box-shadow:0 0 0 2px #fff}
+.lienzo>.pin{position:absolute;z-index:60}
+.notas .pin{box-shadow:none;margin-top:1px}
+
+.side{position:absolute;left:0;top:0;bottom:0;width:232px;background:#f0eee9;border-right:1px solid var(--rule-2);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+.side .logo{padding:2px 8px 12px}
+.side h4{margin:14px 8px 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between}
+.side a{display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:13px}
+.side a span.c{margin-left:auto;color:var(--ink-2);font-size:12px;font-variant-numeric:tabular-nums}
+.side a.on{background:var(--ink);color:#fff}
+.side a.on span.c{color:#d9d6cf}
+.side a.sec{color:var(--ink-2)}
+.side .pie{margin-top:auto;border-top:1px solid var(--rule-2);padding-top:10px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);padding-left:8px}
+.side .pie em{font-style:normal;font-size:11px;padding:1px 6px;border-radius:9px;background:var(--sunken)}
+.cont-b{position:absolute;left:232px;right:0;top:0;bottom:0}
+.tb{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;background:var(--raised);border-bottom:1px solid var(--rule)}
+.tb h1{margin:0;font-size:16px;font-weight:650;letter-spacing:-.01em;white-space:nowrap}
+.tb h1 small{font-weight:400;color:var(--ink-2);font-size:12px;margin-left:6px}
+.tb .der{margin-left:auto;display:flex;align-items:center;gap:8px}
+.chips{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--paper);border-bottom:1px solid var(--rule-2)}
+.chips .alc{font-size:12.5px;color:var(--ink-2)}
+.chips .alc b{color:var(--ink)}
+.cont{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:0 5px}
+.panes{position:absolute;top:90px;left:0;right:0;bottom:0;display:flex}
+.lista{width:520px;flex:none;background:var(--raised);border-right:1px solid var(--rule-2);position:relative;overflow:hidden}
+.lista-cab{height:34px;display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;border-bottom:1px solid var(--rule);font-size:12px;color:var(--ink-2);background:var(--paper)}
+.lista-cab .der{margin-left:auto;display:flex;gap:6px;align-items:center}
+.lista ul{list-style:none;margin:0;padding:0}
+.lista li{display:grid;grid-template-columns:22px 1fr auto;gap:2px 10px;padding:8px 14px 8px 12px;border-bottom:1px solid var(--rule);position:relative}
+.lista li .cb{margin-top:2px;opacity:0}
+.lista li.marcada .cb,.lista li.hover .cb,.lista li.sel .cb{opacity:1}
+.lista li .nm{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lista li .pm{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.lista li .pm small{font-weight:400;color:var(--ink-2);font-size:11px}
+.lista li .ln2{grid-column:2;color:var(--ink-2);font-size:12px;display:flex;gap:10px;white-space:nowrap;overflow:hidden}
+.lista li .ln2r{grid-column:3;display:flex;gap:10px;justify-content:flex-end}
+.lista li.sel{background:var(--sel-bg);box-shadow:inset 3px 0 0 var(--ink)}
+.lista li.hover{background:var(--hover-bg)}
+.lista li.marcada{background:#eceae5}
+.lote{position:absolute;left:0;right:0;top:0;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;background:var(--ink);color:#fff;font-size:12.5px;z-index:3}
+.lote .btn{height:24px;font-size:12px;background:transparent;border-color:#6b6764;color:#fff}
+.lote .der{margin-left:auto;display:flex;gap:6px}
+.mapa-p{flex:1;position:relative;overflow:hidden}
+.tarjeta{position:absolute;width:350px;z-index:5;background:var(--overlay);border:1px solid var(--rule-2);border-radius:12px;box-shadow:0 2px 4px rgba(0,0,0,.06),0 14px 34px rgba(0,0,0,.16);overflow:hidden}
+.tarjeta .t-cab{padding:14px 16px 10px}
+.tarjeta h2{margin:0;font-size:15.5px;line-height:1.3;font-weight:650}
+.tarjeta .sub{margin:3px 0 0;color:var(--ink-2);font-size:12px}
+.tarjeta .t-datos{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:10px 16px;border-top:1px solid var(--rule)}
+.tarjeta .t-datos dt{font-size:11px;color:var(--ink-2)}
+.tarjeta .t-datos dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.tarjeta .t-pie{display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--rule)}
+.tarjeta .t-arch{padding:8px 16px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.tarjeta .t-arch div{display:flex;gap:8px;align-items:center}
+.tarjeta .t-arch div span{margin-left:auto}
+.etq-sel{position:absolute;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;background:var(--ink);color:#fff;font-size:12px;font-weight:500;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.etq-sel .ic{width:13px;height:13px}
+.etq-hover{position:absolute;padding:2px 7px;border-radius:5px;background:var(--overlay);border:1px solid var(--rule-2);font-size:12px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.det{position:absolute;inset:0;background:var(--raised);overflow:hidden}
+.det-cab{height:44px;display:flex;align-items:center;gap:8px;padding:0 10px 0 8px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.det-cab .der{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.det h2{margin:14px 18px 2px;font-size:18px;line-height:1.3;font-weight:650;letter-spacing:-.01em}
+.det .sub{margin:0 18px 10px;color:var(--ink-2);font-size:12.5px}
+.form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 14px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--ink-2)}
+.form label.ancho2{grid-column:span 2}
+.form label.ancho3{grid-column:span 3}
+.form .in{height:32px;display:flex;align-items:center;padding:0 9px;border:1px solid var(--borde-campo);border-radius:6px;background:#fff;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums;gap:6px}
+.form .in small{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.form .in.vacio{color:var(--ink-3);font-style:italic}
+.form .in.foco{border:2px solid var(--ink);padding:0 8px}
+.form .in.ok{border-color:#9cc59e}
+.form .est{font-size:11px;display:flex;align-items:center;gap:4px}
+.form .est.ok{color:var(--ok)}
+.form .est .ic{width:12px;height:12px}
+.form .in.area{height:52px;align-items:flex-start;padding-top:7px}
+.hoja-b .side{width:56px;padding:12px 8px;align-items:center}
+.hoja-b .cont-b{left:56px}
+.seg span{white-space:nowrap}
+.form .tag{display:inline-block;font-size:10px;padding:0 5px;border-radius:7px;background:var(--sunken);color:var(--ink-2);margin-left:4px;vertical-align:1px}
+.tels .tel-pantalla{background:var(--map)}
+.hoja-sheet{position:absolute;left:0;right:0;bottom:0;background:var(--raised);border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.14)}
+.agarre{width:38px;height:5px;border-radius:3px;background:var(--rule-2);margin:8px auto 6px}
+.pop-b{position:absolute;z-index:20;background:var(--overlay);border:1px solid var(--rule-2);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.16)}
+
+.tels{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:22px 0 0}
+.tel{margin:0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.tel-pantalla{width:390px;height:844px;border-radius:38px;border:10px solid #1d1b19;overflow:hidden;position:relative;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.tel figcaption{font-size:12px;color:var(--ink-2)}
+.tel-estado{height:44px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600}
+
+</style></head><body><div class="hoja">
+  <div class="hoja-ui"><div class="lienzo" style="width:1440px;height:900px"><nav class="side" aria-label="Bases"><span class="logo"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 1.5 22.5 12 12 22.5 1.5 12z" fill="#233fc4"/><path d="M12 7 17 12l-5 5-5-5z" fill="#fff"/><path d="M12 9.6 14.4 12 12 14.4 9.6 12z" fill="#233fc4"/></svg><b>ARA Map</b></span>
+  
+  <h4>Mis bases</h4>
+  <a class="on"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2.5 5.5 3L8 8.5l-5.5-3z"/><path d="m2.5 8.5 5.5 3 5.5-3M2.5 11 8 14l5.5-3"/></svg>Bajío Industrial 2026<span class="c">48</span></a>
+  
+  <h4>Consulta</h4><a class="sec"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 8S4 3.8 8 3.8 14.2 8 14.2 8 12 12.2 8 12.2 1.8 8 1.8 8z"/><circle cx="8" cy="8" r="2"/></svg>Catálogo público</a>
+  
+  <div class="pie"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5.5" r="2.6"/><path d="M3 13.5c.8-2.6 2.8-3.8 5-3.8s4.2 1.2 5 3.8"/></svg>Olga Ficticia <em>Operadora</em></div></nav><div class="cont-b"><div class="tb"><h1>Bajío Industrial 2026<small>48 terrenos</small></h1>
+  <span class="campo" style="width:230px;margin-left:8px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>Buscar en esta base</span>
+  <span class="btn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11M4.5 8h7M6.5 12h3"/></svg>Filtros <span class="cont">2</span></span>
+  <div class="der"><span class="seg"><span class="on"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="11" height="10" rx="1"/><path d="M6 3v10"/></svg>Lista y mapa</span><span class=""><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="11" height="10" rx="1"/><path d="M2.5 6.5h11M2.5 10h11M6.5 3v10"/></svg>Hoja</span></span>
+  <span class="btn prim"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>Agregar</span></div></div><div class="chips"><span class="alc"><b>22</b> de 48 · 20 en el mapa · 2 sin ubicación</span>
+  <span class="chip">Estado: <b>Guanajuato, Querétaro</b><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 8 8M12 4l-8 8"/></svg></span><span class="chip">Tipo: <b>Industrial, Comercial</b><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 8 8M12 4l-8 8"/></svg></span>
+  <span style="font-size:12px;text-decoration:underline;text-underline-offset:2px">Quitar filtros</span></div>
+  <div class="panes"><section class="lista" aria-label="Ficha del terreno"><div class="det">
+  <div class="det-cab"><span class="btn quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4-4 4 4 4"/></svg>22 terrenos</span><span class="btn icono" title="Anterior (K)"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 4-4 4 4"/></svg></span><span class="btn icono" title="Siguiente (J)"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></span><span style="font-size:12px;color:var(--ink-2)">10 de 22</span>
+  <div class="der"><span class="estado-guardado ok"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>Guardado hace 3 s</span><span class="btn icono"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 8a5.2 5.2 0 1 0 1.6-3.8"/><path d="M2.5 2.8v2.6h2.6M8 5v3.2l2.2 1.4"/></svg></span><span class="btn icono"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="3.5" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12.5" cy="8" r="1" fill="currentColor"/></svg></span></div></div>
+  <h2>Polígono Apaseo El Grande – Fracción Norte del Rancho San Bartolo</h2><p class="sub">Bajío Industrial 2026 · Apaseo el Grande, Guanajuato</p>
+  <div class="sec"><h3>Datos del terreno</h3><div class="form">
+    <label class="ancho3">Nombre de terreno<span class="in">Polígono Apaseo El Grande – Fracción Norte del Rancho San Bartolo</span></label>
+    <label>Tipo<span class="in">Industrial <svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></span></label><label>Estado<span class="in">Guanajuato</span></label><label>Municipio<span class="in">Apaseo el Grande</span></label>
+    <label>Superficie<span class="in">184,500<small>m²</small></span></label><label>HA<span class="in">18.45</span></label><label>Afectaciones<span class="in">12<small>%</small></span></label>
+    <label>Asking price<span class="in foco">$92,500,000<small>MXN</small></span><span class="est">Enter guarda · Esc deshace</span></label><label>Asking $/m²<span class="in">$500<small>MXN</small></span><span class="est">No se recalcula: ya tiene valor</span></label><label><span>Etapa<span class="tag">de la base</span></span><span class="in ok">Oferta <svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></span><span class="est ok"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>Guardado</span></label>
+    <label>Fecha de visita<span class="in">2026-09-14</span></label><label class="ancho2">Broker<span class="in">Inmobiliaria Bajío Centro</span></label>
+    <label class="ancho3">Comentarios<span class="in area">Frente a carretera federal 45. Revisar derecho de vía CFE.</span></label>
+  </div></div>
+  <div class="sec"><h3>Archivos <em>1 PDF · 1 KMZ</em></h3><div class="archivos">
+    <div class="arch-grupo"><div class="arch-cab"><span>PDF y JPG</span><span class="btn sm quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>Agregar</span></div><ul><li class="arch"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><div><b>ficha-tecnica.pdf</b><span>PDF · 1.2 MB · versión 1 · Olga Ficticia, 12 oct</span></div><span class="btn sm">Abrir</span></li></ul></div>
+    <div class="arch-grupo"><div class="arch-cab"><span>KMZ o KML</span><span class="btn sm quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg>Reemplazar</span></div><ul><li class="arch"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><div><b>poligono-apaseo.kmz</b><span>Contorno activo · versión 1</span></div><span class="btn sm">Descargar</span></li></ul></div>
+    <p class="arch-ayuda">También puedes arrastrar el archivo sobre la ficha. PDF/JPG hasta 25 MiB · KMZ 20 MiB · KML 16 MiB.</p>
+  </div></div>
+  </div></section><div class="mapa-p"><svg class="mapa-svg" viewBox="0 0 688 810" width="688" height="810" role="img" aria-label="Mapa ilustrativo de terrenos"><defs><pattern id="b3-rel" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M0 22 22 0" stroke="#e4e2db" stroke-width=".6"/></pattern></defs><rect width="688" height="810" fill="#ecebe6"/><ellipse cx="-1849.0000000000293" cy="-3889.147609972188" rx="1935" ry="1354.5" fill="url(#b3-rel)" opacity=".9"/><ellipse cx="2665.9999999999586" cy="-903.9113035744082" rx="1290" ry="902.9999999999999" fill="url(#b3-rel)" opacity=".9"/><ellipse cx="1590.9999999999584" cy="-5726.2161062169735" rx="2150" ry="1505" fill="url(#b3-rel)" opacity=".9"/><ellipse cx="-3568.9999999999927" cy="933.1571926703932" rx="1505" ry="1053.5" fill="url(#b3-rel)" opacity=".9"/><ellipse cx="-774.0000000000293" cy="152.40308176634895" rx="516" ry="361.2" fill="url(#b3-rel)" opacity=".9"/><ellipse cx="945.9999999999951" cy="-123.15719267036391" rx="387" ry="270.9" fill="url(#b3-rel)" opacity=".9"/><polyline points="1625.4,276.4 1419.0,519.8 361.2,492.3 -193.5,597.9 -971.8,634.6 -1806.0,382.0 -2511.2,-104.8 -2825.1,-1335.6 -3925.9,-2157.7 -4996.6,-3232.4 -6561.8,-5643.5 -6751.0,-6001.8" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="1625.4,276.4 1419.0,519.8 361.2,492.3 -193.5,597.9 -971.8,634.6 -1806.0,382.0 -2511.2,-104.8 -2825.1,-1335.6 -3925.9,-2157.7 -4996.6,-3232.4 -6561.8,-5643.5 -6751.0,-6001.8" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="3328.2,1213.3 2709.0,703.5 1625.4,276.4 1659.8,-1592.8 -688.0,-5266.9 -885.8,-6879.0" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="3328.2,1213.3 2709.0,703.5 1625.4,276.4 1659.8,-1592.8 -688.0,-5266.9 -885.8,-6879.0" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="1625.4,276.4 2107.0,14.6 3096.0,-582.4" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="1625.4,276.4 2107.0,14.6 3096.0,-582.4" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="1625.4,276.4 111.8,-1197.8 -705.2,-2313.9 -885.8,-6879.0" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="1625.4,276.4 111.8,-1197.8 -705.2,-2313.9 -885.8,-6879.0" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-193.5,597.9 -958.9,46.8 111.8,-1197.8" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-193.5,597.9 -958.9,46.8 111.8,-1197.8" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-193.5,597.9 645.0,896.4 3328.2,1213.3" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-193.5,597.9 645.0,896.4 3328.2,1213.3" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-2511.2,-104.8 -8600.0,1392.4" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-2511.2,-104.8 -8600.0,1392.4" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-3925.9,-2157.7 -705.2,-2313.9" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="-3925.9,-2157.7 -705.2,-2313.9" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polyline points="-1806.0,382.0 -958.9,46.8" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="-1806.0,382.0 -958.9,46.8" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polygon points="338.7,450.9 319.5,427.0 277.7,420.7 262.8,450.9 282.3,475.2 322.6,478.9" fill="#4384d4" fill-opacity="0.32" stroke="#4384d4" stroke-width="2" /><circle cx="64.50000000000244" cy="680.5602744367357" r="5.6" fill="#0d2f5e" stroke="#ffffff" stroke-width="1.6"/><circle cx="64.50000000000244" cy="680.5602744367357" r="6.6" fill="none" stroke="#1d1b19" stroke-opacity=".3" stroke-width=".8"/><text x="368.1999999999526" y="486.2607535716428" class="mapa-ciudad">Apaseo el Grande</text><polygon points="338.7,450.9 319.5,427.0 277.7,420.7 262.8,450.9 282.3,475.2 322.6,478.9" fill="none" stroke="#ffffff" stroke-width="7" stroke-linejoin="round"/><polygon points="338.7,450.9 319.5,427.0 277.7,420.7 262.8,450.9 282.3,475.2 322.6,478.9" fill="none" stroke="#1d1b19" stroke-width="3" stroke-linejoin="round"/></svg>
+  <div class="flota" style="left:12px;top:12px;padding:10px 12px;width:300px;font-size:12px"><b style="display:flex;gap:6px;align-items:center"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg>Contorno activo · poligono-apaseo.kmz</b><span style="color:var(--ink-2)">X 20.555 · Y −100.7 también capturadas. El mapa usa el contorno.</span></div>
+  <div class="mapa-ctrl" style="right:12px;top:12px"><span>+</span><span>−</span><span style="font-size:13px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg></span></div>
+  <div class="base-mapa" style="right:12px;bottom:12px"><span class="on">Claro</span><span>Satélite</span><span>Calles</span></div>
+  <span class="ilustrativo" style="left:12px;bottom:12px">Mapa base ilustrativo</span></div></div></div><i class="pin" style="left:238px;top:96px">1</i><i class="pin" style="left:494px;top:96px">2</i><i class="pin" style="left:412px;top:390px">3</i><i class="pin" style="left:758px;top:96px">4</i><i class="pin" style="left:238px;top:690px">5</i></div></div>
+  <aside class="notas"><p class="notas-dir">B · Mesa dividida — reorganización</p><h1>3 · Ficha editable en el panel de la lista</h1><ol><li><i class="pin">1</i><div><b>El detalle sustituye a la lista, no al mapa.</b> «‹ 22 terrenos» vuelve a la misma posición, filtros y selección.</div></li><li><i class="pin">2</i><div><b>Recorrer el conjunto filtrado</b> sin volver a la lista: anterior/siguiente (J/K), «10 de 22». Útil para completar datos en serie.</div></li><li><i class="pin">3</i><div><b>Formulario siempre editable</b>, con guardado por campo y versión. Los campos propios de la base llevan la marca «de la base». Sin dato se ve como campo vacío, nunca como cero.</div></li><li><i class="pin">4</i><div><b>El mapa explica la fuente de la ubicación</b> y muestra el contorno a escala. El fondo elegido se conserva.</div></li><li><i class="pin">5</i><div><b>Archivos en el mismo flujo</b> que los datos; se arrastran sobre el panel.</div></li></ol>
+  <p class="notas-pie">Mockup estático con datos ficticios. Las notas no forman parte de la interfaz.</p></aside></div></body></html>

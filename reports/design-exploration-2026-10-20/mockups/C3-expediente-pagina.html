@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C · Atlas de expedientes — Expediente</title><style>
+:root{
+  --paper:#f7f6f3;--raised:#fdfdfc;--sunken:#efede9;--overlay:#ffffff;
+  --ink:#1d1b19;--ink-2:#55524f;--ink-3:#6b6764;--rule:#e2dfda;--rule-2:#cbc7c1;
+  --sel-bg:#e8e5df;--hover-bg:#f1efeb;
+  --err:#b42f2f;--err-bg:#fbeaea;--warn:#7a5b16;--warn-bg:#fbf3e3;--ok:#2f7d32;--ok-bg:#eaf4ea;
+  --map:#ecebe6;--borde-campo:#8d8984;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#d9d6cf}
+body{font:13px/1.4 var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss03"}
+.lienzo{position:relative;overflow:hidden;background:var(--paper);margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+.ic{width:16px;height:16px;flex:none;vertical-align:-3px}
+.num,td.n,.n{font-variant-numeric:tabular-nums}
+.sd{color:var(--ink-3)}
+.sd-t{color:var(--ink-3);font-style:italic}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--rule-2);border-radius:6px;background:var(--raised);font-size:13px;white-space:nowrap;cursor:default}
+.btn.prim{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.quiet{border-color:transparent;background:transparent}
+.btn.sm{height:24px;padding:0 8px;font-size:12px}
+.btn.icono{width:28px;padding:0;justify-content:center}
+.btn.peligro{color:var(--err);border-color:#e4b9b9}
+.seg{display:inline-flex;border:1px solid var(--rule-2);border-radius:7px;padding:2px;background:var(--sunken);gap:2px}
+.seg span{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:5px;color:var(--ink-2)}
+.seg span.on{background:var(--overlay);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:500}
+.campo{display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border:1px solid var(--borde-campo);border-radius:7px;background:var(--overlay);color:var(--ink-3)}
+.campo b{font-weight:400;color:var(--ink)}
+.kbd{font:11px var(--mono);color:var(--ink-2);border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--raised)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 4px 0 9px;border-radius:12px;background:var(--overlay);border:1px solid var(--rule-2);font-size:12px;white-space:nowrap}
+.chip b{font-weight:600}
+.chip .ic{width:14px;height:14px;color:var(--ink-2)}
+.chip.sug{border-style:dashed;padding-right:9px;color:var(--ink-2);background:transparent}
+.ubic,.docs{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:var(--ink-2)}
+.ubic-contorno .ic{color:var(--ink)}
+.ubic-elegir{color:var(--warn);font-weight:500}
+.ubic-ninguna{color:var(--ink-3)}
+.docs-0{color:var(--ink-3)}
+.etq{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.nota-mock{position:absolute;z-index:50;background:#fffbe6;border:1px solid #e6d58a;color:#4d4211;font-size:11.5px;line-height:1.35;padding:7px 9px;border-radius:6px;max-width:260px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.nota-mock b{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.nota-mock .n{display:inline-flex;width:18px;height:18px;border-radius:9px;background:#4d4211;color:#fffbe6;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:4px}
+.foco{outline:2px solid var(--ink);outline-offset:2px;box-shadow:0 0 0 5px rgba(255,255,255,.9)}
+.estado-guardado{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);white-space:nowrap}
+.estado-guardado.ok .ic{color:var(--ok)}
+.estado-guardado.trabajando .ic{color:var(--ink-2)}
+.estado-guardado.alerta{color:var(--err);font-weight:600}
+.mapa-svg{display:block}
+.mapa-ciudad{font:11px var(--font);fill:#55524f;paint-order:stroke;stroke:#ecebe6;stroke-width:3px}
+.mapa-ciudad.mayor{font-weight:600;fill:#3d3a37}
+.mapa-ctrl{position:absolute;display:flex;flex-direction:column;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mapa-ctrl span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--ink)}
+.mapa-ctrl span+span{border-top:1px solid var(--rule)}
+.flota{position:absolute;background:rgba(253,253,252,.94);border:1px solid var(--rule-2);border-radius:10px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.10)}
+.leyenda{width:228px;padding:10px 12px;font-size:12px}
+.leyenda .ley-titulo{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.leyenda .ley-titulo span{color:var(--ink-2);font-size:11px}
+.ley-rampa{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:3px}
+.ley-rampa li{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.ley-rampa i{width:14px;height:10px;border-radius:2px;display:inline-block}
+.ley-rampa i.hueco{background:#fff;border:2px solid #5b5754;border-radius:6px;width:12px}
+.ley-formas{display:flex;gap:12px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:7px}
+.ley-formas .ic{width:14px;height:14px;color:var(--ink)}
+.ley-fuera{display:flex;gap:6px;align-items:center;margin-top:7px;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.ley-fuera .ic{width:14px;height:14px}
+.leyenda.compacta .ley-rampa{grid-template-columns:1fr 1fr}
+.base-mapa{position:absolute;display:flex;gap:2px;padding:2px;background:var(--overlay);border:1px solid var(--rule-2);border-radius:8px;font-size:12px}
+.base-mapa span{padding:4px 9px;border-radius:6px;color:var(--ink-2)}
+.base-mapa span.on{background:var(--ink);color:#fff}
+.ilustrativo{position:absolute;font-size:10px;color:var(--ink-2);background:rgba(236,235,230,.85);padding:1px 5px;border-radius:3px}
+
+.grid-envoltura{overflow:hidden;position:relative;height:100%;background:var(--raised)}
+.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;font-size:13px}
+.grid th{position:sticky;top:0;height:32px;padding:0 10px;text-align:left;font-weight:600;font-size:12px;color:var(--ink-2);background:var(--paper);border-bottom:1px solid var(--rule-2);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden}
+.grid th.n{text-align:right}
+.grid th.ordenada{color:var(--ink)}
+.grid th .ord{width:12px;height:12px;margin-left:3px;vertical-align:-1px}
+.grid th .th-custom{border-bottom:1px dashed var(--ink-3)}
+.grid td{height:34px;padding:0 10px;border-bottom:1px solid var(--rule);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+.grid td.n{text-align:right;font-variant-numeric:tabular-nums}
+.grid td.c-nom,.grid th.c-nom{position:sticky;left:34px;background:inherit;z-index:1;border-right:1px solid var(--rule-2)}
+.grid th.c-nom{background:var(--paper);z-index:2}
+.grid .c-check{width:34px;padding:0 0 0 10px;position:sticky;left:0;background:inherit;z-index:1}
+.grid th.c-check{background:var(--paper);z-index:2}
+.grid tbody tr{background:var(--raised)}
+.grid tbody tr:nth-child(even){background:#faf9f7}
+.grid tr.sel{background:var(--sel-bg)!important}
+.grid tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--ink)}
+.grid tr.sel .nom{font-weight:600}
+.grid tr.marcada{background:#eceae5!important}
+.grid tr.hover{background:var(--hover-bg)!important}
+.cb{display:inline-block;width:14px;height:14px;border:1.4px solid var(--ink-3);border-radius:3px;vertical-align:-2px;background:#fff;position:relative}
+.cb.on{background:var(--ink);border-color:var(--ink)}
+.cb.on::after{content:"";position:absolute;left:3.5px;top:1px;width:4px;height:7px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+.cb.mixto{background:var(--ink);border-color:var(--ink)}
+.cb.mixto::after{content:"";position:absolute;left:2px;top:5px;width:7px;height:1.6px;background:#fff}
+.foco-celda{outline:2px solid var(--ink);outline-offset:-2px}
+.celda-edit{background:#fff!important;box-shadow:inset 0 0 0 2px var(--ink)}
+.celda-guardando{color:var(--ink-2)}
+.celda-guardando i,.celda-conflicto i,.celda-incierta i{font-style:normal;font-size:11px;margin-left:4px}
+.celda-conflicto{background:var(--err-bg)!important;box-shadow:inset 0 0 0 1.5px var(--err)}
+.celda-conflicto i{color:var(--err);font-weight:600}
+.celda-incierta{background:var(--warn-bg)!important}
+.celda-incierta i{color:var(--warn);font-weight:600}
+
+.dl{margin:0;display:grid;gap:10px 16px}
+.dl.dos{grid-template-columns:1fr 1fr}
+.dl.tres{grid-template-columns:1fr 1fr 1fr}
+.dl-f dt{font-size:11.5px;color:var(--ink-2);margin-bottom:2px}
+.dl-f dt small{font-size:10.5px;color:var(--ink-3);margin-left:3px}
+.dl-f dd{margin:0;font-size:13px}
+.dl-f dd .grande{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.dl-f.editable dd{border-radius:5px;margin:-3px -6px;padding:3px 6px;background:var(--hover-bg)}
+.mono{font-family:var(--mono);font-size:12px}
+.sec{padding:14px 18px;border-top:1px solid var(--rule)}
+.sec h3{margin:0 0 10px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.sec h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-3)}
+.ubic-ficha p{margin:6px 0 10px;color:var(--ink-2);font-size:12.5px}
+.ubic-ficha .ubic{font-size:13px;color:var(--ink);font-weight:500}
+.archivos{display:grid;gap:12px}
+.arch-cab{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.archivos ul{list-style:none;margin:0;padding:0;border:1px solid var(--rule);border-radius:8px;background:var(--overlay)}
+.arch{display:flex;align-items:center;gap:10px;padding:8px 10px}
+.arch+.arch{border-top:1px solid var(--rule)}
+.arch div{flex:1;min-width:0}
+.arch b{display:block;font-weight:500;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch span:not(.btn){display:block;font-size:11.5px;color:var(--ink-2)}
+.arch.vacio{color:var(--ink-3);font-size:12px;font-style:italic}
+.arch.subiendo{background:#fafaf8}
+.barra{display:block;height:4px;border-radius:2px;background:var(--rule);margin-top:5px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--ink)}
+.arch-ayuda{margin:0;font-size:11.5px;color:var(--ink-2)}
+.campo-edit{display:flex;align-items:center;gap:6px;height:32px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.campo-edit small{font-size:11px;font-weight:500;color:var(--ink-2);margin-left:auto}
+.campo-edit .cursor{display:inline-block;width:1.5px;height:17px;background:var(--ink);margin-left:-4px}
+.ayuda-campo{display:block;font-size:11px;color:var(--ink-2);margin-top:4px}
+.guardado-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ok);margin-left:6px}
+.guardado-campo .ic{width:13px;height:13px}
+.guardando-campo{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);margin-left:6px}
+.select-edit{display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 8px;border:2px solid var(--ink);border-radius:6px;background:#fff}
+
+.hoja{display:flex;align-items:stretch;width:max-content}
+.hoja-ui{flex:none}
+.notas{width:330px;flex:none;background:#26231f;color:#efede9;padding:22px 22px 18px;font-size:12.5px;line-height:1.45;position:relative}
+.notas h1{font-size:19px;line-height:1.2;margin:0 0 16px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.notas-dir{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#c4bfb6}
+.notas ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.notas li{display:flex;gap:10px}
+.notas li div{flex:1}
+.notas li b{color:#fff}
+.notas-pie{position:absolute;bottom:14px;left:22px;right:22px;margin:0;font-size:11px;color:#a9a399}
+.pin{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:10px;background:#e8562a;color:#fff;font:700 11px/1 var(--font);font-style:normal;flex:none;box-shadow:0 0 0 2px #fff}
+.lienzo>.pin{position:absolute;z-index:60}
+.notas .pin{box-shadow:none;margin-top:1px}
+
+.vidrio{background:rgba(253,253,252,.86);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);border:1px solid rgba(203,199,193,.9);box-shadow:0 1px 2px rgba(0,0,0,.06),0 10px 30px rgba(0,0,0,.12)}
+.top-c{position:absolute;left:12px;right:12px;top:12px;height:52px;border-radius:14px;display:flex;align-items:center;gap:10px;padding:0 10px 0 14px;z-index:6}
+.top-c .der{margin-left:auto;display:flex;gap:10px;align-items:center}
+.ambito-c{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:8px;font-weight:600;font-size:14px}
+.cmd{display:flex;align-items:center;gap:8px;height:34px;width:380px;padding:0 10px;border-radius:9px;background:#fff;border:1px solid var(--borde-campo);color:var(--ink-3)}
+.cmd .kbd{margin-left:auto}
+.pend{position:absolute;left:12px;top:74px;display:flex;gap:6px;z-index:6;align-items:center}
+.pend .chip{height:28px;padding:0 10px;border-radius:14px;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pend .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pend .chip.on .ic{color:#fff}
+.pend .chip em{font-style:normal;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pend .chip.on em{color:#d9d6cf}
+.pend .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;background:rgba(236,235,230,.9);padding:3px 6px;border-radius:5px}
+.panel{position:absolute;left:12px;top:112px;bottom:64px;width:384px;border-radius:14px;z-index:5;overflow:hidden;display:flex;flex-direction:column}
+.panel-cab{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule);font-size:12.5px;color:var(--ink-2)}
+.panel-cab b{color:var(--ink)}
+.panel-cab .der{margin-left:auto;display:flex;gap:6px;align-items:center}
+.panel ul{list-style:none;margin:0;padding:0;overflow:hidden}
+.panel li{padding:9px 14px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr auto;gap:3px 10px}
+.panel li b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel li .pm{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.panel li .pm small{font-weight:400;font-size:11px;color:var(--ink-2)}
+.panel li .s{color:var(--ink-2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel li .f{font-size:11.5px;color:var(--ink-2);text-align:right;white-space:nowrap}
+.panel li .f b{font-size:11.5px;font-weight:600;color:var(--warn)}
+.panel li.sel{background:rgba(232,229,223,.95);box-shadow:inset 3px 0 0 var(--ink)}
+.panel li.hover{background:rgba(241,239,235,.9)}
+.tira{display:inline-flex;gap:3px;align-items:center}
+.tira i{display:inline-block;width:14px;height:8px;border-radius:2px;border:1.4px solid var(--ink)}
+.tira i.seg-si{background:var(--ink)}
+.tira i.seg-parcial{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.tira i.seg-aviso{border-color:var(--warn);background:repeating-linear-gradient(45deg,var(--warn) 0 2px,transparent 2px 4px)}
+.tira i.seg-no{background:#fff;border-style:dashed;border-color:var(--ink-3)}
+.tira.grande{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:560px}
+.tira.grande i{width:auto;height:auto;border-radius:8px;padding:6px 9px;display:flex;flex-direction:column;border-width:1.5px;min-width:0}
+.tira.grande i b{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+.tira.grande i small{font-size:12.5px;font-weight:600;white-space:nowrap}
+.tira.grande i.seg-si{background:var(--ok-bg);border-color:#a9cfab;color:var(--ink)}
+.tira.grande i.seg-si small::before{content:"✓ ";color:var(--ok)}
+.tira.grande i.seg-parcial{background:#fff;border-color:var(--ink-3);color:var(--ink)}
+.tira.grande i.seg-no{background:#fff;color:var(--warn)}
+.tira.grande i.seg-aviso{background:var(--warn-bg);color:var(--warn)}
+.cajon{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;height:40px;border-radius:20px;display:flex;align-items:center;gap:10px;padding:0 16px;font-size:13px;z-index:6}
+.cajon .kbd{margin-left:4px}
+.exp{position:absolute;right:12px;top:112px;width:392px;border-radius:14px;z-index:6;overflow:hidden;background:var(--overlay)}
+.exp-cab{padding:14px 16px 10px}
+.exp-cab h2{margin:0;font-size:16px;line-height:1.3;font-weight:650}
+.exp-cab .sub{margin:3px 0 10px;font-size:12px;color:var(--ink-2)}
+.exp .sec{padding:12px 16px}
+.exp-pie{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--rule)}
+.ctrl-c{position:absolute;right:12px;z-index:5}
+.pag{position:absolute;inset:0;background:var(--paper)}
+.pag-cab{height:56px;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--rule);background:var(--raised)}
+.pag-cab .migas{display:flex;gap:6px;align-items:center;color:var(--ink-2);font-size:13px}
+.pag-cab .migas b{color:var(--ink)}
+.pag-cab .der{margin-left:auto;display:flex;gap:8px;align-items:center}
+.pag-cuerpo{position:absolute;top:56px;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 470px;gap:0}
+.pag-izq{padding:22px 28px;overflow:hidden;border-right:1px solid var(--rule)}
+.pag-der{padding:22px 24px;overflow:hidden;background:var(--raised)}
+.pag h1{margin:0 0 4px;font-size:24px;line-height:1.2;font-weight:650;letter-spacing:-.015em;max-width:760px}
+.pag .sub{margin:0 0 16px;color:var(--ink-2);font-size:13px}
+.bloque{background:var(--raised);border:1px solid var(--rule);border-radius:12px;margin-top:16px}
+.bloque h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between}
+.bloque h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink-3)}
+.bloque .cuerpo{padding:14px 16px}
+.actividad{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:12.5px}
+.actividad li{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.actividad li .ic{color:var(--ink-2);margin-top:1px}
+.actividad li span{color:var(--ink-2);display:block;font-size:11.5px}
+.mini-mapa{border-radius:10px;overflow:hidden;border:1px solid var(--rule-2);position:relative}
+.aviso-red{display:flex;gap:10px;align-items:center;padding:10px 14px;background:var(--err-bg);border-bottom:1px solid #eab9b9;color:var(--err);font-size:12.5px}
+.aviso-red b{color:var(--err)}
+.aviso-red span{color:var(--ink)}
+.aviso-red .der{margin-left:auto;display:flex;gap:8px}
+.cajon-alto{position:absolute;left:0;right:0;bottom:0;height:560px;border-radius:16px 16px 0 0;z-index:7;overflow:hidden;background:var(--raised);box-shadow:0 -8px 30px rgba(0,0,0,.18);border:1px solid var(--rule-2)}
+.cajon-cab{height:46px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--rule)}
+.cajon-cab .der{margin-left:auto;display:flex;gap:8px;align-items:center}
+.agarre{width:38px;height:5px;border-radius:3px;background:var(--rule-2);position:absolute;left:50%;top:6px;transform:translateX(-50%)}
+
+.tels{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:22px 0 0}
+.tel{margin:0;display:flex;flex-direction:column;align-items:center;gap:10px}
+.tel-pantalla{width:390px;height:844px;border-radius:38px;border:10px solid #1d1b19;overflow:hidden;position:relative;background:var(--paper);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.tel figcaption{font-size:12px;color:var(--ink-2)}
+.tel-estado{height:44px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600}
+
+.marca-celda{float:left}.celda-incierta .marca-celda{color:var(--warn)}</style></head><body><div class="hoja">
+  <div class="hoja-ui"><div class="lienzo" style="width:1440px;height:900px"><div class="pag"><header class="pag-cab"><span class="logo"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 1.5 22.5 12 12 22.5 1.5 12z" fill="#233fc4"/><path d="M12 7 17 12l-5 5-5-5z" fill="#fff"/><path d="M12 9.6 14.4 12 12 14.4 9.6 12z" fill="#233fc4"/></svg></span><span class="btn quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m10 4-4 4 4 4"/></svg>Atlas</span><span class="migas">Bajío Industrial 2026 <svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg> <b>Expediente</b></span>
+  <div class="der"><span class="estado-guardado trabajando"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 4.8V8l2.2 1.6"/></svg>Guardando Asking price…</span><span class="btn icono" title="Anterior (K)"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 4-4 4 4"/></svg></span><span class="btn icono" title="Siguiente (J)"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"/></svg></span><span style="font-size:12px;color:var(--ink-2)">10 de 22</span><span class="btn icono"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="3.5" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12.5" cy="8" r="1" fill="currentColor"/></svg></span></div></header>
+  <div class="pag-cuerpo"><div class="pag-izq">
+    <h1>Polígono Apaseo El Grande – Fracción Norte del Rancho San Bartolo</h1><p class="sub">Industrial · Apaseo el Grande, Guanajuato · versión 3 · editado por Olga Ficticia hoy 10:42</p>
+    <span class="tira grande" role="img" aria-label="Datos: completo, Precio: completo, Ubicación: completo, PDF: completo"><i class="seg-si" title="Datos"><b>Datos</b><small>Completo</small></i><i class="seg-si" title="Precio"><b>Precio</b><small>Completo</small></i><i class="seg-si" title="Ubicación"><b>Ubicación</b><small>Contorno</small></i><i class="seg-si" title="PDF"><b>PDF</b><small>Completo</small></i></span>
+    <div class="bloque"><h3>Precio y superficie <em>Clic en un dato para editarlo</em></h3><div class="cuerpo"><dl class="dl tres">
+      <div class="dl-f "><dt>Asking price <small>MXN</small></dt><dd><span class="campo-edit" style="font-size:16px">$92,500,000<span class="cursor"></span><small>MXN</small></span></dd></div>
+      <div class="dl-f "><dt>Asking $/m² <small>MXN</small></dt><dd><span class="n grande">$500</span><span class="ayuda-campo">Ya tiene valor: no se recalcula.</span></dd></div>
+      <div class="dl-f "><dt>Afectaciones</dt><dd><span class="n grande">12%</span></dd></div>
+      <div class="dl-f "><dt>Superficie <small>m²</small></dt><dd><span class="n">184,500</span></dd></div><div class="dl-f "><dt>HA</dt><dd><span class="n">18.45</span></dd></div><div class="dl-f "><dt>Tipo de terreno</dt><dd>Industrial</dd></div>
+    </dl></div></div>
+    <div class="bloque"><h3>Columnas de Bajío Industrial 2026 <em>4 columnas · Gestionar</em></h3><div class="cuerpo"><dl class="dl dos"><div class="dl-f "><dt>Etapa <small>opción</small></dt><dd>Oferta <span class="guardado-campo"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-7"/></svg>Guardado</span></dd></div><div class="dl-f "><dt>Fecha de visita</dt><dd>2026-09-14</dd></div><div class="dl-f "><dt>Broker</dt><dd>Inmobiliaria Bajío Centro</dd></div><div class="dl-f "><dt>Uso de suelo</dt><dd>Industrial ligera</dd></div></dl></div></div>
+    <div class="bloque"><h3>Comentarios</h3><div class="cuerpo"><p style="margin:0">Frente a carretera federal 45. Revisar derecho de vía CFE.</p></div></div>
+  </div>
+  <div class="pag-der">
+    <div class="mini-mapa"><svg class="mapa-svg" viewBox="0 0 420 236" width="420" height="236" role="img" aria-label="Mapa ilustrativo de terrenos"><defs><pattern id="c3-rel" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M0 22 22 0" stroke="#e4e2db" stroke-width=".6"/></pattern></defs><rect width="420" height="236" fill="#ecebe6"/><ellipse cx="-1737.2727272727207" cy="-3694.985192787155" rx="1718.1818181818182" ry="1202.7272727272727" fill="url(#c3-rel)" opacity=".9"/><ellipse cx="2271.8181818181774" cy="-1044.2468234698872" rx="1145.4545454545453" ry="801.8181818181816" fill="url(#c3-rel)" opacity=".9"/><ellipse cx="1317.272727272723" cy="-5326.208804674703" rx="1909.0909090909092" ry="1336.3636363636365" fill="url(#c3-rel)" opacity=".9"/><ellipse cx="-3264.545454545416" cy="586.9767884176745" rx="1336.3636363636363" ry="935.4545454545453" fill="url(#c3-rel)" opacity=".9"/><ellipse cx="-782.7272727272663" cy="-106.29324663454248" rx="458.18181818181813" ry="320.7272727272727" fill="url(#c3-rel)" opacity=".9"/><ellipse cx="744.5454545454828" cy="-350.9767884176702" rx="343.6363636363636" ry="240.54545454545453" fill="url(#c3-rel)" opacity=".9"/><polyline points="1347.8,3.8 1164.5,220.0 225.3,195.5 -267.3,289.3 -958.4,321.9 -1699.1,97.6 -2325.3,-334.7 -2604.0,-1427.6 -3581.5,-2157.6 -4532.2,-3111.8 -5922.0,-5252.8 -6090.0,-5570.9" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="1347.8,3.8 1164.5,220.0 225.3,195.5 -267.3,289.3 -958.4,321.9 -1699.1,97.6 -2325.3,-334.7 -2604.0,-1427.6 -3581.5,-2157.6 -4532.2,-3111.8 -5922.0,-5252.8 -6090.0,-5570.9" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="2859.8,835.7 2310.0,383.1 1347.8,3.8 1378.4,-1656.0 -706.4,-4918.4 -882.0,-6349.8" fill="none" stroke="#d6d3cb" stroke-width="6" stroke-linejoin="round"/><polyline points="2859.8,835.7 2310.0,383.1 1347.8,3.8 1378.4,-1656.0 -706.4,-4918.4 -882.0,-6349.8" fill="none" stroke="#fbfaf6" stroke-width="4" stroke-linejoin="round"/><polyline points="1347.8,3.8 1775.5,-228.6 2653.6,-758.8" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="1347.8,3.8 1775.5,-228.6 2653.6,-758.8" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="1347.8,3.8 3.8,-1305.2 -721.6,-2296.2 -882.0,-6349.8" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="1347.8,3.8 3.8,-1305.2 -721.6,-2296.2 -882.0,-6349.8" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-267.3,289.3 -946.9,-200.1 3.8,-1305.2" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-267.3,289.3 -946.9,-200.1 3.8,-1305.2" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-267.3,289.3 477.3,554.4 2859.8,835.7" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-267.3,289.3 477.3,554.4 2859.8,835.7" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-2325.3,-334.7 -7731.8,994.8" fill="none" stroke="#d6d3cb" stroke-width="4.6" stroke-linejoin="round"/><polyline points="-2325.3,-334.7 -7731.8,994.8" fill="none" stroke="#f6f4ee" stroke-width="2.6" stroke-linejoin="round"/><polyline points="-3581.5,-2157.6 -721.6,-2296.2" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="-3581.5,-2157.6 -721.6,-2296.2" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polyline points="-1699.1,97.6 -946.9,-200.1" fill="none" stroke="#d6d3cb" stroke-width="3.8" stroke-linejoin="round"/><polyline points="-1699.1,97.6 -946.9,-200.1" fill="none" stroke="#f6f4ee" stroke-width="1.8" stroke-linejoin="round"/><polygon points="205.3,158.8 188.3,137.5 151.1,132.0 137.9,158.8 155.2,180.3 191.0,183.6" fill="#4384d4" fill-opacity="0.32" stroke="#4384d4" stroke-width="2" /><polygon points="205.3,158.8 188.3,137.5 151.1,132.0 137.9,158.8 155.2,180.3 191.0,183.6" fill="none" stroke="#ffffff" stroke-width="7" stroke-linejoin="round"/><polygon points="205.3,158.8 188.3,137.5 151.1,132.0 137.9,158.8 155.2,180.3 191.0,183.6" fill="none" stroke="#1d1b19" stroke-width="3" stroke-linejoin="round"/></svg><span class="flota" style="left:10px;top:10px;padding:5px 8px;font-size:12px;display:flex;gap:6px;align-items:center;border-radius:7px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg>Contorno activo · poligono-apaseo.kmz</span><span class="btn sm" style="position:absolute;right:10px;bottom:10px"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.2 6 2.8l4 1.6 3.5-1.4v9l-3.5 1.4-4-1.6-3.5 1.4z"/><path d="M6 2.8v9M10 4.4v9"/></svg>Ver en el atlas</span></div>
+    <p style="font-size:12px;color:var(--ink-2);margin:8px 0 0">X 20.555 · Y −100.7 también capturadas; el mapa usa el contorno.</p>
+    <div class="bloque"><h3>Documentos <em>1 PDF · 1 KMZ</em></h3><div class="cuerpo"><div class="archivos">
+    <div class="arch-grupo"><div class="arch-cab"><span>PDF y JPG</span><span class="btn sm quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>Agregar</span></div><ul><li class="arch"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><div><b>ficha-tecnica.pdf</b><span>PDF · 1.2 MB · versión 1 · Olga Ficticia, 12 oct</span></div><span class="btn sm">Abrir</span></li></ul></div>
+    <div class="arch-grupo"><div class="arch-cab"><span>KMZ o KML</span><span class="btn sm quiet"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M4.5 6.5 8 3l3.5 3.5M3 13h10"/></svg>Reemplazar</span></div><ul><li class="arch"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><div><b>poligono-apaseo.kmz</b><span>Contorno activo · versión 1</span></div><span class="btn sm">Descargar</span></li></ul></div>
+    <p class="arch-ayuda">También puedes arrastrar el archivo sobre la ficha. PDF/JPG hasta 25 MiB · KMZ 20 MiB · KML 16 MiB.</p>
+  </div></div></div>
+    <div class="bloque"><h3>Actividad <em>datos y archivos</em></h3><div class="cuerpo"><ul class="actividad">
+      <li><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3 13 5.5 6 12.5H3.5V10z"/></svg><div>Olga Ficticia cambió <b>Etapa</b> a «Oferta»<span>hoy 10:42 · versión 3</span></div></li>
+      <li><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 7 2.6l6 2.2-.8 6.6-6.6 2.2L2.6 10z"/></svg><div>Ada Ficticia subió <b>poligono-apaseo.kmz</b>; contorno activado<span>12 oct · versión 2</span></div></li>
+      <li><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2.5h5l3 3v8H4z"/><path d="M9 2.5v3h3"/></svg><div>Olga Ficticia agregó <b>ficha-tecnica.pdf</b><span>12 oct</span></div></li>
+      <li><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg><div>Ada Ficticia creó el terreno en Bajío Industrial 2026<span>3 oct · versión 1</span></div></li></ul></div></div>
+  </div></div></div><i class="pin" style="left:14px;top:76px">1</i><i class="pin" style="left:30px;top:140px">2</i><i class="pin" style="left:30px;top:234px">3</i><i class="pin" style="left:978px;top:66px">4</i><i class="pin" style="left:978px;top:560px">5</i><i class="pin" style="left:640px;top:14px">6</i></div></div>
+  <aside class="notas"><p class="notas-dir">C · Atlas de expedientes — exploración</p><h1>3 · Expediente completo en edición</h1><ol><li><i class="pin">1</i><div><b>Una página por terreno</b> con dirección propia: se puede enviar el enlace a otra persona con acceso. «Atlas» y Esc regresan al mismo encuadre y filtros.</div></li><li><i class="pin">2</i><div><b>El nombre completo manda</b>, sin truncar; debajo, versión y última edición.</div></li><li><i class="pin">3</i><div><b>La tira grande</b> resume el expediente y lleva a lo que falta (clic en «Falta»).</div></li><li><i class="pin">4</i><div><b>Ubicación con su fuente</b> y un mapa pequeño con el contorno; «Ver en el atlas» vuelve al mapa completo.</div></li><li><i class="pin">5</i><div><b>Actividad en una sola línea de tiempo</b>: cambios de datos y de archivos juntos. Hoy viven en dos historiales distintos; unirlos en la vista no exige datos nuevos.</div></li><li><i class="pin">6</i><div><b>Recorrer los 22 en serie</b> con J/K, guardando cada campo con su versión.</div></li></ol>
+  <p class="notas-pie">Mockup estático con datos ficticios. Las notas no forman parte de la interfaz.</p></aside></div></body></html>

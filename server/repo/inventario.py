@@ -75,7 +75,7 @@ _ESTADOS_DE_PUBLICACION = {
 
 
 def listar(conn: DatabaseConnection, q: Mapping[str, Any], base_id: str | None = None,
-           ) -> tuple[list[dict[str, Any]], int, str | None, dict[str, list[str]]]:
+           ) -> tuple[list[dict[str, Any]], int, str | None, dict[str, Any]]:
     """One page of a terrain list: (records, total, next cursor, facets).
 
     ``base_id`` confines the whole query to one work base: the caller has
@@ -257,20 +257,24 @@ def _valor_de_cursor(campo: str, valor: Any) -> str | float | None:
 
 
 def _facetas(conn: DatabaseConnection, q: Mapping[str, Any], donde: str,
-             params: tuple[Any, ...]) -> dict[str, list[str]]:
-    """The distinct values in view. Municipalities narrow to the chosen states."""
-    def distintos(campo: str, extra: str = "", mas: tuple[Any, ...] = ()) -> list[str]:
-        rows = conn.execute(f"SELECT DISTINCT d.{campo} AS valor" + _FROM + donde
-                            + f" AND d.{campo} IS NOT NULL" + extra, (*params, *mas)).fetchall()
-        return sorted((r["valor"] for r in rows), key=lambda v: (db.plegar(v), v))
+             params: tuple[Any, ...]) -> dict[str, Any]:
+    """The distinct values in view, and in ``conteos`` how many terrains in view
+    hold each. Municipalities narrow to the chosen states."""
+    def distintos(campo: str, extra: str = "", mas: tuple[Any, ...] = ()) -> dict[str, int]:
+        rows = conn.execute(f"SELECT d.{campo} AS valor, COUNT(*) AS n" + _FROM + donde
+                            + f" AND d.{campo} IS NOT NULL" + extra + f" GROUP BY d.{campo}",
+                            (*params, *mas)).fetchall()
+        return {r["valor"]: int(r["n"])
+                for r in sorted(rows, key=lambda r: (db.plegar(r["valor"]), r["valor"]))}
 
     en_estados = ""
     if q["estado"]:
         en_estados = f" AND d.estado IN ({', '.join('?' for _ in q['estado'])})"
-    return {"estados": distintos("estado"),
-            "municipios": distintos("municipio", en_estados, tuple(q["estado"])),
-            "monedas": distintos("moneda"),
-            "tipos": distintos("tipo_terreno")}
+    conteos = {"estados": distintos("estado"),
+               "municipios": distintos("municipio", en_estados, tuple(q["estado"])),
+               "monedas": distintos("moneda"),
+               "tipos": distintos("tipo_terreno")}
+    return {**{k: list(v) for k, v in conteos.items()}, "conteos": conteos}
 
 
 def history(conn: DatabaseConnection, inventory_id: str, before_version: int | None,

@@ -22,15 +22,21 @@
   padding: var(--space-5) var(--space-6) var(--space-4);
 }
 .tabla-cabeza { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-/* The view selector is the screen's title. */
-.tabla-titulo.input {
-  width: auto; max-width: 100%; padding: 0 1.75rem 0 0;
-  border: 0; background: transparent no-repeat right center / 1.1rem
+/* The view selector is the screen's title: the name as text, the select
+ * invisible over it so its menu opens at the normal size. */
+.tabla-titulo-caja { position: relative; max-width: 100%; }
+.tabla-titulo-texto {
+  display: block; padding-right: 1.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  background: no-repeat right center / 1.1rem
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  appearance: none; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.022em; cursor: pointer;
-  field-sizing: content;   /* as wide as the chosen view, where supported */
+  font-size: 1.75rem; font-weight: 600; letter-spacing: -0.022em; line-height: 1.25;
 }
-.tabla-titulo.input:disabled { cursor: default; background-image: none; }
+.tabla-titulo.input {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
+}
+.tabla-titulo.input:disabled { cursor: default; }
+.tabla-titulo-caja:has(.tabla-titulo:disabled) .tabla-titulo-texto { background-image: none; }
+.tabla-titulo-caja:has(.tabla-titulo:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
 .tabla-encabezado { display: grid; gap: var(--space-1); margin-right: auto; min-width: 0; }
 .tabla-subtitulo { margin: 0; font-size: var(--text-small); color: var(--ink-muted); }
 .tabla-subtitulo:empty { display: none; }
@@ -44,7 +50,8 @@
 .tabla-chip-quitar { border: 0; background: none; padding: 0 2px; color: var(--ink-muted); cursor: pointer; font-size: 1rem; line-height: 1; }
 .tabla-chip-quitar:hover { color: var(--ink); }
 .tabla-filtros .tabla-campo { min-width: 0; }
-.tabla-filtros .tabla-varios-resumen { max-width: none; }
+.tabla-casillas { margin: 0; }
+.tabla-casillas .check { justify-content: space-between; }
 
 /* Importar Excel: the destination, a drop zone and the dry run's summary. */
 .importar { display: grid; gap: var(--space-4); }
@@ -65,23 +72,6 @@
 .tabla-campo .input { min-width: 0; }
 .tabla-casilla { padding-bottom: var(--space-2); }
 
-/* Tipo: several values at once. Looks like the other selects; its checks
-   open in a small panel under it. */
-.tabla-varios { position: relative; }
-.tabla-varios-resumen {
-  display: block; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  cursor: pointer; list-style: none;
-}
-.tabla-varios-resumen::-webkit-details-marker { display: none; }
-.tabla-varios-resumen::after { content: " ▾"; color: var(--ink-secondary); }
-.tabla-varios[data-bloqueado] .tabla-varios-resumen { opacity: 0.45; cursor: not-allowed; }
-.tabla-varios-panel {
-  position: absolute; top: calc(100% + var(--space-1)); left: 0; z-index: var(--z-panel);
-  display: grid; gap: var(--space-1); min-width: 100%; max-height: 18rem; overflow-y: auto;
-  padding: var(--space-2) var(--space-3);
-  background: var(--paper-overlay); border: 1px solid var(--rule-strong); border-radius: var(--radius);
-  box-shadow: var(--shadow-pop); font-size: var(--text-small); white-space: nowrap;
-}
 .tabla-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-left: auto; }
 
 .tabla-aviso {
@@ -115,7 +105,7 @@
 /* Tabla / Mapa: the grid, or the map of the whole view in the same area. */
 .tabla-cuerpo { flex: 1 1 auto; display: flex; min-height: 0; }
 /* The grid sits on a white card; the map keeps the full width. */
-.tabla-pantalla:not(.modo-mapa) .tabla-cuerpo {
+.tabla-pantalla .tabla-cuerpo {
   margin: 0 var(--space-6); background: var(--paper-overlay); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05); overflow: hidden;
 }
@@ -135,13 +125,6 @@
 .previa-mapa { flex: 1 1 auto; min-height: 16rem; isolation: isolate; }
 .previa-estado { margin: 0; }
 
-/* Map mode: one slim row (the view, Tabla / Mapa, Actualizar) and the map
- * takes the rest. The grid's query controls are hidden there (Tabla.js). */
-.tabla-pantalla.modo-mapa .tabla-barra { padding: var(--space-1) var(--space-4); }
-.tabla-pantalla.modo-mapa .tabla-titulo.input { font-size: var(--text-lead); }
-.tabla-pantalla.modo-mapa .tabla-acciones { align-items: center; }
-.tabla-pantalla.modo-mapa .tabla-acciones > .btn { padding-block: var(--space-1); }
-.tabla-pantalla.modo-mapa .segment { padding-block: 2px; }
 /* The read-only note is about editing, which the map does not offer. */
 .tabla-pantalla.modo-mapa .tabla-aviso { display: none; }
 /* The footer's count and status are the grid's: on the map it shows only
@@ -150,25 +133,6 @@
 .tabla-pantalla.modo-mapa .tabla-pie .tabla-estado { display: none; }
 .tabla-pantalla.modo-mapa .tabla-pie:not(:has(.tabla-alerta:not(:empty), .tabla-subidas:not([hidden]))) { display: none; }
 
-/* The table's filters that bound the map's set: a small toggle in the bar. */
-.tabla-heredados { position: relative; }
-.tabla-heredados > summary {
-  list-style: none; cursor: pointer; background: var(--paper-sunken); border-color: var(--rule-strong); color: var(--ink);
-}
-.tabla-heredados > summary::-webkit-details-marker { display: none; }
-.tabla-heredados > summary::after { content: "▾"; margin-left: var(--space-1); }
-.tabla-heredados[open] > summary::after { content: "▴"; }
-.tabla-heredados-panel {
-  position: absolute; top: calc(100% + var(--space-1)); left: 0; z-index: var(--z-panel);
-  width: min(22rem, calc(100vw - var(--space-6))); padding: var(--space-3);
-  background: var(--paper-overlay); border: 1px solid var(--rule-strong); border-radius: var(--radius);
-  box-shadow: var(--shadow-pop); font-size: var(--text-small);
-}
-.tabla-heredados-panel p { margin: 0; }
-.tabla-heredados-panel:focus, .previa-nota:focus { outline: none; }
-.tabla-heredados-panel .muted { font-size: var(--text-micro); }
-.tabla-heredados-lista { margin: var(--space-2) 0; padding-left: var(--space-5); }
-.tabla-heredados-lista li { overflow-wrap: anywhere; }
 
 /* What floats over the map. Top-left: the "Filtros" button (narrow screens)
  * and the notices, only while there is something to say. Top-right, under
@@ -211,42 +175,47 @@
   box-shadow: var(--shadow-pop);
 }
 
-/* The map screen of the tables: filters | map | record, as the old map was.
- * Everything here is under .mapa-tabla or .previa, so the legacy workspace
- * and the grid keep their own layout. Below 960px the shared rules take over:
- * the rail hides behind the "Filtros" drawer and the record floats. */
+/* The map screen of the tables: the map takes it all. Its filters live in a
+ * drawer opened from the bar's "Filtros", and the selected terrain's record
+ * floats over the map's right side. Everything here is under .mapa-tabla or
+ * .previa, so the legacy workspace and the grid keep their own layout. */
 .mapa-tabla {
-  flex: 1 1 auto; min-width: 0; min-height: 0;
-  display: grid; grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  position: relative; flex: 1 1 auto; min-width: 0; min-height: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr);
 }
-.mapa-tabla.con-ficha { grid-template-columns: var(--rail-width) minmax(0, 1fr) var(--panel-width); }
-.mapa-tabla-rail { min-height: 0; }
+.mapa-tabla-rail { display: none; }
 .mapa-tabla-centro { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.mapa-tabla-ficha { min-height: 0; }
+.mapa-tabla-ficha.detail-slot {
+  /* Under "Encuadrar todo", which stays reachable while a record is open. */
+  position: absolute; inset: calc(var(--space-4) + 36px + var(--space-3)) var(--space-4) var(--space-4) auto;
+  z-index: var(--z-panel);
+  width: min(24rem, calc(100% - var(--space-5))); min-height: 0; overflow-y: auto;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-panel);
+}
+/* Only "Encuadrar todo" and the basemaps over the map: zoom stays on the wheel,
+ * pinch, double click and keys; the explanation and the legend go. */
+.previa .leaflet-control-zoom, .previa-info { display: none; }
+.previa-herramientas { top: var(--space-4); right: var(--space-4); }
+.previa-encuadre.btn {
+  min-height: 36px; padding: 0 var(--space-4); font-size: var(--text-small);
+  border-color: var(--rule-strong); box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+.mapa-tabla-leyenda { margin-top: var(--space-5); }
+.mapa-tabla-leyenda .legend { position: static; box-shadow: none; border: 0; padding: 0; background: none; }
 .mapa-tabla-detalle .detail-heading .chip { margin-top: var(--space-1); }
 .mapa-tabla-ubicacion { margin: 0 0 var(--space-2); font-size: var(--text-small); }
 .mapa-tabla-detalle .detail-grid dd { white-space: pre-wrap; }
 .mapa-tabla-detalle .detail-nota { margin: var(--space-4) 0 0; font-size: var(--text-micro); }
 .previa-escenario { position: relative; flex: 1 1 auto; display: flex; min-height: 16rem; }
 .previa-sobre-mapa {
-  position: absolute; left: var(--space-3); bottom: calc(var(--space-3) + 14px); z-index: var(--z-overlay);
+  position: absolute; left: var(--space-4); bottom: calc(var(--space-4) + 14px); z-index: var(--z-overlay);
   display: flex; flex-direction: column-reverse; align-items: flex-start; gap: var(--space-2);
   max-height: calc(100% - var(--space-6)); overflow: auto; pointer-events: none;
 }
 .previa-sobre-mapa > * > * { pointer-events: auto; }
 .previa .legend-escala:empty { display: none; }
 
-@media (max-width: 960px) {
-  .mapa-tabla, .mapa-tabla.con-ficha { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-width: 720px) {
-  .tabla-pantalla.modo-mapa .tabla-barra { padding-inline: var(--space-3); }
-  .tabla-pantalla.modo-mapa .tabla-barra .tabla-campo { flex: 1 1 10rem; }
-  .tabla-pantalla.modo-mapa .tabla-barra .tabla-campo .input { flex: 1 1 auto; width: 0; max-width: none; }
-  /* The note's panel spans the bar, so it is never cut at the screen's edge. */
-  .tabla-pantalla.modo-mapa .tabla-barra { position: relative; }
-  .tabla-heredados { position: static; }
-  .tabla-heredados-panel { left: var(--space-3); right: var(--space-3); top: calc(100% - var(--space-1)); width: auto; }
 }
 @media (max-width: 767px) {
   .previa-sobre-mapa .legend { min-width: 0; max-width: min(15rem, calc(100vw - var(--space-7))); }
@@ -337,15 +306,19 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
   .tabla-barra, .tabla-pie, .tabla-bandeja, .tabla-lote { padding-inline: var(--space-3); }
   /* The "⋯" menu opens leftwards, so it stays at the right of its row. */
   .tabla-acciones { margin-left: 0; width: 100%; justify-content: flex-end; }
-  .tabla-pantalla:not(.modo-mapa) .tabla-cuerpo, .tabla-pantalla:not(.modo-mapa) .tabla-pie { margin-inline: var(--space-3); }
-  .tabla-titulo.input { font-size: 1.375rem; }
+  .tabla-pantalla .tabla-cuerpo, .tabla-pantalla:not(.modo-mapa) .tabla-pie { margin-inline: var(--space-3); }
+  .tabla-titulo-texto { font-size: 1.375rem; }
 }
 
 .detalle-nota { margin: 0 0 var(--space-3); color: var(--ink-secondary); font-size: var(--text-small); }
 
-/* On the map the bar stays one slim row: the subtitle is the grid's. */
-.tabla-pantalla.modo-mapa .tabla-subtitulo { display: none; }
+/* The map is a card like the grid's, under the same bar: switching never moves the bar. */
+.tabla-pantalla.modo-mapa .tabla-cuerpo { border-radius: var(--radius-lg); margin-bottom: var(--space-5); }
+.cajon-mapa { justify-self: start; color: #0066cc; text-decoration: none; text-align: left; }
 .importar-zona.is-ocupada { opacity: 0.6; cursor: progress; }
+
+/* "Ver los N" in the filter panels reads as a link. */
+.cajon .check-more, .drawer .check-more { color: #0066cc; text-decoration: none; }
 
 /* «Asistente IA» in the record detail (issue #65). */
 .asistente-terreno { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--rule); }

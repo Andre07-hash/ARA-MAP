@@ -212,15 +212,29 @@ def _exportar_vista(request: Request, permitidos: tuple[str, ...],
         # a count-free variant in server/repo if exports get slow.
         while True:
             pagina, _, cursor, _ = repo_inventario.listar(conn, consulta, base_id)
-            filas.extend({**t["draft"], "base": nombres.get(t.get("base_id") or "")}
-                         for t in pagina)
+            filas.extend({**t["draft"], "base_id": t.get("base_id"),
+                          "base": nombres.get(t.get("base_id") or "")} for t in pagina)
             if cursor is None:
                 break
             consulta = {**consulta, "cursor": cursor}
-    columnas = COLUMNAS_MAESTRA if base_id is not None else (*COLUMNAS_MAESTRA, COLUMNA_BASE)
     book = Workbook()
     book.remove(book.active)
-    write_terrain_sheet(book, HOJA_SIMPLE, filas, columnas)
+    if base_id is not None or not filas:
+        write_terrain_sheet(book, HOJA_SIMPLE, filas, COLUMNAS_MAESTRA)
+    else:
+        # The master table: one sheet per base, by name, and the unassigned
+        # rows last. Each row still names its base, so a sheet copied
+        # elsewhere keeps saying where it came from.
+        # By base id, not name: two bases may share a name and stay two sheets.
+        por_base: dict[str | None, list[dict[str, Any]]] = {}
+        for fila in filas:
+            por_base.setdefault(fila["base_id"], []).append(fila)
+        usados: set[str] = set()
+        orden = sorted(por_base, key=lambda b: (b is None, (nombres.get(b or "") or "").casefold()))
+        for indice, base in enumerate(orden):
+            titulo = nombres.get(base or "") or "Sin asignar" if base else "Sin asignar"
+            write_terrain_sheet(book, sheet_title(titulo, usados, indice),
+                                por_base[base], (*COLUMNAS_MAESTRA, COLUMNA_BASE))
     buffer = io.BytesIO()
     book.save(buffer)
     return buffer.getvalue(), "terrenos.xlsx"

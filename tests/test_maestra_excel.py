@@ -52,14 +52,16 @@ class Excel(Escenario):
                               "X-Archivo": urllib.parse.quote(nombre)})
         return estado, json.loads(cuerpo)
 
-    def exportar(self, path, user="ada"):
+    def exportar(self, path, user="ada", hojas=False):
         estado, cabeceras, cuerpo = self.crudo("GET", path, user=user)
         if estado != 200:
             return estado, json.loads(cuerpo)
         from openpyxl import load_workbook  # vendored: reachable once server is imported
         self.assertIn("spreadsheetml", cabeceras["Content-Type"])
-        hoja = load_workbook(io.BytesIO(cuerpo)).active
-        return estado, [list(r) for r in hoja.iter_rows(values_only=True)]
+        libro = load_workbook(io.BytesIO(cuerpo))
+        if hojas:
+            return estado, {h.title: [list(r) for r in h.iter_rows(values_only=True)] for h in libro}
+        return estado, [list(r) for r in libro.active.iter_rows(values_only=True)]
 
     def de_base(self, base):
         return {r["terreno"]: r for r in filas(
@@ -125,6 +127,18 @@ class Excel(Escenario):
         self.assertEqual((estado, r["nuevas"], r["no_cargadas"]), (200, 4, []), r)
         uno = self.de_base(self.b2)["Lote Excel Uno"]
         self.assertEqual((uno["tipo_terreno"], uno["notas_internas"]), ("Industrial", "Nota ficticia"))
+
+    def test_the_master_export_has_one_sheet_per_base_and_the_unassigned_last(self):
+        estado, hojas = self.exportar("/api/maestra/exportar", hojas=True)
+        self.assertEqual(estado, 200, hojas)
+        self.assertEqual(list(hojas), ["Base Archivada", "Base Dos", "Base Uno", "Sin asignar"])
+        nombres = {titulo: sorted(r[1] for r in filas[1:]) for titulo, filas in hojas.items()}
+        self.assertEqual(nombres["Base Uno"], ["Lote 1", "Lote a"])
+        self.assertEqual(nombres["Base Dos"], ["Lote 2"])
+        self.assertEqual(len(nombres["Sin asignar"]), 1)
+        # A filter that leaves one base gives one sheet.
+        self.assertEqual(list(self.exportar("/api/maestra/exportar?q=Lote%202", hojas=True)[1]),
+                         ["Base Dos"])
 
     def test_the_master_export_is_for_administrators_and_names_each_base(self):
         self.importar(self.b1)

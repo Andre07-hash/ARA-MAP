@@ -61,7 +61,7 @@ import {
   VISTA_SIN_ASIGNAR,
 } from "../../lib/tabla.js";
 import { openTerrainHistory } from "../inventory/TerrainHistory.js";
-import { closeAllDialogs, confirmarBorrado, confirmDialog } from "../ui/dialog.js";
+import { closeAllDialogs, confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { toast, toastError } from "../ui/toast.js";
 import { conectarArchivos } from "./archivosAnfitrion.js";
 import { reunirPaginas } from "../../lib/inventario.js";
@@ -256,11 +256,12 @@ export function createTabla({
   const btnImportar = admin && deMenu("subir", "Importar Excel…", () => importar(), "Agrega filas a una base");
   const btnBases = admin && deMenu("personas", "Bases y accesos", () => basesDialogo());
   const btnColumnas = deMenu("columnas", "Columnas", () => columnasDialogo());
+  const btnMostrar = deMenu("columnas", "Mostrar columnas", () => mostrarDialogo(), "Esconde columnas en esta pantalla");
   const btnRecargar = deMenu("actualizar", "Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
   const menuMas = el("details", { class: "menu-mas" },
     el("summary", { class: "btn btn-quiet btn-icono", "aria-label": "Más acciones", title: "Más acciones" },
       icono("puntos")),
-    el("div", { class: "menu-panel" }, btnExportar, btnImportar,
+    el("div", { class: "menu-panel" }, btnExportar, btnImportar, btnMostrar,
       el("hr", { class: "menu-separador" }), btnBases, btnColumnas, btnRecargar));
   cerrarAlSalir(menuMas);
   const cuentaFiltros = el("span", { class: "insignia", hidden: true });
@@ -380,7 +381,34 @@ export function createTabla({
   const panelMapa = el("div", { id: "tabla-previa", class: "tabla-previa", hidden: true }, previa.element);
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
   const lote = el("div", { class: "tabla-lote", role: "region", "aria-label": "Terrenos seleccionados", hidden: true });
-  const element = el("div", { class: "tabla-pantalla" }, barra, aviso, bandeja, lote, cuerpo, vacio, pie);
+  // Columns hidden on this screen only (to show the table to someone without,
+  // say, its prices). A per-browser choice: nothing on the server changes.
+  const CLAVE_OCULTAS = "ara.tabla.ocultas";
+  const ocultas = new Set((() => {
+    try { return JSON.parse(localStorage.getItem(CLAVE_OCULTAS)) ?? []; } catch { return []; }
+  })());
+  const estiloOcultas = el("style");
+  function pintarOcultas() {
+    estiloOcultas.textContent = [...ocultas]
+      .map((id) => `.tabla-grid [data-col="${CSS.escape(id)}"] { display: none; }`).join("\n");
+    try { localStorage.setItem(CLAVE_OCULTAS, JSON.stringify([...ocultas])); } catch { /* kept for this visit */ }
+  }
+  pintarOcultas();
+  function mostrarDialogo() {
+    const casillas = columnas.map((c) => el("label", { class: "check" },
+      el("input", { type: "checkbox", checked: !ocultas.has(c.id), onchange: (e) => {
+        if (e.target.checked) ocultas.delete(c.id); else ocultas.add(c.id);
+        pintarOcultas();
+      } }), el("span", {}, c.etiqueta)));
+    openDialog({
+      titulo: "Mostrar columnas",
+      descripcion: "Sólo cambia lo que se ve en esta pantalla y este navegador. Los datos no se tocan.",
+      contenido: el("div", { class: "tabla-mostrar" }, casillas),
+      acciones: [{ etiqueta: "Listo", variante: "principal", onClick: (close) => close() }],
+    });
+  }
+
+  const element = el("div", { class: "tabla-pantalla" }, estiloOcultas, barra, aviso, bandeja, lote, cuerpo, vacio, pie);
 
   tbody.addEventListener("focusin", (e) => {
     const celda = e.target.closest("td[data-col]");
@@ -685,6 +713,7 @@ export function createTabla({
     btnAgregar.hidden = !vista || lectura;
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
+    btnMostrar.hidden = !vista || modo === "mapa";
     btnRecargar.hidden = !vista;
     btnExportar.hidden = !vista;
     if (btnImportar) btnImportar.hidden = soloConsulta();
@@ -1832,7 +1861,7 @@ export function createTabla({
    * last cell; only Tab (`saltar`) wraps to the next or previous row.
    */
   function mover(id, colId, dx, dy, { saltar = false } = {}) {
-    const celdasDeFila = (tr) => [...tr.querySelectorAll("td[tabindex]")];
+    const celdasDeFila = (tr) => [...tr.querySelectorAll("td[tabindex]")].filter((n) => !ocultas.has(n.dataset.col));
     let tr = tbody.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
     if (!tr) return false;
     let lista = celdasDeFila(tr);

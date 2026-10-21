@@ -319,3 +319,8 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 
 /* "Ver los N" in the filter panels reads as a link. */
 .cajon .check-more, .drawer .check-more { color: #0066cc; text-decoration: none; }
+
+/* «Mostrar columnas»: one check per column. */
+.tabla-mostrar { display: grid; gap: var(--space-2); max-height: 60vh; overflow-y: auto; }
+/* The place and figures of a record or a map label: pieces that hide one by one. */
+.mapa-tabla-lugar [data-col]:not(:last-child)::after { content: ", "; }

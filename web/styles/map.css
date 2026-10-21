@@ -204,6 +204,11 @@
 }
 .mark-tooltip strong { display: block; font-size: var(--text-small); }
 .mark-tooltip span { display: block; opacity: 0.75; }
+/* The place and figures come in pieces, one per table column, so a column
+ * the table hides is hidden here too. */
+.mark-tooltip span[data-col] { display: inline; opacity: 1; }
+.mark-tooltip-lugar [data-col]:not(:last-child)::after { content: ", "; }
+.mark-tooltip-cifras [data-col]:not(:last-child)::after { content: " · "; }
 .mark-tooltip::before { border-top-color: var(--ink) !important; }
 
 /* A boundary whose outline is not drawn says why in words: click to load it

@@ -139,7 +139,7 @@ test("custom columns are the terrain's own base's, without retired ones", () => 
     { id: "custom:c", nombre: "Vieja", tipo: "texto", retirada: true },
     { id: "custom:d", nombre: "Vacía", tipo: "texto", retirada: false },
   ];
-  assert.deepEqual(personalizadasDeFicha(r, defs), [["Seguimiento", "Visita pendiente"], ["Prioridad", "7"], ["Vacía", "—"]]);
+  assert.deepEqual(personalizadasDeFicha(r, defs), [["Seguimiento", "Visita pendiente", "custom:a"], ["Prioridad", "7", "custom:b"], ["Vacía", "—", "custom:d"]]);
   assert.deepEqual(personalizadasDeFicha(r, []), []);
 });
 

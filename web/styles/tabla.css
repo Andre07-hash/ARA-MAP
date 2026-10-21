@@ -340,6 +340,18 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 .bases-nueva-fila .btn { flex: none; }
 .cuentas-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-4); }
 .cuentas-campos .rail-field { margin: 0; }
+/* «Logo»: two radios drawn as a segmented control. The radio itself is hidden
+ * visually but stays focusable; its label shows the choice and the focus. */
+.cuentas-logo { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: var(--space-1); }
+.cuentas-logo .field-label { padding: 0; }
+.segmented-radio { justify-self: start; position: relative; }
+.segmented-radio input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+.segmented-radio input:checked + .segment {
+  background: var(--paper-overlay);
+  color: var(--ink);
+  box-shadow: 0 1px 2px oklch(19% 0.006 60 / 0.12);
+}
+.segmented-radio input:focus-visible + .segment { outline: 2px solid var(--ink); outline-offset: 1px; }
 @media (max-width: 640px) {
   .bases-item { grid-template-columns: minmax(0, 1fr) auto; }
   .bases-item .columnas-botones { grid-column: 1 / -1; flex-wrap: wrap; }

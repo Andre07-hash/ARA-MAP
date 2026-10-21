@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS workspace_backup (
   created TIMESTAMPTZ NOT NULL DEFAULT now(), payload TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS workspace_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-""" + BORRADOR_SQL + inventory_sql() + archivos_sql()
+""" + BORRADOR_SQL + inventory_sql() + archivos_sql() + marca_sql()
 
 
 def inventory_sql() -> str:
@@ -188,6 +188,22 @@ END $$;"""
     return _to_postgres(ciclo.sub("", ATTACHMENT_SCHEMA)) + restricciones + "\n"
 
 
+def marca_sql() -> str:
+    """The v11 team_user.marca column. As in SQLite, the one-time backfill runs
+    only in the same step that adds the column."""
+    from .db import V11_MARCA, V11_MARCA_INICIAL
+
+    return f"""
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema()
+                 AND table_name = 'team_user' AND column_name = 'marca') THEN
+    ALTER TABLE team_user ADD COLUMN marca {V11_MARCA};
+    {V11_MARCA_INICIAL};
+  END IF;
+END $$;
+"""
+
+
 # Import-assistant drafts: the parsed file and the choices made so far, kept
 # between requests that may land on different cloud workers. Temporary --
 # expired rows are deleted -- and deliberately not part of workspace backups.
@@ -220,7 +236,7 @@ def migrate_sql() -> str:
     from .db import FOLDER_INDEXES, SCHEMA, SCHEMA_VERSION
 
     return ("".join(_crear_tabla(SCHEMA, t) for t in NUEVAS_TABLAS) + BORRADOR_SQL
-            + inventory_sql() + archivos_sql() + """
+            + inventory_sql() + archivos_sql() + marca_sql() + """
 ALTER TABLE base ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE mapa ADD COLUMN IF NOT EXISTS carpeta_id INTEGER REFERENCES carpeta(id) ON DELETE SET NULL;
 ALTER TABLE terreno ADD COLUMN IF NOT EXISTS moneda TEXT CHECK (moneda IN ('USD', 'MXN'));

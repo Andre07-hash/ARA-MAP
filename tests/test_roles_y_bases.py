@@ -255,21 +255,26 @@ class Matriz(Escenario):
         ruta, clave = "/api/maestra/cuentas", "clave-ficticia-larga"
         nueva = {"login": "Nora", "display_name": " Nora  Ficticia ", "password": clave,
                  "rol": "operador"}
-        status, body = self.call("POST", ruta, nueva, "olga")
-        self.assertEqual((status, body["detalle"]["code"]), (403, "forbidden"))
+        for cuerpo in (nueva, {**nueva, "marca": "dewa"}):  # an operator, with either logo
+            status, body = self.call("POST", ruta, cuerpo, "olga")
+            self.assertEqual((status, body["detalle"]["code"]), (403, "forbidden"))
         self.assertEqual(self.cuenta("team_user", "login = 'nora'"), 0)
         for cuerpo in ({**nueva, "rol": "jefe"}, {**nueva, "password": "  "},
                        {**nueva, "login": "x"}, {**nueva, "extra": 1}, {"login": "nora"},
-                       {**nueva, "login": "ada"}):
+                       {**nueva, "login": "ada"}, {**nueva, "marca": "otra"},
+                       {**nueva, "marca": "DEWA"}, {**nueva, "marca": None}):
             self.assertEqual(self.call("POST", ruta, cuerpo)[0], 422, cuerpo)
         self.assertEqual(self.cuenta("team_user", "login = 'nora'"), 0)
 
         status, body = self.call("POST", ruta, nueva)
         self.assertEqual((status, body["cuenta"]["login"], body["cuenta"]["display_name"],
                           body["cuenta"]["rol"]), (200, "nora", "Nora Ficticia", "operador"))
-        self.assertEqual(set(body["cuenta"]), {"id", "login", "display_name", "rol"})
-        status, body = self.call("POST", ruta, {**nueva, "login": "adela", "rol": "admin"}, "alan")
-        self.assertEqual((status, body["cuenta"]["rol"]), (200, "admin"))
+        self.assertEqual(set(body["cuenta"]), {"id", "login", "display_name", "rol", "marca"})
+        self.assertEqual(body["cuenta"]["marca"], "ara")  # the default logo
+        status, body = self.call("POST", ruta, {**nueva, "login": "adela", "rol": "admin",
+                                                "marca": "dewa"}, "alan")
+        self.assertEqual((status, body["cuenta"]["rol"], body["cuenta"]["marca"]),
+                         (200, "admin", "dewa"))
         status, body = self.call("POST", ruta, {**nueva, "login": "corto", "password": "ab"}, "alan")
         self.assertEqual((status, body["cuenta"]["login"]), (200, "corto"))  # no minimum length
         eventos = filas("team_user_event", "action = 'cuenta_creada' AND actor_id IS NOT NULL")
@@ -548,15 +553,20 @@ class Matriz(Escenario):
 
     # -- 4. sessions -------------------------------------------------------------
 
-    def test_only_the_tyrag_login_is_branded_dewa_never_by_display_name(self):
-        # Fictional accounts: the login is typed in another case and padded, and
-        # an unrelated account borrows the name «TyraG» as its display name.
-        sql(lambda c: auth.create_user(c, " TyraG ", "Nombre Cualquiera", TEST_PASSWORD,
-                                       iterations=1000, rol="admin"))
-        sql(lambda c: auth.create_user(c, "impostora", "TyraG", TEST_PASSWORD, iterations=1000,
-                                       rol="admin"))
-        for login, marca in (("TYRAG", "dewa"), ("impostora", "ara"), ("ada", "ara"),
-                             ("olga", "ara")):
+    def test_the_logo_chosen_at_creation_follows_the_account_never_its_display_name(self):
+        # Fictional accounts, created through the API as an administrator would.
+        # One borrows the name «TyraG» but keeps the default logo, and a login
+        # «tyrag» created today gets only what was chosen for it.
+        ruta = "/api/maestra/cuentas"
+        for login, nombre, extra in (("dalia", "Dalia Ficticia", {"marca": "dewa"}),
+                                     ("impostora", "TyraG", {}),
+                                     ("tyrag", "Nombre Cualquiera", {"marca": "ara"})):
+            self.ok(self.call("POST", ruta, {"login": login, "display_name": nombre,
+                                             "password": TEST_PASSWORD, "rol": "operador", **extra}))
+        # Each login is a new session, as from another device; the sequence is
+        # also one browser switching accounts. Dalia signs in twice.
+        for login, marca in (("DALIA", "dewa"), ("impostora", "ara"), ("dalia", "dewa"),
+                             ("tyrag", "ara"), ("ada", "ara"), ("olga", "ara")):
             peticion = urllib.request.Request(
                 f"http://127.0.0.1:{self.httpd.server_address[1]}/api/login", method="POST",
                 data=json.dumps({"username": login, "password": TEST_PASSWORD}).encode(),
@@ -567,7 +577,7 @@ class Matriz(Escenario):
             self.assertEqual(entrada["user"]["marca"], marca, login)
             estado = self.ok(self.call("GET", "/api/session", cookie=cookie))
             self.assertEqual(estado["user"]["marca"], marca, login)
-            self.assertEqual(estado["user"]["rol"], "admin" if login != "olga" else "operador")
+            self.assertEqual(estado["user"]["rol"], "admin" if login == "ada" else "operador")
             self.ok(self.call("POST", "/api/logout", cookie=cookie))
             self.assertEqual(self.call("GET", "/api/session", cookie=cookie)[1],
                              {"authenticated": False})

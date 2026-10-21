@@ -1,7 +1,8 @@
 /* The header logo for whoever is signed in.
  *
- * The server decides the brand from the authenticated login (`sesion.marca`);
- * the editable display name plays no part. Anything unknown, and anyone signed
+ * The server reads the brand stored on the authenticated account
+ * (`sesion.marca`, chosen when an administrator creates it); the editable
+ * display name plays no part. Anything unknown, and anyone signed
  * out, gets ARA. Width and height are each image's intrinsic size, so the
  * header keeps the supplied proportions and does not shift while it loads.
  */

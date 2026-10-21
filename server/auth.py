@@ -62,6 +62,8 @@ _PUBLIC_DETAIL = re.compile(r"^/api/publico/terrenos/[^/]+$")
 
 
 ROLES = ("admin", "operador")
+# The header logo of an account (db.MARCAS); a new one sees ARA unless chosen.
+MARCA_PREDETERMINADA = "ara"
 _DE_TRABAJO = ("maestra.ver", "maestra.editar", "maestra.borrar", "columnas.gestionar",
                "archivos.ver", "archivos.subir", "archivos.borrar")
 # What each role may do. Where is a separate question, answered per request
@@ -138,11 +140,15 @@ def normalize_login(value: Any) -> str:
 
 def create_user(conn: DatabaseConnection, login: str, display_name: str, password: str,
                 *, iterations: int = PBKDF2_ITERATIONS, rol: str = "operador",
+                marca: str = MARCA_PREDETERMINADA,
                 actor: dict[str, Any] | None = None) -> dict[str, Any]:
     """A new account. It is an operator unless told otherwise: nothing here,
-    and no migration, ever makes an administrator by default. ``actor`` is the
-    administrator who asked from the web app; without it, the command."""
+    and no migration, ever makes an administrator by default. ``marca`` is the
+    header logo it will see. ``actor`` is the administrator who asked from the
+    web app; without it, the command."""
     _check_rol(rol)
+    if marca not in db.MARCAS:
+        raise AccountError(f"El logo debe ser uno de: {', '.join(db.MARCAS)}.")
     login = normalize_login(login)
     if not _LOGIN.match(login):
         raise AccountError(
@@ -158,10 +164,11 @@ def create_user(conn: DatabaseConnection, login: str, display_name: str, passwor
     with db.transaction(conn):
         conn.execute(
             "INSERT INTO team_user (id, login, display_name, password_hash, active,"
-            " credential_revision, rol, created_at, updated_at) VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?)",
-            (user_id, login, nombre, hash_password(password, iterations), rol, ahora, ahora))
+            " credential_revision, rol, marca, created_at, updated_at)"
+            " VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?, ?)",
+            (user_id, login, nombre, hash_password(password, iterations), rol, marca, ahora, ahora))
         _account_event(conn, user_id, "cuenta_creada", ahora, {"rol": rol}, actor)
-    return {"id": user_id, "login": login, "display_name": nombre, "rol": rol}
+    return {"id": user_id, "login": login, "display_name": nombre, "rol": rol, "marca": marca}
 
 
 def set_password(conn: DatabaseConnection, login: str, password: str,
@@ -288,16 +295,17 @@ class Sesion:
     unpack; encoded by accident it shows only its repr.
     """
 
-    __slots__ = ("referencia", "user_id", "display_name", "rol", "credential_revision", "login")
+    __slots__ = ("referencia", "user_id", "display_name", "rol", "credential_revision", "marca")
 
     def __init__(self, referencia: str, user_id: str, display_name: str, rol: str,
-                 credential_revision: int, login: str = "") -> None:
+                 credential_revision: int, marca: str = MARCA_PREDETERMINADA) -> None:
         self.referencia = referencia
         self.user_id = user_id
         self.display_name = display_name
         self.rol = rol
         self.credential_revision = credential_revision
-        self.login = normalize_login(login)
+        # The header logo stored on the account; anything unexpected is ARA.
+        self.marca = marca if marca in db.MARCAS else MARCA_PREDETERMINADA
 
     def __repr__(self) -> str:
         return f"<Sesion de {self.user_id}>"
@@ -335,7 +343,7 @@ def sesion_de_token(conn: DatabaseConnection, token: str) -> Sesion | None:
     """
     referencia = _token_hash(token)
     row = conn.execute(
-        "SELECT u.id, u.login, u.display_name, u.rol, s.credential_revision"
+        "SELECT u.id, u.display_name, u.rol, u.marca, s.credential_revision"
         " FROM team_session s JOIN team_user u ON u.id = s.user_id"
         " WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ?"
         " AND u.active = 1 AND u.credential_revision = s.credential_revision",
@@ -343,7 +351,7 @@ def sesion_de_token(conn: DatabaseConnection, token: str) -> Sesion | None:
     if row is None:
         return None
     return Sesion(referencia, row["id"], row["display_name"], row["rol"], row["credential_revision"],
-                  row["login"])
+                  row["marca"])
 
 
 def user_for_token(conn: DatabaseConnection, token: str) -> dict[str, Any] | None:

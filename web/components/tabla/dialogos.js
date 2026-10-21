@@ -451,12 +451,24 @@ export function abrirBases({ onCerrar }) {
   });
   const rol = el("select", { id: "cuenta-rol", class: "input" },
     el("option", { value: "operador" }, "Operador"), el("option", { value: "admin" }, "Administrador"));
+  // The header logo the new account will see: native radios, so the arrow
+  // keys move between them and a screen reader announces «Logo» and the choice.
+  // reset() brings back ARA, the default.
+  const opcionLogo = (valor, etiqueta) => {
+    const radio = el("input", {
+      type: "radio", id: `cuenta-logo-${valor}`, name: "cuenta-logo", value: valor, checked: valor === "ara",
+    });
+    return [radio, el("label", { class: "segment", for: radio.id }, etiqueta)];
+  };
+  const logo = el("fieldset", { class: "cuentas-logo" },
+    el("legend", { class: "field-label" }, "Logo"),
+    el("div", { class: "segmented segmented-radio" }, ...opcionLogo("ara", "ARA"), ...opcionLogo("dewa", "Dewa")));
   const avisoCuenta = Aviso();
   const nuevaCuenta = el("form", { class: "cuentas-nueva" },
     el("h3", {}, "Nueva cuenta"),
     el("div", { class: "cuentas-campos" },
       campo("cuenta-login", "Usuario", login), campo("cuenta-nombre", "Nombre visible", visible),
-      campo("cuenta-clave", "Contraseña inicial", clave), campo("cuenta-rol", "Rol", rol)),
+      campo("cuenta-clave", "Contraseña inicial", clave), campo("cuenta-rol", "Rol", rol), logo),
     avisoCuenta.nodo,
     el("div", {}, el("button", { type: "submit", class: "btn btn-principal" }, "Crear cuenta")),
   );
@@ -466,9 +478,11 @@ export function abrirBases({ onCerrar }) {
     try {
       const { cuenta } = await api.crearCuenta({
         login: login.value, display_name: visible.value, password: clave.value, rol: rol.value,
+        marca: nuevaCuenta.elements["cuenta-logo"].value || "ara",
       });
       nuevaCuenta.reset();
-      avisoCuenta.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
+      avisoCuenta.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}`
+        + ` con el logo ${cuenta.marca === "dewa" ? "Dewa" : "ARA"}.`);
     } catch (error) {
       const campos = Object.values(error.detalle?.fields ?? {});
       avisoCuenta.decir(campos.length ? campos.join(" ") : error.message);

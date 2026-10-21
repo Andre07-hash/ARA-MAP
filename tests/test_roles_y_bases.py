@@ -296,7 +296,7 @@ class Matriz(Escenario):
         por_login = {c["login"]: c for c in body["cuentas"]}
         self.assertEqual(set(por_login), set(self.ids))
         self.assertEqual((por_login["ada"]["rol"], por_login["olga"]["rol"]), ("admin", "operador"))
-        self.assertEqual(set(por_login["olga"]), {"id", "login", "display_name", "rol", "active"})
+        self.assertEqual(set(por_login["olga"]), {"id", "login", "display_name", "rol", "marca", "active"})
         self.assertEqual(self.call("GET", "/api/maestra/cuentas", user="olga")[0], 403)
 
         ruta = f"/api/maestra/cuentas/{self.ids['olga']}/rol"
@@ -315,6 +315,24 @@ class Matriz(Escenario):
         # Back to operator, by the other administrator.
         status, body = self.call("POST", ruta, {"rol": "operador"}, "alan")
         self.assertEqual((status, body["cuenta"]["rol"]), (200, "operador"))
+
+    def test_an_administrator_changes_an_accounts_logo_without_ending_its_session(self):
+        ruta = f"/api/maestra/cuentas/{self.ids['olga']}/marca"
+        self.assertEqual(self.call("POST", ruta, {"marca": "dewa"}, "omar")[0], 403)
+        self.assertEqual(self.call("POST", ruta, {"marca": "otra"})[0], 422)
+        self.assertEqual(self.call("POST", ruta, {"marca": "dewa", "extra": 1})[0], 422)
+        self.assertEqual(self.call("POST", f"/api/maestra/cuentas/{uuid.uuid4()}/marca", {"marca": "dewa"})[0], 404)
+
+        status, body = self.call("POST", ruta, {"marca": "dewa"})
+        self.assertEqual((status, body["cuenta"]["marca"]), (200, "dewa"))
+        self.assertEqual(self.call("GET", "/api/session", user="olga")[1]["user"]["marca"], "dewa")
+        evento = filas("team_user_event", "action = 'marca_cambiada'")[0]
+        self.assertEqual((evento["user_id"], evento["actor_id"]), (self.ids["olga"], self.ids["ada"]))
+        # The same logo again changes nothing; an administrator may set their own.
+        self.assertEqual(self.call("POST", ruta, {"marca": "dewa"})[0], 200)
+        self.assertEqual(len(filas("team_user_event", "action = 'marca_cambiada'")), 1)
+        status, body = self.call("POST", f"/api/maestra/cuentas/{self.ids['ada']}/marca", {"marca": "dewa"})
+        self.assertEqual((status, body["cuenta"]["marca"]), (200, "dewa"))
 
     # -- 2. work bases and grants -----------------------------------------------
 

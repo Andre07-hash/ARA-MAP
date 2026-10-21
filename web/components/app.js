@@ -469,7 +469,7 @@ function renderHeader(host) {
         height: String(logo.height),
         decoding: "async",
       }),
-      el("span", { class: "brand-name" }, "Map"),
+      el("span", { class: "brand-name" }, logo.nombre),
     ),
     el("nav", { class: "nav", "aria-label": "Secciones" },
       items.map(([key, etiqueta]) =>

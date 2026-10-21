@@ -20,6 +20,7 @@ import { ubicacionDe } from "../lib/geometria.js";
 import {
   contarFiltros, FILTROS_VACIOS, itemDeInventario, itemPublico, opcionesDeFacetas,
 } from "../lib/inventario.js";
+import { logoDe } from "../lib/marca.js";
 import {
   defaultRoute, isPrivateRoute, navigate, parseRoute, routeAllowed, routeHash, sameRoute,
 } from "../lib/router.js";
@@ -445,7 +446,8 @@ function renderHeader(host) {
   const legacyAbierto = Boolean(baseActiva || mapaActivo);
   // Rebuilding the header on every keystroke is wasted work and a focus hazard
   // for anything inside it, so it is rebuilt only when what it shows changes.
-  const clave = [activa, sesion?.id, sesion?.display_name, sesion?.rol, sesionLista, legacyAbierto].join("|");
+  const logo = logoDe(sesion);
+  const clave = [activa, sesion?.id, sesion?.display_name, sesion?.rol, logo.src, sesionLista, legacyAbierto].join("|");
   if (headerClave === clave && host.childElementCount) return;
   headerClave = clave;
 
@@ -456,15 +458,15 @@ function renderHeader(host) {
   // Element.append would print it as text.
   append(clear(host), [
     el("div", { class: "brand" },
-      // Decorative: the name sits right beside it, so an alt text would make a
-      // screen reader announce the brand twice. Intrinsic size is declared to
-      // keep the header from shifting while the image loads.
+      // ARA for everyone except the accounts the server brands otherwise
+      // (lib/marca.js). Intrinsic size is declared to keep the header from
+      // shifting while the image loads.
       el("img", {
-        class: "brand-logo",
-        src: "assets/ara-logo.png",
-        alt: "",
-        width: "522",
-        height: "478",
+        class: logo.clase,
+        src: logo.src,
+        alt: logo.alt,
+        width: String(logo.width),
+        height: String(logo.height),
         decoding: "async",
       }),
       el("span", { class: "brand-name" }, "ARA Map"),

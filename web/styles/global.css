@@ -87,6 +87,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
   flex-shrink: 0;
 }
 
+/* The supplied Dewa wordmark, at its own 622:238 proportion. About half of its
+ * height is transparent margin, so it is drawn taller than the ARA mark for the
+ * letters to read at a similar size. */
+.brand-logo.brand-logo-dewa {
+  height: 44px;
+  max-width: 115px;     /* 44 x 622 / 238, rounded */
+}
+
 .brand-name {
   font-weight: 600;
   letter-spacing: var(--tracking-tight);

@@ -288,15 +288,16 @@ class Sesion:
     unpack; encoded by accident it shows only its repr.
     """
 
-    __slots__ = ("referencia", "user_id", "display_name", "rol", "credential_revision")
+    __slots__ = ("referencia", "user_id", "display_name", "rol", "credential_revision", "login")
 
     def __init__(self, referencia: str, user_id: str, display_name: str, rol: str,
-                 credential_revision: int) -> None:
+                 credential_revision: int, login: str = "") -> None:
         self.referencia = referencia
         self.user_id = user_id
         self.display_name = display_name
         self.rol = rol
         self.credential_revision = credential_revision
+        self.login = normalize_login(login)
 
     def __repr__(self) -> str:
         return f"<Sesion de {self.user_id}>"
@@ -334,14 +335,15 @@ def sesion_de_token(conn: DatabaseConnection, token: str) -> Sesion | None:
     """
     referencia = _token_hash(token)
     row = conn.execute(
-        "SELECT u.id, u.display_name, u.rol, s.credential_revision"
+        "SELECT u.id, u.login, u.display_name, u.rol, s.credential_revision"
         " FROM team_session s JOIN team_user u ON u.id = s.user_id"
         " WHERE s.token_hash = ? AND s.revoked_at IS NULL AND s.expires_at > ?"
         " AND u.active = 1 AND u.credential_revision = s.credential_revision",
         (referencia, time.time())).fetchone()
     if row is None:
         return None
-    return Sesion(referencia, row["id"], row["display_name"], row["rol"], row["credential_revision"])
+    return Sesion(referencia, row["id"], row["display_name"], row["rol"], row["credential_revision"],
+                  row["login"])
 
 
 def user_for_token(conn: DatabaseConnection, token: str) -> dict[str, Any] | None:

@@ -548,11 +548,37 @@ class Matriz(Escenario):
 
     # -- 4. sessions -------------------------------------------------------------
 
+    def test_only_the_tyrag_login_is_branded_dewa_never_by_display_name(self):
+        # Fictional accounts: the login is typed in another case and padded, and
+        # an unrelated account borrows the name «TyraG» as its display name.
+        sql(lambda c: auth.create_user(c, " TyraG ", "Nombre Cualquiera", TEST_PASSWORD,
+                                       iterations=1000, rol="admin"))
+        sql(lambda c: auth.create_user(c, "impostora", "TyraG", TEST_PASSWORD, iterations=1000,
+                                       rol="admin"))
+        for login, marca in (("TYRAG", "dewa"), ("impostora", "ara"), ("ada", "ara"),
+                             ("olga", "ara")):
+            peticion = urllib.request.Request(
+                f"http://127.0.0.1:{self.httpd.server_address[1]}/api/login", method="POST",
+                data=json.dumps({"username": login, "password": TEST_PASSWORD}).encode(),
+                headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(peticion, timeout=20) as respuesta:
+                cookie = respuesta.headers["Set-Cookie"].split(";")[0]
+                entrada = json.loads(respuesta.read())
+            self.assertEqual(entrada["user"]["marca"], marca, login)
+            estado = self.ok(self.call("GET", "/api/session", cookie=cookie))
+            self.assertEqual(estado["user"]["marca"], marca, login)
+            self.assertEqual(estado["user"]["rol"], "admin" if login != "olga" else "operador")
+            self.ok(self.call("POST", "/api/logout", cookie=cookie))
+            self.assertEqual(self.call("GET", "/api/session", cookie=cookie)[1],
+                             {"authenticated": False})
+        self.assertEqual(self.call("GET", "/api/session", user=None)[1], {"authenticated": False})
+
     def test_the_session_reports_role_capabilities_and_scope_and_no_secret(self):
         olga = self.call("GET", "/api/session", user="olga")[1]
         self.assertEqual(olga, {
             "authenticated": True,
-            "user": {"id": self.ids["olga"], "display_name": "Olga Ficticia", "rol": "operador"},
+            "user": {"id": self.ids["olga"], "display_name": "Olga Ficticia", "rol": "operador",
+                     "marca": "ara"},
             "capacidades": list(auth.CAPACIDADES["operador"]),
             "alcance": {"bases": [{"id": self.b3, "nombre": "Base Archivada"},
                                   {"id": self.b1, "nombre": "Base Uno"}]}})

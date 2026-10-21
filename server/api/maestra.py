@@ -134,6 +134,33 @@ def create_account(request: Request) -> Respuesta:
     return {"cuenta": cuenta}
 
 
+def accounts(request: Request) -> Respuesta:
+    """Every account with its role and status. Administrators only
+    (usuarios.gestionar). Nothing about passwords or sessions."""
+    with db.session() as conn:
+        return {"cuentas": [auth.cuenta_publica(conn, u["id"]) for u in auth.list_users(conn)]}
+
+
+def change_role(request: Request) -> Respuesta:
+    """{rol}: make an account an operator or an administrator. Its open
+    sessions end. Administrators only, and never on their own account."""
+    user_id = request.uuid_param("uid")
+    data, errors = _body(request, "rol")
+    if data.get("rol") not in auth.ROLES:
+        errors["rol"] = "Elige operador o administrador."
+    if errors:
+        raise _invalid(errors)
+    with db.escritura() as conn:
+        alcance = auth.reverificar(conn, request.sesion, "usuarios.gestionar")
+        try:
+            cuenta = auth.change_role(conn, user_id, data["rol"], alcance.actor)
+        except auth.AccountError as error:
+            raise ApiError(str(error), 422, {"code": "validation_failed"}) from None
+    if cuenta is None:
+        raise ApiError("No existe esa cuenta.", 404, {"code": "not_found"})
+    return {"cuenta": cuenta}
+
+
 def create(request: Request) -> Respuesta:
     """{nombre}: a new empty work base. No terrain data or file is needed."""
     data, errors = _body(request, "nombre")

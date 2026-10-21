@@ -185,11 +185,12 @@ def set_active(conn: DatabaseConnection, login: str, active: bool) -> None:
             (1 if active else 0,), "cuenta_reactivada" if active else "cuenta_desactivada")
 
 
-def set_role(conn: DatabaseConnection, login: str, rol: str) -> bool:
+def set_role(conn: DatabaseConnection, login: str, rol: str,
+             actor: dict[str, Any] | None = None) -> bool:
     """Change an account's role; False if it already had it (nothing changes).
 
     A real change ends every session of that user, so no open session keeps
-    acting with the old role.
+    acting with the old role. ``actor`` is the web administrator who asked.
     """
     _check_rol(rol)
     actual = conn.execute("SELECT rol FROM team_user WHERE login = ?",
@@ -197,8 +198,31 @@ def set_role(conn: DatabaseConnection, login: str, rol: str) -> bool:
     if actual is not None and actual["rol"] == rol:
         return False
     _change(conn, login, "rol = ?, credential_revision = credential_revision + 1", (rol,),
-            "rol_cambiado", {"antes": actual["rol"] if actual else None, "despues": rol})
+            "rol_cambiado", {"antes": actual["rol"] if actual else None, "despues": rol}, actor)
     return True
+
+
+def change_role(conn: DatabaseConnection, user_id: str, rol: str,
+                actor: dict[str, Any]) -> dict[str, Any] | None:
+    """The web app's role change: an account by id, never the actor's own.
+
+    Since nobody demotes themselves, an active administrator (the actor)
+    always remains. None if there is no such account.
+    """
+    row = conn.execute("SELECT login FROM team_user WHERE id = ?", (user_id,)).fetchone()
+    if row is None:
+        return None
+    if user_id == actor["id"]:
+        raise AccountError("No puedes cambiar tu propio rol.")
+    set_role(conn, row["login"], rol, actor)
+    return cuenta_publica(conn, user_id)
+
+
+def cuenta_publica(conn: DatabaseConnection, user_id: str) -> dict[str, Any]:
+    """What the web app shows of an account: identity, role and status."""
+    row = conn.execute("SELECT id, login, display_name, rol, active FROM team_user WHERE id = ?",
+                       (user_id,)).fetchone()
+    return {**dict(row), "active": bool(row["active"])}
 
 
 def list_users(conn: DatabaseConnection) -> list[dict[str, Any]]:
@@ -209,7 +233,8 @@ def list_users(conn: DatabaseConnection) -> list[dict[str, Any]]:
 
 
 def _change(conn: DatabaseConnection, login: str, assignments: str, params: tuple[Any, ...],
-            action: str, details: dict[str, Any] | None = None) -> None:
+            action: str, details: dict[str, Any] | None = None,
+            actor: dict[str, Any] | None = None) -> None:
     """One account change and its audit row, together or not at all."""
     ahora = _now_iso()
     with db.transaction(conn):
@@ -219,14 +244,14 @@ def _change(conn: DatabaseConnection, login: str, assignments: str, params: tupl
             raise AccountError(f"No existe el usuario «{normalize_login(login)}».")
         conn.execute(f"UPDATE team_user SET {assignments}, updated_at = ? WHERE id = ?",
                      (*params, ahora, row["id"]))
-        _account_event(conn, row["id"], action, ahora, details)
+        _account_event(conn, row["id"], action, ahora, details, actor)
 
 
 def _account_event(conn: DatabaseConnection, user_id: str, action: str, ahora: str,
                    details: dict[str, Any] | None = None,
                    actor: dict[str, Any] | None = None) -> None:
     """Append-only account history. The actor is the web administrator who
-    created the account, or else the operations command."""
+    made the change, or else the operations command."""
     conn.execute(
         "INSERT INTO team_user_event (id, user_id, action, actor_id, actor_name, at, details_json)"
         " VALUES (?, ?, ?, ?, ?, ?, ?)",

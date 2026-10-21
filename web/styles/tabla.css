@@ -357,3 +357,6 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
   .bases-item .columnas-botones { grid-column: 1 / -1; flex-wrap: wrap; }
   .cuentas-campos { grid-template-columns: minmax(0, 1fr); }
 }
+.usuarios-item { grid-template-columns: minmax(0, 1fr) 11rem; }
+.usuarios-quien { display: grid; gap: 2px; min-width: 0; }
+.usuarios-quien > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

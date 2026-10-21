@@ -74,8 +74,7 @@ import { montarRanura } from "./ranuraArchivos.js";
 import { createMapaPaneles } from "./mapaPaneles.js";
 
 const BUSCAR_MS = 300;
-const PAGINA_MAPA = 200;          // the list's largest page
-const MAXIMO_MAPA = 5000;         // a map set larger than this is drawn as partial and said so
+const MAXIMO_MAPA = 30000;        // a map set larger than this is drawn as partial and said so (30 light pages)
 const ESTADOS = {
   pendiente: "guardando", error: "sin guardar", conflicto: "en conflicto", incierto: "sin confirmar",
 };
@@ -854,11 +853,11 @@ export function createTabla({
   async function marcarVista() {
     const clave = claveConjunto();
     const deVista = vista;
-    const deConsulta = { ...consulta, limit: PAGINA_MAPA };
+    const deConsulta = { ...consulta };
     decir("Reuniendo los terrenos de esta vista…");
     try {
       const r = conjuntoVigente() && !conjunto.incompleto ? { terrenos: conjunto.filas } : await reunirPaginas(
-        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente)),
+        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente, { mapa: true })),
         { maximo: MAXIMO_MAPA });
       if (!vivo || claveConjunto() !== clave) return;
       for (const t of r.terrenos) marcar(t, true);
@@ -945,7 +944,7 @@ export function createTabla({
   const modoDeRuta = () => (modo === "mapa" ? "mapa" : null);
   /** The map set's key: the view and its query (filters and order), not the page. */
   const claveConjunto = () =>
-    (vista ? `${vista}?${consultaDeLista(vista, { ...consulta, limit: PAGINA_MAPA })}` : null);
+    (vista ? `${vista}?${consultaDeLista(vista, consulta, null, { mapa: true })}` : null);
   const conjuntoVigente = () => conjunto.clave !== null && conjunto.clave === claveConjunto();
   const filaDelConjunto = (id) => (conjuntoVigente() ? conjunto.filas.find((t) => t.id === id) ?? null : null);
   /** A terrain this view shows: on the grid's page or in the map's current set. */
@@ -1112,11 +1111,12 @@ export function createTabla({
     const mia = ++reunionGen;
     reunion = { clave, control, recibidos: 0, total: null };
     const deVista = vista;
-    const deConsulta = { ...consulta, limit: PAGINA_MAPA };
+    const deConsulta = { ...consulta };
     pintarAvisoMapa();
     try {
       const r = await reunirPaginas(
-        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente), control.signal),
+        (siguiente) => api.tablaLista(rutaDeLista(deVista), consultaDeLista(deVista, deConsulta, siguiente, { mapa: true }),
+          control.signal),
         {
           maximo: MAXIMO_MAPA,
           onProgreso: (recibidos, total) => {

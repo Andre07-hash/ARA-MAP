@@ -104,8 +104,10 @@ def listar(conn: DatabaseConnection, q: Mapping[str, Any], base_id: str | None =
     if len(rows) > q["limit"]:
         ultimo = pagina[-1]
         siguiente = ultimo["id"] if q["sort"] == "id" else _cursor(q["sort"], ultimo)
-    return (_dtos(conn, pagina), int(total), siguiente,
-            _facetas(conn, q, " WHERE " + " AND ".join(candidatos), p_candidatos))
+    # The map's pages (mapa=1) need no facets: the table's own page has them.
+    facetas = {} if q.get("mapa") else _facetas(conn, q, " WHERE " + " AND ".join(candidatos),
+                                                 p_candidatos)
+    return _dtos(conn, pagina), int(total), siguiente, facetas
 
 
 def _candidatos(q: Mapping[str, Any], base_id: str | None) -> tuple[list[str], tuple[Any, ...]]:

@@ -133,7 +133,7 @@ const listo = (page) => page.locator('.tabla-lienzo:not([aria-busy])').waitFor({
 const mapa = (page) => page.evaluate(() => window.__araTabla?.mapa());
 const previa = (page) => page.evaluate(() => window.__araTabla?.previa());
 const posicion = (page, id) => page.evaluate((i) => window.__araTabla?.posicion(i), id);
-const reuniones = (s) => s.api.filter((l) => /\/terrenos\?.*limit=200/.test(l)).length;
+const reuniones = (s) => s.api.filter((l) => /\/terrenos\?.*mapa=1/.test(l)).length;
 const cuerposPedidos = (s) => s.api.filter((l) => /\/api\/archivos\/geometrias\/[^/]+\/contenido/.test(l));
 const modoBoton = (page, nombre) => page.locator('.tabla-modo').getByRole('button', { name: nombre, exact: true });
 const foto = async (page, nombre) => { if (SHOTS) { await esperar(400); await page.screenshot({ path: join(SHOTS, `${nombre}.png`) }); } };
@@ -338,7 +338,7 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
   igual([m.filas.length, m.total, m.incompleto], [TODOS.length, TODOS.length, false], 'conjunto');
   igual([...m.filas].sort(), [...TODOS].sort(), 'mismos terrenos');
   cierto(m.filas.some((id) => !pagina.includes(id)), 'debe incluir terrenos fuera de la página');
-  igual(reuniones(ada) - antes, 1, 'una reunión (111 < 200 por página)');
+  igual(reuniones(ada) - antes, 1, 'una reunión (111 < 1000 por página)');
   // The counts live in the filters panel (filtered) and the legend (placed / not placed), once.
   cierto(/111 terrenos de 111/.test(await ada.page.locator('.mapa-tabla-rail .rail-result').innerText()), 'filtrados en el panel');
   const leyenda = await ada.page.locator('.mapa-tabla-leyenda .legend').innerText();
@@ -474,17 +474,17 @@ await revisar('cambios rápidos de selección, filtros y base no dejan un contor
 });
 
 await revisar('un error al reunir se dice y se puede reintentar; la carga parcial no se presenta como completa', async () => {
-  await ada.page.route(/\/terrenos\?.*limit=200/, (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"fallo simulado"}' }));
+  await ada.page.route(/\/terrenos\?.*mapa=1/, (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"fallo simulado"}' }));
   await ada.page.locator('#tabla-vista').selectOption(base.id);
   await hasta(async () => /No se pudieron reunir/.test(await ada.page.locator('.tabla-mapa-aviso').innerText().catch(() => '')), 'sin aviso de error');
   igual((await mapa(ada.page)).filas.length, 0, 'nada mostrado como completo');
-  await ada.page.unroute(/\/terrenos\?.*limit=200/);
+  await ada.page.unroute(/\/terrenos\?.*mapa=1/);
   await ada.page.getByRole('button', { name: 'Volver a intentar' }).click();
   await hasta(async () => (await mapa(ada.page)).filas.length === TODOS.length, 'reintento');
   igual(await ada.page.locator('.tabla-mapa-aviso').isVisible(), false, 'sin aviso al completar');
   // A first page that says there is more, then a failure: partial is never shown as the set.
   let n = 0;
-  await ada.page.route(/\/terrenos\?.*limit=200/, async (r) => {
+  await ada.page.route(/\/terrenos\?.*mapa=1/, async (r) => {
     n += 1;
     if (n === 1) {
       const resp = await r.fetch();
@@ -498,7 +498,7 @@ await revisar('un error al reunir se dice y se puede reintentar; la carga parcia
   await enMenu(ada.page, 'Actualizar');
   await hasta(async () => /No se pudo actualizar el mapa: muestra lo que se reunió antes/.test(await ada.page.locator('.tabla-mapa-aviso').innerText().catch(() => '')), 'aviso de actualización fallida');
   igual((await mapa(ada.page)).filas.length, TODOS.length, 'conserva el conjunto completo anterior, no el parcial');
-  await ada.page.unroute(/\/terrenos\?.*limit=200/);
+  await ada.page.unroute(/\/terrenos\?.*mapa=1/);
   await ada.page.getByRole('button', { name: 'Volver a intentar' }).click();
   await hasta(async () => !(await ada.page.locator('.tabla-mapa-aviso').isVisible()), 'actualizado');
 });
@@ -527,7 +527,7 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   // The grid's page answers slowly; the map must not wait for it to drop the old query's rows.
   // The filter is changed in Tabla and the map shown again at once, before the grid's page arrives.
   await aTabla(ada.page);
-  await ada.page.route(/\/terrenos\?(?!.*limit=200)/, async (r) => { await esperar(1500); await r.continue(); });
+  await ada.page.route(/\/terrenos\?(?!.*mapa=1)/, async (r) => { await esperar(1500); await r.continue(); });
   await verFiltros(ada.page);
   await ada.page.locator('#tabla-estado input[value="Sonora"]').check();
   await cerrarFiltros(ada.page);
@@ -538,7 +538,7 @@ await revisar('un cambio de filtro en el mapa limpia el mapa al instante y cance
   cierto([0, sonora].includes((await previa(ada.page)).filas), `filas en el mapa: ${(await previa(ada.page)).filas}`);
   cierto(await ada.page.locator('.tabla-lienzo[aria-busy]').count(), 'la página de la tabla aún no debía llegar');
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && x.clave?.includes('Sonora'); }, 'nueva consulta');
-  await ada.page.unroute(/\/terrenos\?(?!.*limit=200)/);
+  await ada.page.unroute(/\/terrenos\?(?!.*mapa=1)/);
   await filtrar(ada.page, '#tabla-estado', '');
   await hasta(async () => { const x = await mapa(ada.page); return !x.reuniendo && !x.clave?.includes('Sonora') && x.filas.length === activos.length; }, 'sin filtro');
 });

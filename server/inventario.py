@@ -46,6 +46,7 @@ CONFIRMABLE = ("price", "availability")
 DEFAULT_LIMIT = 100
 MAX_LIMIT = 250          # history pages
 MAX_LIST_LIMIT = 200     # terrain lists
+MAX_MAP_LIMIT = 1000     # the same lists with mapa=1: fewer, lighter pages for the map
 
 # Validation findings that a publication blocker already reports.
 _COVERED_BY_BLOCKERS = {"SIN_COORDENADAS", "COORD_INVERTIDA", "COORD_FUERA_MEXICO"}
@@ -259,7 +260,7 @@ PUBLIC_QUERY = ("q", "estado", "municipio", "area_min_m2", "area_max_m2", "moned
                 "price_min", "price_max", "price_basis", "cursor", "limit")
 # One work base's list. "sort" names a key of SORTS, "-" in front for descending.
 SCOPED_QUERY = (*PUBLIC_QUERY, "publication_state", "availability", "attention",
-                "tipo_terreno", "sort")
+                "tipo_terreno", "sort", "mapa")
 # The administrators' master table adds the base filter: base ids and/or
 # SIN_ASIGNAR for records that belong to no base.
 INTERNAL_QUERY = (*SCOPED_QUERY, "base")
@@ -292,12 +293,16 @@ def parse_query(raw: Mapping[str, Sequence[str]], allowed: Sequence[str]) -> dic
     if (q["price_min"] is not None or q["price_max"] is not None) and not q["moneda"]:
         errors["moneda"] = "Un filtro de precio necesita una sola moneda: USD o MXN."
     q["cursor"] = single.get("cursor") or None
+    if single.get("mapa", "0") not in ("0", "1"):
+        errors["mapa"] = "Usa 1 o 0."
+    q["mapa"] = single.get("mapa") == "1"
+    maximo = MAX_MAP_LIMIT if q["mapa"] else MAX_LIST_LIMIT
     try:
         q["limit"] = int(single.get("limit") or DEFAULT_LIMIT)
-        if not 1 <= q["limit"] <= MAX_LIST_LIMIT:
+        if not 1 <= q["limit"] <= maximo:
             raise ValueError
     except ValueError:
-        errors["limit"] = f"Usa un número entero de 1 a {MAX_LIST_LIMIT}."
+        errors["limit"] = f"Usa un número entero de 1 a {maximo}."
     q["sort"] = single.get("sort") or "id"
     if q["sort"].lstrip("-") not in SORTS or q["sort"].startswith("--"):
         errors["sort"] = f"Valores admitidos: {', '.join(SORTS)} (con «-» delante para descendente)."

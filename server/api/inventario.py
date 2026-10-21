@@ -89,6 +89,12 @@ def base_listing(request: Request) -> Respuesta:
     return _listar(request, inventario.SCOPED_QUERY, base_id)
 
 
+# What the map and its record never show: dropped from the map's pages (mapa=1),
+# which carry several times as many terrains as a page of the grid.
+_NO_EN_MAPA = frozenset({"attention", "confirmations", "source_extra", "created_by", "created_at",
+                         "draft_revision_id", "published_revision_id", "revision_number"})
+
+
 def _listar(request: Request, permitidos: tuple[str, ...], base_id: str | None) -> Respuesta:
     _actor(request)
     with db.lectura() as conn:
@@ -99,6 +105,8 @@ def _listar(request: Request, permitidos: tuple[str, ...], base_id: str | None) 
             q = inventario.parse_query(request.query, permitidos)
             terrenos, total, cursor, facets = repo.listar(conn, q, base_id)
             _presentar(conn, request, terrenos)
+            if q["mapa"]:
+                terrenos = [{k: v for k, v in t.items() if k not in _NO_EN_MAPA} for t in terrenos]
         except inventario.QueryError as exc:
             raise _invalid(exc.errors, "Filtros inválidos.") from None
         except repo.CursorError:

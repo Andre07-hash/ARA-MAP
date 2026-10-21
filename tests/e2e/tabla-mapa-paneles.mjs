@@ -306,13 +306,13 @@ await revisar('la barra es la misma que en Tabla; sobre el mapa sólo Encuadrar 
     cierto(await p.locator(visible).isVisible(), `${visible} visible también en el mapa`);
   }
   // Inside the closed "⋯" menu nothing is visible, so the hidden attribute is what tells.
-  igual(await p.locator('.menu-panel .menu-item', { hasText: 'Columnas' }).getAttribute('hidden'), '', 'Columnas oculto en el mapa');
+  igual(await p.locator('.menu-panel .menu-item', { hasText: /^Columnas$/ }).getAttribute('hidden'), '', 'Columnas oculto en el mapa');
   for (const quitado of ['.mapa-tabla-alcance', '.previa-cuenta', '.previa-titulo', '.previa-pie', '.mapa-tabla-cabecera', '.tabla-heredados']) {
     igual(await p.locator(quitado).count(), 0, `sin ${quitado}`);
   }
   igual(await p.locator('.tabla-pie').isVisible(), false, 'sin el pie que repite «N terrenos»');
-  // Over the map: only "Encuadrar todo" (top right) and the basemaps; no zoom buttons, no info toggle.
-  igual(await p.locator('.previa-mapa .leaflet-control-zoom').isVisible(), false, 'sin botones de zoom');
+  // Over the map: + / − (top left), "Encuadrar todo" (top right) and the basemaps; no info toggle.
+  igual(await p.locator('.previa-mapa .leaflet-top.leaflet-left .leaflet-control-zoom').isVisible(), true, '+ / − arriba a la izquierda');
   igual(await p.locator('.previa-info').isVisible(), false, 'sin botón de información');
   igual(await leyenda(p).isVisible(), false, 'la leyenda está en los filtros del mapa, no encima');
   const lienzo = await p.locator('.previa-mapa').boundingBox();

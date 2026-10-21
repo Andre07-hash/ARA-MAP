@@ -204,3 +204,11 @@ test("consultaDeLista: several states, municipalities and types are repeated par
   assert.equal(consultaDeLista("maestra", { estado: ["Jalisco"] }), consultaDeLista("maestra", { estado: ["Jalisco"] }));
   assert.equal(consultaDeLista("maestra", {}), "limit=100");
 });
+
+test("the map asks for its light pages of 1,000", () => {
+  const q = new URLSearchParams(consultaDeLista("maestra", { limit: 50, q: "Lote" }, "c1", { mapa: true }));
+  assert.equal(q.get("mapa"), "1");
+  assert.equal(q.get("limit"), "1000");
+  assert.equal(q.get("cursor"), "c1");
+  assert.equal(new URLSearchParams(consultaDeLista("maestra", { limit: 50 })).get("mapa"), null);
+});

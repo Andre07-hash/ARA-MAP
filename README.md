@@ -75,7 +75,7 @@ python3 scripts/cuentas.py --sqlite /tmp/ara-dev.db crear dev_admin "Admin local
 ARA_MAP_DB=/tmp/ara-dev.db python3 -m server.app
 ```
 
-La contraseña se pide de forma oculta (mínimo general de 12 caracteres).
+La contraseña se pide de forma oculta; es obligatoria, sin longitud mínima.
 Abre `http://localhost:8420`. Usa datos ficticios. La guía de desarrollo explica
 cómo crear un operador local y concederle una base.
 

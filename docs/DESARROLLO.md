@@ -48,7 +48,7 @@ python3 scripts/cuentas.py --sqlite /tmp/ara-dev.db crear dev_operador "Operador
 ARA_MAP_DB=/tmp/ara-dev.db python3 -m server.app
 ```
 
-Las contraseñas se piden de forma oculta (mínimo general: 12 caracteres).
+Las contraseñas se piden de forma oculta; son obligatorias, sin longitud mínima.
 Elige otra ruta de SQLite si `/tmp/ara-dev.db` ya contiene trabajo que quieres
 conservar; no borres ni recrees una base existente para seguir este ejemplo.
 

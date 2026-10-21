@@ -84,6 +84,8 @@ router.add("GET", "/api/maestra/operadores", api_maestra.operators, "bases.gesti
 router.add("GET", "/api/maestra/cuentas", api_maestra.accounts, "usuarios.gestionar")
 router.add("POST", "/api/maestra/cuentas", api_maestra.create_account, "usuarios.gestionar")
 router.add("POST", "/api/maestra/cuentas/:uid/rol", api_maestra.change_role, "usuarios.gestionar")
+router.add("POST", "/api/maestra/cuentas/:uid/marca", api_maestra.change_brand,
+           "usuarios.gestionar")
 # A base's custom columns. Their values are saved by the terrain PATCH above.
 router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "maestra.ver")
 router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")

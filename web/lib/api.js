@@ -209,6 +209,7 @@ export const api = {
   crearCuenta:        (cuerpo) => request("/maestra/cuentas", { method: "POST", body: cuerpo }),
   cuentas:            () => request("/maestra/cuentas"),
   cambiarRol:         (id, rol) => request(`/maestra/cuentas/${enc(id)}/rol`, { method: "POST", body: { rol } }),
+  cambiarMarca:       (id, marca) => request(`/maestra/cuentas/${enc(id)}/marca`, { method: "POST", body: { marca } }),
 
   columnas:           (base, signal) => request(`/maestra/bases/${enc(base)}/columnas`, { signal }),
   crearColumna:       (base, cuerpo, clave) => request(`/maestra/bases/${enc(base)}/columnas`, {

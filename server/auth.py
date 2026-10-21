@@ -218,16 +218,33 @@ def change_role(conn: DatabaseConnection, user_id: str, rol: str,
     return cuenta_publica(conn, user_id)
 
 
+def change_brand(conn: DatabaseConnection, user_id: str, marca: str,
+                 actor: dict[str, Any]) -> dict[str, Any] | None:
+    """The header logo an account sees. Sessions stay open: each request reads
+    the brand afresh. None if there is no such account."""
+    if marca not in db.MARCAS:
+        raise AccountError("Elige el logo ARA o Dewa.")
+    row = conn.execute("SELECT login, marca FROM team_user WHERE id = ?", (user_id,)).fetchone()
+    if row is None:
+        return None
+    if row["marca"] != marca:
+        _change(conn, row["login"], "marca = ?", (marca,), "marca_cambiada",
+                {"antes": row["marca"], "despues": marca}, actor)
+    return cuenta_publica(conn, user_id)
+
+
 def cuenta_publica(conn: DatabaseConnection, user_id: str) -> dict[str, Any]:
-    """What the web app shows of an account: identity, role and status."""
-    row = conn.execute("SELECT id, login, display_name, rol, active FROM team_user WHERE id = ?",
+    """What the web app shows of an account: identity, role, logo and status."""
+    row = conn.execute("SELECT id, login, display_name, rol, marca, active FROM team_user"
+                       " WHERE id = ?",
                        (user_id,)).fetchone()
     return {**dict(row), "active": bool(row["active"])}
 
 
 def list_users(conn: DatabaseConnection) -> list[dict[str, Any]]:
     rows = conn.execute(
-        "SELECT id, login, display_name, rol, active, created_at FROM team_user ORDER BY login"
+        "SELECT id, login, display_name, rol, marca, active, created_at FROM team_user"
+        " ORDER BY login"
     ).fetchall()
     return [dict(r) for r in rows]
 

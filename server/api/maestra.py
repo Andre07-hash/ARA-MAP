@@ -161,6 +161,23 @@ def change_role(request: Request) -> Respuesta:
     return {"cuenta": cuenta}
 
 
+def change_brand(request: Request) -> Respuesta:
+    """{marca}: the header logo an account sees, ARA or Dewa. Administrators
+    only; their own account too."""
+    user_id = request.uuid_param("uid")
+    data, errors = _body(request, "marca")
+    if data.get("marca") not in db.MARCAS:
+        errors["marca"] = "Elige el logo ARA o Dewa."
+    if errors:
+        raise _invalid(errors)
+    with db.escritura() as conn:
+        alcance = auth.reverificar(conn, request.sesion, "usuarios.gestionar")
+        cuenta = auth.change_brand(conn, user_id, data["marca"], alcance.actor)
+    if cuenta is None:
+        raise ApiError("No existe esa cuenta.", 404, {"code": "not_found"})
+    return {"cuenta": cuenta}
+
+
 def create(request: Request) -> Respuesta:
     """{nombre}: a new empty work base. No terrain data or file is needed."""
     data, errors = _body(request, "nombre")

@@ -9,6 +9,7 @@
 import { api, importarEnBase } from "../../lib/api.js";
 import { el } from "../../lib/dom.js";
 import { crearIntento } from "../../lib/inventario.js";
+import { getState, setState } from "../../lib/store.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
 import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { toast } from "../ui/toast.js";
@@ -516,11 +517,27 @@ export function abrirBases({ yo, onCerrar }) {
       },
     }, el("option", { value: "operador", selected: u.rol === "operador" }, "Operador"),
     el("option", { value: "admin", selected: u.rol === "admin" }, "Administrador"));
+    // The header logo this account sees. No session ends: it shows on their
+    // next page load (on yours, right away).
+    const selLogo = el("select", {
+      class: "input", "aria-label": `Logo de ${u.display_name}`,
+      onchange: async () => {
+        avisoUsuarios.decir("");
+        try {
+          const { cuenta } = await api.cambiarMarca(u.id, selLogo.value);
+          const { sesion } = getState();
+          if (u.id === yo && sesion) setState({ sesion: { ...sesion, marca: cuenta.marca } });
+          toast(`${u.display_name} verá el logo ${cuenta.marca === "dewa" ? "Dewa" : "ARA"}.`);
+        } catch (error) { avisoUsuarios.decir(error.message); }
+        cargarUsuarios();
+      },
+    }, el("option", { value: "ara", selected: u.marca !== "dewa" }, "Logo ARA"),
+    el("option", { value: "dewa", selected: u.marca === "dewa" }, "Logo Dewa"));
     return el("li", { class: "bases-item usuarios-item" },
       el("div", { class: "usuarios-quien" },
         el("strong", {}, u.display_name, u.id === yo && " (tú)"),
         el("span", { class: "secondary" }, `${u.login}${u.active ? "" : " · cuenta inactiva"}`)),
-      selRol);
+      selLogo, selRol);
   }
   async function cargarUsuarios() {
     try {
@@ -535,7 +552,7 @@ export function abrirBases({ yo, onCerrar }) {
       el("p", { class: "secondary" }, "Una base agrupa terrenos y dice qué operadores pueden abrirlos."),
       lista, aviso.nodo, crear),
     usuarios: el("div", { class: "bases-pagina", hidden: true },
-      el("p", { class: "secondary" }, "Quién tiene cuenta y con qué rol. Un administrador ve y cambia todo; " +
+      el("p", { class: "secondary" }, "Quién tiene cuenta, qué logo ve y con qué rol. Un administrador ve y cambia todo; " +
         "un operador sólo abre las bases a las que tiene acceso."),
       avisoUsuarios.nodo, usuarios),
     cuentas: el("div", { class: "bases-pagina", hidden: true },

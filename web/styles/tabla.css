@@ -192,9 +192,18 @@
   width: min(24rem, calc(100% - var(--space-5))); min-height: 0; overflow-y: auto;
   border-radius: var(--radius-lg); box-shadow: var(--shadow-panel);
 }
-/* Only "Encuadrar todo" and the basemaps over the map: zoom stays on the wheel,
- * pinch, double click and keys; the explanation and the legend go. */
-.previa .leaflet-control-zoom, .previa-info { display: none; }
+/* Over the map: + / − at the top left (one zoom step each), "Encuadrar todo"
+ * at the top right and the basemaps; the explanation and the legend go. */
+.previa-info { display: none; }
+.previa .leaflet-top.leaflet-left .leaflet-control-zoom {
+  margin: var(--space-4) 0 0 var(--space-4); border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+.previa .leaflet-left .leaflet-control-zoom.leaflet-bar a {
+  width: 36px; height: 36px; line-height: 36px; font-size: 20px; font-weight: 400; color: var(--ink);
+}
+/* The notices start beside the + / −, not over them. */
+.mapa-tabla .previa-arriba { top: var(--space-4); left: calc(var(--space-4) + 36px + var(--space-3)); }
 .previa-herramientas { top: var(--space-4); right: var(--space-4); }
 .previa-encuadre.btn {
   min-height: 36px; padding: 0 var(--space-4); font-size: var(--text-small);

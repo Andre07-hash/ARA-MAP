@@ -202,8 +202,26 @@
 .previa .leaflet-left .leaflet-control-zoom.leaflet-bar a {
   width: 36px; height: 36px; line-height: 36px; font-size: 20px; font-weight: 400; color: var(--ink);
 }
-/* The notices start beside the + / −, not over them. */
-.mapa-tabla .previa-arriba { top: var(--space-4); left: calc(var(--space-4) + 36px + var(--space-3)); }
+/* The notices start beside the + / − and stop before "Encuadrar todo"; on a
+ * phone they go under the + / −, across the map. */
+.mapa-tabla .previa-arriba {
+  top: var(--space-4); left: calc(var(--space-4) + 36px + var(--space-3));
+  max-width: calc(100% - var(--space-4) - 36px - var(--space-3) - 10.5rem);
+}
+@media (max-width: 720px) {
+  /* A phone: the record is a sheet over the lower half, and the basemaps rise
+   * above it, so the map and its controls stay usable while it is open. */
+  .mapa-tabla-ficha.detail-slot {
+    inset: auto var(--space-3) var(--space-3) var(--space-3); width: auto; max-height: 50%;
+  }
+  .mapa-tabla:has(> .mapa-tabla-ficha:not([hidden])) .previa-sobre-mapa {
+    bottom: calc(50% + var(--space-3) + var(--space-2));
+  }
+  .mapa-tabla .previa-arriba {
+    top: calc(var(--space-4) + 74px + var(--space-2)); left: var(--space-4);
+    max-width: calc(100% - 2 * var(--space-4));
+  }
+}
 .previa-herramientas { top: var(--space-4); right: var(--space-4); }
 .previa-encuadre.btn {
   min-height: 36px; padding: 0 var(--space-4); font-size: var(--text-small);
@@ -314,7 +332,12 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 @media (max-width: 720px) {
   .tabla-barra, .tabla-pie, .tabla-bandeja, .tabla-lote { padding-inline: var(--space-3); }
   /* The "⋯" menu opens leftwards, so it stays at the right of its row. */
-  .tabla-acciones { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .tabla-acciones { margin-left: 0; width: 100%; justify-content: flex-end; flex-wrap: nowrap; gap: var(--space-2); }
+  /* One row on a phone: Agregar keeps its +, Tabla / Mapa their words. */
+  .tabla-acciones > .btn { padding-inline: var(--space-3); }
+  .tabla-btn-texto, .tabla-modo .segment .icono { display: none; }
+  .tabla-modo .segment { padding-inline: var(--space-3); }
+  .tabla-barra { padding-block: var(--space-3) var(--space-2); gap: var(--space-2); }
   .tabla-pantalla .tabla-cuerpo, .tabla-pantalla:not(.modo-mapa) .tabla-pie { margin-inline: var(--space-3); }
   .tabla-titulo-texto { font-size: 1.375rem; }
 }

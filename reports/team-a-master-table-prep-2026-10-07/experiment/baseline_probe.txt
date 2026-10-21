@@ -1,0 +1,21 @@
+1. Blank record
+   validation errors: {}
+   created id is a uuid: True | version: 1
+   name: None | moneda: None
+   attention codes on a blank record: ['name_required', 'location_invalid', 'area_required', 'availability_unknown', 'price_required', 'price_unconfirmed', 'availability_unconfirmed', 'CAMPO_FALTANTE', 'CAMPO_FALTANTE']
+2. Price typed without a currency
+   errors: {'moneda': 'Indica la moneda del precio: USD o MXN.'}
+   with moneda=MXN: {}
+3. Partial and odd values
+   only X (lat) given: {}
+   negative area: {'superficie_m2': 'No puede ser negativo.'}
+   text in a number cell: {'superficie_m2': 'Debe ser un número.'}
+   unknown core field tipo_terreno: {'tipo_terreno': 'Campo desconocido o no editable.'}
+   unknown core field comentarios: {'comentarios': 'Campo desconocido o no editable.'}
+4. Compare-and-set and history
+   version after one cell edit: 2
+   stale expected_version -> ConflictError
+   events: [(2, 'update', ['municipio']), (1, 'create', [])]
+5. Roles
+   team_user columns: ['id', 'login', 'display_name', 'password_hash', 'active', 'credential_revision', 'created_at', 'updated_at']
+   session user payload keys: ['display_name', 'id']

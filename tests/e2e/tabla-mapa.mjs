@@ -432,19 +432,23 @@ await revisar('los filtros acotan el mapa; un filtro sin resultados y «sin ubic
 });
 
 await revisar('cambios rápidos de selección, filtros y base no dejan un contorno anterior', async () => {
-  // A slow body: each boundary answer waits, so later choices overtake it.
-  await ada.page.route('**/api/archivos/geometrias/*/contenido*', async (r) => { await esperar(700); await r.continue(); });
-  await ada.page.getByRole('button', { name: 'Encuadrar todo' }).click();
-  await esperar(500);
+  // A slow body: each boundary answer waits, so later choices overtake it. Long
+  // enough that the first boundary is still on its way at the second click: once
+  // drawn it covers the second's symbol and would take the click itself.
+  await ada.page.route('**/api/archivos/geometrias/*/contenido*', async (r) => { await esperar(2500); await r.continue(); });
+  await desdeCero(ada.page);
   await clicEnMapa(ada.page, conContorno);
+  // The selection moves the map clear of the floating record: aim the next click
+  // once it is taken, while its boundary is still on the way.
+  await hasta(async () => (await mapa(ada.page)).seleccion === conContorno, 'sin la primera selección');
+  igual((await previa(ada.page)).cuerpos, 0, 'el primer contorno sigue en camino');
   await clicEnMapa(ada.page, conContorno2);
   await hasta(async () => (await posicion(ada.page, conContorno2))?.contorno === true, 'sin el último contorno');
   await esperar(1000);
   igual((await posicion(ada.page, conContorno))?.contorno, false, 'el primero no llegó a dibujarse');
   igual((await previa(ada.page)).cuerpos, 1, 'un cuerpo');
   // A filter that excludes the selected one while its body is still on the way.
-  await ada.page.getByRole('button', { name: 'Encuadrar todo' }).click();
-  await esperar(500);
+  await desdeCero(ada.page);
   await clicEnMapa(ada.page, conContorno);
   await filtrar(ada.page, '#tabla-estado', 'Jalisco');
   await hasta(async () => { const m = await mapa(ada.page); return !m.reuniendo && m.clave?.includes('Jalisco'); }, 'filtro');
@@ -454,8 +458,7 @@ await revisar('cambios rápidos de selección, filtros y base no dejan un contor
   // Another base while a body is on the way: nothing of the first base remains.
   await filtrar(ada.page, '#tabla-estado', '');
   await hasta(async () => (await mapa(ada.page)).filas.length === TODOS.length, 'total');
-  await ada.page.getByRole('button', { name: 'Encuadrar todo' }).click();
-  await esperar(500);
+  await desdeCero(ada.page);
   await clicEnMapa(ada.page, conContorno2);
   await ada.page.locator('#tabla-vista').selectOption(ajena.id);
   await hasta(async () => { const m = await mapa(ada.page); return !m.reuniendo && m.clave?.startsWith(ajena.id); }, 'otra base');

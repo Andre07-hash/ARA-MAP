@@ -72,7 +72,7 @@ def _respuesta(conn: DatabaseConnection, base: dict[str, Any]) -> Respuesta:
 
 def listing(request: Request) -> Respuesta:
     sesion: auth.Sesion = request.sesion
-    with db.session() as conn:
+    with db.lectura() as conn:
         bases = repo.listar(conn, None if sesion.rol == "admin" else sesion.user_id)
     return {"bases": bases, "total": len(bases)}
 

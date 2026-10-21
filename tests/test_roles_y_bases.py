@@ -1066,12 +1066,19 @@ class RolesPostgres(Matriz, unittest.TestCase):
                 casos = {
                     "administrator write": self.call("POST", "/api/maestra/bases", {"nombre": "Ocupada"}),
                     "operator write": self.patch_fijo("olga"),
-                    "operator read": self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga"),
                     "legacy read": self.call("GET", "/api/bases"),
-                    "session with a cookie": self.call("GET", "/api/session", user="olga"),
                     "sign-in": self.call("POST", "/api/login", {"username": "olga", "password": TEST_PASSWORD},
                                          user=None),
                     "sign-out": self.call("POST", "/api/logout", user="omar"),
+                }
+                # The table's reads take no workspace lock: they answer while a writer holds it.
+                lecturas = {
+                    "operator read": self.call("GET", f"/api/inventario/terrenos/{self.t1}", user="olga"),
+                    "session with a cookie": self.call("GET", "/api/session", user="olga"),
+                    "master table page": self.call("GET", "/api/inventario/terrenos?limit=5"),
+                    "base page": self.call("GET", f"/api/maestra/bases/{self.b1}/terrenos?limit=5", user="olga"),
+                    "bases": self.call("GET", "/api/maestra/bases", user="olga"),
+                    "history": self.call("GET", f"/api/inventario/terrenos/{self.t1}/historial"),
                 }
                 # What needs no database is answered as before.
                 self.assertEqual(self.call("GET", "/api/session", user=None), (200, {"authenticated": False}))
@@ -1082,11 +1089,50 @@ class RolesPostgres(Matriz, unittest.TestCase):
         for nombre, (status, body) in casos.items():
             with self.subTest(nombre):
                 self.assertEqual((status, body["detalle"]), (503, {"code": "ocupado"}))
+        for nombre, (status, body) in lecturas.items():
+            with self.subTest(nombre):
+                self.assertEqual(status, 200, body)
         # Nothing was written, no session ended, and the same requests now succeed in full.
         self.assertEqual({t: filas(t) for t in antes}, antes)
         self.assertEqual(self.call("POST", "/api/maestra/bases", {"nombre": "Ocupada"})[0], 200)
         self.assertEqual(self.patch_fijo("olga")[0], 200)
         self.assertEqual(self.call("GET", "/api/maestra/bases", user="omar")[0], 200)
+
+    def test_a_read_session_refuses_to_write_and_reads_one_snapshot(self):
+        with self.assertRaises(Exception) as caught, db.lectura() as conn:
+            conn.execute("UPDATE team_user SET display_name = 'X' WHERE id = ?", (self.ids["olga"],))
+        self.assertIn("read-only", str(caught.exception))
+        self.assertEqual(filas("team_user", "display_name = 'X'"), [])
+        # A write committed after the read began is not seen by it.
+        with db.lectura() as conn:
+            antes = conn.execute("SELECT COUNT(*) AS n FROM maestra_base").fetchone()["n"]
+            self.assertEqual(self.call("POST", "/api/maestra/bases", {"nombre": "Durante"})[0], 200)
+            self.assertEqual(conn.execute("SELECT COUNT(*) AS n FROM maestra_base").fetchone()["n"], antes)
+
+    def test_connections_are_reused_clean_after_a_failure(self):
+        import psycopg
+
+        def pid(conn):
+            return conn.execute("SELECT pg_backend_pid() AS p").fetchone()["p"]
+        with db.lectura() as conn:
+            primero = pid(conn)
+        with db.escritura() as conn:
+            self.assertEqual(pid(conn), primero)                # no new connection
+        with self.assertRaises(ValueError), db.escritura() as conn:
+            conn.execute("UPDATE team_user SET display_name = 'Y' WHERE id = ?", (self.ids["olga"],))
+            raise ValueError("falla a la mitad")
+        self.assertEqual(filas("team_user", "display_name = 'Y'"), [])   # rolled back
+        with self.assertRaises(psycopg.errors.UndefinedTable), db.escritura() as conn:
+            conn.execute("SELECT * FROM tabla_que_no_existe")
+        # The workspace lock and the aborted transaction did not travel with the connection.
+        ocupante = self.cruda()
+        ocupante.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (postgres.LOCK_ID,))
+        ocupante.rollback()
+        with db.escritura() as conn:
+            self.assertEqual(conn.execute("SELECT 1 AS uno").fetchone()["uno"], 1)
+        # One idle too long is closed, not handed out.
+        with patch.object(postgres, "INACTIVA_MAX", 0.0), db.lectura() as conn:
+            self.assertNotEqual(pid(conn), primero)
 
     def test_a_row_lock_inside_the_write_boundary_ends_in_503(self):
         # The other place a write can wait: past the workspace lock, on a row.

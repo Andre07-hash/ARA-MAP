@@ -329,6 +329,11 @@ await revisar('administrador: el mapa reúne TODOS los terrenos de la base, más
   await aMapa(ada.page);
   medidas.reunir_111_ms = Date.now() - t0;
   cierto(/#\/tabla\/[^/]+\/mapa$/.test(ada.page.url()), `dirección ${ada.page.url()}`);
+  // Settings stays in the "⋯" menu on the map too, for administrators.
+  await ada.page.locator('.tabla-acciones .menu-mas > summary').click();
+  cierto(await ada.page.locator('.tabla-acciones .menu-panel').getByText('Settings', { exact: true }).isVisible(),
+    'Settings en el menú ⋯ del mapa');
+  await ada.page.locator('.tabla-acciones .menu-mas > summary').click();
   const m = await mapa(ada.page);
   igual([m.filas.length, m.total, m.incompleto], [TODOS.length, TODOS.length, false], 'conjunto');
   igual([...m.filas].sort(), [...TODOS].sort(), 'mismos terrenos');

@@ -1005,7 +1005,6 @@ export function createTabla({
     btnMasMapa.hidden = !mapa;
     if (!vista) cerrarFiltros();
     pintarChips();
-    if (btnBases) btnBases.hidden = mapa;
     pintarPermisos();
   }
 

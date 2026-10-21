@@ -196,7 +196,7 @@ def de_base(request: Request) -> tuple[bytes, str]:
 def _exportar_vista(request: Request, permitidos: tuple[str, ...],
                     base_id: str | None) -> tuple[bytes, str]:
     """The same filters and order as the table's list route, without paging."""
-    with db.session() as conn:
+    with db.lectura() as conn:
         if base_id is not None:
             auth.require_base(request, base_id, "maestra.ver", conn)
         crudo = {k: v for k, v in request.query.items() if k not in ("limit", "cursor")}

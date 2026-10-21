@@ -91,7 +91,7 @@ def base_listing(request: Request) -> Respuesta:
 
 def _listar(request: Request, permitidos: tuple[str, ...], base_id: str | None) -> Respuesta:
     _actor(request)
-    with db.session() as conn:
+    with db.lectura() as conn:
         if base_id is not None:
             # Before the query is even parsed: out of scope is 404 whatever was asked.
             auth.require_base(request, base_id, "maestra.ver", conn)
@@ -109,7 +109,7 @@ def _listar(request: Request, permitidos: tuple[str, ...], base_id: str | None) 
 
 def detail(request: Request) -> Respuesta:
     inventory_id = request.uuid_param("id")
-    with db.session() as conn:
+    with db.lectura() as conn:
         auth.require_terreno(request, inventory_id, "maestra.ver", conn)
         terreno = _presentar_uno(conn, request, repo.get(conn, inventory_id))
     if terreno is None:
@@ -329,7 +329,7 @@ def history(request: Request) -> Respuesta:
         errors["cursor"] = "Cursor inválido."
     if errors:
         raise _invalid(errors, "Parámetros inválidos.")
-    with db.session() as conn:
+    with db.lectura() as conn:
         alcance = auth.require_terreno(request, inventory_id, "maestra.ver", conn)
         eventos, total, siguiente = repo.history(
             conn, inventory_id, int(cursor) if cursor else None, limit,

@@ -200,7 +200,9 @@ export function createMapaPaneles({
   function Ficha(registro, custom) {
     const d = registro.draft ?? {};
     const nombre = d.terreno || "Sin nombre";
-    const lugar = [d.municipio, d.estado].filter(Boolean).join(", ");
+    // Each piece names its table column: a column hidden there hides here too.
+    const lugar = [["core:municipio", d.municipio], ["core:estado", d.estado]].filter(([, v]) => v)
+      .map(([col, v]) => el("span", { "data-col": col }, v));
     const ubicacion = ubicacionDeFicha(registro);
     const baseNombre = registro.base_id ? (nombreDeBase?.(registro.base_id) ?? "—") : "Sin asignar";
     const archivo = (tipo) => {
@@ -219,12 +221,12 @@ export function createMapaPaneles({
       if (filas.length) personalizadas = Section("Columnas personalizadas", filas);
     }
 
-    return el("div", { class: "detail mapa-tabla-detalle", role: "region", "aria-label": `Ficha de ${nombre}` },
+    return el("div", { class: "detail mapa-tabla-detalle", role: "region", "aria-label": "Ficha del terreno" },
       el("header", { class: "detail-header" },
         el("div", { class: "detail-heading" },
           el("span", { class: "eyebrow" }, baseNombre),
-          el("h2", {}, nombre),
-          lugar && el("p", { class: "secondary" }, lugar),
+          el("h2", { "data-col": "core:terreno" }, nombre),
+          lugar.length > 0 && el("p", { class: "secondary mapa-tabla-lugar" }, lugar),
         ),
         el("button", {
           type: "button", class: "icon-btn", "aria-label": "Cerrar detalle", dataset: { ficha: "cerrar" },
@@ -237,11 +239,11 @@ export function createMapaPaneles({
         onclick: () => previa.verAEscala(),
       }, "Ver a escala"),
       el("div", { class: "detail-lead" },
-        el("div", {},
+        el("div", { "data-col": "core:asking_price" },
           el("span", { class: "eyebrow" }, "Asking price"),
           el("p", { class: "figure-lead" }, fmtPrice(d.asking_price)),
         ),
-        el("div", { class: "detail-lead-sub" },
+        el("div", { class: "detail-lead-sub", "data-col": "core:asking_m2" },
           el("span", { class: "eyebrow" }, "Asking $/m2"),
           el("p", { class: "figure-sub" }, fmtUnitPrice(d.asking_m2)),
         ),
@@ -251,12 +253,14 @@ export function createMapaPaneles({
         el("h3", { class: "eyebrow" }, "Ubicación"),
         el("p", { class: "mapa-tabla-ubicacion" }, ubicacion.texto),
         el("dl", { class: "detail-grid" },
-          el("dt", {}, "X (latitud)"), el("dd", { class: "figure mono" }, ubicacion.x),
-          el("dt", {}, "Y (longitud)"), el("dd", { class: "figure mono" }, ubicacion.y),
+          el("dt", { "data-col": "core:lat" }, "X (latitud)"),
+          el("dd", { class: "figure mono", "data-col": "core:lat" }, ubicacion.x),
+          el("dt", { "data-col": "core:lon" }, "Y (longitud)"),
+          el("dd", { class: "figure mono", "data-col": "core:lon" }, ubicacion.y),
         ),
       ),
       personalizadas,
-      Section("Archivos", [["PDF / JPG", archivo("pdf")], ["KMZ / KML", archivo("kmz")]]),
+      Section("Archivos", [["PDF / JPG", archivo("pdf"), "core:archivos"], ["KMZ / KML", archivo("kmz"), "core:kmz"]]),
       el("p", { class: "detail-nota muted" },
         "Ficha de solo lectura. Para editar, subir, activar o retirar archivos usa la tabla."),
       el("footer", { class: "detail-footer muted" },

@@ -655,18 +655,18 @@ export function avisoDeContorno(estado, cargaAlSeleccionar) {
 }
 
 function tooltipHtml(terreno, { aviso = "" } = {}) {
-  const name = escapeHtml(terreno.terreno);
-  const place = escapeHtml(
-    [terreno.municipio, terreno.estado].filter(Boolean).join(", ")
-  );
-  const figures = [fmtArea(terreno.superficie_m2), fmtUnitPrice(terreno.asking_m2)]
-    .filter((v) => v !== "—")
-    .join(" · ");
+  // Each piece names its table column (data-col), so a column the table hides
+  // is hidden here too.
+  const parte = (col, texto) => `<span data-col="${col}">${escapeHtml(texto)}</span>`;
+  const place = [["core:municipio", terreno.municipio], ["core:estado", terreno.estado]]
+    .filter(([, v]) => v).map(([col, v]) => parte(col, v)).join("");
+  const figures = [["core:superficie_m2", fmtArea(terreno.superficie_m2)], ["core:asking_m2", fmtUnitPrice(terreno.asking_m2)]]
+    .filter(([, v]) => v !== "—").map(([col, v]) => parte(col, v)).join("");
 
   return (
-    `<strong>${name}</strong>` +
-    (place ? `<span>${place}</span>` : "") +
-    (figures ? `<span class="figure">${escapeHtml(figures)}</span>` : "") +
+    `<strong data-col="core:terreno">${escapeHtml(terreno.terreno)}</strong>` +
+    (place ? `<span class="mark-tooltip-lugar">${place}</span>` : "") +
+    (figures ? `<span class="figure mark-tooltip-cifras">${figures}</span>` : "") +
     (aviso ? `<span class="mark-tooltip-aviso">${escapeHtml(aviso)}</span>` : "")
   );
 }

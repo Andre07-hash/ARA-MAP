@@ -59,18 +59,18 @@ export const CAMPOS_DE_FICHA = Object.freeze(
 
 const vacio = (texto) => (texto === "" ? "—" : texto);
 
-/** [etiqueta, texto] of the core fields, as the table shows them. */
+/** [etiqueta, texto, column id] of the core fields, as the table shows them. */
 export function camposDeFicha(registro) {
-  return CAMPOS_DE_FICHA.map((c) => [c.etiqueta, vacio(textoDe(valorDe(registro, c), c))]);
+  return CAMPOS_DE_FICHA.map((c) => [c.etiqueta, vacio(textoDe(valorDe(registro, c), c)), c.id]);
 }
 
 /**
- * [etiqueta, texto] of the live custom columns of the terrain's OWN base.
+ * [etiqueta, texto, column id] of the live custom columns of the terrain's OWN base.
  * `definiciones` must be that base's; retired columns are not shown.
  */
 export function personalizadasDeFicha(registro, definiciones = []) {
   return definiciones.filter((d) => !d.retirada).map((d) =>
-    [d.nombre, vacio(textoDe(valorDe(registro, { id: d.id, custom: true }), d))]);
+    [d.nombre, vacio(textoDe(valorDe(registro, { id: d.id, custom: true }), d)), d.id]);
 }
 
 /**

@@ -12,6 +12,7 @@ import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
 import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { toast } from "../ui/toast.js";
+import { segment } from "../inventory/DatosView.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];
@@ -428,11 +429,11 @@ export function abrirBases({ onCerrar }) {
     } catch (error) { aviso.decir(error.message); }
   }
 
-  const crear = el("form", { class: "columnas-nueva" },
+  const crear = el("form", { class: "bases-nueva" },
     el("h3", {}, "Nueva base de trabajo"),
-    el("div", { class: "rail-field" },
-      el("label", { class: "field-label", for: "base-nombre" }, "Nombre"), nombre),
-    el("button", { type: "submit", class: "btn btn-principal" }, "Crear base"),
+    el("label", { class: "field-label", for: "base-nombre" }, "Nombre"),
+    el("div", { class: "bases-nueva-fila" }, nombre,
+      el("button", { type: "submit", class: "btn btn-principal" }, "Crear base")),
   );
   crear.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -450,32 +451,57 @@ export function abrirBases({ onCerrar }) {
   });
   const rol = el("select", { id: "cuenta-rol", class: "input" },
     el("option", { value: "operador" }, "Operador"), el("option", { value: "admin" }, "Administrador"));
-  const nuevaCuenta = el("form", { class: "columnas-nueva" },
+  const avisoCuenta = Aviso();
+  const nuevaCuenta = el("form", { class: "cuentas-nueva" },
     el("h3", {}, "Nueva cuenta"),
-    campo("cuenta-login", "Usuario", login), campo("cuenta-nombre", "Nombre visible", visible),
-    campo("cuenta-clave", "Contraseña inicial", clave), campo("cuenta-rol", "Rol", rol),
-    el("button", { type: "submit", class: "btn btn-principal" }, "Crear cuenta"),
+    el("div", { class: "cuentas-campos" },
+      campo("cuenta-login", "Usuario", login), campo("cuenta-nombre", "Nombre visible", visible),
+      campo("cuenta-clave", "Contraseña inicial", clave), campo("cuenta-rol", "Rol", rol)),
+    avisoCuenta.nodo,
+    el("div", {}, el("button", { type: "submit", class: "btn btn-principal" }, "Crear cuenta")),
   );
   nuevaCuenta.addEventListener("submit", async (event) => {
     event.preventDefault();
-    aviso.decir("");
+    avisoCuenta.decir("");
     try {
       const { cuenta } = await api.crearCuenta({
         login: login.value, display_name: visible.value, password: clave.value, rol: rol.value,
       });
       nuevaCuenta.reset();
-      aviso.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
+      avisoCuenta.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
     } catch (error) {
       const campos = Object.values(error.detalle?.fields ?? {});
-      aviso.decir(campos.length ? campos.join(" ") : error.message);
+      avisoCuenta.decir(campos.length ? campos.join(" ") : error.message);
     } finally { clave.value = ""; }
   });
 
+  // Two pages: the bases with their grants, and the accounts.
+  const paginas = {
+    bases: el("div", { class: "bases-pagina" },
+      el("p", { class: "secondary" }, "Una base agrupa terrenos y dice qué operadores pueden abrirlos."),
+      lista, aviso.nodo, crear),
+    cuentas: el("div", { class: "bases-pagina", hidden: true },
+      el("p", { class: "secondary" }, "Crea cuentas de operador o de administrador. Después, en «Bases y " +
+        "accesos», elige qué bases puede abrir cada operador."),
+      nuevaCuenta),
+  };
+  const pestanas = {
+    bases: segment("Bases y accesos", true, () => mostrar("bases")),
+    cuentas: segment("Cuentas", false, () => mostrar("cuentas")),
+  };
+  function mostrar(cual) {
+    for (const [nombrePagina, pagina] of Object.entries(paginas)) {
+      pagina.hidden = nombrePagina !== cual;
+      pestanas[nombrePagina].classList.toggle("is-active", nombrePagina === cual);
+      pestanas[nombrePagina].setAttribute("aria-pressed", String(nombrePagina === cual));
+    }
+  }
   const { dialog } = openDialog({
-    titulo: "Bases de trabajo y accesos",
-    descripcion: "Una base agrupa terrenos y dice qué operadores pueden abrirlos.",
+    titulo: "Bases y accesos",
     ancho: "44rem",
-    contenido: el("div", {}, lista, aviso.nodo, crear, nuevaCuenta),
+    contenido: el("div", { class: "bases-dialogo" },
+      el("div", { class: "segmented", role: "group", "aria-label": "Sección" }, pestanas.bases, pestanas.cuentas),
+      paginas.bases, paginas.cuentas),
     acciones: [cerrar],
   });
   dialog.addEventListener("close", () => onCerrar?.(cambio));

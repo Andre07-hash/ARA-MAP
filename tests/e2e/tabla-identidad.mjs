@@ -290,7 +290,7 @@ await caso('administrator dialogs (bases, grants, transfer preview) do not outli
   for (const abrir of [
     async (page) => {
       await enMenu(page, 'Bases y accesos');
-      const bases = page.getByRole('dialog', { name: 'Bases de trabajo y accesos' });
+      const bases = page.getByRole('dialog', { name: 'Bases y accesos' });
       await bases.locator('li', { has: page.getByLabel('Nombre de la base Base Grande') }).getByRole('button', { name: 'Accesos…' }).click();
       await page.getByRole('dialog', { name: 'Accesos · Base Grande' }).getByLabel(/^Olivia Ficticia/).waitFor();
     },

@@ -66,7 +66,11 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
   info.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && info.open) { e.stopPropagation(); info.open = false; info.querySelector("summary").focus(); }
   });
-  info.addEventListener("focusout", (e) => { if (!info.contains(e.relatedTarget)) info.open = false; });
+  // Safari does not focus a clicked control: a blur with no relatedTarget is a
+  // press, and closes it only when the press is outside.
+  info.addEventListener("focusout", (e) => { if (e.relatedTarget && !info.contains(e.relatedTarget)) info.open = false; });
+  const fueraDeInfo = (e) => { if (info.open && !info.contains(e.target)) info.open = false; };
+  document.addEventListener("pointerdown", fueraDeInfo);
   const lienzo = el("div", { class: "previa-mapa", role: "application", "aria-label": "Mapa de los terrenos de la vista" });
   const fondos = el("div", { class: "previa-fondos" });
   const capas = el("div", { class: "previa-capas" });
@@ -254,6 +258,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
     posicionDe: (id) => canvas?.posicionDe(id) ?? null,
     destroy() {
       if (!vivo) return;
+      document.removeEventListener("pointerdown", fueraDeInfo);
       vivo = false;
       soltarCuerpo();
       filas = [];

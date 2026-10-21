@@ -92,7 +92,12 @@ function cerrarAlSalir(details) {
     details.open = false;
     details.querySelector("summary").focus();
   });
-  details.addEventListener("focusout", (e) => { if (!details.contains(e.relatedTarget)) details.open = false; });
+  // Tabbing out closes it. Safari does not focus a button on click, so a press
+  // on an item blurs with no relatedTarget: that must not close it before the
+  // click lands. Presses outside are closed by app.js's pointerdown.
+  details.addEventListener("focusout", (e) => {
+    if (e.relatedTarget && !details.contains(e.relatedTarget)) details.open = false;
+  });
 }
 
 export function createTabla({

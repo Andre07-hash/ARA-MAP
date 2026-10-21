@@ -61,9 +61,10 @@ export function Section(titulo, filas) {
   return el("section", { class: "detail-section" },
     el("h3", { class: "eyebrow" }, titulo),
     el("dl", { class: "detail-grid" },
-      filas.map(([etiqueta, valor]) => [
-        el("dt", {}, etiqueta),
-        el("dd", { class: "figure" }, valor),
+      // A row may name its table column, so a column hidden there hides here too.
+      filas.map(([etiqueta, valor, col]) => [
+        el("dt", { "data-col": col }, etiqueta),
+        el("dd", { class: "figure", "data-col": col }, valor),
       ])
     )
   );

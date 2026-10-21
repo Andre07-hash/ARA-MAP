@@ -256,7 +256,7 @@ export function createTabla({
   const btnImportar = admin && deMenu("subir", "Importar Excel…", () => importar(), "Agrega filas a una base");
   const btnBases = admin && deMenu("personas", "Bases y accesos", () => basesDialogo());
   const btnColumnas = deMenu("columnas", "Columnas", () => columnasDialogo());
-  const btnMostrar = deMenu("columnas", "Mostrar columnas", () => mostrarDialogo(), "Esconde columnas en esta pantalla");
+  const btnMostrar = deMenu("columnas", "Mostrar columnas", () => mostrarDialogo(), "Esconde datos en la tabla y el mapa");
   const btnRecargar = deMenu("actualizar", "Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
   const menuMas = el("details", { class: "menu-mas" },
     el("summary", { class: "btn btn-quiet btn-icono", "aria-label": "Más acciones", title: "Más acciones" },
@@ -390,7 +390,7 @@ export function createTabla({
   const estiloOcultas = el("style");
   function pintarOcultas() {
     estiloOcultas.textContent = [...ocultas]
-      .map((id) => `.tabla-grid [data-col="${CSS.escape(id)}"] { display: none; }`).join("\n");
+      .map((id) => `.tabla-pantalla [data-col="${CSS.escape(id)}"] { display: none !important; }`).join("\n");
     try { localStorage.setItem(CLAVE_OCULTAS, JSON.stringify([...ocultas])); } catch { /* kept for this visit */ }
   }
   pintarOcultas();
@@ -402,7 +402,7 @@ export function createTabla({
       } }), el("span", {}, c.etiqueta)));
     openDialog({
       titulo: "Mostrar columnas",
-      descripcion: "Sólo cambia lo que se ve en esta pantalla y este navegador. Los datos no se tocan.",
+      descripcion: "Se esconden en la tabla y en el mapa, sólo en este navegador. Los datos no se tocan.",
       contenido: el("div", { class: "tabla-mostrar" }, casillas),
       acciones: [{ etiqueta: "Listo", variante: "principal", onClick: (close) => close() }],
     });
@@ -713,7 +713,7 @@ export function createTabla({
     btnAgregar.hidden = !vista || lectura;
     btnAgregar.disabled = creacion?.estado === "enviando";
     btnColumnas.hidden = !vista || esGlobal(vista) || modo === "mapa";
-    btnMostrar.hidden = !vista || modo === "mapa";
+    btnMostrar.hidden = !vista;
     btnRecargar.hidden = !vista;
     btnExportar.hidden = !vista;
     if (btnImportar) btnImportar.hidden = soloConsulta();

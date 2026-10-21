@@ -324,3 +324,24 @@ textarea.tabla-editor { height: 5.5rem; min-width: 18rem; white-space: pre-wrap;
 .tabla-mostrar { display: grid; gap: var(--space-2); max-height: 60vh; overflow-y: auto; }
 /* The place and figures of a record or a map label: pieces that hide one by one. */
 .mapa-tabla-lugar [data-col]:not(:last-child)::after { content: ", "; }
+
+/* «Bases y accesos»: two pages, each base on one line, and compact forms. */
+.bases-dialogo { display: grid; gap: var(--space-5); }
+.bases-dialogo > .segmented { justify-self: start; }
+.bases-pagina { display: grid; gap: var(--space-4); }
+.bases-pagina > .secondary { margin: 0; }
+.bases-pagina .bases-lista { margin: 0; }
+.bases-item { grid-template-columns: minmax(0, 1fr) auto auto; }
+.bases-item .columnas-botones { grid-column: auto; flex-wrap: nowrap; }
+.bases-nueva, .cuentas-nueva { display: grid; gap: var(--space-2); }
+.bases-nueva h3, .cuentas-nueva h3 { margin: 0 0 var(--space-1); font-size: var(--text-body); }
+.bases-nueva-fila { display: flex; gap: var(--space-2); align-items: center; }
+.bases-nueva-fila .input { flex: 1 1 auto; min-width: 0; }
+.bases-nueva-fila .btn { flex: none; }
+.cuentas-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-4); }
+.cuentas-campos .rail-field { margin: 0; }
+@media (max-width: 640px) {
+  .bases-item { grid-template-columns: minmax(0, 1fr) auto; }
+  .bases-item .columnas-botones { grid-column: 1 / -1; flex-wrap: wrap; }
+  .cuentas-campos { grid-template-columns: minmax(0, 1fr); }
+}

@@ -18,6 +18,11 @@ Respuesta = dict[str, Any]
 
 MAX_LOGIN_BODY = 4096
 
+# Header branding by normalized login, never by the editable display name.
+# Every other account, and anyone signed out, sees ARA.
+MARCAS = {"tyrag": "dewa"}
+MARCA_PREDETERMINADA = "ara"
+
 
 def config(request: Request) -> Respuesta:
     """Nonsecret UI configuration. /api/session is the authority on sign-in;
@@ -38,7 +43,8 @@ def _estado(conn: DatabaseConnection, sesion: auth.Sesion) -> Respuesta:
         alcance = [{"id": b["id"], "nombre": b["nombre"]}
                    for b in repo_maestra.listar(conn, sesion.user_id)]
     return {"authenticated": True,
-            "user": {**sesion.actor, "rol": sesion.rol},
+            "user": {**sesion.actor, "rol": sesion.rol,
+                     "marca": MARCAS.get(sesion.login, MARCA_PREDETERMINADA)},
             "capacidades": list(auth.CAPACIDADES[sesion.rol]),
             "alcance": {"bases": alcance}}
 

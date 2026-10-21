@@ -140,3 +140,20 @@ test("clearing private state forgets every team dataset but keeps the public cat
   assert.deepEqual([s.bases, s.mapas, s.terrenos, s.baseActiva], [[], [], [], null]);
   assert.equal(s.catalogo, catalogo);
 });
+
+/* ------------------------------------------------------------ header logo */
+
+test("the header shows Dewa only for the session the server brands dewa", async () => {
+  const { logoDe } = await import("../../web/lib/marca.js");
+  const dewa = logoDe({ id: "u1", display_name: "Cualquier nombre", rol: "admin", marca: "dewa" });
+  assert.equal(dewa.src, "assets/dewa-logo.png");
+  assert.deepEqual([dewa.width, dewa.height], [622, 238]);
+  assert.equal(dewa.alt, "Dewa");
+  // The display name decides nothing; only the server's marca does.
+  for (const sesion of [null, undefined, {}, { display_name: "tyrag", marca: "ara" },
+    { display_name: "TyraG" }, { marca: "otra" }, { marca: "__proto__" }]) {
+    const logo = logoDe(sesion);
+    assert.equal(logo.src, "assets/ara-logo.png", JSON.stringify(sesion));
+    assert.deepEqual([logo.width, logo.height, logo.alt], [522, 478, ""]);
+  }
+});

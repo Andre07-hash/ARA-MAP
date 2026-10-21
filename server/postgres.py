@@ -102,38 +102,65 @@ class Connection:
 
 # Idle connections kept for the next session: each new one to the cloud
 # database costs a network and TLS handshake. One idle longer than INACTIVA_MAX
-# seconds is closed instead of reused, since the server may have dropped it.
+# seconds is closed instead of reused, by the next session or by a sweep every
+# INACTIVA_MAX seconds, so idle connections never keep the database awake.
 # ponytail: a list and a lock; psycopg_pool if sizing or health checks are needed.
 LIBRES_MAX = 5
 INACTIVA_MAX = 60.0
-_libres: list[tuple[Any, str, float]] = []   # (connection, its URL, idle since)
+_libres: list[tuple[Any, str, float]] = []   # (connection, its URL, idle since), oldest first
 _libres_lock = threading.Lock()
+_barrido: threading.Thread | None = None
 
 
-def _tomar(url: str) -> Any:
+def _conectar(url: str) -> Any:
     import psycopg
 
-    ahora, viejas, raw = time.monotonic(), [], None
+    # No server-side prepared statements: on a reused connection one would
+    # outlive its transaction, and a schema change would break it until restart.
+    return psycopg.connect(url, row_factory=row_factory, connect_timeout=15,
+                           prepare_threshold=None)
+
+
+def _vencidas(url: str | None = None) -> list[Any]:
+    """Take out of the list what must not be reused (caller holds the lock)."""
+    ahora = time.monotonic()
+    fuera = [e for e in _libres if ahora - e[2] >= INACTIVA_MAX or e[0].closed
+             or (url is not None and e[1] != url)]
+    _libres[:] = [e for e in _libres if e not in fuera]
+    return [e[0] for e in fuera]
+
+
+def _tomar(url: str) -> tuple[Any, bool]:
+    """A connection for ``url`` and whether it was reused."""
     with _libres_lock:
-        while _libres and raw is None:
-            candidata, de, desde = _libres.pop()
-            if de == url and not candidata.closed and ahora - desde < INACTIVA_MAX:
-                raw = candidata
-            else:
-                viejas.append(candidata)
+        viejas = _vencidas(url)
+        raw = _libres.pop()[0] if _libres else None
     for vieja in viejas:
         vieja.close()
-    return raw or psycopg.connect(url, row_factory=row_factory, connect_timeout=15)
+    return (raw, True) if raw is not None else (_conectar(url), False)
+
+
+def _barrer() -> None:
+    while True:
+        time.sleep(INACTIVA_MAX)
+        with _libres_lock:
+            viejas = _vencidas()
+        for vieja in viejas:
+            vieja.close()
 
 
 def _devolver(raw: Any, url: str) -> None:
     """Keep a connection that ended its transaction cleanly; close any other."""
+    global _barrido
     from psycopg.pq import TransactionStatus
 
     if not raw.closed and not raw.broken and raw.info.transaction_status == TransactionStatus.IDLE:
         with _libres_lock:
             if len(_libres) < LIBRES_MAX:
                 _libres.append((raw, url, time.monotonic()))
+                if _barrido is None:
+                    _barrido = threading.Thread(target=_barrer, name="postgres-barrido", daemon=True)
+                    _barrido.start()
                 return
     raw.close()
 
@@ -143,16 +170,27 @@ def session(*, solo_lectura: bool = False) -> Iterator[Connection]:
     """One transaction, committed on a normal exit and rolled back otherwise.
     Its SET LOCAL settings and advisory lock end with it, so the connection
     goes back to the idle list as clean as a new one."""
+    import psycopg
+
     url = os.environ["ARA_MAP_DATABASE_URL"]
-    raw = _tomar(url)
+    raw, reusada = _tomar(url)
+    # SET TRANSACTION first: one snapshot for every statement (a page, its
+    # count and facets agree), never a write, and no workspace lock, so readers
+    # neither queue behind a writer nor make one wait.
+    inicio = (["SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"] if solo_lectura else []) + [
+        "SET LOCAL statement_timeout = '60s'", f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'"]
     try:
-        if solo_lectura:
-            # First in the transaction. One snapshot for every statement (a page,
-            # its count and facets agree), never a write, and no workspace lock:
-            # readers neither queue behind a writer nor make one wait.
-            raw.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-        raw.execute("SET LOCAL statement_timeout = '60s'")
-        raw.execute(f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'")
+        try:
+            raw.execute(inicio[0])
+        except psycopg.OperationalError:
+            if not reusada:
+                raise
+            # The server dropped it while idle: once more, on a new connection.
+            raw.close()
+            raw = _conectar(url)
+            raw.execute(inicio[0])
+        for sentencia in inicio[1:]:
+            raw.execute(sentencia)
         if not solo_lectura:
             raw.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (LOCK_ID,))
         yield Connection(raw)

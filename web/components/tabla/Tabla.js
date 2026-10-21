@@ -332,7 +332,7 @@ export function createTabla({
   }
   function cerrarFiltros() { if (filtrosFila.open) filtrosFila.close(); }
   function limpiarFiltros() {
-    if (modo === "mapa") previa.limpiarFiltros();
+    if (modo === "mapa") { previa.limpiarFiltros(); if (marcadosVigentes()) quitarSeleccion(); }
     consultar({ estado: [], municipio: [], tipo_terreno: [], area_min_m2: "", area_max_m2: "" });
   }
 
@@ -817,8 +817,20 @@ export function createTabla({
       admin && boton("Crear base con ellos…", () => loteNuevaBase()),
       admin && boton("Transferir…", () => loteTransferir()),
       boton("Borrar…", () => loteBorrar(), "btn btn-small btn-peligro"),
-      boton("Quitar selección", () => { marcados.clear(); pintarCasillas(); pintarLote(); }),
+      boton("Quitar selección", () => quitarSeleccion()),
     ].filter(Boolean));
+  }
+
+  function quitarSeleccion() {
+    marcados.clear();
+    pintarCasillas();
+    pintarLote();
+    if (modo === "mapa") { pintarChips(); entregarAlMapa(); }
+  }
+
+  /** The ticked terrains of this view and query, when any: the map shows only them. */
+  function marcadosVigentes() {
+    return marcadosClave === claveConjunto() && marcados.size ? marcados : null;
   }
 
   /** Every terrain of this view and query, gathered page by page like the map's set. */
@@ -1021,7 +1033,8 @@ export function createTabla({
     const activos = filtrosHeredados().filter(([etiqueta]) => quitar[etiqueta]);
     // On the map, its own filters count too, and say so in a chip of their own.
     const delMapa = modo === "mapa" ? previa.estado.filtros : 0;
-    const n = activos.length + delMapa;
+    const soloMarcados = modo === "mapa" ? marcadosVigentes()?.size ?? 0 : 0;
+    const n = activos.length + delMapa + (soloMarcados ? 1 : 0);
     btnMasMapa.textContent = "Más filtros del mapa: precio por m², ubicación y colores"
       + (delMapa ? ` (${delMapa} activos)` : "");
     cuentaFiltros.textContent = String(n);
@@ -1037,6 +1050,11 @@ export function createTabla({
       el("button", {
         type: "button", class: "tabla-chip-quitar", "aria-label": "Quitar los filtros del mapa",
         onclick: () => { buscar.focus(); previa.limpiarFiltros(); },
+      }, "×")), soloMarcados > 0 && el("span", { class: "chip tabla-filtro-chip" },
+      `Sólo los ${terrenos(soloMarcados)} seleccionados`,
+      el("button", {
+        type: "button", class: "tabla-chip-quitar", "aria-label": "Mostrar todos, no sólo los seleccionados",
+        onclick: () => { buscar.focus(); quitarSeleccion(); },
       }, "×"))].filter(Boolean));
     btnLimpiar.hidden = !n;
   }
@@ -1056,8 +1074,12 @@ export function createTabla({
   }
 
   function entregarAlMapa() {
-    previa.pintar(conjunto.filas, { nuevaPagina: mapaPintado !== conjunto.clave });
-    mapaPintado = conjunto.clave;
+    // Terrains ticked in the table work as a filter: the map shows only them.
+    const solo = marcadosVigentes();
+    const filas = solo ? conjunto.filas.filter((t) => solo.has(t.id)) : conjunto.filas;
+    const pintado = solo ? `${conjunto.clave}|${[...solo.keys()].join(",")}` : conjunto.clave;
+    previa.pintar(filas, { nuevaPagina: mapaPintado !== pintado });
+    mapaPintado = pintado;
     if (seleccion && seleccion !== previa.seleccion && filaDelConjunto(seleccion)) previa.seleccionar(seleccion);
   }
 

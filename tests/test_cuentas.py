@@ -87,6 +87,13 @@ class Provisioning(unittest.TestCase):
         self.assertNotIn("role", " ".join(columnas))
         self.assertTrue(guardado.startswith("pbkdf2_sha256$600000$"))
 
+    def test_short_passwords_are_accepted(self):
+        self.run_script("--sqlite", str(self.path), "crear", "ana", "Ana", answers=("ab", "ab"))
+        self.assertTrue(self.login("ana", "ab"))
+        self.run_script("--sqlite", str(self.path), "restablecer", "ana", answers=("1", "1"))
+        self.assertIsNone(self.login("ana", "ab"))
+        self.assertTrue(self.login("ana", "1"))
+
     def test_password_from_stdin_for_automation(self):
         with patch("sys.stdin", io.StringIO(CLAVE + "\n")), contextlib.redirect_stdout(io.StringIO()):
             cuentas.main(["--sqlite", str(self.path), "--password-stdin", "crear", "ana", "Ana"],
@@ -104,7 +111,8 @@ class Provisioning(unittest.TestCase):
     def test_bad_input_changes_nothing(self):
         for argv, answers, mensaje in (
             (("crear", "ana", "Ana"), (CLAVE, "distinta-clave-larga"), "no coinciden"),
-            (("crear", "ana", "Ana"), ("corta", "corta"), "al menos"),
+            (("crear", "ana", "Ana"), ("", ""), "obligatoria"),
+            (("crear", "ana", "Ana"), ("   ", "   "), "obligatoria"),
             (("crear", "a", "Ana"), (CLAVE, CLAVE), "3 a 64"),
             (("restablecer", "nadie"), (CLAVE, CLAVE), "No existe"),
         ):

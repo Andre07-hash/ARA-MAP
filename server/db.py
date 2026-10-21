@@ -884,7 +884,8 @@ def lectura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
 
     Postgres: one read-only snapshot without the workspace lock, so reads do
     not wait for each other or for a writer; any write through it fails.
-    SQLite: the same as session(), whose readers already run alongside.
+    SQLite: session(), whose readers already run alongside, refusing writes
+    too, so a write slipped in here fails in local tests as it would online.
     """
     from . import postgres
     with _ocupado():
@@ -894,6 +895,7 @@ def lectura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
             return
         conn = connect(path)
         try:
+            conn.execute("PRAGMA query_only = ON")
             yield conn
         finally:
             conn.close()

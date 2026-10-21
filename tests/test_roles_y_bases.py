@@ -906,6 +906,11 @@ class RolesSqlite(Matriz, unittest.TestCase):
             self.assertEqual(auth.require_terreno(type("R", (), {"sesion": sesion})(), self.t1,
                                                   "archivos.subir", conn).base_id, self.b1)
 
+    def test_a_read_session_refuses_to_write_here_too(self):
+        with self.assertRaises(sqlite3.OperationalError), db.lectura() as conn:
+            conn.execute("UPDATE team_user SET display_name = 'X'")
+        self.assertEqual(filas("team_user", "display_name = 'X'"), [])
+
     def test_only_lock_failures_are_reported_as_busy(self):
         for mensaje in ("database is locked", "database table is locked"):
             with self.assertRaises(db.OcupadoError), db.session():
@@ -1150,7 +1155,25 @@ class RolesPostgres(Matriz, unittest.TestCase):
             self.assertEqual(conn.execute("SELECT 1 AS uno").fetchone()["uno"], 1)
         # One idle too long is closed, not handed out.
         with patch.object(postgres, "INACTIVA_MAX", 0.0), db.lectura() as conn:
-            self.assertNotEqual(pid(conn), primero)
+            segundo = pid(conn)
+            self.assertNotEqual(segundo, primero)
+        # One the server dropped while idle costs a reconnection, not an error.
+        self.cruda().execute("SELECT pg_terminate_backend(%s)", (segundo,))
+        with db.lectura() as conn:
+            self.assertNotEqual(pid(conn), segundo)
+
+    def test_a_schema_change_does_not_break_reused_connections(self):
+        for _ in range(8):  # past psycopg's default threshold for preparing a statement
+            with db.lectura() as conn:
+                conn.execute("SELECT * FROM maestra_base").fetchall()
+        otra = self.cruda()
+        otra.execute("ALTER TABLE maestra_base ADD COLUMN prueba_esquema TEXT")
+        otra.commit()
+        with db.lectura() as conn:
+            fila = conn.execute("SELECT * FROM maestra_base").fetchone()
+        otra.execute("ALTER TABLE maestra_base DROP COLUMN prueba_esquema")
+        otra.commit()
+        self.assertIn("prueba_esquema", fila)
 
     def test_a_row_lock_inside_the_write_boundary_ends_in_503(self):
         # The other place a write can wait: past the workspace lock, on a row.

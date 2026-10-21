@@ -143,6 +143,14 @@ export function createMapCanvas(container, {
         // and requesting it makes tiles fail to load. Nothing reads tile pixels.
       }).addTo(map);
       layer.setZIndex(index);
+      // A tile that fails to download (a slow or filtering network) would stay
+      // blank: ask for it again, up to three times, a little later each time.
+      layer.on("tileerror", ({ tile, coords }) => {
+        const intento = Number(tile.dataset.reintentos ?? 0) + 1;
+        if (intento > 3) return;
+        tile.dataset.reintentos = String(intento);
+        setTimeout(() => { tile.src = `${layer.getTileUrl(coords)}?reintento=${intento}`; }, 1000 * intento);
+      });
       return layer;
     });
 

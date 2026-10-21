@@ -249,8 +249,11 @@ export function createTabla({
     id: "tabla-limite", class: "input", onchange: () => consultar({ limit: Number(selLimite.value) }),
   }, LIMITES.map((n) => el("option", { value: n, selected: n === consulta.limit }, String(n))));
 
-  const btnAgregar = el("button", { type: "button", class: "btn btn-principal", onclick: () => agregar() },
-    icono("mas"), "Agregar terreno");
+  // Its words hide on a phone (tabla.css); the label keeps its name.
+  const btnAgregar = el("button", {
+    type: "button", class: "btn btn-principal", "aria-label": "Agregar terreno", title: "Agregar terreno",
+    onclick: () => agregar(),
+  }, icono("mas"), el("span", { class: "tabla-btn-texto" }, "Agregar terreno"));
   // The less frequent actions live in the "⋯" menu; choosing one closes it.
   const deMenu = (nombre, etiqueta, accion, nota = null) => el("button", {
     type: "button", class: "menu-item",

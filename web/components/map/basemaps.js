@@ -10,7 +10,11 @@
  * layer carrying the place names, so "capas" stacks both.
  */
 
-const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services";
+// Esri serves the same tiles from two hosts: {s} spreads a map's downloads over
+// both, so a network that caps or stalls connections per host lets twice as
+// many through, and a retry can go to the other one (MapCanvas).
+const ESRI = "https://{s}.arcgisonline.com/ArcGIS/rest/services";
+const ESRI_HOSTS = ["server", "services"];
 
 export const BASEMAPS = {
   claro: {
@@ -21,6 +25,7 @@ export const BASEMAPS = {
       `${ESRI}/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`,
     ],
     attribution: "Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
+    subdomains: ESRI_HOSTS,
     maxZoom: 16,
     oscuro: false,
   },
@@ -32,6 +37,7 @@ export const BASEMAPS = {
       `${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`,
     ],
     attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics",
+    subdomains: ESRI_HOSTS,
     maxZoom: 19,
     oscuro: true,
   },

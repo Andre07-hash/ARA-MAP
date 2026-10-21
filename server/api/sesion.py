@@ -47,7 +47,7 @@ def _estado(conn: DatabaseConnection, sesion: auth.Sesion) -> Respuesta:
 def session(request: Request) -> Respuesta:
     if request.sesion is None:
         return {"authenticated": False}
-    with db.session() as conn:
+    with db.lectura() as conn:
         return _estado(conn, request.sesion)
 
 

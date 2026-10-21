@@ -879,6 +879,27 @@ def bloqueo(conn: DatabaseConnection, exclusivo: bool = False) -> str:
 
 
 @contextmanager
+def lectura(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
+    """session() for work that only reads.
+
+    Postgres: one read-only snapshot without the workspace lock, so reads do
+    not wait for each other or for a writer; any write through it fails.
+    SQLite: the same as session(), whose readers already run alongside.
+    """
+    from . import postgres
+    with _ocupado():
+        if path is None and postgres.enabled():
+            with postgres.session(solo_lectura=True) as cloud_conn:
+                yield cloud_conn
+            return
+        conn = connect(path)
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+
+@contextmanager
 def session(path: Path | str | None = None) -> Iterator[DatabaseConnection]:
     """Open a connection for one unit of work and close it afterwards.
 

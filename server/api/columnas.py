@@ -70,7 +70,7 @@ def _estado(exc: repo.EstadoError) -> ApiError:
 
 def listing(request: Request) -> Respuesta:
     base_id = request.uuid_param("bid")
-    with db.session() as conn:
+    with db.lectura() as conn:
         auth.require_base(request, base_id, "maestra.ver", conn)
         return {"columnas": repo.listar(conn, base_id)}
 

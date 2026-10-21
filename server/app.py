@@ -201,11 +201,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(
                     {"error": "La base compartida no está configurada."}, HTTPStatus.SERVICE_UNAVAILABLE)
             if token is not None and ready:
-                # On Postgres even this read waits for the workspace lock, and
-                # can time out waiting. That is "busy", answered like a busy
-                # handler, not an unanswered connection.
+                # A read without the workspace lock. A lock or row timeout is
+                # still "busy", answered like a busy handler, not an
+                # unanswered connection.
                 try:
-                    with db.session() as conn:
+                    with db.lectura() as conn:
                         sesion = auth.sesion_de_token(conn, token)
                 except db.OcupadoError:
                     return self._busy()

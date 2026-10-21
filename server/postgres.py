@@ -4,6 +4,8 @@ Repository SQL uses SQLite's parameter syntax. This small adapter converts only
 placeholders and generated ids; data remains in normal relational tables.
 Each session commits atomically and a transaction lock serializes the small
 workspace's edits, including read-then-write operations such as import dedupe.
+A read-only session (db.lectura) takes no such lock: it reads one consistent
+snapshot, and Postgres refuses any write made through it.
 """
 
 from __future__ import annotations
@@ -11,6 +13,8 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
+import time
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from typing import Any
@@ -96,16 +100,71 @@ class Connection:
         return Cursor(self.raw.execute(statement, params), generated)
 
 
-@contextmanager
-def session() -> Iterator[Connection]:
+# Idle connections kept for the next session: each new one to the cloud
+# database costs a network and TLS handshake. One idle longer than INACTIVA_MAX
+# seconds is closed instead of reused, since the server may have dropped it.
+# ponytail: a list and a lock; psycopg_pool if sizing or health checks are needed.
+LIBRES_MAX = 5
+INACTIVA_MAX = 60.0
+_libres: list[tuple[Any, str, float]] = []   # (connection, its URL, idle since)
+_libres_lock = threading.Lock()
+
+
+def _tomar(url: str) -> Any:
     import psycopg
 
-    with psycopg.connect(os.environ["ARA_MAP_DATABASE_URL"], row_factory=row_factory,
-                         connect_timeout=15) as raw:
+    ahora, viejas, raw = time.monotonic(), [], None
+    with _libres_lock:
+        while _libres and raw is None:
+            candidata, de, desde = _libres.pop()
+            if de == url and not candidata.closed and ahora - desde < INACTIVA_MAX:
+                raw = candidata
+            else:
+                viejas.append(candidata)
+    for vieja in viejas:
+        vieja.close()
+    return raw or psycopg.connect(url, row_factory=row_factory, connect_timeout=15)
+
+
+def _devolver(raw: Any, url: str) -> None:
+    """Keep a connection that ended its transaction cleanly; close any other."""
+    from psycopg.pq import TransactionStatus
+
+    if not raw.closed and not raw.broken and raw.info.transaction_status == TransactionStatus.IDLE:
+        with _libres_lock:
+            if len(_libres) < LIBRES_MAX:
+                _libres.append((raw, url, time.monotonic()))
+                return
+    raw.close()
+
+
+@contextmanager
+def session(*, solo_lectura: bool = False) -> Iterator[Connection]:
+    """One transaction, committed on a normal exit and rolled back otherwise.
+    Its SET LOCAL settings and advisory lock end with it, so the connection
+    goes back to the idle list as clean as a new one."""
+    url = os.environ["ARA_MAP_DATABASE_URL"]
+    raw = _tomar(url)
+    try:
+        if solo_lectura:
+            # First in the transaction. One snapshot for every statement (a page,
+            # its count and facets agree), never a write, and no workspace lock:
+            # readers neither queue behind a writer nor make one wait.
+            raw.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
         raw.execute("SET LOCAL statement_timeout = '60s'")
         raw.execute(f"SET LOCAL lock_timeout = '{LOCK_TIMEOUT}'")
-        raw.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (LOCK_ID,))
+        if not solo_lectura:
+            raw.execute("SELECT pg_advisory_xact_lock(hashtext(current_schema()), %s)", (LOCK_ID,))
         yield Connection(raw)
+        raw.commit()
+    except BaseException:
+        try:
+            raw.rollback()
+        except Exception:
+            raw.close()
+        raise
+    finally:
+        _devolver(raw, url)
 
 
 def es_bloqueo(exc: BaseException) -> bool:

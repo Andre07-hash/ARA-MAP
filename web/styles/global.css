@@ -93,6 +93,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand-logo.brand-logo-dewa {
   height: 44px;
   max-width: 115px;     /* 44 x 622 / 238, rounded */
+  /* Its right 93 of 622 px are transparent (17px at this size): pull "Map"
+   * back so it sits beside the letters, not after the empty margin. */
+  margin-right: -13px;
 }
 
 .brand-name {

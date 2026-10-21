@@ -145,11 +145,21 @@ export function createMapCanvas(container, {
       layer.setZIndex(index);
       // A tile that fails to download (a slow or filtering network) would stay
       // blank: ask for it again, up to three times, a little later each time.
-      layer.on("tileerror", ({ tile, coords }) => {
+      layer.on("tileerror", ({ tile }) => {
         const intento = Number(tile.dataset.reintentos ?? 0) + 1;
         if (intento > 3) return;
         tile.dataset.reintentos = String(intento);
-        setTimeout(() => { tile.src = `${layer.getTileUrl(coords)}?reintento=${intento}`; }, 1000 * intento);
+        // Keep the URL this tile asked for: getTileUrl() would use the zoom the
+        // map shows when the timer fires, so zooming out meanwhile requested
+        // the old x/y at the new zoom, somewhere else or nowhere.
+        tile.dataset.original ??= tile.src;
+        setTimeout(() => {
+          // Leaflet detaches a tile it drops (zoom, another basemap, leaving the
+          // map) and stops listening to one left from a previous zoom; a
+          // download for either could never be drawn.
+          if (!tile.isConnected || tile.onload === L.Util.falseFn) return;
+          tile.src = `${tile.dataset.original}?reintento=${intento}`;
+        }, 1000 * intento);
       });
       return layer;
     });

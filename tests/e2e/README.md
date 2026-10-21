@@ -39,6 +39,19 @@ node contornos-medicion.mjs     # tiempos y memoria (opcional: archivos de lími
 `CHROMIUM=/ruta/a/chrome` usa ese binario en lugar del canal `chrome`.
 `CONTORNOS_EVIDENCIA=/ruta` guarda capturas y un resumen JSON.
 
+## Reintentos de teselas del fondo
+
+Reintentos de #93 con el `createMapCanvas` real en `contornos.html`, sin descargar
+teselas: cada petición a Esri u OpenStreetMap se responde desde la prueba con un
+PNG gris, un 503 o nada. Cubre fallo pasajero, fallo persistente, alejar con
+reintentos pendientes, cambiar de fondo o salir, y registra (sin exigirlo) que
+una petición sin respuesta no se reintenta.
+
+```bash
+cd tests/e2e && npm ci
+node teselas.mjs
+```
+
 ## Tabla / Mapa
 
 Selector «Tabla / Mapa» de la tabla de empleados con los widgets, el cargador

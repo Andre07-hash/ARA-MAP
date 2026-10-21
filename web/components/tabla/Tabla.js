@@ -387,27 +387,35 @@ export function createTabla({
   const cuerpo = el("div", { class: "tabla-cuerpo" }, lienzo, panelMapa);
   const lote = el("div", { class: "tabla-lote", role: "region", "aria-label": "Terrenos seleccionados", hidden: true });
   // Columns hidden on this screen only (to show the table to someone without,
-  // say, its prices). A per-browser choice: nothing on the server changes.
-  const CLAVE_OCULTAS = "ara.tabla.ocultas";
-  const ocultas = new Set((() => {
-    try { return JSON.parse(localStorage.getItem(CLAVE_OCULTAS)) ?? []; } catch { return []; }
-  })());
+  // say, its prices), one set per view. A per-browser choice: nothing on the
+  // server changes, and nobody else's screen does.
+  const CLAVE_OCULTAS = "ara.tabla.ocultasPorVista";
+  const ocultasPorVista = (() => {
+    try { return JSON.parse(localStorage.getItem(CLAVE_OCULTAS)) ?? {}; } catch { return {}; }
+  })();
+  let ocultas = new Set();
   const estiloOcultas = el("style");
+  /** The open view's hidden columns. Called whenever the view changes. */
   function pintarOcultas() {
+    ocultas = new Set(ocultasPorVista[vista] ?? []);
     estiloOcultas.textContent = [...ocultas]
       .map((id) => `.tabla-pantalla [data-col="${CSS.escape(id)}"] { display: none !important; }`).join("\n");
-    try { localStorage.setItem(CLAVE_OCULTAS, JSON.stringify([...ocultas])); } catch { /* kept for this visit */ }
   }
-  pintarOcultas();
+  function guardarOcultas() {
+    if (ocultas.size) ocultasPorVista[vista] = [...ocultas]; else delete ocultasPorVista[vista];
+    try { localStorage.setItem(CLAVE_OCULTAS, JSON.stringify(ocultasPorVista)); } catch { /* kept for this visit */ }
+    pintarOcultas();
+  }
   function mostrarDialogo() {
     const casillas = columnas.map((c) => el("label", { class: "check" },
       el("input", { type: "checkbox", checked: !ocultas.has(c.id), onchange: (e) => {
         if (e.target.checked) ocultas.delete(c.id); else ocultas.add(c.id);
-        pintarOcultas();
+        guardarOcultas();
       } }), el("span", {}, c.etiqueta)));
     openDialog({
       titulo: "Mostrar columnas",
-      descripcion: "Se esconden en la tabla y en el mapa, sólo en este navegador. Los datos no se tocan.",
+      descripcion: "Se esconden sólo en esta vista, en la tabla y en el mapa, y sólo en este navegador. " +
+        "Los datos no se tocan y los demás usuarios siguen viéndolas.",
       contenido: el("div", { class: "tabla-mostrar" }, casillas),
       acciones: [{ etiqueta: "Listo", variante: "principal", onClick: (close) => close() }],
     });
@@ -691,6 +699,7 @@ export function createTabla({
     selVista.replaceChildren(...opciones.flat());
     selVista.value = vista ?? "";
     pintarTitulo();
+    pintarOcultas();
 
     const sinAcceso = !vista;
     for (const nodo of [pie, bandeja]) nodo.hidden = sinAcceso || (nodo === bandeja && !bandeja.childElementCount);

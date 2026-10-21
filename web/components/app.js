@@ -507,7 +507,10 @@ function menuDeCuenta(sesion) {
   menu.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && menu.open) { e.stopPropagation(); cerrar(); menu.querySelector("summary").focus(); }
   });
-  menu.addEventListener("focusout", (e) => { if (!menu.contains(e.relatedTarget)) cerrar(); });
+  // Only a focus moving elsewhere closes it: Safari does not focus a clicked
+  // item, so a press inside blurs with no relatedTarget. Presses outside are
+  // closed by the document's pointerdown above.
+  menu.addEventListener("focusout", (e) => { if (e.relatedTarget && !menu.contains(e.relatedTarget)) cerrar(); });
   return menu;
 }
 

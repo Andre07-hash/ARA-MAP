@@ -120,6 +120,7 @@ export function createVistaPrevia({ cargador = () => null, onSeleccion, onError,
       if (!lienzo.isConnected || lienzo.offsetParent === null || typeof L === "undefined") return;
       canvas = createMapCanvas(lienzo, {
         cargaAlSeleccionar: true,
+        posicionZoom: "topleft",
         onSelect: (id) => { seleccionar(id, { desdeMapa: true }); },
         onDoubleSelect: (id) => { canvas.zoomToScale(id); },
       });

@@ -44,7 +44,7 @@ export const ZOOM_MAXIMO = 20;
 /* `cargaAlSeleccionar`: the host loads a boundary's outline when it is
  * selected (the tables' map), so its symbol can say to click for it. */
 export function createMapCanvas(container, {
-  onSelect, onScaleChange, onDoubleSelect, cargaAlSeleccionar = false,
+  onSelect, onScaleChange, onDoubleSelect, cargaAlSeleccionar = false, posicionZoom = "topright",
 } = {}) {
   const map = L.map(container, {
     zoomControl: false,
@@ -55,7 +55,7 @@ export function createMapCanvas(container, {
   });
 
   map.fitBounds(MEXICO_BOUNDS);
-  L.control.zoom({ position: "topright" }).addTo(map);
+  L.control.zoom({ position: posicionZoom, zoomInTitle: "Acercar", zoomOutTitle: "Alejar" }).addTo(map);
   map.attributionControl.setPrefix("");
 
   // Outlines share the map's single canvas renderer with every circle and

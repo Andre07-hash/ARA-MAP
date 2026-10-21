@@ -816,6 +816,68 @@ await caso('Importar Excel reviews first and adds to the chosen base; Exportar a
   await context.close();
 });
 
+await caso('Exportar a Excel is offered on the grid only: the map has filters of its own (#68 review, E1)', async () => {
+  const { context, page, errores } = await abrir('ada');
+  await irATabla(page, B['Base Norte']);
+  const opciones = async () => {
+    await page.locator('.tabla-acciones .menu-mas > summary').click();
+    const textos = await page.locator('.tabla-acciones .menu-panel .menu-item:visible').allInnerTexts();
+    await page.locator('.tabla-acciones .menu-mas > summary').click();
+    return textos.join(' | ');
+  };
+  assert.match(await opciones(), /Exportar a Excel\s*La tabla, con sus filtros/);
+  await page.getByRole('button', { name: 'Mapa', exact: true }).click();
+  await page.locator('.tabla-pantalla.modo-mapa').waitFor();
+  assert.doesNotMatch(await opciones(), /Exportar a Excel/, 'offered on the map, which narrows its set itself');
+  await page.getByRole('button', { name: 'Tabla', exact: true }).click();
+  await listo(page);
+  assert.match(await opciones(), /Exportar a Excel/);
+  assert.deepEqual(errores, []);
+  await context.close();
+});
+
+await caso('an import answer that arrives after its dialog closed changes nothing on screen (#68 review, E2)', async () => {
+  const { context, page, errores } = await abrir('ada');
+  await irATabla(page, B['Base Norte']);
+  await page.locator('.tabla-acciones .menu-mas > summary').click();
+  await page.locator('.tabla-acciones .menu-item', { hasText: 'Importar Excel' }).click();
+  const dialogo = page.getByRole('dialog', { name: 'Importar Excel' });
+  await dialogo.locator('input[type=file]').setInputFiles({
+    name: 'tardio.csv', mimeType: 'text/csv',
+    buffer: Buffer.from('Terreno,Estado,Municipio\nLote Importado Tardío Ficticio,Jalisco,Zapopan\n'),
+  });
+  await dialogo.getByRole('button', { name: 'Revisar filas' }).click();
+  await dialogo.getByText('1 de 1 filas leídas son nuevas').waitFor();
+  // The confirmation reaches the server; its answer is held in the browser.
+  let soltar;
+  const retenida = new Promise((r) => { soltar = r; });
+  let llego = false;
+  await page.route(/\/api\/maestra\/bases\/[^/]+\/importar(\?(?!simular).*)?$/, async (ruta) => {
+    const respuesta = await ruta.fetch();
+    llego = true;
+    await retenida;
+    await ruta.fulfill({ response: respuesta }).catch(() => {});
+  });
+  await dialogo.getByRole('button', { name: 'Agregar 1 terreno' }).click();
+  for (let i = 0; i < 200 && !llego; i += 1) await new Promise((r) => setTimeout(r, 50));
+  assert.ok(llego, 'the confirmation was not sent');
+  await dialogo.getByRole('button', { name: 'Cancelar' }).click();
+  await dialogo.waitFor({ state: 'detached' });
+  // Another view (Base Sur is deleted by an earlier journey): the master table.
+  await page.locator('#tabla-vista').selectOption('maestra');
+  await page.waitForURL(/#\/tabla\/maestra$/);
+  await listo(page);
+  soltar();
+  await new Promise((r) => setTimeout(r, 1200));
+  assert.match(page.url(), /#\/tabla\/maestra$/, 'the late answer took the view back');
+  assert.equal(await page.getByText(/Se agregaron/).count(), 0, 'a late success notice');
+  // Closing did not cancel what the server had already saved.
+  assert.equal((await pedir(page, `/api/maestra/bases/${B['Base Norte']}/terrenos?q=Tard%C3%ADo`)).body.total, 1);
+  await page.unrouteAll({ behavior: 'ignoreErrors' });
+  assert.deepEqual(errores, []);
+  await context.close();
+});
+
 await caso('public and legacy administrator journeys still work', async () => {
   const anon = await abrir(null);
   await anon.page.getByText('Todavía no hay terrenos publicados').waitFor();

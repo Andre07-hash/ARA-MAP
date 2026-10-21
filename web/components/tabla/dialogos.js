@@ -12,6 +12,7 @@ import { crearIntento } from "../../lib/inventario.js";
 import { textoDe, valorDe } from "../../lib/tabla.js";
 import { confirmarBorrado, confirmDialog, openDialog } from "../ui/dialog.js";
 import { toast } from "../ui/toast.js";
+import { montarAsistente } from "./asistenteTerreno.js";
 import { montarRanura } from "./ranuraArchivos.js";
 
 const TIPOS = [["texto", "Texto"], ["numero", "Número"], ["opcion", "Opción"], ["fecha", "Fecha"]];
@@ -116,9 +117,12 @@ export function abrirDetalle({
     el("dd", {}, `${terreno.updated_by?.display_name ?? "—"} · versión ${terreno.version}`),
   );
   const acciones = el("div", { class: "detalle-acciones" });
+  // Administrators only; it stays hidden unless the server has it on.
+  const asistente = admin ? montarAsistente({ terreno }) : null;
   function pintarEstado() {
     acciones.replaceChildren(...[
       boton("Historial", () => onHistorial()),
+      asistente?.boton,
       admin && puedeCambiar && boton("Transferir a otra base…", async () => {
         if (await close()) onTransferir();
       }),
@@ -135,7 +139,7 @@ export function abrirDetalle({
   const { dialog, close } = openDialog({
     titulo: terreno.draft?.terreno || "Terreno sin nombre",
     ancho: "38rem",
-    contenido: el("div", {}, datos, acciones),
+    contenido: el("div", {}, datos, acciones, asistente?.panel),
     acciones: [cerrar],
     // Closing destroys the file controls: never silently while an upload is unfinished.
     antesDeCerrar: () => (montadas.some((m) => m.ocupado?.()) ? confirmDialog({
@@ -148,6 +152,7 @@ export function abrirDetalle({
   });
   pintarEstado();
   dialog.addEventListener("close", () => {
+    asistente?.destroy();
     for (const m of montadas.splice(0)) m.destroy();
     onCerrar?.();
   });
@@ -606,6 +611,9 @@ export function abrirImportar({ bases, baseInicial, onHecho }) {
     aviso.decir("");
     try {
       const r = await importarEnBase(baseId, archivo, { simular: !confirmar });
+      // Closed meanwhile (Cancelar, Escape, a logout): this answer changes
+      // nothing on screen. What the server saved stays saved.
+      if (!dialog.isConnected) return;
       if (confirmar) {
         toast(`Se agregaron ${terrenos(r.nuevas)} a «${nombreBase}».`);
         close();
@@ -624,6 +632,7 @@ export function abrirImportar({ bases, baseInicial, onHecho }) {
           `Columnas que la tabla no tiene y no se cargan: ${r.no_cargadas.join(", ")}.`),
       ].filter(Boolean));
     } catch (error) {
+      if (!dialog.isConnected) return;
       revisado = null;
       const errores = error.detalle?.errores ?? [];
       aviso.decir(error.message);

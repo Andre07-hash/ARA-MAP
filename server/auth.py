@@ -371,6 +371,16 @@ def _sesion(request: Any) -> Sesion:
     return sesion
 
 
+def require(request: Any, capacidad: str, conn: DatabaseConnection | None = None) -> Alcance:
+    """Request-time read check for an action that names no terrain or base:
+    the session and the role, read again from the database."""
+    sesion = _sesion(request)
+    if conn is not None:
+        return _verificar(conn, sesion, capacidad)
+    with db.session() as propia:
+        return _verificar(propia, sesion, capacidad)
+
+
 def require_base(request: Any, base_id: str, capacidad: str,
                  conn: DatabaseConnection | None = None) -> Alcance:
     """Request-start check that the caller may do this in that work base.

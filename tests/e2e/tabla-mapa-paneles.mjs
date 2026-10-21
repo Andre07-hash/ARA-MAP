@@ -306,7 +306,7 @@ await revisar('la barra es la misma que en Tabla; sobre el mapa sólo Encuadrar 
     cierto(await p.locator(visible).isVisible(), `${visible} visible también en el mapa`);
   }
   // Inside the closed "⋯" menu nothing is visible, so the hidden attribute is what tells.
-  igual(await p.locator('.menu-panel .menu-item', { hasText: 'Columnas' }).getAttribute('hidden'), '', 'Columnas oculto en el mapa');
+  igual(await p.locator('.menu-panel .menu-item', { hasText: /^Columnas$/ }).getAttribute('hidden'), '', 'Columnas oculto en el mapa');
   for (const quitado of ['.mapa-tabla-alcance', '.previa-cuenta', '.previa-titulo', '.previa-pie', '.mapa-tabla-cabecera', '.tabla-heredados']) {
     igual(await p.locator(quitado).count(), 0, `sin ${quitado}`);
   }

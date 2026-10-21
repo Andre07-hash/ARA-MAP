@@ -22,7 +22,7 @@ APP_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB = APP_ROOT / "datos" / "ara_map.db"
 BACKUPS_KEPT = 10
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 # Savepoint names only need to be unique while nested.
 _savepoints = itertools.count()
@@ -438,6 +438,14 @@ V9_COLUMNS = (
 V9_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_inventory_terrain_base ON inventory_terrain(base_id);
 """
+
+# v11: the header logo an account sees, chosen by the administrator who
+# creates it. Existing accounts keep what they saw before: "tyrag" was the one
+# account branded Dewa by login (PR #81), so the upgrade stores that once, when
+# the column is added; every other account gets the default, ARA.
+MARCAS = ("ara", "dewa")
+V11_MARCA = "TEXT NOT NULL DEFAULT 'ara' CHECK (marca IN ('ara', 'dewa'))"
+V11_MARCA_INICIAL = "UPDATE team_user SET marca = 'dewa' WHERE login = 'tyrag'"
 
 # v10: attachment storage (PDF and KMZ of a terrain). Storage only: nothing
 # writes these tables yet. Table and column names are the ones Team B's
@@ -919,6 +927,7 @@ def migrate(conn: sqlite3.Connection) -> None:
     conn.executescript(INVENTORY_SCHEMA)  # v7 -> v8, additive and idempotent
     _migrate_bases_de_trabajo(conn)
     conn.executescript(ATTACHMENT_SCHEMA)  # v9 -> v10, additive and idempotent
+    _migrate_marca(conn)
     # Before any snapshot below copies terrains: the copy names this column.
     _migrate_moneda(conn)
 
@@ -1066,6 +1075,14 @@ def _migrate_bases_de_trabajo(conn: sqlite3.Connection) -> None:
         if column not in _columns(conn, table):
             conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definicion}")
     conn.executescript(V9_INDEXES)
+
+
+def _migrate_marca(conn: sqlite3.Connection) -> None:
+    """v10 -> v11: each account's header logo. The backfill runs only when the
+    column is added, so a later choice is never overwritten."""
+    if "marca" not in _columns(conn, "team_user"):
+        conn.execute(f"ALTER TABLE team_user ADD COLUMN marca {V11_MARCA}")
+        conn.execute(V11_MARCA_INICIAL)
 
 
 def _table_names(conn: sqlite3.Connection) -> set[str]:

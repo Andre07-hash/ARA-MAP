@@ -224,7 +224,8 @@ class Resumenes:
         self.assertEqual(claves(r) & {"archivos", "ubicacion", "geometria"}, set())
 
     def test_no_schema_change(self):
-        self.assertEqual(db.SCHEMA_VERSION, 10)
+        # Summaries added no schema; v11 (team_user.marca) is unrelated to them.
+        self.assertEqual(db.SCHEMA_VERSION, 11)
 
 
 class ResumenesSQLite(Resumenes, unittest.TestCase):

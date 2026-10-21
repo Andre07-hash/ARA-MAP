@@ -144,10 +144,13 @@ class V10Checks:
     # -- 1. the upgrade --------------------------------------------------------
 
     def test_schema_9_content_is_unchanged_and_the_new_tables_start_empty(self):
-        self.assertEqual((db.SCHEMA_VERSION, self.version_actual()), (10, 10))
+        self.assertGreaterEqual(db.SCHEMA_VERSION, 10)
+        self.assertEqual(self.version_actual(), db.SCHEMA_VERSION)
         for tabla, filas in self.antes.items():
             self.assertTrue(filas or tabla == "incidencia", tabla)
-            self.assertEqual(self.despues[tabla], filas, tabla)
+            # Later versions may add columns (v11: team_user.marca); values stay.
+            ahora = [{k: fila[k] for k in filas[0]} for fila in self.despues[tabla]] if filas else []
+            self.assertEqual(sorted(ahora, key=repr), filas, tabla)
         self.assertEqual(self.antes["team_user"][0].keys() >= {"rol"}, True)
         for tabla in V10_TABLES:
             self.assertEqual(self.despues[tabla], [], tabla)
@@ -594,7 +597,7 @@ class SchemaV10Sqlite(V10Checks, unittest.TestCase):
     def test_a_new_database_gets_the_attachment_tables(self):
         with tempfile.TemporaryDirectory() as tmp, db.session(Path(tmp) / "nueva.db") as conn:
             tablas = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
-            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 10)
+            self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], db.SCHEMA_VERSION)
         self.assertTrue(set(V10_TABLES) <= tablas)
 
 
@@ -615,7 +618,7 @@ class SchemaV10Postgres(V10Checks, unittest.TestCase):
             # A fresh workspace through the normal path reaches 10 ...
             conn.raw.execute(postgres.schema_sql(), prepare=False)
             postgres.migrate(conn)
-            assert postgres.schema_version(conn) == 10
+            assert postgres.schema_version(conn) == db.SCHEMA_VERSION
             assert conn.execute("SELECT to_regclass('archivo_trabajo') AS t").fetchone()["t"]
             # ... and is then taken back to schema 9: no attachment tables.
             conn.raw.execute(

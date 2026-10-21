@@ -105,10 +105,11 @@ def operators(request: Request) -> Respuesta:
 
 
 def create_account(request: Request) -> Respuesta:
-    """{login, display_name, password, rol}: a new account, operator or
-    administrator. Administrators only (usuarios.gestionar). The password is
-    only hashed: it is never logged, stored as is or sent back."""
-    data, errors = _body(request, "login", "display_name", "password", "rol")
+    """{login, display_name, password, rol, marca}: a new account, operator or
+    administrator, and the header logo it will see (ARA when omitted).
+    Administrators only (usuarios.gestionar). The password is only hashed: it
+    is never logged, stored as is or sent back."""
+    data, errors = _body(request, "login", "display_name", "password", "rol", "marca")
     for campo in ("login", "display_name", "password"):
         valor = data.get(campo)
         if not isinstance(valor, str) or not valor.strip():
@@ -117,6 +118,9 @@ def create_account(request: Request) -> Respuesta:
             errors[campo] = "Contiene caracteres no admitidos o es demasiado largo."
     if data.get("rol") not in auth.ROLES:
         errors["rol"] = "Elige operador o administrador."
+    marca = data.get("marca", auth.MARCA_PREDETERMINADA)
+    if marca not in db.MARCAS:
+        errors["marca"] = "Elige el logo ARA o Dewa."
     if errors:
         raise _invalid(errors)
     with db.escritura() as conn:
@@ -124,7 +128,7 @@ def create_account(request: Request) -> Respuesta:
         try:
             # ponytail: hashing (PBKDF2) runs inside the write lock; rare admin action.
             cuenta = auth.create_user(conn, data["login"], data["display_name"], data["password"],
-                                      rol=data["rol"], actor=alcance.actor)
+                                      rol=data["rol"], marca=marca, actor=alcance.actor)
         except auth.AccountError as error:
             raise ApiError(str(error), 422, {"code": "validation_failed"}) from None
     return {"cuenta": cuenta}

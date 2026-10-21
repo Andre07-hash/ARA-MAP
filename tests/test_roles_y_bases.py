@@ -251,6 +251,37 @@ class Matriz(Escenario):
                          {"authenticated": False})
         self.assertEqual(self.call("GET", "/api/maestra/bases", cookie="ara_sesion=" + "x" * 43)[0], 401)
 
+    def test_only_an_administrator_creates_accounts_and_the_password_is_never_echoed(self):
+        ruta, clave = "/api/maestra/cuentas", "clave-ficticia-larga"
+        nueva = {"login": "Nora", "display_name": " Nora  Ficticia ", "password": clave,
+                 "rol": "operador"}
+        status, body = self.call("POST", ruta, nueva, "olga")
+        self.assertEqual((status, body["detalle"]["code"]), (403, "forbidden"))
+        self.assertEqual(self.cuenta("team_user", "login = 'nora'"), 0)
+        for cuerpo in ({**nueva, "rol": "jefe"}, {**nueva, "password": "corta"},
+                       {**nueva, "login": "x"}, {**nueva, "extra": 1}, {"login": "nora"},
+                       {**nueva, "login": "ada"}):
+            self.assertEqual(self.call("POST", ruta, cuerpo)[0], 422, cuerpo)
+        self.assertEqual(self.cuenta("team_user", "login = 'nora'"), 0)
+
+        status, body = self.call("POST", ruta, nueva)
+        self.assertEqual((status, body["cuenta"]["login"], body["cuenta"]["display_name"],
+                          body["cuenta"]["rol"]), (200, "nora", "Nora Ficticia", "operador"))
+        self.assertEqual(set(body["cuenta"]), {"id", "login", "display_name", "rol"})
+        status, body = self.call("POST", ruta, {**nueva, "login": "adela", "rol": "admin"}, "alan")
+        self.assertEqual((status, body["cuenta"]["rol"]), (200, "admin"))
+        eventos = filas("team_user_event", "action = 'cuenta_creada' AND actor_id IS NOT NULL")
+        self.assertEqual(sorted((e["actor_id"], e["actor_name"]) for e in eventos),
+                         sorted([(self.ids["ada"], "Ada Ficticia"), (self.ids["alan"], "Alan Ficticia")]))
+        self.assertNotIn(clave, json.dumps(eventos) + json.dumps(filas("team_user")))
+        for login in ("nora", "adela"):  # both can sign in with the password they were given
+            peticion = urllib.request.Request(
+                f"http://127.0.0.1:{self.httpd.server_address[1]}/api/login", method="POST",
+                data=json.dumps({"username": login, "password": clave}).encode(),
+                headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(peticion, timeout=20) as respuesta:
+                self.assertEqual(respuesta.status, 200)
+
     # -- 2. work bases and grants -----------------------------------------------
 
     def test_an_administrator_creates_renames_and_deletes_a_base(self):

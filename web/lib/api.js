@@ -206,6 +206,7 @@ export const api = {
                         request(`/maestra/bases/${enc(id)}/acceso`,
                           { method: "PUT", body: { expected_version, usuarios } }),
   operadores:         (q = "") => request(`/maestra/operadores?limit=200${q ? `&q=${enc(q)}` : ""}`),
+  crearCuenta:        (cuerpo) => request("/maestra/cuentas", { method: "POST", body: cuerpo }),
 
   columnas:           (base, signal) => request(`/maestra/bases/${enc(base)}/columnas`, { signal }),
   crearColumna:       (base, cuerpo, clave) => request(`/maestra/bases/${enc(base)}/columnas`, {

@@ -439,11 +439,43 @@ export function abrirBases({ onCerrar }) {
     hacer(async () => { await api.crearBaseDeTrabajo(nombre.value); nombre.value = ""; });
   });
 
+  // A new account. The password goes to the server once and is cleared here.
+  const campo = (id, etiqueta, nodo) => el("div", { class: "rail-field" },
+    el("label", { class: "field-label", for: id }, etiqueta), nodo);
+  const login = el("input", { id: "cuenta-login", class: "input", maxlength: "64", autocomplete: "off", required: true });
+  const visible = el("input", { id: "cuenta-nombre", class: "input", maxlength: "100", autocomplete: "off", required: true });
+  const clave = el("input", {
+    id: "cuenta-clave", class: "input", type: "password", minlength: "12", maxlength: "200",
+    autocomplete: "new-password", required: true,
+  });
+  const rol = el("select", { id: "cuenta-rol", class: "input" },
+    el("option", { value: "operador" }, "Operador"), el("option", { value: "admin" }, "Administrador"));
+  const nuevaCuenta = el("form", { class: "columnas-nueva" },
+    el("h3", {}, "Nueva cuenta"),
+    campo("cuenta-login", "Usuario", login), campo("cuenta-nombre", "Nombre visible", visible),
+    campo("cuenta-clave", "Contraseña inicial (12 caracteres o más)", clave), campo("cuenta-rol", "Rol", rol),
+    el("button", { type: "submit", class: "btn btn-principal" }, "Crear cuenta"),
+  );
+  nuevaCuenta.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    aviso.decir("");
+    try {
+      const { cuenta } = await api.crearCuenta({
+        login: login.value, display_name: visible.value, password: clave.value, rol: rol.value,
+      });
+      nuevaCuenta.reset();
+      aviso.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
+    } catch (error) {
+      const campos = Object.values(error.detalle?.fields ?? {});
+      aviso.decir(campos.length ? campos.join(" ") : error.message);
+    } finally { clave.value = ""; }
+  });
+
   const { dialog } = openDialog({
     titulo: "Bases de trabajo y accesos",
     descripcion: "Una base agrupa terrenos y dice qué operadores pueden abrirlos.",
     ancho: "44rem",
-    contenido: el("div", {}, lista, aviso.nodo, crear),
+    contenido: el("div", {}, lista, aviso.nodo, crear, nuevaCuenta),
     acciones: [cerrar],
   });
   dialog.addEventListener("close", () => onCerrar?.(cambio));

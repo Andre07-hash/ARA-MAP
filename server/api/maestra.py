@@ -78,6 +78,7 @@ def listing(request: Request) -> Respuesta:
 
 
 MAX_OPERADORES = 200
+MAX_CAMPO_CUENTA = 200
 
 
 def operators(request: Request) -> Respuesta:
@@ -101,6 +102,32 @@ def operators(request: Request) -> Respuesta:
     with db.session() as conn:
         usuarios, total = repo.operadores(conn, buscado, limite)
     return {"usuarios": usuarios, "total": total}
+
+
+def create_account(request: Request) -> Respuesta:
+    """{login, display_name, password, rol}: a new account, operator or
+    administrator. Administrators only (usuarios.gestionar). The password is
+    only hashed: it is never logged, stored as is or sent back."""
+    data, errors = _body(request, "login", "display_name", "password", "rol")
+    for campo in ("login", "display_name", "password"):
+        valor = data.get(campo)
+        if not isinstance(valor, str) or not valor.strip():
+            errors[campo] = "Campo obligatorio."
+        elif len(valor) > MAX_CAMPO_CUENTA or not texto_seguro(valor):
+            errors[campo] = "Contiene caracteres no admitidos o es demasiado largo."
+    if data.get("rol") not in auth.ROLES:
+        errors["rol"] = "Elige operador o administrador."
+    if errors:
+        raise _invalid(errors)
+    with db.escritura() as conn:
+        alcance = auth.reverificar(conn, request.sesion, "usuarios.gestionar")
+        try:
+            # ponytail: hashing (PBKDF2) runs inside the write lock; rare admin action.
+            cuenta = auth.create_user(conn, data["login"], data["display_name"], data["password"],
+                                      rol=data["rol"], actor=alcance.actor)
+        except auth.AccountError as error:
+            raise ApiError(str(error), 422, {"code": "validation_failed"}) from None
+    return {"cuenta": cuenta}
 
 
 def create(request: Request) -> Respuesta:

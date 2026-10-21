@@ -258,7 +258,7 @@ class Matriz(Escenario):
         status, body = self.call("POST", ruta, nueva, "olga")
         self.assertEqual((status, body["detalle"]["code"]), (403, "forbidden"))
         self.assertEqual(self.cuenta("team_user", "login = 'nora'"), 0)
-        for cuerpo in ({**nueva, "rol": "jefe"}, {**nueva, "password": "corta"},
+        for cuerpo in ({**nueva, "rol": "jefe"}, {**nueva, "password": "  "},
                        {**nueva, "login": "x"}, {**nueva, "extra": 1}, {"login": "nora"},
                        {**nueva, "login": "ada"}):
             self.assertEqual(self.call("POST", ruta, cuerpo)[0], 422, cuerpo)
@@ -270,9 +270,12 @@ class Matriz(Escenario):
         self.assertEqual(set(body["cuenta"]), {"id", "login", "display_name", "rol"})
         status, body = self.call("POST", ruta, {**nueva, "login": "adela", "rol": "admin"}, "alan")
         self.assertEqual((status, body["cuenta"]["rol"]), (200, "admin"))
+        status, body = self.call("POST", ruta, {**nueva, "login": "corto", "password": "ab"}, "alan")
+        self.assertEqual((status, body["cuenta"]["login"]), (200, "corto"))  # no minimum length
         eventos = filas("team_user_event", "action = 'cuenta_creada' AND actor_id IS NOT NULL")
         self.assertEqual(sorted((e["actor_id"], e["actor_name"]) for e in eventos),
-                         sorted([(self.ids["ada"], "Ada Ficticia"), (self.ids["alan"], "Alan Ficticia")]))
+                         sorted([(self.ids["ada"], "Ada Ficticia")]
+                                + [(self.ids["alan"], "Alan Ficticia")] * 2))
         self.assertNotIn(clave, json.dumps(eventos) + json.dumps(filas("team_user")))
         for login in ("nora", "adela"):  # both can sign in with the password they were given
             peticion = urllib.request.Request(

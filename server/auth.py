@@ -41,7 +41,6 @@ SESSION_SECONDS = 12 * 60 * 60
 # there. Iterations are stored in each hash, so raising this later re-hashes
 # nothing and breaks no login. Measured: ~0.06 s (3.14) / ~0.14 s (3.9).
 PBKDF2_ITERATIONS = 600_000
-MIN_PASSWORD = 12
 
 # Login throttle, counted in the database so every cloud worker shares it.
 # ponytail: keyed by login only; an attacker can lock a known login for the
@@ -235,8 +234,9 @@ def _check_rol(rol: str) -> None:
 
 
 def _check_password(password: str) -> None:
-    if len(password) < MIN_PASSWORD:
-        raise AccountError(f"La contraseña debe tener al menos {MIN_PASSWORD} caracteres.")
+    # Any length is allowed; only a blank password is refused.
+    if not password.strip():
+        raise AccountError("La contraseña es obligatoria.")
 
 
 # -- login and sessions ----------------------------------------------------------

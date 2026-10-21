@@ -446,7 +446,7 @@ export function abrirBases({ onCerrar }) {
   const login = el("input", { id: "cuenta-login", class: "input", maxlength: "64", autocomplete: "off", required: true });
   const visible = el("input", { id: "cuenta-nombre", class: "input", maxlength: "100", autocomplete: "off", required: true });
   const clave = el("input", {
-    id: "cuenta-clave", class: "input", type: "password", minlength: "12", maxlength: "200",
+    id: "cuenta-clave", class: "input", type: "password", maxlength: "200",
     autocomplete: "new-password", required: true,
   });
   const rol = el("select", { id: "cuenta-rol", class: "input" },
@@ -456,7 +456,7 @@ export function abrirBases({ onCerrar }) {
     el("h3", {}, "Nueva cuenta"),
     el("div", { class: "cuentas-campos" },
       campo("cuenta-login", "Usuario", login), campo("cuenta-nombre", "Nombre visible", visible),
-      campo("cuenta-clave", "Contraseña inicial (12 caracteres o más)", clave), campo("cuenta-rol", "Rol", rol)),
+      campo("cuenta-clave", "Contraseña inicial", clave), campo("cuenta-rol", "Rol", rol)),
     avisoCuenta.nodo,
     el("div", {}, el("button", { type: "submit", class: "btn btn-principal" }, "Crear cuenta")),
   );

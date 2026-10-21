@@ -289,8 +289,8 @@ await caso('administrator dialogs (bases, grants, transfer preview) do not outli
   const id = fila();
   for (const abrir of [
     async (page) => {
-      await enMenu(page, 'Bases y accesos');
-      const bases = page.getByRole('dialog', { name: 'Bases y accesos' });
+      await enMenu(page, 'Settings');
+      const bases = page.getByRole('dialog', { name: 'Settings' });
       await bases.locator('li', { has: page.getByLabel('Nombre de la base Base Grande') }).getByRole('button', { name: 'Accesos…' }).click();
       await page.getByRole('dialog', { name: 'Accesos · Base Grande' }).getByLabel(/^Olivia Ficticia/).waitFor();
     },
@@ -311,7 +311,7 @@ await caso('administrator dialogs (bases, grants, transfer preview) do not outli
     await hastaSesion(p.page, 'Olga Ficticia');
     await p.page.waitForFunction(() => document.querySelectorAll('#tabla-vista option').length === 1);
     await cargada(p.page);
-    const queda = await loQueQueda(p.page, ['Olivia Ficticia', 'Oriol Ficticia', 'Base 01', 'Bases y accesos', 'Tabla maestra']);
+    const queda = await loQueQueda(p.page, ['Olivia Ficticia', 'Oriol Ficticia', 'Base 01', 'Bases y accesos', 'Settings', 'Tabla maestra']);
     assert.deepEqual([queda.marcas, queda.dialogosPrivados], [[], 0], JSON.stringify({ ...queda, donde: queda.donde.map((d) => d.slice(100, 220)) }));
     assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
     assert.deepEqual(await p.page.locator('#tabla-vista option').allInnerTexts(), ['Base Grande']);
@@ -325,7 +325,7 @@ await caso('a role change ends the session; signing in again shows the new role 
   await p.entrarPorApi('alan');
   await p.page.goto(`${URL_BASE}/#/tabla/maestra`);
   await cargada(p.page);
-  await enMenu(p.page, 'Bases y accesos');
+  await enMenu(p.page, 'Settings');
   await p.page.getByLabel('Nombre de la base Base 01').waitFor();
   execFileSync('/usr/bin/python3', [join(RAIZ, 'scripts/cuentas.py'), '--sqlite', BD, 'rol', 'alan', 'operador'], { stdio: 'pipe' });
   await revalidar(p.page);
@@ -335,7 +335,7 @@ await caso('a role change ends the session; signing in again shows the new role 
   await entrarEnDialogo(p.page, 'alan');
   await p.page.getByRole('heading', { name: 'Todavía no tienes una base de trabajo' }).waitFor();
   assert.deepEqual(await p.page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
-  assert.equal(await p.page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 0);
+  assert.equal(await p.page.locator('.menu-panel .menu-item', { hasText: /Settings|Importar Excel/ }).count(), 0);
   assert.equal((await p.api('GET', '/api/inventario/terrenos?limit=1')).status, 403);
   await foto(p.page, 'c1-05-cambio-de-rol');
   assert.deepEqual(p.errores, []);

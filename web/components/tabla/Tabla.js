@@ -259,7 +259,7 @@ export function createTabla({
     nota && el("span", { class: "menu-item-nota" }, nota)));
   const btnExportar = deMenu("bajar", "Exportar a Excel", () => exportar(), "La vista actual, con sus filtros");
   const btnImportar = admin && deMenu("subir", "Importar Excel…", () => importar(), "Agrega filas a una base");
-  const btnBases = admin && deMenu("personas", "Bases y accesos", () => basesDialogo());
+  const btnBases = admin && deMenu("personas", "Settings", () => basesDialogo());
   const btnColumnas = deMenu("columnas", "Columnas", () => columnasDialogo());
   const btnMostrar = deMenu("columnas", "Mostrar columnas", () => mostrarDialogo(), "Esconde datos en la tabla y el mapa");
   const btnRecargar = deMenu("actualizar", "Actualizar", () => (modo === "mapa" ? actualizarMapa() : actualizarTabla()));
@@ -2068,6 +2068,7 @@ export function createTabla({
 
   function basesDialogo() {
     abrirBases({
+      yo: sesion.id,
       onCerrar: async (cambio) => {
         if (!vivo || !cambio) return;
         await refrescarBases();

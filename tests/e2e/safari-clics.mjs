@@ -66,7 +66,7 @@ await paso("⋯ → Mostrar columnas (casilla y Listo)", async () => {
   await page.locator("dialog[open]").waitFor({ state: "detached" }).catch(() => {});
   await page.evaluate(() => localStorage.clear());
 });
-await paso("⋯ → Bases y accesos", async () => { await menu("Bases y accesos"); await visible("dialog[open]"); });
+await paso("⋯ → Settings", async () => { await menu("Settings"); await visible("dialog[open]"); });
 await paso("⋯ → Actualizar", async () => { await menu("Actualizar"); await page.waitForTimeout(500); });
 await paso("Filtros → casilla → Ver terrenos → chip ×", async () => {
   await page.click("button[aria-controls=tabla-filtros]");
@@ -103,7 +103,7 @@ await paso("Celda → editar → Escape", async () => {
   await page.locator('tbody td[data-col="core:estado"]').first().dblclick();
   await visible("tbody td input, tbody td textarea");
 });
-await paso("Cambiar de vista a una base", async () => { await vista("Base 01"); await visible(".tabla-grid tbody tr"); });
+await paso("Cambiar de vista a una base", async () => { await vista("Base Grande"); await visible(".tabla-grid tbody tr"); });
 await paso("⋯ → Columnas (en una base)", async () => { await menu("Columnas"); await visible("dialog[open] .columnas-lista, dialog[open]"); });
 await paso("Agregar terreno", async () => {
   await page.locator("button", { hasText: "Agregar terreno" }).click();

@@ -285,6 +285,32 @@ class Matriz(Escenario):
             with urllib.request.urlopen(peticion, timeout=20) as respuesta:
                 self.assertEqual(respuesta.status, 200)
 
+    def test_an_administrator_lists_accounts_and_changes_roles_but_never_their_own(self):
+        status, body = self.call("GET", "/api/maestra/cuentas")
+        self.assertEqual(status, 200)
+        por_login = {c["login"]: c for c in body["cuentas"]}
+        self.assertEqual(set(por_login), set(self.ids))
+        self.assertEqual((por_login["ada"]["rol"], por_login["olga"]["rol"]), ("admin", "operador"))
+        self.assertEqual(set(por_login["olga"]), {"id", "login", "display_name", "rol", "active"})
+        self.assertEqual(self.call("GET", "/api/maestra/cuentas", user="olga")[0], 403)
+
+        ruta = f"/api/maestra/cuentas/{self.ids['olga']}/rol"
+        self.assertEqual(self.call("POST", ruta, {"rol": "admin"}, "omar")[0], 403)
+        self.assertEqual(self.call("POST", ruta, {"rol": "jefe"})[0], 422)
+        self.assertEqual(self.call("POST", ruta, {"rol": "admin", "extra": 1})[0], 422)
+        status, body = self.call("POST", f"/api/maestra/cuentas/{self.ids['ada']}/rol", {"rol": "operador"})
+        self.assertEqual((status, body["error"]), (422, "No puedes cambiar tu propio rol."))
+        self.assertEqual(self.call("POST", f"/api/maestra/cuentas/{uuid.uuid4()}/rol", {"rol": "admin"})[0], 404)
+
+        status, body = self.call("POST", ruta, {"rol": "admin"})
+        self.assertEqual((status, body["cuenta"]["rol"]), (200, "admin"))
+        self.assertEqual(self.call("GET", "/api/session", user="olga")[1], {"authenticated": False})
+        evento = filas("team_user_event", "action = 'rol_cambiado'")[0]
+        self.assertEqual((evento["user_id"], evento["actor_id"]), (self.ids["olga"], self.ids["ada"]))
+        # Back to operator, by the other administrator.
+        status, body = self.call("POST", ruta, {"rol": "operador"}, "alan")
+        self.assertEqual((status, body["cuenta"]["rol"]), (200, "operador"))
+
     # -- 2. work bases and grants -----------------------------------------------
 
     def test_an_administrator_creates_renames_and_deletes_a_base(self):

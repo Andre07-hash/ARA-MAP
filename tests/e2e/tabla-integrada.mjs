@@ -127,15 +127,15 @@ await caso('administrator: role-aware navigation, master table columns, bases, g
   const nav = await page.locator('nav .nav-item').allInnerTexts();
   // "Inventario" left the menu: its map is the master table's Tabla / Mapa now.
   assert.deepEqual(nav, ['Terrenos']);
-  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 2);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Settings|Importar Excel/ }).count(), 2);
   await irATabla(page);
   assert.match(page.url(), /#\/tabla\/maestra$/);
   const cabeceras = await page.locator('thead th[data-col]').allInnerTexts();
   assert.deepEqual(cabeceras, ['Tipo de terreno', 'Nombre de terreno', 'Estado', 'Municipio', 'Superficie', 'HA',
     'Afectaciones %', 'Asking price', 'Asking $/m2', 'Comentarios', 'X', 'Y', 'Archivos', 'KMZ / KML', 'Base']);
 
-  await enMenu(page, 'Bases y accesos');
-  const bases = page.getByRole('dialog', { name: 'Bases y accesos' });
+  await enMenu(page, 'Settings');
+  const bases = page.getByRole('dialog', { name: 'Settings' });
   for (const nombre of ['Base Norte', 'Base Sur']) {
     await bases.getByLabel('Nombre', { exact: true }).fill(nombre);
     await bases.getByRole('button', { name: 'Crear base' }).click();
@@ -197,7 +197,7 @@ await caso('operator: only her bases; blank create; every core and custom type e
   await listo(page);
   assert.deepEqual(await page.locator('nav .nav-item').allInnerTexts(), ['Terrenos']);
   assert.deepEqual(await page.locator('#tabla-vista option').allInnerTexts(), ['Base Norte']);
-  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Bases y accesos|Importar Excel/ }).count(), 0);
+  assert.equal(await page.locator('.menu-panel .menu-item', { hasText: /Settings|Importar Excel/ }).count(), 0);
   assert.ok(!api.some((l) => / (401|403|500)$/.test(l)), `no refused or failed call: ${api.filter((l) => / (401|403|500)$/.test(l))}`);
   assert.ok(!api.some((l) => /\/api\/(bases|mapas|carpetas|inventario\/terrenos) /.test(l)), 'no legacy or master-table call');
 
@@ -634,8 +634,8 @@ await caso('grants: a concurrent change is shown, not overwritten; losing the gr
   const ada = await abrir('ada');
   const alan = await abrir('alan');
   await irATabla(ada.page);
-  await enMenu(ada.page, 'Bases y accesos');
-  const bases = ada.page.getByRole('dialog', { name: 'Bases y accesos' });
+  await enMenu(ada.page, 'Settings');
+  const bases = ada.page.getByRole('dialog', { name: 'Settings' });
   await bases.locator('li', { has: ada.page.getByLabel('Nombre de la base Base Norte') })
     .getByRole('button', { name: 'Accesos…' }).click();
   const accesos = ada.page.getByRole('dialog', { name: 'Accesos · Base Norte' });
@@ -750,8 +750,8 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
   const enSur = await agregar(page);
   await escribir(page, enSur, 'core:terreno', 'Lote del Sur');
   const sur = (dialogo) => dialogo.locator('li', { has: page.getByLabel('Nombre de la base Base Sur') });
-  await enMenu(page, 'Bases y accesos');
-  let bases = page.getByRole('dialog', { name: 'Bases y accesos' });
+  await enMenu(page, 'Settings');
+  let bases = page.getByRole('dialog', { name: 'Settings' });
   await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
   // Earlier journeys (the transfer) may have left terrains in Base Sur too: the server says how many.
   const enSurAhora = (await pedir(page, '/api/maestra/bases')).body.bases.find((b) => b.id === B['Base Sur']).terrenos;
@@ -770,8 +770,8 @@ await caso('a base with terrains cannot be deleted; once empty it is deleted for
     assert.equal(r.status, 200, `borrar ${t.id}`);
   }
   await irATabla(page, B['Base Norte']);             // not standing in the base that goes away
-  await enMenu(page, 'Bases y accesos');
-  bases = page.getByRole('dialog', { name: 'Bases y accesos' });
+  await enMenu(page, 'Settings');
+  bases = page.getByRole('dialog', { name: 'Settings' });
   await sur(bases).getByRole('button', { name: 'Borrar…' }).click();
   await page.getByRole('dialog', { name: '¿Borrar la base «Base Sur»?' }).getByRole('button', { name: 'Borrar definitivamente' }).click();
   await sur(bases).waitFor({ state: 'detached' });

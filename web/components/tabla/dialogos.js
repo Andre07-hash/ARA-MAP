@@ -377,7 +377,7 @@ export function abrirColumnas({ base, soloLectura, onCerrar, onAlcancePerdido })
 
 /* ------------------------------------------------------- bases and grants */
 
-export function abrirBases({ onCerrar }) {
+export function abrirBases({ yo, onCerrar }) {
   let cambio = false;
   const aviso = Aviso();
   const lista = el("ul", { class: "bases-lista" });
@@ -468,18 +468,62 @@ export function abrirBases({ onCerrar }) {
         login: login.value, display_name: visible.value, password: clave.value, rol: rol.value,
       });
       nuevaCuenta.reset();
-      avisoCuenta.decir(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
+      toast(`Cuenta «${cuenta.login}» creada como ${cuenta.rol === "admin" ? "administrador" : "operador"}.`);
     } catch (error) {
       const campos = Object.values(error.detalle?.fields ?? {});
       avisoCuenta.decir(campos.length ? campos.join(" ") : error.message);
     } finally { clave.value = ""; }
   });
 
-  // Two pages: the bases with their grants, and the accounts.
+  // Who has an account, and their role. A change ends that person's open
+  // sessions; nobody changes their own role (the server refuses it too).
+  const avisoUsuarios = Aviso();
+  const usuarios = el("ul", { class: "bases-lista" });
+  const rolDe = (r) => (r === "admin" ? "administrador" : "operador");
+  function Usuario(u) {
+    const selRol = el("select", {
+      class: "input", "aria-label": `Rol de ${u.display_name}`, disabled: u.id === yo,
+      onchange: async () => {
+        const nuevo = selRol.value;
+        selRol.value = u.rol;
+        if (!(await confirmDialog({
+          titulo: `¿Hacer ${rolDe(nuevo)} a ${u.display_name}?`,
+          mensaje: `${nuevo === "admin" ? "Podrá ver y cambiar todo, incluidas las bases y las cuentas."
+            : "Sólo verá las bases a las que le des acceso."} Si tiene la sesión abierta, tendrá que volver a entrar.`,
+          confirmar: `Hacer ${rolDe(nuevo)}`,
+        }))) return;
+        avisoUsuarios.decir("");
+        try {
+          await api.cambiarRol(u.id, nuevo);
+          cambio = true;
+          toast(`${u.display_name} ahora es ${rolDe(nuevo)}.`);
+        } catch (error) { avisoUsuarios.decir(error.message); }
+        cargarUsuarios();
+      },
+    }, el("option", { value: "operador", selected: u.rol === "operador" }, "Operador"),
+    el("option", { value: "admin", selected: u.rol === "admin" }, "Administrador"));
+    return el("li", { class: "bases-item usuarios-item" },
+      el("div", { class: "usuarios-quien" },
+        el("strong", {}, u.display_name, u.id === yo && " (tú)"),
+        el("span", { class: "secondary" }, `${u.login}${u.active ? "" : " · cuenta inactiva"}`)),
+      selRol);
+  }
+  async function cargarUsuarios() {
+    try {
+      const { cuentas } = await api.cuentas();
+      usuarios.replaceChildren(...cuentas.map(Usuario));
+    } catch (error) { avisoUsuarios.decir(error.message); }
+  }
+
+  // Three pages: the bases with their grants, who has an account, and new accounts.
   const paginas = {
     bases: el("div", { class: "bases-pagina" },
       el("p", { class: "secondary" }, "Una base agrupa terrenos y dice qué operadores pueden abrirlos."),
       lista, aviso.nodo, crear),
+    usuarios: el("div", { class: "bases-pagina", hidden: true },
+      el("p", { class: "secondary" }, "Quién tiene cuenta y con qué rol. Un administrador ve y cambia todo; " +
+        "un operador sólo abre las bases a las que tiene acceso."),
+      avisoUsuarios.nodo, usuarios),
     cuentas: el("div", { class: "bases-pagina", hidden: true },
       el("p", { class: "secondary" }, "Crea cuentas de operador o de administrador. Después, en «Bases y " +
         "accesos», elige qué bases puede abrir cada operador."),
@@ -487,9 +531,11 @@ export function abrirBases({ onCerrar }) {
   };
   const pestanas = {
     bases: segment("Bases y accesos", true, () => mostrar("bases")),
+    usuarios: segment("Usuarios", false, () => mostrar("usuarios")),
     cuentas: segment("Cuentas", false, () => mostrar("cuentas")),
   };
   function mostrar(cual) {
+    if (cual === "usuarios") cargarUsuarios();
     for (const [nombrePagina, pagina] of Object.entries(paginas)) {
       pagina.hidden = nombrePagina !== cual;
       pestanas[nombrePagina].classList.toggle("is-active", nombrePagina === cual);
@@ -497,11 +543,12 @@ export function abrirBases({ onCerrar }) {
     }
   }
   const { dialog } = openDialog({
-    titulo: "Bases y accesos",
+    titulo: "Settings",
     ancho: "44rem",
     contenido: el("div", { class: "bases-dialogo" },
-      el("div", { class: "segmented", role: "group", "aria-label": "Sección" }, pestanas.bases, pestanas.cuentas),
-      paginas.bases, paginas.cuentas),
+      el("div", { class: "segmented", role: "group", "aria-label": "Sección" },
+        pestanas.bases, pestanas.usuarios, pestanas.cuentas),
+      paginas.bases, paginas.usuarios, paginas.cuentas),
     acciones: [cerrar],
   });
   dialog.addEventListener("close", () => onCerrar?.(cambio));

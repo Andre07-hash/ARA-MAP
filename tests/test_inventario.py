@@ -317,6 +317,24 @@ class InternalList(InventoryServer):
             ids.append(body["terreno"]["id"])
         return ids
 
+    def test_the_map_pages_are_larger_and_lighter(self):
+        ids = self.seed(251)
+        ruta = "/api/inventario/terrenos"
+        self.assertEqual(self.call("GET", f"{ruta}?limit=1000")[0], 422)           # only with mapa=1
+        self.assertEqual(self.call("GET", f"{ruta}?mapa=1&limit=1001")[0], 422)
+        self.assertEqual(self.call("GET", f"{ruta}?mapa=2")[0], 422)
+        status, body = self.call("GET", f"{ruta}?mapa=1&limit=1000")
+        self.assertEqual((status, body["total"], len(body["terrenos"]), body["next_cursor"]), (200, 251, 251, None))
+        self.assertEqual(sorted(t["id"] for t in body["terrenos"]), sorted(ids))
+        self.assertEqual(body["facets"], {})
+        fila = body["terrenos"][0]
+        self.assertFalse({"attention", "confirmations", "created_by", "source_extra"} & set(fila))
+        # What the map and its record read is all there.
+        self.assertTrue({"id", "version", "base_id", "draft", "custom", "updated_by",
+                         "publication_state"} <= set(fila), fila.keys())
+        completo = self.call("GET", f"{ruta}?limit=1")[1]["terrenos"][0]
+        self.assertIn("attention", completo)                                        # the grid's pages keep it
+
     def test_251_records_page_without_gaps_or_duplicates(self):
         ids = self.seed(251)
         self.assertEqual(self.call("GET", "/api/inventario/terrenos?limit=201")[0], 422)  # was 250

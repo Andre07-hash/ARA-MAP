@@ -211,7 +211,11 @@ export const ORDENES = Object.freeze([
 ]);
 
 /** The query string of one page. Everything is the server's to filter. */
-export function consultaDeLista(vista, consulta, cursor = null) {
+/** The map's pages: the server's largest, without what only the grid shows. */
+export const PAGINA_MAPA = 1000;
+
+/** ``mapa``: one of the map's light pages (mapa=1) instead of a grid page. */
+export function consultaDeLista(vista, consulta, cursor = null, { mapa = false } = {}) {
   const c = { ...CONSULTA_VACIA, ...consulta };
   const q = new URLSearchParams();
   if (c.q.trim()) q.set("q", c.q.trim());
@@ -222,7 +226,8 @@ export function consultaDeLista(vista, consulta, cursor = null) {
   for (const campo of ["area_min_m2", "area_max_m2"]) if (c[campo]) q.set(campo, c[campo]);
   if (vista === VISTA_SIN_ASIGNAR) q.set("base", VISTA_SIN_ASIGNAR);
   if (c.sort && c.sort !== "id") q.set("sort", c.sort);
-  q.set("limit", String(LIMITES.includes(c.limit) ? c.limit : LIMITE_INICIAL));
+  if (mapa) q.set("mapa", "1");
+  q.set("limit", String(mapa ? PAGINA_MAPA : LIMITES.includes(c.limit) ? c.limit : LIMITE_INICIAL));
   if (cursor) q.set("cursor", cursor);
   return q.toString();
 }

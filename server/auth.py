@@ -6,8 +6,9 @@ request without it. The SCOPE says where: an administrator's capabilities
 apply everywhere, an operator's only inside the work bases granted to that
 person (maestra_base_acceso), checked by require_* / reverificar_*.
 
-Accounts and roles are created and changed by an explicit-target operations
-command (scripts/cuentas.py), never by the web app.
+Accounts and roles are changed by an explicit-target operations command
+(scripts/cuentas.py). Accounts are created there too, or by an administrator
+in the web app (usuarios.gestionar), never by anyone else.
 
 The same policy guards the local loopback server and the cloud adapter: an API
 route is anonymous only if it is on PUBLIC_API; everything else -- including
@@ -130,16 +131,18 @@ def _unb64(text: str) -> bytes:
 _DUMMY_HASH = "$".join(("pbkdf2_sha256", str(PBKDF2_ITERATIONS), _b64(bytes(16)), _b64(bytes(32))))
 
 
-# -- accounts (operations command only) -----------------------------------------
+# -- accounts (operations command; creation also from an administrator) --------
 
 def normalize_login(value: Any) -> str:
     return str(value or "").strip().casefold()
 
 
 def create_user(conn: DatabaseConnection, login: str, display_name: str, password: str,
-                *, iterations: int = PBKDF2_ITERATIONS, rol: str = "operador") -> dict[str, Any]:
+                *, iterations: int = PBKDF2_ITERATIONS, rol: str = "operador",
+                actor: dict[str, Any] | None = None) -> dict[str, Any]:
     """A new account. It is an operator unless told otherwise: nothing here,
-    and no migration, ever makes an administrator by default."""
+    and no migration, ever makes an administrator by default. ``actor`` is the
+    administrator who asked from the web app; without it, the command."""
     _check_rol(rol)
     login = normalize_login(login)
     if not _LOGIN.match(login):
@@ -158,7 +161,7 @@ def create_user(conn: DatabaseConnection, login: str, display_name: str, passwor
             "INSERT INTO team_user (id, login, display_name, password_hash, active,"
             " credential_revision, rol, created_at, updated_at) VALUES (?, ?, ?, ?, 1, 1, ?, ?, ?)",
             (user_id, login, nombre, hash_password(password, iterations), rol, ahora, ahora))
-        _account_event(conn, user_id, "cuenta_creada", ahora, {"rol": rol})
+        _account_event(conn, user_id, "cuenta_creada", ahora, {"rol": rol}, actor)
     return {"id": user_id, "login": login, "display_name": nombre, "rol": rol}
 
 
@@ -214,13 +217,15 @@ def _change(conn: DatabaseConnection, login: str, assignments: str, params: tupl
 
 
 def _account_event(conn: DatabaseConnection, user_id: str, action: str, ahora: str,
-                   details: dict[str, Any] | None = None) -> None:
-    """Append-only account history. These functions are only reachable from
-    the operations command, so the actor is the command, not a web user."""
+                   details: dict[str, Any] | None = None,
+                   actor: dict[str, Any] | None = None) -> None:
+    """Append-only account history. The actor is the web administrator who
+    created the account, or else the operations command."""
     conn.execute(
         "INSERT INTO team_user_event (id, user_id, action, actor_id, actor_name, at, details_json)"
-        " VALUES (?, ?, ?, NULL, ?, ?, ?)",
-        (str(uuid.uuid4()), user_id, action, ACTOR_CLI, ahora,
+        " VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (str(uuid.uuid4()), user_id, action, actor["id"] if actor else None,
+         actor["display_name"] if actor else ACTOR_CLI, ahora,
          json.dumps(details, ensure_ascii=False) if details else None))
 
 

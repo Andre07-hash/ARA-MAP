@@ -81,6 +81,7 @@ router.add("POST", "/api/inventario/terrenos/:id/transferir", api_inventario.tra
 router.add("GET", "/api/maestra/bases/:bid/acceso", api_maestra.access, "bases.gestionar")
 router.add("PUT", "/api/maestra/bases/:bid/acceso", api_maestra.replace_access, "bases.gestionar")
 router.add("GET", "/api/maestra/operadores", api_maestra.operators, "bases.gestionar")
+router.add("POST", "/api/maestra/cuentas", api_maestra.create_account, "usuarios.gestionar")
 # A base's custom columns. Their values are saved by the terrain PATCH above.
 router.add("GET", "/api/maestra/bases/:bid/columnas", api_columnas.listing, "maestra.ver")
 router.add("POST", "/api/maestra/bases/:bid/columnas", api_columnas.create, "columnas.gestionar")

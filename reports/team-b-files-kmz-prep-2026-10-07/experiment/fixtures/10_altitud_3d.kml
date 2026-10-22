@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2"><Document><name>Ficticio</name><Placemark><name>Predio Ficticio Diez</name><Polygon><extrude>1</extrude><altitudeMode>relativeToGround</altitudeMode><outerBoundaryIs><LinearRing><coordinates>-100.400000,20.600000,25 -100.397000,20.600000,25 -100.397000,20.603000,25 -100.400000,20.603000,25 -100.400000,20.600000,25</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark></Document></kml>

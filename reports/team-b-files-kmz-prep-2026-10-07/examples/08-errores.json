@@ -1,0 +1,37 @@
+{
+  "_nota": "Forma de error idéntica a la del inventario actual (tests/js/fixtures/inventario/error-*.json).",
+  "codigos": {
+    "ARCHIVO_DEMASIADO_GRANDE": "413 al iniciar; el archivo supera el límite del tipo.",
+    "ARCHIVO_TIPO_NO_PERMITIDO": "422 al iniciar; extensión/tipo no admitido en la columna.",
+    "ARCHIVO_NO_COINCIDE": "422 al completar; tamaño o sha256 distinto del declarado.",
+    "PDF_INVALIDO": "fallido; no empieza con %PDF-.",
+    "KMZ_NO_ES_ZIP": "fallido",
+    "KMZ_SIN_KML": "fallido",
+    "KMZ_VARIOS_KML": "fallido",
+    "KMZ_DEMASIADOS_ARCHIVOS": "fallido",
+    "KMZ_EXPANSION_EXCESIVA": "fallido",
+    "KML_DEMASIADO_GRANDE": "fallido",
+    "KML_XML_INVALIDO": "fallido",
+    "KML_DTD_NO_PERMITIDA": "fallido",
+    "KML_DEMASIADO_ANIDADO": "fallido",
+    "KML_DEMASIADOS_ELEMENTOS": "fallido",
+    "KML_DEMASIADOS_VERTICES": "fallido",
+    "KML_SIN_POLIGONOS": "fallido; el mensaje dice qué sí contenía (Point, LineString, GroundOverlay…)",
+    "KML_ANILLO_INVALIDO": "fallido",
+    "KML_COORDENADAS_INVALIDAS": "fallido (incluye lat/lon invertidos fuera de rango)",
+    "ELECCION_INVALIDA": "422 en /eleccion",
+    "avisos": [
+      "KMZ_KML_ADICIONALES",
+      "KML_CONTENIDO_IGNORADO",
+      "KML_ALTITUD_DESCARTADA",
+      "KML_ENLACE_EXTERNO",
+      "GEOMETRIA_FUERA_DE_MEXICO"
+    ]
+  },
+  "forma_error": {
+    "error": "«mensaje en español»",
+    "detalle": {
+      "code": "«codigo»"
+    }
+  }
+}

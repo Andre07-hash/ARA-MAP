@@ -1,0 +1,16 @@
+{
+  "_nota": "Requisito de B para el modelo de instantáneas de A (ola 3). La forma final la define A.",
+  "mapa_terreno_extra": {
+    "geometria_id": "00000000-0000-4000-8000-0000000000d1",
+    "archivos_versiones": [
+      "00000000-0000-4000-8000-0000000000c1",
+      "00000000-0000-4000-8000-0000000000c2"
+    ]
+  },
+  "reglas": [
+    "Una instantánea guarda referencias a versiones inmutables, no copias del GeoJSON ni del archivo.",
+    "Una versión referenciada por una instantánea no puede purgarse; retirar o reemplazar sólo mueve punteros.",
+    "Reemplazar el KMZ del terreno no cambia la geometría de mapas ya guardados.",
+    "Los mapas existentes (sin geometría) siguen exactamente igual: columnas nuevas nulas."
+  ]
+}

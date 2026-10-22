@@ -1,0 +1,6 @@
+<pre id="resultado">zoom 12 · contornos 2 · puntos 1 · sin ubicación 0
+t-hueco: modo=geometria X/Y=—/— partes=1 huecos=1 área calc.=266789 m²
+t-multi: modo=geometria X/Y=—/— partes=2 huecos=0 área calc.=173993.4 m²
+t-xy: modo=punto X/Y=20.6075/-100.3965
+click → t-multi
+seleccionado=t-multi</pre>

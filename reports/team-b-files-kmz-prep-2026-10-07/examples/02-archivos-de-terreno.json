@@ -1,0 +1,57 @@
+{
+  "_nota": "Metadatos únicamente. Nunca incluye clave de almacenamiento ni URL de descarga. 'permisos' lo calcula el servidor con las capacidades de A; el widget sólo lo refleja.",
+  "request": "GET /api/inventario/terrenos/00000000-0000-4000-8000-0000000000a1/archivos",
+  "response": {
+    "terreno_id": "00000000-0000-4000-8000-0000000000a1",
+    "archivos": [
+      {
+        "id": "00000000-0000-4000-8000-0000000000b1",
+        "columna_id": "core:archivos",
+        "tipo": "pdf",
+        "estado": "listo",
+        "version_activa": {
+          "id": "00000000-0000-4000-8000-0000000000c1",
+          "numero": 1,
+          "estado": "listo",
+          "nombre": "escritura-ficticia.pdf",
+          "tipo_mime": "application/pdf",
+          "tamano": 2483112,
+          "sha256": "e3b0c4…(64 hex)",
+          "creado_en": "2026-10-07T15:04:05Z",
+          "creado_por": {
+            "id": "00000000-0000-4000-8000-0000000000e1",
+            "display_name": "Operador Ficticio"
+          }
+        },
+        "versiones_anteriores": 0,
+        "retirado_en": null
+      },
+      {
+        "id": "00000000-0000-4000-8000-0000000000b2",
+        "columna_id": "core:kmz",
+        "tipo": "kmz",
+        "estado": "procesando",
+        "version_activa": {
+          "id": "00000000-0000-4000-8000-0000000000c2",
+          "numero": 1,
+          "estado": "listo",
+          "nombre": "contorno-ficticio.kmz",
+          "geometria_id": "00000000-0000-4000-8000-0000000000d1"
+        },
+        "version_pendiente": {
+          "id": "00000000-0000-4000-8000-0000000000c3",
+          "numero": 2,
+          "estado": "procesando",
+          "nombre": "contorno-ficticio-v2.kmz"
+        },
+        "versiones_anteriores": 0,
+        "retirado_en": null
+      }
+    ],
+    "permisos": {
+      "subir": true,
+      "retirar": true,
+      "descargar": true
+    }
+  }
+}

@@ -1,0 +1,168 @@
+[
+ {
+  "id": "t-hueco",
+  "terreno": "Predio Ficticio Dos",
+  "lat": null,
+  "lon": null,
+  "superficie_m2": null,
+  "geometria": {
+   "id": "g-1",
+   "estado": "activa",
+   "utilizable": true,
+   "geojson": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        -100.4,
+        20.6
+       ],
+       [
+        -100.394,
+        20.6
+       ],
+       [
+        -100.394,
+        20.604
+       ],
+       [
+        -100.4,
+        20.604
+       ],
+       [
+        -100.4,
+        20.6
+       ]
+      ],
+      [
+       [
+        -100.398,
+        20.601
+       ],
+       [
+        -100.397,
+        20.601
+       ],
+       [
+        -100.397,
+        20.602
+       ],
+       [
+        -100.398,
+        20.602
+       ],
+       [
+        -100.398,
+        20.601
+       ]
+      ]
+     ]
+    ]
+   },
+   "bbox": [
+    -100.4,
+    20.6,
+    -100.394,
+    20.604
+   ],
+   "punto_simbolo": [
+    20.602,
+    -100.397
+   ],
+   "area_calculada_m2": 266789.0,
+   "partes": 1,
+   "huecos": 1,
+   "vertices": 10,
+   "dentro_de_mexico": true
+  }
+ },
+ {
+  "id": "t-multi",
+  "terreno": "Predio Ficticio Tres",
+  "lat": null,
+  "lon": null,
+  "superficie_m2": null,
+  "geometria": {
+   "id": "g-2",
+   "estado": "activa",
+   "utilizable": true,
+   "geojson": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        -100.391,
+        20.6
+       ],
+       [
+        -100.388,
+        20.6
+       ],
+       [
+        -100.388,
+        20.603
+       ],
+       [
+        -100.391,
+        20.603
+       ],
+       [
+        -100.391,
+        20.6
+       ]
+      ]
+     ],
+     [
+      [
+       [
+        -100.386,
+        20.6
+       ],
+       [
+        -100.384,
+        20.6
+       ],
+       [
+        -100.384,
+        20.603
+       ],
+       [
+        -100.386,
+        20.603
+       ],
+       [
+        -100.386,
+        20.6
+       ]
+      ]
+     ]
+    ]
+   },
+   "bbox": [
+    -100.391,
+    20.6,
+    -100.384,
+    20.603
+   ],
+   "punto_simbolo": [
+    20.6015,
+    -100.3895
+   ],
+   "area_calculada_m2": 173993.4,
+   "partes": 2,
+   "huecos": 0,
+   "vertices": 10,
+   "dentro_de_mexico": true
+  }
+ },
+ {
+  "id": "t-xy",
+  "terreno": "Predio Ficticio XY",
+  "lat": 20.6075,
+  "lon": -100.3965,
+  "superficie_m2": 60000,
+  "geometria": null
+ }
+]

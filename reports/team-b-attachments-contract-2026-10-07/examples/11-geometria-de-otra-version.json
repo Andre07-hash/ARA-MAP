@@ -1,0 +1,27 @@
+{
+  "_nota": "Ficticio (§9.4). Un archivo con dos versiones finalizadas, cada una con su geometría. Activar V1 con la geometría de V2 se rechaza en el repositorio; un UPDATE directo fallaría la llave compuesta (id, version_actual_id, geometria_activa_id) → geometria(archivo_id, archivo_version_id, id).",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/fictional-file-kmz-1/activar",
+    "encabezados": {
+      "Idempotency-Key": "ficticia-0002-activar"
+    },
+    "cuerpo": {
+      "version_id": "fictional-file-version-1",
+      "geometria_id": "fictional-geometry-2",
+      "expected_revision": 4
+    }
+  },
+  "respuesta": {
+    "estado_http": 422,
+    "cuerpo": {
+      "error": "Ese contorno no pertenece a la versión elegida.",
+      "detalle": {
+        "code": "validation_failed",
+        "fields": {
+          "geometria_id": "no_pertenece_a_la_version"
+        }
+      }
+    }
+  }
+}

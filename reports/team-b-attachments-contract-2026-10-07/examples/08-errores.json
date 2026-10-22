@@ -1,0 +1,80 @@
+{
+  "_nota": "Ficticio. Forma de error existente.",
+  "casos": [
+    {
+      "estado_http": 404,
+      "cuerpo": {
+        "error": "Archivo no encontrado.",
+        "detalle": {
+          "code": "not_found"
+        }
+      }
+    },
+    {
+      "estado_http": 403,
+      "cuerpo": {
+        "error": "No tienes permiso para esta acción.",
+        "detalle": {
+          "code": "forbidden",
+          "capacidad": "archivos.retirar"
+        }
+      }
+    },
+    {
+      "estado_http": 409,
+      "cuerpo": {
+        "error": "Este terreno ya tiene un KMZ. Reemplázalo en lugar de agregar otro.",
+        "detalle": {
+          "code": "kmz_existente",
+          "archivo_id": "fictional-file-kmz-1"
+        }
+      }
+    },
+    {
+      "estado_http": 413,
+      "cuerpo": {
+        "error": "El archivo supera el tamaño máximo.",
+        "detalle": {
+          "code": "archivo_demasiado_grande",
+          "limite": 26214400
+        }
+      }
+    },
+    {
+      "estado_http": 415,
+      "cuerpo": {
+        "error": "El archivo no es un PDF.",
+        "detalle": {
+          "code": "tipo_no_admitido"
+        }
+      }
+    },
+    {
+      "estado_http": 422,
+      "cuerpo": {
+        "error": "El contenido recibido no coincide con el archivo declarado.",
+        "detalle": {
+          "code": "contenido_no_coincide"
+        }
+      }
+    },
+    {
+      "estado_http": 422,
+      "cuerpo": {
+        "error": "El contorno está fuera de México; no puede ubicar el terreno.",
+        "detalle": {
+          "code": "geometria_no_utilizable"
+        }
+      }
+    },
+    {
+      "estado_http": 503,
+      "cuerpo": {
+        "error": "El almacenamiento no responde. Intenta de nuevo; no se perdió nada.",
+        "detalle": {
+          "code": "almacen_no_disponible"
+        }
+      }
+    }
+  ]
+}

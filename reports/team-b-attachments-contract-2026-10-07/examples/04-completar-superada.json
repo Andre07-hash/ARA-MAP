@@ -1,0 +1,35 @@
+{
+  "_nota": "Ficticio. Dos reemplazos simultáneos desde revision 5: el otro se confirmó primero (revision 6). Esta versión queda en historial, sin sobrescribir la decisión más nueva. No es un error. El desenlace queda guardado en la versión terminal (§9.2); 'archivo' refleja el estado actual.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/subidas/fictional-file-version-6/completar",
+    "cuerpo": {}
+  },
+  "respuesta": {
+    "estado_http": 200,
+    "cuerpo": {
+      "version": {
+        "id": "fictional-file-version-6",
+        "numero": 6,
+        "estado": "disponible",
+        "finalizado_en": "2026-10-07T18:42:03Z",
+        "aplicada": false,
+        "motivo_no_aplicada": "superada"
+      },
+      "intento": {
+        "id": "fictional-attempt-6-1",
+        "resultado": "listo",
+        "geometria_id": "fictional-geometry-6",
+        "origen": "completar"
+      },
+      "archivo": {
+        "id": "fictional-file-kmz-1",
+        "revision": 6,
+        "estado_capa": "activa",
+        "version_actual_id": "fictional-file-version-5"
+      },
+      "aplicada": false,
+      "motivo": "superada"
+    }
+  }
+}

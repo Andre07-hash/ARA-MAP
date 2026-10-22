@@ -1,0 +1,36 @@
+{
+  "_nota": "Ficticio. Una sola confirmación (§9.2): verificación del objeto final, intento B-1 y decisión condicional se guardan juntos; aplicada/motivo_no_aplicada quedan en la versión terminal y se repiten idénticos en cada reenvío.",
+  "solicitud": {
+    "metodo": "POST",
+    "ruta": "/api/archivos/subidas/fictional-file-version-5/completar",
+    "cuerpo": {}
+  },
+  "respuesta": {
+    "estado_http": 200,
+    "cuerpo": {
+      "version": {
+        "id": "fictional-file-version-5",
+        "numero": 5,
+        "estado": "disponible",
+        "tamano": 2304,
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "finalizado_en": "2026-10-07T18:41:10Z",
+        "aplicada": true,
+        "motivo_no_aplicada": null
+      },
+      "intento": {
+        "id": "fictional-attempt-5-1",
+        "resultado": "listo",
+        "avisos": [],
+        "geometria_id": "fictional-geometry-5",
+        "origen": "completar"
+      },
+      "archivo": {
+        "id": "fictional-file-kmz-1",
+        "revision": 6,
+        "estado_capa": "activa"
+      },
+      "aplicada": true
+    }
+  }
+}

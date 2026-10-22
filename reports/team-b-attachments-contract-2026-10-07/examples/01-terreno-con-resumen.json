@@ -1,0 +1,74 @@
+{
+  "_nota": "Ficticio. Fragmento del DTO de terreno (A) con los resúmenes de B. Sin claves de almacenamiento ni URLs. inventory version no cambia por operaciones de archivos. Sin token agregado (revision_max retirado, §9.3): la tabla compara o reemplaza el resumen.",
+  "terreno": {
+    "id": "fictional-terrain-1",
+    "base_id": "fictional-work-base-1",
+    "version": 4,
+    "draft": {
+      "terreno": null,
+      "lat": null,
+      "lon": null
+    },
+    "ubicacion": {
+      "modo": "geometria",
+      "xy": "sin_dato",
+      "geometria": {
+        "id": "fictional-geometry-2",
+        "archivo_version_id": "fictional-file-version-3",
+        "utilizable": true,
+        "bbox": [
+          -100.4,
+          20.6,
+          -100.396,
+          20.603
+        ],
+        "punto_interior": {
+          "type": "Point",
+          "coordinates": [
+            -100.398,
+            20.6015
+          ]
+        }
+      }
+    },
+    "archivos": {
+      "core:archivos": {
+        "total": 1,
+        "recientes": [
+          {
+            "archivo_id": "fictional-file-pdf-1",
+            "revision": 2,
+            "version_actual": {
+              "id": "fictional-file-version-1",
+              "numero": 1,
+              "nombre": "escritura-ficticia.pdf",
+              "tamano": 482113,
+              "terminado_en": "2026-10-07T18:02:00Z"
+            }
+          }
+        ],
+        "pendientes": []
+      },
+      "core:kmz": {
+        "archivo_id": "fictional-file-kmz-1",
+        "revision": 5,
+        "estado_capa": "activa",
+        "version_actual": {
+          "id": "fictional-file-version-3",
+          "numero": 3,
+          "nombre": "poligono-ficticio-v3.kmz",
+          "tamano": 2210,
+          "terminado_en": "2026-10-07T18:20:00Z"
+        },
+        "pendientes": [],
+        "ultima_falla": {
+          "version_id": "fictional-file-version-4",
+          "numero": 4,
+          "codigo": "KML_SIN_CONTORNO",
+          "mensaje": "El archivo no contiene un contorno de terreno (contiene: LineString)."
+        },
+        "procesamiento": "terminado"
+      }
+    }
+  }
+}

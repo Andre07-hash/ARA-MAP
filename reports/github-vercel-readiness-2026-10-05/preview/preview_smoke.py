@@ -178,6 +178,11 @@ def main() -> int:
     if status != 200:
         return finish(args.out)
 
+    status, listing, _ = a.call("GET", "/api/inventario/terrenos?limit=250")
+    record("signed-in inventory listing accepts the browser query on Vercel",
+           status == 200 and isinstance(listing, dict) and "terrenos" in listing,
+           {"status": status})
+
     # Import (openpyxl on Vercel), map data, saved map, export.
     fixture = fictional_workbook()
     status, prev, _ = a.call("POST", "/api/importar/vista-previa", raw=fixture, headers={

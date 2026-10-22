@@ -41,6 +41,12 @@ const DOBLE_ACTIVACION_PX = 28;
 
 export const ZOOM_MAXIMO = 20;
 
+/* A basemap tile still loading after this long is asked for again. */
+const TESELA_ATORADA_MS = 8000;
+/* The same tile from Esri's other host; any other URL is left as it is. */
+const otroHost = (url) => url.replace(/\/\/(server|services)\.arcgisonline\.com\//,
+  (_, host) => `//${host === "server" ? "services" : "server"}.arcgisonline.com/`);
+
 /* `cargaAlSeleccionar`: the host loads a boundary's outline when it is
  * selected (the tables' map), so its symbol can say to click for it. */
 export function createMapCanvas(container, {
@@ -139,13 +145,17 @@ export function createMapCanvas(container, {
         // tile levels that do not exist. Overzoom shows no extra detail.
         maxZoom: ZOOM_MAXIMO,
         maxNativeZoom: spec.maxZoom,
+        ...(spec.subdomains ? { subdomains: spec.subdomains } : {}),
         // No crossOrigin: the tile services do not reliably send CORS headers,
         // and requesting it makes tiles fail to load. Nothing reads tile pixels.
       }).addTo(map);
       layer.setZIndex(index);
-      // A tile that fails to download (a slow or filtering network) would stay
-      // blank: ask for it again, up to three times, a little later each time.
-      layer.on("tileerror", ({ tile }) => {
+      // A tile that fails to download, or that never arrives (a network that
+      // holds the download open), would stay blank: ask for it again, up to
+      // three times, a little later each time and from the other host where
+      // the basemap has two.
+      const reintentar = (tile) => {
+        clearTimeout(tile._vigia);
         const intento = Number(tile.dataset.reintentos ?? 0) + 1;
         if (intento > 3) return;
         tile.dataset.reintentos = String(intento);
@@ -158,9 +168,17 @@ export function createMapCanvas(container, {
           // map) and stops listening to one left from a previous zoom; a
           // download for either could never be drawn.
           if (!tile.isConnected || tile.onload === L.Util.falseFn) return;
-          tile.src = `${tile.dataset.original}?reintento=${intento}`;
+          vigilar(tile);
+          tile.src = `${intento % 2 ? otroHost(tile.dataset.original) : tile.dataset.original}?reintento=${intento}`;
         }, 1000 * intento);
-      });
+      };
+      const vigilar = (tile) => {
+        clearTimeout(tile._vigia);
+        tile._vigia = setTimeout(() => reintentar(tile), TESELA_ATORADA_MS);
+      };
+      layer.on("tileloadstart", ({ tile }) => vigilar(tile));
+      layer.on("tileload tileunload", ({ tile }) => clearTimeout(tile._vigia));
+      layer.on("tileerror", ({ tile }) => reintentar(tile));
       return layer;
     });
 

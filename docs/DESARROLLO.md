@@ -63,13 +63,20 @@ Para probar un cambio pequeño suelen bastar unas filas creadas en la interfaz.
 
 ## Comprobar el cambio
 
-Ejecuta las pruebas afectadas y la verificación normal antes de subir:
+Antes de subir, ejecuta las pruebas afectadas por el cambio. Sigue la sección
+«Pruebas proporcionales y diagnóstico» de `AGENTS.md`: si una ejecución falla,
+lee sus logs e identifica los tests fallidos antes de volver a ejecutarlos por
+nombre en el mismo entorno. No lances la suite completa para descubrir el
+fallo ni la repitas por cada push. Amplía las pruebas sólo con un motivo concreto.
+
+La verificación completa está disponible cuando el alcance lo justifique:
 
 ```bash
 ./verificar.sh
 ```
 
-Si la máquina no tiene zsh, ejecuta sus comprobaciones equivalentes:
+Si necesitas esa verificación completa y la máquina no tiene zsh, ejecuta sus
+comprobaciones equivalentes:
 
 ```bash
 python3 -m unittest discover -s tests -t .

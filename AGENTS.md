@@ -104,7 +104,8 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   hecha, por merge commit (`gh pr merge N --merge --delete-branch`), nunca con
   push directo. Fusionar no publica: desplegar en Render sigue siendo del
   responsable, con autorización de publicación.
-- Correr `./verificar.sh` antes de cada push.
+- Antes de cada push, ejecutar las comprobaciones pertinentes al cambio según
+  «Pruebas proporcionales y diagnóstico»; no repetir la suite completa por rutina.
 - Commits pequeños con mensaje en inglés que diga qué cambia y por qué.
 - Al terminar, reportar el PR, SHA, comportamiento cambiado, pruebas afectadas
   y límites. Distinguir pruebas locales, CI y comprobación publicada.
@@ -112,6 +113,33 @@ Estas reglas no admiten excepción sin autorización explícita del dueño.
   esenciales rotos. Reutilizar evidencia del código que no cambió; no repetir
   suites grandes de navegador o memoria por mejoras menores sin una razón.
 - No reescribir historial compartido ni forzar push sobre ramas ajenas.
+
+## Pruebas proporcionales y diagnóstico
+
+- Durante el desarrollo, ejecutar primero las pruebas del comportamiento y
+  componentes afectados. Un cambio pequeño de texto, imagen o estilo suele
+  necesitar revisión visual y comprobaciones dirigidas. Si depende de sesión,
+  permisos o datos, incluir las pruebas específicas de esos recorridos.
+- Si falla CI o una ejecución local, leer primero el log de esa ejecución e
+  identificar los tests fallidos, sus errores y el entorno. No lanzar toda la
+  suite de Python o Postgres sólo para descubrir cuáles fallaron.
+- Reproducir los tests fallidos por nombre (por ejemplo,
+  `python3 -m unittest tests.test_modulo.Clase.test_caso`) en el entorno que
+  falló; para Postgres, usar únicamente una base desechable. Corregir y volver
+  a ejecutar esos tests y las pruebas relacionadas con el código modificado.
+- Ampliar a un módulo o suite sólo si hay evidencia de interacción entre tests,
+  estado compartido, cambios transversales o fallos que las pruebas dirigidas
+  no explican. Explicar el motivo antes de iniciar una ejecución amplia.
+- Si los logs faltan o están truncados, intentar recuperarlos primero; si no
+  permiten identificar el fallo, ejecutar el conjunto mínimo que lo aclare y
+  conservar su salida. Una omisión no cuenta como prueba aprobada.
+- Reutilizar resultados que siguen siendo válidos para código y entorno que
+  no cambiaron. No repetir suites completas mientras CI ya está comprobando
+  el mismo cambio, salvo una necesidad concreta de diagnóstico.
+- Los checks de GitHub Actions siguen habilitados y deben estar verdes antes
+  de fusionar. No cancelar, omitir ni desactivar checks para ocultar un fallo;
+  no fusionar con un fallo sin resolver. Registrar qué se ejecutó y qué quedó
+  sin comprobar en el PR.
 
 ## Convenciones de código
 

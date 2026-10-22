@@ -1,0 +1,70 @@
+{
+ "parser_commit": "efc362818ba64618dbfc23556db8678cde525336",
+ "kmz_py_sha256": "92e3a9fa81ba638286bab06c839b35d1a35319b64b88afd954731a4a92bb94c3",
+ "casos": {
+  "circulo-100k": {
+   "partes": 1,
+   "huecos": 0,
+   "vertices": 100000,
+   "bbox": [
+    -100.42,
+    20.58,
+    -100.38,
+    20.62
+   ],
+   "utilizable": true,
+   "kmz_bytes": 541950,
+   "json_bytes": 2576983,
+   "json_sha256": "20601c3fc60211d47b44a6205cb231af93e79f82e1d28adddfedafbd62d0c01b",
+   "parser_s": 1.6
+  },
+  "multiparte-20000": {
+   "partes": 20000,
+   "huecos": 0,
+   "vertices": 100000,
+   "bbox": [
+    -100.4,
+    20.6,
+    -99.6031,
+    20.9969
+   ],
+   "utilizable": true,
+   "kmz_bytes": 269279,
+   "json_bytes": 1882142,
+   "json_sha256": "4d470b4f81ebb05305819ccb4cc986ba503ba5dd01259a3fbc66c9503098d260",
+   "parser_s": 7.95
+  },
+  "grande-mas-19999": {
+   "partes": 20000,
+   "huecos": 0,
+   "vertices": 100000,
+   "bbox": [
+    -100.4,
+    20.6,
+    -99.6836,
+    21.1679
+   ],
+   "utilizable": true,
+   "kmz_bytes": 294300,
+   "json_bytes": 1968746,
+   "json_sha256": "fb58322f681219cb1c7f3cc7b8e51bc58ae10f0046a1ef9b4930ea2cb2e04c36",
+   "parser_s": 7.0
+  },
+  "denso-grande-mas-19999": {
+   "partes": 20000,
+   "huecos": 0,
+   "vertices": 100000,
+   "bbox": [
+    -100.4,
+    20.6,
+    -100.2083,
+    20.7533
+   ],
+   "utilizable": true,
+   "kmz_bytes": 280855,
+   "json_bytes": 2050022,
+   "json_sha256": "b6e312b8d0a5ffba918c04b534fba97eb80d02e4961ff719225b3fb42e22b3fc",
+   "parser_s": 6.5
+  }
+ }
+}

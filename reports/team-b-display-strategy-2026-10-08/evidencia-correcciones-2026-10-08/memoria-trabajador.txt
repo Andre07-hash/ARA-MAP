@@ -1,0 +1,49 @@
+MODULO {
+ "presupuestoTrabajador": 33554432,
+ "presupuestoCache": 33554432,
+ "visitas": {
+  "mainBytes": 32641632,
+  "mainEntradas": 34,
+  "trabajadorBytes": 32641632,
+  "trabajadorEntradas": 34,
+  "totalBytes": 65283264,
+  "clienteContadoMaxBytes": 32641632,
+  "copiasEnviadas": 45,
+  "esperas": 11,
+  "bitmapsRetenidos": 0
+ },
+ "revisita": {
+  "estado": "esperando",
+  "reenviado": true,
+  "dibujado": true
+ },
+ "reinicio": {
+  "contadoAntesDeConfirmar": 32641632,
+  "confirmado": true,
+  "trabajadorBytes": 0,
+  "trabajadorEntradas": 0,
+  "contadoDespues": 0
+ },
+ "desmontaje": {
+  "cerrado": true,
+  "contado": 0,
+  "estadisticasTrasCerrar": null,
+  "asegurarTrasCerrar": "rechazado"
+ },
+ "fijados": {
+  "estados": {
+   "listo": 34,
+   "rechazado": 11
+  },
+  "mainBytes": 32641632,
+  "trabajadorBytes": 32641632,
+  "trabajadorEntradas": 34,
+  "totalBytes": 65283264
+ }
+}
+MAPA {"n":1,"estados":["listo"],"zoom":13,"lienzo":"1440x768","cacheBytes":480048,"trabajadorBytes":480048,"bitmapsBytes":35389440,"bitmapsBytesMax":35389440,"enVueloMax":1,"descartados":0,"cancelados":0,"dpr":1,"totalBytes":36349536}
+MAPA {"n":3,"estados":["listo","listo","listo"],"zoom":13,"lienzo":"1440x768","cacheBytes":1440144,"trabajadorBytes":1440144,"bitmapsBytes":106168320,"bitmapsBytesMax":106168320,"enVueloMax":3,"descartados":0,"cancelados":0,"dpr":1,"totalBytes":109048608}
+MAPA {"n":6,"estados":["listo","listo","listo","listo","listo","listo"],"zoom":13,"lienzo":"1440x768","cacheBytes":2880288,"trabajadorBytes":2880288,"bitmapsBytes":212336640,"bitmapsBytesMax":212336640,"enVueloMax":6,"descartados":0,"cancelados":0,"dpr":1,"totalBytes":218097216}
+MAPA {"n":1,"estados":["listo"],"zoom":13,"lienzo":"2880x1536","cacheBytes":480048,"trabajadorBytes":480048,"bitmapsBytes":141557760,"bitmapsBytesMax":141557760,"enVueloMax":1,"descartados":0,"cancelados":0,"dpr":2,"totalBytes":142517856}
+MAPA {"n":3,"estados":["listo","listo","listo"],"zoom":13,"lienzo":"2880x1536","cacheBytes":1440144,"trabajadorBytes":1440144,"bitmapsBytes":424673280,"bitmapsBytesMax":424673280,"enVueloMax":3,"descartados":0,"cancelados":0,"dpr":2,"totalBytes":427553568}
+MAPA {"n":6,"estados":["listo","listo","listo","listo","listo","listo"],"zoom":13,"lienzo":"2880x1536","cacheBytes":2880288,"trabajadorBytes":2880288,"bitmapsBytes":849346560,"bitmapsBytesMax":849346560,"enVueloMax":6,"descartados":0,"cancelados":0,"dpr":2,"totalBytes":855107136}

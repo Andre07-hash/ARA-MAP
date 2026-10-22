@@ -1,0 +1,75 @@
+<!doctype html>
+<!-- Display-strategy benchmark page. ?impl=b2 loads the ACCEPTED B-2
+     renderer (mounted from `git archive 5d8e2dc` at /b2/); ?impl=e1/e2/e3 loads
+     a prototype strategy from ./prototipo/. Same Leaflet, CSS and rows. No
+     tiles, no network, fictional data only. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>cargando</title>
+<link rel="stylesheet" href="/b2/web/vendor/leaflet.css">
+<link rel="stylesheet" href="/b2/web/styles/tokens.css">
+<link rel="stylesheet" href="/b2/web/styles/map.css">
+<style>
+  body { margin: 0; background: #f4f3ef; font: 13px system-ui, sans-serif; }
+  #mapa { width: 1200px; height: 640px; background: #e8e6df; }
+</style>
+</head>
+<body>
+<div id="mapa"></div>
+<script src="/b2/web/vendor/leaflet.js"></script>
+<script type="module">
+const impl = new URLSearchParams(location.search).get("impl") ?? "b2";
+let createMapCanvas;
+if (impl === "b2") {
+  ({ createMapCanvas } = await import("/b2/web/components/map/MapCanvas.js"));
+} else {
+  const proto = await import("/proto/prototipo/MapCanvas.js");
+  // ?presupuesto=<bytes>: a smaller worker budget, for the F3 behaviour check only.
+  const presupuesto = Number(new URLSearchParams(location.search).get("presupuesto")) || undefined;
+  proto.configurarPrototipo({ estrategia: impl, presupuestoTrabajador: presupuesto });
+  createMapCanvas = proto.createMapCanvas;
+}
+
+const selecciones = [];
+const estados = [];
+const canvas = createMapCanvas(document.getElementById("mapa"), {
+  onSelect: (id) => selecciones.push({ id, t: performance.now() }),
+  // Additive prototype callback; the accepted renderer never calls it.
+  onContornoEstado: (id, estado) => estados.push({ id, estado, t: performance.now() }),
+});
+const colorFor = () => "#2a78d6";
+
+/* Rows for one generated case: the boundary terrain plus one XY control
+ * just outside its south-west corner. */
+async function cargar(caso) {
+  const datos = await (await fetch(`/casos/${caso}.json`)).json();
+  const { descriptor, cuerpo } = datos;
+  const filas = [
+    { id: "contorno", terreno: "Contorno ficticio", lat: null, lon: null, geometria: descriptor },
+    { id: "xy", terreno: "Punto ficticio", lat: descriptor.bbox[1] - 0.004,
+      lon: descriptor.bbox[0] - 0.004, superficie_m2: 5000, geometria: null },
+  ];
+  return { filas, geometrias: new Map([[descriptor.id, cuerpo]]), descriptor };
+}
+
+/* Small normal control: B-2's 12-row fixture (bodies from the B-1 parser). */
+async function cargarFixture() {
+  const f = await (await fetch("/b2/tests/js/fixtures/geometria/contornos.json")).json();
+  const geometrias = new Map(Object.entries(f.cuerpos).filter(([id]) => id !== "geo-sin-cuerpo"));
+  return { filas: f.filas, geometrias, descriptor: f.filas[0].geometria };
+}
+
+/* XY-only control: 500 fictional points, no geometry option at all. */
+function cargarXY() {
+  const filas = Array.from({ length: 500 }, (_, i) => ({
+    id: `p-${i}`, terreno: `Punto ficticio ${i}`, lat: 20.4 + Math.floor(i / 25) * 0.01,
+    lon: -100.6 + (i % 25) * 0.01, superficie_m2: 20000, geometria: null }));
+  return { filas, geometrias: null, descriptor: null };
+}
+
+window.__banco = { impl, canvas, colorFor, cargar, cargarFixture, cargarXY, selecciones, estados };
+document.title = "listo";
+</script>
+</body>
+</html>

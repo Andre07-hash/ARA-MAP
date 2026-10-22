@@ -1,0 +1,14 @@
+Chromium 141.0.7390.37
+┌─────────┬────────────┬──────────────────────────────┬────────────────────────┐
+│ (index) │ repeticion │ modo                         │ tareasLargasQueSolapan │
+├─────────┼────────────┼──────────────────────────────┼────────────────────────┤
+│ 0       │ 0          │ 'evaluate directo'           │ '[]'                   │
+│ 1       │ 0          │ 'tras setTimeout(0)'         │ '[150]'                │
+│ 2       │ 0          │ 'tras requestAnimationFrame' │ '[150]'                │
+│ 3       │ 1          │ 'evaluate directo'           │ '[]'                   │
+│ 4       │ 1          │ 'tras setTimeout(0)'         │ '[150]'                │
+│ 5       │ 1          │ 'tras requestAnimationFrame' │ '[150]'                │
+│ 6       │ 2          │ 'evaluate directo'           │ '[]'                   │
+│ 7       │ 2          │ 'tras setTimeout(0)'         │ '[150]'                │
+│ 8       │ 2          │ 'tras requestAnimationFrame' │ '[150]'                │
+└─────────┴────────────┴──────────────────────────────┴────────────────────────┘

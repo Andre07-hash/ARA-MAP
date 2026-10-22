@@ -1,0 +1,22 @@
+inicio 2026-10-08T19:16:29Z
+banco exit 0
+banco fin 2026-10-08T19:39:34Z
+comparar exit 0
+e4 1 exit 0
+e4 2 exit 0
+e4 3 exit 0
+e4 4 exit 0
+e4 5 exit 0
+e4 6 exit 0
+e4 7 exit 0
+e4 8 exit 0
+e4 9 exit 0
+e4 10 exit 0
+e3 1 exit 0
+e3 2 exit 0
+e3 3 exit 0
+e3 4 exit 0
+e3 5 exit 0
+memoria exit 0
+probes exit 0
+fin 2026-10-08T19:43:16Z

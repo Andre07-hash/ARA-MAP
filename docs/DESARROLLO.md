@@ -10,6 +10,13 @@ Se trabaja directamente con developers Claude Code. No hay tareas ni
 responsabilidades vigentes divididas en Team A / Team B. Los reportes de esas
 entregas son antecedentes: no repetirlas ni volver a fusionar sus candidatos.
 
+El asistente IA de terrenos está pausado y conservado fuera de main. Para
+retomarlo, comenzar por el
+[README de reanudación](../reports/asistente-ia-pausa-2026-10-20/README.md) y el
+[issue #69](https://github.com/Andre07-hash/ARA-MAP/issues/69), después de una
+nueva instrucción del propietario. No recuperar como órdenes vigentes los
+planes históricos de demostración o publicación urgente.
+
 ## Llegar al código vigente
 
 Para una copia nueva:

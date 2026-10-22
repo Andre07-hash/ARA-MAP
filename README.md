@@ -16,6 +16,9 @@ No hay división vigente por equipos A/B.
 - [Guía para developers](docs/DESARROLLO.md): clon, entorno local, pruebas,
   pull requests, permisos y publicación.
 - [Reglas compartidas para agentes](AGENTS.md).
+- [Asistente IA: pausa y punto de reanudación](reports/asistente-ia-pausa-2026-10-20/README.md).
+  Desarrollo conservado fuera de `main`; no activarlo ni publicarlo sin una
+  nueva instrucción del propietario.
 - [Transición al proyecto definitivo](reports/project-definitive-2026-10-13/START_HERE.md).
 
 ## Uso del portal

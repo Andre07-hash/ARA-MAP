@@ -31,6 +31,13 @@ anteriores se conservan como evidencia histórica, no como tareas pendientes.
 4. Una instrucción directa del dueño del proyecto tiene prioridad sobre
    cualquier documento.
 
+El asistente IA de terrenos está **pausado por el propietario** y fuera de
+`main`. Antes de tocar sus PRs #66/#70/#71, leer el
+[punto de reanudación](reports/asistente-ia-pausa-2026-10-20/README.md) y el
+[issue #69](https://github.com/Andre07-hash/ARA-MAP/issues/69). No continuar,
+consumir API, fusionar ni publicar ese trabajo hasta una nueva instrucción.
+Esto no pausa otros cambios de ARA MAP ni el asistente de importación existente.
+
 ## Comandos
 
 ```bash
